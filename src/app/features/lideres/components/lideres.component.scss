@@ -1,24 +1,68 @@
 /* lideres.component.scss */
 
 // ── Design Tokens ──────────────────────────────────────────
-$primary:     #163572;   // Sapphire
-$primary-dark: #162C56;  // Darkslate Blue
-$secondary:   #F5F5F5;   // White Smoke
-$white:       #ffffff;
-$text-dark:   #1a1a2e;
-$text-mid:    #4a4a6a;
-$text-light:  #7C7C7C;
-$border:      #E5E5E5;
-$activo:      #22c55e;
-$inactivo:    #ef4444;
-$hover-row:   rgba(#163572, 0.04);
+$primary:      #163572;
+$primary-dark: #162C56;
+$secondary:    #F5F5F5;
+$white:        #ffffff;
+$text-dark:    #1a1a2e;
+$text-mid:     #4a4a6a;
+$text-light:   #7C7C7C;
+$border:       #E5E5E5;
+$activo:       #22c55e;
+$inactivo:     #ef4444;
+$hover-row:    rgba(#163572, 0.04);
 
 // ── Container ──────────────────────────────────────────────
 .lideres-container {
-  padding: 28px 32px;
+  padding: 0 32px 28px;
   background: $secondary;
   min-height: 100vh;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+// ── Top Bar ────────────────────────────────────────────────
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 12px;
+  margin-bottom: 8px;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar-greeting {
+  font-size: 14px;
+  color: $text-mid;
+
+  strong {
+    color: $primary;
+    font-weight: 600;
+  }
+}
+
+.notif-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+
+  .material-icons { font-size: 22px; }
+
+  &:hover {
+    background: $border;
+    color: $primary;
+  }
 }
 
 // ── Header ─────────────────────────────────────────────────
@@ -30,11 +74,12 @@ $hover-row:   rgba(#163572, 0.04);
 }
 
 .page-title {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 48px;
+  font-weight: 800;
   color: $primary;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -1px;
+  font-family: 'Inter', sans-serif;
 }
 
 .header-actions {
@@ -55,19 +100,13 @@ $hover-row:   rgba(#163572, 0.04);
   border: none;
   transition: all 0.18s ease;
 
-  .material-icons {
-    font-size: 18px;
-  }
+  .material-icons { font-size: 18px; }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 
   &.btn-primary {
     background: $primary;
     color: $white;
-
     &:hover:not(:disabled) {
       background: $primary-dark;
       box-shadow: 0 4px 12px rgba($primary, 0.3);
@@ -78,22 +117,21 @@ $hover-row:   rgba(#163572, 0.04);
     background: $white;
     color: $primary;
     border: 1.5px solid $primary;
-
-    &:hover:not(:disabled) {
-      background: rgba($primary, 0.06);
-    }
+    &:hover:not(:disabled) { background: rgba($primary, 0.06); }
   }
 }
 
-// ── Cards / Frames de resumen ──────────────────────────────
+// ── Cards ──────────────────────────────────────────────────
 .cards-row {
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
+  justify-content: flex-start;
 }
 
 .summary-card {
-  flex: 1;
+  width: 200px;
+  flex: 0 0 200px;
   background: $white;
   border-radius: 12px;
   border: 1px solid $border;
@@ -101,12 +139,10 @@ $hover-row:   rgba(#163572, 0.04);
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   transition: box-shadow 0.2s;
 
-  &:hover {
-    box-shadow: 0 4px 14px rgba($primary, 0.12);
-  }
+  &:hover { box-shadow: 0 4px 14px rgba($primary, 0.12); }
 }
 
 .card-icon {
@@ -122,15 +158,8 @@ $hover-row:   rgba(#163572, 0.04);
 
   .material-icons { font-size: 22px; }
 
-  &--external {
-    background: rgba($primary-dark, 0.10);
-    color: $primary-dark;
-  }
-
-  &--inactive {
-    background: rgba($inactivo, 0.10);
-    color: $inactivo;
-  }
+  &--external { background: rgba($primary-dark, 0.10); color: $primary-dark; }
+  &--inactive  { background: rgba($inactivo, 0.10);    color: $inactivo;     }
 }
 
 .card-info {
@@ -165,25 +194,20 @@ $hover-row:   rgba(#163572, 0.04);
 
   .material-icons { font-size: 20px; }
 
-  &:hover {
-    background: $secondary;
-    color: $primary;
-  }
+  &:hover { background: $secondary; color: $primary; }
 }
 
 // ── Search Bar ─────────────────────────────────────────────
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 
 .search-input-wrapper {
   position: relative;
   flex: 1;
-  min-width: 220px;
 }
 
 .search-icon {
@@ -209,40 +233,43 @@ $hover-row:   rgba(#163572, 0.04);
   transition: border-color 0.18s;
 
   &::placeholder { color: $text-light; }
-
   &:focus {
     border-color: $primary;
     box-shadow: 0 0 0 3px rgba($primary, 0.10);
   }
 }
 
-.filter-chips {
+.estado-filter-wrapper {
+  position: relative;
   display: flex;
-  gap: 8px;
+  align-items: center;
 }
 
-.chip {
-  padding: 8px 16px;
-  border-radius: 20px;
+.estado-icon {
+  position: absolute;
+  left: 10px;
+  color: $text-light;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.estado-select {
+  padding: 10px 30px 10px 34px;
   border: 1.5px solid $border;
+  border-radius: 20px;
+  font-size: 14px;
   background: $white;
-  font-size: 13px;
   color: $text-mid;
+  outline: none;
   cursor: pointer;
-  transition: all 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23163572' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.18s;
 
-  &:hover {
-    border-color: $primary;
-    color: $primary;
-  }
-
-  &--active {
-    background: $primary;
-    border-color: $primary;
-    color: $white;
-  }
+  &:focus { border-color: $primary; }
 }
-
 // ── Table ──────────────────────────────────────────────────
 .table-wrapper {
   background: $white;
@@ -257,19 +284,18 @@ $hover-row:   rgba(#163572, 0.04);
   border-collapse: collapse;
   font-size: 14px;
 
-  thead {
-    background: $primary;
+ thead {
+    background: $white;
+    border-bottom: 2px solid $border;
 
     th {
       padding: 13px 16px;
       text-align: left;
-      font-weight: 600;
-      color: $white;
+      font-weight: 500;
+      color: $text-light;
       font-size: 13px;
       letter-spacing: 0.2px;
       white-space: nowrap;
-
-      &:first-child { border-radius: 0; }
     }
   }
 
@@ -279,7 +305,6 @@ $hover-row:   rgba(#163572, 0.04);
       transition: background 0.12s;
 
       &:last-child { border-bottom: none; }
-
       &:hover { background: $hover-row; }
     }
 
@@ -332,13 +357,9 @@ $hover-row:   rgba(#163572, 0.04);
   display: flex;
   align-items: center;
 
-  &:hover {
-    background: $secondary;
-    color: $primary;
-  }
+  &:hover { background: $secondary; color: $primary; }
 }
 
-// ── Empty state ────────────────────────────────────────────
 .empty-state {
   text-align: center;
   color: $text-light;
@@ -384,24 +405,12 @@ $hover-row:   rgba(#163572, 0.04);
 
   .material-icons { font-size: 18px; }
 
-  &:hover:not(:disabled) {
-    border-color: $primary;
-    color: $primary;
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  &--active {
-    background: $primary;
-    border-color: $primary;
-    color: $white;
-  }
+  &:hover:not(:disabled) { border-color: $primary; color: $primary; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &--active { background: $primary; border-color: $primary; color: $white; }
 }
 
-// ── Modal Overlay ──────────────────────────────────────────
+// ── Modal ──────────────────────────────────────────────────
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -464,15 +473,11 @@ $hover-row:   rgba(#163572, 0.04);
   transition: background 0.15s;
 
   .material-icons { font-size: 20px; }
-
   &:hover { background: rgba($white, 0.25); }
 }
 
-.modal-body {
-  padding: 24px 28px;
-}
+.modal-body { padding: 24px 28px; }
 
-// ── Form ───────────────────────────────────────────────────
 .form-row {
   display: flex;
   gap: 16px;
@@ -507,7 +512,6 @@ $hover-row:   rgba(#163572, 0.04);
   box-sizing: border-box;
 
   &::placeholder { color: $text-light; }
-
   &:focus {
     border-color: $primary;
     box-shadow: 0 0 0 3px rgba($primary, 0.10);
@@ -539,29 +543,12 @@ select.form-input {
 
 // ── Responsive ─────────────────────────────────────────────
 @media (max-width: 768px) {
-  .lideres-container {
-    padding: 18px 16px;
-  }
-
-  .cards-row {
-    flex-direction: column;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .search-bar {
-    flex-direction: column;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-  }
-
-  .form-row {
-    flex-direction: column;
-  }
+  .lideres-container { padding: 0 16px 18px; }
+  .cards-row { flex-wrap: wrap; }
+  .summary-card { width: 100%; flex: 1 1 100%; }
+  .page-title { font-size: 32px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .search-bar { flex-direction: column; }
+  .table-wrapper { overflow-x: auto; }
+  .form-row { flex-direction: column; }
 }

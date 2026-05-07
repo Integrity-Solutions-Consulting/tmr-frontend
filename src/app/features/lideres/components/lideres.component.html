@@ -1,6 +1,17 @@
 <!-- lideres.component.html -->
 <div class="lideres-container">
 
+  <!-- Top Bar: Hola Marlene + campanita -->
+  <div class="top-bar">
+    <span></span>
+    <div class="top-bar-right">
+      <button class="notif-btn">
+        <span class="material-icons">notifications</span>
+      </button>
+      <span class="top-bar-greeting">Hola, <strong>Marlene</strong></span>
+    </div>
+  </div>
+
   <!-- Header -->
   <div class="page-header">
     <h1 class="page-title">Líderes</h1>
@@ -58,34 +69,20 @@
     </div>
   </div>
 
-  <!-- Barra de búsqueda y filtros -->
+  <!-- Barra de búsqueda y filtro Estado -->
   <div class="search-bar">
     <div class="search-input-wrapper">
       <span class="material-icons search-icon">search</span>
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Buscar por nombre, código..."
-        [(ngModel)]="busqueda"
-        (input)="aplicarFiltros()"
-      />
+      <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
+        (input)="aplicarFiltros()" />
     </div>
-    <div class="filter-chips">
-      <button
-        class="chip"
-        [class.chip--active]="estadoFiltro === ''"
-        (click)="filtrarEstado('')"
-      >Todos</button>
-      <button
-        class="chip"
-        [class.chip--active]="estadoFiltro === 'Activo'"
-        (click)="filtrarEstado('Activo')"
-      >Activo</button>
-      <button
-        class="chip"
-        [class.chip--active]="estadoFiltro === 'Inactivo'"
-        (click)="filtrarEstado('Inactivo')"
-      >Inactivo</button>
+    <div class="estado-filter-wrapper">
+      <span class="material-icons estado-icon">tune</span>
+      <select class="estado-select" [(ngModel)]="estadoFiltro" (change)="aplicarFiltros()">
+        <option value="">Estado</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
     </div>
   </div>
 
@@ -113,7 +110,8 @@
           <td>{{ lider.correo }}</td>
           <td>{{ lider.telefono }}</td>
           <td>
-            <span class="badge" [class.badge--activo]="lider.estado === 'Activo'" [class.badge--inactivo]="lider.estado !== 'Activo'">
+            <span class="badge" [class.badge--activo]="lider.estado === 'Activo'"
+              [class.badge--inactivo]="lider.estado !== 'Activo'">
               {{ lider.estado }}
             </span>
           </td>
@@ -150,12 +148,8 @@
       <button class="page-btn" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
         <span class="material-icons">chevron_left</span>
       </button>
-      <button
-        *ngFor="let p of paginas"
-        class="page-btn page-number"
-        [class.page-btn--active]="p === paginaActual"
-        (click)="irPagina(p)"
-      >{{ p }}</button>
+      <button *ngFor="let p of paginas" class="page-btn page-number" [class.page-btn--active]="p === paginaActual"
+        (click)="irPagina(p)">{{ p }}</button>
       <button class="page-btn" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas">
         <span class="material-icons">chevron_right</span>
       </button>
@@ -167,7 +161,7 @@
 
 </div>
 
-<!-- ===== MODAL / FORM CREAR/EDITAR LÍDER ===== -->
+<!-- MODAL -->
 <div class="modal-overlay" *ngIf="mostrarFormulario" (click)="cerrarFormulario()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -176,17 +170,14 @@
         <span class="material-icons">close</span>
       </button>
     </div>
-
     <div class="modal-body">
       <form [formGroup]="liderForm" (ngSubmit)="guardarLider()">
-
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Código *</label>
             <input type="text" class="form-input" formControlName="codigo" placeholder="Ej. 001" />
-            <span class="form-error" *ngIf="liderForm.get('codigo')?.invalid && liderForm.get('codigo')?.touched">
-              Campo requerido
-            </span>
+            <span class="form-error" *ngIf="liderForm.get('codigo')?.invalid && liderForm.get('codigo')?.touched">Campo
+              requerido</span>
           </div>
           <div class="form-group">
             <label class="form-label">Tipo *</label>
@@ -195,43 +186,37 @@
               <option value="Interno">Interno</option>
               <option value="Externo">Externo</option>
             </select>
-            <span class="form-error" *ngIf="liderForm.get('tipo')?.invalid && liderForm.get('tipo')?.touched">
-              Campo requerido
-            </span>
+            <span class="form-error" *ngIf="liderForm.get('tipo')?.invalid && liderForm.get('tipo')?.touched">Campo
+              requerido</span>
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group form-group--full">
             <label class="form-label">Nombre completo *</label>
             <input type="text" class="form-input" formControlName="nombre" placeholder="Nombre y apellido" />
-            <span class="form-error" *ngIf="liderForm.get('nombre')?.invalid && liderForm.get('nombre')?.touched">
-              Campo requerido
-            </span>
+            <span class="form-error" *ngIf="liderForm.get('nombre')?.invalid && liderForm.get('nombre')?.touched">Campo
+              requerido</span>
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group form-group--full">
             <label class="form-label">Cliente</label>
-            <input type="text" class="form-input" formControlName="cliente" placeholder="Nombre del banco o institución" />
+            <input type="text" class="form-input" formControlName="cliente"
+              placeholder="Nombre del banco o institución" />
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Correo electrónico *</label>
             <input type="email" class="form-input" formControlName="correo" placeholder="correo@ejemplo.com" />
-            <span class="form-error" *ngIf="liderForm.get('correo')?.invalid && liderForm.get('correo')?.touched">
-              Correo inválido
-            </span>
+            <span class="form-error" *ngIf="liderForm.get('correo')?.invalid && liderForm.get('correo')?.touched">Correo
+              inválido</span>
           </div>
           <div class="form-group">
             <label class="form-label">Teléfono</label>
             <input type="tel" class="form-input" formControlName="telefono" placeholder="0999999999" />
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Estado *</label>
@@ -241,14 +226,12 @@
             </select>
           </div>
         </div>
-
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" (click)="cerrarFormulario()">Cancelar</button>
           <button type="submit" class="btn btn-primary" [disabled]="liderForm.invalid">
             {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder' }}
           </button>
         </div>
-
       </form>
     </div>
   </div>
