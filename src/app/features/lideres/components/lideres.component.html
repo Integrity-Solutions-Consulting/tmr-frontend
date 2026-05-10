@@ -2,8 +2,8 @@
 
   <!-- Header -->
   <div class="page-header">
-  <h1 class="page-title">Líderes</h1>
-</div>
+    <h1 class="page-title">Líderes</h1>
+  </div>
 
   <!-- Cards -->
   <div class="cards-row">
@@ -48,47 +48,37 @@
     </div>
   </div>
 
-  <!-- Barra de búsqueda -->
   <!-- Barra de búsqueda y botones -->
-<div class="search-bar">
-  <div class="search-input-wrapper">
-    <span class="material-icons search-icon">search</span>
-    <input type="text" class="search-input" placeholder="Buscar por nombres, código..."
-      [(ngModel)]="busqueda" (input)="aplicarFiltros()" />
-  </div>
-  <div class="estado-filter-wrapper">
-    <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
-    <select class="estado-select" [(ngModel)]="estadoFiltro" (change)="aplicarFiltros()">
-      <option value="">Estado</option>
-      <option value="Activo">Activo</option>
-      <option value="Inactivo">Inactivo</option>
-    </select>
-  </div>
-  <div class="header-actions">
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
+        (input)="aplicarFiltros()" />
+    </div>
+    <div class="estado-filter-wrapper">
+      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
+      <select class="estado-select" [(ngModel)]="estadoFiltro" (change)="aplicarFiltros()">
+        <option value="">Estado</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+    <div class="search-spacer"></div>
     <div class="descarga-wrapper">
       <button class="btn btn-outline" (click)="abrirDescarga()">
-        <span class="material-icons">download</span>
         Descargar
+        <span class="material-symbols-outlined">file_download</span>
       </button>
-      <app-modal-descarga
-        [mostrar]="mostrarDescarga"
-        (cerrar)="cerrarDescarga()"
-        (descargarPDF)="descargarPDF()"
+      <app-modal-descarga [mostrar]="mostrarDescarga" (cerrar)="cerrarDescarga()" (descargarPDF)="descargarPDF()"
         (descargarExcel)="descargarExcel()">
       </app-modal-descarga>
     </div>
+
     <button class="btn btn-primary" (click)="abrirFormulario()">
-      <span class="material-icons">add</span>
       Agregar
+      <span class="material-icons">add</span>
     </button>
   </div>
-</div>
-
-
-
-
-
-
 
   <!-- Tabla -->
   <div class="table-wrapper">
@@ -124,13 +114,15 @@
               <span class="material-icons">more_vert</span>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="verLider(lider, rangoInicio + i)">
-                👁 Ver más
-              </button>
-              <button mat-menu-item (click)="editarLider(lider)">
-                ✏️ Editar
-              </button>
-            </mat-menu>
+  <button mat-menu-item (click)="verLider(lider, rangoInicio + i)">
+    <span class="material-symbols-outlined">visibility</span>
+    Ver más
+  </button>
+  <button mat-menu-item (click)="editarLider(lider)">
+    <span class="material-symbols-outlined">edit_square</span>
+    Editar
+  </button>
+</mat-menu>
           </td>
         </tr>
         <tr *ngIf="lideresFiltrados.length === 0">
@@ -154,8 +146,8 @@
         <button class="page-btn" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
           <span class="material-icons">chevron_left</span>
         </button>
-        <button *ngFor="let p of paginas" class="page-btn page-number"
-          [class.page-btn--active]="p === paginaActual" (click)="irPagina(p)">{{ p }}</button>
+        <button *ngFor="let p of paginas" class="page-btn page-number" [class.page-btn--active]="p === paginaActual"
+          (click)="irPagina(p)">{{ p }}</button>
         <button class="page-btn" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas">
           <span class="material-icons">chevron_right</span>
         </button>
