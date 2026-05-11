@@ -144,10 +144,12 @@ export class LideresComponent implements OnInit {
   }
 
   seleccionarEstado(estado: string): void {
-    this.estadoFiltro = estado;
-    this.mostrarEstadoDropdown = false;
-    this.aplicarFiltros();
+  this.estadoFiltro = estado;
+  if (estado === '') {
+    this.mostrarEstadoDropdown = false; // solo cierra al limpiar
   }
+  this.aplicarFiltros();
+}
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
