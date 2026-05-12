@@ -193,6 +193,8 @@
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
 </app-modal-detalle-lider>
-
-<app-modal-confirmacion [mostrar]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion">
+<app-modal-confirmacion 
+  [mostrar]="mostrarConfirmacion" 
+  [mensaje]="mensajeConfirmacion"
+  (cerrarModal)="mostrarConfirmacion = false">
 </app-modal-confirmacion>

@@ -1,9 +1,8 @@
-<div class="confirmacion-overlay" *ngIf="mostrar">
-  <div class="confirmacion-card">
+<div class="confirmacion-overlay" *ngIf="mostrar" (click)="cerrar()">
+  <div class="confirmacion-card" (click)="$event.stopPropagation()">
     <div class="confirmacion-icono">
       <img src="icons/circle-check.svg" alt="check" />
     </div>
-    <p class="confirmacion-texto" [innerHTML]="mensaje">
-    </p>
+    <p class="confirmacion-texto" [innerHTML]="mensaje"></p>
   </div>
 </div>
