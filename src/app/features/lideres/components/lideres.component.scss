@@ -312,6 +312,9 @@ $hover-row: rgba(#163572, 0.04);
   thead {
     background: $white;
     border-bottom: 2px solid $border;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 
     th {
       padding: 11px 14px;
@@ -320,6 +323,7 @@ $hover-row: rgba(#163572, 0.04);
       color: #737373;
       font-size: 14px;
       white-space: nowrap;
+      background: $white;
     }
   }
 
