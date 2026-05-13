@@ -1,0 +1,15 @@
+@if (abierto) {
+  <div class="profile-popover">
+    <button class="profile-popover__overlay" type="button" aria-label="Cerrar perfil" (click)="cerrar.emit()"></button>
+
+    <section class="profile-popover__card" role="menu">
+      <strong>{{ nombre }}</strong>
+      <span>{{ correo }}</span>
+
+      <button mat-button type="button" class="profile-popover__logout" (click)="onCerrarSesion()">
+        <span aria-hidden="true">↪</span>
+        Cerrar Sesion
+      </button>
+    </section>
+  </div>
+}

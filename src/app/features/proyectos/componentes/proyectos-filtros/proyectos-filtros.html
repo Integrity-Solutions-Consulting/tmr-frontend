@@ -1,0 +1,39 @@
+<div class="filtros">
+  <mat-form-field appearance="outline" class="filtros__search">
+    <span class="filtros__search-icon"></span>
+
+    <input
+      matInput
+      [(ngModel)]="busqueda"
+      (ngModelChange)="emitirFiltros()"
+      placeholder="Buscar proyecto, cliente, codigo..."
+    >
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filtros__select">
+    <mat-label>Estado</mat-label>
+    <mat-select
+      [(ngModel)]="estado"
+      (selectionChange)="emitirFiltros()"
+    >
+      <mat-option value="">Todos</mat-option>
+      <mat-option value="En progreso">En progreso</mat-option>
+      <mat-option value="En espera">En espera</mat-option>
+      <mat-option value="Completado">Completado</mat-option>
+      <mat-option value="Cancelado">Cancelado</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filtros__select">
+    <mat-label>Tipo</mat-label>
+    <mat-select
+      [(ngModel)]="tipo"
+      (selectionChange)="emitirFiltros()"
+    >
+      <mat-option value="">Todos</mat-option>
+      <mat-option value="Llave en mano">Llave en mano</mat-option>
+      <mat-option value="Soporte evolutivo">Soporte evolutivo</mat-option>
+      <mat-option value="Consultoria">Consultoria</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
