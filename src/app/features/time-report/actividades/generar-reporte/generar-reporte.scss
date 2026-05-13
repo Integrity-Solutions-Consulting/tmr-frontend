@@ -1,0 +1,94 @@
+@use "sass:color";
+
+$primary-blue: #163572;
+$text-dark: #1A1A2E;
+$text-gray: #6B7280;
+$label-color: #374151;
+$error-red: #EF4444;
+
+.modal-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 420px;
+    font-family: 'Inter', sans-serif;
+}
+
+.modal-title {
+    padding: 24px 24px 8px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: $text-dark;
+}
+
+.modal-body {
+    padding: 12px 24px;
+}
+
+.empleado-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+
+    .empleado-label {
+        font-weight: 600;
+        color: $label-color;
+    }
+
+    .empleado-value {
+        color: $text-gray;
+    }
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.req {
+    color: $error-red;
+}
+
+.modal-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+.btn-cancelar {
+    color: $primary-blue;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+        background-color: rgba($primary-blue, 0.04);
+    }
+}
+
+.btn-generar {
+    background-color: $primary-blue;
+    color: white;
+    border-radius: 24px;
+    padding: 0 32px;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust($primary-blue, $lightness: -5%);
+    }
+
+    &:disabled {
+        background-color: #e0e0e0;
+        color: #a0a0a0;
+    }
+}

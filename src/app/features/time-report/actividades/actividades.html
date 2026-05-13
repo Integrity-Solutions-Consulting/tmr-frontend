@@ -1,0 +1,89 @@
+<div class="actividades-page">
+
+    <!-- ===== HEADER ===== -->
+    <header class="page-header">
+        <h1 class="page-title">Time Report</h1>
+
+        <div class="header-right">
+            <div class="horas-badge">
+                <mat-icon>schedule</mat-icon>
+                <span>Horas Registradas: {{ actividadesService.horasRegistradasHoy() | horasFormat }}</span>
+            </div>
+
+            <button mat-flat-button class="btn-agregar" (click)="abrirAgregarActividad()">
+                Agregar Actividad <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== CALENDAR CARD ===== -->
+    <main class="calendar-card">
+        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)"></app-calendario>
+    </main>
+
+    <!-- ===== FOOTER METRICS ===== -->
+    <footer class="metrics-footer">
+
+        <!-- Horas por registrar -->
+        <div class="metric-item">
+            <div class="metric-icon-wrap blue">
+                <mat-icon>schedule</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ actividadesService.horasPorRegistrar() | horasFormat }}</span>
+                <span class="metric-name">Horas por registrar</span>
+                <span class="metric-desc">Horas pendientes del día</span>
+            </div>
+        </div>
+
+        <div class="metric-divider"></div>
+
+        <!-- Horas registradas hoy -->
+        <div class="metric-item">
+            <div class="metric-icon-wrap green">
+                <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ actividadesService.horasRegistradasHoy() | horasFormat }}</span>
+                <span class="metric-name">Horas registradas</span>
+                <span class="metric-desc">Total del día</span>
+            </div>
+        </div>
+
+        <div class="metric-divider"></div>
+
+        <!-- Horas de la semana -->
+        <div class="metric-item">
+            <div class="metric-icon-wrap purple">
+                <mat-icon>calendar_today</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ actividadesService.horasSemanaActual() | horasFormat }}</span>
+                <span class="metric-name">Horas de la semana</span>
+                <span class="metric-desc">Total acumulado</span>
+            </div>
+        </div>
+
+        <div class="metric-divider"></div>
+
+        <!-- Horas del mes -->
+        <div class="metric-item">
+            <div class="metric-icon-wrap orange">
+                <mat-icon>bar_chart</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ actividadesService.horasMesActual() | horasFormat }}</span>
+                <span class="metric-name">Horas del mes</span>
+                <span class="metric-desc">Total acumulado</span>
+            </div>
+        </div>
+
+        <div class="footer-spacer"></div>
+
+        <button mat-stroked-button class="btn-reporte" (click)="abrirGenerarReporte()">
+            <mat-icon>description</mat-icon>
+            Generar Reporte
+        </button>
+    </footer>
+
+</div>

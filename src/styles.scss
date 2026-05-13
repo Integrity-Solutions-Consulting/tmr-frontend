@@ -1,40 +1,131 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
+@use 'styles/material-theme';
 
-html {
-  height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+$breakpoint-sm: 640px; // Móviles grandes
+$breakpoint-md: 768px; // Tablets
+$breakpoint-lg: 1024px; // Laptops / Desktops
+$breakpoint-xl: 1280px; // Pantallas grandes
+
+/* ===== RESET & BASE ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
+html,
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
   height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background-color: #F5F5F5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-@import 'tailwindcss';
-/* You can add global styles to this file, and also import other style files */
+
+/* Material icon font */
+.material-icons {
+  font-family: 'Material Icons';
+}
+
+/* ===== GLOBAL OVERRIDES ===== */
+
+/* Make dialog panels clean */
+.mat-mdc-dialog-container {
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-dialog-surface {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+/* Outline form fields */
+.mat-mdc-form-field-subscript-wrapper {
+  font-family: 'Inter', sans-serif !important;
+}
+
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: #D1D5DB !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #163572 !important;
+}
+
+.mat-mdc-floating-label {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  color: #6B7280 !important;
+}
+
+/* Paginator font */
+.mat-mdc-paginator {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+}
+
+/* Menu panel */
+.mat-mdc-menu-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.mat-mdc-menu-item {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+}
+
+/* Checkbox */
+.mat-mdc-checkbox .mdc-checkbox__background {
+  border-color: #D1D5DB !important;
+}
+
+/* Table */
+.mat-mdc-table {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Sort header */
+.mat-sort-header-content {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+
+@media (max-width: $breakpoint-md) {
+
+  html,
+  body {
+    /* Ajustamos el tamaño de fuente base para que todo escale un poco */
+    font-size: 14px;
+  }
+
+  /* Hacer que los diálogos de Material ocupen más ancho en móviles */
+  .cdk-overlay-pane {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+
+  /* Ajustes para pantallas muy pequeñas */
+  .mat-mdc-dialog-container {
+    padding: 8px !important; // Un poco de aire en los bordes
+  }
+
+  /* Ocultar elementos que estorben en móvil si es necesario */
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
