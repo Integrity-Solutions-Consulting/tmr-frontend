@@ -1,0 +1,72 @@
+@use "sass:color";
+$primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted: #64748b;
+
+.dashboard-container { padding: 2rem; background-color: $bg-color; min-height: 100vh; font-family: sans-serif; }
+.header-main-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; 
+  .page-title { color: $primary-color; font-size: 1.8rem; font-weight: 800; margin: 0; }
+}
+
+.alert-container { margin-bottom: 1rem; width: 100%; }
+.alert-error { 
+  display: flex; justify-content: space-between; align-items: center; 
+  background-color: #fee2e2; border: 1px solid #f87171; border-radius: 8px; 
+  padding: 0.75rem 1rem; color: #991b1b; animation: fadeIn 0.3s ease-in-out;
+  .alert-content { display: flex; align-items: center; gap: 10px; .material-icons { color: #dc2626; } .error-text { font-size: 0.9rem; font-weight: 600; } }
+  .close-alert { background: transparent; border: none; color: #991b1b; cursor: pointer; &:hover { background-color: #fecaca; border-radius: 4px; } }
+}
+
+.header-actions { display: flex; gap: 1rem; align-items: center; }
+.stats-card { display: flex; align-items: center; background: white; padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid $border-color;
+  .stats-icon-circle { color: #3b82f6; margin-right: 10px; background: #eff6ff; border-radius: 50%; padding: 5px; display: flex; }
+  .stats-label { font-size: 10px; color: $text-muted; margin: 0; text-transform: uppercase; }
+  .stats-value { font-size: 1rem; font-weight: 700; color: $primary-color; margin: 0; }
+}
+
+.toolbar-section { 
+  background: white; padding: 1.2rem; border-radius: 12px 12px 0 0; border: 1px solid $border-color; 
+  display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  .search-input-wrapper { flex: 1; min-width: 300px; display: flex; align-items: center; background: #f1f5f9; border-radius: 8px; padding: 0 1rem;
+    input { width: 100%; border: none; background: transparent; padding: 0.7rem; outline: none; }
+  }
+}
+
+.filters-group { display: flex; gap: 1rem; align-items: center; flex-wrap: nowrap; }
+.custom-select { padding: 0.7rem; border-radius: 8px; border: 1px solid $border-color; font-weight: 600; color: $primary-color; background: white; }
+.date-controls { 
+  display: flex; gap: 0.8rem; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid $border-color;
+  .date-field { display: flex; align-items: center; gap: 8px; 
+    label { font-size: 10px; font-weight: 800; color: $text-muted; white-space: nowrap; }
+    input { border: none; background: transparent; font-size: 0.85rem; color: $primary-color; outline: none; }
+  }
+}
+
+.table-card { background: white; border: 1px solid $border-color; border-top: none; border-radius: 0 0 12px 12px;
+  .data-table { width: 100%; border-collapse: collapse;
+    th { background: #f8fafc; padding: 1.2rem 1rem; text-align: left; font-size: 0.75rem; color: $text-muted; border-bottom: 2px solid $border-color; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 1.2rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+    .font-bold { font-weight: 600; color: $primary-color; }
+    .client-tag { background: #eff6ff; color: #1e40af; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    .empty-row { padding: 3rem; text-align: center; color: $text-muted; }
+  }
+}
+
+.status-badge.pendiente { 
+  display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #dcfce7; color: #166534;
+  .dot { height: 7px; width: 7px; border-radius: 50%; background: #22c55e; margin-right: 8px; }
+}
+
+.btn-primary { background: $primary-color; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s;
+  &:hover { background: color.adjust($primary-color, $lightness: 10%); }
+}
+.btn-secondary { background: white; border: 1px solid $border-color; padding: 0.7rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: $text-muted; font-weight: 600; transition: 0.2s;
+  &:hover { background: #f8fafc; border-color: color.adjust($border-color, $lightness: -10%); }
+}
+
+.pagination-bar { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-top: 1px solid $border-color; }
+.btn-icon { background: white; border: 1px solid $border-color; border-radius: 6px; cursor: pointer; padding: 5px; transition: 0.2s;
+  &:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+  &:not(:disabled):hover { background: #f1f5f9; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.hidden-input { display: none; }
