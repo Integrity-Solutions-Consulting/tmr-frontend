@@ -1,0 +1,43 @@
+<div class="action-menu">
+  <button
+    mat-icon-button
+    class="action-menu__trigger"
+    type="button"
+    aria-label="Acciones"
+    title="Acciones"
+    [matMenuTriggerFor]="accionesMenu"
+    (click)="onToggleMenu($event)"
+  >
+    <mat-icon aria-hidden="true">more_vert</mat-icon>
+  </button>
+
+  <mat-menu
+    #accionesMenu="matMenu"
+    class="action-menu__panel"
+    xPosition="before"
+    yPosition="below"
+    [overlapTrigger]="false"
+  >
+    @for (accion of acciones; track accion.id) {
+      <button
+        mat-menu-item
+        class="action-menu__item"
+        type="button"
+        [class.action-menu__item--danger]="accion.danger"
+        (click)="onAccionClick(accion, $event)"
+      >
+        @if (accion.icon) {
+          <img [src]="accion.icon" alt="">
+        } @else if (accion.id === 'ver-mas') {
+          <mat-icon aria-hidden="true">visibility</mat-icon>
+        } @else if (accion.id === 'editar') {
+          <mat-icon aria-hidden="true">edit</mat-icon>
+        } @else if (accion.id === 'eliminar') {
+          <mat-icon aria-hidden="true">delete</mat-icon>
+        }
+
+        <span>{{ accion.label }}</span>
+      </button>
+    }
+  </mat-menu>
+</div>

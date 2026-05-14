@@ -13,6 +13,255 @@ html {
       typography: Roboto,
       density: 0,
     ));
+/* Estilos globales de TMR Frontend - Estructura Refactorizada */
+@import 'styles/variables';
+@import 'styles/shared-components';
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   ESTILOS DE LEGACY / DASHBOARD (Traídos de Master)
+   ========================================================================== */
+
+.dashboard-container {
+  all: initial; /* Resetea herencias extrañas de styles.scss */
+  display: block;
+  padding: 2.5rem 5rem;
+  background-color: #fbfcff;
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+
+  * { box-sizing: border-box; }
+
+  .user-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    
+    .user-info {
+      font-size: 14px;
+      color: #1e293b;
+      margin: 0;
+      .user-name { font-weight: 700; color: #163572; }
+    }
+    
+    .icon-badge {
+      position: relative;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      .dot-indicator {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+    }
+  }
+
+  .header-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #163572;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+  }
+
+  .stats-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+
+    .stats-icon-circle {
+      width: 38px;
+      height: 38px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #163572;
+      span { font-size: 20px; }
+    }
+
+    .stats-info {
+      .stats-label {
+        font-size: 10px;
+        color: #94a3b8;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 0.3px;
+      }
+      .stats-value {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+      }
+    }
+  }
+
+  .btn-primary {
+    background: #163572;
+    color: #fff;
+    padding: 0.8rem 1.6rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    &:hover { background: #0e244d; transform: translateY(-1px); }
+  }
+
+  .filters-bar {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+
+    .search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      span { color: #cbd5e0; font-size: 22px; }
+      input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 14px;
+        color: #475569;
+        background: transparent;
+        &::placeholder { color: #cbd5e0; }
+      }
+    }
+
+    .custom-select, .date-group {
+      border-left: 1px solid #f1f5f9;
+      padding-left: 1.5rem;
+    }
+
+    .custom-select {
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      color: #163572;
+      outline: none;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .date-group {
+      display: flex;
+      flex-direction: column;
+      label { font-size: 10px; font-weight: 800; color: #cbd5e0; margin-bottom: 3px; }
+      input { border: none; font-size: 13px; color: #475569; outline: none; background: transparent; }
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #cbd5e0;
+      border: 1.5px solid #f1f5f9;
+      padding: 0.7rem 1.4rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      &:not(:disabled) {
+        color: #163572;
+        border-color: #163572;
+        &:hover { background: #f8fafc; }
+      }
+    }
+  }
+
+  .table-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 0;
+    .empty-icon { font-size: 70px; color: #f1f5f9; margin-bottom: 1.5rem; }
+    h3 { font-size: 20px; font-weight: 800; color: #163572; margin: 0; }
+    p { font-size: 15px; color: #94a3b8; margin-top: 10px; }
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    th {
+      background: #f8fafc;
+      padding: 1.2rem 1rem;
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    td { padding: 1.2rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #475569; }
+    .colab-name { font-weight: 800; color: #163572; }
+  }
 }
 
 body {
@@ -35,3 +284,6 @@ body {
 
 @import 'tailwindcss';
 /* You can add global styles to this file, and also import other style files */
+.notranslate { font-family: 'Material Icons' !important; }
+.animate-spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

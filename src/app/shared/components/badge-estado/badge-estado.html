@@ -1,0 +1,9 @@
+<span
+  class="badge"
+  [class.en-progreso]="estado === 'En progreso'"
+  [class.en-espera]="estado === 'En espera' || estado === 'Pendiente'"
+  [class.completado]="estado === 'Completado' || estado === 'Finalizado'"
+  [class.cancelado]="estado === 'Cancelado'"
+>
+  {{ estado }}
+</span>

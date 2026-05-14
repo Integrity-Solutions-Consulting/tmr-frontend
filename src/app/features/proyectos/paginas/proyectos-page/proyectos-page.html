@@ -1,0 +1,171 @@
+<section class="proyectos-page">
+  <div class="proyectos-page__header">
+    <div>
+      <h2>Proyectos</h2>
+    </div>
+  </div>
+
+  <div class="proyectos-page__toolbar">
+    <app-proyectos-filtros
+      (filtrosChange)="aplicarFiltros($event)"
+    ></app-proyectos-filtros>
+  
+    <div class="proyectos-page__actions">
+      <app-descarga-menu
+        [opciones]="opcionesDescarga"
+        etiquetaBoton="Descargar"
+      ></app-descarga-menu>
+
+      <button
+        mat-flat-button
+        type="button"
+        class="proyectos-page__create"
+        (click)="abrirModalCrear()"
+      >
+        <span class="proyectos-page__create-content">
+          Crear
+          <img src="assets/imagenes/iconos/btn-agregar.svg" alt="">
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="proyectos-page__content">
+    <app-tabla
+      [filtros]="filtros"
+      (verMas)="abrirModalDetalle($event)"
+      (editar)="abrirModalEditar($event)"
+      (eliminar)="solicitarEliminarProyecto($event)"
+    ></app-tabla>
+  </div>
+</section>
+
+<app-modal-base
+  [titulo]="proyectoSeleccionado ? 'Editar Proyecto' : 'Nuevo Proyecto'"
+  [visible]="modalCrearVisible"
+  (cerrar)="cerrarModalCrear()"
+>
+  @if (modalCrearVisible) {
+    <app-proyecto-form
+      [proyecto]="proyectoSeleccionado"
+      (guardarProyecto)="guardarProyecto($event)"
+    ></app-proyecto-form>
+  }
+</app-modal-base>
+
+<app-confirm-dialog
+  [visible]="confirmEliminarVisible"
+  titulo="Eliminar proyecto"
+  mensaje="Esta accion eliminara el proyecto seleccionado. Deseas continuar?"
+  textoCancelar="Cancelar"
+  textoConfirmar="Eliminar"
+  (cancelar)="cancelarEliminarProyecto()"
+  (confirmar)="confirmarEliminarProyecto()"
+></app-confirm-dialog>
+
+<app-success-modal
+  [visible]="successCrearVisible"
+  mensaje="El nuevo proyecto ha sido creado exitosamente"
+  (cerrar)="cerrarSuccessCrear()"
+></app-success-modal>
+
+<app-modal-base
+  titulo="Detalle del Proyecto"
+  [visible]="modalDetalleVisible"
+  [wide]="true"
+  (cerrar)="cerrarModalDetalle()"
+>
+  @if (proyectoDetalle) {
+    <article class="proyecto-detalle">
+      <header class="proyecto-detalle__header">
+        <div>
+          <span class="proyecto-detalle__codigo">{{ proyectoDetalle.codigo }}</span>
+          <div class="proyecto-detalle__title">
+            <h3>{{ proyectoDetalle.nombre }}</h3>
+            <app-badge-estado [estado]="proyectoDetalle.estado"></app-badge-estado>
+          </div>
+          <p>{{ proyectoDetalle.cliente || 'Sin cliente' }}</p>
+        </div>
+
+        <div class="proyecto-detalle__metrics">
+          <div>
+            <span>Presupuesto</span>
+            <strong>${{ proyectoDetalle.presupuesto || 0 }}</strong>
+          </div>
+
+          <div>
+            <span>Horas</span>
+            <strong>{{ proyectoDetalle.horas || 0 }}</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="proyecto-detalle__summary">
+        <div>
+          <span>Tipo de proyecto</span>
+          <strong>{{ proyectoDetalle.tipo || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Rango de fechas</span>
+          <strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong>
+        </div>
+      </section>
+
+      <section class="proyecto-detalle__leader">
+        <h4>Lider</h4>
+
+        <div class="proyecto-detalle__leader-grid">
+          <div>
+            <span>Nombre</span>
+            <strong>{{ proyectoDetalle.lider || '-' }}</strong>
+          </div>
+
+          <div>
+            <span>Costo/hora</span>
+            <strong>${{ proyectoDetalle.costoHoraLider || 0 }}/hora</strong>
+          </div>
+
+          <div>
+            <span>Horas</span>
+            <strong>{{ proyectoDetalle.horasLider || 0 }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="proyecto-detalle__resources">
+        <h4>Recursos</h4>
+
+        <div class="proyecto-detalle__table">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Nombre</th>
+                <th>Rol asignado</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Costo/hora</th>
+                <th>Horas</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (recurso of proyectoDetalle.recursos || []; track recurso.nombre) {
+                <tr>
+                  <td>{{ recurso.tipo }}</td>
+                  <td>{{ recurso.nombre }}</td>
+                  <td>{{ recurso.rol }}</td>
+                  <td>{{ formatearFecha(recurso.entrada) }}</td>
+                  <td>{{ formatearFecha(recurso.salida) }}</td>
+                  <td>${{ recurso.costoHora }}/hora</td>
+                  <td>{{ recurso.horas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </article>
+  }
+</app-modal-base>
