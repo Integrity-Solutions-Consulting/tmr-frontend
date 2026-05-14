@@ -1,0 +1,116 @@
+<div class="modal-overlay" (click)="onOverlay($event)">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="header-top">
+        <span class="codigo">{{ cliente.codigo }}</span>
+        <button class="btn-cerrar" (click)="cerrar.emit()">✕</button>
+      </div>
+      <div class="header-main">
+        <h2 class="nombre">{{ cliente.nombreComercial }}</h2>
+        <span class="estado-badge"
+          [class.activo]="cliente.estado === 'Activo'"
+          [class.inactivo]="cliente.estado === 'Inactivo'">
+          <span class="dot"></span>{{ cliente.estado }}
+        </span>
+      </div>
+      <div class="tipo-row">
+        <span class="tipo-item">
+          <img src="assets/iconos/identificacion.svg" width="14" height="14" alt="tipo"/>
+          {{ cliente.tipoId }}
+        </span>
+        <span class="tipo-item">
+          <img src="assets/iconos/cliente.svg" width="14" height="14" alt="id"/>
+          {{ cliente.identificador }}
+        </span>
+      </div>
+    </div>
+
+<!-- Datos de contacto -->
+<div class="seccion">
+  <div class="seccion-titulo">
+    <span class="barra"></span>
+    Datos de contacto
+  </div>
+  <div class="contacto-grid">
+
+    <!-- Nombres -->
+    <div class="contacto-item">
+      <div class="contacto-label">
+        <img src="assets/iconos/nombre.svg" width="13" height="13" alt="nombre"/>
+        Nombres
+      </div>
+      <div class="contacto-valor">{{ cliente.nombres || '—' }}</div>
+    </div>
+
+    <!-- Apellidos -->
+    <div class="contacto-item">
+      <div class="contacto-label">
+        <img src="assets/iconos/nombre.svg" width="13" height="13" alt="apellido"/>
+        Apellidos
+      </div>
+      <div class="contacto-valor">{{ cliente.apellidos || '—' }}</div>
+    </div>
+
+    <!-- Correo -->
+    <div class="contacto-item">
+      <div class="contacto-label">
+        <img src="assets/iconos/correo.svg" width="13" height="13" alt="correo"/>
+        Correo electrónico
+      </div>
+      <div class="contacto-valor">{{ cliente.correoElectronico }}</div>
+    </div>
+
+    <!-- Teléfono -->
+    <div class="contacto-item">
+      <div class="contacto-label">
+        <img src="assets/iconos/telefono.svg" width="13" height="13" alt="telefono"/>
+        Teléfono
+      </div>
+      <div class="contacto-valor telefono">{{ cliente.telefono }}</div>
+    </div>
+
+    <!-- Dirección -->
+    <div class="contacto-item campo-full">
+      <div class="contacto-label">
+        <img src="assets/iconos/direccion.svg" width="13" height="13" alt="direccion"/>
+        Dirección
+      </div>
+      <div class="contacto-valor">{{ cliente.direccion || '—' }}</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Proyectos asignados -->
+<div class="seccion">
+  <div class="proyectos-header" (click)="toggleProyectos()">
+    <div class="seccion-titulo clickeable">
+      <span class="barra"></span>
+      <span class="toggle-icon">{{ expandido ? '▼' : '▶' }}</span>
+      Proyectos asignados
+      <span class="badge-count">{{ cliente.proyectosAsignados?.length || 0 }}</span>
+    </div>
+  </div>
+
+  <!-- Solo esta parte tiene scroll -->
+  <div class="seccion-proyectos" *ngIf="expandido">
+    <div *ngIf="!cliente.proyectosAsignados || cliente.proyectosAsignados.length === 0"
+         class="sin-proyectos">
+      Sin proyectos asignados
+    </div>
+    <div *ngFor="let p of cliente.proyectosAsignados" class="proyecto-item">
+      <div class="proyecto-info">
+        <div class="proyecto-nombre">{{ p.nombre }}</div>
+        <div class="proyecto-cliente">
+          <img src="assets/iconos/cliente.svg" width="12" height="12" alt="cliente"/>
+          {{ p.cliente }}
+        </div>
+      </div>
+      <span class="proyecto-estado" [class]="getClase(p.estado)">
+        <span class="dot"></span>{{ p.estado }}
+      </span>
+    </div>
+  </div>
+</div>

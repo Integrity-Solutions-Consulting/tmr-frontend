@@ -1,3 +1,45 @@
+@use '@angular/material' as mat;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Inter,
+    density: 0,
+  ));
+}
+
+body {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  height: 100%;
+}
+
+:root {
+  --primario:   #163572;
+  --oscuro:     #162056;
+  --secundario: #F5F5F5;
+  --borde:      #e5e7eb;
+  --texto:      #111827;
+  --texto-gris: #737373;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
@@ -37,7 +79,6 @@ body {
    ========================================================================== */
 
 .dashboard-container {
-  all: initial; /* Resetea herencias extrañas de styles.scss */
   display: block;
   padding: 2.5rem 5rem;
   background-color: #fbfcff;
@@ -52,14 +93,14 @@ body {
     align-items: center;
     gap: 1rem;
     margin-bottom: 2rem;
-    
+
     .user-info {
       font-size: 14px;
       color: #1e293b;
       margin: 0;
       .user-name { font-weight: 700; color: #163572; }
     }
-    
+
     .icon-badge {
       position: relative;
       color: #64748b;

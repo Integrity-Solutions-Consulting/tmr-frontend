@@ -12,6 +12,15 @@ export const routes: Routes = [
     children: authRoutes,
   },
   {
+    path: 'clientes',
+    loadChildren: () =>
+      import('./features/clientes/clientes.routes').then(m => m.clientesRoutes),
+  },
+  {
+    path: '',
+    redirectTo: '/clientes',
+    pathMatch: 'full',
+  },
     path: '',
     component: AppLayout,
     children: [

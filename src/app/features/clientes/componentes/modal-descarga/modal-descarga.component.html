@@ -1,0 +1,13 @@
+<div class="descarga-popup">
+  <p class="descarga-titulo">Seleccione el formato:</p>
+
+  <!-- Descargar PDF -->
+  <button class="btn-descarga" (click)="descargar.emit('pdf')">
+    Descargar PDF
+  </button>
+
+  <!-- Descargar Excel -->
+  <button class="btn-descarga" (click)="descargar.emit('excel')">
+    Descargar Excel
+  </button>
+</div>
