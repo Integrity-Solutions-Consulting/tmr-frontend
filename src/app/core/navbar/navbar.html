@@ -1,0 +1,26 @@
+<header class="navbar">
+    <div class="navbar-profile">
+
+        <!-- Trigger del Menú -->
+        <button type="button" class="navbar-profile-button" [matMenuTriggerFor]="profileMenu">
+            <span>Hola, {{ user.name.split(' ')[0] }}</span>
+            <mat-icon class="notif-icon">notifications</mat-icon>
+        </button>
+
+        <!-- Menú desplegable de Material -->
+        <mat-menu #profileMenu="matMenu" xPosition="before" class="custom-profile-menu">
+            <div class="profile-container" (click)="$event.stopPropagation()">
+                <div class="profile-info">
+                    <h3>{{ user.name }}</h3>
+                    <p>{{ user.email }}</p>
+                </div>
+
+                <button mat-menu-item class="logout-button" (click)="onLogout()">
+                    <mat-icon>logout</mat-icon>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </mat-menu>
+
+    </div>
+</header>

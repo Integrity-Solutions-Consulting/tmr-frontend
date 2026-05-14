@@ -1,0 +1,132 @@
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(360px, 440px) 132px 168px;
+  gap: 16px;
+  align-items: center;
+
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 40px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 40px;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: 40px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep .mat-mdc-select-value {
+    color: #737373;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  ::ng-deep .mat-mdc-input-element::placeholder {
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    color: #737373;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  ::ng-deep .mdc-notched-outline__leading,
+  ::ng-deep .mdc-notched-outline__notch,
+  ::ng-deep .mdc-notched-outline__trailing {
+    border-color: #e5e7eb !important;
+  }
+
+  ::ng-deep .mdc-text-field--focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #163572 !important;
+    }
+  }
+}
+
+.filtros__search {
+  position: relative;
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-left: 36px !important;
+  }
+}
+
+.filtros__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 13px;
+  z-index: 2;
+  width: 13px;
+  height: 13px;
+  border: 1.7px solid #737373;
+  border-radius: 999px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    bottom: -3px;
+    width: 5px;
+    height: 1.7px;
+    border-radius: 999px;
+    background: #737373;
+    transform: rotate(45deg);
+  }
+}
+
+.filtros__select {
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 1440px) {
+  .filtros {
+    grid-template-columns: minmax(300px, 1fr) 132px 168px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .filtros {
+    grid-template-columns: minmax(280px, 1fr) 132px 168px;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filtros__search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtros {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

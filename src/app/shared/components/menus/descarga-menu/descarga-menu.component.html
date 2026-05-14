@@ -1,0 +1,33 @@
+<div class="descarga">
+  <button
+    class="descarga__btn"
+    [class.descarga__btn--open]="abierto"
+    (click)="toggle()"
+    type="button"
+  >
+    <span>{{ etiquetaBoton }}</span>
+    <img
+      src="assets/imagenes/iconos/download.svg"
+      alt="descargar"
+      width="16"
+      height="16"
+    />
+  </button>
+
+  @if (abierto) {
+    <div class="descarga__overlay" (click)="cerrar()"></div>
+    <div class="descarga__panel">
+      <p class="descarga__title">{{ titulo }}</p>
+      @for (opcion of opciones; track opcion.id) {
+        <button
+          class="descarga__option"
+          (click)="onOpcion(opcion, $event)"
+          type="button"
+        >
+          <img [src]="opcion.icon" alt="{{ opcion.label }}" width="16" height="16" />
+          {{ opcion.label }}
+        </button>
+      }
+    </div>
+  }
+</div>
