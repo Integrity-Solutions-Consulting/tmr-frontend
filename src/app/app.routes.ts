@@ -1,7 +1,12 @@
 import { Routes } from '@angular/router';
+import { authRoutes } from './features/auth/auth.routes';
 import { LayoutComponent } from './shared/componentes/layout/layout.component';
 
 export const routes: Routes = [
+  {
+    path: 'auth',
+    children: authRoutes,
+  },
   {
     path: '',
     component: LayoutComponent,
@@ -23,6 +28,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: ''
+    redirectTo: 'auth/login'
   }
 ];
