@@ -1,12 +1,17 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+
+import { actividadesReducer } from './core/state/actividades/actividades.reducer';
+import { ActividadesEffects } from './core/state/actividades/actividades.effects'; // Con mayúscula inicial
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideAnimations()
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes)
   ]
 };
