@@ -1,10 +1,8 @@
 import { Routes } from '@angular/router';
 import { authRoutes } from './features/auth/auth.routes';
 import { AppLayout } from './core/layout/app-layout/app-layout';
-import { ReporteFechasComponent } from './features/reportes/componentes/reporte-fechas/reporte-fechas.component';
-import { TablaEjemplosComponent } from './shared/componentes/tabla-ejemplos';
+import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
 
-// Routes configuration
 export const routes: Routes = [
   {
     path: 'auth',
@@ -12,29 +10,17 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/auth/login',
-    pathMatch: 'full',
-  },
-/*  { 
-    path: 'appMenu',
     component: AppLayout,
+    children: [
+      {
+        path: '',
+        redirectTo: 'proyectos',
+        pathMatch: 'full',
+      },
+      {
+        path: 'proyectos',
+        component: ProyectosPage,
+      },
+    ],
   },
-  {
-    path: 'colaboradores',
-    loadChildren: () =>
-      import('./features/colaboradores/colaboradores.routes').then(
-        m => m.COLABORADORES_ROUTES
-      ),
-  },
-  {
-    path: 'reportes',
-    component: ReporteFechasComponent,
-  },
-  {
-    path: 'tabla-ejemplos',
-    component: TablaEjemplosComponent,
-  },
-
-*/
-  
 ];
