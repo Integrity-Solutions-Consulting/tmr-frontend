@@ -1,0 +1,59 @@
+<div class="metricas">
+
+  <!-- Card 1: No asignados / Asignados -->
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <img
+          src="assets/iconos/card-project.svg"
+          alt="proyectos"
+          class="metricas__icon"
+          width="20"
+          height="20"
+        />
+        <span class="metricas__numero">
+          {{ mostrandoAsignados ? asignados : noAsignados }}
+        </span>
+      </div>
+      <span class="metricas__label">
+        {{ mostrandoAsignados ? 'Asignados' : 'No asignados' }}
+      </span>
+    </div>
+    <button
+      class="metricas__filter-btn"
+      (click)="toggleAsignados()"
+      [title]="mostrandoAsignados ? 'Ver no asignados' : 'Ver asignados'"
+    >
+      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
+    </button>
+  </div>
+
+  <!-- Card 2: Inactivos / Activos -->
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <img
+          src="assets/iconos/card-user.svg"
+          alt="usuarios"
+          class="metricas__icon"
+          width="20"
+          height="20"
+        />
+        <span class="metricas__numero">
+          {{ mostrandoActivos ? activos : inactivos }}
+        </span>
+      </div>
+      <span class="metricas__label">
+        {{ mostrandoActivos ? 'Activos' : 'Inactivos' }}
+      </span>
+    </div>
+    <button
+      class="metricas__filter-btn"
+      (click)="toggleActivos()"
+      [title]="mostrandoActivos ? 'Ver inactivos' : 'Ver activos'"
+    >
+      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,328 @@
+<div class="modal-backdrop" (click)="onCerrar()">
+  <div class="modal-form" (click)="$event.stopPropagation()">
+
+    <div class="modal-form__header">
+      <div>
+        <h2 class="modal-form__title">Agregar Colaborador</h2>
+        <p class="modal-form__subtitle">Complete los datos del nuevo colaborador</p>
+      </div>
+      <button class="modal-form__close" (click)="onCerrar()" type="button">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-form__body" [formGroup]="form">
+
+      <!-- CONTRATO -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Contrato
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="tipoIdentificacion"
+                [class.float-select__input--error]="campoInvalido('tipoIdentificacion')">
+                @for (a of asociaciones; track a) {
+                  <option [value]="a">{{ a }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('tipoIdentificacion')">
+                Asociación <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('tipoIdentificacion')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="tipoContrato"
+                [class.float-select__input--error]="campoInvalido('tipoContrato')">
+                @for (t of tiposContrato; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('tipoContrato')">
+                Tipo de contrato <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('tipoContrato')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos personales
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="nombres"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('nombres')"/>
+              <label class="float-field__label">Nombres <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('nombres')) {
+              <span class="form-field__error">
+                @if (form.get('nombres')?.errors?.['required']) { Campo requerido }
+                @else { Mínimo 3 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="apellidos"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('apellidos')"/>
+              <label class="float-field__label">Apellidos <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('apellidos')) {
+              <span class="form-field__error">
+                @if (form.get('apellidos')?.errors?.['required']) { Campo requerido }
+                @else { Mínimo 3 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="identificacion"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('identificacion')"/>
+              <label class="float-field__label">Identificación <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('identificacion')) {
+              <span class="form-field__error">
+                @if (form.get('identificacion')?.errors?.['required']) { Campo requerido }
+                @else { Mínimo 10 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input float-field__input--date" type="date"
+                formControlName="fechaNacimiento" placeholder=" "
+                [class.float-field__input--error]="campoInvalido('fechaNacimiento')"/>
+              <label class="float-field__label float-field__label--always">
+                Fecha de nacimiento <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('fechaNacimiento')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="genero"
+                [class.float-select__input--error]="campoInvalido('genero')">
+                @for (g of generos; track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('genero')">
+                Género <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('genero')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS DE CONTACTO -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos de contacto
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <input class="float-field__input" type="email" formControlName="correoElectronico"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('correoElectronico')"/>
+              <label class="float-field__label">Correo electrónico <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('correoElectronico')) {
+              <span class="form-field__error">
+                @if (form.get('correoElectronico')?.errors?.['required']) { Campo requerido }
+                @else { Formato de correo inválido }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="telefono"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('telefono')"/>
+              <label class="float-field__label">Teléfono <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('telefono')) {
+              <span class="form-field__error">
+                @if (form.get('telefono')?.errors?.['required']) { Campo requerido }
+                @else { Mínimo 10 caracteres }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="direccion"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('direccion')"/>
+              <label class="float-field__label">Dirección <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('direccion')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS LABORALES -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos laborales
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="departamento"
+                [class.float-select__input--error]="campoInvalido('departamento')">
+                @for (dep of departamentos; track dep) {
+                  <option [value]="dep">{{ dep }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('departamento')">
+                Departamento <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('departamento')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input float-field__input--date" type="date"
+                formControlName="fechaContratacion" placeholder=" "
+                [class.float-field__input--error]="campoInvalido('fechaContratacion')"/>
+              <label class="float-field__label float-field__label--always">
+                Fecha de contratación <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('fechaContratacion')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Cargo — depende del departamento -->
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="cargo"
+                [class.float-select__input--error]="campoInvalido('cargo')"
+                [disabled]="!tieneValor('departamento')">
+                @for (c of cargosDisponibles; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('cargo')">
+                Cargo <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('cargo')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+            @if (!tieneValor('departamento')) {
+              <span class="form-field__hint">Seleccione un departamento primero</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="number" formControlName="aniosExperiencia"
+                placeholder=" " min="0" max="50"
+                [class.float-field__input--error]="campoInvalido('aniosExperiencia')"/>
+              <label class="float-field__label">Años de experiencia <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('aniosExperiencia')) {
+              <span class="form-field__error">
+                @if (form.get('aniosExperiencia')?.errors?.['required']) { Campo requerido }
+                @else { Entre 0 y 50 años }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="modalidad"
+                [class.float-select__input--error]="campoInvalido('modalidad')">
+                @for (m of modalidades; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('modalidad')">
+                Modalidad <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('modalidad')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="categoria"
+                [class.float-select__input--error]="campoInvalido('categoria')">
+                @for (c of categorias; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('categoria')">
+                Categoría <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('categoria')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-form__footer">
+      <button class="modal-form__btn modal-form__btn--cancel" (click)="onCerrar()" type="button">
+        Cancelar
+      </button>
+      <button class="modal-form__btn modal-form__btn--save" (click)="onGuardar()" type="button">
+        <span class="material-icons">person_add</span>
+        Agregar Colaborador
+      </button>
+    </div>
+
+  </div>
+</div>
