@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+
+export const routes: Routes = [];
 import { authRoutes } from './features/auth/auth.routes';
 import { AppLayout } from './core/layout/app-layout/app-layout';
 import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
