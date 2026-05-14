@@ -1,0 +1,17 @@
+@if (visible) {
+  <div class="success-modal" role="dialog" aria-modal="true">
+    <div class="success-modal__backdrop" (click)="cerrarModal()"></div>
+
+    <section class="success-modal__card">
+      <div class="success-modal__icon" aria-hidden="true">
+        <span>✓</span>
+      </div>
+
+      <p>{{ mensaje }}</p>
+
+      <button mat-flat-button type="button" (click)="cerrarModal()">
+        {{ textoBoton }}
+      </button>
+    </section>
+  </div>
+}

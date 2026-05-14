@@ -1,0 +1,30 @@
+<div class="action-menu">
+  <button
+    class="action-menu__trigger"
+    type="button"
+    (click)="onToggleMenu($event)"
+    title="Acciones"
+    aria-label="Acciones"
+  >
+    <img src="assets/imagenes/iconos/puntos.svg" alt="">
+  </button>
+
+  @if (menuAbiertoPara) {
+    <div class="action-menu__dropdown">
+      @for (accion of acciones; track accion.id) {
+        <button
+          class="action-menu__item"
+          type="button"
+          [class.action-menu__item--danger]="accion.danger"
+          (click)="onAccionClick(accion, $event)"
+        >
+          @if (accion.icon) {
+            <img [src]="accion.icon" alt="" width="15" height="15" />
+          }
+
+          {{ accion.label }}
+        </button>
+      }
+    </div>
+  }
+</div>

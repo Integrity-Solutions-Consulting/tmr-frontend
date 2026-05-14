@@ -1,0 +1,52 @@
+<div class="modal-wrap">
+    <h2 class="modal-title">Generar Reporte</h2>
+
+    <div class="modal-body">
+        <div class="empleado-row">
+            <span class="empleado-label">Empleado:</span>
+            <span class="empleado-value">Administrador Administrador</span>
+        </div>
+
+        <form [formGroup]="form" class="modal-form">
+            <!-- Selección de Cliente -->
+            <mat-form-field appearance="outline">
+                <mat-label>Cliente</mat-label>
+                <mat-select formControlName="clienteId">
+                    <mat-option value="all">Todos los clientes</mat-option>
+                    <mat-option value="c1">BANCO DEL PACÍFICO</mat-option>
+                    <mat-option value="c2">BANCO BOLIVARIANO</mat-option>
+                    <mat-option value="c3">INTEGRITY SOLUTIONS</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Selección de Año -->
+            <mat-form-field appearance="outline">
+                <mat-label>Año <span class="req">*</span></mat-label>
+                <mat-select formControlName="anio">
+                    <mat-option [value]="2024">2024</mat-option>
+                    <mat-option [value]="2025">2025</mat-option>
+                    <mat-option [value]="2026">2026</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Selección de Mes -->
+            <mat-form-field appearance="outline">
+                <mat-label>Mes <span class="req">*</span></mat-label>
+                <mat-select formControlName="mes">
+                    @for (m of meses; track m; let i = $index) {
+                    <mat-option [value]="i">{{ m }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button mat-button class="btn-cancelar" (click)="cancelar()">
+            Cancelar
+        </button>
+        <button mat-flat-button class="btn-generar" [disabled]="form.invalid" (click)="generar()">
+            Generar
+        </button>
+    </div>
+</div>

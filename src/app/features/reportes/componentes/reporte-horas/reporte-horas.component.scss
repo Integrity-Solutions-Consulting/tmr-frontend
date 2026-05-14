@@ -1,0 +1,291 @@
+// Sobrescribir estilos de la tabla compartida para consistencia
+:host ::ng-deep {
+  .tabla {
+    thead th {
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 0.05em;
+    }
+
+    tbody td {
+      font-size: 14px;
+      color: #1e293b;
+    }
+  }
+}
+
+.report-wrapper {
+  animation: fadeIn 0.7s;
+}
+
+.report-content {
+  padding-top: 8px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 250px;
+}
+
+.select-group {
+  flex: none;
+  width: 192px; /* w-48 equivalent approx */
+}
+
+.filter-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+
+.filter-input-wrapper {
+  position: relative;
+
+  &:focus-within .filter-icon {
+    color: #163572;
+  }
+}
+
+.filter-input {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-sizing: border-box;
+
+  &:focus {
+    box-shadow: 0 0 0 1px #163572;
+  }
+}
+
+/* Espacio extra para los iconos de la izquierda (input de texto) */
+input.filter-input {
+  padding-left: 40px;
+}
+
+/* Reglas específicas para los Select */
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.filter-icon-right {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.btn-clear {
+  padding: 10px;
+  color: #94a3b8;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #f43f5e;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #E5E5E5;
+  border-radius: 12px;
+}
+
+.report-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+
+  th {
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    background-color: rgba(248, 250, 252, 0.5);
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  td {
+    padding: 16px;
+    font-size: 14px;
+    color: #475569;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+}
+
+.data-row {
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f8fafc;
+
+  &:hover {
+    background-color: rgba(248, 250, 252, 0.5);
+  }
+
+  .font-bold { font-weight: 700; }
+  .font-medium { font-weight: 500; }
+  .text-dark { color: #334155; }
+  .text-highlight { color: #163572; font-weight: 800; }
+}
+
+.empty-state {
+  padding: 96px;
+  text-align: center;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  p {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #f8fafc;
+  color: #cbd5e1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.btn-link {
+  margin-top: 24px;
+  color: #163572;
+  font-weight: 700;
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.pagination-wrapper {
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.pagination-info span {
+  font-weight: 700;
+  color: #475569;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-page {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #E5E5E5;
+  background-color: white;
+  color: #475569;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #f8fafc;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background-color: rgba(22, 53, 114, 0.05);
+    color: #163572;
+    border-color: rgba(22, 53, 114, 0.2);
+  }
+}
+
+.page-dots {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

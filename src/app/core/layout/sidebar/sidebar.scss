@@ -1,0 +1,162 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  width: 220px;
+  min-width: 220px;
+  min-height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 22px 14px 18px;
+}
+
+.sidebar__logo {
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.sidebar__logo-img {
+  width: 84px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__link,
+.sidebar__sublink {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #737373;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sidebar__link {
+  min-height: 38px;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 10px;
+
+  &:hover {
+    background: #f5f7fb;
+    color: #163572;
+  }
+
+  &.active {
+    background: #eef4ff;
+    color: #163572;
+    font-weight: 600;
+  }
+}
+
+.sidebar__icon-img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__link--parent {
+  position: relative;
+}
+
+.sidebar__chevron {
+  margin-left: auto;
+  color: #9ca3af;
+  font-size: 9px;
+  transform: rotate(180deg);
+}
+
+.sidebar__submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 6px 28px;
+}
+
+.sidebar__sublink {
+  min-height: 30px;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+
+  &:hover {
+    background: #f5f7fb;
+    color: #163572;
+  }
+
+  .sidebar__icon-img {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 88px;
+    min-width: 88px;
+    padding: 18px 8px;
+  }
+
+  .sidebar__logo-img {
+    width: 50px;
+  }
+
+  .sidebar__link,
+  .sidebar__sublink {
+    justify-content: center;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .sidebar__submenu,
+  .sidebar__chevron {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 72px;
+    min-width: 72px;
+    padding: 14px 6px;
+  }
+
+  .sidebar__logo {
+    height: 70px;
+    margin-bottom: 12px;
+  }
+
+  .sidebar__logo-img {
+    width: 42px;
+  }
+
+  .sidebar__link {
+    min-height: 40px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 62px;
+    min-width: 62px;
+  }
+}

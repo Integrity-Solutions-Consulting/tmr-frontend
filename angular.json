@@ -7,13 +7,8 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "tmr-frontend": {
+    "gestion-actividades": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -21,17 +16,40 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "dist/gestion-actividades",
+            "index": "src/index.html",
             "browser": "src/main.ts",
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/app/shared/assets",
+                "output": "assets"
               }
             ],
             "styles": [
               "src/tailwind.css",
+              "src/styles.scss"
+            ]
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/app/shared/assets",
+                "output": "assets"
+              }
+            ],
+            "styles": [
               "src/styles.scss"
             ]
           },
@@ -40,13 +58,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "20kB"
                 }
               ],
               "outputHashing": "all"
@@ -56,25 +74,45 @@
               "extractLicenses": false,
               "sourceMap": true
             }
+            "assets": [{ "glob": "**/*", "input": "public" }],
+            "assets": [
+              { "glob": "**/*", "input": "public" },
+              { "glob": "**/*", "input": "src/assets", "output": "assets" },
+              { "glob": "**/*", "input": "src/app/shared/assets", "output": "assets" }
+            ],
+            "styles": ["src/styles.scss"],
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": { "outputHashing": "all" },
+            "development": { "optimization": false, "sourceMap": true }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "production": {
-              "buildTarget": "tmr-frontend:build:production"
-            },
-            "development": {
-              "buildTarget": "tmr-frontend:build:development"
-            }
+            "production": { "buildTarget": "gestion-actividades:build:production" },
+            "development": { "buildTarget": "gestion-actividades:build:development" }
           },
           "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test"
         }
       }
     }
+  },
+  "cli": {
+    "packageManager": "npm",
+    "analytics": false
   }
 }

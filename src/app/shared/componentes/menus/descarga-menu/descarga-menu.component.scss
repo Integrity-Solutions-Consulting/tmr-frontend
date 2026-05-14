@@ -1,0 +1,109 @@
+.descarga {
+  position: relative;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 14px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.15s;
+    white-space: nowrap;
+
+    img {
+      flex-shrink: 0;
+      color: #374151;
+      transition: color 0.15s;
+    }
+
+    &:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+      color: #374151;
+    }
+
+    &--open {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+  }
+
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+  }
+
+  &__panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 270px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    padding: 12px 0;
+    animation: descargaPanelFade 0.12s ease;
+  }
+
+  &__title {
+    padding: 0 12px 8px 12px;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    margin-bottom: 4px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #374151;
+    text-align: left;
+    transition: background 0.1s;
+
+    img {
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    &:active {
+      background: #f3f4f6;
+    }
+  }
+}
+
+@keyframes descargaPanelFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

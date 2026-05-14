@@ -1,0 +1,148 @@
+<div class="modal-wrap">
+    <h2 class="modal-title">Agregar actividad</h2>
+
+    <div class="modal-body">
+        <form [formGroup]="form" class="modal-form">
+
+            <!-- Tipo de Actividad -->
+            <div class="field-row">
+                <mat-form-field appearance="outline" class="full-field">
+                    <mat-label>Tipo de Actividad <span class="required">*</span></mat-label>
+                    <mat-select formControlName="tipoActividad">
+                        <mat-option value="Desarrollo">Desarrollo</mat-option>
+                        <mat-option value="Diseño">Diseño</mat-option>
+                        <mat-option value="Reunión">Reunión</mat-option>
+                        <mat-option value="Testing">Testing</mat-option>
+                        <mat-option value="Otro">Otro</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button class="help-btn" type="button" matTooltip="Seleccione el tipo de actividad">?</button>
+            </div>
+
+            <!-- Proyecto -->
+            <div class="field-row">
+                <mat-form-field appearance="outline" class="full-field">
+                    <mat-label>Proyecto <span class="required">*</span></mat-label>
+                    <mat-select formControlName="proyectoId">
+                        <mat-option value="p1">Proyecto bolsa de empleo</mat-option>
+                        <mat-option value="p2">Middleware Fábrica de software</mat-option>
+                        <mat-option value="p3">Accesos Fábrica de software</mat-option>
+                        <mat-option value="p4">Arquitectura Fábrica de software</mat-option>
+                        <mat-option value="p5">DESARROLLO DE APLICACIONES NAOS</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button class="help-btn" type="button">?</button>
+            </div>
+
+            <!-- Código de Requerimiento -->
+            <div class="field-row">
+                <mat-form-field appearance="outline" class="full-field">
+                    <mat-label>Código de Requerimiento <span class="required">*</span></mat-label>
+                    <input matInput formControlName="codigoRequerimiento" maxlength="50">
+                    <mat-hint align="end">{{ form.get('codigoRequerimiento')?.value?.length || 0 }}/50</mat-hint>
+                </mat-form-field>
+                <button class="help-btn" type="button">?</button>
+            </div>
+
+            <!-- Descripción -->
+            <div class="field-row">
+                <mat-form-field appearance="outline" class="full-field">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput formControlName="descripcion" rows="5" maxlength="350"
+                        placeholder="Descripción"></textarea>
+                    <mat-hint align="end">{{ form.get('descripcion')?.value?.length || 0 }}/350</mat-hint>
+                </mat-form-field>
+                <button class="help-btn help-btn-top" type="button">?</button>
+            </div>
+
+            <!-- Fecha + Horas -->
+            <div class="two-col">
+                <div class="field-row flex-1">
+                    <mat-form-field appearance="outline" class="full-field">
+                        <mat-label>Fecha Actividad <span class="required">*</span></mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="fechaActividad">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+                <div class="field-row flex-1">
+                    <mat-form-field appearance="outline" class="full-field">
+                        <mat-label>Número de Horas <span class="required">*</span></mat-label>
+                        <input matInput type="number" formControlName="numeroHoras" min="0.5" max="24">
+                    </mat-form-field>
+                    <button class="help-btn" type="button">?</button>
+                </div>
+            </div>
+
+            <!-- Recurrente checkbox -->
+            <div class="recurrente-row">
+                <mat-checkbox formControlName="esRecurrente" color="primary">
+                    Actividad Recurrente
+                </mat-checkbox>
+                <button class="help-btn" type="button">?</button>
+            </div>
+
+            <!-- Panel de Recurrencia -->
+            @if (form.get('esRecurrente')?.value) {
+            <div class="recurrence-panel">
+                <div class="two-col">
+                    <div class="field-row flex-1">
+                        <mat-form-field appearance="outline" class="full-field">
+                            <mat-label>Fecha Inicio <span class="required">*</span></mat-label>
+                            <input matInput [matDatepicker]="startPicker" formControlName="fechaInicio">
+                            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #startPicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="field-row flex-1">
+                        <mat-form-field appearance="outline" class="full-field">
+                            <mat-label>Fecha Fin <span class="required">*</span></mat-label>
+                            <input matInput [matDatepicker]="endPicker" formControlName="fechaFin">
+                            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #endPicker></mat-datepicker>
+                        </mat-form-field>
+                        <button class="help-btn" type="button">?</button>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <mat-form-field appearance="outline" class="full-field">
+                        <mat-label>Horas por día <span class="required">*</span></mat-label>
+                        <input matInput type="number" formControlName="horasPorDia" min="0.5">
+                    </mat-form-field>
+                    <button class="help-btn" type="button">?</button>
+                </div>
+
+                <div class="checkbox-item">
+                    <mat-checkbox formControlName="incluirFinesDeSemana" color="primary">
+                        Incluir fines de semana
+                    </mat-checkbox>
+                    <button class="help-btn" type="button">?</button>
+                </div>
+
+                <div class="checkbox-item">
+                    <mat-checkbox formControlName="incluirFeriados" color="primary">
+                        Incluir días feriados
+                    </mat-checkbox>
+                    <button class="help-btn" type="button">?</button>
+                </div>
+
+                @if (previewText()) {
+                <div class="preview-banner">
+                    {{ previewText() }}
+                </div>
+                }
+            </div>
+            }
+
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+        <button mat-button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+        <button mat-flat-button class="btn-agregar" [disabled]="form.invalid" (click)="guardar()">
+            Agregar
+        </button>
+    </div>
+</div>
