@@ -3,8 +3,9 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.html',
+  templateUrl: './app.component.html', // Cámbialo a este nombre
   styleUrl: './app.scss'
 })
-export class App {}
+export class AppComponent {}

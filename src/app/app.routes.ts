@@ -1,14 +1,19 @@
 import { Routes } from '@angular/router';
-import { Component } from '@angular/core';
+import { authRoutes } from './features/auth/auth.routes';
+
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'clientes',
-    pathMatch: 'full',
+    path: 'auth',
+    children: authRoutes,
   },
   {
     path: 'clientes',
     loadChildren: () =>
       import('./features/clientes/clientes.routes').then(m => m.clientesRoutes),
+  },
+  {
+    path: '',
+    redirectTo: '/auth/login',
+    pathMatch: 'full',
   },
 ];
