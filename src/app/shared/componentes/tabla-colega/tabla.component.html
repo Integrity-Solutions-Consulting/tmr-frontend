@@ -1,0 +1,120 @@
+<div class="tabla-wrapper">
+  <div class="table-container">
+    <table class="tabla">
+      <!-- Header -->
+      <thead>
+        <tr class="tabla-header-row">
+          @for (columna of columnas; track columna.property) {
+            <th 
+              class="tabla-header-cell" 
+              [ngClass]="columna.headerClass"
+              [style.width]="columna.width">
+              {{ columna.header }}
+            </th>
+          }
+        </tr>
+      </thead>
+
+      <!-- Body -->
+      <tbody>
+        <!-- Estado vacío -->
+        @if (!getSignalValue(mostrarDatos)) {
+          <tr class="tabla-empty-row">
+            <td [attr.colspan]="columnas.length" class="tabla-empty-cell">
+              <div class="empty-content">
+                <div class="empty-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                </div>
+                @if (config.emptyState) {
+                  <h3>{{ config.emptyState.title }}</h3>
+                  <p>{{ config.emptyState.description }}</p>
+                  @if (config.emptyState.showAction) {
+                    <button (click)="onEmptyStateAction()" class="btn-empty-action">
+                      {{ config.emptyState.actionText || 'Realizar acción' }}
+                    </button>
+                  }
+                }
+              </div>
+            </td>
+          </tr>
+        } @else {
+          <!-- Filas de datos -->
+          @if (rowTemplate) {
+            <!-- Template personalizado -->
+            @for (item of datosPaginados; track getRowId(item, $index)) {
+              <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: item, index: $index }"/>
+            }
+          } @else {
+            <!-- Filas automáticas -->
+            @for (item of datosPaginados; track getRowId(item, $index)) {
+              <tr 
+                class="tabla-row"
+                (click)="onRowClick(item)"
+                [attr.data-row-id]="getRowId(item, $index)">
+                @for (columna of columnas; track columna.property) {
+                  <td 
+                    class="tabla-cell"
+                    [ngClass]="columna.cellClass">
+                    
+                    <!-- Tipo: texto -->
+                    @if (columna.type === 'text') {
+                      <span>{{ getValue(item, columna.property) }}</span>
+                    }
+
+                    <!-- Tipo: fecha -->
+                    @if (columna.type === 'fecha') {
+                      <span>{{ getValue(item, columna.property) | date:(columna.dateFormat || 'dd/MM/yyyy') }}</span>
+                    }
+
+                    <!-- Tipo: badge -->
+                    @if (columna.type === 'badge') {
+                      <span class="badge-inline">
+                        {{ getValue(item, columna.property) }}
+                      </span>
+                    }
+
+                    <!-- Tipo: badge-estado (componente) -->
+                    @if (columna.type === 'badge-estado') {
+                      <app-badge-estado
+                        [estado]="getValue(item, columna.property)">
+                      </app-badge-estado>
+                    }
+
+                    <!-- Tipo: action-menu (placeholder para componente) -->
+                    @if (columna.type === 'action-menu') {
+                      <div class="action-menu-cell">
+                        <!-- El componente action-menu se inyectará aquí via template -->
+                        <span class="action-menu-placeholder">...</span>
+                      </div>
+                    }
+
+                    <!-- Tipo: custom (template personalizado) -->
+                    @if (columna.type === 'custom' && columna.templateRef) {
+                      <ng-container *ngTemplateOutlet="columna.templateRef; context: { item: item, columna: columna }"/>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  @if (getSignalValue(mostrarDatos) && datosPaginados.length > 0) {
+    <div class="pagination-wrapper">
+      <app-paginacion
+        [paginaActual]="getSignalValue(paginaActual)"
+        [totalPaginas]="getSignalValue(totalPaginas)"
+        [total]="total"
+        [porPagina]="porPagina"
+        (paginaCambia)="onPaginaCambia($event)">
+      </app-paginacion>
+    </div>
+  }
+</div>
