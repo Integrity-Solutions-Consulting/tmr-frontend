@@ -23,6 +23,17 @@
               { "glob": "**/*", "input": "src/app/shared/assets", "output": "assets" }
             ],
             "styles": ["src/styles.scss"],
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {

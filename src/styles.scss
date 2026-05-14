@@ -1,3 +1,26 @@
+/* Estilos globales de TMR Frontend - Estructura Refactorizada */
+@import 'styles/variables';
+@import 'styles/shared-components';
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   ESTILOS DE LEGACY / DASHBOARD (Traídos de Master)
+   ========================================================================== */
+
 .dashboard-container {
   all: initial; /* Resetea herencias extrañas de styles.scss */
   display: block;
