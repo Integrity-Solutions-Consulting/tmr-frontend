@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { authRoutes } from './features/auth/auth.routes';
+import { AppLayout } from './core/layout/app-layout/app-layout';
+import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
 import { LayoutComponent } from './shared/componentes/layout/layout.component';
 
 export const routes: Routes = [
@@ -9,6 +11,19 @@ export const routes: Routes = [
   },
   {
     path: '',
+    component: AppLayout,
+    children: [
+      {
+        path: '',
+        redirectTo: 'proyectos',
+        pathMatch: 'full',
+      },
+      {
+        path: 'proyectos',
+        component: ProyectosPage,
+      },
+    ],
+  },
     component: LayoutComponent,
     children: [
       {

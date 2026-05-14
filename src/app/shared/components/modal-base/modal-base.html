@@ -1,0 +1,21 @@
+@if (visible) {
+  <div class="modal-backdrop" (click)="cerrar.emit()">
+    <section
+      class="modal"
+      [class.modal--wide]="wide"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal__header">
+        <h2>{{ titulo }}</h2>
+
+        <button type="button" class="modal__cerrar" (click)="cerrar.emit()">
+          ×
+        </button>
+      </header>
+
+      <div class="modal__body">
+        <ng-content></ng-content>
+      </div>
+    </section>
+  </div>
+}

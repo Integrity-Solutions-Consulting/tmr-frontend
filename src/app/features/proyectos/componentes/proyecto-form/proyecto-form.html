@@ -1,0 +1,275 @@
+<form class="proyecto-form" [formGroup]="formulario" (ngSubmit)="guardar()">
+  <section class="proyecto-form__section">
+    <h3>Información General</h3>
+
+    <div class="proyecto-form__grid">
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Tipo de proyecto</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="Llave en mano">Llave en mano</mat-option>
+          <mat-option value="Soporte evolutivo">Soporte evolutivo</mat-option>
+          <mat-option value="Consultoria">Consultoria</mat-option>
+        </mat-select>
+        @if (campoInvalido('tipo')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Código</mat-label>
+        <input matInput formControlName="codigo">
+        @if (campoInvalido('codigo')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Cliente</mat-label>
+        <input matInput formControlName="cliente">
+        @if (campoInvalido('cliente')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Nombre del Proyecto</mat-label>
+        <input matInput formControlName="nombre">
+        @if (campoInvalido('nombre')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Fecha de inicio</mat-label>
+        <input matInput [matDatepicker]="inicioDatepicker" formControlName="fechaInicio">
+        <mat-datepicker-toggle matSuffix [for]="inicioDatepicker"></mat-datepicker-toggle>
+        <mat-datepicker #inicioDatepicker></mat-datepicker>
+        @if (campoInvalido('fechaInicio')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Fecha de fin</mat-label>
+        <input matInput [matDatepicker]="finDatepicker" formControlName="fechaFin">
+        <mat-datepicker-toggle matSuffix [for]="finDatepicker"></mat-datepicker-toggle>
+        <mat-datepicker #finDatepicker></mat-datepicker>
+        @if (fechaFinInvalida()) {
+          <mat-error>La fecha fin no puede ser menor que la fecha de inicio</mat-error>
+        } @else if (campoInvalido('fechaFin')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Presupuesto</mat-label>
+        <input
+          matInput
+          type="text"
+          inputmode="decimal"
+          formControlName="presupuesto"
+          (keydown)="bloquearCaracteresNumericos($event, true)"
+          (paste)="bloquearPegadoNoNumerico($event, true)"
+        >
+        @if (campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')) {
+          <mat-error>Solo se permiten números</mat-error>
+        } @else if (campoInvalido('presupuesto')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Horas</mat-label>
+        <input
+          matInput
+          type="text"
+          inputmode="numeric"
+          formControlName="horas"
+          (keydown)="bloquearCaracteresNumericos($event, false)"
+          (paste)="bloquearPegadoNoNumerico($event, false)"
+        >
+        @if (campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))) {
+          <mat-error>Solo se permiten números</mat-error>
+        } @else if (campoInvalido('horas')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="En progreso">En progreso</mat-option>
+          <mat-option value="En espera">En espera</mat-option>
+          <mat-option value="Completado">Completado</mat-option>
+          <mat-option value="Cancelado">Cancelado</mat-option>
+        </mat-select>
+        @if (campoInvalido('estado')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="proyecto-form__section">
+    <h3>Asignación</h3>
+    <h4 class="proyecto-form__subtitle">Líder</h4>
+
+    <div class="proyecto-form__leader">
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Seleccionar líder</mat-label>
+        <input matInput formControlName="lider">
+        @if (campoInvalido('lider')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Costo</mat-label>
+        <input
+          matInput
+          type="text"
+          inputmode="decimal"
+          formControlName="costoHoraLider"
+          (keydown)="bloquearCaracteresNumericos($event, true)"
+          (paste)="bloquearPegadoNoNumerico($event, true)"
+        >
+        @if (campoInvalido('costoHoraLider') && formulario.controls.costoHoraLider.hasError('soloNumeros')) {
+          <mat-error>Solo se permiten números</mat-error>
+        } @else if (campoInvalido('costoHoraLider')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Horas</mat-label>
+        <input
+          matInput
+          type="text"
+          inputmode="numeric"
+          formControlName="horasLider"
+          (keydown)="bloquearCaracteresNumericos($event, false)"
+          (paste)="bloquearPegadoNoNumerico($event, false)"
+        >
+        @if (campoInvalido('horasLider') && (formulario.controls.horasLider.hasError('soloNumeros') || formulario.controls.horasLider.hasError('min'))) {
+          <mat-error>Solo se permiten números</mat-error>
+        } @else if (campoInvalido('horasLider')) {
+          <mat-error>Este campo es obligatorio</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="proyecto-form__resources-header">
+      <h4 class="proyecto-form__subtitle">Recursos</h4>
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="proyecto-form__add"
+        (click)="agregarRecurso()"
+      >
+        + Añadir recurso
+      </button>
+    </div>
+
+    <div class="proyecto-form__resources" formArrayName="recursos">
+      @for (recurso of recursos.controls; track $index; let index = $index) {
+        <div class="proyecto-form__resource">
+          <div class="proyecto-form__resource-row" [formGroupName]="index">
+            <div class="proyecto-form__resource-top">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-nombre">
+                <mat-label>Seleccionar recurso</mat-label>
+                <input matInput formControlName="nombre">
+                @if (recursoCampoInvalido(index, 'nombre')) {
+                  <mat-error>Este campo es obligatorio</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
+                <mat-label>Seleccionar cargo</mat-label>
+                <input matInput formControlName="rol">
+                @if (recursoCampoInvalido(index, 'rol')) {
+                  <mat-error>Este campo es obligatorio</mat-error>
+                }
+              </mat-form-field>
+
+              <button
+                mat-icon-button
+                type="button"
+                class="proyecto-form__remove"
+                aria-label="Eliminar recurso"
+                (click)="eliminarRecurso(index)"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div class="proyecto-form__resource-bottom">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
+                <mat-label>Entrada</mat-label>
+                <input matInput [matDatepicker]="entradaDatepicker" formControlName="entrada">
+                <mat-datepicker-toggle matSuffix [for]="entradaDatepicker"></mat-datepicker-toggle>
+                <mat-datepicker #entradaDatepicker></mat-datepicker>
+                @if (recursoCampoInvalido(index, 'entrada')) {
+                  <mat-error>Este campo es obligatorio</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
+                <mat-label>Salida</mat-label>
+                <input matInput [matDatepicker]="salidaDatepicker" formControlName="salida">
+                <mat-datepicker-toggle matSuffix [for]="salidaDatepicker"></mat-datepicker-toggle>
+                <mat-datepicker #salidaDatepicker></mat-datepicker>
+                @if (recursoFechaSalidaInvalida(index)) {
+                  <mat-error>La salida no puede ser menor que la entrada</mat-error>
+                } @else if (recursoCampoInvalido(index, 'salida')) {
+                  <mat-error>Este campo es obligatorio</mat-error>
+                }
+              </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-costo">
+              <mat-label>Costo</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="decimal"
+                formControlName="costoHora"
+                (keydown)="bloquearCaracteresNumericos($event, true)"
+                (paste)="bloquearPegadoNoNumerico($event, true)"
+              >
+              @if (recursoCampoInvalido(index, 'costoHora') && recursos.at(index).get('costoHora')?.hasError('soloNumeros')) {
+                <mat-error>Solo se permiten números</mat-error>
+              } @else if (recursoCampoInvalido(index, 'costoHora')) {
+                <mat-error>Este campo es obligatorio</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-horas">
+              <mat-label>Horas</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                formControlName="horas"
+                (keydown)="bloquearCaracteresNumericos($event, false)"
+                (paste)="bloquearPegadoNoNumerico($event, false)"
+              >
+              @if (recursoCampoInvalido(index, 'horas') && (recursos.at(index).get('horas')?.hasError('soloNumeros') || recursos.at(index).get('horas')?.hasError('min'))) {
+                <mat-error>Solo se permiten números</mat-error>
+              } @else if (recursoCampoInvalido(index, 'horas')) {
+                <mat-error>Este campo es obligatorio</mat-error>
+              }
+            </mat-form-field>
+
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="proyecto-form__actions">
+    <button mat-flat-button type="submit">
+      {{ proyecto ? 'Guardar cambios' : 'Crear proyecto +' }}
+    </button>
+  </div>
+</form>
