@@ -1,0 +1,50 @@
+.status-badge {
+  min-width: 102px;
+  height: 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 0 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  font-size: 11px;
+  font-weight: 500;
+
+  color: #6b7280;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+}
+
+.progress {
+  background: #1677ff;
+}
+
+.completed {
+  background: #22c55e;
+}
+
+.cancelled {
+  background: #ef4444;
+}
+
+.waiting {
+  background: #f97316;
+}
+
+.inactive {
+  background: #9ca3af;
+}

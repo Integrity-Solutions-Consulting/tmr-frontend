@@ -1,40 +1,23 @@
-import {
-  ApplicationConfig,
-  provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection
-} from '@angular/core';
-
-import { provideRouter } from '@angular/router';
-
+import { ApplicationConfig, isDevMode } from '@angular/core';
+import { provideRouter } from '@angular/router'; // provideRouter, NO providerRouter
+import { routes } from './app.routes';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
-import { routes } from './app.routes';
-import { proyectosReducer } from './features/proyectos/store/proyectos.reducer';
-import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
+import { actividadesReducer } from './core/state/actividades/actividades.reducer';
+import { ActividadesEffects } from './core/state/actividades/actividades.effects'; // Con mayúscula inicial
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-
-    provideZoneChangeDetection({
-      eventCoalescing: true
-    }),
-
     provideRouter(routes),
-
     provideStore({
-      proyectos: proyectosReducer
+      actividades: actividadesReducer
     }),
-
-    provideEffects([
-      ProyectosEffects
-    ]),
-
+    provideEffects([ActividadesEffects]), // Con mayúscula inicial
     provideStoreDevtools({
       maxAge: 25,
-      logOnly: false
+      logOnly: !isDevMode()
     })
   ]
 };

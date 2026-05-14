@@ -1,0 +1,63 @@
+<div class="login-container">
+  <img src="assets/imagenes/background.png" alt="Background" class="background" />
+
+  <div class="login-card">
+    <div class="logo-container">
+      <img src="assets/imagenes/logo-isc.png" alt="Logo" class="logo" />
+    </div>
+
+    <h1 class="title">Iniciar Sesión</h1>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="form">
+      <!-- Email Input -->
+      <div class="form-group">
+        <input
+          type="email"
+          placeholder="Correo electrónico"
+          formControlName="email"
+          class="input-field"
+          [class.error]="email?.invalid && email?.touched"
+        />
+        <span class="error-message" *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">Email es requerido</span>
+          <span *ngIf="email?.errors?.['email']">Email no válido</span>
+        </span>
+      </div>
+
+      <!-- Password Input -->
+      <div class="form-group">
+        <input
+          type="password"
+          placeholder="Contraseña"
+          formControlName="password"
+          class="input-field"
+          [class.error]="password?.invalid && password?.touched"
+        />
+        <span class="error-message" *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">Contraseña es requerida</span>
+          <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+        </span>
+      </div>
+
+      <!-- Error Message -->
+      <div class="global-error" *ngIf="error$ | async as error">
+        {{ error }}
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="loginForm.invalid || (loading$ | async)"
+      >
+        <span *ngIf="!(loading$ | async)">Iniciar Sesión</span>
+        <span *ngIf="loading$ | async">Cargando...</span>
+      </button>
+    </form>
+
+    <!-- Forgot Password Link -->
+    <div class="forgot-password">
+      <a routerLink="/auth/forgot-password">¿Olvidaste tu contraseña?</a>
+    </div>
+  </div>
+</div>
