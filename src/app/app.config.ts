@@ -1,21 +1,23 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi } from '@angular/common/http';
+import { ApplicationConfig, isDevMode } from '@angular/core';
+import { provideRouter } from '@angular/router'; // provideRouter, NO providerRouter
+import { routes } from './app.routes';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
-import { AuthMockInterceptor } from './core/interceptors/auth-mock.interceptor';
-import { authReducer } from './features/auth/store/auth.reducer';
-import { AuthEffects } from './features/auth/store/auth.effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
 
-import { routes } from './app.routes';
+import { actividadesReducer } from './core/state/actividades/actividades.reducer';
+import { ActividadesEffects } from './core/state/actividades/actividades.effects'; // Con mayúscula inicial
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideStore({ auth: authReducer }),
-    provideEffects([AuthEffects]),
-    { provide: HTTP_INTERCEPTORS, useClass: AuthMockInterceptor, multi: true }
+    provideStore({
+      actividades: actividadesReducer
+    }),
+    provideEffects([ActividadesEffects]), // Con mayúscula inicial
+    provideStoreDevtools({
+      maxAge: 25,
+      logOnly: !isDevMode()
+    })
   ]
 };

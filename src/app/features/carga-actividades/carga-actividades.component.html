@@ -1,0 +1,117 @@
+<div class="dashboard-container">
+  <header class="header-main-row">
+    <h1 class="page-title">Carga de Actividades</h1>
+    <div class="header-actions">
+      <div class="stats-card">
+        <div class="stats-icon-circle"><span class="material-icons">schedule</span></div>
+        <div class="stats-info">
+          <p class="stats-label">Horas por registrar</p>
+          <p class="stats-value">{{ (horasPorRegistrar$ | async) }} h</p>
+        </div>
+      </div>
+      <input type="file" #fileInput class="hidden-input" (change)="onFileSelected($event)" accept=".xlsx,.xls,.xlm">
+      <button class="btn-primary" (click)="fileInput.click()">
+        <span class="material-icons">cloud_upload</span> 
+        <span>Cargar Excel</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="alert-container">
+    @if (errorMessage) {
+      <div class="alert-error">
+        <div class="alert-content">
+          <span class="material-icons">error_outline</span>
+          <span class="error-text">{{ errorMessage }}</span>
+        </div>
+        <button class="close-alert" (click)="errorMessage = ''">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <section class="toolbar-section">
+    <div class="search-input-wrapper">
+      <span class="material-icons">search</span>
+      <input type="text" [formControl]="searchControl" placeholder="Buscar colaborador, proyecto...">
+    </div>
+
+    <div class="filters-group">
+      <select class="custom-select" [formControl]="clienteControl">
+        <option value="">TODOS LOS CLIENTES</option>
+        @for (cliente of (clientes$ | async); track cliente) {
+          <option [value]="cliente">{{ cliente }}</option>
+        }
+      </select>
+
+      <div class="date-controls">
+        <div class="date-field">
+          <label>DESDE</label>
+          <input type="date" value="2026-04-01">
+        </div>
+        <div class="date-field">
+          <label>HASTA</label>
+          <input type="date" value="2026-04-30">
+        </div>
+      </div>
+
+      <button class="btn-secondary" (click)="descargarExcel()">
+        <span class="material-icons">file_download</span> 
+        <span>Descargar</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox"></th>
+            <th>COLABORADOR</th>
+            <th>PROYECTO</th>
+            <th>CLIENTE</th>
+            <th>LÍDER TÉCNICO</th>
+            <th>NRO HORAS</th>
+            <th>ESTADO</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of (actividadesFiltradas$ | async); track item.id) {
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="font-bold">{{ item.colaborador }}</td>
+              <td>{{ item.proyecto }}</td>
+              <td><span class="client-tag">{{ item.cliente }}</span></td>
+              <td>{{ item.liderTecnico }}</td>
+              <td class="text-center">{{ item.nroHoras }} h</td>
+              <td><span class="status-badge pendiente"><span class="dot"></span>{{ item.estado }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="empty-row">No hay registros disponibles.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((totalItemsFiltrados$ | async)! > 0) {
+      <footer class="pagination-bar">
+        <div class="pagination-info">
+          <p>Página <strong>{{ (paginaActual$ | async) }}</strong> de <strong>{{ Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina) }}</strong></p>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn-icon" [disabled]="(paginaActual$ | async) === 1" (click)="paginaAnterior()">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <span class="current-page-indicator">{{ (paginaActual$ | async) }}</span>
+          <button class="btn-icon" 
+                  [disabled]="(paginaActual$ | async)! >= Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina)" 
+                  (click)="paginaSiguiente()">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+      </footer>
+    }
+  </div>
+</div>
