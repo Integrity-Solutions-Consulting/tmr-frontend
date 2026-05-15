@@ -5,7 +5,16 @@
     <img src="assets/imagenes/logo-isc.png" alt="Integrity Solutions" class="sidebar__logo-img">
   </div>
 
-  <nav class="sidebar__nav">
+    <!-- ══ Dashboard ══ (icono cambiado a gráfico de pastel) -->
+    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link">
+      <!-- Pie chart icon -->
+      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2v10l4.5 2.6"/>
+        <path d="M12 12l-4.5 2.6L7 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </a>
 
     <!-- ══ Proyectos ══ -->
     <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link">
@@ -185,5 +194,4 @@
       </div>
     </div>
 
-  </nav>
 </aside>
