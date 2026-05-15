@@ -106,11 +106,4 @@
   </div>
 }
 
-<!-- Toasts -->
-@for (toast of toasts; track toast.id) {
-  <app-toast
-    [tipo]="toast.tipo"
-    [mensaje]="toast.mensaje"
-    (cerrado)="onToastCerrado(toast.id)"
-  />
-}
+<!-- Toasts removed -->

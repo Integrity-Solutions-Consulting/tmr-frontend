@@ -6,47 +6,73 @@
   min-height: 100vh;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  padding: 22px 14px 18px;
+  padding: 22px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* ── Logo ── */
 .sidebar__logo {
   height: 92px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .sidebar__logo-img {
   width: 84px;
   height: auto;
   object-fit: contain;
-  display: block;
 }
 
+/* ── Nav wrapper ── */
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
+  flex: 1;
 }
 
-.sidebar__link,
-.sidebar__sublink {
+/* ── SVG icons ── */
+.sidebar__svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: currentColor;
+  transition: color 0.18s;
+}
+
+.sidebar__svg--sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Links principales ── */
+.sidebar__link {
   display: flex;
   align-items: center;
-  text-decoration: none;
-  color: #737373;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.sidebar__link {
   min-height: 38px;
   gap: 10px;
   padding: 0 14px;
   border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+  user-select: none;
+
+  span:first-of-type {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &:hover {
     background: #f5f7fb;
@@ -60,13 +86,7 @@
   }
 }
 
-.sidebar__icon-img {
-  width: 15px;
-  height: 15px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
+/* ── Grupo colapsable ── */
 .sidebar__group {
   display: flex;
   flex-direction: column;
@@ -76,87 +96,99 @@
   position: relative;
 }
 
+/* Chevron animado */
 .sidebar__chevron {
-  margin-left: auto;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
   color: #9ca3af;
-  font-size: 9px;
+  margin-left: auto;
+  transition: transform 0.22s ease;
+}
+
+.sidebar__chevron--up {
   transform: rotate(180deg);
 }
 
+/* Submenu con animación suave */
 .sidebar__submenu {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 6px 0 6px 28px;
+  gap: 2px;
+  margin: 3px 0 3px 26px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
 }
 
+.sidebar__submenu--visible {
+  max-height: 200px;
+}
+
+/* ── Sub-links ── */
 .sidebar__sublink {
+  display: flex;
+  align-items: center;
   min-height: 30px;
   gap: 8px;
-  padding: 0 8px;
+  padding: 0 10px;
   border-radius: 8px;
   font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+  user-select: none;
 
   &:hover {
     background: #f5f7fb;
     color: #163572;
   }
 
-  .sidebar__icon-img {
-    width: 13px;
-    height: 13px;
+  &.active {
+    background: #eef4ff;
+    color: #163572;
+    font-weight: 700;
   }
 }
 
+/* ── Divider ── */
+.sidebar__divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 8px 4px;
+}
+
+/* ── Responsive compacto ── */
 @media (max-width: 1024px) {
   .sidebar {
-    width: 88px;
-    min-width: 88px;
-    padding: 18px 8px;
+    width: 68px;
+    min-width: 68px;
+    padding: 18px 6px;
   }
 
-  .sidebar__logo-img {
-    width: 50px;
-  }
+  .sidebar__logo-img { width: 40px; }
 
-  .sidebar__link,
-  .sidebar__sublink {
+  .sidebar__link {
     justify-content: center;
     padding: 0;
-    font-size: 0;
+    gap: 0;
+
+    span { display: none; }
   }
 
+  .sidebar__svg { width: 20px; height: 20px; }
+
   .sidebar__submenu,
-  .sidebar__chevron {
-    display: none;
-  }
+  .sidebar__chevron,
+  .sidebar__divider,
+  .sidebar__sublink { display: none; }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 72px;
-    min-width: 72px;
-    padding: 14px 6px;
-  }
-
-  .sidebar__logo {
-    height: 70px;
-    margin-bottom: 12px;
-  }
-
-  .sidebar__logo-img {
-    width: 42px;
-  }
-
-  .sidebar__link {
-    min-height: 40px;
-    border-radius: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar {
-    width: 62px;
-    min-width: 62px;
+    width: 56px;
+    min-width: 56px;
   }
 }

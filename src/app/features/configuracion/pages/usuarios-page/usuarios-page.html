@@ -1,0 +1,42 @@
+<section class="page">
+  <div class="hero">
+    <div>
+      <h2>Usuarios</h2>
+    </div>
+    <app-boton label="Nuevo Usuario" icon="person_add" (clicked)="openModal()" />
+  </div>
+
+  <div class="stats-grid">
+    <article>
+      <span>Usuarios</span>
+      <strong>{{ usuarios().length }}</strong>
+    </article>
+    <article>
+      <span>Activos</span>
+      <strong>{{ activos() }}</strong>
+    </article>
+    <article>
+      <span>Roles disponibles</span>
+      <strong>{{ roles().length }}</strong>
+    </article>
+  </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <app-search-input
+        placeholder="Buscar por nombres, identificacion, correo o rol..."
+        [value]="query()"
+        (valueChange)="query.set($event)"
+      />
+    </div>
+
+    <app-tabla
+      [columns]="columns"
+      [rows]="$any(filteredUsuarios())"
+      emptyMessage="No se encontraron usuarios."
+      (view)="viewUsuario($any($event))"
+      (edit)="openModal($any($event))"
+      (delete)="deleteUsuario($any($event))"
+    />
+  </div>
+</section>

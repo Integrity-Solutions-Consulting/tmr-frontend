@@ -36,22 +36,8 @@
             "styles": [
               "src/tailwind.css",
               "src/styles.scss"
-            ]
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "src/app/shared/assets",
-                "output": "assets"
-              }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -74,29 +60,6 @@
               "extractLicenses": false,
               "sourceMap": true
             }
-            "assets": [{ "glob": "**/*", "input": "public" }],
-            "assets": [
-              { "glob": "**/*", "input": "public" },
-              { "glob": "**/*", "input": "src/assets", "output": "assets" },
-              { "glob": "**/*", "input": "src/app/shared/assets", "output": "assets" }
-            ],
-            "styles": ["src/styles.scss"],
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              },
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss"
-            ],
-            "scripts": []
-          },
-          "configurations": {
-            "production": { "outputHashing": "all" },
-            "development": { "optimization": false, "sourceMap": true }
           },
           "defaultConfiguration": "production"
         },

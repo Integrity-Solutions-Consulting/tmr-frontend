@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables de color del proyecto
 $primary-blue: #163572;
 $text-dark: #1A1A2E;
@@ -84,7 +86,7 @@ $border-color: #E5E7EB;
     transition: background 0.15s ease-in-out;
 
     &:hover {
-        background: lighten($primary-blue, 10%);
+        background: color.adjust($primary-blue, $lightness: 10%);
     }
 
     &-top {

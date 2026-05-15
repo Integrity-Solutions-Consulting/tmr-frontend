@@ -1,4 +1,7 @@
 @use '@angular/material' as mat;
+@use 'styles/variables' as *;
+@use 'styles/shared-components';
+
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -40,25 +43,8 @@ body {
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
-
-html {
-  height: 100%;
-  @include mat.theme((color: (primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    ));
 /* Estilos globales de TMR Frontend - Estructura Refactorizada */
-@import 'styles/variables';
-@import 'styles/shared-components';
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import url('@angular/material/prebuilt-themes/indigo-pink.css');
 
 html,
 body {
@@ -323,7 +309,6 @@ body {
   height: 100%;
 }
 
-@import 'tailwindcss';
 /* You can add global styles to this file, and also import other style files */
 .notranslate { font-family: 'Material Icons' !important; }
 .animate-spin { animation: spin 1s linear infinite; }

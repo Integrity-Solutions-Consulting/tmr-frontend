@@ -4,7 +4,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { FiltroMetrica } from '../cards-metricas/cards-metricas.component';
 import { ExportarService }                  from '../../servicios/exportar.service';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
-import { ToastService }                     from '../../../../shared/services/toast.service';
 import {
   Colaborador,
   FiltrosColaborador,
@@ -16,11 +15,10 @@ import { CardsMetricasComponent }           from '../cards-metricas/cards-metric
 import { FiltrosColaboradoresComponent }    from '../filtros-colaboradores/filtros-colaboradores.component';
 import { DescargarMenuComponent }           from '../descargar-menu/descargar-menu.component';
 import { TablaColaboradoresComponent }      from '../tabla-colaboradores/tabla-colaboradores.component';
-import { PaginacionComponent }             from '../../../../shared/components/paginacion/paginacion.component';
+import { PaginacionComponent }             from '../../../../shared/componentes/paginacion/paginacion.component';
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
-import { ToastComponent }                   from '../../../../shared/toast/toast.component';
 
 @Component({
   selector: 'app-colaboradores-page',
@@ -35,7 +33,6 @@ import { ToastComponent }                   from '../../../../shared/toast/toast
     ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
-    ToastComponent,
   ],
   templateUrl: './colaboradores-page.component.html',
   styleUrl:    './colaboradores-page.component.scss',
@@ -66,14 +63,13 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   modalCrear   = false;
   modalEditar: Colaborador | null = null;
 
-  // ── Toasts ───────────────────────────────────────────────
-  get toasts() { return this.toastSvc.toasts(); }
+  // ── Toasts (Removidos) ───────────────────────────────────────────────
+  toasts: any[] = [];
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private svc:         ColaboradoresService,
-    private toastSvc:    ToastService,
     private exportarSvc: ExportarService,
   ) {}
 
@@ -96,7 +92,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.cargando = false;
-          this.toastSvc.error('Error al cargar los colaboradores');
+          console.error('Error al cargar los colaboradores');
         },
       });
   }
@@ -156,9 +152,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           this.cerrarCrear();
           this.paginaActual = 1;
           this.cargarDatos();
-          this.toastSvc.success('Colaborador creado exitosamente');
+          console.log('Colaborador creado exitosamente');
         },
-        error: () => this.toastSvc.error('Error al crear el colaborador'),
+        error: () => console.error('Error al crear el colaborador'),
       });
   }
 
@@ -170,9 +166,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         next: () => {
           this.cerrarEditar();
           this.cargarDatos();
-          this.toastSvc.success('Colaborador actualizado exitosamente');
+          console.log('Colaborador actualizado exitosamente');
         },
-        error: () => this.toastSvc.error('Error al actualizar el colaborador'),
+        error: () => console.error('Error al actualizar el colaborador'),
       });
   }
 
@@ -190,9 +186,9 @@ confirmarEliminar(): void {
       next: () => {
         this.colaboradorAEliminar = null;
         this.cargarDatos();
-        this.toastSvc.success('Colaborador eliminado correctamente');
+        console.log('Colaborador eliminado correctamente');
       },
-      error: () => this.toastSvc.error('Error al eliminar el colaborador'),
+      error: () => console.error('Error al eliminar el colaborador'),
     });
 }
 
@@ -207,9 +203,9 @@ cancelarEliminar(): void {
     .subscribe({
       next: res => {
         this.exportarSvc.exportarPDF(res.data);
-        this.toastSvc.success('PDF generado correctamente');
+        console.log('PDF generado correctamente');
       },
-      error: () => this.toastSvc.error('Error al generar el PDF'),
+      error: () => console.error('Error al generar el PDF'),
     });
 }
 
@@ -219,13 +215,13 @@ onDescargarExcel(): void {
     .subscribe({
       next: res => {
         this.exportarSvc.exportarExcel(res.data);
-        this.toastSvc.success('Excel generado correctamente');
+        console.log('Excel generado correctamente');
       },
-      error: () => this.toastSvc.error('Error al generar el Excel'),
+      error: () => console.error('Error al generar el Excel'),
     });
 }
   // ── Toast ────────────────────────────────────────────────
-  onToastCerrado(id: number): void { this.toastSvc.remover(id); }
+  onToastCerrado(id: number): void { }
 
   ngOnDestroy(): void {
     this.destroy$.next();
