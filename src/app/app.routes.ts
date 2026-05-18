@@ -37,12 +37,12 @@ export const routes: Routes = [
           import('./features/clientes/clientes.routes').then(m => m.clientesRoutes),
       },
 
-      // Líderes (placeholder hasta que Elisa integre el feature)
+      // Líderes
       {
         path: 'lideres',
         loadComponent: () =>
-          import('./features/lideres/lideres-placeholder.page').then(
-            m => m.LideresPlaceholderPage
+          import('./features/lideres/components/lideres.component').then(
+            m => m.LideresComponent
           ),
       },
 

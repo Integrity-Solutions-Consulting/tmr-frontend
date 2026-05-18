@@ -1,0 +1,224 @@
+<section class="lideres-page">
+  <div class="lideres-page__header">
+    <div>
+      <h2>Líderes</h2>
+    </div>
+  </div>
+
+  <div class="lideres-page__toolbar">
+    <div class="filtros">
+      <div class="search-box">
+        <span class="material-icons">search</span>
+        <input type="text" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda" (input)="aplicarFiltros()">
+      </div>
+      
+      <div class="estado-filter" (click)="toggleEstadoDropdown()">
+        <img src="assets/imagenes/iconos/filter.svg" alt="Filtro" />
+        <span>Estado</span>
+        
+        <div class="dropdown-menu" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+          <div class="dropdown-item" (click)="seleccionarEstado('Activo')">
+            <span class="material-icons" [class.invisible]="estadoFiltro !== 'Activo'">check</span>
+            Activo
+          </div>
+          <div class="dropdown-item" (click)="seleccionarEstado('Inactivo')">
+            <span class="material-icons" [class.invisible]="estadoFiltro !== 'Inactivo'">check</span>
+            Inactivo
+          </div>
+          <div class="dropdown-item clean" (click)="seleccionarEstado('')">
+            Limpiar filtro
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="lideres-page__actions">
+      <app-descarga-menu
+        [opciones]="opcionesDescarga"
+        etiquetaBoton="Descargar"
+      ></app-descarga-menu>
+
+      <button
+        mat-flat-button
+        type="button"
+        class="lideres-page__create"
+        (click)="abrirModalCrear()"
+      >
+        <span class="lideres-page__create-content">
+          Crear
+          <img src="assets/imagenes/iconos/btn-agregar.svg" alt="">
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="lideres-page__content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>Cliente</th>
+            <th>Correo electrónico</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (lider of lideresPaginados; track lider.codigo) {
+            <tr>
+              <td>{{ lider.codigo }}</td>
+              <td>{{ lider.tipo }}</td>
+              <td>{{ lider.nombre }}</td>
+              <td>{{ lider.cliente }}</td>
+              <td>{{ lider.correo }}</td>
+              <td>{{ lider.telefono }}</td>
+              <td>
+                <app-badge-estado [estado]="lider.estado"></app-badge-estado>
+              </td>
+              <td>
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="abrirModalDetalle(lider)">
+                    <span class="material-symbols-outlined">visibility</span>
+                    Ver más
+                  </button>
+                  <button mat-menu-item (click)="abrirModalEditar(lider)">
+                    <span class="material-symbols-outlined">edit_square</span>
+                    Editar
+                  </button>
+                  <button mat-menu-item (click)="solicitarEliminarLider(lider)" style="color: red;">
+                    <span class="material-symbols-outlined" style="color: red;">delete</span>
+                    Eliminar
+                  </button>
+                </mat-menu>
+              </td>
+            </tr>
+          }
+          @if (lideresPaginados.length === 0) {
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 2rem;">No se encontraron líderes.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <app-paginacion 
+      [totalRegistros]="lideresFiltrados.length"
+      [pageSize]="porPagina"
+      [pageIndex]="paginaActual - 1"
+      (pageChange)="onPageChange($event)">
+    </app-paginacion>
+  </div>
+</section>
+
+<!-- Modal Crear/Editar -->
+<app-modal-base
+  [titulo]="liderSeleccionado ? 'Editar Líder' : 'Nuevo Líder'"
+  [visible]="modalCrearVisible"
+  (cerrar)="cerrarModalCrear()"
+>
+  @if (modalCrearVisible) {
+    <form [formGroup]="liderForm" (ngSubmit)="guardarLider()" class="lider-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Código</label>
+          <input type="text" formControlName="codigo" class="input-control" />
+        </div>
+        <div class="form-field">
+          <label>Tipo</label>
+          <select formControlName="tipo" class="input-control">
+            <option value="Interno">Interno</option>
+            <option value="Externo">Externo</option>
+          </select>
+        </div>
+        <div class="form-field" style="grid-column: span 2;">
+          <label>Nombre</label>
+          <input type="text" formControlName="nombre" class="input-control" />
+        </div>
+        <div class="form-field" style="grid-column: span 2;">
+          <label>Cliente</label>
+          <input type="text" formControlName="cliente" class="input-control" />
+        </div>
+        <div class="form-field">
+          <label>Correo</label>
+          <input type="email" formControlName="correo" class="input-control" />
+        </div>
+        <div class="form-field">
+          <label>Teléfono</label>
+          <input type="text" formControlName="telefono" class="input-control" />
+        </div>
+        <div class="form-field">
+          <label>Estado</label>
+          <select formControlName="estado" class="input-control">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-cancelar" (click)="cerrarModalCrear()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="liderForm.invalid">Guardar</button>
+      </div>
+    </form>
+  }
+</app-modal-base>
+
+<!-- Detalle -->
+<app-modal-base
+  titulo="Detalle del Líder"
+  [visible]="modalDetalleVisible"
+  [wide]="true"
+  (cerrar)="cerrarModalDetalle()"
+>
+  @if (liderSeleccionado && modalDetalleVisible) {
+    <article class="lider-detalle">
+      <header class="lider-detalle__header">
+        <div>
+          <span class="lider-detalle__codigo">{{ liderSeleccionado.codigo }}</span>
+          <div class="lider-detalle__title">
+            <h3>{{ liderSeleccionado.nombre }}</h3>
+            <app-badge-estado [estado]="liderSeleccionado.estado"></app-badge-estado>
+          </div>
+          <p>{{ liderSeleccionado.cliente || 'Sin cliente' }}</p>
+        </div>
+      </header>
+      <section class="lider-detalle__summary">
+        <div>
+          <span>Tipo</span>
+          <strong>{{ liderSeleccionado.tipo }}</strong>
+        </div>
+        <div>
+          <span>Correo</span>
+          <strong>{{ liderSeleccionado.correo }}</strong>
+        </div>
+        <div>
+          <span>Teléfono</span>
+          <strong>{{ liderSeleccionado.telefono || '-' }}</strong>
+        </div>
+      </section>
+    </article>
+  }
+</app-modal-base>
+
+<app-confirm-dialog
+  [visible]="confirmEliminarVisible"
+  titulo="Eliminar líder"
+  mensaje="Esta acción eliminará el líder seleccionado. ¿Deseas continuar?"
+  textoCancelar="Cancelar"
+  textoConfirmar="Eliminar"
+  (cancelar)="cancelarEliminarLider()"
+  (confirmar)="confirmarEliminarLider()"
+></app-confirm-dialog>
+
+<app-success-modal
+  [visible]="successCrearVisible"
+  [mensaje]="mensajeConfirmacion"
+  (cerrar)="cerrarSuccessCrear()"
+></app-success-modal>
