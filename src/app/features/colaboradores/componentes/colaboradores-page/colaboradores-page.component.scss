@@ -4,12 +4,23 @@
   gap: 10px;
   min-height: 0;
 
+  &__wrapper {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 10px 24px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap:10px;
+}
+
   &__title {
     font-family: 'Inter', sans-serif;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
     color: #163572;
-    margin: 0;
+    margin: 8px 0 0 0;
     line-height: 1.2;
   }
 
@@ -65,10 +76,10 @@
     display: flex;
     flex-direction: column;
     overflow: visible;
-    background: #ffffff;
+    /*background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);*/
   }
 }
 

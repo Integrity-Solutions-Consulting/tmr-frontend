@@ -79,8 +79,9 @@
     white-space: nowrap;
 
     &:hover {
-      border-color: #163572;
-      color: #163572;
+      background: #f3f4f6;;
+      border-color: #d1d5db;
+      color: #374151;
     }
   }
 
@@ -192,7 +193,7 @@
       text-align: left; 
 
       &:hover {
-        color: #163572;
+        color: #6b7280;
         background: #f9fafb;
         font-weight: 500;
       }
