@@ -9,24 +9,25 @@
   border-radius: 18px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  padding: 10px 24px 16px 24px;
+  padding: 8px 24px 16px 24px; 
   display: flex;
   flex-direction: column;
-  gap:10px;
+  gap:12px;
 }
 
   &__title {
-    font-family: 'Inter', sans-serif;
+    //font-family: 'Inter', sans-serif;
     font-size: 32px;
     font-weight: 800;
     color: #163572;
-    margin: 8px 0 0 0;
+    padding-top: 18px;
     line-height: 1.2;
   }
 
   &__metricas {
     display: flex;
     justify-content: flex-end;
+    margin-top: -35px;
   }
 
   &__toolbar {
