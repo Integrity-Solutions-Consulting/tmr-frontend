@@ -5,13 +5,13 @@
     <img src="assets/imagenes/logo-isc.png" alt="Integrity Solutions" class="sidebar__logo-img">
   </div>
 
-    <!-- ══ Dashboard ══ (icono cambiado a gráfico de pastel) -->
+    <!-- ══ Dashboard ══ -->
     <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link">
       <!-- Pie chart icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2v10l4.5 2.6"/>
-        <path d="M12 12l-4.5 2.6L7 22"/>
+        <path d="M12 2v10l8.66 5"/>
+        <path d="M12 12l-8.66 5L12 12"/>
       </svg>
       <span>Dashboard</span>
     </a>
@@ -118,12 +118,13 @@
     <!-- ══ Líderes: persona con corbata ══ -->
     <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link">
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="6" r="3.5"/>
-        <!-- Cuerpo con corbata -->
-        <path d="M6 21a6 6 0 0 1 12 0"/>
-        <!-- Corbata -->
-        <path d="M11 10.5 l1 2.5 l1-2.5" stroke-width="1.4" fill="none"/>
-        <path d="M11.3 13 l.7 3 l.7-3" stroke-width="1.2" fill="none"/>
+          <circle cx="12" cy="5" r="3.5"/>
+          <!-- Cuerpo -->
+          <path d="M5 18a6 6 0 0 1 14 0"/>
+          <!-- Nudo de corbata -->
+          <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none"/>
+          <!-- Cuerpo de la corbata -->
+          <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none"/>
       </svg>
       <span>Líderes</span>
     </a>
@@ -131,10 +132,10 @@
     <!-- ══ Colaboradores: persona casual (sin corbata) ══ -->
     <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link">
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="9" cy="7" r="3"/>
+        <circle cx="9" cy="8" r="3"/>
         <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
-        <circle cx="17" cy="8" r="2.5"/>
-        <path d="M14 21v-.5A4.5 4.5 0 0 1 21 21"/>
+        <circle cx="18" cy="14" r="2.5"/>
+        <path d="M15 21v-.5A4.5 4.5 0 0 1 21 21"/>
       </svg>
       <span>Colaboradores</span>
     </a>
@@ -144,7 +145,7 @@
       <!-- Building / company icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="2" width="16" height="20" rx="1"/>
-        <path d="M9 22V12h6v10"/>
+        <path d="M9 22V15h6v6"/>
         <path d="M8 7h.01M12 7h.01M16 7h.01"/>
         <path d="M8 11h.01M12 11h.01M16 11h.01"/>
       </svg>
