@@ -51,33 +51,34 @@
 
 .navbar__notification-dot {
   position: relative;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 16px;
+  background: transparent;
   border: 1.7px solid #163572;
-  border-radius: 8px 8px 6px 6px;
+  border-radius: 50% 50% 35% 35% / 60% 60% 30% 30%;
   display: block;
+  transform: rotate(-15deg);
 
   &::before {
     content: '';
     position: absolute;
-    top: -4px;
+    top: -5px;
     left: 4px;
-    width: 5px;
-    height: 4px;
-    border: 1.7px solid #163572;
-    border-bottom: 0;
-    border-radius: 6px 6px 0 0;
+    width: 6px;
+    height: 6px;
+    background: #163572;
+    border-radius: 50%;
   }
 
   &::after {
     content: '';
     position: absolute;
     bottom: -4px;
-    left: 4px;
-    width: 5px;
-    height: 2px;
-    border-radius: 999px;
+    left: 5px;
+    width: 6px;
+    height: 3px;
     background: #163572;
+    border-radius: 2px;
   }
 }
 
