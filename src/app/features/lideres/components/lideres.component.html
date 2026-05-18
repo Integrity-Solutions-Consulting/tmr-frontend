@@ -110,10 +110,11 @@
     </div>
     
     <app-paginacion 
-      [totalRegistros]="lideresFiltrados.length"
-      [pageSize]="porPagina"
-      [pageIndex]="paginaActual - 1"
-      (pageChange)="onPageChange($event)">
+      [paginaActual]="paginaActual"
+      [totalPaginas]="totalPaginas"
+      [total]="lideresFiltrados.length"
+      [porPagina]="porPagina"
+      (paginaCambia)="onPageChange($event)">
     </app-paginacion>
   </div>
 </section>

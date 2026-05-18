@@ -8,12 +8,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
-import { BadgeEstado } from '../../../../shared/components/badge-estado/badge-estado';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
-import { DescargaMenuComponent, DescargaOpcion } from '../../../../shared/components/descarga-menu/descarga-menu.component';
-import { Paginacion } from '../../../../shared/components/paginacion/paginacion';
+import { ModalBase } from '../../../shared/components/modal-base/modal-base';
+import { BadgeEstado } from '../../../shared/components/badge-estado/badge-estado';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
+import { DescargaMenuComponent, DescargaOpcion } from '../../../shared/components/descarga-menu/descarga-menu.component';
+import { PaginacionComponent } from '../../../shared/componentes/paginacion/paginacion.component';
 
 export interface Lider {
   codigo: string;
@@ -40,7 +40,7 @@ export interface Lider {
     ConfirmDialogComponent,
     SuccessModalComponent,
     DescargaMenuComponent,
-    Paginacion
+    PaginacionComponent
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
@@ -181,9 +181,8 @@ export class LideresComponent implements OnInit {
     this.lideresPaginados = this.lideresFiltrados.slice(inicio, inicio + this.porPagina);
   }
 
-  onPageChange(event: any): void {
-    this.paginaActual = event.pageIndex + 1;
-    this.porPagina = event.pageSize;
+  onPageChange(pagina: number): void {
+    this.paginaActual = pagina;
     this.actualizarPaginados();
   }
 
