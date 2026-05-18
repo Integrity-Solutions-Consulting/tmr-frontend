@@ -80,27 +80,27 @@ export class LideresComponent implements OnInit {
   modalDetalleVisible = false;
   confirmEliminarVisible = false;
   successCrearVisible = false;
-  
+
   mensajeConfirmacion = '';
   liderSeleccionado: Lider | null = null;
   liderEliminar: Lider | null = null;
-  
+
   liderForm!: FormGroup;
 
   // ── Estado Dropdown ────────────────────────────────────
   mostrarEstadoDropdown = false;
-  
+
   opcionesDescarga: DescargaOpcion[] = [
     {
       id: 'excel',
       label: 'Exportar Excel',
-      icon: 'assets/imagenes/iconos/download.svg',
+      icon: 'assets/iconos/download.svg',
       action: () => this.descargarExcel()
     },
     {
       id: 'pdf',
       label: 'Exportar PDF',
-      icon: 'assets/imagenes/iconos/download.svg',
+      icon: 'assets/iconos/download.svg',
       action: () => this.descargarPDF()
     }
   ];
@@ -223,7 +223,7 @@ export class LideresComponent implements OnInit {
     this.modalDetalleVisible = false;
     this.liderSeleccionado = null;
   }
-  
+
   cerrarSuccessCrear(): void {
     this.successCrearVisible = false;
   }

@@ -5,8 +5,8 @@ import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proye
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // ── Raíz → Login ─────────────────────────────────────────
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  // ── Raíz → Dashboard ───────────────────────────────────────
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
   // ── Auth (sin sidebar) ───────────────────────────────────
   { path: 'auth', children: authRoutes },
@@ -17,6 +17,15 @@ export const routes: Routes = [
     component: AppLayout,
     canActivate: [authGuard],
     children: [
+
+      // Dashboard
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
+            m => m.DashboardPageComponent
+          ),
+      },
 
       // Proyectos
       { path: 'proyectos', component: ProyectosPage },

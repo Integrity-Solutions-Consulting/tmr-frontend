@@ -40,14 +40,14 @@ export class LoginComponent implements OnInit, OnDestroy {
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    // Redirige a /proyectos cuando el login es exitoso
+    // Redirige a /dashboard cuando el login es exitoso
     this.actions$
       .pipe(
         ofType(AuthActions.loginSuccess),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        this.router.navigate(['/proyectos']);
+        this.router.navigate(['/dashboard']);
       });
   }
 
@@ -63,7 +63,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   onLoginDemo(): void {
     this.tokenService.setToken('mock-demo-token-' + Date.now());
     this.tokenService.setUser(JSON.stringify({ nombre: 'Marlene', email: 'demo@tmr.com' }));
-    this.router.navigate(['/proyectos']);
+    this.router.navigate(['/dashboard']);
   }
 
   get email() {

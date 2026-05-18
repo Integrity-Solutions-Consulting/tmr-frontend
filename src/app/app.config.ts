@@ -12,12 +12,14 @@ import { authReducer } from './features/auth/store/auth.reducer';
 import { clientesReducer } from './features/clientes/store/clientes.reducer';
 import { actividadesReducer } from './core/state/actividades/actividades.reducer';
 import { proyectosReducer } from './features/proyectos/store/proyectos.reducer';
+import { dashboardReducer } from './features/dashboard/store/dashboard.reducer';
 
 // Effects
 import { AuthEffects } from './features/auth/store/auth.effects';
 import * as ClientesEffects from './features/clientes/store/clientes.effects';
 import { ActividadesEffects } from './core/state/actividades/actividades.effects';
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
+import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
 // Mock interceptor
 import { AuthMockInterceptor } from './core/interceptors/auth-mock.interceptor';
@@ -37,8 +39,9 @@ export const appConfig: ApplicationConfig = {
       clientes: clientesReducer,
       actividades: actividadesReducer,
       proyectos: proyectosReducer,
+      dashboard: dashboardReducer,
     }),
-    provideEffects(AuthEffects, ClientesEffects, ActividadesEffects, ProyectosEffects),
+    provideEffects(AuthEffects, ClientesEffects, ActividadesEffects, ProyectosEffects, DashboardEffects),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
 };

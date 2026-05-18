@@ -64,13 +64,13 @@ export class ProyectosPage {
     {
       id: 'excel',
       label: 'Exportar Excel',
-      icon: 'assets/imagenes/iconos/download.svg',
+      icon: 'assets/iconos/download.svg',
       action: () => undefined
     },
     {
       id: 'pdf',
       label: 'Exportar PDF',
-      icon: 'assets/imagenes/iconos/download.svg',
+      icon: 'assets/iconos/download.svg',
       action: () => undefined
     }
   ];
