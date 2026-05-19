@@ -5,6 +5,45 @@
     </div>
   </div>
 
+  <!-- Cards de Resumen -->
+  <div class="lideres-page__summary-cards">
+    <!-- Internos -->
+    <div class="summary-card">
+      <div class="summary-card__icon">
+        <span class="material-icons">person</span>
+      </div>
+      <div class="summary-card__content">
+        <span class="summary-card__count">{{ totalInternos }}</span>
+        <span class="summary-card__label">Internos</span>
+      </div>
+      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
+    </div>
+
+    <!-- Externos -->
+    <div class="summary-card">
+      <div class="summary-card__icon">
+        <img src="assets/iconos/card-user.svg" alt="Externos" />
+      </div>
+      <div class="summary-card__content">
+        <span class="summary-card__count">{{ totalExternos }}</span>
+        <span class="summary-card__label">Externos</span>
+      </div>
+      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="summary-card__icon">
+        <img src="assets/iconos/inactivos.svg" alt="Inactivos" />
+      </div>
+      <div class="summary-card__content">
+        <span class="summary-card__count">{{ totalInactivos }}</span>
+        <span class="summary-card__label">Inactivos</span>
+      </div>
+      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
+    </div>
+  </div>
+
   <div class="lideres-page__toolbar">
     <div class="filtros">
       <div class="search-box">
@@ -13,7 +52,7 @@
       </div>
       
       <div class="estado-filter" (click)="toggleEstadoDropdown()">
-        <img src="assets/iconos/filter.svg" alt="Filtro" />
+        <img src="assets/iconos/estado.svg" alt="Filtro" />
         <span>Estado</span>
         
         <div class="dropdown-menu" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
@@ -96,7 +135,7 @@
                     <span class="material-symbols-outlined" style="color: red;">delete</span>
                     Eliminar
                   </button>
-                </mat-menu>
+                </mat-menu> 
               </td>
             </tr>
           }
