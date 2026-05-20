@@ -1,0 +1,269 @@
+<div class="seguimiento-page">
+
+    <!-- ===== HEADER ===== -->
+    <div class="page-header">
+        <h1 class="page-title">Seguimiento</h1>
+        <div class="header-right">
+            <div class="horas-badge">
+                <mat-icon>schedule</mat-icon>
+                <span>Horas por registrar: {{ metricas().horasPendientes | horasFormat }}</span>
+            </div>
+            <button mat-flat-button class="btn-reporte" [matMenuTriggerFor]="reporteMenu">
+                <span>Reporte</span>
+                <mat-icon class="expand-icon">expand_more</mat-icon>
+            </button>
+            <mat-menu #reporteMenu="matMenu">
+                <button mat-menu-item (click)="exportarExcel()">
+                    <mat-icon>table_view</mat-icon> Exportar Excel (.xlsx)
+                </button>
+                <button mat-menu-item (click)="exportarCSV()">
+                    <mat-icon>description</mat-icon> Exportar CSV
+                </button>
+            </mat-menu>
+        </div>
+    </div>
+
+    <!-- ===== FILTER BAR ===== -->
+    <div class="filters-card">
+
+        <!-- Search -->
+        <div class="filter-group">
+            <label class="filter-label">Búsqueda</label>
+            <div class="filter-input-wrapper">
+                <input class="filter-input" type="text" placeholder="Buscar colaborador, proyecto, cliente..."
+                    [(ngModel)]="busqueda" (input)="aplicarFiltros()" />
+                <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Cliente -->
+        <div class="filter-group">
+            <label class="filter-label">Cliente</label>
+            <div class="filter-input-wrapper">
+                <select class="filter-select" [(ngModel)]="clienteSeleccionado" (change)="aplicarFiltros()">
+                    <option value="">Todos los clientes</option>
+                    <option value="BANCO DEL PACÍFICO">BANCO DEL PACÍFICO</option>
+                    <option value="BANCO BOLIVARIANO">BANCO BOLIVARIANO</option>
+                    <option value="INTEGRITY SOLUTIONS">INTEGRITY SOLUTIONS</option>
+                </select>
+                <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M10 14H6a4 4 0 0 0-4 4v2" />
+                    <path d="M12 21h10" />
+                    <path d="m18 15 4 4-4 4" />
+                </svg>
+                <mat-icon class="select-chevron">expand_more</mat-icon>
+            </div>
+        </div>
+
+        <!-- Fecha Desde -->
+        <div class="filter-group date-group">
+            <label class="filter-label">Fecha desde</label>
+            <input class="filter-input" type="date" [(ngModel)]="fechaDesde" (change)="aplicarFiltros()">
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="filter-group date-group">
+            <label class="filter-label">Fecha hasta</label>
+            <input class="filter-input" type="date" [(ngModel)]="fechaHasta" (change)="aplicarFiltros()">
+        </div>
+
+        <!-- Período toggle -->
+        <div class="filter-group periodo-group">
+            <label class="filter-label">Período</label>
+            <div class="toggle-group">
+                <button class="toggle-btn" [class.active]="periodo === 'quincena'"
+                    (click)="periodo = 'quincena'; aplicarFiltros()">
+                    @if (periodo === 'quincena') {
+                    <mat-icon class="check-icon">check</mat-icon>
+                    }
+                    Quincena
+                </button>
+                <button class="toggle-btn" [class.active]="periodo === 'mes-completo'"
+                    (click)="periodo = 'mes-completo'; aplicarFiltros()">
+                    @if (periodo === 'mes-completo') {
+                    <mat-icon class="check-icon">check</mat-icon>
+                    }
+                    Mes Completo
+                </button>
+            </div>
+        </div>
+
+        <!-- Aprobar -->
+        <button class="btn-aprobar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
+            (click)="aprobarSeleccionados()">
+            <mat-icon>check_circle</mat-icon>
+            Aprobar
+        </button>
+    </div>
+
+    <!-- ===== TABLE ===== -->
+    <div class="table-card">
+        <table mat-table [dataSource]="dataSource" matSort class="data-table">
+
+            <!-- Checkbox col -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox color="primary" (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    <mat-checkbox color="primary" (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+
+            <!-- Colaborador -->
+            <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Colaborador</th>
+                <td mat-cell *matCellDef="let el"><strong>{{ el.nombre }}</strong></td>
+            </ng-container>
+
+            <!-- Proyecto -->
+            <ng-container matColumnDef="proyecto">
+                <th mat-header-cell *matHeaderCellDef>Proyecto</th>
+                <td mat-cell *matCellDef="let el">{{ el.proyecto }}</td>
+            </ng-container>
+
+            <!-- Cliente -->
+            <ng-container matColumnDef="cliente">
+                <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                <td mat-cell *matCellDef="let el">{{ el.cliente }}</td>
+            </ng-container>
+
+            <!-- Líder -->
+            <ng-container matColumnDef="liderTecnico">
+                <th mat-header-cell *matHeaderCellDef>Líder Técnico</th>
+                <td mat-cell *matCellDef="let el">{{ el.liderTecnico }}</td>
+            </ng-container>
+
+            <!-- Horas -->
+            <ng-container matColumnDef="nroHoras">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Nro de Horas</th>
+                <td mat-cell *matCellDef="let el">{{ el.nroHoras | horasFormat }}</td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let el">
+                    <app-badge-estado [estado]="el.estado"></app-badge-estado>
+                </td>
+            </ng-container>
+
+            <!-- Días con reporte -->
+            <ng-container matColumnDef="diasConReporte">
+                <th mat-header-cell *matHeaderCellDef>Días con Reporte</th>
+                <td mat-cell *matCellDef="let el" class="center">{{ el.diasConReporte }}</td>
+            </ng-container>
+
+            <!-- Días a completar -->
+            <ng-container matColumnDef="diasACompletar">
+                <th mat-header-cell *matHeaderCellDef>Días a Completar</th>
+                <td mat-cell *matCellDef="let el" class="center">{{ el.diasACompletar }}</td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let el">
+                    <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #rowMenu="matMenu">
+                        <button mat-menu-item (click)="descargarDetalle(el)">
+                            <mat-icon>download</mat-icon> Descargar detalle
+                        </button>
+                        <button mat-menu-item>
+                            <mat-icon>visibility</mat-icon> Ver detalle
+                        </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnas;" (click)="selection.toggle(row)"
+                [class.selected-row]="selection.isSelected(row)">
+            </tr>
+        </table>
+    </div>
+
+    <mat-paginator [style.display]="'none'" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
+
+    <div class="tabla-footer">
+        <app-paginacion style="width: 100%;"
+            [paginaActual]="paginaActualHuman"
+            [totalPaginas]="totalPaginas"
+            [total]="totalRegistros"
+            [porPagina]="pageSize"
+            (paginaCambia)="onCustomPageChange($event)">
+        </app-paginacion>
+    </div>
+
+    <!-- ===== FOOTER METRICS ===== -->
+    <div class="metrics-footer">
+        <div class="metric-item">
+            <div class="metric-icon-wrap blue">
+                <mat-icon>schedule</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
+                <span class="metric-name">Horas por registrar</span>
+                <span class="metric-desc">Pendientes por completar</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap green">
+                <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
+                <span class="metric-name">Horas registradas</span>
+                <span class="metric-desc">Total del periodo</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap purple">
+                <mat-icon>calendar_today</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
+                <span class="metric-name">Promedio por día</span>
+                <span class="metric-desc">Horas registradas</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap orange">
+                <mat-icon>groups</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
+                <span class="metric-name">Colaboradores activos</span>
+                <span class="metric-desc">Con reporte en el periodo</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap gray">
+                <mat-icon>folder</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
+                <span class="metric-name">Proyectos</span>
+                <span class="metric-desc">Con actividades</span>
+            </div>
+        </div>
+    </div>
+
+</div>
