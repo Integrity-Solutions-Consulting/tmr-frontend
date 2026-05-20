@@ -1,19 +1,18 @@
+// lideres.component.ts
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-
-import { ModalBase } from '../../../shared/components/modal-base/modal-base';
-import { BadgeEstado } from '../../../shared/components/badge-estado/badge-estado';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
-import { DescargaMenuComponent, DescargaOpcion } from '../../../shared/components/descarga-menu/descarga-menu.component';
-import { PaginacionComponent } from '../../../shared/componentes/paginacion/paginacion.component';
+import { ModalLider } from './modal-lider/modal-lider';
+import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
+import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
+import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
 
 export interface Lider {
   codigo: string;
@@ -35,12 +34,10 @@ export interface Lider {
     MatMenuModule,
     MatButtonModule,
     MatIconModule,
-    ModalBase,
-    BadgeEstado,
-    ConfirmDialogComponent,
-    SuccessModalComponent,
-    DescargaMenuComponent,
-    PaginacionComponent
+    ModalLider,
+    ModalDetalleLider,
+    ModalDescargaComponent,
+    ModalConfirmacion
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
@@ -74,36 +71,21 @@ export class LideresComponent implements OnInit {
   paginaActual = 1;
   porPagina = 10;
   totalPaginas = 1;
+  paginas: number[] = [];
 
   // ── Modales ────────────────────────────────────────────
-  modalCrearVisible = false;
-  modalDetalleVisible = false;
-  confirmEliminarVisible = false;
-  successCrearVisible = false;
-
+  mostrarFormulario = false;
+  mostrarDetalle = false;
+  mostrarDescarga = false;
+  mostrarConfirmacion = false;
   mensajeConfirmacion = '';
-  liderSeleccionado: Lider | null = null;
-  liderEliminar: Lider | null = null;
-
+  liderSeleccionado: any = null;
+  modoEdicion = false;
+  liderEditando: Lider | null = null;
   liderForm!: FormGroup;
 
   // ── Estado Dropdown ────────────────────────────────────
   mostrarEstadoDropdown = false;
-
-  opcionesDescarga: DescargaOpcion[] = [
-    {
-      id: 'excel',
-      label: 'Exportar Excel',
-      icon: 'assets/iconos/download.svg',
-      action: () => this.descargarExcel()
-    },
-    {
-      id: 'pdf',
-      label: 'Exportar PDF',
-      icon: 'assets/iconos/download.svg',
-      action: () => this.descargarPDF()
-    }
-  ];
 
   constructor(private fb: FormBuilder) { }
 
@@ -137,9 +119,23 @@ export class LideresComponent implements OnInit {
     return this.lideres.filter(l => l.estado === 'Activo').length;
   }
 
+  // ── Paginación helpers ─────────────────────────────────
+  get rangoInicio(): number {
+    return this.lideresFiltrados.length === 0 ? 0 : (this.paginaActual - 1) * this.porPagina + 1;
+  }
+
+  get rangoFin(): number {
+    return Math.min(this.paginaActual * this.porPagina, this.lideresFiltrados.length);
+  }
+
   // ── Filtros ────────────────────────────────────────────
   filtrarPor(tipo: string): void {
-    this.tipoFiltro = this.tipoFiltro === tipo ? '' : tipo;
+    this.tipoFiltro = tipo;
+    this.aplicarFiltros();
+  }
+
+  filtrarEstado(estado: string): void {
+    this.estadoFiltro = estado;
     this.aplicarFiltros();
   }
 
@@ -148,12 +144,12 @@ export class LideresComponent implements OnInit {
   }
 
   seleccionarEstado(estado: string): void {
-    this.estadoFiltro = estado;
-    if (estado === '') {
-      this.mostrarEstadoDropdown = false;
-    }
-    this.aplicarFiltros();
+  this.estadoFiltro = estado;
+  if (estado === '') {
+    this.mostrarEstadoDropdown = false; // solo cierra al limpiar
   }
+  this.aplicarFiltros();
+}
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
@@ -173,7 +169,14 @@ export class LideresComponent implements OnInit {
     });
     this.totalPaginas = Math.max(1, Math.ceil(this.lideresFiltrados.length / this.porPagina));
     this.paginaActual = 1;
+    this.calcularPaginas();
     this.actualizarPaginados();
+  }
+
+  calcularPaginas(): void {
+    const max = Math.min(this.totalPaginas, 4);
+    const inicio = Math.max(1, Math.min(this.paginaActual - 2, this.totalPaginas - max + 1));
+    this.paginas = Array.from({ length: max }, (_, i) => inicio + i);
   }
 
   actualizarPaginados(): void {
@@ -181,81 +184,85 @@ export class LideresComponent implements OnInit {
     this.lideresPaginados = this.lideresFiltrados.slice(inicio, inicio + this.porPagina);
   }
 
-  onPageChange(pagina: number): void {
-    this.paginaActual = pagina;
+  irPagina(p: number): void {
+    this.paginaActual = p;
+    this.calcularPaginas();
     this.actualizarPaginados();
   }
 
-  // ── Modales ───────────────────────────────────
-  abrirModalCrear(): void {
-    this.liderSeleccionado = null;
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) this.irPagina(this.paginaActual - 1);
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) this.irPagina(this.paginaActual + 1);
+  }
+
+  // ── Modal Formulario ───────────────────────────────────
+  abrirFormulario(): void {
+    this.mostrarDescarga = false;
+    this.modoEdicion = false;
+    this.liderEditando = null;
     this.liderForm.reset({ estado: 'Activo' });
-    this.modalCrearVisible = true;
+    this.mostrarFormulario = true;
   }
 
-  cerrarModalCrear(): void {
-    this.modalCrearVisible = false;
+  cerrarFormulario(): void {
+    this.mostrarFormulario = false;
+    this.liderEditando = null;
+    this.liderForm.reset();
   }
 
-  abrirModalEditar(lider: Lider): void {
-    this.liderSeleccionado = lider;
+  // ── Modal Ver Detalle ──────────────────────────────────
+  verLider(lider: Lider, numero: number): void {
+    this.mostrarDescarga = false;
+    this.liderSeleccionado = { ...lider, numero };
+    this.mostrarDetalle = true;
+  }
+
+  cerrarDetalle(): void {
+    this.mostrarDetalle = false;
+    this.liderSeleccionado = null;
+  }
+
+  // ── Modal Editar ───────────────────────────────────────
+  editarLider(lider: Lider): void {
+    this.mostrarDescarga = false;
+    this.modoEdicion = true;
+    this.liderEditando = lider;
     this.liderForm.patchValue(lider);
-    this.modalCrearVisible = true;
+    this.mostrarFormulario = true;
   }
 
   guardarLider(): void {
-    if (this.liderForm.invalid) return;
+    this.mensajeConfirmacion = this.modoEdicion
+      ? 'Los cambios han sido<br>guardados exitosamente'
+      : 'El nuevo líder ha sido<br>agregado exitosamente';
 
-    this.mensajeConfirmacion = this.liderSeleccionado
-      ? 'Los cambios han sido guardados exitosamente'
-      : 'El nuevo líder ha sido agregado exitosamente';
-
-    this.cerrarModalCrear();
-    this.successCrearVisible = true;
+    this.mostrarConfirmacion = true;
+    setTimeout(() => {
+      this.mostrarConfirmacion = false;
+    }, 3000);
   }
 
-  abrirModalDetalle(lider: Lider): void {
-    this.liderSeleccionado = lider;
-    this.modalDetalleVisible = true;
+  // ── Modal Descarga ─────────────────────────────────────
+  abrirDescarga(): void {
+    this.mostrarDescarga = true;
   }
 
-  cerrarModalDetalle(): void {
-    this.modalDetalleVisible = false;
-    this.liderSeleccionado = null;
+  cerrarDescarga(): void {
+    this.mostrarDescarga = false;
   }
 
-  cerrarSuccessCrear(): void {
-    this.successCrearVisible = false;
-  }
-
-  solicitarEliminarLider(lider: Lider): void {
-    this.liderEliminar = lider;
-    this.confirmEliminarVisible = true;
-  }
-
-  cancelarEliminarLider(): void {
-    this.liderEliminar = null;
-    this.confirmEliminarVisible = false;
-  }
-
-  confirmarEliminarLider(): void {
-    if (!this.liderEliminar) return;
-
-    this.lideres = this.lideres.filter(l => l !== this.liderEliminar);
-    this.aplicarFiltros();
-    this.cancelarEliminarLider();
-  }
-
-  // ── Descarga ─────────────────────────────────────
   descargarPDF(): void {
     const doc = new jsPDF();
     doc.setTextColor(115, 115, 115);
     doc.text('Lista de Líderes', 14, 16);
     doc.setTextColor(0, 0, 0);
     autoTable(doc, {
-      head: [['Código', 'Tipo', 'Nombre', 'Cliente', 'Correo', 'Teléfono', 'Estado']],
-      body: this.lideres.map(l => [
-        l.codigo, l.tipo, l.nombre, l.cliente, l.correo, l.telefono, l.estado
+      head: [['#', 'Tipo', 'Nombre', 'Cliente', 'Correo', 'Teléfono', 'Estado']],
+      body: this.lideres.map((l, i) => [
+        i + 1, l.tipo, l.nombre, l.cliente, l.correo, l.telefono, l.estado
       ]),
       startY: 22,
       headStyles: {
@@ -268,11 +275,12 @@ export class LideresComponent implements OnInit {
       }
     });
     doc.save('lideres.pdf');
+    this.mostrarDescarga = false;
   }
 
   descargarExcel(): void {
-    const datos = this.lideres.map(l => ({
-      'Código': l.codigo,
+    const datos = this.lideres.map((l, i) => ({
+      '#': i + 1,
       'Tipo': l.tipo,
       'Nombre': l.nombre,
       'Cliente': l.cliente,
@@ -284,5 +292,13 @@ export class LideresComponent implements OnInit {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Líderes');
     XLSX.writeFile(wb, 'lideres.xlsx');
+    this.mostrarDescarga = false;
+  }
+
+  eliminarLider(lider: Lider): void {
+    if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
+      this.lideres = this.lideres.filter(l => l !== lider);
+      this.aplicarFiltros();
+    }
   }
 }

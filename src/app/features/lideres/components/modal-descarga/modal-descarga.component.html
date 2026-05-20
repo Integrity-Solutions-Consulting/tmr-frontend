@@ -1,0 +1,9 @@
+<div class="descarga-dropdown" *ngIf="mostrar" (click)="$event.stopPropagation()">
+  <p class="descarga-titulo">Seleccione el formato:</p>
+  <button class="btn-descarga" (click)="onDescargarPDF()">
+    Descargar PDF
+  </button>
+  <button class="btn-descarga" (click)="onDescargarExcel()">
+    Descargar Excel
+  </button>
+</div>

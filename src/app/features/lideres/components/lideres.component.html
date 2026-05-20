@@ -1,99 +1,114 @@
-<section class="lideres-page">
-  <div class="lideres-page__header">
-    <div>
-      <h2>Líderes</h2>
-    </div>
+<div class="lideres-container" (click)="cerrarDropdowns()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Líderes</h1>
   </div>
 
-  <!-- Cards de Resumen -->
-  <div class="lideres-page__summary-cards">
-    <!-- Internos -->
+  <!-- Cards -->
+  <div class="cards-row">
     <div class="summary-card">
-      <div class="summary-card__icon">
-        <span class="material-icons">person</span>
-      </div>
-      <div class="summary-card__content">
-        <span class="summary-card__count">{{ totalInternos }}</span>
-        <span class="summary-card__label">Internos</span>
-      </div>
-      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
-    </div>
-
-    <!-- Externos -->
-    <div class="summary-card">
-      <div class="summary-card__icon">
-        <img src="assets/iconos/card-user.svg" alt="Externos" />
-      </div>
-      <div class="summary-card__content">
-        <span class="summary-card__count">{{ totalExternos }}</span>
-        <span class="summary-card__label">Externos</span>
-      </div>
-      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
-    </div>
-
-    <!-- Inactivos -->
-    <div class="summary-card">
-      <div class="summary-card__icon">
-        <img src="assets/iconos/inactivos.svg" alt="Inactivos" />
-      </div>
-      <div class="summary-card__content">
-        <span class="summary-card__count">{{ totalInactivos }}</span>
-        <span class="summary-card__label">Inactivos</span>
-      </div>
-      <img src="assets/iconos/filtro-inactivo.svg" alt="" class="summary-card__filter-icon" />
-    </div>
-  </div>
-
-  <div class="lideres-page__toolbar">
-    <div class="filtros">
-      <div class="search-box">
-        <span class="material-icons">search</span>
-        <input type="text" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda" (input)="aplicarFiltros()">
-      </div>
-      
-      <div class="estado-filter" (click)="toggleEstadoDropdown()">
-        <img src="assets/iconos/estado.svg" alt="Filtro" />
-        <span>Estado</span>
-        
-        <div class="dropdown-menu" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-          <div class="dropdown-item" (click)="seleccionarEstado('Activo')">
-            <span class="material-icons" [class.invisible]="estadoFiltro !== 'Activo'">check</span>
-            Activo
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon">
+            <img src="icons/user.svg" class="card-svg" />
           </div>
-          <div class="dropdown-item" (click)="seleccionarEstado('Inactivo')">
-            <span class="material-icons" [class.invisible]="estadoFiltro !== 'Inactivo'">check</span>
-            Inactivo
-          </div>
-          <div class="dropdown-item clean" (click)="seleccionarEstado('')">
-            Limpiar filtro
-          </div>
+          <span class="card-number">{{ totalInternos }}</span>
         </div>
+        <span class="card-label">Internos</span>
       </div>
+      <button class="card-filter-btn" (click)="filtrarPor('Interno')">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
     </div>
-  
-    <div class="lideres-page__actions">
-      <app-descarga-menu
-        [opciones]="opcionesDescarga"
-        etiquetaBoton="Descargar"
-      ></app-descarga-menu>
 
-      <button
-        mat-flat-button
-        type="button"
-        class="lideres-page__create"
-        (click)="abrirModalCrear()"
-      >
-        <span class="lideres-page__create-content">
-          Crear
-          <img src="assets/iconos/btn-agregar.svg" alt="">
-        </span>
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--external">
+            <img src="icons/user.svg" class="card-svg" />
+            <img src="icons/arrow-up-right.svg" class="card-svg-arrow" />
+          </div>
+          <span class="card-number">{{ totalExternos }}</span>
+        </div>
+        <span class="card-label">Externos</span>
+      </div>
+      <button class="card-filter-btn" (click)="filtrarPor('Externo')">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--inactive">
+            <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ totalInactivos }}</span>
+        </div>
+        <span class="card-label">Inactivos</span>
+      </div>
+      <button class="card-filter-btn" (click)="filtrarPor('Inactivo')">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
       </button>
     </div>
   </div>
 
-  <div class="lideres-page__content">
-    <div class="table-container">
-      <table>
+  <!-- Barra de búsqueda y botones -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
+        (input)="aplicarFiltros()" />
+    </div>
+    <div class="estado-filter-wrapper">
+      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img"
+        (click)="$event.stopPropagation(); toggleEstadoDropdown()" />
+      <span class="estado-texto">Estado</span>
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-search">
+          <span class="material-icons dropdown-search-icon">search</span>
+          <input type="text" placeholder="Estado" class="dropdown-search-input" />
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('Activo')">
+          <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
+            <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
+          </div>
+          <span>Activo</span>
+          <span class="dropdown-count">{{ totalActivos }}</span>
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('Inactivo')">
+          <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Inactivo'">
+            <span class="material-icons" *ngIf="estadoFiltro === 'Inactivo'">check</span>
+          </div>
+          <span>Inactivo</span>
+          <span class="dropdown-count">{{ totalInactivos }}</span>
+        </div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado('')">Limpiar filtro</div>
+      </div>
+    </div>
+    <div class="search-spacer"></div>
+
+    <div class="descarga-wrapper">
+      <button class="btn btn-outline" (click)="abrirDescarga()">
+        Descargar
+        <span class="material-symbols-outlined">file_download</span>
+      </button>
+      <app-modal-descarga [mostrar]="mostrarDescarga" (cerrar)="cerrarDescarga()" (descargarPDF)="descargarPDF()"
+        (descargarExcel)="descargarExcel()">
+      </app-modal-descarga>
+    </div>
+
+    <button class="btn btn-primary" (click)="abrirFormulario()">
+      Agregar
+      <span class="material-icons">add</span>
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-scroll-container">
+    <div class="table-wrapper" #tableWrapper>
+      <table class="lideres-table">
         <thead>
           <tr>
             <th>Código</th>
@@ -103,162 +118,83 @@
             <th>Correo electrónico</th>
             <th>Teléfono</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          @for (lider of lideresPaginados; track lider.codigo) {
-            <tr>
-              <td>{{ lider.codigo }}</td>
-              <td>{{ lider.tipo }}</td>
-              <td>{{ lider.nombre }}</td>
-              <td>{{ lider.cliente }}</td>
-              <td>{{ lider.correo }}</td>
-              <td>{{ lider.telefono }}</td>
-              <td>
-                <app-badge-estado [estado]="lider.estado"></app-badge-estado>
-              </td>
-              <td>
-                <button mat-icon-button [matMenuTriggerFor]="menu">
-                  <mat-icon>more_vert</mat-icon>
+          <tr *ngFor="let lider of lideresPaginados; let i = index">
+            <td>{{ lider.codigo }}</td>
+            <td>{{ lider.tipo }}</td>
+            <td>{{ lider.nombre }}</td>
+            <td>{{ lider.cliente }}</td>
+            <td>{{ lider.correo }}</td>
+            <td>{{ lider.telefono }}</td>
+            <td>
+              <span class="badge" [class.badge--activo]="lider.estado === 'Activo'"
+                [class.badge--inactivo]="lider.estado !== 'Activo'">
+                {{ lider.estado }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">
+                <span class="material-icons">more_vert</span>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="verLider(lider, rangoInicio + i)">
+                  <span class="material-symbols-outlined">visibility</span>
+                  Ver más
                 </button>
-                <mat-menu #menu="matMenu">
-                  <button mat-menu-item (click)="abrirModalDetalle(lider)">
-                    <span class="material-symbols-outlined">visibility</span>
-                    Ver más
-                  </button>
-                  <button mat-menu-item (click)="abrirModalEditar(lider)">
-                    <span class="material-symbols-outlined">edit_square</span>
-                    Editar
-                  </button>
-                  <button mat-menu-item (click)="solicitarEliminarLider(lider)" style="color: red;">
-                    <span class="material-symbols-outlined" style="color: red;">delete</span>
-                    Eliminar
-                  </button>
-                </mat-menu> 
-              </td>
-            </tr>
-          }
-          @if (lideresPaginados.length === 0) {
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 2rem;">No se encontraron líderes.</td>
-            </tr>
-          }
+                <button mat-menu-item (click)="editarLider(lider)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                  Editar
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+          <tr *ngIf="lideresFiltrados.length === 0">
+            <td colspan="8" class="empty-state">No se encontraron líderes</td>
+          </tr>
         </tbody>
       </table>
     </div>
-    
-    <app-paginacion 
-      [paginaActual]="paginaActual"
-      [totalPaginas]="totalPaginas"
-      [total]="lideresFiltrados.length"
-      [porPagina]="porPagina"
-      (paginaCambia)="onPageChange($event)">
-    </app-paginacion>
   </div>
-</section>
 
-<!-- Modal Crear/Editar -->
-<app-modal-base
-  [titulo]="liderSeleccionado ? 'Editar Líder' : 'Nuevo Líder'"
-  [visible]="modalCrearVisible"
-  (cerrar)="cerrarModalCrear()"
->
-  @if (modalCrearVisible) {
-    <form [formGroup]="liderForm" (ngSubmit)="guardarLider()" class="lider-form">
-      <div class="form-grid">
-        <div class="form-field">
-          <label>Código</label>
-          <input type="text" formControlName="codigo" class="input-control" />
-        </div>
-        <div class="form-field">
-          <label>Tipo</label>
-          <select formControlName="tipo" class="input-control">
-            <option value="Interno">Interno</option>
-            <option value="Externo">Externo</option>
-          </select>
-        </div>
-        <div class="form-field" style="grid-column: span 2;">
-          <label>Nombre</label>
-          <input type="text" formControlName="nombre" class="input-control" />
-        </div>
-        <div class="form-field" style="grid-column: span 2;">
-          <label>Cliente</label>
-          <input type="text" formControlName="cliente" class="input-control" />
-        </div>
-        <div class="form-field">
-          <label>Correo</label>
-          <input type="email" formControlName="correo" class="input-control" />
-        </div>
-        <div class="form-field">
-          <label>Teléfono</label>
-          <input type="text" formControlName="telefono" class="input-control" />
-        </div>
-        <div class="form-field">
-          <label>Estado</label>
-          <select formControlName="estado" class="input-control">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
+  <!-- Paginación -->
+  <div class="pagination-bar">
+    <span class="pagination-info">
+      Mostrando registros del {{ rangoInicio }} al {{ rangoFin }}
+    </span>
+    <div class="pagination-right">
+      <span class="pagination-page-info">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <div class="pagination-controls">
+        <button class="page-btn" (click)="irPagina(1)" [disabled]="paginaActual === 1">
+          <span class="material-icons">keyboard_double_arrow_left</span>
+        </button>
+        <button class="page-btn" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <button *ngFor="let p of paginas" class="page-btn page-number" [class.page-btn--active]="p === paginaActual"
+          (click)="irPagina(p)">{{ p }}</button>
+        <button class="page-btn" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas">
+          <span class="material-icons">chevron_right</span>
+        </button>
+        <button class="page-btn" (click)="irPagina(totalPaginas)" [disabled]="paginaActual === totalPaginas">
+          <span class="material-icons">keyboard_double_arrow_right</span>
+        </button>
       </div>
-      <div class="form-actions">
-        <button type="button" class="btn-cancelar" (click)="cerrarModalCrear()">Cancelar</button>
-        <button type="submit" class="btn-guardar" [disabled]="liderForm.invalid">Guardar</button>
-      </div>
-    </form>
-  }
-</app-modal-base>
+    </div>
+  </div>
 
-<!-- Detalle -->
-<app-modal-base
-  titulo="Detalle del Líder"
-  [visible]="modalDetalleVisible"
-  [wide]="true"
-  (cerrar)="cerrarModalDetalle()"
->
-  @if (liderSeleccionado && modalDetalleVisible) {
-    <article class="lider-detalle">
-      <header class="lider-detalle__header">
-        <div>
-          <span class="lider-detalle__codigo">{{ liderSeleccionado.codigo }}</span>
-          <div class="lider-detalle__title">
-            <h3>{{ liderSeleccionado.nombre }}</h3>
-            <app-badge-estado [estado]="liderSeleccionado.estado"></app-badge-estado>
-          </div>
-          <p>{{ liderSeleccionado.cliente || 'Sin cliente' }}</p>
-        </div>
-      </header>
-      <section class="lider-detalle__summary">
-        <div>
-          <span>Tipo</span>
-          <strong>{{ liderSeleccionado.tipo }}</strong>
-        </div>
-        <div>
-          <span>Correo</span>
-          <strong>{{ liderSeleccionado.correo }}</strong>
-        </div>
-        <div>
-          <span>Teléfono</span>
-          <strong>{{ liderSeleccionado.telefono || '-' }}</strong>
-        </div>
-      </section>
-    </article>
-  }
-</app-modal-base>
+</div>
 
-<app-confirm-dialog
-  [visible]="confirmEliminarVisible"
-  titulo="Eliminar líder"
-  mensaje="Esta acción eliminará el líder seleccionado. ¿Deseas continuar?"
-  textoCancelar="Cancelar"
-  textoConfirmar="Eliminar"
-  (cancelar)="cancelarEliminarLider()"
-  (confirmar)="confirmarEliminarLider()"
-></app-confirm-dialog>
+<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion"
+  (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider()">
+</app-modal-lider>
 
-<app-success-modal
-  [visible]="successCrearVisible"
+<app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
+</app-modal-detalle-lider>
+<app-modal-confirmacion 
+  [mostrar]="mostrarConfirmacion" 
   [mensaje]="mensajeConfirmacion"
-  (cerrar)="cerrarSuccessCrear()"
-></app-success-modal>
+  (cerrarModal)="mostrarConfirmacion = false">
+</app-modal-confirmacion>
