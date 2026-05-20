@@ -1,0 +1,62 @@
+<div class="calendar-wrapper">
+    <!-- ===== CALENDAR TOP BAR ===== -->
+    <div class="calendar-topbar">
+        <div class="nav-controls">
+            <button class="nav-btn" (click)="anteriorMes()">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button class="nav-btn" (click)="siguienteMes()">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button class="hoy-btn" (click)="irAHoy()">
+                <mat-icon class="hoy-icon">calendar_today</mat-icon>
+                Hoy
+            </button>
+        </div>
+
+        <div class="month-title-wrap">
+            <select class="month-select" [(ngModel)]="mesSeleccionado" (change)="onMesChange()">
+                @for (m of mesesNombres; track m; let i = $index) {
+                <option [value]="i">{{ m }}</option>
+                }
+            </select>
+            <span class="month-year-label">{{ mesLabel }} de {{ anioActual }}</span>
+            <mat-icon class="dropdown-chevron">expand_more</mat-icon>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot blue"></span>
+                Completo
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot yellow"></span>
+                Parcial
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CALENDAR GRID ===== -->
+    <div class="calendar-grid">
+        @for (dia of nombresDias; track dia) {
+        <div class="day-header">{{ dia }}</div>
+        }
+
+        @for (dia of diasCalendario(); track dia.fecha.toISOString()) {
+        <div class="day-cell" [class.weekend]="dia.esFinDeSemana" [class.holiday]="dia.esFeriado && dia.esMesActual"
+            [class.today]="dia.esHoy" [class.other-month]="!dia.esMesActual"
+            (click)="dia.esMesActual && seleccionarDia(dia.fecha)">
+
+            <span class="day-number">{{ dia.fecha.getDate() }}</span>
+
+            <!-- El bloque de horas ahora es visible siempre en el mes actual -->
+            <div class="day-hours-block" [class.v-hidden]="!dia.esMesActual">
+                <span class="day-hours-text" [class.blue-text]="dia.horas >= 8 || dia.horas === 0"
+                    [class.yellow-text]="dia.horas > 0 && dia.horas < 8">
+                    {{ dia.horas | horasFormat }}
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+</div>

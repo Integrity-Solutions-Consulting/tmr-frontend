@@ -1,0 +1,21 @@
+<header class="navbar">
+  <div class="navbar__spacer"></div>
+
+  <div class="navbar__user">
+    <button type="button" class="navbar__profile-trigger" (click)="togglePerfil()">
+      Hola, Marlene
+    </button>
+
+    <button type="button" class="navbar__notification" aria-label="Notificaciones">
+      <span class="navbar__notification-dot"></span>
+    </button>
+
+    <app-profile-popover
+      [abierto]="perfilAbierto"
+      nombre="Marlene Canizares"
+      correo="marlene.canizares@integritysolutions.com.ec"
+      (cerrar)="cerrarPerfil()"
+      (cerrarSesion)="cerrarSesion()"
+    ></app-profile-popover>
+  </div>
+</header>

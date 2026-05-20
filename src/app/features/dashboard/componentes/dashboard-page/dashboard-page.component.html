@@ -1,0 +1,25 @@
+<div class="dashboard-container">
+  <!-- Título -->
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+  </div>
+
+  <!-- Métricas -->
+  <div class="section-metricas" *ngIf="metricas$ | async as metricas">
+    <app-dashboard-metricas [metricas]="metricas"></app-dashboard-metricas>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="dashboard-content">
+    
+    <!-- Proximamente a cerrar -->
+    <div class="section-proximamente" *ngIf="proximosACerrar$ | async as proximamente">
+      <app-proximamente-cerrar [proyectos]="proximamente"></app-proximamente-cerrar>
+    </div>
+
+    <!-- Gráfico de Horas -->
+    <div class="section-grafico" *ngIf="horasPorProyecto$ | async as horasData">
+      <app-grafico-horas [horasData]="horasData"></app-grafico-horas>
+    </div>
+  </div>
+</div>

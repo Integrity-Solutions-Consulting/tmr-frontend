@@ -1,0 +1,33 @@
+$white: #ffffff;
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  background: #F5F5F5;
+  padding: 16px;
+  box-sizing: border-box;
+  gap: 0;
+  overflow: hidden;
+}
+
+.layout-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border-radius: 0 15px 15px 0;
+  border: 1px solid #E5E5E5;
+  border-left: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  //overflow: hidden;
+}
+
+.layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  //overflow: hidden;
+  overflow-x: hidden;
+  min-height: 0;
+}

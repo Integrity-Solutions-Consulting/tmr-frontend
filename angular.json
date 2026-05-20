@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": "19b0e6c8-eefe-4f36-b62a-37198760c921"
+  },
   "newProjectRoot": "projects",
   "projects": {
     "gestion-actividades": {
@@ -15,7 +19,7 @@
             "outputPath": "dist/gestion-actividades",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js","@angular/localize/init" ],
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -23,16 +27,39 @@
                 "glob": "**/*",
                 "input": "public"
               },
-              "src/assets"
+              {
+                "glob": "**/*",
+                "input": "src/app/shared/assets",
+                "output": "assets"
+              }
             ],
             "styles": [
+              "src/tailwind.css",
               "src/styles.scss"
             ],
             "scripts": []
           },
           "configurations": {
-            "production": { "outputHashing": "all" },
-            "development": { "optimization": false, "sourceMap": true }
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "10kB",
+                  "maximumError": "20kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
           },
           "defaultConfiguration": "production"
         },
@@ -48,6 +75,7 @@
     }
   },
   "cli": {
+    "packageManager": "npm",
     "analytics": false
   }
 }

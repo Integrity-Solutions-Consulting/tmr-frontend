@@ -1,0 +1,71 @@
+.metricas {
+  display: flex;
+  gap: 16px;
+
+  &__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-width: 160px;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  &__card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  // Icono + número en la misma fila alineados
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__icon {
+    color: #163572;
+    flex-shrink: 0;
+  }
+
+  &__numero {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1;
+  }
+
+  // Label alineada a la izquierda debajo del icono
+  &__label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #6b7280;
+    padding-left: 0;
+    line-height: 1;
+  }
+
+  &__filter-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #9ca3af;
+    display: flex;
+    align-items: flex-start;
+    align-self: flex-start;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover {
+      color: #163572;
+      background: #f0f4ff;
+    }
+  }
+}

@@ -1,0 +1,184 @@
+.colabs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+
+  &__wrapper {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 8px 24px 16px 24px; 
+  display: flex;
+  flex-direction: column;
+  gap:12px;
+}
+
+  &__title {
+    //font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #163572;
+    padding-top: 18px;
+    line-height: 1.2;
+  }
+
+  &__metricas {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -35px;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  &__btn-agregar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    background: #163572;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.15s;
+    white-space: nowrap;
+
+    &:hover { background: #122d63; }
+  }
+
+  &__table-container {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    /*background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);*/
+  }
+}
+
+// ── Confirm modal — FUERA de .colabs-page ─────────────
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.confirm-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+  padding: 36px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 320px;
+  text-align: center;
+  animation: slideUp 0.22s ease;
+
+  &__icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid #163572;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #163572;
+    margin-bottom: 4px;
+  }
+
+  &__icon { font-size: 32px; }
+
+  &__title {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  &__mensaje {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+    strong { color: #374151; }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  &__btn {
+    flex: 1;
+    height: 38px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+
+    &--cancel {
+      background: #f3f4f6;
+      color: #374151;
+      &:hover { background: #e5e7eb; }
+    }
+
+    &--confirm {
+      background: #163572;
+      color: #ffffff;
+      &:hover { background: #122d63; }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

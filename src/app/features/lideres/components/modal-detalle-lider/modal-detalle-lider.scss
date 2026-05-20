@@ -1,0 +1,199 @@
+$primary: #163572;
+$primary-dark: #162C56;
+$white: #ffffff;
+$border: #E5E5E5;
+$text-dark: #1a1a2e;
+$text-mid: #4a4a6a;
+$text-light: #737373;
+$activo: #26BF4D;
+$inactivo: #ef4444;
+
+.detalle-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba($primary-dark, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detalle-card {
+  background: $white;
+  border-radius: 16px;
+  width: 560px;
+  max-width: 95vw;
+  padding: 32px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detalle-codigo {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  color: $text-light;
+}
+
+.detalle-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+
+  .material-icons { font-size: 20px; }
+  &:hover { background: $border; }
+}
+
+.detalle-nombre-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detalle-nombre {
+  font-size: 22px;
+  font-weight: 700;
+  color: $primary;
+  margin: 0;
+}
+
+// ── Badge estado ───────────────────────────────────────────
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 400;
+  border: 1px solid #D4D4D4;
+  background: #ffffff;
+  color: #404040;
+}
+
+.badge-circulo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.badge-activo {
+  .badge-circulo { background: #26BF4D; }
+}
+
+.badge-inactivo {
+  .badge-circulo { background: #ef4444; }
+}
+
+// ── Info row ───────────────────────────────────────────────
+.detalle-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.detalle-info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: $text-light;
+}
+
+.detalle-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+// ── Ícono con flechita ─────────────────────────────────────
+.detalle-icon-wrapper {
+  position: relative;
+  width: 24px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.detalle-icon-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 0px;
+  right: 4px;
+  opacity: 1;
+  filter: invert(40%);
+}
+// ── Sección contacto ───────────────────────────────────────
+.detalle-seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: 0;
+  color: #163572;
+  margin-bottom: 16px;
+  padding-top: 16px;
+  border-top: 1px solid $border;
+}
+
+.detalle-linea-azul {
+  width: 3px;
+  height: 16px;
+  background: $primary;
+  border-radius: 2px;
+}
+
+.detalle-contacto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detalle-contacto-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detalle-contacto-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: $text-light;
+}
+
+.detalle-icon-sm {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
+.detalle-contacto-valor {
+  font-size: 13px;
+  color: $text-dark;
+
+  &.azul { color: $primary; }
+}

@@ -149,6 +149,29 @@
         }
       }
     }
+
+    .demo-access {
+      text-align: center;
+      margin-top: 12px;
+
+      .demo-button {
+        background: none;
+        border: 1px dashed #cbd5e1;
+        border-radius: 6px;
+        color: #64748b;
+        font-size: 12px;
+        padding: 8px 20px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f8fafc;
+          border-color: #163572;
+          color: #163572;
+        }
+      }
+    }
   }
 }
 

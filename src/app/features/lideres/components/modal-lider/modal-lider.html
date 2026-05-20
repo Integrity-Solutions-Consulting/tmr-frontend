@@ -1,0 +1,107 @@
+<div class="modal-overlay" *ngIf="mostrarFormulario" (click)="cerrar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        {{ modoEdicion ? 'Editar Líder' : 'Nuevo Líder' }}
+      </h2>
+      <button class="modal-close" (click)="cerrar()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <div class="section-title">
+        <span class="section-line"></span>
+        Información General
+      </div>
+
+      <!-- Estado solo en edición -->
+      <div class="form-row" *ngIf="modoEdicion">
+        <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.estado">
+          <div class="custom-select" (click)="toggleDropdown('estado', $event)"
+            [class.open]="dropdownAbierto === 'estado'">
+            <span class="custom-select-value" [class.placeholder]="!form.estado">{{ form.estado || 'Estado' }}</span>
+            <span class="material-icons custom-select-arrow">expand_more</span>
+          </div>
+          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'estado'">
+            <li (click)="seleccionar('estado', 'Activo', $event)">Activo</li>
+            <li (click)="seleccionar('estado', 'Inactivo', $event)">Inactivo</li>
+          </ul>
+          <span class="error-msg" *ngIf="enviado && !form.estado">Campo requerido</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <!-- Tipo de líder -->
+        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.tipo">
+          <div class="custom-select" (click)="toggleDropdown('tipo', $event)" [class.open]="dropdownAbierto === 'tipo'">
+            <span class="custom-select-value" [class.placeholder]="!form.tipo">{{ form.tipo || 'Tipo de líder' }}</span>
+            <span class="material-icons custom-select-arrow">expand_more</span>
+          </div>
+          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
+            <li (click)="seleccionar('tipo', 'Interno', $event)">Interno</li>
+            <li (click)="seleccionar('tipo', 'Externo', $event)">Externo</li>
+          </ul>
+          <span class="error-msg" *ngIf="enviado && !form.tipo">Campo requerido</span>
+        </div>
+
+        <!-- Persona -->
+        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.persona">
+          <div class="custom-select" (click)="toggleDropdown('persona', $event)"
+            [class.open]="dropdownAbierto === 'persona'">
+            <span class="custom-select-value" [class.placeholder]="!form.persona">{{ getPersonaNombre() || 'Persona'
+              }}</span>
+            <span class="material-icons custom-select-arrow">expand_more</span>
+          </div>
+          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
+            <li (click)="seleccionar('persona', '1', $event)">Maribel Sofía Cabezas Paredes</li>
+            <li (click)="seleccionar('persona', '2', $event)">Leonel Pablo Catro Jiménez</li>
+            <li (click)="seleccionar('persona', '3', $event)">Diego Armando Maradona Carchi</li>
+            <li (click)="seleccionar('persona', '4', $event)">Óscar Mario Suárez Torres</li>
+          </ul>
+          <span class="error-msg" *ngIf="enviado && !form.persona">Campo requerido</span>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <span class="section-line"></span>
+        Datos de contacto
+      </div>
+
+      <div class="form-row">
+        <div class="input-wrapper" [class.input-error]="enviado && !form.nombres">
+          <input type="text" class="form-input" placeholder="Nombres" [(ngModel)]="form.nombres">
+          <span class="error-msg" *ngIf="enviado && !form.nombres">Campo requerido</span>
+        </div>
+        <div class="input-wrapper" [class.input-error]="enviado && !form.apellidos">
+          <input type="text" class="form-input" placeholder="Apellidos" [(ngModel)]="form.apellidos">
+          <span class="error-msg" *ngIf="enviado && !form.apellidos">Campo requerido</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-wrapper" [class.input-error]="enviado && !form.correo">
+          <input type="email" class="form-input" placeholder="Correo electrónico" [(ngModel)]="form.correo">
+          <span class="error-msg" *ngIf="enviado && !form.correo">Campo requerido</span>
+        </div>
+        <div class="input-wrapper" [class.input-error]="enviado && !form.telefono">
+          <input type="text" class="form-input" placeholder="Teléfono" [(ngModel)]="form.telefono">
+          <span class="error-msg" *ngIf="enviado && !form.telefono">Campo requerido</span>
+        </div>
+      </div>
+
+      <div class="button-container">
+        <!-- DESPUÉS -->
+        <!-- DESPUÉS -->
+        <button class="btn-guardar" (click)="onGuardar()">
+          {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
+          <span *ngIf="modoEdicion" class="material-icons">save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
