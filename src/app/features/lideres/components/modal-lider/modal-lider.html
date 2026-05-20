@@ -22,7 +22,8 @@
       <!-- Estado solo en edición -->
       <div class="form-row" *ngIf="modoEdicion">
         <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.estado">
-          <div class="custom-select" (click)="toggleDropdown('estado', $event)" [class.open]="dropdownAbierto === 'estado'">
+          <div class="custom-select" (click)="toggleDropdown('estado', $event)"
+            [class.open]="dropdownAbierto === 'estado'">
             <span class="custom-select-value" [class.placeholder]="!form.estado">{{ form.estado || 'Estado' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
@@ -50,8 +51,10 @@
 
         <!-- Persona -->
         <div class="custom-select-wrapper" [class.input-error]="enviado && !form.persona">
-          <div class="custom-select" (click)="toggleDropdown('persona', $event)" [class.open]="dropdownAbierto === 'persona'">
-            <span class="custom-select-value" [class.placeholder]="!form.persona">{{ getPersonaNombre() || 'Persona' }}</span>
+          <div class="custom-select" (click)="toggleDropdown('persona', $event)"
+            [class.open]="dropdownAbierto === 'persona'">
+            <span class="custom-select-value" [class.placeholder]="!form.persona">{{ getPersonaNombre() || 'Persona'
+              }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
@@ -93,10 +96,10 @@
 
       <div class="button-container">
         <!-- DESPUÉS -->
-<button class="btn-guardar" (click)="onGuardar()">
-  {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
-  <span *ngIf="modoEdicion" class="material-icons">save</span>
-</button>
+        <button class="btn-guardar" (click)="onGuardar()">
+          {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
+          <span *ngIf="modoEdicion" class="material-icons">save</span>
+        </button>
       </div>
 
     </div>
