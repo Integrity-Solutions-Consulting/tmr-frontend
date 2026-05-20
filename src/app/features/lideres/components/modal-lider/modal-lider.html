@@ -92,10 +92,11 @@
       </div>
 
       <div class="button-container">
-        <button class="btn-guardar" (click)="onGuardar()">
-          <span *ngIf="modoEdicion" class="material-icons">save</span>
-          {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
-        </button>
+        <!-- DESPUÉS -->
+<button class="btn-guardar" (click)="onGuardar()">
+  {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
+  <span *ngIf="modoEdicion" class="material-icons">save</span>
+</button>
       </div>
 
     </div>
