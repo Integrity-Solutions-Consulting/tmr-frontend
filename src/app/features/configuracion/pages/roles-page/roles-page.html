@@ -1,0 +1,42 @@
+<section class="page">
+  <div class="hero">
+    <div>
+      <h2>Roles</h2>
+    </div>
+    <app-boton label="Nuevo Rol" icon="add" (clicked)="openModal()" />
+  </div>
+
+  <div class="stats-grid">
+    <article>
+      <span>Roles activos</span>
+      <strong>{{ roles().length }}</strong>
+    </article>
+    <article>
+      <span>Modulos cubiertos</span>
+      <strong>14</strong>
+    </article>
+    <article>
+      <span>Acceso critico</span>
+      <strong>1</strong>
+    </article>
+  </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <app-search-input
+        placeholder="Buscar por nombre de rol, descripcion o modulo..."
+        [value]="query()"
+        (valueChange)="query.set($event)"
+      />
+    </div>
+
+    <app-tabla
+      [columns]="columns"
+      [rows]="$any(filteredRoles())"
+      emptyMessage="No se encontraron roles."
+      (view)="viewRol($any($event))"
+      (edit)="openModal($any($event))"
+      (delete)="deleteRol($any($event))"
+    />
+  </div>
+</section>

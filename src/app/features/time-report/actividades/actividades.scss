@@ -1,0 +1,196 @@
+@use "sass:color";
+
+// Variables locales
+$dark-navy: #1A1A2E;
+$primary-blue: #163572;
+$gray-bg: #F3F4F6;
+$border-color: #E5E7EB;
+$text-muted: #9CA3AF;
+
+.actividades-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: calc(100vh - 112px); // Ajustado según tu layout
+}
+
+/* ---- HEADER ---- */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .page-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: $dark-navy;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+}
+
+.horas-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: $gray-bg;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+
+    mat-icon {
+        font-size: 17px;
+        width: 17px;
+        height: 17px;
+        color: #6B7280;
+    }
+}
+
+.btn-agregar {
+    background-color: $primary-blue;
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    height: 40px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    &:hover {
+        background-color: color.adjust($primary-blue, $lightness: -5%);
+    }
+}
+
+/* ---- CALENDAR CARD ---- */
+.calendar-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+    flex: 1;
+}
+
+/* ---- FOOTER METRICS ---- */
+.metrics-footer {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.metric-divider {
+    width: 1px;
+    height: 48px;
+    background: $border-color;
+    margin: 0 24px;
+}
+
+.metric-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .metric-icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        mat-icon {
+            font-size: 22px;
+            width: 22px;
+            height: 22px;
+        }
+
+        &.blue {
+            background: #EEF3FB;
+            color: $primary-blue;
+        }
+
+        &.green {
+            background: #DCFCE7;
+            color: #15803D;
+        }
+
+        &.purple {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+
+        &.orange {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+    }
+
+    .metric-texts {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: $dark-navy;
+            line-height: 1.2;
+        }
+
+        .metric-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .metric-desc {
+            font-size: 11px;
+            color: $text-muted;
+        }
+    }
+}
+
+.footer-spacer {
+    flex: 1;
+}
+
+.btn-reporte {
+    border: 1px solid #D1D5DB;
+    color: #374151;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        background-color: $gray-bg;
+    }
+}

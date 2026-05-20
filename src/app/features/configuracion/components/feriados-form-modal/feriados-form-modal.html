@@ -1,0 +1,60 @@
+<app-modal-base
+  [title]="isEdit ? 'Editar Feriado' : 'Agregar Nuevo Feriado'"
+  subtitle="Configura tipo, nombre y fecha del calendario laboral."
+>
+  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <div class="two-columns">
+        <mat-form-field appearance="outline" hideRequiredMarker="true">
+          <mat-label>Tipo de Feriado</mat-label>
+          <mat-icon matPrefix>category</mat-icon>
+          <mat-select formControlName="tipo">
+            @for (tipo of tipos; track tipo) {
+              <mat-option [value]="tipo">{{ tipo }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>
+            @if (form.controls.tipo.errors?.['required'] && form.controls.tipo.touched) {
+              Campo requerido
+            }
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" hideRequiredMarker="true">
+          <mat-label>Nombre del Feriado</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
+          <input matInput formControlName="nombre" placeholder="Ej. Independencia de Guayaquil" />
+          <mat-error>
+            @if (form.controls.nombre.errors?.['required'] && form.controls.nombre.touched) {
+              Campo requerido
+            }
+            @if (form.controls.nombre.errors?.['pattern'] && form.controls.nombre.touched) {
+              Solo letras, espacios y tildes
+            }
+            @if (form.controls.nombre.errors?.['minlength'] && form.controls.nombre.touched) {
+              Mínimo 3 caracteres
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Fecha del Feriado</mat-label>
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <input matInput type="date" formControlName="fecha" />
+        <mat-error>
+          @if (form.controls.fecha.errors?.['required'] && form.controls.fecha.touched) {
+            Campo requerido
+          }
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="modal-actions">
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit">
+        {{ isEdit ? 'Guardar cambios' : 'Guardar feriado' }}
+      </button>
+    </div>
+  </form>
+</app-modal-base>

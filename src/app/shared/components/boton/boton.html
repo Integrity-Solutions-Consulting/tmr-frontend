@@ -1,0 +1,14 @@
+<button
+  mat-flat-button
+  [disabled]="disabled"
+  (click)="onClick($event)"
+  class="app-boton"
+  [class.app-boton--primary]="type === 'primary'"
+  [class.app-boton--secondary]="type === 'secondary'"
+  [class.app-boton--danger]="type === 'danger'"
+>
+  <span class="app-boton__content">
+    <span *ngIf="icon" class="material-icons app-boton__icon">{{ icon }}</span>
+    <span class="app-boton__label">{{ label }}</span>
+  </span>
+</button>

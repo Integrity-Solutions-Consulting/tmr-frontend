@@ -1,0 +1,28 @@
+.layout-container {
+  min-height: 100vh;
+  background-color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+.layout-main {
+  margin-left: 164px; /* Espacio para el Sidebar */
+  padding-top: 54px;  /* Espacio para el Navbar */
+}
+
+.layout-section {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1380px;
+  padding: 20px 28px;
+  box-sizing: border-box;
+}
+
+.layout-card {
+  border-radius: 16px;
+  border: 1px solid #E5E5E5;
+  background-color: white;
+  padding: 24px 26px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  box-sizing: border-box;
+}

@@ -1,0 +1,73 @@
+.modal-form {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-body {
+  min-height: 0;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #bdc9d9;
+}
+
+mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.two-columns {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(203, 213, 225, 0.9);
+  background: transparent;
+}
+
+.modal-actions button {
+  max-width: 100%;
+}
+
+@media (max-width: 620px) {
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,97 @@
+<app-modal-base
+  [title]="isEdit ? 'Editar Usuario' : 'Nuevo Usuario'"
+  subtitle="Gestiona identidad, roles multiples y estado operativo del usuario."
+>
+  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Nombres</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <input matInput formControlName="nombres" placeholder="Ej. Juan Carlos Perez Lopez" />
+        <mat-error>
+          @if (form.controls.nombres.errors?.['required'] && form.controls.nombres.touched) {
+            Campo requerido
+          }
+          @if (form.controls.nombres.errors?.['pattern'] && form.controls.nombres.touched) {
+            Solo letras, espacios y tildes
+          }
+          @if (form.controls.nombres.errors?.['minlength'] && form.controls.nombres.touched) {
+            Mínimo 4 caracteres
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <div class="two-columns">
+        <mat-form-field appearance="outline" hideRequiredMarker="true">
+          <mat-label>Correo Corporativo</mat-label>
+          <mat-icon matPrefix>mail</mat-icon>
+          <input matInput formControlName="email" placeholder="Ej. usuario@empresa.com" />
+          <mat-error>
+            @if (form.controls.email.errors?.['required'] && form.controls.email.touched) {
+              Campo requerido
+            }
+            @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
+              Email inválido
+            }
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" hideRequiredMarker="true">
+          <mat-label>Nombre de Usuario</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="usuario" placeholder="Ej. jperez" />
+          <mat-error>
+            @if (form.controls.usuario.errors?.['required'] && form.controls.usuario.touched) {
+              Campo requerido
+            }
+            @if (form.controls.usuario.errors?.['pattern'] && form.controls.usuario.touched) {
+              Solo letras, números y guion bajo
+            }
+            @if (form.controls.usuario.errors?.['minlength'] && form.controls.usuario.touched) {
+              Mínimo 3 caracteres
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Área</mat-label>
+        <mat-icon matPrefix>business</mat-icon>
+        <input matInput formControlName="area" placeholder="Selecciona el área" />
+        <mat-error>
+          @if (form.controls.area.errors?.['required'] && form.controls.area.touched) {
+            Campo requerido
+          }
+          @if (form.controls.area.errors?.['pattern'] && form.controls.area.touched) {
+            Solo letras, espacios y tildes
+          }
+          @if (form.controls.area.errors?.['minlength'] && form.controls.area.touched) {
+            Mínimo 2 caracteres
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Roles</mat-label>
+        <mat-icon matPrefix>verified_user</mat-icon>
+        <mat-select formControlName="roles" multiple>
+          @for (rol of data.roles; track rol.id) {
+            <mat-option [value]="rol.nombre">{{ rol.nombre }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>
+          @if (form.controls.roles.errors?.['required'] && form.controls.roles.touched) {
+            Selecciona al menos un rol
+          }
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="modal-actions">
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit">
+        {{ isEdit ? 'Guardar cambios' : 'Crear usuario' }}
+      </button>
+    </div>
+  </form>
+</app-modal-base>

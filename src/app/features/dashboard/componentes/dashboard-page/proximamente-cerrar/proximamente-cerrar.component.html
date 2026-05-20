@@ -1,0 +1,40 @@
+<div class="proximamente-card">
+  <div class="card-header">
+    <h2>Próximos a cerrar</h2>
+  </div>
+
+  <div class="projects-list" *ngIf="proyectos.length > 0; else noProjects">
+    <div class="project-item" *ngFor="let proyecto of proyectos">
+      <div class="project-header">
+        <div class="project-info">
+          <div class="project-codigo">{{ proyecto.codigo }}</div>
+          <div class="project-nombre">{{ proyecto.nombre }}</div>
+        </div>
+        <span class="estado-badge" [ngClass]="getEstadoBadgeClass(proyecto.estado)">
+          {{ proyecto.estado }}
+        </span>
+      </div>
+
+      <div class="project-details">
+        <div class="detail-item">
+          <span class="detail-label">Cliente</span>
+          <span class="detail-value">{{ proyecto.cliente }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Horas</span>
+          <span class="detail-value">{{ proyecto.horas }} h</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Presupuesto</span>
+          <span class="detail-value">${{ proyecto.presupuesto | number }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noProjects>
+    <div class="no-projects">
+      <p>No hay proyectos próximos a cerrar</p>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,71 @@
+<section class="calendar-card">
+  <header class="calendar-header">
+    <div>
+      <h3>{{ monthTitle() }}</h3>
+      <p>Calendario mensual de feriados configurados</p>
+    </div>
+
+    <div class="calendar-actions">
+      <button mat-stroked-button type="button" (click)="previousMonth()">
+        <mat-icon>chevron_left</mat-icon>
+        Anterior
+      </button>
+      <button mat-stroked-button type="button" (click)="goToday()">Hoy</button>
+      <button mat-stroked-button type="button" (click)="nextMonth()">
+        Siguiente
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="calendar-scroll">
+    <div class="calendar-grid weekday-grid">
+      @for (weekday of weekdays; track weekday) {
+        <div class="weekday">{{ weekday }}</div>
+      }
+    </div>
+
+    <div class="calendar-grid day-grid">
+      @for (day of calendarDays(); track day.key) {
+        <button
+          class="day-cell"
+          type="button"
+          [class.muted]="!day.inCurrentMonth"
+          [class.today]="day.isToday"
+          [class]="dayTypeClass(day)"
+          (click)="selectDay(day)"
+        >
+          <span class="day-number">{{ day.dayNumber }}</span>
+
+          <div class="holiday-list">
+            @for (feriado of day.feriados; track feriado.id) {
+              <span
+                class="holiday-chip"
+                [class]="typeClass(feriado.tipo)"
+                [matMenuTriggerFor]="holidayMenu"
+                (click)="openFeriadoMenu($event, feriado)"
+              >
+                {{ feriado.nombre }}
+              </span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+<mat-menu #holidayMenu="matMenu" class="holiday-menu" xPosition="after">
+  <button mat-menu-item type="button" (click)="emitSelected('view')">
+    <mat-icon>visibility</mat-icon>
+    <span>Ver mas</span>
+  </button>
+  <button mat-menu-item type="button" (click)="emitSelected('edit')">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item type="button" class="danger" (click)="emitSelected('delete')">
+    <mat-icon>delete_outline</mat-icon>
+    <span>Eliminar</span>
+  </button>
+</mat-menu>
