@@ -2,9 +2,10 @@ import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
-  CrearColaboradorDto, TipoIdentificacion,
-  Modalidad, Categoria, Genero,
+  CrearColaboradorDto,
+  Modalidad, Genero,
 } from '../../models/colaborador.model';
+import { PersonaMock, PERSONAS_MOCK } from '../../mock/personas.mock';
 
 @Component({
   selector: 'app-modal-crear-colaborador',
@@ -19,6 +20,8 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
   form!: FormGroup;
   enviado = false;
+
+  readonly personas: PersonaMock[] = PERSONAS_MOCK;
 
   readonly asociaciones: string[]  = ['RPS', 'ISC', 'RPS & ISC'];
   readonly tiposContrato: string[] = ['Fijo', 'Por Proyecto'];
@@ -76,27 +79,58 @@ export class ModalCrearColaboradorComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       tipoIdentificacion: ['',  Validators.required],
-      tipoContrato:       ['', Validators.required],
-      nombres:            ['', [Validators.required, Validators.minLength(3)]],
-      apellidos:          ['', [Validators.required, Validators.minLength(3)]],
-      identificacion:     ['', [Validators.required, Validators.minLength(10)]],
-      fechaNacimiento:    ['', Validators.required],
-      genero:             ['', Validators.required],
-      correoElectronico:  ['', [Validators.required, Validators.email]],
-      telefono:           ['', [Validators.required, Validators.minLength(10)]],
-      direccion:          ['', Validators.required],
-      departamento:       ['', Validators.required],
-      fechaContratacion:  ['', Validators.required],
-      cargo:              ['', Validators.required],
+      tipoContrato:       ['',  Validators.required],
+      personaId:          ['',  Validators.required],
+      nombres:            ['',  [Validators.required, Validators.minLength(3)]],
+      apellidos:          ['',  [Validators.required, Validators.minLength(3)]],
+      identificacion:     ['',  [Validators.required, Validators.minLength(10)]],
+      fechaNacimiento:    ['',  Validators.required],
+      genero:             ['',  Validators.required],
+      correoElectronico:  ['',  [Validators.required, Validators.email]],
+      telefono:           ['',  [Validators.required, Validators.minLength(10)]],
+      direccion:          ['',  Validators.required],
+      departamento:       ['',  Validators.required],
+      fechaContratacion:  ['',  Validators.required],
+      cargo:              ['',  Validators.required],
       aniosExperiencia:   [null, [Validators.required, Validators.min(0), Validators.max(50)]],
-      modalidad:          ['', Validators.required],
-      categoria:          ['', Validators.required],
+      modalidad:          ['',  Validators.required],
+      categoria:          ['',  Validators.required],
     });
 
-    // Reset cargo cuando cambia departamento
     this.form.get('departamento')?.valueChanges.subscribe(() => {
       this.form.patchValue({ cargo: '' });
     });
+
+    this.form.get('personaId')?.valueChanges.subscribe(id => {
+      this.aplicarPersona(id);
+    });
+  }
+
+  private aplicarPersona(personaId: string): void {
+    const camposPersonales = ['nombres', 'apellidos', 'identificacion', 'fechaNacimiento', 'genero'];
+
+    if (!personaId) {
+      camposPersonales.forEach(c => {
+        this.form.get(c)?.enable();
+        this.form.get(c)?.reset('');
+      });
+      return;
+    }
+
+    const persona = this.personas.find(p => p.id === personaId);
+    if (!persona) return;
+
+    camposPersonales.forEach(c => this.form.get(c)?.enable());
+
+    this.form.patchValue({
+      nombres:         persona.nombres,
+      apellidos:       persona.apellidos,
+      identificacion:  persona.identificacion,
+      fechaNacimiento: persona.fechaNacimiento,
+      genero:          persona.genero,
+    });
+
+    camposPersonales.forEach(c => this.form.get(c)?.disable());
   }
 
   tieneValor(campo: string): boolean {
@@ -106,13 +140,13 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
   campoInvalido(campo: string): boolean {
     const ctrl = this.form.get(campo);
-    return !!(ctrl && ctrl.invalid && (ctrl.touched || this.enviado));
+    return !!(ctrl && ctrl.invalid && !ctrl.disabled && (ctrl.touched || this.enviado));
   }
 
   onGuardar(): void {
     this.enviado = true;
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const v = this.form.value;
+    const v = this.form.getRawValue();
     const dto: CrearColaboradorDto = {
       tipoIdentificacion: v.tipoIdentificacion,
       identificacion:     v.identificacion,

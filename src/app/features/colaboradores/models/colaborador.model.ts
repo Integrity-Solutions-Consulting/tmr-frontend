@@ -90,3 +90,8 @@ export interface FiltrosColaborador {
   estado: EstadoColaborador | 'Todos';
   asignacion?: 'asignado' | 'noAsignado' | null;
 }
+
+export interface Notificacion {
+  tipo:    'exito' | 'error';
+  mensaje: string;
+}

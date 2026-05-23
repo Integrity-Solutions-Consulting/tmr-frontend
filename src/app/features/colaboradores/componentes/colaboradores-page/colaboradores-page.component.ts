@@ -9,6 +9,7 @@ import {
   FiltrosColaborador,
   CrearColaboradorDto,
   EditarColaboradorDto,
+  Notificacion,
 } from '../../models/colaborador.model';
 
 import { CardsMetricasComponent }           from '../cards-metricas/cards-metricas.component';
@@ -19,6 +20,7 @@ import { PaginacionComponent }             from '../../../../shared/componentes/
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
+import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
 
 @Component({
   selector: 'app-colaboradores-page',
@@ -33,6 +35,7 @@ import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/mo
     ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
+    NotificacionColaboradorComponent,
   ],
   templateUrl: './colaboradores-page.component.html',
   styleUrl:    './colaboradores-page.component.scss',
@@ -62,6 +65,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   modalDetalle: Colaborador | null = null;
   modalCrear   = false;
   modalEditar: Colaborador | null = null;
+
+  // ── Notificación ─────────────────────────────────────────────────────
+  notificacion: Notificacion | null = null;
 
   // ── Toasts (Removidos) ───────────────────────────────────────────────
   toasts: any[] = [];
@@ -152,7 +158,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           this.cerrarCrear();
           this.paginaActual = 1;
           this.cargarDatos();
-          console.log('Colaborador creado exitosamente');
+          this.notificacion = { tipo: 'exito', mensaje: 'El nuevo colaborador ha sido agregado exitosamente' };
         },
         error: () => console.error('Error al crear el colaborador'),
       });
@@ -166,11 +172,13 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         next: () => {
           this.cerrarEditar();
           this.cargarDatos();
-          console.log('Colaborador actualizado exitosamente');
+          this.notificacion = { tipo: 'exito', mensaje: 'El colaborador ha sido actualizado exitosamente' };
         },
         error: () => console.error('Error al actualizar el colaborador'),
       });
   }
+
+  cerrarNotificacion(): void { this.notificacion = null; }
 
   colaboradorAEliminar: Colaborador | null = null;
 
