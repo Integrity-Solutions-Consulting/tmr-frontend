@@ -17,7 +17,7 @@
       <div class="form-grid">
 
         <!-- Tipo de Identificador -->
-        <div class="campo campo-full">
+        <div class="campo">
           <div class="floating-field" [class.focused]="focusTipo || form.get('tipoId')?.value">
             <select formControlName="tipoId" class="input-field select-field"
               (focus)="focusTipo=true" (blur)="focusTipo=false"
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Nombre Comercial -->
-        <div class="campo">
+        <div class="campo campo-full">
           <div class="floating-field" [class.focused]="focusNombre || form.get('nombreComercial')?.value">
             <input formControlName="nombreComercial" class="input-field"
               (focus)="focusNombre=true" (blur)="focusNombre=false"
