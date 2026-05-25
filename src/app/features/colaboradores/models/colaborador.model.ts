@@ -19,6 +19,8 @@ export interface ProyectoAsignado {
  
 export interface Colaborador {
   id: string;
+  codigoEmpleado?: string;
+  tipoContrato?: string;
   identificacion: string;
   tipoIdentificacion: TipoIdentificacion;
   nombreCompleto: string;
@@ -94,4 +96,19 @@ export interface FiltrosColaborador {
 export interface Notificacion {
   tipo:    'exito' | 'error';
   mensaje: string;
+}
+
+// ============================================================
+// Interface que coincide con lo que devuelve GET /api/colaboradores
+// ============================================================
+export interface ColaboradorListaApi {
+  id: number;
+  codigoEmpleado: string;
+  numeroIdentificacion: string;
+  asociacion: string;
+  nombreCompleto: string;
+  email: string;
+  cargo: string;
+  numProyectos: number;
+  activo: boolean;
 }

@@ -1,10 +1,10 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Colaborador } from '../../models/colaborador.model';
 import {
-  Colaborador, EditarColaboradorDto,
-  EstadoColaborador, Modalidad, Genero,
-} from '../../models/colaborador.model';
+  CatalogosService, CatalogoItem, CargoItem
+} from '../../servicios/catalogos.service';
 
 @Component({
   selector: 'app-modal-editar-colaborador',
@@ -16,91 +16,116 @@ import {
 export class ModalEditarColaboradorComponent implements OnInit {
   @Input() colaborador!: Colaborador;
   @Output() cerrar  = new EventEmitter<void>();
-  @Output() guardar = new EventEmitter<EditarColaboradorDto>();
+  @Output() guardar = new EventEmitter<any>();
+
+  private fb = inject(FormBuilder);
+  private catalogosService = inject(CatalogosService);
 
   form!: FormGroup;
   enviado = false;
 
-  readonly tiposContrato: string[]      = ['Fijo', 'Por Proyecto'];
-  readonly modalidades: Modalidad[]     = ['Presencial', 'Remoto', 'Híbrida'];
-  readonly categorias: string[]         = ['Junior', 'Semi-Senior', 'Senior', 'Especialista', 'Especialista Plus'];
-  readonly generos: Genero[]            = ['Masculino', 'Femenino', 'Otro'];
-  readonly estados: EstadoColaborador[] = ['Activo', 'Inactivo'];
+  // Listas del backend (datos laborales)
+  tiposContrato: CatalogoItem[] = [];
+  modalidades: CatalogoItem[] = [];
+  categorias: CatalogoItem[] = [];
+  departamentos: CatalogoItem[] = [];
+  cargosDisponibles: CargoItem[] = [];
 
-  readonly departamentos: string[] = [
-    'Desarrollo',
-    'Seguridad e Informática',
-    'Procesos',
-    'Proyectos',
-    'Administración',
-    'Comercial',
-    'Recursos Humanos',
-  ];
+  // Para los dropdowns personales (solo lectura, pero el select necesita opciones)
+  generos: CatalogoItem[] = [];
 
-  readonly cargosPorDepartamento: Record<string, string[]> = {
-    'Desarrollo': [
-      'Desarrollador Fullstack', 'Analista QA', 'DevOps',
-      'Desarrollador Backend', 'Desarrollador Frontend', 'Desarrollador Web',
-      'Desarrollador Android', 'Desarrollador Cobol', 'Desarrollador iOS',
-      'Desarrollador Java', 'Desarrollador PHP', 'Desarrollador Visual FoxPro',
-    ],
-    'Recursos Humanos': [
-      'Analista de Talento Humano', 'Líder de Talento Humano',
-    ],
-    'Comercial': [
-      'Gerente Comercial', 'Ejecutivo Comercial', 'Asistente Comercial',
-    ],
-    'Administración': [
-      'Jefe Administrativo', 'Asistente de Marketing',
-      'Asistente Administrativo', 'Asistente Contable',
-    ],
-    'Proyectos': [
-      'Gerente de Proyectos y Producto', 'Coordinador de Proyectos',
-      'Gestor de Proyectos', 'Líder de Proyectos y Productos', 'Líder Técnico',
-    ],
-    'Procesos': [
-      'Analista de Procesos', 'Analista Funcional',
-    ],
-    'Seguridad e Informática': [
-      'Analista Middleware', 'Soporte Técnico',
-      'Líder de Seguridad e Informática', 'Help Desk',
-    ],
-  };
-
-  get cargosDisponibles(): string[] {
-    const dep = this.form?.get('departamento')?.value;
-    return dep ? (this.cargosPorDepartamento[dep] ?? []) : [];
-  }
-
-  get nombres(): string  { return this.colaborador?.nombreCompleto?.split(' ')[0] ?? ''; }
-  get apellidos(): string { return this.colaborador?.nombreCompleto?.split(' ').slice(1).join(' ') ?? ''; }
-
-  constructor(private fb: FormBuilder) {}
+  // Estados como lista para el dropdown
+  readonly estados = ['Activo', 'Inactivo'];
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      tipoContrato:      ['Fijo',                             Validators.required],
-      nombres:           [this.nombres,                       [Validators.required, Validators.minLength(3)]],
-      apellidos:         [this.apellidos,                     [Validators.required, Validators.minLength(3)]],
-      identificacion:    [this.colaborador.identificacion,    [Validators.required, Validators.minLength(10)]],
-      fechaNacimiento:   [this.colaborador.fechaNacimiento,   Validators.required],
-      genero:            [this.colaborador.genero,            Validators.required],
-      correoElectronico: [this.colaborador.correoElectronico, [Validators.required, Validators.email]],
-      telefono:          [this.colaborador.telefono,          [Validators.required, Validators.minLength(10)]],
-      direccion:         [this.colaborador.direccion,         Validators.required],
-      departamento:      [this.colaborador.departamento,      Validators.required],
-      fechaContratacion: [this.colaborador.fechaContratacion, Validators.required],
-      cargo:             [this.colaborador.cargo,             Validators.required],
-      aniosExperiencia:  [this.colaborador.aniosExperiencia,  [Validators.required, Validators.min(0), Validators.max(50)]],
-      modalidad:         [this.colaborador.modalidad,         Validators.required],
-      categoria:         [this.colaborador.categoria,         Validators.required],
-      estado:            [this.colaborador.estado,            Validators.required],
+      // ── Contrato (editable) ──
+      idTipoContrato:      ['', Validators.required],
+      estado:              ['', Validators.required],
+
+      // ── Datos personales (DESHABILITADOS, solo lectura) ──
+      nombres:             [{ value: '', disabled: true }],
+      apellidos:           [{ value: '', disabled: true }],
+      identificacion:      [{ value: '', disabled: true }],
+      fechaNacimiento:     [{ value: '', disabled: true }],
+      genero:              [{ value: '', disabled: true }],
+
+      // ── Datos de contacto (DESHABILITADOS, solo lectura) ──
+      correoElectronico:   [{ value: '', disabled: true }],
+      telefono:            [{ value: '', disabled: true }],
+      direccion:           [{ value: '', disabled: true }],
+
+      // ── Datos laborales (editables) ──
+      idDepartamento:      ['', Validators.required],
+      fechaContratacion:   ['', Validators.required],
+      idCargo:             ['', Validators.required],
+      aniosExperiencia:    [null, [Validators.required, Validators.min(0), Validators.max(50)]],
+      idModoTrabajo:       ['', Validators.required],
+      idCategoriaEmpleado: ['', Validators.required],
     });
 
-    // Reset cargo cuando cambia departamento
-    this.form.get('departamento')?.valueChanges.subscribe(() => {
-      this.form.patchValue({ cargo: '' });
+    this.cargarCatalogosYPrecargar();
+
+    // Al cambiar departamento, cargar sus cargos.
+    this.form.get('idDepartamento')?.valueChanges.subscribe(idDep => {
+      if (idDep) {
+        this.catalogosService.getCargosPorDepartamento(Number(idDep)).subscribe(cargos => {
+          this.cargosDisponibles = cargos;
+        });
+      }
     });
+  }
+
+  private cargarCatalogosYPrecargar(): void {
+    this.catalogosService.getCatalogo('TCT').subscribe(d => this.tiposContrato = d);
+    this.catalogosService.getCatalogo('MDT').subscribe(d => this.modalidades = d);
+    this.catalogosService.getCatalogo('CAT').subscribe(d => this.categorias = d);
+    this.catalogosService.getCatalogo('GEN').subscribe(d => this.generos = d);
+    this.catalogosService.getCatalogo('DEP').subscribe(d => {
+      this.departamentos = d;
+      this.precargarValores();
+    });
+  }
+
+  // Precarga los datos del colaborador en el formulario.
+  private precargarValores(): void {
+    // Datos personales y contacto (se muestran, vienen del colaborador).
+    const partes = this.colaborador.nombreCompleto.split(' ');
+    this.form.patchValue({
+      nombres: partes[0] ?? '',
+      apellidos: partes.slice(1).join(' ') ?? '',
+      identificacion: this.colaborador.identificacion,
+      fechaNacimiento: this.colaborador.fechaNacimiento,
+      genero: this.colaborador.genero,
+      correoElectronico: this.colaborador.correoElectronico,
+      telefono: this.colaborador.telefono,
+      direccion: this.colaborador.direccion,
+      estado: this.colaborador.estado,
+      fechaContratacion: this.colaborador.fechaContratacion,
+      aniosExperiencia: this.colaborador.aniosExperiencia,
+    });
+
+    // Departamento: buscar su id por el nombre.
+    const dep = this.departamentos.find(d => d.valor === this.colaborador.departamento);
+    if (dep) {
+      this.form.patchValue({ idDepartamento: dep.id });
+      // Cargar cargos y precargar el cargo actual.
+      this.catalogosService.getCargosPorDepartamento(dep.id).subscribe(cargos => {
+        this.cargosDisponibles = cargos;
+        const cargo = cargos.find(c => c.nombreCargo === this.colaborador.cargo);
+        if (cargo) this.form.patchValue({ idCargo: cargo.id });
+      });
+    }
+
+    // Modalidad, categoría y tipo de contrato: buscar id por texto.
+    setTimeout(() => {
+      const mod = this.modalidades.find(m => m.valor === this.colaborador.modalidad);
+      const cat = this.categorias.find(c => c.valor === this.colaborador.categoria);
+      const tc  = this.tiposContrato.find(t => t.valor === this.colaborador.tipoContrato);
+      if (mod) this.form.patchValue({ idModoTrabajo: mod.id });
+      if (cat) this.form.patchValue({ idCategoriaEmpleado: cat.id });
+      if (tc)  this.form.patchValue({ idTipoContrato: tc.id });
+    }, 400);
   }
 
   tieneValor(campo: string): boolean {
@@ -110,30 +135,26 @@ export class ModalEditarColaboradorComponent implements OnInit {
 
   campoInvalido(campo: string): boolean {
     const ctrl = this.form.get(campo);
-    return !!(ctrl && ctrl.invalid && (ctrl.touched || this.enviado));
+    return !!(ctrl && ctrl.invalid && !ctrl.disabled && (ctrl.touched || this.enviado));
   }
 
   onGuardar(): void {
     this.enviado = true;
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const v = this.form.value;
-    const dto: EditarColaboradorDto = {
-      nombreCompleto:    `${v.nombres} ${v.apellidos}`,
-      identificacion:    v.identificacion,
-      departamento:      v.departamento,
-      fechaContratacion: v.fechaContratacion,
-      cargo:             v.cargo,
-      aniosExperiencia:  v.aniosExperiencia,
-      modalidad:         v.modalidad,
-      categoria:         v.categoria,
-      correoElectronico: v.correoElectronico,
-      fechaNacimiento:   v.fechaNacimiento,
-      telefono:          v.telefono,
-      genero:            v.genero,
-      direccion:         v.direccion,
-      estado:            v.estado,
+
+    const v = this.form.getRawValue();
+    const request = {
+      idTipoContrato:      Number(v.idTipoContrato),
+      activo:              v.estado === 'Activo',
+      idDepartamento:      Number(v.idDepartamento),
+      fechaIngreso:        v.fechaContratacion || null,
+      idCargo:             Number(v.idCargo),
+      aniosExperiencia:    v.aniosExperiencia,
+      idModoTrabajo:       Number(v.idModoTrabajo),
+      idCategoriaEmpleado: Number(v.idCategoriaEmpleado),
     };
-    this.guardar.emit(dto);
+
+    this.guardar.emit(request);
   }
 
   onCerrar(): void { this.cerrar.emit(); }
