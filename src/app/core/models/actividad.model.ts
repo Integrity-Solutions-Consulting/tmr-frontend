@@ -4,6 +4,7 @@ export interface Actividad {
   proyecto: string;
   cliente: string;
   liderTecnico: string;
+  fecha?: string | Date;
   nroHoras: number;
   estado: 'Cargado' | 'Pendiente' | 'Error';
 }
