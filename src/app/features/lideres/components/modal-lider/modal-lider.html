@@ -42,10 +42,17 @@
             <span class="custom-select-value" [class.placeholder]="!form.tipo">{{ form.tipo || 'Tipo de líder' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
-          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
+          <!-- <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
             <li (click)="seleccionar('tipo', 'Interno', $event)">Interno</li>
             <li (click)="seleccionar('tipo', 'Externo', $event)">Externo</li>
-          </ul>
+          </ul> -->
+          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
+  @for (opcion of tiposLideres; track opcion.id) {
+    <li (click)="seleccionar('tipo', opcion, $event)">
+      {{ opcion.valor }}
+    </li>
+  }
+</ul>
           <span class="error-msg" *ngIf="enviado && !form.tipo">Campo requerido</span>
         </div>
 
@@ -58,10 +65,11 @@
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
-            <li (click)="seleccionar('persona', '1', $event)">Maribel Sofía Cabezas Paredes</li>
-            <li (click)="seleccionar('persona', '2', $event)">Leonel Pablo Catro Jiménez</li>
-            <li (click)="seleccionar('persona', '3', $event)">Diego Armando Maradona Carchi</li>
-            <li (click)="seleccionar('persona', '4', $event)">Óscar Mario Suárez Torres</li>
+            @for (persona of personasDisponibles; track persona.id) {
+              <li (click)="seleccionar('persona', persona, $event)">
+                {{ persona.nombres }}
+              </li>
+            }
           </ul>
           <span class="error-msg" *ngIf="enviado && !form.persona">Campo requerido</span>
         </div>
