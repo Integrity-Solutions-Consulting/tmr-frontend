@@ -12,7 +12,7 @@ import {
 // ─────────────────────────────────────────────────────────────
 const DATA_MOCK: Cliente[] = [
   {
-    id: 1, codigo: 'BGQ', tipoId: 'RUC', identificador: '0991506241001',
+    id: 1, tipoId: 'RUC', identificador: '0991506241001',
     nombreComercial: 'Banco Guayaquil',
     correoElectronico: 'valeria.pazmino@bancoguayaquil.fin.ec',
     telefono: '0986473829', estado: 'Activo',
@@ -26,7 +26,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 2, codigo: 'BPC', tipoId: 'RUC', identificador: '1790221806001',
+    id: 2, tipoId: 'RUC', identificador: '1790221806001',
     nombreComercial: 'Banco Pichincha',
     correoElectronico: 'ricardo.molina@gmail.com.ec',
     telefono: '0992783645', estado: 'Activo',
@@ -37,7 +37,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 3, codigo: 'BBV', tipoId: 'RUC', identificador: '1390067506001',
+    id: 3, tipoId: 'RUC', identificador: '1390067506001',
     nombreComercial: 'Banco Bolivariano',
     correoElectronico: 'samantha.salcedo@hotmail.com.ec',
     telefono: '0989374652', estado: 'Activo',
@@ -47,7 +47,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 4, codigo: 'PDB', tipoId: 'RUC', identificador: '0990459444001',
+    id: 4, tipoId: 'RUC', identificador: '0990459444001',
     nombreComercial: 'Produbanco',
     correoElectronico: 'daniel.erazo@pichincha.com.ec',
     telefono: '0997456321', estado: 'Activo',
@@ -55,7 +55,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 5, codigo: 'BDA', tipoId: 'RUC', identificador: '0790002350001',
+    id: 5, tipoId: 'RUC', identificador: '0790002350001',
     nombreComercial: 'Banco del Austro',
     correoElectronico: 'fernanda.ocana@lojanos.com.ec',
     telefono: '0982345678', estado: 'Activo',
@@ -65,7 +65,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 6, codigo: 'BIT', tipoId: 'RUC', identificador: '0990005737001',
+    id: 6, tipoId: 'RUC', identificador: '0990005737001',
     nombreComercial: 'Banco Internacional',
     correoElectronico: 'carlos.iturralde@quito.gob.ec',
     telefono: '0995678901', estado: 'Activo',
@@ -73,7 +73,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 7, codigo: 'BSL', tipoId: 'RUC', identificador: '0990049459001',
+    id: 7, tipoId: 'RUC', identificador: '0990049459001',
     nombreComercial: 'Banco Solidario',
     correoElectronico: 'maria.guzman@cuenca.edu.ec',
     telefono: '0987654321', estado: 'Activo',
@@ -83,7 +83,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 8, codigo: 'BPR', tipoId: 'RUC', identificador: '1790098354001',
+    id: 8, tipoId: 'RUC', identificador: '1790098354001',
     nombreComercial: 'Banco ProCredit',
     correoElectronico: 'luis.yanez@espol.edu.ec',
     telefono: '0999887766', estado: 'Inactivo',
@@ -91,7 +91,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 9, codigo: 'CTB', tipoId: 'RUC', identificador: '1791251237001',
+    id: 9, tipoId: 'RUC', identificador: '1791251237001',
     nombreComercial: 'Citibank Ecuador',
     correoElectronico: 'pedro.salinas@citibank.com.ec',
     telefono: '0999887701', estado: 'Activo',
@@ -101,7 +101,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 10, codigo: 'BNF', tipoId: 'RUC', identificador: '1768150560001',
+    id: 10, tipoId: 'RUC', identificador: '1768150560001',
     nombreComercial: 'BanEcuador',
     correoElectronico: 'patricia.morales@banecuador.fin.ec',
     telefono: '0984321987', estado: 'Activo',
@@ -109,7 +109,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 11, codigo: 'CFN', tipoId: 'RUC', identificador: '1760001560001',
+    id: 11, tipoId: 'RUC', identificador: '1760001560001',
     nombreComercial: 'Corporación Financiera Nacional',
     correoElectronico: 'roberto.vargas@cfn.fin.ec',
     telefono: '0976543210', estado: 'Activo',
@@ -119,7 +119,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 12, codigo: 'MUT', tipoId: 'RUC', identificador: '1791423268001',
+    id: 12, tipoId: 'RUC', identificador: '1791423268001',
     nombreComercial: 'Mutualista Pichincha',
     correoElectronico: 'andrea.torres@mutualista.com.ec',
     telefono: '0991234567', estado: 'Inactivo',
@@ -127,7 +127,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 13, codigo: 'JEP', tipoId: 'RUC', identificador: '0990003456001',
+    id: 13, tipoId: 'RUC', identificador: '0990003456001',
     nombreComercial: 'Cooperativa JEP',
     correoElectronico: 'miguel.santos@jep.fin.ec',
     telefono: '0987654320', estado: 'Activo',
@@ -137,7 +137,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 14, codigo: 'GNB', tipoId: 'RUC', identificador: '1792234567001',
+    id: 14, tipoId: 'RUC', identificador: '1792234567001',
     nombreComercial: 'GNB Sudameris',
     correoElectronico: 'carolina.paz@gnb.com.ec',
     telefono: '0983456789', estado: 'Activo',
@@ -145,7 +145,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 15, codigo: 'LOM', tipoId: 'RUC', identificador: '1790567890001',
+    id: 15, tipoId: 'RUC', identificador: '1790567890001',
     nombreComercial: 'Loja Sociedad Financiera',
     correoElectronico: 'jose.lozano@loja.fin.ec',
     telefono: '0994567890', estado: 'Inactivo',
@@ -153,7 +153,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 16, codigo: 'PSO', tipoId: 'Cédula', identificador: '1712345678',
+    id: 16, tipoId: 'Cédula', identificador: '1712345678',
     nombreComercial: 'Pascuales Online',
     correoElectronico: 'sofia.hidalgo@pascuales.ec',
     telefono: '0981234567', estado: 'Activo',
@@ -163,7 +163,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 17, codigo: 'TRC', tipoId: 'RUC', identificador: '1792876543001',
+    id: 17, tipoId: 'RUC', identificador: '1792876543001',
     nombreComercial: 'Telecom Ecuador',
     correoElectronico: 'diana.luna@telecom.ec',
     telefono: '0996789012', estado: 'Activo',
@@ -171,7 +171,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 18, codigo: 'ENR', tipoId: 'RUC', identificador: '1793456789001',
+    id: 18, tipoId: 'RUC', identificador: '1793456789001',
     nombreComercial: 'Energía Renovable SA',
     correoElectronico: 'pablo.guerrero@energia.ec',
     telefono: '0985678901', estado: 'Activo',
@@ -181,7 +181,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 19, codigo: 'SLT', tipoId: 'Pasaporte', identificador: 'XB123456',
+    id: 19, tipoId: 'Pasaporte', identificador: 'XB123456',
     nombreComercial: 'Salud Total Corp',
     correoElectronico: 'natalia.vega@saludtotal.com',
     telefono: '0999012345', estado: 'Activo',
@@ -189,7 +189,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 20, codigo: 'EDU', tipoId: 'RUC', identificador: '1791098765001',
+    id: 20, tipoId: 'RUC', identificador: '1791098765001',
     nombreComercial: 'EduTech Ecuador',
     correoElectronico: 'gabriel.mora@edutech.ec',
     telefono: '0978901234', estado: 'Activo',
@@ -199,7 +199,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 21, codigo: 'AGR', tipoId: 'RUC', identificador: '1794567890001',
+    id: 21, tipoId: 'RUC', identificador: '1794567890001',
     nombreComercial: 'AgroTech Solutions',
     correoElectronico: 'lucia.castillo@agrotech.ec',
     telefono: '0990123456', estado: 'Activo',
@@ -207,7 +207,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 22, codigo: 'TRN', tipoId: 'RUC', identificador: '1795678901001',
+    id: 22, tipoId: 'RUC', identificador: '1795678901001',
     nombreComercial: 'Transporte Nacional',
     correoElectronico: 'ivan.flores@transporte.ec',
     telefono: '0989234567', estado: 'Inactivo',
@@ -215,7 +215,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 23, codigo: 'MRC', tipoId: 'RUC', identificador: '1796789012001',
+    id: 23, tipoId: 'RUC', identificador: '1796789012001',
     nombreComercial: 'MercadoCentro EC',
     correoElectronico: 'valeria.rios@mercadocentro.ec',
     telefono: '0997890123', estado: 'Activo',
@@ -225,7 +225,7 @@ const DATA_MOCK: Cliente[] = [
     ]
   },
   {
-    id: 24, codigo: 'CNS', tipoId: 'RUC', identificador: '1797890123001',
+    id: 24, tipoId: 'RUC', identificador: '1797890123001',
     nombreComercial: 'Constructora del Sur',
     correoElectronico: 'oscar.mendez@constructora.ec',
     telefono: '0986789012', estado: 'Activo',
@@ -233,7 +233,7 @@ const DATA_MOCK: Cliente[] = [
     proyectosAsignados: []
   },
   {
-    id: 25, codigo: 'PFT', tipoId: 'RUC', identificador: '1798901234001',
+    id: 25, tipoId: 'RUC', identificador: '1798901234001',
     nombreComercial: 'Pharmafuture SA',
     correoElectronico: 'elena.suarez@pharmafuture.ec',
     telefono: '0995678901', estado: 'Activo',
@@ -307,7 +307,6 @@ export class ClientesMockService {
   crearCliente(req: CrearClienteRequest): Observable<Cliente> {
     const nuevo: Cliente = {
       id:                nextId++,
-      codigo:            '',
       tipoId:            req.tipoId,
       identificador:     req.identificador,
       nombreComercial:   req.nombreComercial,

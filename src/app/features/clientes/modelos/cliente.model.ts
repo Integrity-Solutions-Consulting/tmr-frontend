@@ -8,7 +8,6 @@ export type EstadoProyecto     = 'En progreso' | 'Completado' | 'Pausado' | 'Can
 
 export interface Cliente {
   id:                  number;
-  codigo:              string;
   tipoId:              TipoIdentificacion;
   identificador:       string;
   nombreComercial:     string;
