@@ -68,6 +68,41 @@
         </div>
         <div class="form-grid form-grid--2">
 
+          <!-- Fila 1: Persona | Identificación -->
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="personaId"
+                [class.float-select__input--error]="campoInvalido('personaId')">
+                <option value=""></option>
+                @for (p of personas; track p.id) {
+                  <option [value]="p.id">{{ p.nombres }} {{ p.apellidos }} — {{ p.identificacion }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('personaId')">
+                Persona <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('personaId')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="identificacion"
+                placeholder=" " [class.float-field__input--error]="campoInvalido('identificacion')"/>
+              <label class="float-field__label">Identificación <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('identificacion')) {
+              <span class="form-field__error">
+                @if (form.get('identificacion')?.errors?.['required']) { Campo requerido }
+                @else { Mínimo 10 caracteres }
+              </span>
+            }
+          </div>
+
+          <!-- Fila 2: Nombres | Apellidos -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input" type="text" formControlName="nombres"
@@ -96,20 +131,7 @@
             }
           </div>
 
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="identificacion"
-                placeholder=" " [class.float-field__input--error]="campoInvalido('identificacion')"/>
-              <label class="float-field__label">Identificación <span class="req">*</span></label>
-            </div>
-            @if (campoInvalido('identificacion')) {
-              <span class="form-field__error">
-                @if (form.get('identificacion')?.errors?.['required']) { Campo requerido }
-                @else { Mínimo 10 caracteres }
-              </span>
-            }
-          </div>
-
+          <!-- Fila 3: Fecha de nacimiento | Género -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input float-field__input--date" type="date"

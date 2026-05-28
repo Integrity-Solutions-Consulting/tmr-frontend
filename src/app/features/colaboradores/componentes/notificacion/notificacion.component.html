@@ -1,0 +1,24 @@
+<div class="notificacion-overlay" *ngIf="notificacion">
+  <div class="notificacion-card"
+    [class.exito]="notificacion.tipo === 'exito'"
+    [class.error]="notificacion.tipo === 'error'">
+
+    <!-- Ícono círculo éxito -->
+    <div class="icono-circulo" *ngIf="notificacion.tipo === 'exito'">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="24" stroke="#22c55e" stroke-width="2.5" fill="none"/>
+        <path d="M14 26l9 9 15-16" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Ícono círculo error -->
+    <div class="icono-circulo" *ngIf="notificacion.tipo === 'error'">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="24" stroke="#ef4444" stroke-width="2.5" fill="none"/>
+        <path d="M18 18l16 16M34 18L18 34" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <p class="mensaje">{{ notificacion.mensaje }}</p>
+  </div>
+</div>
