@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AsyncPipe, DatePipe } from '@angular/common'; // 🚀 CORREGIDO: Importamos DatePipe
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { combineLatest, map, startWith, take, BehaviorSubject, tap, Observable } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
-import * as ActividadesActions from '../../core/state/actividades/actividades.actions';
+import { Actividad } from '../../core/models/actividad.model';
+import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
 import { selectActividadesList } from '../../core/state/actividades/actividades.selectors';
 
 @Component({
@@ -18,8 +19,8 @@ import { selectActividadesList } from '../../core/state/actividades/actividades.
 export class CargaActividadesComponent {
   protected Math = Math;
   private store = inject(Store);
-  private http = inject(HttpClient); 
   private actions$ = inject(Actions);
+  private http = inject(HttpClient);
   
   searchControl = new FormControl(''); 
   clienteControl = new FormControl('');
@@ -36,11 +37,11 @@ export class CargaActividadesComponent {
   paginaActual$ = new BehaviorSubject<number>(1);
   itemsPorPagina = 10;
 
-  private actividadesRaw$ = this.store.select(selectActividadesList);
+  private actividadesRaw$: Observable<Actividad[]> = this.store.select(selectActividadesList) as Observable<Actividad[]>;
 
   // 🚀 CORREGIDO: Usamos 'nroHoras' que es la propiedad real en tu TypeScript model
   horasPorRegistrar$: Observable<string> = this.actividadesRaw$.pipe(
-    map(actividades => {
+    map((actividades: Actividad[]) => {
       const total = actividades.reduce((acc, curr) => acc + (Number(curr.nroHoras) || 0), 0);
       return total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     })
@@ -48,14 +49,14 @@ export class CargaActividadesComponent {
 
   // 🚀 CORREGIDO: Usamos 'cliente' en minúscula
   clientes$ = this.actividadesRaw$.pipe(
-    map(actividades => {
+    map((actividades: Actividad[]) => {
       const lista = actividades.map(a => a.cliente || 'SIN CLIENTE');
       return [...new Set(lista)];
     })
   );
 
   // 🚀 CORREGIDO: Filtros adaptados exactamente a tu interfaz de Angular (colaborador, proyecto, cliente, fecha)
-  private aplicarFiltros(actividades: any[], term: string | null, clienteSelected: string | null, desde: string | null, hasta: string | null) {
+  private aplicarFiltros(actividades: Actividad[], term: string | null, clienteSelected: string | null, desde: string | null, hasta: string | null) {
     let filtrados = actividades;
 
     if (term) {
@@ -149,14 +150,14 @@ export class CargaActividadesComponent {
 
     this.actions$.pipe(
       ofType(
-        ActividadesActions.ActividadesActions.importarExcelSuccess,
-        ActividadesActions.ActividadesActions.importarExcelFailure
+        ActividadesActions.importarExcelSuccess,
+        ActividadesActions.importarExcelFailure
       ),
       take(1)
     ).subscribe((action) => {
       this.cargando = false;
 
-      if (action.type === ActividadesActions.ActividadesActions.importarExcelSuccess.type) {
+      if (action.type === ActividadesActions.importarExcelSuccess.type) {
         const total = action.actividades.length;
         this.successMessage = total > 0
           ? `Planilla procesada con éxito. ${total} registro(s) cargado(s) en la tabla.`
@@ -170,22 +171,15 @@ export class CargaActividadesComponent {
     });
 
     this.store.dispatch(
-      ActividadesActions.ActividadesActions.importarExcel({ archivo: file })
+      ActividadesActions.importarExcel({ archivo: file })
     );
 
     event.target.value = '';
   }
 
   descargarExcel() {
-    let params = new HttpParams();
-    if (this.searchControl.value) params = params.set('buscar', this.searchControl.value);
-    if (this.clienteControl.value) params = params.set('cliente', this.clienteControl.value);
-    if (this.fechaDesdeControl.value) params = params.set('desde', this.fechaDesdeControl.value);
-    if (this.fechaHastaControl.value) params = params.set('hasta', this.fechaHastaControl.value);
-
     this.http.get('http://localhost:5071/api/carga-actividades/download', {
-      params: params,
-      responseType: 'blob' 
+      responseType: 'blob'
     }).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -200,5 +194,12 @@ export class CargaActividadesComponent {
         console.error(err);
       }
     });
+  }
+
+  private formatearFecha(fecha?: string | Date) {
+    if (!fecha) return '';
+    const valor = new Date(fecha);
+    if (Number.isNaN(valor.getTime())) return '';
+    return valor.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

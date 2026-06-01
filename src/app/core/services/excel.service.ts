@@ -8,7 +8,6 @@ import { Observable } from 'rxjs';
 })
 export class ExcelService {
   private http = inject(HttpClient);
-  
   // CORRECCIÓN: Quitamos el '/excel' del final para que coincida con tu mapeo de .NET
   private apiUrl = 'http://localhost:5071/api/carga-actividades/excel';
 

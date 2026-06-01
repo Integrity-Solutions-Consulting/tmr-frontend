@@ -7,14 +7,14 @@ export interface ActividadesState {
   items: Actividad[];
   importing: boolean;
   error: any;
-  horasPendientes: string; 
+  horasPendientes: string;
 }
 
 export const initialState: ActividadesState = {
   items: [],
   importing: false,
   error: null,
-  horasPendientes: '96,50 h' 
+  horasPendientes: '96,50 h'
 };
 
 export const actividadesReducer = createReducer(
@@ -26,11 +26,9 @@ export const actividadesReducer = createReducer(
     error: null
   })),
 
-  // CORRECCIÓN AQUÍ: Ahora acumulamos los items en lugar de reemplazarlos
   on(ActividadesActions.importarExcelSuccess, (state, { actividades }) => ({
     ...state,
-    // Mantenemos los items actuales y agregamos los nuevos
-    items: [...state.items, ...actividades], 
+    items: actividades,
     importing: false,
     horasPendientes: '45,20 h', // Simulación de actualización
     error: null
