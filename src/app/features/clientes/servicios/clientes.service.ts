@@ -24,7 +24,7 @@ interface ClienteBackendDetalle {
 interface TipoIdentificacionBackend { id: number; valor: string; }
 
 @Injectable({ providedIn: 'root' })
-export class ClientesMockService {
+export class ClientesService {
 
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/clientes`;
@@ -32,11 +32,12 @@ export class ClientesMockService {
   // Cache de tipos (id ↔ valor) para traducir texto → Id.
   private tiposCache: TipoIdentificacionBackend[] = [];
 
-  private get headers(): HttpHeaders {
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${environment.token}`,
-    });
+  // ── Opciones de petición: cookies automáticas (token de Auth) ─
+  private get options() {
+    return {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      withCredentials: true, // manda las cookies automáticamente (token de Auth)
+    };
   }
 
   private aEstado(activo: boolean): EstadoCliente {
@@ -54,7 +55,7 @@ export class ClientesMockService {
   private getTipos(): Observable<TipoIdentificacionBackend[]> {
     if (this.tiposCache.length) return of(this.tiposCache);
     return this.http.get<TipoIdentificacionBackend[]>(
-      `${this.baseUrl}/tipos-identificacion`, { headers: this.headers }
+      `${this.baseUrl}/tipos-identificacion`, this.options
     ).pipe(map(tipos => { this.tiposCache = tipos; return tipos; }));
   }
 
@@ -71,7 +72,11 @@ export class ClientesMockService {
   // ─────────────────────────────────────────────────────────
   //  LISTAR
   // ─────────────────────────────────────────────────────────
-  getClientes(pagina: number, tamanoPagina: number, filtros: FiltrosCliente): Observable<PaginacionResponse<Cliente>> {
+  getClientes(
+    pagina: number,
+    tamanoPagina: number,
+    filtros: FiltrosCliente
+  ): Observable<PaginacionResponse<Cliente>> {
     let url = this.baseUrl;
     const params: string[] = [];
     if (filtros.busqueda?.trim()) params.push(`busqueda=${encodeURIComponent(filtros.busqueda.trim())}`);
@@ -79,7 +84,7 @@ export class ClientesMockService {
     if (filtros.estado === 'Inactivo') params.push('activo=false');
     if (params.length) url += '?' + params.join('&');
 
-    return this.http.get<ClienteBackendLista[]>(url, { headers: this.headers }).pipe(
+    return this.http.get<ClienteBackendLista[]>(url, this.options).pipe(
       map(lista => {
         const clientes: Cliente[] = lista.map(c => ({
           id: c.id,
@@ -90,10 +95,10 @@ export class ClientesMockService {
           telefono: c.telefono,
           estado: this.aEstado(c.activo),
         }));
-        const totalItems = clientes.length;
+        const totalItems   = clientes.length;
         const totalPaginas = Math.ceil(totalItems / tamanoPagina) || 1;
-        const inicio = (pagina - 1) * tamanoPagina;
-        const items = clientes.slice(inicio, inicio + tamanoPagina);
+        const inicio       = (pagina - 1) * tamanoPagina;
+        const items        = clientes.slice(inicio, inicio + tamanoPagina);
         return { items, totalItems, paginaActual: pagina, tamanoPagina, totalPaginas };
       })
     );
@@ -103,7 +108,9 @@ export class ClientesMockService {
   //  POR ID
   // ─────────────────────────────────────────────────────────
   getClientePorId(id: number): Observable<Cliente> {
-    return this.http.get<ClienteBackendDetalle>(`${this.baseUrl}/${id}`, { headers: this.headers }).pipe(
+    return this.http.get<ClienteBackendDetalle>(
+      `${this.baseUrl}/${id}`, this.options
+    ).pipe(
       map(c => ({
         id: c.id,
         tipoId: this.aTipoId(c.tipoIdentificacion),
@@ -116,14 +123,15 @@ export class ClientesMockService {
         apellidos: c.apellidos,
         direccion: c.direccion,
         proyectosAsignados: (c.proyectos ?? []).map(p => ({
-          id: p.id, nombre: p.nombre, cliente: p.cliente, estado: p.estado as EstadoProyecto,
+          id: p.id, nombre: p.nombre, cliente: p.cliente,
+          estado: p.estado as EstadoProyecto,
         })),
       }))
     );
   }
 
   // ─────────────────────────────────────────────────────────
-  //  CREAR — traduce el tipo y manda el POST
+  //  CREAR
   // ─────────────────────────────────────────────────────────
   crearCliente(req: CrearClienteRequest): Observable<Cliente> {
     return this.idDeTipo(req.tipoId).pipe(
@@ -131,25 +139,25 @@ export class ClientesMockService {
         const body = {
           idTipoIdentificacion: idTipo,
           numeroIdentificacion: req.identificador,
-          nombreComercial: req.nombreComercial,
-          nombres: req.nombres,
-          apellidos: req.apellidos,
-          email: req.correoElectronico,
-          telefono: req.telefono,
-          direccion: req.direccion,
+          nombreComercial:      req.nombreComercial,
+          nombres:              req.nombres,
+          apellidos:            req.apellidos,
+          email:                req.correoElectronico,
+          telefono:             req.telefono,
+          direccion:            req.direccion,
         };
-        return this.http.post<{ id: number }>(this.baseUrl, body, { headers: this.headers }).pipe(
+        return this.http.post<{ id: number }>(this.baseUrl, body, this.options).pipe(
           map(resp => ({
-            id: resp.id,
-            tipoId: req.tipoId,
-            identificador: req.identificador,
-            nombreComercial: req.nombreComercial,
+            id:                resp.id,
+            tipoId:            req.tipoId,
+            identificador:     req.identificador,
+            nombreComercial:   req.nombreComercial,
             correoElectronico: req.correoElectronico,
-            telefono: req.telefono,
-            estado: 'Activo' as EstadoCliente,
-            nombres: req.nombres,
-            apellidos: req.apellidos,
-            direccion: req.direccion,
+            telefono:          req.telefono,
+            estado:            'Activo' as EstadoCliente,
+            nombres:           req.nombres,
+            apellidos:         req.apellidos,
+            direccion:         req.direccion,
           }))
         );
       })
@@ -157,34 +165,34 @@ export class ClientesMockService {
   }
 
   // ─────────────────────────────────────────────────────────
-  //  EDITAR — traduce el tipo y manda el PUT
+  //  EDITAR
   // ─────────────────────────────────────────────────────────
   editarCliente(id: number, req: EditarClienteRequest): Observable<Cliente> {
     return this.idDeTipo(req.tipoId).pipe(
       switchMap(idTipo => {
         const body = {
-          activo: req.estado === 'Activo',
+          activo:               req.estado === 'Activo',
           idTipoIdentificacion: idTipo,
           numeroIdentificacion: req.identificador,
-          nombreComercial: req.nombreComercial,
-          nombres: req.nombres,
-          apellidos: req.apellidos,
-          email: req.correoElectronico,
-          telefono: req.telefono,
-          direccion: req.direccion,
+          nombreComercial:      req.nombreComercial,
+          nombres:              req.nombres,
+          apellidos:            req.apellidos,
+          email:                req.correoElectronico,
+          telefono:             req.telefono,
+          direccion:            req.direccion,
         };
-        return this.http.put(`${this.baseUrl}/${id}`, body, { headers: this.headers }).pipe(
+        return this.http.put(`${this.baseUrl}/${id}`, body, this.options).pipe(
           map(() => ({
             id,
-            tipoId: req.tipoId,
-            identificador: req.identificador,
-            nombreComercial: req.nombreComercial,
+            tipoId:            req.tipoId,
+            identificador:     req.identificador,
+            nombreComercial:   req.nombreComercial,
             correoElectronico: req.correoElectronico,
-            telefono: req.telefono,
-            estado: req.estado,
-            nombres: req.nombres,
-            apellidos: req.apellidos,
-            direccion: req.direccion,
+            telefono:          req.telefono,
+            estado:            req.estado,
+            nombres:           req.nombres,
+            apellidos:         req.apellidos,
+            direccion:         req.direccion,
           }))
         );
       })
