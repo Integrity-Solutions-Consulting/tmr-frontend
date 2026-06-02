@@ -17,8 +17,8 @@ export class DashboardEffects {
     this.loadDashboardData$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DashboardActions.loadDashboardData),
-        mergeMap(() =>
-          this.dashboardService.getDashboardData().pipe(
+        mergeMap((action) =>
+          this.dashboardService.getDashboardData(action.rango).pipe(
             map(data => DashboardActions.loadDashboardDataSuccess({ data })),
             catchError(error => of(DashboardActions.loadDashboardDataFailure({ error })))
           )

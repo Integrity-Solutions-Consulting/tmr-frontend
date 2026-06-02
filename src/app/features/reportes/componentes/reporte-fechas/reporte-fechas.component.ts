@@ -1,8 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteFechas } from '../../modelos/reporte-fechas.model';
 import { HeaderComponent } from '../../../../shared/componentes/header/header.component';
+import { ReportesService } from '../../servicios/reportes.service';
 
 import { TablaComponent } from '../../../../shared/componentes/tabla-colega/tabla.component';
 import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/tabla.types';
@@ -16,10 +17,10 @@ import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/ta
 })
 export class ReporteFechasComponent {
   columnasTabla: ColumnDefinition[] = [
-    { header: 'Cliente', property: 'cliente', type: 'text', cellClass: 'font-bold text-dark' },
+    { header: 'Cliente', property: 'cliente', type: 'text' },
     { header: 'Líder', property: 'lider', type: 'text' },
-    { header: 'Recurso', property: 'recurso', type: 'text', cellClass: 'font-medium' },
-    { header: 'Cargo', property: 'cargo', type: 'badge' },
+    { header: 'Recurso', property: 'recurso', type: 'text' },
+    { header: 'Cargo', property: 'cargo', type: 'text' },
     { header: 'Inicio', property: 'fechaInicio', type: 'fecha', dateFormat: 'dd/MM/yyyy' },
     { header: 'Fin', property: 'fechaFin', type: 'fecha', dateFormat: 'dd/MM/yyyy' }
   ];
@@ -33,72 +34,62 @@ export class ReporteFechasComponent {
 
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
+  totalItems = signal(0);
 
-  datos = signal<ReporteFechas[]>([
-    { id: '1', cliente: 'BANCO GUAYAQUIL', lider: 'Adriana Martinez', recurso: 'Luiggi Ricardo Rendon Cajape', cargo: 'Desarrollador Fullstack', fechaInicio: new Date('2023-01-20'), fechaFin: new Date('2026-12-31') },
-    { id: '2', cliente: 'TORRES Y TORRES', lider: 'Alex Gonzalez', recurso: 'Steven Jostin Quimi Perez', cargo: 'Desarrollador Fullstack', fechaInicio: new Date('2025-03-20'), fechaFin: new Date('2026-09-04') },
-    { id: '3', cliente: 'BANCO DEL PACIFICO', lider: 'Allan Gallegos', recurso: 'Lucy Viviana Anastacio Burgos', cargo: 'Ingeniero de Seguridad', fechaInicio: new Date('2025-03-10'), fechaFin: new Date('2026-03-09') },
-    { id: '4', cliente: 'BANCO DEL PACIFICO', lider: 'Allan Gallegos', recurso: 'Martha Melany Aguilar Reasco', cargo: 'Ingeniero de Seguridad', fechaInicio: new Date('2025-03-10'), fechaFin: new Date('2026-03-09') },
-    { id: '5', cliente: 'BANCO GUAYAQUIL', lider: 'Anabelle Valero', recurso: 'Aaron David Álvarez Llamuca', cargo: 'Desarrollador Fullstack', fechaInicio: new Date('2023-05-02'), fechaFin: new Date('2026-12-30') },
-    { id: '6', cliente: 'BANCO PICHINCHA', lider: 'Carlos Mendez', recurso: 'Juan Perez', cargo: 'Arquitecto Cloud', fechaInicio: new Date('2024-02-15'), fechaFin: new Date('2025-02-15') },
-    { id: '7', cliente: 'PRODUBANCO', lider: 'Diana Rios', recurso: 'Elena Gomez', cargo: 'Analista QA', fechaInicio: new Date('2024-06-01'), fechaFin: new Date('2025-12-01') },
-    { id: '8', cliente: 'BANCO BOLIVARIANO', lider: 'Ricardo Molina', recurso: 'Valeria Pazmiño', cargo: 'Fullstack Analyst', fechaInicio: new Date('2023-08-12'), fechaFin: new Date('2026-12-31') },
-    { id: '9', cliente: 'BANCO SOLIDARIO', lider: 'Samantha Salcedo', recurso: 'Daniel Erazo', cargo: 'Especialista IA', fechaInicio: new Date('2024-01-10'), fechaFin: new Date('2026-01-10') },
-    { id: '10', cliente: 'BANCO INTERNACIONAL', lider: 'Luis Yánez', recurso: 'Fernanda Benavides', cargo: 'Consultor Ciberseguridad', fechaInicio: new Date('2025-01-15'), fechaFin: new Date('2025-12-15') },
-    { id: '11', cliente: 'BANCO PROCREDIT', lider: 'Marlene Figueroa', recurso: 'Carlos Iturralde', cargo: 'Arquitecto Cloud', fechaInicio: new Date('2023-11-05'), fechaFin: new Date('2026-11-05') },
-    { id: '12', cliente: 'CITIBANK ECUADOR', lider: 'Luis Yánez', recurso: 'Maria Guzmán', cargo: 'Ingeniero DevOps', fechaInicio: new Date('2024-04-20'), fechaFin: new Date('2025-04-20') },
-    { id: '13', cliente: 'BANCO GUAYAQUIL', lider: 'Adriana Martinez', recurso: 'Luis Rendón', cargo: 'UX Designer', fechaInicio: new Date('2025-02-01'), fechaFin: new Date('2026-02-01') },
-    { id: '14', cliente: 'BANCO PICHINCHA', lider: 'Carlos Mendez', recurso: 'Ana Lucía Jara', cargo: 'Backend Dev', fechaInicio: new Date('2024-09-15'), fechaFin: new Date('2025-09-15') },
-    { id: '15', cliente: 'DINERS CLUB', lider: 'Marlene Figueroa', recurso: 'Pedro Armijos', cargo: 'Scrum Master', fechaInicio: new Date('2023-03-10'), fechaFin: new Date('2026-03-10') },
-    { id: '16', cliente: 'BANCO BOLIVARIANO', lider: 'Ricardo Molina', recurso: 'Sofia Castro', cargo: 'QA Lead', fechaInicio: new Date('2025-05-12'), fechaFin: new Date('2026-05-12') }
-  ]);
+  private reportesService = inject(ReportesService);
+  datos = signal<ReporteFechas[]>([]);
+
+  constructor() {
+    effect(() => {
+      // Signals we depend on
+      const cliente = this.busquedaCliente();
+      const lider = this.busquedaLider();
+      const fInicio = this.fechaInicio();
+      const fFin = this.fechaFin();
+      const page = this.paginaActual();
+      const pageSize = this.itemsPorPagina();
+      const mostrar = this.mostrarDatos();
+
+      if (!mostrar) {
+        this.datos.set([]);
+        this.totalItems.set(0);
+        return;
+      }
+
+      const filtros = {
+        cliente: cliente || undefined,
+        lider: lider || undefined,
+        fechaInicio: fInicio ? fInicio + 'T00:00:00' : undefined,
+        fechaFin: fFin ? fFin + 'T23:59:59' : undefined
+      };
+
+      this.reportesService.getReporteFechas(filtros, page, pageSize).subscribe({
+        next: (res) => {
+          this.datos.set(res.data || []);
+          this.totalItems.set(res.total || 0);
+        },
+        error: (err) => {
+          console.error('Error al cargar reporte de fechas:', err);
+        }
+      });
+    });
+  }
 
   mostrarDatos = computed(() => {
     const hayFiltros = this.busquedaCliente() !== '' || this.busquedaLider() !== '' || this.fechaInicio() !== '' || this.fechaFin() !== '';
     return hayFiltros || this.forzarMostrar();
   });
 
-  datosFiltrados = computed(() => {
-    if (!this.mostrarDatos()) return [];
+  datosFiltrados = computed(() => this.datos());
 
-    const searchC = this.busquedaCliente().toLowerCase();
-    const searchL = this.busquedaLider().toLowerCase();
+  totalPaginas = computed(() => Math.ceil(this.totalItems() / this.itemsPorPagina()) || 1);
+  
+  datosPaginados = computed(() => this.datos());
 
-    // Normalizar filtros (Solo fecha local)
-    const fIni = this.fechaInicio() ? new Date(this.fechaInicio() + 'T00:00:00') : null;
-    const fFin = this.fechaFin() ? new Date(this.fechaFin() + 'T00:00:00') : null;
-
-    if (fIni) fIni.setHours(0, 0, 0, 0);
-    if (fFin) fFin.setHours(0, 0, 0, 0);
-
-    return this.datos().filter(d => {
-      const matchC = !searchC || d.cliente.toLowerCase().includes(searchC);
-      const matchL = !searchL || d.lider.toLowerCase().includes(searchL);
-
-      // Normalizar fechas del registro para comparación local
-      const recordIni = new Date(d.fechaInicio);
-      const recordFin = new Date(d.fechaFin);
-
-      // Forzar a medianoche local para ignorar desfases UTC
-      recordIni.setHours(0, 0, 0, 0);
-      recordFin.setHours(0, 0, 0, 0);
-
-      // Lógica de Inclusión Estricta (Especificidad)
-      const matchF = (!fIni || recordIni >= fIni) && (!fFin || recordFin <= fFin);
-
-      return matchC && matchL && matchF;
-    }).sort((a, b) => b.fechaInicio.getTime() - a.fechaInicio.getTime());
-  });
-
-  totalPaginas = computed(() => Math.ceil(this.datosFiltrados().length / this.itemsPorPagina()));
-  datosPaginados = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.itemsPorPagina();
-    return this.datosFiltrados().slice(inicio, inicio + this.itemsPorPagina());
-  });
-
-  clientesUnicos = computed(() => new Set(this.datosFiltrados().map(d => d.cliente)).size);
-  lideresUnicos = computed(() => new Set(this.datosFiltrados().map(d => d.lider)).size);
-  recursosUnicos = computed(() => new Set(this.datosFiltrados().map(d => d.recurso)).size);
+  clientesUnicos = computed(() => new Set(this.datos().map(d => d.cliente)).size);
+  lideresUnicos = computed(() => new Set(this.datos().map(d => d.lider)).size);
+  recursosUnicos = computed(() => new Set(this.datos().map(d => d.recurso)).size);
+  actividadesTotales = computed(() => this.totalItems());
 
   onInputSanitized(campo: string, event: Event) {
     const input = event.target as HTMLInputElement;
@@ -118,8 +109,6 @@ export class ReporteFechasComponent {
 
     this.paginaActual.set(1);
     
-    // Solo quitamos el "ver todo" si el usuario borró una palabra que ya estaba escrita.
-    // Si la caja estaba vacía y el usuario solo intentó dar un espacio, no ocultamos la tabla.
     if (valorSanitizado === '' && valorAnterior !== '') {
       this.forzarMostrar.set(false);
     }
@@ -158,17 +147,107 @@ export class ReporteFechasComponent {
     this.paginaActual.set(1);
   }
 
-  exportarExcel() {
+  async exportarExcel() {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
-    const headers = ['Cliente', 'Lider', 'Recurso', 'Cargo', 'Inicio', 'Fin'];
-    const rows = data.map(item => [item.cliente, item.lider, item.recurso, item.cargo, item.fechaInicio.toLocaleDateString(), item.fechaFin.toLocaleDateString()]);
-    const csvContent = [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    const { Workbook } = await import('exceljs');
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de Fechas');
+
+    // 1. Columnas y anchos recomendados
+    worksheet.columns = [
+      { header: 'Cliente', key: 'cliente', width: 25 },
+      { header: 'Líder', key: 'lider', width: 25 },
+      { header: 'Recurso', key: 'recurso', width: 25 },
+      { header: 'Cargo', key: 'cargo', width: 25 },
+      { header: 'Inicio', key: 'fechaInicio', width: 15 },
+      { header: 'Fin', key: 'fechaFin', width: 15 }
+    ];
+
+    // 2. Agregar datos
+    data.forEach(item => {
+      worksheet.addRow({
+        cliente: item.cliente,
+        lider: item.lider,
+        recurso: item.recurso,
+        cargo: item.cargo,
+        fechaInicio: item.fechaInicio ? item.fechaInicio.toLocaleDateString() : '',
+        fechaFin: item.fechaFin ? item.fechaFin.toLocaleDateString() : ''
+      });
+    });
+
+    // 3. Aplicar estilos a la cabecera
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 25;
+    headerRow.eachCell(cell => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF163572' } // Color de marca principal #163572
+      };
+      cell.font = {
+        name: 'Segoe UI',
+        size: 11,
+        bold: true,
+        color: { argb: 'FFFFFFFF' }
+      };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+      };
+    });
+
+    // 4. Aplicar estilos a las celdas de datos
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Omitir cabecera
+
+      row.height = 20;
+
+      // Cebra (alternar fondo gris y blanco)
+      const fillType = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
+
+      row.eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: fillType }
+        };
+        cell.font = {
+          name: 'Segoe UI',
+          size: 10,
+          color: { argb: 'FF334155' } // Gris oscuro #334155
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+        
+        // Centrar las fechas
+        if (cell.address.startsWith('E') || cell.address.startsWith('F')) {
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+          };
+        } else {
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: 'left'
+          };
+        }
+      });
+    });
+
+    // 5. Descargar archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Reporte_Fechas_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.href = url;
+    link.download = `Reporte_Fechas_${new Date().toISOString().slice(0, 10)}.xlsx`;
     link.click();
+    URL.revokeObjectURL(url);
   }
 }
