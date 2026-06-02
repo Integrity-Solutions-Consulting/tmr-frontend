@@ -5,8 +5,6 @@ import {
   Colaborador,
   ColaboradoresPaginados,
   ColaboradorListaApi,
-  CrearColaboradorDto,
-  EditarColaboradorDto,
   FiltrosColaborador,
 } from '../models/colaborador.model';
 import { environment } from '../../../../environments/environment';
@@ -20,8 +18,13 @@ export class ColaboradoresService {
   // URL base del módulo colaboradores en el backend.
   private readonly apiUrl = `${environment.apiUrl}/colaboradores`;
 
-  // Guardamos la última lista cargada (para las métricas reactivas).
+  // Guardamos la última lista cargada para las métricas reactivas.
   private _colaboradores = signal<Colaborador[]>([]);
+
+  // Configuración para enviar cookies al backend.
+  private readonly httpOptions = {
+    withCredentials: true
+  };
 
   // ── Métricas reactivas ───────────────────────────────────
   readonly noAsignados = computed(() =>
@@ -43,9 +46,9 @@ export class ColaboradoresService {
   getMetricas() {
     return {
       noAsignados: this.noAsignados,
-      asignados:   this.asignados,
-      inactivos:   this.inactivos,
-      activos:     this.activos,
+      asignados: this.asignados,
+      inactivos: this.inactivos,
+      activos: this.activos,
     };
   }
 
@@ -59,21 +62,31 @@ export class ColaboradoresService {
   ): Observable<ColaboradoresPaginados> {
 
     // Armamos los query params según los filtros.
-    let params: string[] = [];
+    const params: string[] = [];
 
     if (filtros.busqueda?.trim()) {
       params.push(`busqueda=${encodeURIComponent(filtros.busqueda.trim())}`);
     }
-    if (filtros.estado === 'Activo') params.push('activo=true');
-    else if (filtros.estado === 'Inactivo') params.push('activo=false');
 
-    if (filtros.asignacion === 'noAsignado') params.push('asignacion=0');
-    else if (filtros.asignacion === 'asignado') params.push('asignacion=1');
+    if (filtros.estado === 'Activo') {
+      params.push('activo=true');
+    } else if (filtros.estado === 'Inactivo') {
+      params.push('activo=false');
+    }
+
+    if (filtros.asignacion === 'noAsignado') {
+      params.push('asignacion=0');
+    } else if (filtros.asignacion === 'asignado') {
+      params.push('asignacion=1');
+    }
 
     const queryString = params.length ? `?${params.join('&')}` : '';
 
-    // Llamada GET al backend.
-    return this.http.get<ColaboradorListaApi[]>(`${this.apiUrl}${queryString}`).pipe(
+    // Llamada GET al backend con cookies.
+    return this.http.get<ColaboradorListaApi[]>(
+      `${this.apiUrl}${queryString}`,
+      this.httpOptions
+    ).pipe(
       map(respuesta => {
         // Convertimos cada item al modelo que usa el frontend.
         const todos = respuesta.map(api => this.mapApiAColaborador(api));
@@ -87,12 +100,18 @@ export class ColaboradoresService {
         const inicio = (pagina - 1) * porPagina;
         const paginaData = todos.slice(inicio, inicio + porPagina);
 
-        return { data: paginaData, total, pagina, porPagina, totalPaginas };
+        return {
+          data: paginaData,
+          total,
+          pagina,
+          porPagina,
+          totalPaginas
+        };
       })
     );
   }
 
-  // ── Convierte el item del backend (lista) al modelo del frontend ──
+  // ── Convierte el item del backend al modelo del frontend ──
   private mapApiAColaborador(api: ColaboradorListaApi): Colaborador {
     return {
       id: api.id.toString(),
@@ -117,10 +136,13 @@ export class ColaboradoresService {
   }
 
   // =========================================================================
-  // OBTENER uno (detalle) — llama al backend real
+  // OBTENER uno — detalle desde backend real
   // =========================================================================
   getColaboradorById(id: string): Observable<Colaborador> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+      this.httpOptions
+    ).pipe(
       map(api => this.mapDetalleAColaborador(api))
     );
   }
@@ -156,20 +178,35 @@ export class ColaboradoresService {
     };
   }
 
-  // ── CREAR — llama al backend  ──
+  // =========================================================================
+  // CREAR — llama al backend con cookies
+  // =========================================================================
   crearColaborador(request: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, request);
-  }
-
-  // ── EDITAR — llama al backend ──
-  editarColaborador(id: string, request: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, request);
+    return this.http.post(
+      `${this.apiUrl}`,
+      request,
+      this.httpOptions
+    );
   }
 
   // =========================================================================
-  // ELIMINAR — eliminación lógica en el backend
+  // EDITAR — llama al backend con cookies
+  // =========================================================================
+  editarColaborador(id: string, request: any): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/${id}`,
+      request,
+      this.httpOptions
+    );
+  }
+
+  // =========================================================================
+  // ELIMINAR — eliminación lógica en el backend con cookies
   // =========================================================================
   eliminarColaborador(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(
+      `${this.apiUrl}/${id}`,
+      this.httpOptions
+    );
   }
 }

@@ -5,24 +5,18 @@ import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    // Token temporal para pruebas (genéralo en Scalar con el register).
-    // OJO: esto es SOLO para desarrollo. Cuando exista login real,
-    // el token saldrá del usuario logueado.
-    const token = environment.tokenPruebas;
 
-    // Solo agregamos el token a las llamadas que van a nuestro backend.
-    if (token && req.url.startsWith(environment.apiUrl)) {
-      const reqConToken = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
+    if (req.url.startsWith(environment.apiUrl)) {
+      const reqConCookies = req.clone({
+        withCredentials: true
       });
-      return next.handle(reqConToken);
+
+      return next.handle(reqConCookies);
     }
 
-    // Las demás llamadas pasan sin cambios.
     return next.handle(req);
   }
 }
