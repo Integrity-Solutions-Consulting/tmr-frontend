@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Cliente, EditarClienteRequest, TipoIdentificacion, EstadoCliente } from '../../modelos/cliente.model';
@@ -10,7 +10,7 @@ import { Cliente, EditarClienteRequest, TipoIdentificacion, EstadoCliente } from
   templateUrl: './modal-editar.component.html',
   styleUrl: './modal-editar.component.scss',
 })
-export class ModalEditarComponent implements OnInit {
+export class ModalEditarComponent implements OnChanges {
   @Input() cliente!: Cliente;
   @Output() guardar  = new EventEmitter<EditarClienteRequest>();
   @Output() cancelar = new EventEmitter<void>();
@@ -33,19 +33,24 @@ export class ModalEditarComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {}
 
-  // ── Inicializar form con datos del cliente ────────────────
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      estado:            [this.cliente.estado,            Validators.required],
-      tipoId:            [this.cliente.tipoId,            Validators.required],
-      identificador:     [this.cliente.identificador,     Validators.required],
-      nombreComercial:   [this.cliente.nombreComercial,   Validators.required],
-      nombres:           [this.cliente.nombres   || '',   Validators.required],
-      apellidos:         [this.cliente.apellidos || '',   Validators.required],
-      correoElectronico: [this.cliente.correoElectronico, [Validators.required, Validators.email]],
-      telefono:          [this.cliente.telefono,          Validators.required],
-      direccion:         [this.cliente.direccion || '',   Validators.required],
-    });
+  // ── Re-inicializar el form cada vez que cambie el cliente ──
+  // Se usa ngOnChanges (no ngOnInit) porque el cliente llega primero
+  // con datos básicos de la lista y luego se actualiza con el detalle
+  // completo del backend (nombres, apellidos, dirección).
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['cliente'] && this.cliente) {
+      this.form = this.fb.group({
+        estado:            [this.cliente.estado,            Validators.required],
+        tipoId:            [this.cliente.tipoId,            Validators.required],
+        identificador:     [this.cliente.identificador,     Validators.required],
+        nombreComercial:   [this.cliente.nombreComercial,   Validators.required],
+        nombres:           [this.cliente.nombres   || '',   Validators.required],
+        apellidos:         [this.cliente.apellidos || '',   Validators.required],
+        correoElectronico: [this.cliente.correoElectronico, [Validators.required, Validators.email]],
+        telefono:          [this.cliente.telefono,          Validators.required],
+        direccion:         [this.cliente.direccion || '',   Validators.required],
+      });
+    }
   }
 
   // ── Validación de campos ──────────────────────────────────
