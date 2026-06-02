@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http'; // <-- IMPORTANTE PARA EL SERVICES
+import { routes } from './app.routes';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideStore } from '@ngrx/store';
@@ -11,36 +13,13 @@ import { routes } from './app.routes';
 import { authReducer } from './features/auth/store/auth.reducer';
 import { clientesReducer } from './features/clientes/store/clientes.reducer';
 import { actividadesReducer } from './core/state/actividades/actividades.reducer';
-import { proyectosReducer } from './features/proyectos/store/proyectos.reducer';
-import { dashboardReducer } from './features/dashboard/store/dashboard.reducer';
-
-// Effects
-import { AuthEffects } from './features/auth/store/auth.effects';
-import * as ClientesEffects from './features/clientes/store/clientes.effects';
-import { ActividadesEffects } from './core/state/actividades/actividades.effects';
-import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
-import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
-
-// Interceptors
-import { AuthMockInterceptor } from './core/interceptors/auth-mock.interceptor';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { ActividadesEffects } from './core/state/actividades/actividades.effects'; 
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true,
-    },
-    // Comentado: AuthMockInterceptor interfiere con el token real
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: AuthMockInterceptor,
-    //   multi: true,
-    // },
+    provideHttpClient(), // <-- PROVEEDOR AGREGADO PARA HTTP
     provideStore({
       auth: authReducer,
       clientes: clientesReducer,

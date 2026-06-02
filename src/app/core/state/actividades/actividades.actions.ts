@@ -6,7 +6,7 @@ export const ActividadesActions = createActionGroup({
   events: {
     'Importar Excel': props<{ archivo: File }>(),
     'Importar Excel Success': props<{ actividades: Actividad[] }>(),
-    'Importar Excel Failure': props<{ error: string }>(),
+    'Importar Excel Failure': props<{ error: string; errores?: string[] }>(),
     'Reset Estado': emptyProps(),
   }
 });
