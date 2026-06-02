@@ -226,12 +226,11 @@
   border-radius: 20px;
   border: 1px solid var(--borde);
   white-space: nowrap;
-  color: var(--texto-gris);
 
-  &.en-progreso .dot { background: #3b82f6; }
-  &.completado  .dot { background: #22c55e; }
-  &.pausado     .dot { background: #f59e0b; }
-  &.cancelado   .dot { background: #ef4444; }
+  &.en-progreso { color: #3b82f6; .dot { background: #3b82f6; } }
+  &.completado  { color: #22c55e; .dot { background: #22c55e; } }
+  &.pausado     { color: #f59e0b; .dot { background: #f59e0b; } }
+  &.cancelado   { color: #ef4444; .dot { background: #ef4444; } }
 }
 
 

@@ -139,7 +139,6 @@
     <table class="tabla">
       <thead>
         <tr>
-          <th>Código</th>
           <th>Tipo Id</th>
           <th>Identificador</th>
           <th>Nombre Comercial</th>
@@ -152,7 +151,7 @@
       <tbody>
         <!-- Cargando -->
         <tr *ngIf="cargando$ | async">
-          <td colspan="8" class="td-cargando">
+          <td colspan="7" class="td-cargando">
             <div class="spinner"></div>
             Cargando clientes...
           </td>
@@ -160,12 +159,11 @@
 
         <!-- Sin resultados -->
         <tr *ngIf="!(cargando$ | async) && (clientes$ | async)?.length === 0">
-          <td colspan="8" class="td-vacio">No se encontraron clientes</td>
+          <td colspan="7" class="td-vacio">No se encontraron clientes</td>
         </tr>
 
         <!-- Filas -->
         <tr *ngFor="let cliente of clientes$ | async" class="fila">
-          <td class="td-codigo">{{ cliente.codigo }}</td>
           <td>{{ cliente.tipoId }}</td>
           <td>{{ cliente.identificador }}</td>
           <td class="td-nombre">{{ cliente.nombreComercial }}</td>

@@ -1,11 +1,11 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
-import { ClientesMockService } from '../servicios/clientes-mock.service';
+import { ClientesService } from '../servicios/clientes.service';
 import { ClientesActions } from './clientes.actions';
 
 export const cargarClientesEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesMockService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
       ofType(ClientesActions.cargarClientes),
       switchMap(({ pagina, tamanoPagina, filtros }) =>
@@ -19,7 +19,7 @@ export const cargarClientesEffect = createEffect(
 );
 
 export const cargarClientePorIdEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesMockService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
       ofType(ClientesActions.cargarClientePorId),
       switchMap(({ id }) =>
@@ -33,7 +33,7 @@ export const cargarClientePorIdEffect = createEffect(
 );
 
 export const crearClienteEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesMockService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
       ofType(ClientesActions.crearCliente),
       switchMap(({ request }) =>
@@ -47,7 +47,7 @@ export const crearClienteEffect = createEffect(
 );
 
 export const editarClienteEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesMockService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
       ofType(ClientesActions.editarCliente),
       switchMap(({ id, request }) =>
@@ -61,7 +61,7 @@ export const editarClienteEffect = createEffect(
 );
 
 export const recargarTrasCrearEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesMockService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
       ofType(ClientesActions.crearClienteExitoso, ClientesActions.editarClienteExitoso),
       switchMap(() =>
