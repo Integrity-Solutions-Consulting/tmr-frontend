@@ -34,14 +34,14 @@ export class ModalDetalleColaboradorComponent {
     const [y, m, d] = fecha.split('-');
     return `${d}/${m}/${y}`;
   }
- 
+
+
   get contratoTipo(): string {
-    return this.colaborador?.tipoIdentificacion === 'RPS'
-      ? 'Contrato Fijo'
-      : 'Contrato por Servicios';
+    return this.colaborador?.tipoContrato ?? '';
   }
+
  
   get codigoColaborador(): string {
-    return `${this.colaborador?.tipoIdentificacion}${this.colaborador?.id?.replace('COL-', '')}`;
+    return this.colaborador?.codigoEmpleado ?? '';
   }
 }

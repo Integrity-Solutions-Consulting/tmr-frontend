@@ -226,11 +226,13 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   verDetalle(cliente: Cliente): void {
     this.cerrarMenu();
     this.store.dispatch(ClientesActions.abrirModalDetalle({ cliente }));
+    this.store.dispatch(ClientesActions.cargarClientePorId({ id: cliente.id }));
   }
 
   abrirEditar(cliente: Cliente): void {
     this.cerrarMenu();
     this.store.dispatch(ClientesActions.abrirModalEditar({ cliente }));
+    this.store.dispatch(ClientesActions.cargarClientePorId({ id: cliente.id }));
   }
 
   abrirCrear(): void {
@@ -275,9 +277,9 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
 
       autoTable(doc, {
         startY: 24,
-        head: [['Código', 'Tipo ID', 'Identificador', 'Nombre Comercial', 'Correo electrónico', 'Teléfono', 'Estado']],
+        head: [['Tipo ID', 'Identificador', 'Nombre Comercial', 'Correo electrónico', 'Teléfono', 'Estado']],
         body: clientes.map(c => [
-          c.codigo, c.tipoId, c.identificador,
+          c.tipoId, c.identificador,
           c.nombreComercial, c.correoElectronico, c.telefono, c.estado,
         ]),
         styles: { fontSize: 9, cellPadding: 4 },
@@ -292,7 +294,6 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   private descargarExcel(): void {
     this.clientes$.subscribe(clientes => {
       const datos = clientes.map(c => ({
-        'Código':           c.codigo,
         'Tipo ID':          c.tipoId,
         'Identificador':    c.identificador,
         'Nombre Comercial': c.nombreComercial,

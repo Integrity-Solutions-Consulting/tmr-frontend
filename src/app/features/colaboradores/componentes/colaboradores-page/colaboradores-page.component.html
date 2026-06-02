@@ -108,4 +108,10 @@
   </div>
 }
 
-<!-- Toasts removed -->
+<!-- Notificación -->
+@if (notificacion) {
+  <app-notificacion-colaborador
+    [notificacion]="notificacion"
+    (cerrar)="cerrarNotificacion()"
+  />
+}

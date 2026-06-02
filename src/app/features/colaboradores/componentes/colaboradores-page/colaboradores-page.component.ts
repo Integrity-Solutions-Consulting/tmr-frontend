@@ -9,6 +9,7 @@ import {
   FiltrosColaborador,
   CrearColaboradorDto,
   EditarColaboradorDto,
+  Notificacion,
 } from '../../models/colaborador.model';
 
 import { CardsMetricasComponent }           from '../cards-metricas/cards-metricas.component';
@@ -19,6 +20,7 @@ import { PaginacionComponent }             from '../../../../shared/componentes/
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
+import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
 
 @Component({
   selector: 'app-colaboradores-page',
@@ -33,6 +35,7 @@ import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/mo
     ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
+    NotificacionColaboradorComponent,
   ],
   templateUrl: './colaboradores-page.component.html',
   styleUrl:    './colaboradores-page.component.scss',
@@ -62,6 +65,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   modalDetalle: Colaborador | null = null;
   modalCrear   = false;
   modalEditar: Colaborador | null = null;
+
+  // ── Notificación ─────────────────────────────────────────────────────
+  notificacion: Notificacion | null = null;
 
   // ── Toasts (Removidos) ───────────────────────────────────────────────
   toasts: any[] = [];
@@ -131,12 +137,24 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   // ── Modales abrir ────────────────────────────────────────
-  abrirDetalle(col: Colaborador): void { this.modalDetalle = col;  }
-  abrirCrear():                   void { this.modalCrear   = true; }
-  abrirEditar(col: Colaborador):  void {
-    this.modalDetalle = null;
-    this.modalEditar  = col;
+  abrirDetalle(col: Colaborador): void {
+    this.svc.getColaboradorById(col.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: detalle => this.modalDetalle = detalle,
+        error: () => console.error('Error al cargar el detalle'),
+      });
   }
+  abrirCrear():                   void { this.modalCrear   = true; }
+  abrirEditar(col: Colaborador): void {
+      this.modalDetalle = null;
+      this.svc.getColaboradorById(col.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: detalle => this.modalEditar = detalle,
+          error: () => console.error('Error al cargar el colaborador para editar'),
+        });
+    }
 
   // ── Modales cerrar ───────────────────────────────────────
   cerrarDetalle(): void { this.modalDetalle = null;  }
@@ -144,33 +162,43 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   cerrarEditar():  void { this.modalEditar  = null;  }
 
   // ── CRUD ─────────────────────────────────────────────────
-  onCrear(dto: CrearColaboradorDto): void {
-    this.svc.crearColaborador(dto)
+  onCrear(request: any): void {
+    this.svc.crearColaborador(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.cerrarCrear();
           this.paginaActual = 1;
           this.cargarDatos();
-          console.log('Colaborador creado exitosamente');
+          this.notificacion = { tipo: 'exito', mensaje: 'El nuevo colaborador ha sido agregado exitosamente' };
         },
-        error: () => console.error('Error al crear el colaborador'),
+        error: (err) => {
+          console.error('Error al crear el colaborador', err);
+          // Mostramos el mensaje de error del backend si existe
+          const mensaje = err?.error?.detail || 'Error al crear el colaborador';
+          this.notificacion = { tipo: 'error', mensaje };
+        },
       });
   }
 
-  onEditar(dto: EditarColaboradorDto): void {
-    if (!this.modalEditar) return;
-    this.svc.editarColaborador(this.modalEditar.id, dto)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.cerrarEditar();
-          this.cargarDatos();
-          console.log('Colaborador actualizado exitosamente');
-        },
-        error: () => console.error('Error al actualizar el colaborador'),
-      });
-  }
+  onEditar(request: any): void {
+      if (!this.modalEditar) return;
+      this.svc.editarColaborador(this.modalEditar.id, request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.cerrarEditar();
+            this.cargarDatos();
+            this.notificacion = { tipo: 'exito', mensaje: 'El colaborador ha sido actualizado exitosamente' };
+          },
+          error: (err) => {
+            const mensaje = err?.error?.detail || 'Error al actualizar el colaborador';
+            this.notificacion = { tipo: 'error', mensaje };
+          },
+        });
+    }
+
+  cerrarNotificacion(): void { this.notificacion = null; }
 
   colaboradorAEliminar: Colaborador | null = null;
 
