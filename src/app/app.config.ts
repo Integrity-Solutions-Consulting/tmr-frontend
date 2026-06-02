@@ -21,8 +21,9 @@ import { ActividadesEffects } from './core/state/actividades/actividades.effects
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
 import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
-// Mock interceptor
+// Interceptors
 import { AuthMockInterceptor } from './core/interceptors/auth-mock.interceptor';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,14 +32,15 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: AuthMockInterceptor,
+      useClass: AuthInterceptor,
       multi: true,
     },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TokenInterceptor,
-      multi: true,
-    },
+    // Comentado: AuthMockInterceptor interfiere con el token real
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: AuthMockInterceptor,
+    //   multi: true,
+    // },
     provideStore({
       auth: authReducer,
       clientes: clientesReducer,
