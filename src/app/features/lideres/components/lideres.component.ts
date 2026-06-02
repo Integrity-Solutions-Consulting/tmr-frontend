@@ -1,4 +1,3 @@
-// lideres.component.ts
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -9,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'; // Inyectamos HTTP directo
+import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { ModalLider } from './modal-lider/modal-lider';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
@@ -35,7 +34,6 @@ export interface Lider {
     MatMenuModule,
     MatButtonModule,
     MatIconModule,
-    HttpClientModule, // Añadido para peticiones HTTP
     ModalLider,
     ModalDetalleLider,
     ModalDescargaComponent,
@@ -47,7 +45,7 @@ export interface Lider {
 export class LideresComponent implements OnInit {
 
   // ── Data Real ───────────────────────────────────────────
-  lideres: Lider[] = []; // ¡Lista vacía para llenarse del backend!
+  lideres: Lider[] = []; 
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
 
@@ -104,25 +102,25 @@ export class LideresComponent implements OnInit {
   }
 
   // ── Consumir API Real ──────────────────────────────────
-obtenerLideresDelBackend(): void {
-  this.http.get<any[]>(this.apiUrl, { headers: this.obtenerHeaders() }).subscribe({
-    next: (data) => {
-      this.lideres = data.map((l, i) => ({
-        ...l,
-        codigo: String(i + 1).padStart(3, '0'),
-        nombre: `${l.nombres} ${l.apellidos}`,
-        tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
-        correo: l.email,
-        cliente: '',
-        estado: l.activo ? 'Activo' : 'Inactivo'
-      }));
-      this.aplicarFiltros();
-    },
-    error: (err) => {
-      console.error('❌ Error al traer líderes:', err);
-    }
-  });
-}
+  obtenerLideresDelBackend(): void {
+    this.http.get<any[]>(this.apiUrl, { headers: this.obtenerHeaders() }).subscribe({
+      next: (data) => {
+        this.lideres = data.map((l, i) => ({
+          ...l,
+          codigo: String(i + 1).padStart(3, '0'),
+          nombre: `${l.nombres} ${l.apellidos}`,
+          tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
+          correo: l.email,
+          cliente: '',
+          estado: l.activo ? 'Activo' : 'Inactivo'
+        }));
+        this.aplicarFiltros();
+      },
+      error: (err) => {
+        console.error('❌ Error al traer líderes:', err);
+      }
+    });
+  }
 
   // ── Contadores cards dinámicos (Con la data real) ───────
   get totalInternos(): number {
@@ -152,7 +150,6 @@ obtenerLideresDelBackend(): void {
 
   // ── Filtros corregidos ──────────────────────────────────
   filtrarPor(tipo: string): void {
-    // Si das clic en la card de 'Inactivo', seteamos el filtro de estado
     if (tipo === 'Inactivo') {
       this.estadoFiltro = 'Inactivo';
       this.tipoFiltro = '';
@@ -262,14 +259,12 @@ obtenerLideresDelBackend(): void {
   }
 
   guardarLider(): void {
-    // Si tu modal secundario maneja el guardado real, aquí llamamos a refrescar la lista
     this.mensajeConfirmacion = this.modoEdicion
       ? 'Los cambios han sido<br>guardados exitosamente'
       : 'El nuevo líder ha sido<br>agregado exitosamente';
 
     this.mostrarConfirmacion = true;
     
-    // Volvemos a pedir los líderes para que se vea reflejado el cambio
     setTimeout(() => {
       this.mostrarConfirmacion = false;
       this.obtenerLideresDelBackend();
@@ -320,8 +315,8 @@ obtenerLideresDelBackend(): void {
     }));
     const ws = XLSX.utils.json_to_sheet(datos);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Líderes');
-    XLSX.writeFile(wb, 'lideres.xlsx');
+    XLSX.utils.book_append_sheet(wb, ws, 'Líderes'); // ◄ Corregido: XLSX con una sola equis
+    XLSX.writeFile(wb, 'lideres.xlsx');             // ◄ Corregido: XLSX con una sola equis
     this.mostrarDescarga = false;
   }
 

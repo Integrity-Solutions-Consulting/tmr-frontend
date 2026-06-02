@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, HostListener, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ModalConfirmacion } from '../modal-confirmacion/modal-confirmacion';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-modal-lider',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule, HttpClientModule, ModalConfirmacion],
+  imports: [CommonModule, MatIconModule, FormsModule, ModalConfirmacion],
   templateUrl: './modal-lider.html',
   styleUrl: './modal-lider.scss'
 })
@@ -45,11 +45,11 @@ export class ModalLider implements OnInit {
     console.log('📋 Obteniendo tipos de líderes...');
     this.http.get<{ id: number, valor: string }[]>('http://localhost:5071/api/lideres/tipos')
       .subscribe({
-        next: (tipos) => {
+        next: (tipos: any) => { // ◄ Corregido: Agregado tipo explicitamente
           console.log('✅ Tipos de líderes obtenidos:', tipos);
           this.tiposLideres = tipos;
         },
-        error: (error) => console.error('❌ Error al obtener tipos de líderes:', error)
+        error: (error: any) => console.error('❌ Error al obtener tipos de líderes:', error) // ◄ Corregido
       });
   }
 
@@ -57,11 +57,11 @@ export class ModalLider implements OnInit {
     console.log('👥 Obteniendo personas disponibles...');
     this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[]>('http://localhost:5071/api/lideres/personas-disponibles')
       .subscribe({
-        next: (personas) => {
+        next: (personas: any) => { // ◄ Corregido: Agregado tipo explicitamente
           console.log('✅ Personas disponibles obtenidas:', personas);
           this.personasDisponibles = personas;
         },
-        error: (error) => console.error('❌ Error al obtener personas disponibles:', error)
+        error: (error: any) => console.error('❌ Error al obtener personas disponibles:', error) // ◄ Corregido
       });
   }
 
