@@ -19,7 +19,7 @@ export class ReportesService {
   private http = inject(HttpClient);
   // Usa el puerto 7281 (https) o 5071 (http) de acuerdo al launchSettings.json del backend. 
   // Usaremos https porque las APIs ASP.NET Core devuelven 200/OK a través del puerto seguro.
-  private apiUrl = 'http://localhost:5071/api/reportes';
+  private apiUrl = 'http://localhost:5091/api/reportes';
 
   getReporteFechas(filtros?: FiltrosReporteFechas, page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<ReporteFechas>> {
     let params = new HttpParams()

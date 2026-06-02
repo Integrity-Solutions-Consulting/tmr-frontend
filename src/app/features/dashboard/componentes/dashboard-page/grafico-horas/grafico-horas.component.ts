@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HorasPorProyecto } from '../../../modelos/dashboard.model';
 import { ReducePipe } from './reduce.pipe';
@@ -11,6 +11,8 @@ import { ReducePipe } from './reduce.pipe';
   styleUrls: ['./grafico-horas.component.scss']
 })
 export class GraficoHorasComponent {
+  @Output() rangoCambia = new EventEmitter<string>();
+
   @Input() set horasData(data: HorasPorProyecto[]) {
     this._horasData = data;
     this.calcularMaximo();
@@ -37,5 +39,10 @@ export class GraficoHorasComponent {
   getNombreProyectoCorto(nombre: string): string {
     const partes = nombre.split(' ');
     return partes.slice(0, 3).join(' ');
+  }
+
+  onRangoChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.rangoCambia.emit(select.value);
   }
 }
