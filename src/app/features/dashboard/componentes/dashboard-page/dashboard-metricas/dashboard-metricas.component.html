@@ -1,0 +1,61 @@
+<div class="metricas-grid">
+  <!-- Tarjeta 1: Total Proyectos -->
+  <div class="metrica-card">
+    <div class="metrica-content">
+      <div class="metrica-valor">{{ metricas.totalProyectos }}</div>
+      <div class="metrica-label">Proyectos en Total</div>
+    </div>
+    <div class="metrica-icon proyectos">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Tarjeta 2: Horas Reportadas -->
+  <div class="metrica-card">
+    <div class="metrica-content">
+      <div class="metrica-valor">{{ metricas.horasReportadas | number: '1.2-2' }}</div>
+      <div class="metrica-label">Horas Reportadas</div>
+    </div>
+    <div class="metrica-icon horas">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Tarjeta 3: Colaboradores Activos -->
+  <div class="metrica-card">
+    <div class="metrica-content">
+      <div class="metrica-valor">{{ metricas.colaboradoresActivos }}</div>
+      <div class="metrica-label">Colaboradores Activos</div>
+    </div>
+    <div class="metrica-icon colaboradores">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Tarjeta 4: Clientes Activos -->
+  <div class="metrica-card">
+    <div class="metrica-content">
+      <div class="metrica-valor">{{ metricas.clientesActivos }}</div>
+      <div class="metrica-label">Clientes Activos</div>
+    </div>
+    <div class="metrica-icon clientes">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+      </svg>
+    </div>
+  </div>
+</div>

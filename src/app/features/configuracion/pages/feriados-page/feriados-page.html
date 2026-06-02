@@ -1,0 +1,35 @@
+<section class="page">
+  <div class="hero">
+    <div>
+      <h2>Dias Festivos</h2>
+    </div>
+    <app-boton label="Agregar Feriado" icon="event_available" (clicked)="openModal()" />
+  </div>
+
+  <div class="stats-grid">
+    <article>
+      <span>Feriados</span>
+      <strong>{{ feriados().length }}</strong>
+    </article>
+    <article>
+      <span>Nacionales</span>
+      <strong>{{ nacionales() }}</strong>
+    </article>
+    <article>
+      <span>Locales</span>
+      <strong>{{ locales() }}</strong>
+    </article>
+    <article>
+      <span>Religiosos</span>
+      <strong>{{ religiosos() }}</strong>
+    </article>
+  </div>
+
+  <app-feriados-calendar
+    [feriados]="feriados()"
+    (addFeriado)="openModalForDate($event)"
+    (viewFeriado)="viewFeriado($event)"
+    (editFeriado)="openModal($event)"
+    (deleteFeriado)="deleteFeriado($event)"
+  />
+</section>

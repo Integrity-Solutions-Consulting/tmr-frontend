@@ -1,0 +1,33 @@
+<div class="descarga-menu">
+  <button class="descarga-menu__trigger" type="button" (click)="toggle()">
+    <span>{{ etiquetaBoton }}</span>
+    <img src="assets/iconos/download.svg" alt="">
+  </button>
+
+  @if (abierto) {
+    <button class="descarga-menu__overlay" type="button" aria-label="Cerrar descarga" (click)="cerrar()"></button>
+
+    <section class="descarga-menu__panel">
+      <label for="descarga-contenido">Contenido</label>
+
+      <mat-select
+        id="descarga-contenido"
+        class="descarga-menu__select"
+        [(value)]="contenidoSeleccionado"
+        panelClass="descarga-menu__select-panel"
+      >
+        @for (contenido of contenidos; track contenido.id) {
+          <mat-option [value]="contenido.id">{{ contenido.label }}</mat-option>
+        }
+      </mat-select>
+
+      <button mat-flat-button type="button" class="descarga-menu__download" (click)="onDescargarPdf($event)">
+        Descargar PDF
+      </button>
+
+      <button mat-flat-button type="button" class="descarga-menu__download" (click)="onDescargarExcel($event)">
+        Descargar Excel
+      </button>
+    </section>
+  }
+</div>

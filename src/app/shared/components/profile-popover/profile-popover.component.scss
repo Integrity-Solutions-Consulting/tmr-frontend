@@ -1,0 +1,72 @@
+.profile-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 90;
+}
+
+.profile-popover__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.profile-popover__card {
+  position: relative;
+  z-index: 91;
+  width: 260px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-popover__card strong {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-popover__card span {
+  color: #737373;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.profile-popover__logout {
+  justify-content: flex-start;
+  margin-top: 12px;
+  padding: 0 !important;
+  color: #737373 !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-popover__logout span {
+  margin-right: 8px;
+  color: #737373;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .profile-popover {
+    right: -46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-popover {
+    right: -4px;
+  }
+
+  .profile-popover__card {
+    width: min(260px, calc(100vw - 24px));
+  }
+}

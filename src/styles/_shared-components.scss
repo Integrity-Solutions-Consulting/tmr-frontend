@@ -1,0 +1,80 @@
+@use 'variables' as *;
+
+// Botones Estándar
+.btn-export {
+  padding: 8px 16px;
+  border: 1px solid $color-text-light;
+  border-radius: $radius-lg;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  @include transition-standard;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: $color-bg-light;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Inputs y Filtros
+.filter-input {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: $radius-lg;
+  outline: none;
+  font-size: 14px;
+  font-weight: 500;
+  @include transition-standard;
+  box-sizing: border-box;
+
+  &:focus {
+    box-shadow: 0 0 0 1px $color-primary;
+  }
+}
+
+// Tablas de Reporte
+.report-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+
+  th {
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: $color-text-light;
+    text-transform: uppercase;
+    background-color: rgba($color-bg-light, 0.5);
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  td {
+    padding: 16px;
+    font-size: 14px;
+    color: #475569;
+  }
+
+  .text-center { text-align: center; }
+  .font-bold { font-weight: 700; }
+}
+
+// Tarjetas de Métricas
+.metric-card {
+  border: 1px solid #f1f5f9;
+  border-radius: $radius-xl;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}

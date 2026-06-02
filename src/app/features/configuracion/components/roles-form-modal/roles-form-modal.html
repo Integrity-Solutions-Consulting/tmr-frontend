@@ -1,0 +1,68 @@
+<app-modal-base
+  [title]="isEdit ? 'Editar Rol' : 'Crear Nuevo Rol'"
+  subtitle="Define el alcance funcional y los modulos accesibles del perfil."
+>
+  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Nombre de Rol</mat-label>
+        <mat-icon matPrefix>admin_panel_settings</mat-icon>
+        <input matInput formControlName="nombre" placeholder="Ej. Coordinador de proyectos" />
+        <mat-error>
+          @if (form.controls.nombre.errors?.['required'] && form.controls.nombre.touched) {
+            Campo requerido
+          }
+          @if (form.controls.nombre.errors?.['pattern'] && form.controls.nombre.touched) {
+            Solo letras, espacios y tildes
+          }
+          @if (form.controls.nombre.errors?.['minlength'] && form.controls.nombre.touched) {
+            Mínimo 3 caracteres
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>Descripción</mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+        <textarea matInput formControlName="descripcion" rows="2" placeholder="Describe el alcance del rol"></textarea>
+        <mat-error>
+          @if (form.controls.descripcion.errors?.['required'] && form.controls.descripcion.touched) {
+            Campo requerido
+          }
+          @if (form.controls.descripcion.errors?.['minlength'] && form.controls.descripcion.touched) {
+            Mínimo 8 caracteres
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <section class="modules">
+        <div>
+          <h3>Modulos Accesibles</h3>
+          <p>Selecciona los permisos visibles para este rol.</p>
+        </div>
+
+        <div class="module-grid">
+          @for (modulo of modulos; track modulo) {
+            <mat-checkbox
+              [checked]="isChecked(modulo)"
+              (change)="toggleModulo(modulo, $event.checked)"
+            >
+              {{ modulo }}
+            </mat-checkbox>
+          }
+        </div>
+
+        @if (form.controls.modulos.errors?.['required'] && form.controls.modulos.touched) {
+          <p class="field-error">Selecciona al menos un módulo</p>
+        }
+      </section>
+    </div>
+
+    <div class="modal-actions">
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit">
+        {{ isEdit ? 'Guardar cambios' : 'Crear rol' }}
+      </button>
+    </div>
+  </form>
+</app-modal-base>

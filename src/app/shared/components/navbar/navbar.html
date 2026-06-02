@@ -1,0 +1,32 @@
+<header class="navbar">
+
+  <div class="navbar-right" (click)="togglePerfil()">
+
+    <span class="saludo">
+      Hola, <strong>Marlene</strong>
+    </span>
+
+    <button class="notification" type="button">
+      <img src="assets/icons/bell-alt-svgrepo-com.png" alt="Bell">
+    </button>
+
+  </div>
+
+  <div class="profile-popup" *ngIf="mostrarPerfil">
+
+    <strong>
+      Marlene Cañizares
+    </strong>
+
+    <span>
+      marlene.cañizares@integritysolutions.com.ec
+    </span>
+
+    <button type="button" class="btn-cerrar-sesion" (click)="cerrarSesion()">
+      <span class="material-icons">logout</span>
+      Cerrar Sesión
+    </button>
+
+  </div>
+
+</header>

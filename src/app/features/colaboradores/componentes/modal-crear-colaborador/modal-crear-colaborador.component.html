@@ -1,0 +1,316 @@
+<div class="modal-backdrop" (click)="onCerrar()">
+  <div class="modal-form" (click)="$event.stopPropagation()">
+
+    <div class="modal-form__header">
+      <div>
+        <h2 class="modal-form__title">Agregar Colaborador</h2>
+        <p class="modal-form__subtitle">Complete los datos del nuevo colaborador</p>
+      </div>
+      <button class="modal-form__close" (click)="onCerrar()" type="button">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-form__body" [formGroup]="form">
+
+      <!-- CONTRATO -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Contrato
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idEmpresaCatalogo"
+                [class.float-select__input--error]="campoInvalido('idEmpresaCatalogo')">
+                <option value=""></option>
+                @for (a of asociaciones; track a.id) {
+                  <option [value]="a.id">{{ a.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idEmpresaCatalogo')">
+                Asociación <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idEmpresaCatalogo')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idTipoContrato"
+                [class.float-select__input--error]="campoInvalido('idTipoContrato')">
+                <option value=""></option>
+                @for (t of tiposContrato; track t.id) {
+                  <option [value]="t.id">{{ t.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idTipoContrato')">
+                Tipo de contrato <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idTipoContrato')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos personales
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <!-- Fila 1: Persona | Identificación -->
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idPersona"
+                [class.float-select__input--error]="campoInvalido('idPersona')">
+                <option value=""></option>
+                @for (p of personas; track p.id) {
+                  <option [value]="p.id">{{ p.nombres }} {{ p.apellidos }} — {{ p.numeroIdentificacion }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idPersona')">
+                Persona <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idPersona')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="identificacion"
+                placeholder=" "/>
+              <label class="float-field__label">Identificación</label>
+            </div>
+          </div>
+
+          <!-- Fila 2: Nombres | Apellidos -->
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="nombres"
+                placeholder=" "/>
+              <label class="float-field__label">Nombres</label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="apellidos"
+                placeholder=" "/>
+              <label class="float-field__label">Apellidos</label>
+            </div>
+          </div>
+
+          <!-- Fila 3: Fecha de nacimiento | Género -->
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input float-field__input--date" type="date"
+                formControlName="fechaNacimiento" placeholder=" "/>
+              <label class="float-field__label float-field__label--always">
+                Fecha de nacimiento
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idGenero">
+                <option value=""></option>
+                @for (g of generos; track g.id) {
+                  <option [value]="g.id">{{ g.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idGenero')">
+                Género
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS DE CONTACTO -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos de contacto
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <input class="float-field__input" type="email" formControlName="correoElectronico"
+                placeholder=" "/>
+              <label class="float-field__label">Correo electrónico</label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="telefono"
+                placeholder=" "/>
+              <label class="float-field__label">Teléfono</label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="direccion"
+                placeholder=" "/>
+              <label class="float-field__label">Dirección</label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DATOS LABORALES -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos laborales
+        </div>
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idDepartamento"
+                [class.float-select__input--error]="campoInvalido('idDepartamento')">
+                <option value=""></option>
+                @for (dep of departamentos; track dep.id) {
+                  <option [value]="dep.id">{{ dep.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idDepartamento')">
+                Departamento <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idDepartamento')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input float-field__input--date" type="date"
+                formControlName="fechaContratacion" placeholder=" "
+                [class.float-field__input--error]="campoInvalido('fechaContratacion')"/>
+              <label class="float-field__label float-field__label--always">
+                Fecha de contratación <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('fechaContratacion')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Cargo — depende del departamento -->
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idCargo"
+                [class.float-select__input--error]="campoInvalido('idCargo')"
+                [disabled]="!tieneValor('idDepartamento')">
+                <option value=""></option>
+                @for (c of cargosDisponibles; track c.id) {
+                  <option [value]="c.id">{{ c.nombreCargo }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idCargo')">
+                Cargo <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idCargo')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+            @if (!tieneValor('idDepartamento')) {
+              <span class="form-field__hint">Seleccione un departamento primero</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="number" formControlName="aniosExperiencia"
+                placeholder=" " min="0" max="50"
+                [class.float-field__input--error]="campoInvalido('aniosExperiencia')"/>
+              <label class="float-field__label">Años de experiencia <span class="req">*</span></label>
+            </div>
+            @if (campoInvalido('aniosExperiencia')) {
+              <span class="form-field__error">
+                @if (form.get('aniosExperiencia')?.errors?.['required']) { Campo requerido }
+                @else { Entre 0 y 50 años }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idModoTrabajo"
+                [class.float-select__input--error]="campoInvalido('idModoTrabajo')">
+                <option value=""></option>
+                @for (m of modalidades; track m.id) {
+                  <option [value]="m.id">{{ m.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idModoTrabajo')">
+                Modalidad <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idModoTrabajo')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idCategoriaEmpleado"
+                [class.float-select__input--error]="campoInvalido('idCategoriaEmpleado')">
+                <option value=""></option>
+                @for (c of categorias; track c.id) {
+                  <option [value]="c.id">{{ c.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idCategoriaEmpleado')">
+                Categoría <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idCategoriaEmpleado')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-form__footer">
+      <button class="modal-form__btn modal-form__btn--cancel" (click)="onCerrar()" type="button">
+        Cancelar
+      </button>
+      <button class="modal-form__btn modal-form__btn--save" (click)="onGuardar()" type="button">
+        <span class="material-icons">person_add</span>
+        Agregar Colaborador
+      </button>
+    </div>
+
+  </div>
+</div>

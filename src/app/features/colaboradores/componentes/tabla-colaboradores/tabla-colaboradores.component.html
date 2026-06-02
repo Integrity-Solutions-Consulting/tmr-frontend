@@ -1,0 +1,101 @@
+<div class="tabla-wrapper">
+
+  <table class="tabla">
+    <thead class="tabla__head">
+      <tr>
+        <th class="tabla__th">Identificación</th>
+        <th class="tabla__th">Tipo</th>
+        <th class="tabla__th">Nombre</th>
+        <th class="tabla__th tabla__th--center">Núm. Proyectos</th>
+        <th class="tabla__th">Correo electrónico</th>
+        <th class="tabla__th">Cargo</th>
+        <th class="tabla__th">Estado</th>
+        <th class="tabla__th tabla__th--actions"></th>
+      </tr>
+    </thead>
+
+    <tbody class="tabla__body">
+
+      @if (cargando) {
+        @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+          <tr class="tabla__row tabla__row--skeleton">
+            @for (j of [1,2,3,4,5,6,7,8]; track j) {
+              <td class="tabla__td"><div class="skeleton-line"></div></td>
+            }
+          </tr>
+        }
+      }
+
+      @if (!cargando && colaboradores.length === 0) {
+        <tr>
+          <td class="tabla__td tabla__td--empty" colspan="8">
+            <span class="material-icons tabla__empty-icon">search_off</span>
+            <p class="tabla__empty-text">No se encontraron colaboradores</p>
+            <p class="tabla__empty-sub">Intenta ajustar los filtros de búsqueda</p>
+          </td>
+        </tr>
+      }
+
+      @if (!cargando) {
+        @for (col of colaboradores; track col.id) {
+          <tr class="tabla__row">
+
+            <td class="tabla__td tabla__td--id">{{ col.identificacion }}</td>
+
+            <td class="tabla__td">
+              <span class="tabla__tipo-badge">{{ col.tipoIdentificacion }}</span>
+            </td>
+
+            <td class="tabla__td tabla__td--nombre">{{ col.nombreCompleto }}</td>
+
+            <td class="tabla__td tabla__td--center">{{ col.numProyectos }}</td>
+
+            <td class="tabla__td tabla__td--email">
+              {{ col.correoElectronico | truncate:32 }}
+            </td>
+
+            <td class="tabla__td tabla__td--cargo">
+              {{ col.cargo | truncate:18 }}
+            </td>
+
+            <td class="tabla__td">
+              <app-badge-estado [estado]="col.estado" />
+            </td>
+
+            <td class="tabla__td tabla__td--actions" (click)="$event.stopPropagation()">
+              <div class="tabla__menu-wrapper">
+                <button
+                  class="tabla__menu-btn"
+                  (click)="toggleMenu(col.id, $event)"
+                  title="Acciones"
+                >
+                  <img src="assets/iconos/puntos.svg" alt="acciones" width="20" height="20" />
+                </button>
+
+                @if (menuAbierto === col.id) {
+                  <div class="tabla__dropdown">
+                    <button class="tabla__dropdown-item" (click)="onVerDetalle(col, $event)">
+                      <img src="assets/iconos/eye.svg" alt="ver" width="15" height="15" />
+                      Ver más
+                    </button>
+                    <button class="tabla__dropdown-item" (click)="onEditar(col, $event)">
+                      <img src="assets/iconos/btn-editar.svg" alt="editar" width="15" height="15" />
+                      Editar
+                    </button>
+                    <button class="tabla__dropdown-item tabla__dropdown-item--danger" (click)="onEliminar(col, $event)">
+                      <img src="assets/iconos/btn-eliminar.svg" alt="eliminar" width="15" height="15" />
+                      Eliminar
+                    </button>
+                  </div>
+                }
+              </div>
+            </td>
+
+          </tr>
+        }
+      }
+
+    </tbody>
+  </table>
+
+</div>

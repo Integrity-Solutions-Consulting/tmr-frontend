@@ -1,0 +1,228 @@
+<!-- ── Notificación ──────────────────────────────────────── -->
+<app-notificacion
+  *ngIf="notificacion$ | async as notif"
+  [notificacion]="notif"
+  (cerrar)="cerrarNotif()">
+</app-notificacion>
+
+<!-- ── Modales ───────────────────────────────────────────── -->
+<app-modal-crear
+  *ngIf="modalCrear$ | async"
+  (guardar)="onGuardarCrear($event)"
+  (cancelar)="cerrarCrear()">
+</app-modal-crear>
+
+<ng-container *ngIf="modalEditar$ | async">
+  <app-modal-editar
+    *ngIf="clienteSelec$ | async as cliente"
+    [cliente]="cliente"
+    (guardar)="onGuardarEditar($event, cliente.id)"
+    (cancelar)="cerrarEditar()">
+  </app-modal-editar>
+</ng-container>
+
+<ng-container *ngIf="modalDetalle$ | async">
+  <app-modal-detalle
+    *ngIf="clienteSelec$ | async as cliente"
+    [cliente]="cliente"
+    (cerrar)="cerrarDetalle()">
+  </app-modal-detalle>
+</ng-container>
+
+<!-- ── Contenido principal ───────────────────────────────── -->
+<div class="clientes-container" (click)="cerrarMenu()">
+
+  <!-- Título -->
+  <h1 class="titulo-pagina">Clientes</h1>
+
+  <!-- Card contador inactivos -->
+  <div class="cards-resumen" *ngIf="resumen$ | async as resumen">
+    <div class="card-resumen">
+
+      <!-- Ícono filtro arriba derecha -->
+      <button class="card-resumen-filtro" (click)="filtrosForm.get('estado')!.setValue('Inactivo')">
+        <img src="assets/iconos/filtro-inactivo.svg" width="24" height="24" alt="filtro"/>
+      </button>
+
+      <!-- Contenido -->
+      <div class="card-resumen-body">
+
+        <!-- Fila superior: ícono + número -->
+        <div class="card-resumen-top">
+          <div class="card-resumen-icono">
+            <img src="assets/iconos/inactivos.svg" width="25" height="25" alt="inactivos"/>
+          </div>
+          <span class="card-resumen-numero">{{ resumen.totalInactivos }}</span>
+        </div>
+
+        <!-- Fila inferior: palabra Inactivos -->
+        <span class="card-resumen-label">Inactivos</span>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra filtros + acciones -->
+  <div class="barra-acciones" [formGroup]="filtrosForm">
+
+    <!-- Búsqueda -->
+    <div class="input-busqueda-wrap">
+      <img class="icono-busqueda" src="assets/iconos/busqueda.svg" width="15" height="15" alt="buscar"/>
+      <input
+        formControlName="busqueda"
+        class="input-busqueda"
+        placeholder="Buscar por nombres, código..."/>
+    </div>
+
+    <!-- Filtro estado -->
+    <div class="select-estado-wrap" [class.activo]="dropdownEstadoAbierto || estadosSeleccionados.length > 0" (click)="toggleDropdownEstado($event)">
+      <img src="assets/iconos/estado.svg" width="13" height="13" alt="estado"/>
+      <span class="select-estado-texto">Estado</span>
+
+      <div class="dropdown-estado" *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
+        <!-- Buscador -->
+        <div class="dropdown-search-wrap">
+          <img src="assets/iconos/busqueda.svg" width="13" height="13" alt="buscar"/>
+          <input class="dropdown-search" placeholder="Estado" [(ngModel)]="busquedaEstado" (click)="$event.stopPropagation()"/>
+        </div>
+
+        <!-- Opciones con checkbox -->
+        <div class="dropdown-opcion" (click)="toggleEstado('Activo')">
+          <span class="checkbox" [class.checked]="estadosSeleccionados.includes('Activo')">
+            <svg *ngIf="estadosSeleccionados.includes('Activo')" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </span>
+          <span class="opcion-label">Activo</span>
+          <span class="opcion-count">{{ contarPorEstado('Activo') }}</span>
+        </div>
+
+        <div class="dropdown-opcion" (click)="toggleEstado('Inactivo')">
+          <span class="checkbox" [class.checked]="estadosSeleccionados.includes('Inactivo')">
+            <svg *ngIf="estadosSeleccionados.includes('Inactivo')" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </span>
+          <span class="opcion-label">Inactivo</span>
+          <span class="opcion-count">{{ contarPorEstado('Inactivo') }}</span>
+        </div>
+
+        <!-- Limpiar filtro -->
+        <div class="dropdown-limpiar" (click)="limpiarFiltroEstado()">Limpiar filtro</div>
+      </div>
+    </div>
+
+    <div class="acciones-derecha">
+      <!-- Botón Descargar -->
+      <div class="btn-descarga-wrap">
+        <button class="btn-descargar" (click)="toggleDescarga($event)">
+          Descargar
+          <img src="assets/iconos/descargar.svg" width="15" height="15" alt="descargar"/>
+        </button>
+        <app-modal-descarga
+          *ngIf="descargaAbierta"
+          (descargar)="onDescargar($event)"
+          (cerrar)="descargaAbierta = false">
+        </app-modal-descarga>
+      </div>
+
+      <!-- Botón Agregar -->
+      <button class="btn-agregar" (click)="abrirCrear()">
+        Agregar
+        <img src="assets/iconos/agregar.svg" width="16" height="16" alt="agregar"/>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrap">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Tipo Id</th>
+          <th>Identificador</th>
+          <th>Nombre Comercial</th>
+          <th>Correo electrónico</th>
+          <th>Teléfono</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Cargando -->
+        <tr *ngIf="cargando$ | async">
+          <td colspan="7" class="td-cargando">
+            <div class="spinner"></div>
+            Cargando clientes...
+          </td>
+        </tr>
+
+        <!-- Sin resultados -->
+        <tr *ngIf="!(cargando$ | async) && (clientes$ | async)?.length === 0">
+          <td colspan="7" class="td-vacio">No se encontraron clientes</td>
+        </tr>
+
+        <!-- Filas -->
+        <tr *ngFor="let cliente of clientes$ | async" class="fila">
+          <td>{{ cliente.tipoId }}</td>
+          <td>{{ cliente.identificador }}</td>
+          <td class="td-nombre">{{ cliente.nombreComercial }}</td>
+          <td class="td-email">{{ cliente.correoElectronico }}</td>
+          <td>{{ cliente.telefono }}</td>
+          <td>
+            <span class="estado-badge"
+              [class.activo]="cliente.estado === 'Activo'"
+              [class.inactivo]="cliente.estado === 'Inactivo'">
+              <span class="estado-dot"></span>
+              {{ cliente.estado }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <div class="menu-wrap">
+              <button class="btn-menu" (click)="toggleMenu(cliente.id, $event)">⋮</button>
+              <div class="menu-desplegable" *ngIf="menuAbierto === cliente.id" (click)="$event.stopPropagation()">
+                <button class="menu-item" (click)="verDetalle(cliente)">
+                  <img src="assets/iconos/ver mas.svg" width="14" height="14" alt="ver"/>
+                  Ver más
+                </button>
+                <button class="menu-item" (click)="abrirEditar(cliente)">
+                  <img src="assets/iconos/editar.svg" width="14" height="14" alt="editar"/>
+                  Editar
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  <div class="paginacion" *ngIf="paginacion$ | async as pag">
+    <span class="pag-info">Página {{ pag.paginaActual }} de {{ pag.totalPaginas }}</span>
+
+    <div class="pag-controles">
+      <!-- Primera -->
+      <button class="pag-btn" (click)="irAPagina(1)" [disabled]="paginaActual === 1">«</button>
+      <!-- Anterior -->
+      <button class="pag-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">‹</button>
+
+      <!-- Páginas -->
+      <ng-container *ngFor="let p of paginas">
+        <span *ngIf="p === -1" class="pag-ellipsis">…</span>
+        <button *ngIf="p !== -1"
+          class="pag-btn pag-numero"
+          [class.activo]="p === paginaActual"
+          (click)="irAPagina(p)">
+          {{ p }}
+        </button>
+      </ng-container>
+
+      <!-- Siguiente -->
+      <button class="pag-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">›</button>
+      <!-- Última -->
+      <button class="pag-btn" (click)="irAPagina(totalPaginas)" [disabled]="paginaActual === totalPaginas">»</button>
+    </div>
+  </div>
+
+</div>

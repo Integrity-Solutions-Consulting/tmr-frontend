@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  font-family: 'Inter', sans-serif;
+
+  &__info {
+    font-size: 12px;
+    color: #737373;
+    
+  }
+
+  &__controles {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  &__pagina-info {
+  font-size: 12px;
+  color: #737373;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 5px;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #737373;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    .material-icons { font-size: 14px; }
+
+    &:hover:not(:disabled):not(.paginacion__btn--activo) {
+      background: #f5f5f5;
+      border-color: #d1d5db;
+      color: #163572;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--activo {
+      background: #163572;
+      border-color: #163572;
+      color: #ffffff;
+      cursor: default;
+    }
+
+    &--numero {
+      min-width: 28px;
+    }
+  }
+
+  &__dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #737373;
+  }
+}

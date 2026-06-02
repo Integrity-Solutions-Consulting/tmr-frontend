@@ -1,0 +1,62 @@
+<div class="filtros" [formGroup]="form">
+
+  <!-- Búsqueda -->
+  <div class="filtros__search">
+    <img src="assets/iconos/buscar.svg" alt="buscar" class="filtros__search-icon" width="16" height="16" />
+    <input
+      class="filtros__search-input"
+      type="text"
+      placeholder="Buscar por nombres, código..."
+      formControlName="busqueda"
+      autocomplete="off"
+    />
+    @if (form.get('busqueda')?.value) {
+      <button class="filtros__search-clear" (click)="form.get('busqueda')?.setValue('')" type="button">
+        <span class="material-icons">close</span>
+      </button>
+    }
+  </div>
+
+  <!-- Estado dropdown -->
+  <div class="filtros__estado">
+    <button class="filtros__estado-btn" (click)="toggleEstado()" type="button">
+      <img src="assets/iconos/estado-btn.svg" alt="estado" class="filtros__estado-icon" width="16" height="16" />
+      <span>Estado</span>
+    </button>
+
+    @if (estadoAbierto) {
+      <div class="filtros__dropdown">
+        <div class="filtros__dropdown-search">
+          <img src="assets/iconos/buscar.svg" alt="buscar" width="14" height="14" />
+          <input type="text" placeholder="Estado" readonly />
+        </div>
+
+        <div class="filtros__dropdown-list">
+          @for (opcion of opcionesEstado; track opcion.valor) {
+            @if (opcion.valor !== 'Todos') {
+              <button
+                class="filtros__dropdown-item"
+                (click)="seleccionarEstado(opcion.valor)"
+                type="button"
+              >
+                <div class="filtros__dropdown-checkbox"
+                  [class.filtros__dropdown-checkbox--active]="estadoSeleccionado === opcion.valor">
+                  @if (estadoSeleccionado === opcion.valor) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="filtros__dropdown-label">{{ opcion.label }}</span>
+                <span class="filtros__dropdown-count">{{ opcion.valor === 'Activo' ? '44' : '13' }}</span>
+              </button>
+            }
+          }
+        </div>
+
+        <button class="filtros__dropdown-clear" (click)="seleccionarEstado('Todos')" type="button">
+          Limpiar filtro
+        </button>
+      </div>
+    }
+  </div>
+
+</div>

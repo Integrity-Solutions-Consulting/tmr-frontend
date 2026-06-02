@@ -1,0 +1,21 @@
+<div class="descargar">
+
+  <button class="descargar__btn" [class.descargar__btn--open]="abierto" (click)="toggle()" type="button">
+    <span>Descargar</span>
+    <img src="assets/iconos/download.svg" alt="descargar" width="16" height="16" />
+  </button>
+
+  @if (abierto) {
+    <div class="descargar__overlay" (click)="cerrar()"></div>
+    <div class="descargar__panel">
+      <p class="descargar__title">Seleccione el formato:</p>
+      <button class="descargar__option" (click)="onPDF()" type="button">
+        Descargar PDF
+      </button>
+      <button class="descargar__option" (click)="onExcel()" type="button">
+        Descargar Excel
+      </button>
+    </div>
+  }
+
+</div>

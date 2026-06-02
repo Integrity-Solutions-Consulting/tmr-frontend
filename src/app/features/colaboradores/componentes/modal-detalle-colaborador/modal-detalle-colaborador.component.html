@@ -1,0 +1,200 @@
+<div class="modal-backdrop" (click)="onCerrar()"></div>
+
+<div class="modal-card">
+
+  <button class="modal-card__close" (click)="onCerrar()">
+    <span class="material-icons">close</span>
+  </button>
+
+  <!-- Header -->
+  <div class="modal-card__header">
+    <p class="modal-card__codigo">{{ codigoColaborador }} · {{ contratoTipo }}</p>
+    <div class="modal-card__title-row">
+      <h2 class="modal-card__nombre">{{ colaborador.nombreCompleto }}</h2>
+      <app-badge-estado [estado]="colaborador.estado" />
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="modal-card__body">
+
+    <!-- Datos laborales -->
+    <div class="detalle-section">
+      <div class="detalle-section__header">
+        <span class="detalle-section__bar"></span>
+        <span class="detalle-section__title">Datos laborales</span>
+      </div>
+      <div class="detalle-grid">
+
+        <div class="detalle-field">
+          <img src="assets/iconos/departamento.svg" alt="departamento" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Departamento</p>
+            <p class="detalle-field__value">{{ colaborador.departamento }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/contratacion.svg" alt="contratacion" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Fecha de contratación</p>
+            <p class="detalle-field__value">{{ formatFecha(colaborador.fechaContratacion) }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/cargo.svg" alt="cargo" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Cargo</p>
+            <p class="detalle-field__value">{{ colaborador.cargo }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/experiencia.svg" alt="experiencia" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Años de experiencia</p>
+            <p class="detalle-field__value">{{ colaborador.aniosExperiencia }} años</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/modalidad.svg" alt="modalidad" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Modalidad</p>
+            <p class="detalle-field__value">{{ colaborador.modalidad }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/categoria.svg" alt="categoria" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Categoría</p>
+            <p class="detalle-field__value">{{ colaborador.categoria }}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Datos personales + contacto -->
+    <div class="detalle-two-col">
+
+      <div class="detalle-section">
+        <div class="detalle-section__header">
+          <span class="detalle-section__bar"></span>
+          <span class="detalle-section__title">Datos personales</span>
+        </div>
+        <div class="detalle-col">
+
+          <div class="detalle-field">
+            <img src="assets/iconos/cedula.svg" alt="identificacion" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Identificación</p>
+              <p class="detalle-field__value">{{ colaborador.identificacion }}</p>
+            </div>
+          </div>
+
+          <div class="detalle-field">
+            <img src="assets/iconos/nacimiento.svg" alt="nacimiento" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Fecha de nacimiento</p>
+              <p class="detalle-field__value">{{ formatFecha(colaborador.fechaNacimiento) }}</p>
+            </div>
+          </div>
+
+          <div class="detalle-field">
+            <img src="assets/iconos/genero.svg" alt="genero" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Género</p>
+              <p class="detalle-field__value">{{ colaborador.genero }}</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="detalle-section">
+        <div class="detalle-section__header">
+          <span class="detalle-section__bar"></span>
+          <span class="detalle-section__title">Datos de contacto</span>
+        </div>
+        <div class="detalle-col">
+
+          <div class="detalle-field">
+            <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Correo electrónico</p>
+              <p class="detalle-field__value detalle-field__value--break">{{ colaborador.correoElectronico }}</p>
+            </div>
+          </div>
+
+          <div class="detalle-field">
+            <img src="assets/iconos/telefono.svg" alt="telefono" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Teléfono</p>
+              <p class="detalle-field__value">{{ colaborador.telefono }}</p>
+            </div>
+          </div>
+
+          <div class="detalle-field">
+            <img src="assets/iconos/direccion.svg" alt="direccion" class="detalle-field__icon" width="15" height="15" />
+            <div>
+              <p class="detalle-field__label">Dirección</p>
+              <p class="detalle-field__value">{{ colaborador.direccion }}</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Proyectos asignados -->
+    <div class="detalle-proyectos">
+      <button class="detalle-proyectos__toggle" (click)="toggleProyectos()" type="button">
+  <img
+    src="assets/iconos/desplegar.svg"
+    alt="toggle"
+    width="12"
+    height="12"
+    [style.transform]="proyectosExpandido ? 'rotate(90deg)' : 'rotate(0deg)'"
+    style="transition: transform 0.2s ease;"
+  />
+  <span class="detalle-proyectos__label">Proyectos asignados</span>
+  <span class="detalle-proyectos__count">{{ colaborador.numProyectos }}</span>
+</button>
+      @if (proyectosExpandido) {
+        <div class="detalle-proyectos__lista">
+          @if (colaborador.proyectosAsignados.length === 0) {
+            <p class="detalle-proyectos__empty">Sin proyectos asignados</p>
+          }
+          @for (proy of colaborador.proyectosAsignados; track proy.id) {
+            <div class="detalle-proyectos__item">
+              <div class="detalle-proyectos__item-info">
+                <p class="detalle-proyectos__item-nombre">{{ proy.nombre }}</p>
+                <div class="detalle-proyectos__item-cliente">
+                  <img src="assets/iconos/proyecto.svg" alt="proyecto" width="13" height="13" />
+                  {{ proy.cliente }}
+                </div>
+              </div>
+              <span
+                class="detalle-proyectos__item-estado"
+                [ngClass]="{
+                  'estado--progreso':   proy.estado === 'En progreso',
+                  'estado--completado': proy.estado === 'Completado',
+                  'estado--pausa':      proy.estado === 'En pausa',
+                  'estado--cancelado':  proy.estado === 'Cancelado'
+                }"
+              >
+                <span class="detalle-proyectos__item-dot"></span>
+                {{ proy.estado }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
