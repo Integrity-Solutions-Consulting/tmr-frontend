@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, HostListener, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { ModalConfirmacion } from '../modal-confirmacion/modal-confirmacion';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-modal-lider',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule, ModalConfirmacion],
+  imports: [CommonModule, MatIconModule, FormsModule],
   templateUrl: './modal-lider.html',
   styleUrl: './modal-lider.scss'
 })
