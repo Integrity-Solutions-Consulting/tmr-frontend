@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Feriado, FeriadoCreate } from '../models/roles-feriados.models';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class FeriadosService {
-  private base = `/api/feriados`;
+  private base = `${environment.apiUrl}/configuracion/dias-festivos`;
 
   constructor(private http: HttpClient) {}
 

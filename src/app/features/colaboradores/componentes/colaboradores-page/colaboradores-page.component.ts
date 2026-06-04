@@ -16,7 +16,7 @@ import { CardsMetricasComponent }           from '../cards-metricas/cards-metric
 import { FiltrosColaboradoresComponent }    from '../filtros-colaboradores/filtros-colaboradores.component';
 import { DescargarMenuComponent }           from '../descargar-menu/descargar-menu.component';
 import { TablaColaboradoresComponent }      from '../tabla-colaboradores/tabla-colaboradores.component';
-import { PaginacionComponent }             from '../../../../shared/componentes/paginacion/paginacion.component';
+import { PaginacionComponent }             from '../../../../shared/components/paginacion/paginacion.component';
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';

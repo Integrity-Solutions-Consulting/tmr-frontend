@@ -1,14 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Proyecto } from '../modelos/proyecto.model';
-import { PROYECTOS_MOCK } from '../mocks/proyectos.mock';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProyectosService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/proyectos`;
 
-  obtenerProyectos(): Proyecto[] {
-    return PROYECTOS_MOCK;
+  obtenerProyectos(): Observable<Proyecto[]> {
+    return this.http.get<Proyecto[]>(this.apiUrl);
   }
-
 }

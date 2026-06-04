@@ -1,12 +1,16 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-badge-estado',
   standalone: true,
-  imports: [],
+  imports: [NgClass],
   templateUrl: './badge-estado.html',
-  styleUrl: './badge-estado.scss'
+  styleUrl: './badge-estado.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeEstado {
-  @Input() estado: string = '';
+
+  @Input() estado = '';
+
 }

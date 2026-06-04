@@ -18,8 +18,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
 import { Colaborador } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
-import { PaginacionComponent } from '../../../shared/componentes/paginacion/paginacion.component';
-import { BadgeEstadoComponent } from '../../../shared/componentes/badge-estado/badge-estado.component';
+import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
+import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
 import * as XLSX from 'xlsx';
 
 @Component({

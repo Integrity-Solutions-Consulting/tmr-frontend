@@ -1,9 +1,17 @@
-<span
-  class="badge"
-  [class.en-progreso]="estado === 'En progreso'"
-  [class.en-espera]="estado === 'En espera' || estado === 'Pendiente'"
-  [class.completado]="estado === 'Completado' || estado === 'Finalizado'"
-  [class.cancelado]="estado === 'Cancelado'"
->
+<span class="status-badge">
+
+  <span
+    class="status-dot"
+    [ngClass]="{
+      'progress': estado === 'En progreso',
+      'completed': estado === 'Completado',
+      'cancelled': estado === 'Cancelado',
+      'waiting': estado === 'En espera',
+      'inactive': estado === 'Inactivo'
+    }"
+  >
+  </span>
+
   {{ estado }}
+
 </span>

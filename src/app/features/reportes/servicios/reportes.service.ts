@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ReporteFechas, FiltrosReporteFechas } from '../modelos/reporte-fechas.model';
 import { ReporteHoras, FiltrosReporteHoras } from '../modelos/reporte-horas.model';
+import { environment } from '../../../../environments/environment';
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -17,9 +18,7 @@ export interface PaginatedResponse<T> {
 })
 export class ReportesService {
   private http = inject(HttpClient);
-  // Usa el puerto 7281 (https) o 5071 (http) de acuerdo al launchSettings.json del backend. 
-  // Usaremos https porque las APIs ASP.NET Core devuelven 200/OK a través del puerto seguro.
-  private apiUrl = 'http://localhost:5091/api/reportes';
+  private apiUrl = `${environment.apiUrl}/reportes`;
 
   getReporteFechas(filtros?: FiltrosReporteFechas, page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<ReporteFechas>> {
     let params = new HttpParams()

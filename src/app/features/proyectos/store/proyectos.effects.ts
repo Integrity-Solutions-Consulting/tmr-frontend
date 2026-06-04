@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { ProyectosService } from '../servicios/proyectos.service';
 import { cargarProyectos, cargarProyectosExito } from './proyectos.actions';
@@ -13,11 +14,12 @@ export class ProyectosEffects {
   cargarProyectos$ = createEffect(() =>
     this.actions$.pipe(
       ofType(cargarProyectos),
-      map(() => {
-        const proyectos = this.proyectosService.obtenerProyectos();
-
-        return cargarProyectosExito({ proyectos });
-      })
+      switchMap(() => 
+        this.proyectosService.obtenerProyectos().pipe(
+          map(proyectos => cargarProyectosExito({ proyectos })),
+          catchError(() => of(cargarProyectosExito({ proyectos: [] })))
+        )
+      )
     )
   );
 }
