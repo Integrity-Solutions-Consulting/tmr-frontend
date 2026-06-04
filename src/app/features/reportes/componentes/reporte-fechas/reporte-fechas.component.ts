@@ -2,11 +2,11 @@ import { Component, signal, computed, OnInit, inject, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteFechas } from '../../modelos/reporte-fechas.model';
-import { HeaderComponent } from '../../../../shared/componentes/header/header.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { ReportesService } from '../../servicios/reportes.service';
 
-import { TablaComponent } from '../../../../shared/componentes/tabla-colega/tabla.component';
-import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/tabla.types';
+import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla.component';
+import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
 
 @Component({
   selector: 'app-reporte-fechas',

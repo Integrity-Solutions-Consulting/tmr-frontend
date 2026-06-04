@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Rol, RolCreate } from '../models/roles-feriados.models';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class RolesService {
-  private base = `/api/roles`;
+  private base = `${environment.apiUrl}/configuracion/roles`;
 
   constructor(private http: HttpClient) {}
 

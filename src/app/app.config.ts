@@ -41,4 +41,4 @@ export const appConfig: ApplicationConfig = {
     provideEffects(AuthEffects, ClientesEffects, ActividadesEffects, ProyectosEffects, DashboardEffects),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
-};
+};

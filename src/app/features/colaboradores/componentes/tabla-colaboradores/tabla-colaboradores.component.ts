@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Colaborador } from '../../models/colaborador.model';
-import { BadgeEstadoComponent } from '../../../../shared/componentes/badge-estado/badge-estado.component';
+import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
 import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
 
 @Component({

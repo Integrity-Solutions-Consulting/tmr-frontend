@@ -5,11 +5,13 @@ import { AuthResponse, User, ForgotPasswordResponse } from '../modelos/auth.mode
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = '/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 

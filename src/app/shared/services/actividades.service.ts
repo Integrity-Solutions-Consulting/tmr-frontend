@@ -1,4 +1,6 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Actividad } from '../models/actividad.model';
 
 const HOY = new Date();
@@ -7,54 +9,34 @@ const ANIO = HOY.getFullYear();
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
-  private _actividades = signal<Actividad[]>([
-    {
-      id: '1',
-      tipoActividad: 'Desarrollo',
-      proyectoId: 'p1',
-      proyectoNombre: 'Proyecto bolsa de empleo',
-      codigoRequerimiento: 'ISC_FS_BOLSA_EMPLEO',
-      descripcion: 'Desarrollo de componentes UI',
-      fechaActividad: new Date(ANIO, MES, 6),
-      numeroHoras: 2.5,
-      esRecurrente: false
-    },
-    {
-      id: '2',
-      tipoActividad: 'Reunión',
-      proyectoId: 'p2',
-      proyectoNombre: 'Middleware Fábrica de software',
-      codigoRequerimiento: 'MID_FAB_001',
-      descripcion: 'Reunión de planning sprint',
-      fechaActividad: new Date(ANIO, MES, 12),
-      numeroHoras: 1.5,
-      esRecurrente: false
-    },
-    {
-      id: '3',
-      tipoActividad: 'Desarrollo',
-      proyectoId: 'p3',
-      proyectoNombre: 'Accesos Fábrica de software',
-      codigoRequerimiento: 'ACC_FAB_002',
-      descripcion: 'Implementación módulo accesos',
-      fechaActividad: new Date(ANIO, MES, 19),
-      numeroHoras: 8,
-      esRecurrente: false
-    },
-    {
-      id: '4',
-      tipoActividad: 'Testing',
-      proyectoId: 'p1',
-      proyectoNombre: 'Proyecto bolsa de empleo',
-      codigoRequerimiento: 'ISC_FS_TEST_01',
-      descripcion: 'Pruebas de integración',
-      fechaActividad: new Date(ANIO, MES, 22),
-      numeroHoras: 4,
-      esRecurrente: false
-    }
-  ]);
+  private http = inject(HttpClient);
+  private _actividades = signal<Actividad[]>([]);
 
   public readonly actividades = this._actividades.asReadonly();
+
+  constructor() {
+    this.cargarActividades();
+  }
+
+  cargarActividades() {
+    this.http.get<any[]>(`${environment.apiUrl}/carga-actividades`).subscribe({
+      next: (data) => {
+        const mapeadas = data.map(dto => ({
+          id: dto.id?.toString() || Math.random().toString(),
+          tipoActividad: 'Desarrollo' as any,
+          proyectoId: dto.idproyecto?.toString() || '',
+          proyectoNombre: 'Proyecto ' + dto.idproyecto,
+          codigoRequerimiento: dto.codigorequerimiento || '',
+          descripcion: dto.descripcionactividad || '',
+          fechaActividad: new Date(dto.fechaactividad),
+          numeroHoras: dto.cantidadhoras || 0,
+          esRecurrente: false
+        }));
+        this._actividades.set(mapeadas);
+      },
+      error: (err) => console.error('Error cargando actividades', err)
+    });
+  }
 
   // === Computed signals ===
   public readonly horasRegistradasHoy = computed(() => {
@@ -98,7 +80,18 @@ export class ActividadesService {
   }
 
   agregarActividad(data: any): void {
-    const nuevas: Actividad[] = [];
+    const url = `${environment.apiUrl}/time-report/actividades`;
+    const payload = {
+        IdEmpleado: 1, // mock user id for now
+        IdProyecto: 1, // backend requires int
+        IdTipoActividad: 1, // backend requires int
+        CodigoRequerimiento: data.codigoRequerimiento || "REQ-001",
+        CantidadHoras: data.horasPorDia || data.numeroHoras || 0,
+        FechaActividad: data.fechaActividad ? new Date(data.fechaActividad).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        DescripcionActividad: data.descripcion || "Sin descripcion",
+        Notas: "",
+        EsBillable: true
+    };
 
     if (data.esRecurrente && data.fechaInicio && data.fechaFin) {
       const inicio = new Date(data.fechaInicio);
@@ -107,35 +100,20 @@ export class ActividadesService {
       while (cur <= fin) {
         const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
         if (!esFDS || data.incluirFinesDeSemana) {
-          nuevas.push({
-            id: Math.random().toString(36).substr(2, 9),
-            tipoActividad: data.tipoActividad,
-            proyectoId: data.proyectoId,
-            proyectoNombre: this.nombreProyecto(data.proyectoId),
-            codigoRequerimiento: data.codigoRequerimiento,
-            descripcion: data.descripcion,
-            fechaActividad: new Date(cur),
-            numeroHoras: data.horasPorDia || data.numeroHoras,
-            esRecurrente: true
+          const recPayload = { ...payload, FechaActividad: new Date(cur).toISOString().split('T')[0] };
+          this.http.post(url, recPayload).subscribe({
+            next: () => this.cargarActividades(),
+            error: (err) => console.error('Error creating recurrente', err)
           });
         }
         cur.setDate(cur.getDate() + 1);
       }
     } else {
-      nuevas.push({
-        id: Math.random().toString(36).substr(2, 9),
-        tipoActividad: data.tipoActividad,
-        proyectoId: data.proyectoId,
-        proyectoNombre: this.nombreProyecto(data.proyectoId),
-        codigoRequerimiento: data.codigoRequerimiento,
-        descripcion: data.descripcion,
-        fechaActividad: new Date(data.fechaActividad),
-        numeroHoras: data.numeroHoras,
-        esRecurrente: false
+      this.http.post(url, payload).subscribe({
+        next: () => this.cargarActividades(),
+        error: (err) => console.error('Error creating activity', err)
       });
     }
-
-    this._actividades.update(prev => [...prev, ...nuevas]);
   }
 
   private nombreProyecto(id: string): string {
