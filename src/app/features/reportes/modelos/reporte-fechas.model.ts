@@ -9,8 +9,8 @@ export interface ReporteFechas {
 }
 
 export interface FiltrosReporteFechas {
-  cliente: string;
-  lider: string;
-  fechaInicio: string;
-  fechaFin: string;
+  cliente?: string;
+  lider?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
 }

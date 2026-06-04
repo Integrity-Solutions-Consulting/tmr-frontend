@@ -6,6 +6,8 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { routes } from './app.routes';
+import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
+import { TokenInterceptor } from './core/interceptors/token.interceptor';
 
 // Reducers
 import { authReducer } from './features/auth/store/auth.reducer';
@@ -21,8 +23,6 @@ import { ActividadesEffects } from './core/state/actividades/actividades.effects
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
 import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
-import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -31,6 +31,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
       multi: true,
     },
     provideStore({

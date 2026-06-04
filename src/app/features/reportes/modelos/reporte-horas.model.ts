@@ -9,7 +9,7 @@ export interface ReporteHoras {
 }
 
 export interface FiltrosReporteHoras {
-  cliente: string;
-  mes: string;
-  anio: string;
+  cliente?: string;
+  mes?: string;
+  anio?: string;
 }

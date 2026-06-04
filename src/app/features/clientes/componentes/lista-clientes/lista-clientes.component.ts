@@ -226,11 +226,13 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   verDetalle(cliente: Cliente): void {
     this.cerrarMenu();
     this.store.dispatch(ClientesActions.abrirModalDetalle({ cliente }));
+    this.store.dispatch(ClientesActions.cargarClientePorId({ id: cliente.id }));
   }
 
   abrirEditar(cliente: Cliente): void {
     this.cerrarMenu();
     this.store.dispatch(ClientesActions.abrirModalEditar({ cliente }));
+    this.store.dispatch(ClientesActions.cargarClientePorId({ id: cliente.id }));
   }
 
   abrirCrear(): void {

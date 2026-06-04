@@ -1,4 +1,3 @@
-// lideres.component.ts
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -9,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { ModalLider } from './modal-lider/modal-lider';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
@@ -44,23 +44,13 @@ export interface Lider {
 })
 export class LideresComponent implements OnInit {
 
-  // ── Data ───────────────────────────────────────────────
-  lideres: Lider[] = [
-    { codigo: '001', tipo: 'Externo', nombre: 'Valeria Antonella Pazmiño Terán', cliente: 'Banco Guayaquil', correo: 'valeria.pazmino@bancoguayaquil.fin.ec', telefono: '0986473829', estado: 'Activo' },
-    { codigo: '002', tipo: 'Interno', nombre: 'Ricardo Molina', cliente: 'Banco Pichincha', correo: 'ricardo.molina@gmail.com.ec', telefono: '0992783645', estado: 'Inactivo' },
-    { codigo: '003', tipo: 'Externo', nombre: 'Samantha Salcedo', cliente: 'Banco Bolivariano', correo: 'samantha.salcedo@hotmail.com.ec', telefono: '0989374652', estado: 'Activo' },
-    { codigo: '004', tipo: 'Interno', nombre: 'Daniel Erazo', cliente: 'Produbanco', correo: 'daniel.erazo@pichincha.com.ec', telefono: '0997456321', estado: 'Activo' },
-    { codigo: '005', tipo: 'Externo', nombre: 'Fernanda Benavides', cliente: 'Banco del Austro', correo: 'fernanda.ocana@lojanos.com.ec', telefono: '0982345678', estado: 'Inactivo' },
-    { codigo: '006', tipo: 'Interno', nombre: 'Carlos Iturralde', cliente: 'Banco Internacional', correo: 'carlos.iturralde@quito.gob.ec', telefono: '0995678901', estado: 'Activo' },
-    { codigo: '007', tipo: 'Externo', nombre: 'María Guzmán', cliente: 'Banco Solidario', correo: 'maria.guzman@cuenca.edu.ec', telefono: '0987654321', estado: 'Activo' },
-    { codigo: '008', tipo: 'Interno', nombre: 'Luis Yánez', cliente: 'Banco ProCredit', correo: 'luis.yanez@espol.edu.ec', telefono: '0999887766', estado: 'Inactivo' },
-    { codigo: '009', tipo: 'Interno', nombre: 'Luis Yánez', cliente: 'Citibank Ecuador', correo: 'luis.yanez@espol.edu.ec', telefono: '0999887766', estado: 'Activo' },
-    { codigo: '010', tipo: 'Externo', nombre: 'Ana Torres', cliente: 'BanEcuador', correo: 'ana.torres@banecuador.fin.ec', telefono: '0978564321', estado: 'Activo' },
-    { codigo: '011', tipo: 'Interno', nombre: 'Jorge Peña', cliente: 'Banco del Pacífico', correo: 'jorge.pena@pacifico.fin.ec', telefono: '0988776655', estado: 'Inactivo' },
-  ];
-
+  // ── Data Real ───────────────────────────────────────────
+  lideres: Lider[] = []; 
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
+
+  // Url base de tu backend Luis
+  private apiUrl = 'http://localhost:5071/api/lideres'; 
 
   // ── Filtros ────────────────────────────────────────────
   busqueda = '';
@@ -87,7 +77,7 @@ export class LideresComponent implements OnInit {
   // ── Estado Dropdown ────────────────────────────────────
   mostrarEstadoDropdown = false;
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private http: HttpClient) { }
 
   ngOnInit(): void {
     this.liderForm = this.fb.group({
@@ -99,10 +89,40 @@ export class LideresComponent implements OnInit {
       telefono: [''],
       estado: ['Activo', Validators.required],
     });
-    this.aplicarFiltros();
+    
+    this.obtenerLideresDelBackend();
   }
 
-  // ── Contadores cards ───────────────────────────────────
+  // Helper para sacar el token guardado
+  private obtenerHeaders() {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  // ── Consumir API Real ──────────────────────────────────
+  obtenerLideresDelBackend(): void {
+    this.http.get<any[]>(this.apiUrl, { headers: this.obtenerHeaders() }).subscribe({
+      next: (data) => {
+        this.lideres = data.map((l, i) => ({
+          ...l,
+          codigo: String(i + 1).padStart(3, '0'),
+          nombre: `${l.nombres} ${l.apellidos}`,
+          tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
+          correo: l.email,
+          cliente: '',
+          estado: l.activo ? 'Activo' : 'Inactivo'
+        }));
+        this.aplicarFiltros();
+      },
+      error: (err) => {
+        console.error('❌ Error al traer líderes:', err);
+      }
+    });
+  }
+
+  // ── Contadores cards dinámicos (Con la data real) ───────
   get totalInternos(): number {
     return this.lideres.filter(l => l.tipo === 'Interno').length;
   }
@@ -128,9 +148,15 @@ export class LideresComponent implements OnInit {
     return Math.min(this.paginaActual * this.porPagina, this.lideresFiltrados.length);
   }
 
-  // ── Filtros ────────────────────────────────────────────
+  // ── Filtros corregidos ──────────────────────────────────
   filtrarPor(tipo: string): void {
-    this.tipoFiltro = tipo;
+    if (tipo === 'Inactivo') {
+      this.estadoFiltro = 'Inactivo';
+      this.tipoFiltro = '';
+    } else {
+      this.tipoFiltro = tipo;
+      this.estadoFiltro = '';
+    }
     this.aplicarFiltros();
   }
 
@@ -144,12 +170,12 @@ export class LideresComponent implements OnInit {
   }
 
   seleccionarEstado(estado: string): void {
-  this.estadoFiltro = estado;
-  if (estado === '') {
-    this.mostrarEstadoDropdown = false; // solo cierra al limpiar
+    this.estadoFiltro = estado;
+    if (estado === '') {
+      this.mostrarEstadoDropdown = false;
+    }
+    this.aplicarFiltros();
   }
-  this.aplicarFiltros();
-}
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
@@ -159,10 +185,10 @@ export class LideresComponent implements OnInit {
     const texto = this.busqueda.toLowerCase();
     this.lideresFiltrados = this.lideres.filter(l => {
       const matchTexto = !texto ||
-        l.nombre.toLowerCase().includes(texto) ||
-        l.codigo.toLowerCase().includes(texto) ||
-        l.correo.toLowerCase().includes(texto) ||
-        l.cliente.toLowerCase().includes(texto);
+        (l.nombre && l.nombre.toLowerCase().includes(texto)) ||
+        (l.codigo && l.codigo.toLowerCase().includes(texto)) ||
+        (l.correo && l.correo.toLowerCase().includes(texto)) ||
+        (l.cliente && l.cliente.toLowerCase().includes(texto));
       const matchTipo = !this.tipoFiltro || l.tipo === this.tipoFiltro;
       const matchEstado = !this.estadoFiltro || l.estado === this.estadoFiltro;
       return matchTexto && matchTipo && matchEstado;
@@ -213,7 +239,6 @@ export class LideresComponent implements OnInit {
     this.liderForm.reset();
   }
 
-  // ── Modal Ver Detalle ──────────────────────────────────
   verLider(lider: Lider, numero: number): void {
     this.mostrarDescarga = false;
     this.liderSeleccionado = { ...lider, numero };
@@ -225,7 +250,6 @@ export class LideresComponent implements OnInit {
     this.liderSeleccionado = null;
   }
 
-  // ── Modal Editar ───────────────────────────────────────
   editarLider(lider: Lider): void {
     this.mostrarDescarga = false;
     this.modoEdicion = true;
@@ -240,12 +264,13 @@ export class LideresComponent implements OnInit {
       : 'El nuevo líder ha sido<br>agregado exitosamente';
 
     this.mostrarConfirmacion = true;
+    
     setTimeout(() => {
       this.mostrarConfirmacion = false;
+      this.obtenerLideresDelBackend();
     }, 3000);
   }
 
-  // ── Modal Descarga ─────────────────────────────────────
   abrirDescarga(): void {
     this.mostrarDescarga = true;
   }
@@ -290,15 +315,19 @@ export class LideresComponent implements OnInit {
     }));
     const ws = XLSX.utils.json_to_sheet(datos);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Líderes');
-    XLSX.writeFile(wb, 'lideres.xlsx');
+    XLSX.utils.book_append_sheet(wb, ws, 'Líderes'); // ◄ Corregido: XLSX con una sola equis
+    XLSX.writeFile(wb, 'lideres.xlsx');             // ◄ Corregido: XLSX con una sola equis
     this.mostrarDescarga = false;
   }
 
   eliminarLider(lider: Lider): void {
     if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
-      this.lideres = this.lideres.filter(l => l !== lider);
-      this.aplicarFiltros();
+      this.http.delete(`${this.apiUrl}/${lider.codigo}`, { headers: this.obtenerHeaders() }).subscribe({
+        next: () => {
+          this.obtenerLideresDelBackend();
+        },
+        error: (err) => console.error('Error al eliminar líder:', err)
+      });
     }
   }
 }

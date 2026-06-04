@@ -1,8 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';
 import { HeaderComponent } from '../../../../shared/componentes/header/header.component';
+import { ReportesService } from '../../servicios/reportes.service';
 
 import { TablaComponent } from '../../../../shared/componentes/tabla-colega/tabla.component';
 import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/tabla.types';
@@ -24,13 +25,11 @@ export class ReporteHorasComponent {
   ];
 
   Math = Math;
-  meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  anios = ['2023', '2024', '2025', '2026'];
-
-  private mesIndices: Record<string, number> = {
-    'Enero': 0, 'Febrero': 1, 'Marzo': 2, 'Abril': 3, 'Mayo': 4, 'Junio': 5,
-    'Julio': 6, 'Agosto': 7, 'Septiembre': 8, 'Octubre': 9, 'Noviembre': 10, 'Diciembre': 11
-  };
+  meses = Array.from({ length: 12 }, (_, i) => {
+    const nombre = new Intl.DateTimeFormat('es', { month: 'long' }).format(new Date(2000, i, 1));
+    return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+  });
+  anios: string[] = [];
 
   busquedaCliente = signal('');
   mesSeleccionado = signal('');
@@ -39,52 +38,69 @@ export class ReporteHorasComponent {
 
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
+  totalItems = signal(0);
 
-  datos = signal<ReporteHoras[]>([
-    { id: '1', cliente: 'BANCO DEL PACIFICO', recursos: 14, horas: 2240, mes: 'Mayo', anio: '2026' },
-    { id: '2', cliente: 'BANCO AMAZONAS', recursos: 2, horas: 160, mes: 'Mayo', anio: '2026' },
-    { id: '3', cliente: 'BANCO COOPNACIONAL', recursos: 1, horas: 80, mes: 'Mayo', anio: '2026' },
-    { id: '4', cliente: 'BANCO GUAYAQUIL', recursos: 5, horas: 400, mes: 'Abril', anio: '2026' },
-    { id: '5', cliente: 'BANCO DE MACHALA', recursos: 3, horas: 240, mes: 'Abril', anio: '2026' },
-    { id: '6', cliente: 'PRODUBANCO', recursos: 10, horas: 1600, mes: 'Diciembre', anio: '2025' },
-    { id: '7', cliente: 'BANCO BOLIVARIANO', recursos: 8, horas: 1280, mes: 'Enero', anio: '2026' },
-    { id: '8', cliente: 'BANCO PICHINCHA', recursos: 12, horas: 1920, mes: 'Marzo', anio: '2025' },
-    { id: '9', cliente: 'BANCO INTERNACIONAL', recursos: 4, horas: 640, mes: 'Junio', anio: '2026' },
-    { id: '10', cliente: 'DINERS CLUB', recursos: 6, horas: 960, mes: 'Agosto', anio: '2025' },
-    { id: '11', cliente: 'BANCO DEL PACIFICO', recursos: 15, horas: 2400, mes: 'Octubre', anio: '2025' },
-    { id: '12', cliente: 'BANCO GUAYAQUIL', recursos: 7, horas: 1120, mes: 'Noviembre', anio: '2024' },
-    { id: '13', cliente: 'BANCO BOLIVARIANO', recursos: 3, horas: 480, mes: 'Febrero', anio: '2026' },
-    { id: '14', cliente: 'PRODUBANCO', recursos: 9, horas: 1440, mes: 'Septiembre', anio: '2025' },
-    { id: '15', cliente: 'BANCO PICHINCHA', recursos: 11, horas: 1760, mes: 'Julio', anio: '2026' }
-  ]);
+  private reportesService = inject(ReportesService);
+  datos = signal<ReporteHoras[]>([]);
+
+  constructor() {
+    effect(() => {
+      const cliente = this.busquedaCliente();
+      const mes = this.mesSeleccionado();
+      const anio = this.anioSeleccionado();
+      const page = this.paginaActual();
+      const pageSize = this.itemsPorPagina();
+      const mostrar = this.mostrarDatos();
+
+      if (!mostrar) {
+        this.datos.set([]);
+        this.totalItems.set(0);
+        return;
+      }
+
+      const filtros = {
+        cliente: cliente || undefined,
+        mes: mes || undefined,
+        anio: anio || undefined
+      };
+
+      this.reportesService.getReporteHoras(filtros, page, pageSize).subscribe({
+        next: (res) => {
+          this.datos.set(res.data || []);
+          this.totalItems.set(res.total || 0);
+
+          if (res.anioMinimo && res.anioMaximo) {
+            const min = res.anioMinimo;
+            const max = res.anioMaximo;
+            const nuevosAnios = Array.from({ length: max - min + 1 }, (_, i) => (min + i).toString());
+            if (this.anios.join(',') !== nuevosAnios.join(',')) {
+              this.anios = nuevosAnios;
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar reporte de horas:', err);
+        }
+      });
+    });
+  }
 
   mostrarDatos = computed(() => {
     const hayFiltros = this.busquedaCliente() !== '' || this.mesSeleccionado() !== '' || this.anioSeleccionado() !== '';
     return hayFiltros || this.forzarMostrar();
   });
 
-  datosFiltrados = computed(() => {
-    if (!this.mostrarDatos()) return [];
-    const search = this.busquedaCliente().toLowerCase();
-    const mes = this.mesSeleccionado();
-    const anio = this.anioSeleccionado();
-    return this.datos().filter(d => {
-      const matchCliente = !search || d.cliente.toLowerCase().includes(search);
-      const matchMes = !mes || mes === 'ALL' || d.mes === mes;
-      const matchAnio = !anio || anio === 'ALL' || d.anio === anio;
-      return matchCliente && matchMes && matchAnio;
-    }).sort((a, b) => Number(a.anio) - Number(b.anio) || this.mesIndices[a.mes] - this.mesIndices[b.mes]);
-  });
+  datosFiltrados = computed(() => this.datos());
 
-  totalPaginas = computed(() => Math.ceil(this.datosFiltrados().length / this.itemsPorPagina()));
-  datosPaginados = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.itemsPorPagina();
-    return this.datosFiltrados().slice(inicio, inicio + this.itemsPorPagina());
-  });
+  totalPaginas = computed(() => Math.ceil(this.totalItems() / this.itemsPorPagina()) || 1);
+  datosPaginados = computed(() => this.datos());
 
-  totalHoras = computed(() => this.datosFiltrados().reduce((acc, curr) => acc + curr.horas, 0));
-  totalRecursos = computed(() => this.datosFiltrados().reduce((acc, curr) => acc + curr.recursos, 0));
-  clientesUnicos = computed(() => new Set(this.datosFiltrados().map(d => d.cliente)).size);
+  // Note: These metrics are currently based on the current paginated page, 
+  // but typically Server-Side filtering should return global totals from the backend. 
+  // For now, we will leave them computed over this.datos().
+  totalHoras = computed(() => this.datos().reduce((acc, curr) => acc + curr.horas, 0));
+  totalRecursos = computed(() => this.datos().reduce((acc, curr) => acc + curr.recursos, 0));
+  clientesUnicos = computed(() => new Set(this.datos().map(d => d.cliente)).size);
 
   onInputSanitized(campo: string, event: Event) {
     const input = event.target as HTMLInputElement;
@@ -142,17 +158,105 @@ export class ReporteHorasComponent {
     this.paginaActual.update(p => p + delta);
   }
 
-  exportarExcel() {
+  async exportarExcel() {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
-    const headers = ['Cliente', 'Mes', 'Año', 'Recursos', 'Horas'];
-    const rows = data.map(item => [item.cliente, item.mes, item.anio, item.recursos, item.horas]);
-    const csvContent = [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    const { Workbook } = await import('exceljs');
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de Horas');
+
+    // 1. Columnas y anchos recomendados
+    worksheet.columns = [
+      { header: 'Cliente', key: 'cliente', width: 30 },
+      { header: 'Mes', key: 'mes', width: 15 },
+      { header: 'Año', key: 'anio', width: 15 },
+      { header: 'Recursos', key: 'recursos', width: 15 },
+      { header: 'Horas', key: 'horas', width: 15 }
+    ];
+
+    // 2. Agregar datos
+    data.forEach(item => {
+      worksheet.addRow({
+        cliente: item.cliente,
+        mes: item.mes,
+        anio: item.anio,
+        recursos: item.recursos,
+        horas: Number(item.horas)
+      });
+    });
+
+    // 3. Aplicar estilos a la cabecera
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 25;
+    headerRow.eachCell(cell => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF163572' } // Color de marca principal #163572
+      };
+      cell.font = {
+        name: 'Segoe UI',
+        size: 11,
+        bold: true,
+        color: { argb: 'FFFFFFFF' }
+      };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+      };
+    });
+
+    // 4. Aplicar estilos a las celdas de datos
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Omitir cabecera
+
+      row.height = 20;
+
+      // Cebra (alternar fondo gris y blanco)
+      const fillType = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
+
+      row.eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: fillType }
+        };
+        cell.font = {
+          name: 'Segoe UI',
+          size: 10,
+          color: { argb: 'FF334155' } // Gris oscuro #334155
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+        
+        // Centrar las columnas numéricas y de fechas, texto alineado a la izquierda
+        if (cell.address.startsWith('B') || cell.address.startsWith('C') || cell.address.startsWith('D') || cell.address.startsWith('E')) {
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+          };
+        } else {
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: 'left'
+          };
+        }
+      });
+    });
+
+    // 5. Descargar archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Reporte_Horas_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.href = url;
+    link.download = `Reporte_Horas_${new Date().toISOString().slice(0, 10)}.xlsx`;
     link.click();
+    URL.revokeObjectURL(url);
   }
 }
