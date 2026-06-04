@@ -9,34 +9,98 @@
   <div class="stats-grid">
     <article>
       <span>Roles activos</span>
+      <strong>{{ rolesActivos() }}</strong>
+    </article>
+    <article>
+      <span>Módulos cubiertos</span>
+      <strong>{{ modulosCubiertos() }}</strong>
+    </article>
+    <article>
+      <span>Total roles</span>
       <strong>{{ roles().length }}</strong>
-    </article>
-    <article>
-      <span>Modulos cubiertos</span>
-      <strong>14</strong>
-    </article>
-    <article>
-      <span>Acceso critico</span>
-      <strong>1</strong>
     </article>
   </div>
 
   <div class="panel">
     <div class="toolbar">
       <app-search-input
-        placeholder="Buscar por nombre de rol, descripcion o modulo..."
+        placeholder="Buscar por nombre de rol, descripción o módulo..."
         [value]="query()"
         (valueChange)="query.set($event)"
       />
     </div>
 
-    <app-tabla
-      [columns]="columns"
-      [rows]="$any(filteredRoles())"
-      emptyMessage="No se encontraron roles."
-      (view)="viewRol($any($event))"
-      (edit)="openModal($any($event))"
-      (delete)="deleteRol($any($event))"
-    />
+    <div class="roles-table-wrap">
+      <table class="roles-table">
+        <thead>
+          <tr>
+            <th>Rol</th>
+            <th>Descripción</th>
+            <th>Módulos accesibles</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredRoles().length === 0) {
+            <tr>
+              <td colspan="5" class="empty-state">No se encontraron roles.</td>
+            </tr>
+          }
+
+          @for (rol of filteredRoles(); track rol.id) {
+            <tr>
+              <td>
+                <strong class="role-name">{{ rol.nombre }}</strong>
+              </td>
+              <td>{{ rol.descripcion }}</td>
+              <td>
+                <div class="module-list">
+                  @for (modulo of rol.modulos; track modulo) {
+                    <span class="module-chip">{{ modulo }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" [class.status-pill--inactive]="!rol.activo">
+                  {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="menu-trigger"
+                  aria-label="Acciones"
+                  [matMenuTriggerFor]="accionesMenu"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #accionesMenu="matMenu" xPosition="before" yPosition="below">
+                  <button mat-menu-item type="button" (click)="viewRol(rol)">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Ver</span>
+                  </button>
+                  <button mat-menu-item type="button" (click)="editRol(rol)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [class.menu-item--danger]="rol.activo"
+                    (click)="toggleEstado(rol)"
+                  >
+                    <mat-icon>{{ rol.activo ? 'block' : 'check_circle' }}</mat-icon>
+                    <span>{{ rol.activo ? 'Inactivar' : 'Activar' }}</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>

@@ -1,11 +1,12 @@
 export type EstadoUsuario = 'Activo' | 'Inactivo' | 'Suspendido';
-export type TipoFeriado = 'Nacional' | 'Local' | 'Religioso' | 'Institucional';
+export type TipoFeriado = 'Nacional' | 'Local' | 'Institucional';
 
 export interface Rol {
   id: number;
   nombre: string;
   descripcion: string;
   modulos: string[];
+  activo: boolean;
 }
 
 export interface UsuarioPayload {
@@ -46,6 +47,9 @@ export interface Feriado {
   nombre: string;
   tipo: TipoFeriado;
   fecha: string;
+  descripcion?: string;
+  recurrente: boolean;
+  activo: boolean;
 }
 
 export interface TableColumn<T> {

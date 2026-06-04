@@ -1,73 +1,420 @@
-.modal-form {
-  width: 100%;
-  min-height: 0;
+/* ── Contenedor principal ──────────────────────────────────────── */
+.feriado-modal {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
+  width: min(95vw, 540px);
+  max-height: 90vh;
   overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.modal-body {
-  min-height: 0;
-  display: grid;
-  flex: 1 1 auto;
+/* ── Header ───────────────────────────────────────────────────── */
+.feriado-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
+  padding: 22px 26px 14px;
+  border-bottom: 1px solid #e8edf5;
+  flex-shrink: 0;
+}
+
+.feriado-modal__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.feriado-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  width: fit-content;
+
+  &--new  { background: #dbeafe; color: #1d4ed8; }
+  &--edit { background: #fef3c7; color: #92400e; }
+  &--view { background: #f1f5f9; color: #475569; }
+}
+
+.feriado-modal__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #163572;
+  line-height: 1.2;
+}
+
+.feriado-modal__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.feriado-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &:hover { background: #f1f5f9; color: #334155; }
+}
+
+/* ── Body ─────────────────────────────────────────────────────── */
+.feriado-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 26px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { border-radius: 999px; background: #bdc9d9; }
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 7px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: #bdc9d9;
-}
-
-mat-form-field {
-  width: 100%;
-  min-width: 0;
-}
-
-.two-columns {
-  width: 100%;
-  min-width: 0;
+/* ── Row ──────────────────────────────────────────────────────── */
+.feriado-modal__row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+
+  &--checks {
+    align-items: end;
+  }
 }
 
-.modal-actions {
+/* ── Field ────────────────────────────────────────────────────── */
+.feriado-modal__field {
   display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.feriado-modal__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+
+  .req { color: #dc2626; margin-left: 2px; }
+}
+
+.feriado-modal__optional {
+  font-weight: 500;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+/* ── Input wrap ───────────────────────────────────────────────── */
+.feriado-modal__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid #d6e0ec;
+  border-radius: 10px;
+  padding: 0 14px;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: #0c3b73;
+    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+  }
+
+  &--error {
+    border-color: #dc2626;
+    &:focus-within { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08); }
+  }
+
+  &--textarea {
+    align-items: flex-start;
+    padding: 10px 14px;
+  }
+}
+
+.feriado-modal__input-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.feriado-modal__input {
+  flex: 1;
+  min-height: 42px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: #1e293b;
+  font-family: inherit;
+  width: 100%;
+
+  &::placeholder { color: #b0bec5; }
+  &[readonly] { cursor: default; color: #475569; }
+
+  &--date {
+    color-scheme: light;
+    &::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+  }
+}
+
+.feriado-modal__textarea {
+  min-height: 56px;
+  resize: vertical;
+  padding: 4px 0;
+  line-height: 1.5;
+}
+
+.feriado-modal__error {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #dc2626;
+
+  &--group {
+    margin: 0;
+    padding: 8px 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+  }
+}
+
+/* ── Select ───────────────────────────────────────────────────── */
+.feriado-modal__select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.feriado-modal__select-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  color: #94a3b8;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.feriado-modal__select {
+  width: 100%;
+  min-height: 44px;
+  border: 1.5px solid #d6e0ec;
+  border-radius: 10px;
+  padding: 0 14px 0 38px;
+  color: #1e293b;
+  background: #ffffff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: #0c3b73;
+    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+  }
+}
+
+.feriado-modal__select-wrap--sm .feriado-modal__select {
+  padding-left: 14px;
+}
+
+/* ── View values ──────────────────────────────────────────────── */
+.feriado-modal__view-value {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.feriado-modal__view-text {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.feriado-modal__view-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+  min-height: 42px;
+}
+
+/* ── Tipo badges ──────────────────────────────────────────────── */
+.tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &--nacional    { background: #dbeafe; color: #1d4ed8; }
+  &--local       { background: #d1fae5; color: #065f46; }
+  &--institucional { background: #ede9fe; color: #5b21b6; }
+}
+
+/* ── Status pill ──────────────────────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+
+  &--inactive {
+    color: #991b1b;
+    background: #fee2e2;
+    border-color: #fecaca;
+  }
+}
+
+/* ── Toggle switch ────────────────────────────────────────────── */
+.feriado-modal__check-field {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  margin-bottom: 5px;
+}
+
+.feriado-modal__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.feriado-modal__toggle-input {
+  display: none;
+
+  &:checked + .feriado-modal__toggle-track {
+    background: #0c3b73;
+  }
+
+  &:checked + .feriado-modal__toggle-track .feriado-modal__toggle-thumb {
+    transform: translateX(18px);
+  }
+}
+
+.feriado-modal__toggle-track {
+  width: 38px;
+  height: 20px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  position: relative;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.feriado-modal__toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.feriado-modal__toggle-label {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 600;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.feriado-modal__footer {
+  display: flex;
   justify-content: flex-end;
   gap: 10px;
-  min-width: 0;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(203, 213, 225, 0.9);
-  background: transparent;
+  padding: 14px 26px 20px;
+  border-top: 1px solid #e8edf5;
+  flex-shrink: 0;
 }
 
-.modal-actions button {
-  max-width: 100%;
+.feriado-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+
+  &--cancel {
+    border: 1.5px solid #d6e0ec;
+    background: #ffffff;
+    color: #475569;
+    &:hover { background: #f8fafc; }
+  }
+
+  &--save {
+    background: #0c3b73;
+    color: #ffffff;
+    &:hover { background: #0a3267; box-shadow: 0 4px 14px rgba(12, 59, 115, 0.22); }
+    &:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+  }
 }
 
-@media (max-width: 620px) {
-  .two-columns {
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .feriado-modal__header,
+  .feriado-modal__body,
+  .feriado-modal__footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .feriado-modal__row {
     grid-template-columns: 1fr;
   }
 
-  .modal-actions {
+  .feriado-modal__footer {
     flex-direction: column-reverse;
   }
 
-  .modal-actions button {
+  .feriado-modal__btn {
     width: 100%;
+    justify-content: center;
   }
 }

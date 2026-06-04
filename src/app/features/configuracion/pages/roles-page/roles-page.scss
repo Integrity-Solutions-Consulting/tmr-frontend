@@ -103,6 +103,126 @@ p {
   margin-bottom: 12px;
 }
 
+.roles-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.roles-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    color: #64748b;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  td {
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.role-name {
+  color: var(--tmr-ink);
+  font-weight: 800;
+}
+
+.module-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.module-chip,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.module-chip {
+  padding: 6px 9px;
+  color: #0c3b73;
+  background: #eef6ff;
+  border: 1px solid #d8e8fb;
+}
+
+.status-pill {
+  padding: 7px 10px;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.status-pill--inactive {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.actions-cell {
+  width: 56px;
+  text-align: center;
+}
+
+.menu-trigger {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 150ms ease;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: #f0f7ff;
+    border-color: #b9d2f2;
+    color: #0c3b73;
+  }
+}
+
+::ng-deep .menu-item--danger {
+  color: #991b1b !important;
+}
+
+.empty-state {
+  padding: 24px !important;
+  color: var(--tmr-muted);
+  text-align: center !important;
+}
 
 @media (max-width: 760px) {
   .hero {
@@ -122,6 +242,10 @@ p {
   .toolbar,
   .toolbar app-search-input {
     width: 100%;
+  }
+
+  .roles-table {
+    min-width: 820px;
   }
 }
 

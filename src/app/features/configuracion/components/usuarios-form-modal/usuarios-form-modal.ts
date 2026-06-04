@@ -63,7 +63,11 @@ export class UsuariosFormModal {
     { id: '5', nombre: 'Ecuador' },
   ];
 
-  readonly rolesList = LOCAL_ROLES;
+  readonly rolesList = this.data.roles?.length
+    ? this.data.roles
+        .filter((rol) => rol.activo)
+        .map((rol) => ({ id: rol.id, nombre: rol.nombre }))
+    : LOCAL_ROLES;
 
   readonly form = this.fb.nonNullable.group({
     tipoPersona: [this.data.usuario?.tipoPersona ?? 'NATURAL', Validators.required],

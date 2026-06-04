@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { FERIADOS_MOCK, ROLES_MOCK, USUARIOS_MOCK } from '../mocks/configuracion.mock';
+import { FERIADOS_MOCK, ROLES_MOCK } from '../mocks/configuracion.mock';
 import { Feriado, Rol, Usuario, EstadoUsuario } from '../models/configuracion.models';
 
 @Injectable({ providedIn: 'root' })
@@ -12,13 +12,23 @@ export class ConfiguracionService {
   readonly usuarios = this.usuariosState.asReadonly();
   readonly feriados = this.feriadosState.asReadonly();
 
+  // ── Roles ─────────────────────────────────────────────────────────────────
+
   upsertRol(rol: Rol): void {
     this.rolesState.update((roles) => this.upsert(roles, rol));
+  }
+
+  setRolEstado(id: number, activo: boolean): void {
+    this.rolesState.update((roles) =>
+      roles.map((rol) => (rol.id === id ? { ...rol, activo } : rol))
+    );
   }
 
   deleteRol(id: number): void {
     this.rolesState.update((roles) => roles.filter((rol) => rol.id !== id));
   }
+
+  // ── Usuarios ───────────────────────────────────────────────────────────────
 
   upsertUsuario(usuario: Usuario): void {
     console.log('[DEBUG] upsertUsuario called with:', usuario);
@@ -34,39 +44,39 @@ export class ConfiguracionService {
     this.usuariosState.set(usuarios);
   }
 
-  // Inactivación lógica: no eliminar físicamente los usuarios
-  // TODO: cuando exista backend, reemplazar esta lógica por la llamada al endpoint correspondiente (PATCH/PUT).
-  // Ejemplo: PATCH /api/usuarios/{id} { estado: 'Inactivo' }
+  // TODO: cuando exista backend, reemplazar por PATCH /api/usuarios/{id} { estado }
   setUsuarioEstado(id: number, estado: EstadoUsuario): void {
     this.usuariosState.update((usuarios) =>
       usuarios.map((u) => (u.id === id ? { ...u, estado } : u))
     );
   }
 
-  // Mantener una API compatible: deleteUsuario ahora inactiva el usuario
   deleteUsuario(id: number): void {
     this.setUsuarioEstado(id, 'Inactivo');
   }
 
-  // Obtener usuario por id (útil para abrir detalle/editar)
   getUsuarioById(id: number): Usuario | undefined {
     return this.usuariosState().find((u) => u.id === id);
   }
 
-  // TODO: puntos de extensión para conectar con backend en el futuro:
-  // - getUsuarios(filtros): GET /api/usuarios
-  // - getUsuarioById(id): GET /api/usuarios/{id}
-  // - crearUsuario(dto): POST /api/usuarios
-  // - editarUsuario(id, dto): PUT /api/usuarios/{id}
-  // - cambiarEstado(id, estado): PATCH /api/usuarios/{id}/estado
+  // ── Feriados ───────────────────────────────────────────────────────────────
+  // TODO: conectar con backend: POST/PUT /api/feriados, PATCH /api/feriados/{id}/estado
 
   upsertFeriado(feriado: Feriado): void {
     this.feriadosState.update((feriados) => this.upsert(feriados, feriado));
   }
 
+  setFeriadoEstado(id: number, activo: boolean): void {
+    this.feriadosState.update((feriados) =>
+      feriados.map((f) => (f.id === id ? { ...f, activo } : f))
+    );
+  }
+
   deleteFeriado(id: number): void {
     this.feriadosState.update((feriados) => feriados.filter((feriado) => feriado.id !== id));
   }
+
+  // ── Shared ─────────────────────────────────────────────────────────────────
 
   nextId(items: { id: number }[]): number {
     return Math.max(0, ...items.map((item) => item.id)) + 1;

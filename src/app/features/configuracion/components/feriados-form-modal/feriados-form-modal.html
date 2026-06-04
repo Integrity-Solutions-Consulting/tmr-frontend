@@ -1,60 +1,195 @@
-<app-modal-base
-  [title]="isEdit ? 'Editar Feriado' : 'Agregar Nuevo Feriado'"
-  subtitle="Configura tipo, nombre y fecha del calendario laboral."
->
-  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
-    <div class="modal-body">
-      <div class="two-columns">
-        <mat-form-field appearance="outline" hideRequiredMarker="true">
-          <mat-label>Tipo de Feriado</mat-label>
-          <mat-icon matPrefix>category</mat-icon>
-          <mat-select formControlName="tipo">
-            @for (tipo of tipos; track tipo) {
-              <mat-option [value]="tipo">{{ tipo }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>
-            @if (form.controls.tipo.errors?.['required'] && form.controls.tipo.touched) {
-              Campo requerido
-            }
-          </mat-error>
-        </mat-form-field>
+<form class="feriado-modal" [formGroup]="form" (ngSubmit)="save()">
 
-        <mat-form-field appearance="outline" hideRequiredMarker="true">
-          <mat-label>Nombre del Feriado</mat-label>
-          <mat-icon matPrefix>event</mat-icon>
-          <input matInput formControlName="nombre" placeholder="Ej. Independencia de Guayaquil" />
-          <mat-error>
-            @if (form.controls.nombre.errors?.['required'] && form.controls.nombre.touched) {
-              Campo requerido
+  <!-- Header -->
+  <div class="feriado-modal__header">
+    <div class="feriado-modal__header-text">
+      @if (isView) {
+        <span class="feriado-modal__badge feriado-modal__badge--view">Solo lectura</span>
+      } @else if (isEdit) {
+        <span class="feriado-modal__badge feriado-modal__badge--edit">Editar</span>
+      } @else {
+        <span class="feriado-modal__badge feriado-modal__badge--new">Nuevo</span>
+      }
+      <h2 class="feriado-modal__title">
+        {{ isView ? data.feriado!.nombre : isEdit ? 'Editar Feriado' : 'Agregar Feriado' }}
+      </h2>
+      <p class="feriado-modal__subtitle">
+        {{ isView ? 'Detalle del feriado configurado.' : 'Configura tipo, nombre y fecha del calendario laboral.' }}
+      </p>
+    </div>
+    <button class="feriado-modal__close" type="button" mat-dialog-close aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="feriado-modal__body">
+
+    <!-- Tipo -->
+    <div class="feriado-modal__field">
+      <label class="feriado-modal__label">Tipo de feriado <span class="req">*</span></label>
+      @if (isView) {
+        <div class="feriado-modal__view-value">
+          <span class="tipo-badge tipo-badge--{{ form.controls.tipo.value.toLowerCase() }}">
+            {{ form.controls.tipo.value }}
+          </span>
+        </div>
+      } @else {
+        <div class="feriado-modal__select-wrap">
+          <mat-icon class="feriado-modal__select-icon">category</mat-icon>
+          <select class="feriado-modal__select" formControlName="tipo">
+            @for (tipo of tipos; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
             }
-            @if (form.controls.nombre.errors?.['pattern'] && form.controls.nombre.touched) {
-              Solo letras, espacios y tildes
-            }
-            @if (form.controls.nombre.errors?.['minlength'] && form.controls.nombre.touched) {
-              Mínimo 3 caracteres
-            }
-          </mat-error>
-        </mat-form-field>
+          </select>
+        </div>
+        @if (form.controls.tipo.invalid && form.controls.tipo.touched) {
+          <span class="feriado-modal__error">Campo requerido</span>
+        }
+      }
+    </div>
+
+    <!-- Nombre y Fecha (2 cols) -->
+    <div class="feriado-modal__row">
+
+      <!-- Nombre -->
+      <div class="feriado-modal__field">
+        <label class="feriado-modal__label">Nombre del feriado <span class="req">*</span></label>
+        <div class="feriado-modal__input-wrap"
+             [class.feriado-modal__input-wrap--error]="form.controls.nombre.invalid && form.controls.nombre.touched">
+          <mat-icon class="feriado-modal__input-icon">event</mat-icon>
+          <input
+            class="feriado-modal__input"
+            formControlName="nombre"
+            placeholder="Ej. Independencia de Guayaquil"
+            [readonly]="isView"
+            autocomplete="off"
+          />
+        </div>
+        @if (!isView && form.controls.nombre.invalid && form.controls.nombre.touched) {
+          <span class="feriado-modal__error">
+            @if (form.controls.nombre.errors?.['required']) { Campo requerido }
+            @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
+          </span>
+        }
       </div>
 
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Fecha del Feriado</mat-label>
-        <mat-icon matPrefix>calendar_today</mat-icon>
-        <input matInput type="date" formControlName="fecha" />
-        <mat-error>
-          @if (form.controls.fecha.errors?.['required'] && form.controls.fecha.touched) {
-            Campo requerido
+      <!-- Fecha -->
+      <div class="feriado-modal__field">
+        <label class="feriado-modal__label">Fecha <span class="req">*</span></label>
+        @if (isView) {
+          <div class="feriado-modal__view-value">
+            <span class="feriado-modal__view-text">
+              {{ formatFecha(form.controls.fecha.value) }}
+            </span>
+          </div>
+        } @else {
+          <div class="feriado-modal__input-wrap"
+               [class.feriado-modal__input-wrap--error]="form.controls.fecha.invalid && form.controls.fecha.touched">
+            <mat-icon class="feriado-modal__input-icon">calendar_today</mat-icon>
+            <input
+              class="feriado-modal__input feriado-modal__input--date"
+              type="date"
+              formControlName="fecha"
+            />
+          </div>
+          @if (form.controls.fecha.invalid && form.controls.fecha.touched) {
+            <span class="feriado-modal__error">Campo requerido</span>
           }
-        </mat-error>
-      </mat-form-field>
+        }
+      </div>
     </div>
 
-    <div class="modal-actions">
-      <button mat-button type="button" (click)="cancel()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit">
+    <!-- Error de duplicado -->
+    @if (!isView && form.errors?.['duplicateFeriado'] && form.touched) {
+      <p class="feriado-modal__error feriado-modal__error--group">
+        Ya existe un feriado con ese nombre en la misma fecha
+      </p>
+    }
+
+    <!-- Descripción -->
+    <div class="feriado-modal__field">
+      <label class="feriado-modal__label">Descripción <span class="feriado-modal__optional">(opcional)</span></label>
+      @if (isView) {
+        <div class="feriado-modal__view-value">
+          <span class="feriado-modal__view-text">{{ form.controls.descripcion.value || '—' }}</span>
+        </div>
+      } @else {
+        <div class="feriado-modal__input-wrap feriado-modal__input-wrap--textarea">
+          <mat-icon class="feriado-modal__input-icon">notes</mat-icon>
+          <textarea
+            class="feriado-modal__input feriado-modal__textarea"
+            formControlName="descripcion"
+            rows="2"
+            placeholder="Describe este feriado (opcional)"
+          ></textarea>
+        </div>
+      }
+    </div>
+
+    <!-- Recurrente y Estado -->
+    <div class="feriado-modal__row feriado-modal__row--checks">
+
+      <!-- Recurrente -->
+      <div class="feriado-modal__check-field">
+        @if (isView) {
+          <div class="feriado-modal__view-row">
+            <mat-icon class="feriado-modal__check-icon">{{ form.controls.recurrente.value ? 'repeat' : 'repeat_one' }}</mat-icon>
+            <span>{{ form.controls.recurrente.value ? 'Feriado recurrente cada año' : 'No es recurrente' }}</span>
+          </div>
+        } @else {
+          <label class="feriado-modal__toggle">
+            <input type="checkbox" formControlName="recurrente" class="feriado-modal__toggle-input" />
+            <span class="feriado-modal__toggle-track">
+              <span class="feriado-modal__toggle-thumb"></span>
+            </span>
+            <span class="feriado-modal__toggle-label">Se repite cada año</span>
+          </label>
+        }
+      </div>
+
+      <!-- Estado -->
+      <div class="feriado-modal__field">
+        <label class="feriado-modal__label">Estado <span class="req">*</span></label>
+        @if (isView) {
+          <div class="feriado-modal__view-value">
+            <span class="status-pill" [class.status-pill--inactive]="!form.controls.activo.value">
+              {{ form.controls.activo.value ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        } @else {
+          <div class="feriado-modal__select-wrap feriado-modal__select-wrap--sm">
+            <select class="feriado-modal__select" formControlName="activo">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+        }
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="feriado-modal__footer">
+    @if (isView) {
+      <button class="feriado-modal__btn feriado-modal__btn--cancel" type="button" mat-dialog-close>
+        Cerrar
+      </button>
+    } @else {
+      <button class="feriado-modal__btn feriado-modal__btn--cancel" type="button" mat-dialog-close>
+        Cancelar
+      </button>
+      <button
+        class="feriado-modal__btn feriado-modal__btn--save"
+        type="submit"
+        [disabled]="form.invalid && form.touched"
+      >
+        <mat-icon>{{ isEdit ? 'save' : 'event_available' }}</mat-icon>
         {{ isEdit ? 'Guardar cambios' : 'Guardar feriado' }}
       </button>
-    </div>
-  </form>
-</app-modal-base>
+    }
+  </div>
+
+</form>
