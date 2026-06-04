@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,9 +25,16 @@ import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
     templateUrl: './actividades.html',
     styleUrls: ['./actividades.scss']
 })
-export class Actividades {
+export class Actividades implements OnInit {
     public actividadesService = inject(ActividadesService);
     private dialog = inject(MatDialog);
+
+    ngOnInit() {
+        this.actividadesService.cargarResumen();
+        // Si tienes el mes y año actual, llama a cargarCalendario también
+        const hoy = new Date();
+        this.actividadesService.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
+    }
 
     /**
      * Abre el modal de agregar actividad sin fecha preseleccionada

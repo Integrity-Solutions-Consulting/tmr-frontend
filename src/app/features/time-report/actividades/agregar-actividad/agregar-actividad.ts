@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, computed } from '@angular/core';
+import { Component, Inject, inject, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -12,7 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
@@ -51,17 +52,25 @@ export class AgregarActividad implements OnInit {
     private http = inject(HttpClient);
 
     public form!: FormGroup;
-    public proyectos: LookupOption[] = [];
-    public tiposActividad: TipoActividad[] = [];
-    public cargando = false;
+
+    // Signals para llenar los dropdowns desde la base de datos
+    public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
+    public proyectos = signal<{ id: string, nombre: string }[]>([]);
+
+    private http = inject(HttpClient);
+
+    // Convertimos los cambios del formulario a un Signal para que el computed reaccione
+    private formValues = inject(FormBuilder).group({}); // temporal para inicializar
+    public formState = toSignal(this.fb.group({}).valueChanges); // Se asignará en ngOnInit
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit() {
-        this.cargarDatos();
+        this.cargarCatalogos();
+
         this.form = this.fb.group({
-            idtipoactividad: ['', Validators.required],
-            idproyecto: ['', Validators.required],
+            tipoActividad: [null, Validators.required],
+            proyectoId: [null, Validators.required],
             codigoRequerimiento: ['', [Validators.required, Validators.maxLength(50)]],
             descripcion: ['', Validators.maxLength(255)],
             fechaActividad: [this.data?.fecha || new Date(), Validators.required],
@@ -77,36 +86,20 @@ export class AgregarActividad implements OnInit {
         });
     }
 
-    private cargarDatos(): void {
-        this.cargando = true;
-        
-        // Cargar proyectos
-        this.proyectosService.obtenerLookups().subscribe({
-            next: (lookups) => {
-                this.proyectos = lookups.clientes || [];
-            },
-            error: (err) => console.error('Error cargando proyectos', err),
-            complete: () => this.cargando = false
-        });
-
-        // Cargar tipos de actividad
-        this.cargarTiposActividad();
-    }
-
-    private cargarTiposActividad(): void {
-        this.http.get<any[]>(`${environment.apiUrl}/time-report/tipos-actividad`)
-            .pipe(
-                map((tipos) => tipos.map((tipo) => ({
-                    id: tipo.id ?? tipo.idtipoactividad,
-                    nombre: tipo.nombre ?? tipo.tipoActividadNombre ?? tipo.nombreActividad ?? tipo.descripcion ?? 'Tipo de actividad',
-                    descripcion: tipo.descripcion
-                })))
-            )
+    // Cargar listas desplegables desde la Base de Datos
+    private cargarCatalogos() {
+        // Tipos de Actividad
+        this.http.get<{ id: string, nombre: string }[]>(`${environment.apiUrl}/time-report/tipos-actividad`)
             .subscribe({
-                next: (tipos) => {
-                    this.tiposActividad = tipos;
-                },
-                error: (err) => console.error('Error cargando tipos de actividad', err)
+                next: (res) => this.tiposActividad.set(res || []),
+                error: (err) => console.error('Falta endpoint de tipos de actividad en .NET', err)
+            });
+
+        // Proyectos
+        this.http.get<{ id: string, nombre: string }[]>(`${environment.apiUrl}/proyectos`)
+            .subscribe({
+                next: (res) => this.proyectos.set(res || []),
+                error: (err) => console.error('Falta endpoint de proyectos en .NET', err)
             });
     }
 

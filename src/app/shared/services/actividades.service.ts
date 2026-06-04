@@ -1,145 +1,85 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Actividad } from '../models/actividad.model';
-
-const HOY = new Date();
-const MES = HOY.getMonth();
-const ANIO = HOY.getFullYear();
+import { AuthService } from '../../features/auth/servicios/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
   private http = inject(HttpClient);
-  private _actividades = signal<Actividad[]>([]);
-  private idEmpleadoActual = 1; // TODO: obtener del auth service
+  private authService = inject(AuthService);
+  private apiUrl = `${environment.apiUrl}/time-report/actividades`;
 
+  private _actividades = signal<Actividad[]>([]);
   public readonly actividades = this._actividades.asReadonly();
 
-  constructor() {
-    this.cargarActividades();
-  }
+  // Signals para métricas
+  private _horasRegistradasHoy = signal<number>(0);
+  public readonly horasRegistradasHoy = this._horasRegistradasHoy.asReadonly();
 
-  cargarActividades() {
-    this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades`).subscribe({
-      next: (data) => {
-        const mapeadas = data.map(dto => ({
-          id: dto.id?.toString() || Math.random().toString(),
-          idempleado: dto.idempleado,
-          idproyecto: dto.idproyecto,
-          idtipoactividad: dto.idtipoactividad,
-          codigorequerimiento: dto.codigorequerimiento || '',
-          cantidadhoras: dto.cantidadhoras || 0,
-          fechaactividad: new Date(dto.fechaactividad),
-          descripcionactividad: dto.descripcionactividad || '',
-          notas: dto.notas,
-          esbillable: dto.esbillable ?? true,
-          activo: dto.activo ?? true,
-          // Propiedades derivadas para visualización
-          nroHoras: dto.cantidadhoras || 0,
-          colaborador: dto.colaborador || 'Empleado',
-          proyecto: dto.proyecto || 'Proyecto',
-          cliente: dto.cliente
-        }));
-        this._actividades.set(mapeadas);
+  private _horasMesActual = signal<number>(0);
+  public readonly horasMesActual = this._horasMesActual.asReadonly();
+
+  private _horasSemanaActual = signal<number>(0);
+  public readonly horasSemanaActual = this._horasSemanaActual.asReadonly();
+
+  private _horasPorRegistrar = signal<number>(0);
+  public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
+
+  cargarResumen(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    this.http.get<any>(`${this.apiUrl}/resumen?idEmpleado=${user.id}`).subscribe({
+      next: (res) => {
+        this._horasPorRegistrar.set(res.horasPorRegistrar);
+        this._horasRegistradasHoy.set(res.horasRegistradas); // Simplificación
+        this._horasSemanaActual.set(res.horasSemana);
+        this._horasMesActual.set(res.horasMes);
       },
-      error: (err) => console.error('Error cargando actividades', err)
+      error: (err) => console.error('Error al cargar resumen', err)
     });
   }
 
-  // === Computed signals ===
-  public readonly horasRegistradasHoy = computed(() => {
-    const hoy = new Date();
-    return this._actividades()
-      .filter(a => this.mismaFecha(a.fechaactividad, hoy) && a.activo)
-      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
-  });
+  cargarCalendario(anio: number, mes: number): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
 
-  public readonly horasMesActual = computed(() => {
-    const hoy = new Date();
-    return this._actividades()
-      .filter(a => {
-        const fecha = a.fechaactividad instanceof Date ? a.fechaactividad : new Date(a.fechaactividad);
-        return fecha.getMonth() === hoy.getMonth() &&
-          fecha.getFullYear() === hoy.getFullYear() &&
-          a.activo;
-      })
-      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
-  });
+    this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${user.id}&anio=${anio}&mes=${mes}`).subscribe({
+      next: (data) => {
+        // Podrías mapear los datos del calendario aquí si es necesario
+      },
+      error: (err) => console.error('Error al cargar calendario', err)
+    });
+  }
 
-  public readonly horasSemanaActual = computed(() => {
-    const hoy = new Date();
-    const inicioSemana = new Date(hoy);
-    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-    inicioSemana.setHours(0, 0, 0, 0);
-    const finSemana = new Date(inicioSemana);
-    finSemana.setDate(inicioSemana.getDate() + 6);
-    finSemana.setHours(23, 59, 59, 999);
-    return this._actividades()
-      .filter(a => {
-        const fecha = a.fechaactividad instanceof Date ? a.fechaactividad : new Date(a.fechaactividad);
-        return fecha >= inicioSemana && fecha <= finSemana && a.activo;
-      })
-      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
-  });
-
-  public readonly horasPorRegistrar = computed(() => {
-    const objetivo = 8;
-    return Math.max(0, objetivo - this.horasRegistradasHoy());
-  });
-
-  // === Methods ===
   getActividadesPorFecha(fecha: Date): Actividad[] {
-    return this._actividades().filter(a => this.mismaFecha(a.fechaactividad, fecha) && a.activo);
+    return this._actividades().filter(a => this.mismaFecha(new Date(a.fechaActividad), fecha));
   }
 
-  agregarActividad(data: any): void {
-    const url = `${environment.apiUrl}/time-report/actividades`;
-    
-    const crearPayload = (fecha: Date | string) => ({
-      idempleado: this.idEmpleadoActual,
-      idproyecto: data.idproyecto || data.proyectoId,
-      idtipoactividad: data.idtipoactividad || data.tipoActividadId,
-      codigorequerimiento: data.codigoRequerimiento || data.codigorequerimiento || 'REQ-001',
-      cantidadhoras: data.numeroHoras || data.cantidadhoras || 0,
-      fechaactividad: typeof fecha === 'string' ? fecha : new Date(fecha).toISOString().split('T')[0],
-      descripcionactividad: data.descripcion || data.descripcionactividad || 'Sin descripción',
-      notas: data.notas || '',
-      esbillable: data.esbillable ?? true,
-      usuariocreacion: 'frontend_user',
-      ipcreacion: 'unknown'
+  agregarActividad(data: any, callback?: () => void): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const payload = {
+      idEmpleado: user.id,
+      idProyecto: data.proyectoId,
+      idTipoActividad: data.tipoActividad, // Suponiendo que es el ID en realidad
+      codigoRequerimiento: data.codigoRequerimiento,
+      cantidadHoras: data.horasPorDia || data.numeroHoras,
+      fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
+      descripcionActividad: data.descripcion,
+      notas: '',
+      esBillable: true
+    };
+
+    this.http.post(this.apiUrl, payload).subscribe({
+      next: (res) => {
+        this.cargarResumen();
+        if (callback) callback();
+      },
+      error: (err) => console.error('Error al crear actividad', err)
     });
-
-    if (data.esRecurrente && data.fechaInicio && data.fechaFin) {
-      const inicio = new Date(data.fechaInicio);
-      const fin = new Date(data.fechaFin);
-      const cur = new Date(inicio);
-      while (cur <= fin) {
-        const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
-        const esFeriado = data.incluirFeriados ? false : this.esFeriado(cur);
-        
-        if ((data.incluirFinesDeSemana || !esFDS) && !esFeriado) {
-          const payload = crearPayload(cur);
-          this.http.post(url, payload).subscribe({
-            next: () => this.cargarActividades(),
-            error: (err) => console.error('Error creating recurrent activity', err)
-          });
-        }
-        cur.setDate(cur.getDate() + 1);
-      }
-    } else {
-      const payload = crearPayload(data.fechaActividad || new Date());
-      this.http.post(url, payload).subscribe({
-        next: () => {
-          this.cargarActividades();
-        },
-        error: (err) => console.error('Error creating activity', err)
-      });
-    }
-  }
-
-  private esFeriado(fecha: Date): boolean {
-    // TODO: integrar con servicio de feriados
-    return false;
   }
 
   private mismaFecha(a: Date | string, b: Date): boolean {

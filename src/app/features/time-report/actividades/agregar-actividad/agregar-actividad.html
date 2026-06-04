@@ -8,9 +8,9 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Tipo de Actividad <span class="required">*</span></mat-label>
-                    <mat-select formControlName="idtipoactividad">
-                        @for (tipo of tiposActividad; track tipo.id) {
-                            <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
+                    <mat-select formControlName="tipoActividad">
+                        @for (tipo of tiposActividad(); track tipo.id) {
+                        <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
@@ -21,9 +21,9 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Proyecto <span class="required">*</span></mat-label>
-                    <mat-select formControlName="idproyecto">
-                        @for (proyecto of proyectos; track proyecto.id) {
-                            <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
+                    <mat-select formControlName="proyectoId">
+                        @for (proyecto of proyectos(); track proyecto.id) {
+                        <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
@@ -55,8 +55,7 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Notas</mat-label>
-                    <textarea matInput formControlName="notas" rows="3"
-                        placeholder="Notas adicionales"></textarea>
+                    <textarea matInput formControlName="notas" rows="3" placeholder="Notas adicionales"></textarea>
                 </mat-form-field>
             </div>
 
