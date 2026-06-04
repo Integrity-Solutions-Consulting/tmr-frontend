@@ -2,8 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../../../auth/servicios/auth.service';
-import { UsuariosService } from '../../services/usuarios.service';
-import { Rol, Usuario, UsuarioPayload } from '../../models/configuracion.models';
+import { Rol, Usuario, UsuarioPayload, RegisterUserRequest } from '../../models/configuracion.models';
+import { ConfiguracionService } from '../../services/configuracion.service';
 import {
   cedulaEcuatorianaValidator,
   INTERNAL_USERNAME_REGEX,
@@ -37,7 +37,7 @@ export class UsuariosFormModal {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<UsuariosFormModal>);
   private readonly authService = inject(AuthService);
-  private readonly usuariosService = inject(UsuariosService);
+  private readonly configuracionService = inject(ConfiguracionService);
   readonly data = inject<{ usuario?: Usuario; roles: Rol[]; nextId: number }>(MAT_DIALOG_DATA);
   showTemporaryPassword = false;
   readonly guardando = signal(false);
@@ -360,42 +360,34 @@ export class UsuariosFormModal {
     this.guardando.set(true);
     this.errorGuardar.set(null);
 
-    this.usuariosService.crearUsuario({
+    const registerPayload: RegisterUserRequest = {
+      idGenero: this.mapGenderId(payload.idgenero),
+      idNacionalidad: Number(payload.idnacionalidad),
+      idTipoIdentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
+      tipoIdentificacion: this.mapIdentificationType(payload.idtipoidentificacion as TipoIdentificacionId),
       numeroidentificacion: payload.numeroidentificacion,
       nombres: payload.nombres,
       apellidos: payload.apellidos,
-      email: payload.email,
-      password: payload.password,
-      idtipoidentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
-      idgenero: this.mapGenderId(payload.idgenero),
-      idnacionalidad: Number(payload.idnacionalidad),
-      fechanacimiento: this.formatBackendDate(payload.fechanacimiento),
+      correoContacto: payload.correoContacto || payload.email,
+      tipoPersona: this.mapTipoPersona(payload.tipoPersona),
+      fechaNacimiento: this.formatBackendDate(payload.fechanacimiento),
       telefono: payload.telefono?.trim() || null,
       direccion: payload.direccion?.trim() || null,
-      rolesids: value.roleid ? [Number(value.roleid)] : [],
-    }).subscribe({
-      next: (response) => {
-        this.guardando.set(false);
-        if (response.status === 201) {
-          window.alert('Usuario creado correctamente.');
-        }
+      email: payload.email,
+      usuario: this.getAuthenticatedUserForPayload(),
+    };
 
-        const body = response.body;
-        const createdId = body?.data?.id ?? body?.id ?? this.data.nextId;
-        const usuario: Usuario = {
-          id: createdId,
-          estado: 'Activo',
-          ...payload,
-        };
+    this.configuracionService.crearUsuarioAdministrativo(registerPayload).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        window.alert('Usuario creado correctamente.');
+        this.configuracionService.loadUsuarios();
         this.form.reset();
-        this.dialogRef.close(usuario);
+        this.dialogRef.close(true);
       },
       error: (err) => {
         this.guardando.set(false);
-        const mensaje = err?.status === 401
-          ? 'Sesión expirada o no autorizada'
-          : this.extractBackendError(err);
-        this.errorGuardar.set(mensaje);
+        this.errorGuardar.set(this.extractBackendError(err));
       },
     });
   }
@@ -453,8 +445,8 @@ export class UsuariosFormModal {
     this.form.controls.numeroidentificacion.updateValueAndValidity({ emitEvent: false });
   }
 
-  private mapIdentificationType(type: TipoIdentificacionId): string {
-    const map: Record<TipoIdentificacionId, string> = {
+  private mapIdentificationType(type: TipoIdentificacionId): 'C' | 'R' | 'P' | 'O' {
+    const map: Record<TipoIdentificacionId, 'C' | 'R' | 'P' | 'O'> = {
       cedula: 'C',
       ruc: 'R',
       pasaporte: 'P',
@@ -466,10 +458,10 @@ export class UsuariosFormModal {
 
   private mapIdentificationTypeId(type: string): number {
     const map: Record<TipoIdentificacionId, number> = {
-      cedula: 1,
-      ruc: 2,
-      pasaporte: 3,
-      'otro-documento': 4,
+      cedula: 25,
+      ruc: 26,
+      pasaporte: 27,
+      'otro-documento': 28,
     };
 
     return map[type as TipoIdentificacionId] ?? Number(type);
@@ -491,7 +483,18 @@ export class UsuariosFormModal {
       return '';
     }
 
-    return value.includes('T') ? value.split('T')[0] : value;
+    const datePart = value.includes('T') ? value.split('T')[0] : value;
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+
+    if (isoMatch) {
+      return `${isoMatch[3]}-${isoMatch[2]}-${isoMatch[1]}`;
+    }
+
+    return datePart;
+  }
+
+  private mapTipoPersona(value: string): 'NATURAL' | 'JURIDICA' {
+    return value === 'JURIDICA' ? 'JURIDICA' : 'NATURAL';
   }
 
   private configureUserValidators(): void {
@@ -586,6 +589,11 @@ export class UsuariosFormModal {
   private getCurrentUserName(): string {
     const user = this.authService.getCurrentUser() as { name?: string; nombre?: string; email?: string } | null;
     return user?.name ?? user?.nombre ?? user?.email ?? '';
+  }
+
+  private getAuthenticatedUserForPayload(): string {
+    const user = this.authService.getCurrentUser() as { email?: string } | null;
+    return user?.email || 'admin@isc.local';
   }
 
   private getCurrentUserId(): string {

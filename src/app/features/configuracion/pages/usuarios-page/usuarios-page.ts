@@ -6,7 +6,6 @@ import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usua
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
 import { Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
-import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-usuarios-page',
@@ -16,7 +15,6 @@ import { UsuariosService } from '../../services/usuarios.service';
 })
 export class UsuariosPage {
   private readonly configuracionService = inject(ConfiguracionService);
-  private readonly usuariosService = inject(UsuariosService);
   private readonly dialog = inject(MatDialog);
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
@@ -55,7 +53,7 @@ export class UsuariosPage {
     const dialogRef = this.dialog.open<
       UsuariosFormModal,
       { usuario?: Usuario; roles: Rol[]; nextId: number },
-      Usuario
+      Usuario | boolean
     >(UsuariosFormModal, {
       data: {
         usuario,
@@ -66,34 +64,11 @@ export class UsuariosPage {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      console.log('[DEBUG] Dialog closed with result:', result);
       if (result) {
-        if (usuario) {
-          console.log('[DEBUG] Result received - calling upsertUsuario');
-          this.configuracionService.upsertUsuario(result);
-          console.log('[DEBUG] After upsertUsuario - usuarios signal:', this.usuarios());
-          return;
+        if (usuario && result !== true) {
+          this.configuracionService.upsertUsuario(result as Usuario);
         }
-
-        this.recargarUsuariosDesdeBackend();
-      } else {
-        console.log('[DEBUG] Dialog closed with no result (cancelled)');
       }
-    });
-  }
-
-  private recargarUsuariosDesdeBackend(): void {
-    this.usuariosService.listarUsuarios().subscribe({
-      next: (response) => {
-        const usuarios = Array.isArray(response) ? response : response.data ?? [];
-        this.configuracionService.setUsuarios(usuarios.map((u) => ({
-          ...u,
-          rolesids: (u.rolesids ?? []).map((roleId) => String(roleId)),
-        })));
-      },
-      error: () => {
-        console.error('Error al recargar usuarios desde backend');
-      },
     });
   }
 

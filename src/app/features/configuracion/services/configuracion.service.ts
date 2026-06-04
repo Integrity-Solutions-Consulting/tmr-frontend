@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Feriado, Rol, Usuario, EstadoUsuario } from '../models/configuracion.models';
+import { Observable } from 'rxjs';
+import { Feriado, Rol, Usuario, EstadoUsuario, RegisterUserRequest } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -55,13 +56,17 @@ export class ConfiguracionService {
   // ── Usuarios ───────────────────────────────────────────────────────────────
 
   loadUsuarios() {
-    this.http.get<any[]>(`${environment.apiUrl}/configuracion/usuarios`).subscribe({
-      next: (data) => this.usuariosState.set(data.map(d => ({
-        id: d.id, nombres: d.nombres + ' ' + (d.apellidos || ''), email: d.email,
-        usuario: d.usuario, roles: d.roles || [d.rol], estado: d.activo ? 'Activo' : 'Inactivo', area: d.area || 'General'
-      }))),
+    this.http.get<unknown[] | { data?: unknown[] }>(`${environment.apiUrl}/configuracion/usuarios`).subscribe({
+      next: (response) => {
+        const data = Array.isArray(response) ? response : response.data ?? [];
+        this.usuariosState.set(data.map((item) => this.mapUsuario(item)));
+      },
       error: (err) => console.error(err)
     });
+  }
+
+  crearUsuarioAdministrativo(payload: RegisterUserRequest): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/configuracion/usuarios/register-user`, payload);
   }
 
   upsertUsuario(usuario: Usuario): void {
@@ -91,6 +96,65 @@ export class ConfiguracionService {
 
   getUsuarioById(id: number): Usuario | undefined {
     return this.usuariosState().find((u) => u.id === id);
+  }
+
+  mapUsuario(item: unknown): Usuario {
+    const d = item as Record<string, any>;
+    const roleIds = d['rolesids'] ?? d['rolesIds'] ?? d['roles'] ?? (d['rol'] ? [d['rol']] : []);
+    const nombres = String(d['nombres'] ?? d['nombre'] ?? '').trim();
+    const apellidos = String(d['apellidos'] ?? '').trim();
+    const tipoIdentificacion = this.normalizeTipoIdentificacion(d['tipoIdentificacion']);
+    const idTipoIdentificacion = d['idTipoIdentificacion'] ?? d['idtipoidentificacion'] ?? '';
+    const idGenero = d['idGenero'] ?? d['idgenero'] ?? '';
+    const idNacionalidad = d['idNacionalidad'] ?? d['idnacionalidad'] ?? '';
+    const fechaNacimiento = d['fechaNacimiento'] ?? d['fechanacimiento'] ?? null;
+    const email = String(d['email'] ?? d['correoContacto'] ?? '').trim();
+
+    return {
+      id: Number(d['id'] ?? d['idUsuario'] ?? d['idPersona'] ?? 0),
+      estado: d['estado'] ?? (d['activo'] === false ? 'Inactivo' : 'Activo'),
+      idGenero,
+      idNacionalidad,
+      idTipoIdentificacion,
+      tipoIdentificacion,
+      numeroidentificacion: String(d['numeroidentificacion'] ?? d['numeroIdentificacion'] ?? ''),
+      nombres,
+      apellidos,
+      correoContacto: String(d['correoContacto'] ?? email),
+      tipoPersona: d['tipoPersona'] ?? 'NATURAL',
+      fechaNacimiento,
+      usuarioCreacion: String(d['usuarioCreacion'] ?? ''),
+      idUsuarioCreacion: String(d['idUsuarioCreacion'] ?? ''),
+      ip: String(d['ip'] ?? ''),
+      email,
+      usuario: String(d['usuario'] ?? email),
+      password: '',
+      debeCambiarPassword: Boolean(d['debeCambiarPassword'] ?? false),
+      usuarioInterno: Boolean(d['usuarioInterno'] ?? true),
+      idtipoidentificacion: this.mapTipoIdentificacionToFormId(tipoIdentificacion, idTipoIdentificacion),
+      idgenero: String(d['idgenero'] ?? d['idGenero'] ?? ''),
+      idnacionalidad: String(d['idnacionalidad'] ?? d['idNacionalidad'] ?? ''),
+      fechanacimiento: fechaNacimiento,
+      telefono: d['telefono'] ? String(d['telefono']) : null,
+      direccion: d['direccion'] ? String(d['direccion']) : null,
+      rolesids: Array.isArray(roleIds) ? roleIds.map((roleId) => String(roleId)) : [],
+    };
+  }
+
+  private normalizeTipoIdentificacion(value: unknown): 'C' | 'R' | 'P' | 'O' {
+    const tipo = String(value ?? 'C').toUpperCase();
+    return tipo === 'R' || tipo === 'P' || tipo === 'O' ? tipo : 'C';
+  }
+
+  private mapTipoIdentificacionToFormId(tipo: string, fallback: unknown): string {
+    const map: Record<string, string> = {
+      C: 'cedula',
+      R: 'ruc',
+      P: 'pasaporte',
+      O: 'otro-documento',
+    };
+
+    return map[tipo] ?? String(fallback ?? '');
   }
 
   // ── Feriados ───────────────────────────────────────────────────────────────

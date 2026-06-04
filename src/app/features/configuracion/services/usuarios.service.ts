@@ -2,6 +2,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Usuario } from '../models/configuracion.models';
+import { environment } from '../../../../environments/environment';
 
 export interface CrearUsuarioRequest {
   numeroidentificacion: string;
@@ -34,7 +35,7 @@ export interface CrearUsuarioResponse {
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
   private readonly http = inject(HttpClient);
-  private readonly API = 'http://localhost:5091/api/configuracion/usuarios';
+  private readonly API = `${environment.apiUrl}/configuracion/usuarios`;
 
   listarUsuarios(): Observable<Usuario[] | { data?: Usuario[] }> {
     return this.http.get<Usuario[] | { data?: Usuario[] }>(this.API);

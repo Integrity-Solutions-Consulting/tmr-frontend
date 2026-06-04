@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Usuario, Rol } from '../../models/configuracion.models';
-import { BadgeEstadoComponent } from '../../../../shared/componentes/badge-estado/badge-estado.component';
+import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({

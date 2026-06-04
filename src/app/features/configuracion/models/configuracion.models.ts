@@ -10,22 +10,22 @@ export interface Rol {
 }
 
 export interface UsuarioPayload {
-  idGenero: string;
-  idNacionalidad: string;
-  idTipoIdentificacion: string;
-  tipoIdentificacion: string;
+  idGenero: number | string;
+  idNacionalidad: number | string;
+  idTipoIdentificacion: number | string;
+  tipoIdentificacion: 'C' | 'R' | 'P' | 'O' | string;
   numeroidentificacion: string;
   nombres: string;
   apellidos: string;
   correoContacto: string;
-  tipoPersona: string;
+  tipoPersona: 'NATURAL' | 'JURIDICA' | string;
   fechaNacimiento: string | null;
   usuarioCreacion: string;
   idUsuarioCreacion: string;
   ip: string;
   email: string;
   usuario: string;
-  password: string;
+  password?: string;
   debeCambiarPassword: boolean;
   usuarioInterno: boolean;
   idtipoidentificacion: string;
@@ -40,6 +40,23 @@ export interface UsuarioPayload {
 export interface Usuario extends UsuarioPayload {
   id: number;
   estado: EstadoUsuario;
+}
+
+export interface RegisterUserRequest {
+  idGenero: number;
+  idNacionalidad: number;
+  idTipoIdentificacion: number;
+  tipoIdentificacion: 'C' | 'R' | 'P' | 'O';
+  numeroidentificacion: string;
+  nombres: string;
+  apellidos: string;
+  correoContacto: string;
+  tipoPersona: 'NATURAL' | 'JURIDICA';
+  fechaNacimiento: string;
+  telefono: string | null;
+  direccion: string | null;
+  email: string;
+  usuario: string;
 }
 
 export interface Feriado {
