@@ -1,0 +1,72 @@
+<div class="modal-backdrop" (click)="onCerrar()"></div>
+
+<div class="modal-card">
+  <button class="modal-card__close" (click)="onCerrar()">
+    <span class="material-icons">close</span>
+  </button>
+
+  <div class="modal-card__header">
+    <div class="modal-card__title-row">
+      <h2 class="modal-card__nombre">{{ usuario.nombres }} {{ usuario.apellidos }}</h2>
+      <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
+    </div>
+    <p class="modal-card__subtitle">Detalle de cuenta, identidad, roles y estado.</p>
+  </div>
+
+  <div class="modal-card__body">
+    <div class="detalle-section">
+      <div class="detalle-section__header">
+        <span class="detalle-section__bar"></span>
+        <span class="detalle-section__title">Identidad</span>
+      </div>
+      <div class="detalle-grid">
+        <div class="detalle-field">
+          <p class="detalle-field__label">Identificación</p>
+          <p class="detalle-field__value">{{ usuario.numeroidentificacion }}</p>
+        </div>
+
+        <div class="detalle-field">
+          <p class="detalle-field__label">Usuario</p>
+          <p class="detalle-field__value">{{ usuario.usuario }}</p>
+        </div>
+
+        <div class="detalle-field">
+          <p class="detalle-field__label">Tipo de persona</p>
+          <p class="detalle-field__value">{{ usuario.tipoPersona }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detalle-section">
+      <div class="detalle-section__header">
+        <span class="detalle-section__bar"></span>
+        <span class="detalle-section__title">Contacto & Roles</span>
+      </div>
+      <div class="detalle-grid">
+        <div class="detalle-field">
+          <p class="detalle-field__label">Correo</p>
+          <p class="detalle-field__value">{{ usuario.email }}</p>
+        </div>
+        <div class="detalle-field">
+          <p class="detalle-field__label">Teléfono</p>
+          <p class="detalle-field__value">{{ usuario.telefono ?? '-' }}</p>
+        </div>
+        <div class="detalle-field">
+          <p class="detalle-field__label">Dirección</p>
+          <p class="detalle-field__value">{{ usuario.direccion ?? '-' }}</p>
+        </div>
+        <div class="detalle-field">
+          <p class="detalle-field__label">Roles</p>
+          <p class="detalle-field__value">{{ resolveRoleNames() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn--secondary" (click)="onEditar()">Editar</button>
+      <button class="btn btn--outline" (click)="onToggleEstado()">
+        {{ usuario.estado === 'Activo' ? 'Inactivar' : 'Activar' }}
+      </button>
+    </div>
+  </div>
+</div>

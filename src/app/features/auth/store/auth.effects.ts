@@ -17,9 +17,17 @@ export class AuthEffects {
       ofType(AuthActions.login),
       switchMap(({ credentials }) =>
         this.authService.login(credentials).pipe(
+          map((response) => {
+            const token = response.data?.accessToken ?? response.data?.token ?? response.token ?? '';
+            const user = response.data?.user ?? response.data?.usuario ?? response.user ?? null;
+
+            return { token, user };
+          }),
           tap(({ token, user }) => {
             this.tokenService.setToken(token);
-            this.tokenService.setUser(JSON.stringify(user));
+            if (user) {
+              this.tokenService.setUser(JSON.stringify(user));
+            }
           }),
           map(({ token, user }) =>
             AuthActions.loginSuccess({ response: { token, user } })

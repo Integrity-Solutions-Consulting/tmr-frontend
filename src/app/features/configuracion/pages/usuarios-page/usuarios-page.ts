@@ -1,35 +1,26 @@
-import { Component, computed, inject, signal, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
-import { Tabla } from '../../../../shared/components/tabla/tabla';
-import { DetailModal, DetailModalData } from '../../../../shared/components/detail-modal/detail-modal';
+import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
-import { Rol, TableColumn, Usuario } from '../../models/configuracion.models';
+import { Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
+import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [Boton, SearchInput, Tabla],
-  schemas: [NO_ERRORS_SCHEMA],
+  imports: [Boton, SearchInput],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
 export class UsuariosPage {
   private readonly configuracionService = inject(ConfiguracionService);
+  private readonly usuariosService = inject(UsuariosService);
   private readonly dialog = inject(MatDialog);
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
   readonly roles = this.configuracionService.roles;
-
-  readonly columns: TableColumn<Record<string, unknown>>[] = [
-    { key: 'nombres', label: 'Nombres', width: '22%' },
-    { key: 'email', label: 'Correo', width: '24%' },
-    { key: 'area', label: 'Area', width: '14%' },
-    { key: 'estado', label: 'Estado', type: 'status', width: '120px' },
-    { key: 'roles', label: 'Roles', type: 'chips' },
-    { key: 'acciones', label: 'Acciones', type: 'actions', width: '110px' },
-  ];
 
   readonly filteredUsuarios = computed(() => {
     const query = this.query().trim().toLowerCase();
@@ -39,12 +30,13 @@ export class UsuariosPage {
 
     return this.usuarios().filter((usuario) =>
       [
+        usuario.numeroidentificacion,
         usuario.nombres,
-        usuario.email,
+        usuario.apellidos,
         usuario.usuario,
-        usuario.area,
+        usuario.email,
         usuario.estado,
-        usuario.roles.join(' '),
+        this.resolveRoleNames(usuario.rolesids).join(' '),
       ]
         .join(' ')
         .toLowerCase()
@@ -53,6 +45,11 @@ export class UsuariosPage {
   });
 
   readonly activos = computed(() => this.usuarios().filter((usuario) => usuario.estado === 'Activo').length);
+
+  resolveRoleNames(roleIds: string[]): string[] {
+    const roles = this.roles();
+    return roleIds.map((roleId) => roles.find((rol) => rol.id.toString() === roleId)?.nombre ?? roleId);
+  }
 
   openModal(usuario?: Usuario): void {
     const dialogRef = this.dialog.open<
@@ -69,30 +66,56 @@ export class UsuariosPage {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
+      console.log('[DEBUG] Dialog closed with result:', result);
       if (result) {
-        this.configuracionService.upsertUsuario(result);
+        if (usuario) {
+          console.log('[DEBUG] Result received - calling upsertUsuario');
+          this.configuracionService.upsertUsuario(result);
+          console.log('[DEBUG] After upsertUsuario - usuarios signal:', this.usuarios());
+          return;
+        }
+
+        this.recargarUsuariosDesdeBackend();
+      } else {
+        console.log('[DEBUG] Dialog closed with no result (cancelled)');
       }
     });
   }
 
-  viewUsuario(usuario: Usuario): void {
-    this.dialog.open<DetailModal, DetailModalData>(DetailModal, {
-      panelClass: 'tmr-dialog-panel',
-      data: {
-        title: usuario.nombres,
-        subtitle: 'Detalle de cuenta, area, roles y estado.',
-        fields: [
-          { label: 'Correo', value: usuario.email },
-          { label: 'Usuario', value: usuario.usuario },
-          { label: 'Area', value: usuario.area },
-          { label: 'Estado', value: usuario.estado },
-          { label: 'Roles', value: usuario.roles.join(', ') },
-        ],
+  private recargarUsuariosDesdeBackend(): void {
+    this.usuariosService.listarUsuarios().subscribe({
+      next: (response) => {
+        const usuarios = Array.isArray(response) ? response : response.data ?? [];
+        this.configuracionService.setUsuarios(usuarios.map((u) => ({
+          ...u,
+          rolesids: (u.rolesids ?? []).map((roleId) => String(roleId)),
+        })));
+      },
+      error: () => {
+        console.error('Error al recargar usuarios desde backend');
       },
     });
   }
 
+  viewUsuario(usuario: Usuario): void {
+    const dialogRef = this.dialog.open(UsuarioDetalleModal, {
+      panelClass: 'tmr-dialog-panel',
+      data: { usuario },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.action === 'editar' && result.usuario) {
+        this.openModal(result.usuario);
+      }
+      if (result?.action === 'toggleEstado' && result.usuario) {
+        const newEstado = result.usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
+        this.configuracionService.setUsuarioEstado(result.usuario.id, newEstado);
+      }
+    });
+  }
+
   deleteUsuario(usuario: Usuario): void {
-    this.configuracionService.deleteUsuario(usuario.id);
+    const newEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
+    this.configuracionService.setUsuarioEstado(usuario.id, newEstado);
   }
 }

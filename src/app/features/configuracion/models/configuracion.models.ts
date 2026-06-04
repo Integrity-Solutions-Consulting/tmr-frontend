@@ -8,14 +8,37 @@ export interface Rol {
   modulos: string[];
 }
 
-export interface Usuario {
-  id: number;
+export interface UsuarioPayload {
+  idGenero: string;
+  idNacionalidad: string;
+  idTipoIdentificacion: string;
+  tipoIdentificacion: string;
+  numeroidentificacion: string;
   nombres: string;
+  apellidos: string;
+  correoContacto: string;
+  tipoPersona: string;
+  fechaNacimiento: string | null;
+  usuarioCreacion: string;
+  idUsuarioCreacion: string;
+  ip: string;
   email: string;
   usuario: string;
-  roles: string[];
+  password: string;
+  debeCambiarPassword: boolean;
+  usuarioInterno: boolean;
+  idtipoidentificacion: string;
+  idgenero: string;
+  idnacionalidad: string;
+  fechanacimiento: string | null;
+  telefono: string | null;
+  direccion: string | null;
+  rolesids: string[];
+}
+
+export interface Usuario extends UsuarioPayload {
+  id: number;
   estado: EstadoUsuario;
-  area: string;
 }
 
 export interface Feriado {

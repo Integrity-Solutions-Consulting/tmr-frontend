@@ -21,8 +21,7 @@ import { ActividadesEffects } from './core/state/actividades/actividades.effects
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
 import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
-// Mock interceptor
-import { AuthMockInterceptor } from './core/interceptors/auth-mock.interceptor';
+import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,7 +30,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: AuthMockInterceptor,
+      useClass: JwtInterceptor,
       multi: true,
     },
     provideStore({

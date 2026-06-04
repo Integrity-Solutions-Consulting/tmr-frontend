@@ -1,1 +1,241 @@
-@use '../roles-page/roles-page.scss';
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #163572;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stats-grid article {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px 20px;
+}
+
+.stats-grid span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.stats-grid strong {
+  display: block;
+  font-size: 24px;
+  color: #163572;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.table-scroll-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  max-height: calc(100vh - 260px);
+}
+
+.table-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.usuarios-table thead {
+  background: #ffffff;
+  border-bottom: 2px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.usuarios-table thead th {
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #737373;
+  font-size: 14px;
+  white-space: nowrap;
+  background: #ffffff;
+}
+
+.usuarios-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.12s;
+}
+
+.usuarios-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.usuarios-table tbody tr:hover {
+  background: rgba(22, 53, 114, 0.04);
+}
+
+.usuarios-table tbody td {
+  padding: 13px 16px;
+  color: #737373;
+  font-weight: 400;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.roles-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 280px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #737373;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.badge--activo::before,
+.badge--inactivo::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge--activo::before {
+  background: #22c55e;
+}
+
+.badge--inactivo::before {
+  background: #737373;
+}
+
+.badge--role {
+  padding: 4px 10px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  border-color: transparent;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #737373;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  font-size: 13px;
+}
+
+.action-btn:hover {
+  background: #f5f5f5;
+  color: #163572;
+}
+
+.action-btn--danger {
+  color: #dc2626;
+}
+
+.action-btn--danger:hover {
+  background: #fef2f2;
+}
+
+.actions-cell {
+  padding: 13px 16px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+  font-style: italic;
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero,
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .usuarios-table thead th,
+  .usuarios-table tbody td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+
+  .action-btn {
+    padding: 6px 8px;
+  }
+}

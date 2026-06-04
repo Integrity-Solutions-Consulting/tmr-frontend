@@ -9,12 +9,15 @@ import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interf
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = '/api/auth';
+  private readonly API_URL = 'http://localhost:5091/api/auth';
 
   constructor(private http: HttpClient) {}
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials);
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, {
+      user: credentials.email,
+      password: credentials.password,
+    });
   }
 
   logout(): Observable<{ message: string }> {
@@ -37,7 +40,7 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       return null;
     }
