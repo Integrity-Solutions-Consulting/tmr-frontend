@@ -43,6 +43,7 @@ export interface Usuario extends UsuarioPayload {
 }
 
 export interface RegisterUserRequest {
+  idRol: number;
   idGenero: number;
   idNacionalidad: number;
   idTipoIdentificacion: number;

@@ -361,6 +361,7 @@ export class UsuariosFormModal {
     this.errorGuardar.set(null);
 
     const registerPayload: RegisterUserRequest = {
+      idRol: Number(value.roleid),
       idGenero: this.mapGenderId(payload.idgenero),
       idNacionalidad: Number(payload.idnacionalidad),
       idTipoIdentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
