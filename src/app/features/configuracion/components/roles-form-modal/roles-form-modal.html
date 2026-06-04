@@ -1,68 +1,151 @@
-<app-modal-base
-  [title]="isEdit ? 'Editar Rol' : 'Crear Nuevo Rol'"
-  subtitle="Define el alcance funcional y los modulos accesibles del perfil."
->
-  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
-    <div class="modal-body">
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Nombre de Rol</mat-label>
-        <mat-icon matPrefix>admin_panel_settings</mat-icon>
-        <input matInput formControlName="nombre" placeholder="Ej. Coordinador de proyectos" />
-        <mat-error>
-          @if (form.controls.nombre.errors?.['required'] && form.controls.nombre.touched) {
-            Campo requerido
-          }
-          @if (form.controls.nombre.errors?.['pattern'] && form.controls.nombre.touched) {
-            Solo letras, espacios y tildes
-          }
-          @if (form.controls.nombre.errors?.['minlength'] && form.controls.nombre.touched) {
-            Mínimo 3 caracteres
-          }
-        </mat-error>
-      </mat-form-field>
+<form class="rol-modal" [formGroup]="form" (ngSubmit)="save()">
 
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Descripción</mat-label>
-        <mat-icon matPrefix>notes</mat-icon>
-        <textarea matInput formControlName="descripcion" rows="2" placeholder="Describe el alcance del rol"></textarea>
-        <mat-error>
-          @if (form.controls.descripcion.errors?.['required'] && form.controls.descripcion.touched) {
-            Campo requerido
-          }
-          @if (form.controls.descripcion.errors?.['minlength'] && form.controls.descripcion.touched) {
-            Mínimo 8 caracteres
-          }
-        </mat-error>
-      </mat-form-field>
+  <!-- Header -->
+  <div class="rol-modal__header">
+    <div class="rol-modal__header-text">
+      @if (isView) {
+        <span class="rol-modal__badge rol-modal__badge--view">Solo lectura</span>
+      } @else if (isEdit) {
+        <span class="rol-modal__badge rol-modal__badge--edit">Editar</span>
+      } @else {
+        <span class="rol-modal__badge rol-modal__badge--new">Nuevo</span>
+      }
+      <h2 class="rol-modal__title">
+        {{ isView ? data.rol!.nombre : isEdit ? 'Editar Rol' : 'Crear Nuevo Rol' }}
+      </h2>
+      <p class="rol-modal__subtitle">
+        {{ isView
+          ? 'Detalle del rol y módulos habilitados.'
+          : 'Define el alcance funcional y los módulos accesibles del perfil.' }}
+      </p>
+    </div>
+    <button class="rol-modal__close" type="button" mat-dialog-close aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-      <section class="modules">
-        <div>
-          <h3>Modulos Accesibles</h3>
-          <p>Selecciona los permisos visibles para este rol.</p>
-        </div>
+  <!-- Body -->
+  <div class="rol-modal__body">
 
-        <div class="module-grid">
-          @for (modulo of modulos; track modulo) {
-            <mat-checkbox
-              [checked]="isChecked(modulo)"
-              (change)="toggleModulo(modulo, $event.checked)"
-            >
-              {{ modulo }}
-            </mat-checkbox>
-          }
-        </div>
-
-        @if (form.controls.modulos.errors?.['required'] && form.controls.modulos.touched) {
-          <p class="field-error">Selecciona al menos un módulo</p>
-        }
-      </section>
+    <!-- Nombre -->
+    <div class="rol-modal__field">
+      <label class="rol-modal__label">Nombre del rol <span class="req">*</span></label>
+      <div class="rol-modal__input-wrap"
+           [class.rol-modal__input-wrap--error]="form.controls.nombre.invalid && form.controls.nombre.touched">
+        <mat-icon class="rol-modal__input-icon">admin_panel_settings</mat-icon>
+        <input
+          class="rol-modal__input"
+          formControlName="nombre"
+          placeholder="Ej. Pasante"
+          [readonly]="isView"
+          autocomplete="off"
+        />
+      </div>
+      @if (!isView && form.controls.nombre.invalid && form.controls.nombre.touched) {
+        <span class="rol-modal__error">
+          @if (form.controls.nombre.errors?.['required']) { Campo requerido }
+          @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
+          @else if (form.controls.nombre.errors?.['pattern']) { Solo letras, espacios y tildes }
+          @else if (form.controls.nombre.errors?.['duplicateRoleName']) { Ya existe un rol con este nombre }
+        </span>
+      }
     </div>
 
-    <div class="modal-actions">
-      <button mat-button type="button" (click)="cancel()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit">
+    <!-- Descripción -->
+    <div class="rol-modal__field">
+      <label class="rol-modal__label">Descripción <span class="req">*</span></label>
+      <div class="rol-modal__input-wrap rol-modal__input-wrap--textarea"
+           [class.rol-modal__input-wrap--error]="form.controls.descripcion.invalid && form.controls.descripcion.touched">
+        <mat-icon class="rol-modal__input-icon">notes</mat-icon>
+        <textarea
+          class="rol-modal__input rol-modal__textarea"
+          formControlName="descripcion"
+          rows="2"
+          placeholder="Describe el alcance del rol"
+          [readonly]="isView"
+        ></textarea>
+      </div>
+      @if (!isView && form.controls.descripcion.invalid && form.controls.descripcion.touched) {
+        <span class="rol-modal__error">
+          @if (form.controls.descripcion.errors?.['required']) { Campo requerido }
+          @else if (form.controls.descripcion.errors?.['minlength']) { Mínimo 5 caracteres }
+        </span>
+      }
+    </div>
+
+    <!-- Estado -->
+    <div class="rol-modal__field">
+      <label class="rol-modal__label">Estado <span class="req">*</span></label>
+      @if (isView) {
+        <div class="rol-modal__view-value">
+          <span class="status-pill" [class.status-pill--inactive]="!form.controls.activo.value">
+            {{ form.controls.activo.value ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      } @else {
+        <div class="rol-modal__select-wrap">
+          <select class="rol-modal__select" formControlName="activo">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </div>
+      }
+    </div>
+
+    <!-- Módulos accesibles -->
+    <div class="rol-modal__modules">
+      <div class="rol-modal__modules-header">
+        <mat-icon class="rol-modal__modules-icon">grid_view</mat-icon>
+        <div>
+          <h3 class="rol-modal__modules-title">Módulos Accesibles</h3>
+          <p class="rol-modal__modules-desc">
+            {{ isView ? 'Módulos habilitados para este rol.' : 'Selecciona los permisos visibles para este rol.' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="rol-modal__module-grid">
+        @for (modulo of modulos; track modulo) {
+          <label class="rol-modal__module-item"
+                 [class.rol-modal__module-item--checked]="isChecked(modulo)"
+                 [class.rol-modal__module-item--disabled]="isView">
+            <input
+              type="checkbox"
+              class="rol-modal__module-check"
+              [checked]="isChecked(modulo)"
+              [disabled]="isView"
+              (change)="toggleModulo(modulo, $any($event.target).checked)"
+            />
+            <mat-icon class="rol-modal__module-icon">
+              {{ getModuleIcon(modulo) }}
+            </mat-icon>
+            <span>{{ modulo }}</span>
+          </label>
+        }
+      </div>
+
+      @if (!isView && form.controls.modulos.errors?.['requiredModules'] && form.controls.modulos.touched) {
+        <p class="rol-modal__error">Selecciona al menos un módulo</p>
+      }
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="rol-modal__footer">
+    @if (isView) {
+      <button class="rol-modal__btn rol-modal__btn--cancel" type="button" mat-dialog-close>
+        Cerrar
+      </button>
+    } @else {
+      <button class="rol-modal__btn rol-modal__btn--cancel" type="button" mat-dialog-close>
+        Cancelar
+      </button>
+      <button class="rol-modal__btn rol-modal__btn--save" type="submit">
+        <mat-icon>{{ isEdit ? 'save' : 'add_circle' }}</mat-icon>
         {{ isEdit ? 'Guardar cambios' : 'Crear rol' }}
       </button>
-    </div>
-  </form>
-</app-modal-base>
+    }
+  </div>
+
+</form>

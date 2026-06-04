@@ -1,9 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Boton } from '../../../../shared/components/boton/boton';
-import { DetailModal, DetailModalData } from '../../../../shared/components/detail-modal/detail-modal';
 import { FeriadosCalendar } from '../../components/feriados-calendar/feriados-calendar';
-import { FeriadosFormModal } from '../../components/feriados-form-modal/feriados-form-modal';
+import { FeriadosFormModal, FeriadoModalData } from '../../components/feriados-form-modal/feriados-form-modal';
 import { Feriado } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
@@ -16,21 +15,30 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 export class FeriadosPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+
   readonly feriados = this.configuracionService.feriados;
 
-  readonly nacionales = computed(() => this.feriados().filter((feriado) => feriado.tipo === 'Nacional').length);
-  readonly locales = computed(() => this.feriados().filter((feriado) => feriado.tipo === 'Local').length);
-  readonly religiosos = computed(() => this.feriados().filter((feriado) => feriado.tipo === 'Religioso').length);
+  // TODO: cuando exista backend, reemplazar por GET /api/feriados
+  readonly nacionales    = computed(() => this.feriados().filter((f) => f.tipo === 'Nacional').length);
+  readonly locales       = computed(() => this.feriados().filter((f) => f.tipo === 'Local').length);
+  readonly institucionales = computed(() => this.feriados().filter((f) => f.tipo === 'Institucional').length);
+  readonly activos       = computed(() => this.feriados().filter((f) => f.activo).length);
 
-  openModal(feriado?: Feriado, fecha?: string): void {
-    const dialogRef = this.dialog.open<FeriadosFormModal, { feriado?: Feriado; nextId: number; fecha?: string }, Feriado>(
+  openModal(feriado?: Feriado, mode: 'create' | 'edit' | 'view' = 'create', fecha?: string): void {
+    const data: FeriadoModalData = {
+      feriado,
+      feriados: this.feriados(),
+      nextId: this.configuracionService.nextId(this.feriados()),
+      fecha,
+      mode: feriado ? mode : 'create',
+    };
+
+    const dialogRef = this.dialog.open<FeriadosFormModal, FeriadoModalData, Feriado>(
       FeriadosFormModal,
-      {
-        data: { feriado, fecha, nextId: this.configuracionService.nextId(this.feriados()) },
-        panelClass: 'tmr-dialog-panel',
-      },
+      { data, panelClass: 'tmr-dialog-panel' },
     );
 
+    // TODO: conectar con POST /api/feriados o PUT /api/feriados/{id} según mode
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.configuracionService.upsertFeriado(result);
@@ -39,24 +47,19 @@ export class FeriadosPage {
   }
 
   viewFeriado(feriado: Feriado): void {
-    this.dialog.open<DetailModal, DetailModalData>(DetailModal, {
-      panelClass: 'tmr-dialog-panel',
-      data: {
-        title: feriado.nombre,
-        subtitle: 'Detalle del feriado configurado.',
-        fields: [
-          { label: 'Tipo', value: feriado.tipo },
-          { label: 'Fecha', value: new Intl.DateTimeFormat('es-EC').format(new Date(`${feriado.fecha}T00:00:00`)) },
-        ],
-      },
-    });
+    this.openModal(feriado, 'view');
   }
 
-  deleteFeriado(feriado: Feriado): void {
-    this.configuracionService.deleteFeriado(feriado.id);
+  editFeriado(feriado: Feriado): void {
+    this.openModal(feriado, 'edit');
+  }
+
+  // TODO: conectar con PATCH /api/feriados/{id}/estado cuando exista backend
+  toggleEstado(feriado: Feriado): void {
+    this.configuracionService.setFeriadoEstado(feriado.id, !feriado.activo);
   }
 
   openModalForDate(fecha: string): void {
-    this.openModal(undefined, fecha);
+    this.openModal(undefined, 'create', fecha);
   }
 }

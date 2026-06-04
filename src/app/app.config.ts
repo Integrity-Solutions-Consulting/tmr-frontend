@@ -4,7 +4,9 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+
 import { routes } from './app.routes';
+import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 
 // Reducers
@@ -17,7 +19,7 @@ import { dashboardReducer } from './features/dashboard/store/dashboard.reducer';
 // Effects
 import { AuthEffects } from './features/auth/store/auth.effects';
 import * as ClientesEffects from './features/clientes/store/clientes.effects';
-import { ActividadesEffects } from './core/state/actividades/actividades.effects'; 
+import { ActividadesEffects } from './core/state/actividades/actividades.effects';
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
 import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
@@ -28,8 +30,13 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
-      multi: true
+      multi: true,
     },
     provideStore({
       auth: authReducer,

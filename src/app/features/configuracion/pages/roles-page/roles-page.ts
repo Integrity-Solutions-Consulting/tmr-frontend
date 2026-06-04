@@ -1,17 +1,17 @@
-import { Component, computed, inject, signal, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
-import { Tabla } from '../../../../shared/components/tabla/tabla';
-import { DetailModal, DetailModalData } from '../../../../shared/components/detail-modal/detail-modal';
-import { RolesFormModal } from '../../components/roles-form-modal/roles-form-modal';
-import { Rol, TableColumn } from '../../models/configuracion.models';
+import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
+import { Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, Tabla],
-  schemas: [NO_ERRORS_SCHEMA],
+  imports: [Boton, SearchInput, MatIconModule, MatMenuModule, MatButtonModule],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -21,12 +21,8 @@ export class RolesPage {
   readonly query = signal('');
   readonly roles = this.configuracionService.roles;
 
-  readonly columns: TableColumn<Record<string, unknown>>[] = [
-    { key: 'nombre', label: 'Rol', width: '18%' },
-    { key: 'descripcion', label: 'Descripcion', width: '28%' },
-    { key: 'modulos', label: 'Modulos', type: 'chips' },
-    { key: 'acciones', label: 'Acciones', type: 'actions', width: '110px' },
-  ];
+  readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
+  readonly modulosCubiertos = computed(() => new Set(this.roles().flatMap((rol) => rol.modulos)).size);
 
   readonly filteredRoles = computed(() => {
     const query = this.query().trim().toLowerCase();
@@ -35,15 +31,25 @@ export class RolesPage {
     }
 
     return this.roles().filter((rol) =>
-      [rol.nombre, rol.descripcion, rol.modulos.join(' ')].join(' ').toLowerCase().includes(query),
+      [rol.nombre, rol.descripcion, rol.modulos.join(' '), rol.activo ? 'activo' : 'inactivo']
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
     );
   });
 
-  openModal(rol?: Rol): void {
-    const dialogRef = this.dialog.open<RolesFormModal, { rol?: Rol; nextId: number }, Rol>(
+  openModal(rol?: Rol, mode: 'create' | 'edit' | 'view' = 'create'): void {
+    const data: RolModalData = {
+      rol,
+      roles: this.roles(),
+      nextId: this.configuracionService.nextId(this.roles()),
+      mode: rol ? mode : 'create',
+    };
+
+    const dialogRef = this.dialog.open<RolesFormModal, RolModalData, Rol>(
       RolesFormModal,
       {
-        data: { rol, nextId: this.configuracionService.nextId(this.roles()) },
+        data,
         panelClass: 'tmr-dialog-panel',
       },
     );
@@ -56,20 +62,14 @@ export class RolesPage {
   }
 
   viewRol(rol: Rol): void {
-    this.dialog.open<DetailModal, DetailModalData>(DetailModal, {
-      panelClass: 'tmr-dialog-panel',
-      data: {
-        title: rol.nombre,
-        subtitle: 'Detalle del rol y modulos habilitados.',
-        fields: [
-          { label: 'Descripcion', value: rol.descripcion },
-          { label: 'Modulos', value: rol.modulos.join(', ') },
-        ],
-      },
-    });
+    this.openModal(rol, 'view');
   }
 
-  deleteRol(rol: Rol): void {
-    this.configuracionService.deleteRol(rol.id);
+  editRol(rol: Rol): void {
+    this.openModal(rol, 'edit');
+  }
+
+  toggleEstado(rol: Rol): void {
+    this.configuracionService.setRolEstado(rol.id, !rol.activo);
   }
 }

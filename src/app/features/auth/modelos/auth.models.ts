@@ -5,8 +5,14 @@ export interface User {
 }
 
 export interface AuthResponse {
-  token: string;
-  user: User;
+  token?: string;
+  user?: User | null;
+  data?: {
+    accessToken?: string;
+    token?: string;
+    user?: User;
+    usuario?: User;
+  };
 }
 
 export interface ForgotPasswordResponse {

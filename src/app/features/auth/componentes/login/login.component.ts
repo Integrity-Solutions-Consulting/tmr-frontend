@@ -61,7 +61,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   // Acceso rápido para demo sin backend — guarda token y redirige
   onLoginDemo(): void {
-    this.tokenService.setToken('mock-demo-token-' + Date.now());
     this.tokenService.setUser(JSON.stringify({ nombre: 'Marlene', email: 'demo@tmr.com' }));
     this.router.navigate(['/dashboard']);
   }

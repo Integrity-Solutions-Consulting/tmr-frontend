@@ -1,15 +1,19 @@
 <section class="page">
   <div class="hero">
     <div>
-      <h2>Dias Festivos</h2>
+      <h2>Días Festivos</h2>
     </div>
     <app-boton label="Agregar Feriado" icon="event_available" (clicked)="openModal()" />
   </div>
 
   <div class="stats-grid">
     <article>
-      <span>Feriados</span>
+      <span>Total feriados</span>
       <strong>{{ feriados().length }}</strong>
+    </article>
+    <article>
+      <span>Activos</span>
+      <strong>{{ activos() }}</strong>
     </article>
     <article>
       <span>Nacionales</span>
@@ -20,8 +24,8 @@
       <strong>{{ locales() }}</strong>
     </article>
     <article>
-      <span>Religiosos</span>
-      <strong>{{ religiosos() }}</strong>
+      <span>Institucionales</span>
+      <strong>{{ institucionales() }}</strong>
     </article>
   </div>
 
@@ -29,7 +33,7 @@
     [feriados]="feriados()"
     (addFeriado)="openModalForDate($event)"
     (viewFeriado)="viewFeriado($event)"
-    (editFeriado)="openModal($event)"
-    (deleteFeriado)="deleteFeriado($event)"
+    (editFeriado)="editFeriado($event)"
+    (deleteFeriado)="toggleEstado($event)"
   />
 </section>

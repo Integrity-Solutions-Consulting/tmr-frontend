@@ -30,13 +30,56 @@
       />
     </div>
 
-    <app-tabla
-      [columns]="columns"
-      [rows]="$any(filteredUsuarios())"
-      emptyMessage="No se encontraron usuarios."
-      (view)="viewUsuario($any($event))"
-      (edit)="openModal($any($event))"
-      (delete)="deleteUsuario($any($event))"
-    />
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="usuarios-table">
+          <thead>
+            <tr>
+              <th>Identificación</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Correo electrónico</th>
+              <th>Roles</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if ($any(filteredUsuarios()).length === 0) {
+              <tr>
+                <td colspan="7" class="empty-state">No se encontraron usuarios</td>
+              </tr>
+            }
+            @for (usuario of filteredUsuarios(); track usuario.id) {
+              <tr>
+                <td>{{ usuario.numeroidentificacion }}</td>
+                <td>{{ usuario.usuario }}</td>
+                <td>{{ usuario.nombres }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                  <div class="roles-cell">
+                    @for (role of resolveRoleNames(usuario.rolesids); track role) {
+                      <span class="badge badge--role">{{ role }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [class.badge--activo]="usuario.estado === 'Activo'" [class.badge--inactivo]="usuario.estado !== 'Activo'">
+                    {{ usuario.estado }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn" type="button" (click)="viewUsuario(usuario)">Ver más</button>
+                  <button class="action-btn" type="button" (click)="openModal(usuario)">Editar</button>
+                  <button class="action-btn action-btn--danger" type="button" (click)="deleteUsuario(usuario)">
+                    {{ usuario.estado === 'Activo' ? 'Inactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </section>
