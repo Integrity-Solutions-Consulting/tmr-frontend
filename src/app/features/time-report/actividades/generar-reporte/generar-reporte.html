@@ -13,9 +13,9 @@
                 <mat-label>Cliente</mat-label>
                 <mat-select formControlName="clienteId">
                     <mat-option value="all">Todos los clientes</mat-option>
-                    <mat-option value="c1">BANCO DEL PACÍFICO</mat-option>
-                    <mat-option value="c2">BANCO BOLIVARIANO</mat-option>
-                    <mat-option value="c3">INTEGRITY SOLUTIONS</mat-option>
+                    @for (cliente of clientes; track cliente.id) {
+                        <mat-option [value]="cliente.id">{{ cliente.nombre }}</mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
 

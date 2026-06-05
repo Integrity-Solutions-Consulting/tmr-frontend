@@ -11,6 +11,7 @@ const ANIO = HOY.getFullYear();
 export class ActividadesService {
   private http = inject(HttpClient);
   private _actividades = signal<Actividad[]>([]);
+  private idEmpleadoActual = 1; // TODO: obtener del auth service
 
   public readonly actividades = this._actividades.asReadonly();
 
@@ -19,18 +20,25 @@ export class ActividadesService {
   }
 
   cargarActividades() {
-    this.http.get<any[]>(`${environment.apiUrl}/carga-actividades`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades`).subscribe({
       next: (data) => {
         const mapeadas = data.map(dto => ({
           id: dto.id?.toString() || Math.random().toString(),
-          tipoActividad: 'Desarrollo' as any,
-          proyectoId: dto.idproyecto?.toString() || '',
-          proyectoNombre: 'Proyecto ' + dto.idproyecto,
-          codigoRequerimiento: dto.codigorequerimiento || '',
-          descripcion: dto.descripcionactividad || '',
-          fechaActividad: new Date(dto.fechaactividad),
-          numeroHoras: dto.cantidadhoras || 0,
-          esRecurrente: false
+          idempleado: dto.idempleado,
+          idproyecto: dto.idproyecto,
+          idtipoactividad: dto.idtipoactividad,
+          codigorequerimiento: dto.codigorequerimiento || '',
+          cantidadhoras: dto.cantidadhoras || 0,
+          fechaactividad: new Date(dto.fechaactividad),
+          descripcionactividad: dto.descripcionactividad || '',
+          notas: dto.notas,
+          esbillable: dto.esbillable ?? true,
+          activo: dto.activo ?? true,
+          // Propiedades derivadas para visualización
+          nroHoras: dto.cantidadhoras || 0,
+          colaborador: dto.colaborador || 'Empleado',
+          proyecto: dto.proyecto || 'Proyecto',
+          cliente: dto.cliente
         }));
         this._actividades.set(mapeadas);
       },
@@ -42,18 +50,20 @@ export class ActividadesService {
   public readonly horasRegistradasHoy = computed(() => {
     const hoy = new Date();
     return this._actividades()
-      .filter(a => this.mismaFecha(a.fechaActividad, hoy))
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
+      .filter(a => this.mismaFecha(a.fechaactividad, hoy) && a.activo)
+      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
   });
 
   public readonly horasMesActual = computed(() => {
     const hoy = new Date();
     return this._actividades()
-      .filter(a =>
-        a.fechaActividad.getMonth() === hoy.getMonth() &&
-        a.fechaActividad.getFullYear() === hoy.getFullYear()
-      )
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
+      .filter(a => {
+        const fecha = a.fechaactividad instanceof Date ? a.fechaactividad : new Date(a.fechaactividad);
+        return fecha.getMonth() === hoy.getMonth() &&
+          fecha.getFullYear() === hoy.getFullYear() &&
+          a.activo;
+      })
+      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
   });
 
   public readonly horasSemanaActual = computed(() => {
@@ -65,8 +75,11 @@ export class ActividadesService {
     finSemana.setDate(inicioSemana.getDate() + 6);
     finSemana.setHours(23, 59, 59, 999);
     return this._actividades()
-      .filter(a => a.fechaActividad >= inicioSemana && a.fechaActividad <= finSemana)
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
+      .filter(a => {
+        const fecha = a.fechaactividad instanceof Date ? a.fechaactividad : new Date(a.fechaactividad);
+        return fecha >= inicioSemana && fecha <= finSemana && a.activo;
+      })
+      .reduce((acc, curr) => acc + curr.cantidadhoras, 0);
   });
 
   public readonly horasPorRegistrar = computed(() => {
@@ -76,22 +89,25 @@ export class ActividadesService {
 
   // === Methods ===
   getActividadesPorFecha(fecha: Date): Actividad[] {
-    return this._actividades().filter(a => this.mismaFecha(a.fechaActividad, fecha));
+    return this._actividades().filter(a => this.mismaFecha(a.fechaactividad, fecha) && a.activo);
   }
 
   agregarActividad(data: any): void {
     const url = `${environment.apiUrl}/time-report/actividades`;
-    const payload = {
-        IdEmpleado: 1, // mock user id for now
-        IdProyecto: 1, // backend requires int
-        IdTipoActividad: 1, // backend requires int
-        CodigoRequerimiento: data.codigoRequerimiento || "REQ-001",
-        CantidadHoras: data.horasPorDia || data.numeroHoras || 0,
-        FechaActividad: data.fechaActividad ? new Date(data.fechaActividad).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        DescripcionActividad: data.descripcion || "Sin descripcion",
-        Notas: "",
-        EsBillable: true
-    };
+    
+    const crearPayload = (fecha: Date | string) => ({
+      idempleado: this.idEmpleadoActual,
+      idproyecto: data.idproyecto || data.proyectoId,
+      idtipoactividad: data.idtipoactividad || data.tipoActividadId,
+      codigorequerimiento: data.codigoRequerimiento || data.codigorequerimiento || 'REQ-001',
+      cantidadhoras: data.numeroHoras || data.cantidadhoras || 0,
+      fechaactividad: typeof fecha === 'string' ? fecha : new Date(fecha).toISOString().split('T')[0],
+      descripcionactividad: data.descripcion || data.descripcionactividad || 'Sin descripción',
+      notas: data.notas || '',
+      esbillable: data.esbillable ?? true,
+      usuariocreacion: 'frontend_user',
+      ipcreacion: 'unknown'
+    });
 
     if (data.esRecurrente && data.fechaInicio && data.fechaFin) {
       const inicio = new Date(data.fechaInicio);
@@ -99,39 +115,39 @@ export class ActividadesService {
       const cur = new Date(inicio);
       while (cur <= fin) {
         const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
-        if (!esFDS || data.incluirFinesDeSemana) {
-          const recPayload = { ...payload, FechaActividad: new Date(cur).toISOString().split('T')[0] };
-          this.http.post(url, recPayload).subscribe({
+        const esFeriado = data.incluirFeriados ? false : this.esFeriado(cur);
+        
+        if ((data.incluirFinesDeSemana || !esFDS) && !esFeriado) {
+          const payload = crearPayload(cur);
+          this.http.post(url, payload).subscribe({
             next: () => this.cargarActividades(),
-            error: (err) => console.error('Error creating recurrente', err)
+            error: (err) => console.error('Error creating recurrent activity', err)
           });
         }
         cur.setDate(cur.getDate() + 1);
       }
     } else {
+      const payload = crearPayload(data.fechaActividad || new Date());
       this.http.post(url, payload).subscribe({
-        next: () => this.cargarActividades(),
+        next: () => {
+          this.cargarActividades();
+        },
         error: (err) => console.error('Error creating activity', err)
       });
     }
   }
 
-  private nombreProyecto(id: string): string {
-    const map: Record<string, string> = {
-      p1: 'Proyecto bolsa de empleo',
-      p2: 'Middleware Fábrica de software',
-      p3: 'Accesos Fábrica de software',
-      p4: 'Arquitectura Fábrica de software',
-      p5: 'DESARROLLO DE APLICACIONES NAOS'
-    };
-    return map[id] || id;
+  private esFeriado(fecha: Date): boolean {
+    // TODO: integrar con servicio de feriados
+    return false;
   }
 
-  private mismaFecha(a: Date, b: Date): boolean {
+  private mismaFecha(a: Date | string, b: Date): boolean {
+    const dateA = a instanceof Date ? a : new Date(a);
     return (
-      a.getDate() === b.getDate() &&
-      a.getMonth() === b.getMonth() &&
-      a.getFullYear() === b.getFullYear()
+      dateA.getDate() === b.getDate() &&
+      dateA.getMonth() === b.getMonth() &&
+      dateA.getFullYear() === b.getFullYear()
     );
   }
 }

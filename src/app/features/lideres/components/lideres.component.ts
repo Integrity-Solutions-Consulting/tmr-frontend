@@ -8,13 +8,15 @@ import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClient, HttpHeaders } from '@angular/common/http'; 
+import { HttpClient } from '@angular/common/http'; 
 import { ModalLider } from './modal-lider/modal-lider';
+import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
 
 export interface Lider {
+  id?: number;
   codigo: string;
   tipo: 'Interno' | 'Externo';
   nombre: string;
@@ -49,8 +51,8 @@ export class LideresComponent implements OnInit {
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
 
-  // Url base de tu backend Luis
-  private apiUrl = 'http://localhost:5071/api/lideres'; 
+  // Url base de tu backend
+  private apiUrl = `${environment.apiUrl}/lideres`;
 
   // ── Filtros ────────────────────────────────────────────
   busqueda = '';
@@ -93,20 +95,13 @@ export class LideresComponent implements OnInit {
     this.obtenerLideresDelBackend();
   }
 
-  // Helper para sacar el token guardado
-  private obtenerHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   // ── Consumir API Real ──────────────────────────────────
   obtenerLideresDelBackend(): void {
-    this.http.get<any[]>(this.apiUrl, { headers: this.obtenerHeaders() }).subscribe({
+    this.http.get<any[]>(this.apiUrl).subscribe({
       next: (data) => {
         this.lideres = data.map((l, i) => ({
           ...l,
+          id: l.id,
           codigo: String(i + 1).padStart(3, '0'),
           nombre: `${l.nombres} ${l.apellidos}`,
           tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
@@ -322,7 +317,8 @@ export class LideresComponent implements OnInit {
 
   eliminarLider(lider: Lider): void {
     if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
-      this.http.delete(`${this.apiUrl}/${lider.codigo}`, { headers: this.obtenerHeaders() }).subscribe({
+      const id = lider.id ?? lider.codigo;
+      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
         next: () => {
           this.obtenerLideresDelBackend();
         },

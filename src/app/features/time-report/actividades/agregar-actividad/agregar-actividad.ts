@@ -12,9 +12,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
+import { ProyectosService } from '../../../proyectos/servicios/proyectos.service';
+import { LookupOption } from '../../../proyectos/modelos/proyecto.model';
+import { TipoActividad } from '../../../../shared/models/actividad.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -41,21 +47,23 @@ export class AgregarActividad implements OnInit {
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
     private dialogRef = inject(MatDialogRef<AgregarActividad>);
+    private proyectosService = inject(ProyectosService);
+    private http = inject(HttpClient);
 
     public form!: FormGroup;
-
-    // Convertimos los cambios del formulario a un Signal para que el computed reaccione
-    private formValues = inject(FormBuilder).group({}); // temporal para inicializar
-    public formState = toSignal(this.fb.group({}).valueChanges); // Se asignará en ngOnInit
+    public proyectos: LookupOption[] = [];
+    public tiposActividad: TipoActividad[] = [];
+    public cargando = false;
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit() {
+        this.cargarDatos();
         this.form = this.fb.group({
-            tipoActividad: ['Desarrollo', Validators.required],
-            proyectoId: ['p1', Validators.required],
+            idtipoactividad: ['', Validators.required],
+            idproyecto: ['', Validators.required],
             codigoRequerimiento: ['', [Validators.required, Validators.maxLength(50)]],
-            descripcion: ['', Validators.maxLength(350)],
+            descripcion: ['', Validators.maxLength(255)],
             fechaActividad: [this.data?.fecha || new Date(), Validators.required],
             numeroHoras: [4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
@@ -63,13 +71,48 @@ export class AgregarActividad implements OnInit {
             fechaFin: [null],
             horasPorDia: [4],
             incluirFinesDeSemana: [false],
-            incluirFeriados: [false]
+            incluirFeriados: [false],
+            notas: [''],
+            esbillable: [true]
         });
+    }
+
+    private cargarDatos(): void {
+        this.cargando = true;
+        
+        // Cargar proyectos
+        this.proyectosService.obtenerLookups().subscribe({
+            next: (lookups) => {
+                this.proyectos = lookups.clientes || [];
+            },
+            error: (err) => console.error('Error cargando proyectos', err),
+            complete: () => this.cargando = false
+        });
+
+        // Cargar tipos de actividad
+        this.cargarTiposActividad();
+    }
+
+    private cargarTiposActividad(): void {
+        this.http.get<any[]>(`${environment.apiUrl}/time-report/tipos-actividad`)
+            .pipe(
+                map((tipos) => tipos.map((tipo) => ({
+                    id: tipo.id ?? tipo.idtipoactividad,
+                    nombre: tipo.nombre ?? tipo.tipoActividadNombre ?? tipo.nombreActividad ?? tipo.descripcion ?? 'Tipo de actividad',
+                    descripcion: tipo.descripcion
+                })))
+            )
+            .subscribe({
+                next: (tipos) => {
+                    this.tiposActividad = tipos;
+                },
+                error: (err) => console.error('Error cargando tipos de actividad', err)
+            });
     }
 
     // Preview dinámico usando lógica de negocio
     public previewText = computed(() => {
-        const v = this.form?.value; // Acceso directo al valor del form
+        const v = this.form?.value;
         if (!v?.esRecurrente || !v?.fechaInicio || !v?.fechaFin) return '';
 
         const inicio = new Date(v.fechaInicio);
@@ -88,8 +131,8 @@ export class AgregarActividad implements OnInit {
         const cur = new Date(inicio);
         while (cur <= fin) {
             const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
-            const esFeriado = this.feriadosService.esFeriado(cur);
-            if ((incluirFDS || !esFDS) && (incluirFeriados || !esFeriado)) count++;
+            const esFeriado = incluirFeriados ? false : this.feriadosService.esFeriado(cur);
+            if ((incluirFDS || !esFDS) && !esFeriado) count++;
             cur.setDate(cur.getDate() + 1);
         }
         return count;
