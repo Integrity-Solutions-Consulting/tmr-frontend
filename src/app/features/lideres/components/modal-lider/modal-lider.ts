@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter, HostListener, OnInit } from '@a
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-modal-lider',
@@ -42,7 +43,7 @@ export class ModalLider implements OnInit {
 
   private loadTiposLideres(): void {
     console.log('📋 Obteniendo tipos de líderes...');
-    this.http.get<{ id: number, valor: string }[]>('http://localhost:5071/api/lideres/tipos')
+    this.http.get<{ id: number, valor: string }[]>(`${environment.apiUrl}/lideres/tipos`)
       .subscribe({
         next: (tipos: any) => { // ◄ Corregido: Agregado tipo explicitamente
           console.log('✅ Tipos de líderes obtenidos:', tipos);
@@ -54,7 +55,7 @@ export class ModalLider implements OnInit {
 
   private loadPersonasDisponibles(): void {
     console.log('👥 Obteniendo personas disponibles...');
-    this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[]>('http://localhost:5071/api/lideres/personas-disponibles')
+    this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[]>(`${environment.apiUrl}/lideres/personas-disponibles`)
       .subscribe({
         next: (personas: any) => { // ◄ Corregido: Agregado tipo explicitamente
           console.log('✅ Personas disponibles obtenidas:', personas);

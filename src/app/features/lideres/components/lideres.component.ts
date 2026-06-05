@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { ModalLider } from './modal-lider/modal-lider';
+import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
@@ -50,7 +51,7 @@ export class LideresComponent implements OnInit {
   lideresPaginados: Lider[] = [];
 
   // Url base de tu backend Luis
-  private apiUrl = 'http://localhost:5071/api/lideres'; 
+  private apiUrl = `${environment.apiUrl}/lideres`; 
 
   // ── Filtros ────────────────────────────────────────────
   busqueda = '';
@@ -95,7 +96,7 @@ export class LideresComponent implements OnInit {
 
   // Helper para sacar el token guardado
   private obtenerHeaders() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });

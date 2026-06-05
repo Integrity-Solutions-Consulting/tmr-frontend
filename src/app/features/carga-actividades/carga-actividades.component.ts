@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AsyncPipe, DatePipe } from '@angular/common';
+import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { combineLatest, map, startWith, take, BehaviorSubject, tap, Observable } from 'rxjs';
@@ -178,7 +179,7 @@ export class CargaActividadesComponent {
   }
 
   descargarExcel() {
-    this.http.get('http://localhost:5071/api/carga-actividades/download', {
+    this.http.get(`${environment.apiUrl}/carga-actividades/download`, {
       responseType: 'blob'
     }).subscribe({
       next: (blob: Blob) => {

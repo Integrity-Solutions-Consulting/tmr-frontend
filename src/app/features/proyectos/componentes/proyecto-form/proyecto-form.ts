@@ -3,6 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChanges,
   inject
@@ -25,6 +26,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 import { Proyecto } from '../../modelos/proyecto.model';
 
@@ -43,13 +46,41 @@ import { Proyecto } from '../../modelos/proyecto.model';
   templateUrl: './proyecto-form.html',
   styleUrl: './proyecto-form.scss'
 })
-export class ProyectoForm implements OnChanges {
+export class ProyectoForm implements OnChanges, OnInit {
   @Input() proyecto: Proyecto | null = null;
 
   @Output() guardarProyecto = new EventEmitter<Proyecto>();
 
   private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
   intentoGuardar = false;
+
+  lideres: any[] = [];
+  clientes: any[] = [];
+  colaboradores: any[] = [];
+  cargos: string[] = [];
+
+  ngOnInit(): void {
+    this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
+      next: (data) => {
+        this.lideres = data.lideres ?? [];
+        this.clientes = data.clientes ?? [];
+      },
+      error: (err) => console.error('Error fetching project lookups:', err)
+    });
+
+    this.http.get<any[]>(`${environment.apiUrl}/colaboradores`).subscribe({
+      next: (data) => {
+        this.colaboradores = data ?? [];
+        const uniqueCargos = new Set<string>();
+        this.colaboradores.forEach(c => {
+          if (c.cargo) uniqueCargos.add(c.cargo);
+        });
+        this.cargos = Array.from(uniqueCargos).sort();
+      },
+      error: (err) => console.error('Error fetching colaboradores:', err)
+    });
+  }
 
   formulario = this.fb.group({
     codigo: ['', Validators.required],
@@ -103,6 +134,7 @@ export class ProyectoForm implements OnChanges {
   crearRecurso(): FormGroup {
     return this.fb.group({
       tipo: ['Interno', Validators.required],
+      idEmpleado: [null],
       nombre: ['', Validators.required],
       rol: ['', Validators.required],
       entrada: ['', [Validators.required, this.fechaValida()]],
@@ -110,6 +142,18 @@ export class ProyectoForm implements OnChanges {
       costoHora: ['', [Validators.required, this.numeroValido(true)]],
       horas: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]]
     }, { validators: this.rangoFechasValido('entrada', 'salida', 'salidaMenor') });
+  }
+
+  seleccionarColaborador(index: number, nombreCompleto: string): void {
+    const colab = this.colaboradores.find(c => c.nombreCompleto === nombreCompleto);
+    if (colab) {
+      const recurso = this.recursos.at(index);
+      recurso.patchValue({
+        idEmpleado: colab.id,
+        nombre: colab.nombreCompleto,
+        rol: colab.cargo
+      });
+    }
   }
 
   agregarRecurso(): void {
@@ -147,6 +191,7 @@ export class ProyectoForm implements OnChanges {
       const grupo = this.crearRecurso();
       grupo.patchValue({
         ...recurso,
+        idEmpleado: (recurso as any).idEmpleado ?? null,
         costoHora: this.valorFormularioNumerico(recurso.costoHora),
         horas: this.valorFormularioNumerico(recurso.horas)
       });

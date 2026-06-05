@@ -5,13 +5,13 @@
 
 export const AUTH_CONFIG = {
   // Clave bajo la cual se almacena el token en localStorage
-  TOKEN_KEY: 'authToken',
+  TOKEN_KEY: 'accessToken',
 
   // Token JWT válido para desarrollo
-  TOKEN_VALUE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2IiwiZW1haWwiOiJ4YXZpZXJAZ21haWwuY29tIiwiaWF0IjoxNzgwMzMyNjYxLCJleHAiOjE3ODAzMzYyNjEsImlzcyI6InRtci1iYWNrZW5kIiwiYXVkIjoidG1yLXVzdWFyaW9zIn0.sJ_3oZpvNa8UAFuF1yWsEYYuI5nPgbjDOPAz9KZourA',
+  TOKEN_VALUE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkB0bXIuY29tIiwianRpIjoiYjhiYTc0MjgtZGQzOC00NzEwLWJkMGUtYzI5MjdjNzEwYmQ1IiwiaWF0IjoxNzgwNjM3NzU3LCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxNzgwNjM4NjU3LCJpc3MiOiJ0bXItYmFja2VuZCIsImF1ZCI6InRtci1mcm9udGVuZCJ9.vHuMfBghN4eM0gHrZnfwcwH6Wijc_fudzcTQks7rIGg',
   //TOKEN_VALUE: localStorage.getItem('authToken') || '',
   // URL base de la API de autenticación
-  API_URL: 'http://localhost:5071/api',
+  API_URL: 'http://localhost:7082/api',
 
   // Endpoints
   ENDPOINTS: {

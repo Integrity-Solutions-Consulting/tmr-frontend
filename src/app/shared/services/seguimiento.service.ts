@@ -18,15 +18,27 @@ export class SeguimientoService {
 
   cargarSeguimiento(filtros?: SeguimientoFiltros) {
     let params = new HttpParams();
+    
+    const formatDate = (d: Date): string => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     if (filtros) {
       if (filtros.busqueda) params = params.set('busqueda', filtros.busqueda);
-      if (filtros.fechaDesde) params = params.set('FechaDesde', filtros.fechaDesde.toISOString());
-      if (filtros.fechaHasta) params = params.set('FechaHasta', filtros.fechaHasta.toISOString());
+      if (filtros.fechaDesde) params = params.set('FechaDesde', formatDate(filtros.fechaDesde));
+      if (filtros.fechaHasta) params = params.set('FechaHasta', formatDate(filtros.fechaHasta));
+      if (filtros.periodo) params = params.set('Periodo', filtros.periodo);
     } else {
       // Default dates if needed by backend
       const hoy = new Date();
-      params = params.set('FechaDesde', new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString());
-      params = params.set('FechaHasta', new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString());
+      const firstDay = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const lastDay = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+      params = params.set('FechaDesde', formatDate(firstDay));
+      params = params.set('FechaHasta', formatDate(lastDay));
+      params = params.set('Periodo', 'mes-completo');
     }
 
     this.http.get<Colaborador[]>(`${environment.apiUrl}/time-report/seguimiento`, { params }).subscribe({

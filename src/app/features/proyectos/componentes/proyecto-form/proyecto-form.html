@@ -25,7 +25,11 @@
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Cliente</mat-label>
-        <input matInput formControlName="cliente">
+        <mat-select formControlName="cliente">
+          @for (cliente of clientes; track cliente.id) {
+            <mat-option [value]="cliente.nombre">{{ cliente.nombre }}</mat-option>
+          }
+        </mat-select>
         @if (campoInvalido('cliente')) {
           <mat-error>Este campo es obligatorio</mat-error>
         }
@@ -117,7 +121,11 @@
     <div class="proyecto-form__leader">
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seleccionar líder</mat-label>
-        <input matInput formControlName="lider">
+        <mat-select formControlName="lider">
+          @for (lider of lideres; track lider.id) {
+            <mat-option [value]="lider.nombre">{{ lider.nombre }}</mat-option>
+          }
+        </mat-select>
         @if (campoInvalido('lider')) {
           <mat-error>Este campo es obligatorio</mat-error>
         }
@@ -178,7 +186,11 @@
             <div class="proyecto-form__resource-top">
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-nombre">
                 <mat-label>Seleccionar recurso</mat-label>
-                <input matInput formControlName="nombre">
+                <mat-select formControlName="nombre" (selectionChange)="seleccionarColaborador(index, $event.value)">
+                  @for (colab of colaboradores; track colab.id) {
+                    <mat-option [value]="colab.nombreCompleto">{{ colab.nombreCompleto }}</mat-option>
+                  }
+                </mat-select>
                 @if (recursoCampoInvalido(index, 'nombre')) {
                   <mat-error>Este campo es obligatorio</mat-error>
                 }
@@ -186,7 +198,11 @@
 
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
                 <mat-label>Seleccionar cargo</mat-label>
-                <input matInput formControlName="rol">
+                <mat-select formControlName="rol">
+                  @for (cargo of cargos; track cargo) {
+                    <mat-option [value]="cargo">{{ cargo }}</mat-option>
+                  }
+                </mat-select>
                 @if (recursoCampoInvalido(index, 'rol')) {
                   <mat-error>Este campo es obligatorio</mat-error>
                 }
