@@ -8,10 +8,9 @@ export const AUTH_CONFIG = {
   TOKEN_KEY: 'accessToken',
 
   // Token JWT válido para desarrollo
-  TOKEN_VALUE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkB0bXIuY29tIiwianRpIjoiYjhiYTc0MjgtZGQzOC00NzEwLWJkMGUtYzI5MjdjNzEwYmQ1IiwiaWF0IjoxNzgwNjM3NzU3LCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxNzgwNjM4NjU3LCJpc3MiOiJ0bXItYmFja2VuZCIsImF1ZCI6InRtci1mcm9udGVuZCJ9.vHuMfBghN4eM0gHrZnfwcwH6Wijc_fudzcTQks7rIGg',
-  //TOKEN_VALUE: localStorage.getItem('authToken') || '',
+  TOKEN_VALUE: '',
   // URL base de la API de autenticación
-  API_URL: 'http://localhost:7082/api',
+  API_URL: 'http://localhost:5091/api',
 
   // Endpoints
   ENDPOINTS: {

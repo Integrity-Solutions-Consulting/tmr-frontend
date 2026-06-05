@@ -12,9 +12,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
-
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
+import { ProyectosService } from '../../../proyectos/servicios/proyectos.service';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -40,9 +40,11 @@ export class AgregarActividad implements OnInit {
     private fb = inject(FormBuilder);
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
+    private proyectosService = inject(ProyectosService);
     private dialogRef = inject(MatDialogRef<AgregarActividad>);
 
     public form!: FormGroup;
+    public proyectos: any[] = [];
 
     // Convertimos los cambios del formulario a un Signal para que el computed reaccione
     private formValues = inject(FormBuilder).group({}); // temporal para inicializar
@@ -53,7 +55,7 @@ export class AgregarActividad implements OnInit {
     ngOnInit() {
         this.form = this.fb.group({
             tipoActividad: ['Desarrollo', Validators.required],
-            proyectoId: ['p1', Validators.required],
+            proyectoId: [null, Validators.required],
             codigoRequerimiento: ['', [Validators.required, Validators.maxLength(50)]],
             descripcion: ['', Validators.maxLength(350)],
             fechaActividad: [this.data?.fecha || new Date(), Validators.required],
@@ -64,6 +66,16 @@ export class AgregarActividad implements OnInit {
             horasPorDia: [4],
             incluirFinesDeSemana: [false],
             incluirFeriados: [false]
+        });
+
+        this.proyectosService.obtenerProyectos().subscribe({
+            next: (projs) => {
+                this.proyectos = projs || [];
+                if (this.proyectos.length > 0) {
+                    this.form.patchValue({ proyectoId: this.proyectos[0].id });
+                }
+            },
+            error: (err) => console.error('Error loading projects in add activity dialog:', err)
         });
     }
 

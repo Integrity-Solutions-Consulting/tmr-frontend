@@ -4,6 +4,7 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
@@ -25,6 +26,7 @@ import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimations(),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),

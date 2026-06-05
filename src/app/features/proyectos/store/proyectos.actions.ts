@@ -10,9 +10,24 @@ export const cargarProyectosExito = createAction(
   props<{ proyectos: Proyecto[] }>()
 );
 
+export const cargarProyectosFallo = createAction(
+  '[Proyectos] Cargar Proyectos Fallo',
+  props<{ error: string }>()
+);
+
 export const agregarProyecto = createAction(
   '[Proyectos] Agregar Proyecto',
   props<{ proyecto: Proyecto }>()
+);
+
+export const agregarProyectoExito = createAction(
+  '[Proyectos] Agregar Proyecto Exito',
+  props<{ proyecto: Proyecto }>()
+);
+
+export const agregarProyectoFallo = createAction(
+  '[Proyectos] Agregar Proyecto Fallo',
+  props<{ error: string }>()
 );
 
 export const editarProyecto = createAction(
@@ -20,7 +35,27 @@ export const editarProyecto = createAction(
   props<{ proyecto: Proyecto }>()
 );
 
+export const editarProyectoExito = createAction(
+  '[Proyectos] Editar Proyecto Exito',
+  props<{ proyecto: Proyecto }>()
+);
+
+export const editarProyectoFallo = createAction(
+  '[Proyectos] Editar Proyecto Fallo',
+  props<{ error: string }>()
+);
+
 export const eliminarProyecto = createAction(
   '[Proyectos] Eliminar Proyecto',
   props<{ codigo: string }>()
+);
+
+export const eliminarProyectoExito = createAction(
+  '[Proyectos] Eliminar Proyecto Exito',
+  props<{ codigo: string }>()
+);
+
+export const eliminarProyectoFallo = createAction(
+  '[Proyectos] Eliminar Proyecto Fallo',
+  props<{ error: string }>()
 );

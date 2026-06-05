@@ -3,10 +3,10 @@ import { createReducer, on } from '@ngrx/store';
 import { Proyecto } from '../modelos/proyecto.model';
 
 import {
-  agregarProyecto,
+  agregarProyectoExito,
   cargarProyectosExito,
-  editarProyecto,
-  eliminarProyecto
+  editarProyectoExito,
+  eliminarProyectoExito
 } from './proyectos.actions';
 
 export interface ProyectosState {
@@ -25,19 +25,19 @@ export const proyectosReducer = createReducer(
     proyectos
   })),
 
-  on(agregarProyecto, (state, { proyecto }) => ({
+  on(agregarProyectoExito, (state, { proyecto }) => ({
     ...state,
     proyectos: [...state.proyectos, proyecto]
   })),
 
-  on(editarProyecto, (state, { proyecto }) => ({
+  on(editarProyectoExito, (state, { proyecto }) => ({
     ...state,
     proyectos: state.proyectos.map(p =>
       p.codigo === proyecto.codigo ? proyecto : p
     )
   })),
 
-  on(eliminarProyecto, (state, { codigo }) => ({
+  on(eliminarProyectoExito, (state, { codigo }) => ({
     ...state,
     proyectos: state.proyectos.filter(
       p => p.codigo !== codigo

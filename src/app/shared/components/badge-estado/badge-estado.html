@@ -3,7 +3,7 @@
   <span
     class="status-dot"
     [ngClass]="{
-      'progress': estado === 'En progreso',
+      'progress': estado === 'En progreso' || estado === 'Activo',
       'completed': estado === 'Completado',
       'cancelled': estado === 'Cancelado',
       'waiting': estado === 'En espera',

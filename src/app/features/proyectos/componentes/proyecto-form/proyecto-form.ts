@@ -83,6 +83,7 @@ export class ProyectoForm implements OnChanges, OnInit {
   }
 
   formulario = this.fb.group({
+    id: [null as number | null],
     codigo: ['', Validators.required],
     nombre: ['', Validators.required],
     cliente: ['', Validators.required],
@@ -303,7 +304,19 @@ export class ProyectoForm implements OnChanges, OnInit {
         return null;
       }
 
-      return /^\d{4}-\d{2}-\d{2}$/.test(String(valor)) ? null : { fechaInvalida: true };
+      if (valor instanceof Date) {
+        return isNaN(valor.getTime()) ? { fechaInvalida: true } : null;
+      }
+
+      if (typeof valor === 'string') {
+        if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+          return null;
+        }
+        const d = new Date(valor);
+        return !isNaN(d.getTime()) ? null : { fechaInvalida: true };
+      }
+
+      return { fechaInvalida: true };
     };
   }
 

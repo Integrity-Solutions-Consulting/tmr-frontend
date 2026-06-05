@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { ProfilePopoverComponent } from '../../../shared/components/profile-popover/profile-popover.component';
+import * as AuthActions from '../../../features/auth/store/auth.actions';
 
 @Component({
   selector: 'app-navbar',
@@ -9,6 +11,7 @@ import { ProfilePopoverComponent } from '../../../shared/components/profile-popo
   styleUrl: './navbar.scss'
 })
 export class Navbar {
+  private store = inject(Store);
   perfilAbierto = false;
 
   togglePerfil(): void {
@@ -21,5 +24,6 @@ export class Navbar {
 
   cerrarSesion(): void {
     this.perfilAbierto = false;
+    this.store.dispatch(AuthActions.logout());
   }
 }

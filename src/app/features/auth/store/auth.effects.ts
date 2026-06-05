@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
@@ -11,6 +12,7 @@ export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
+  private router = inject(Router);
 
   login$ = createEffect(() =>
     this.actions$.pipe(
@@ -53,6 +55,17 @@ export class AuthEffects {
         )
       )
     )
+  );
+
+  logoutSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.logoutSuccess, AuthActions.logoutFailure),
+        tap(() => {
+          this.router.navigate(['/auth/login']);
+        })
+      ),
+    { dispatch: false }
   );
 
   refreshToken$ = createEffect(() =>

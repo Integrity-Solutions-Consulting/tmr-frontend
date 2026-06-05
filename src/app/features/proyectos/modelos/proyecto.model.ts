@@ -1,4 +1,6 @@
 export interface RecursoProyecto {
+  id?: number;
+  idEmpleado?: number;
   tipo: string;
   nombre: string;
   rol: string;
@@ -9,8 +11,14 @@ export interface RecursoProyecto {
 }
 
 export interface Proyecto {
+  id?: number;
   codigo: string;
   nombre: string;
+  descripcion?: string;
+  idCliente?: number;
+  idTipoProyecto?: number;
+  idLider?: number;
+  idEstadoProyecto?: number;
   estado: string;
   cliente?: string;
   tipo?: string;
