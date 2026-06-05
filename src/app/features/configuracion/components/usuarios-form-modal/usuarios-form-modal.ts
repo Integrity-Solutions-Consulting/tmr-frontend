@@ -17,15 +17,6 @@ import {
 type TipoIdentificacionId = 'cedula' | 'ruc' | 'pasaporte' | 'otro-documento';
 const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
-const LOCAL_ROLES: { id: number; nombre: string }[] = [
-  { id: 1, nombre: 'Administrador' },
-  { id: 2, nombre: 'Gerente' },
-  { id: 3, nombre: 'Lider' },
-  { id: 4, nombre: 'Colaborador' },
-  { id: 5, nombre: 'Recursos Humanos' },
-  { id: 6, nombre: 'Administrativo' },
-];
-
 
 @Component({
   selector: 'app-usuarios-form-modal',
@@ -63,11 +54,9 @@ export class UsuariosFormModal {
     { id: '5', nombre: 'Ecuador' },
   ];
 
-  readonly rolesList = this.data.roles?.length
-    ? this.data.roles
-        .filter((rol) => rol.activo)
-        .map((rol) => ({ id: rol.id, nombre: rol.nombre }))
-    : LOCAL_ROLES;
+  readonly rolesList = (this.data.roles ?? [])
+    .filter((rol) => rol.activo)
+    .map((rol) => ({ id: rol.id, nombre: rol.nombre }));
 
   readonly form = this.fb.nonNullable.group({
     tipoPersona: [this.data.usuario?.tipoPersona ?? 'NATURAL', Validators.required],

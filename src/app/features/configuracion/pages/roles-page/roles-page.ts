@@ -20,6 +20,7 @@ export class RolesPage {
   private readonly dialog = inject(MatDialog);
   readonly query = signal('');
   readonly roles = this.configuracionService.roles;
+  readonly modulos = this.configuracionService.modulos;
 
   readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
   readonly modulosCubiertos = computed(() => new Set(this.roles().flatMap((rol) => rol.modulos)).size);
@@ -43,6 +44,7 @@ export class RolesPage {
       rol,
       roles: this.roles(),
       nextId: this.configuracionService.nextId(this.roles()),
+      modulos: this.modulos(),
       mode: rol ? mode : 'create',
     };
 
