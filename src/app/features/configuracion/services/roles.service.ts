@@ -5,6 +5,12 @@ import { Rol, RolCreate } from '../models/roles-feriados.models';
 
 import { environment } from '../../../../environments/environment';
 
+interface RolBackendPayload {
+  nombre: string;
+  descripcion: string;
+  modulosids: number[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class RolesService {
   private base = `${environment.apiUrl}/configuracion/roles`;
@@ -20,11 +26,11 @@ export class RolesService {
   }
 
   createRole(payload: RolCreate): Observable<Rol> {
-    return this.http.post<Rol>(this.base, payload);
+    return this.http.post<Rol>(this.base, this.toBackendPayload(payload));
   }
 
   updateRole(id: number, payload: RolCreate & { activo?: boolean }): Observable<Rol> {
-    return this.http.put<Rol>(`${this.base}/${id}`, payload);
+    return this.http.put<Rol>(`${this.base}/${id}`, this.toBackendPayload(payload));
   }
 
   toggleRole(id: number, activo: boolean): Observable<void> {
@@ -33,5 +39,13 @@ export class RolesService {
 
   deleteRole(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  private toBackendPayload(payload: RolCreate): RolBackendPayload {
+    return {
+      nombre: payload.nombre,
+      descripcion: payload.descripcion,
+      modulosids: payload.modulos.map((modulo) => Number(modulo)).filter((id) => Number.isFinite(id) && id > 0),
+    };
   }
 }

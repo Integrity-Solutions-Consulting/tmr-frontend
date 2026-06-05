@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MODULOS_DISPONIBLES } from '../../mocks/configuracion.mock';
 import { Rol } from '../../models/configuracion.models';
 import { ONLY_LETTERS_REGEX } from '../../../../shared/validators/form-validators';
 
@@ -12,6 +11,7 @@ export interface RolModalData {
   rol?: Rol;
   roles: Rol[];
   nextId: number;
+  modulos?: { id: number; nombre: string }[];
   mode?: RolModalMode;
 }
 
@@ -29,7 +29,7 @@ export class RolesFormModal {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<RolesFormModal>);
   readonly data = inject<RolModalData>(MAT_DIALOG_DATA);
-  readonly modulos = MODULOS_DISPONIBLES;
+  readonly modulos = this.data.modulos?.map((modulo) => modulo.nombre) ?? [];
 
   readonly form = this.fb.nonNullable.group({
     nombre: [
