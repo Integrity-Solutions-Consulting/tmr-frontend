@@ -3,6 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChanges,
   inject
@@ -26,7 +27,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
-import { Proyecto } from '../../modelos/proyecto.model';
+import { Proyecto, LookupOption, ProyectoLookups } from '../../modelos/proyecto.model';
+import { ProyectosService } from '../../servicios/proyectos.service';
 
 @Component({
   selector: 'app-proyecto-form',
@@ -43,13 +45,20 @@ import { Proyecto } from '../../modelos/proyecto.model';
   templateUrl: './proyecto-form.html',
   styleUrl: './proyecto-form.scss'
 })
-export class ProyectoForm implements OnChanges {
+export class ProyectoForm implements OnInit, OnChanges {
   @Input() proyecto: Proyecto | null = null;
 
   @Output() guardarProyecto = new EventEmitter<Proyecto>();
 
   private fb = inject(FormBuilder);
+  private proyectosService = inject(ProyectosService);
+
   intentoGuardar = false;
+
+  clientes: LookupOption[] = [];
+  lideres: LookupOption[] = [];
+  estados: LookupOption[] = [];
+  tipos: LookupOption[] = [];
 
   formulario = this.fb.group({
     codigo: ['', Validators.required],
@@ -69,6 +78,24 @@ export class ProyectoForm implements OnChanges {
       this.crearRecurso()
     ])
   }, { validators: this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor') });
+
+  ngOnInit(): void {
+    this.cargarLookups();
+  }
+
+  private cargarLookups(): void {
+    this.proyectosService.obtenerLookups().subscribe({
+      next: (lookups: ProyectoLookups) => {
+        this.clientes = lookups.clientes;
+        this.lideres = lookups.lideres;
+        this.estados = lookups.estados;
+        this.tipos = lookups.tipos;
+      },
+      error: (error) => {
+        console.error('Error al cargar los lookups:', error);
+      }
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['proyecto']) {

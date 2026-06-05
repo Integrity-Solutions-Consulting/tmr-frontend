@@ -25,3 +25,15 @@ export interface Proyecto {
   horas?: number;
   recursos?: RecursoProyecto[];
 }
+
+export interface LookupOption {
+  id: number;
+  nombre: string;
+}
+
+export interface ProyectoLookups {
+  clientes: LookupOption[];
+  lideres: LookupOption[];
+  estados: LookupOption[];
+  tipos: LookupOption[];
+}

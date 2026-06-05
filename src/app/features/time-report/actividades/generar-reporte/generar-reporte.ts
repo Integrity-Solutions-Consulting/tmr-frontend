@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import * as XLSX from 'xlsx';
+import { ProyectosService } from '../../../proyectos/servicios/proyectos.service';
+import { LookupOption } from '../../../proyectos/modelos/proyecto.model';
 
 @Component({
     selector: 'app-generar-reporte',
@@ -21,20 +23,38 @@ import * as XLSX from 'xlsx';
     templateUrl: './generar-reporte.html',
     styleUrls: ['./generar-reporte.scss']
 })
-export class GenerarReporte {
+export class GenerarReporte implements OnInit {
     private fb = inject(FormBuilder);
     private dialogRef = inject(MatDialogRef<GenerarReporte>);
+    private proyectosService = inject(ProyectosService);
 
     public meses = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
 
+    clientes: LookupOption[] = [];
+
     public form: FormGroup = this.fb.group({
         clienteId: ['all'],
         anio: [2026, Validators.required],
-        mes: [4, Validators.required] // Mayo (índice 4)
+        mes: [4, Validators.required]
     });
+
+    ngOnInit(): void {
+        this.cargarClientes();
+    }
+
+    private cargarClientes(): void {
+        this.proyectosService.obtenerClientes().subscribe({
+            next: (clientes: LookupOption[]) => {
+                this.clientes = clientes;
+            },
+            error: (error) => {
+                console.error('Error al cargar clientes:', error);
+            }
+        });
+    }
 
     cancelar() {
         this.dialogRef.close();
