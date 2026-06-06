@@ -193,34 +193,35 @@
 }
 
 .proyecto-form__resource-top,
+.proyecto-form__resource-middle,
 .proyecto-form__resource-bottom {
   display: grid;
   gap: 12px;
   align-items: center;
 }
 
+/* Fila 1: Recurso (empleado) + Departamento + botón X */
 .proyecto-form__resource-top {
-  grid-template-columns: 394px 320px 36px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
 }
 
+/* Fila 2: Cargo (ocupa todo el ancho) */
+.proyecto-form__resource-middle {
+  grid-template-columns: 1fr;
+}
+
+/* Fila 3: Entrada + Salida + Costo + Horas */
 .proyecto-form__resource-bottom {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 150px 150px;
 }
 
 .proyecto-form__resource-nombre,
+.proyecto-form__resource-departamento,
 .proyecto-form__resource-rol,
 .proyecto-form__resource-fecha,
 .proyecto-form__resource-costo,
 .proyecto-form__resource-horas {
   width: 100%;
-}
-
-.proyecto-form__resource-nombre {
-  width: 394px;
-}
-
-.proyecto-form__resource-rol {
-  width: 320px;
 }
 
 .proyecto-form__resource-costo,
@@ -299,6 +300,7 @@
   }
 
   .proyecto-form__resource-nombre,
+  .proyecto-form__resource-departamento,
   .proyecto-form__resource-rol,
   .proyecto-form__resource-costo,
   .proyecto-form__resource-horas {
@@ -326,9 +328,9 @@
     grid-template-columns: minmax(0, 1fr) 36px;
   }
 
-  .proyecto-form__resource-rol {
+  /* En móvil el departamento baja a segunda fila */
+  .proyecto-form__resource-departamento {
     grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   .proyecto-form__remove {

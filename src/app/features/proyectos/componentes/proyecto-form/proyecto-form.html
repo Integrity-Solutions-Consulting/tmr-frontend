@@ -6,41 +6,29 @@
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Tipo de proyecto</mat-label>
         <mat-select formControlName="tipo">
-          @for (tipo of tipos; track tipo.id) {
-            <mat-option [value]="tipo.nombre">{{ tipo.nombre }}</mat-option>
-          }
+          <mat-option *ngFor="let tipo of tipos" [value]="tipo.nombre">{{ tipo.nombre }}</mat-option>
         </mat-select>
-        @if (campoInvalido('tipo')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('tipo')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Código</mat-label>
         <input matInput formControlName="codigo">
-        @if (campoInvalido('codigo')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('codigo')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Cliente</mat-label>
         <mat-select formControlName="cliente">
-          @for (cliente of clientes; track cliente.id) {
-            <mat-option [value]="cliente.nombre">{{ cliente.nombre }}</mat-option>
-          }
+          <mat-option *ngFor="let cliente of clientes" [value]="cliente.nombre">{{ cliente.nombre }}</mat-option>
         </mat-select>
-        @if (campoInvalido('cliente')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('cliente')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Nombre del Proyecto</mat-label>
         <input matInput formControlName="nombre">
-        @if (campoInvalido('nombre')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('nombre')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -48,9 +36,7 @@
         <input matInput [matDatepicker]="inicioDatepicker" formControlName="fechaInicio">
         <mat-datepicker-toggle matSuffix [for]="inicioDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #inicioDatepicker></mat-datepicker>
-        @if (campoInvalido('fechaInicio')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('fechaInicio')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -58,11 +44,8 @@
         <input matInput [matDatepicker]="finDatepicker" formControlName="fechaFin">
         <mat-datepicker-toggle matSuffix [for]="finDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #finDatepicker></mat-datepicker>
-        @if (fechaFinInvalida()) {
-          <mat-error>La fecha fin no puede ser menor que la fecha de inicio</mat-error>
-        } @else if (campoInvalido('fechaFin')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</mat-error>
+        <mat-error *ngIf="!fechaFinInvalida() && campoInvalido('fechaFin')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -75,11 +58,8 @@
           (keydown)="bloquearCaracteresNumericos($event, true)"
           (paste)="bloquearPegadoNoNumerico($event, true)"
         >
-        @if (campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')) {
-          <mat-error>Solo se permiten números</mat-error>
-        } @else if (campoInvalido('presupuesto')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')">Solo se permiten números</mat-error>
+        <mat-error *ngIf="campoInvalido('presupuesto') && !formulario.controls.presupuesto.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -92,23 +72,16 @@
           (keydown)="bloquearCaracteresNumericos($event, false)"
           (paste)="bloquearPegadoNoNumerico($event, false)"
         >
-        @if (campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))) {
-          <mat-error>Solo se permiten números</mat-error>
-        } @else if (campoInvalido('horas')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))">Solo se permiten números</mat-error>
+        <mat-error *ngIf="campoInvalido('horas') && !formulario.controls.horas.hasError('soloNumeros') && !formulario.controls.horas.hasError('min')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Estado</mat-label>
         <mat-select formControlName="estado">
-          @for (estado of estados; track estado.id) {
-            <mat-option [value]="estado.nombre">{{ estado.nombre }}</mat-option>
-          }
+          <mat-option *ngFor="let estado of estados" [value]="estado.nombre">{{ estado.nombre }}</mat-option>
         </mat-select>
-        @if (campoInvalido('estado')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('estado')">Este campo es obligatorio</mat-error>
       </mat-form-field>
     </div>
   </section>
@@ -121,13 +94,9 @@
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seleccionar líder</mat-label>
         <mat-select formControlName="lider">
-          @for (lider of lideres; track lider.id) {
-            <mat-option [value]="lider.nombre">{{ lider.nombre }}</mat-option>
-          }
+          <mat-option *ngFor="let lider of lideres" [value]="lider.nombre">{{ lider.nombre }}</mat-option>
         </mat-select>
-        @if (campoInvalido('lider')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('lider')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -140,11 +109,8 @@
           (keydown)="bloquearCaracteresNumericos($event, true)"
           (paste)="bloquearPegadoNoNumerico($event, true)"
         >
-        @if (campoInvalido('costoHoraLider') && formulario.controls.costoHoraLider.hasError('soloNumeros')) {
-          <mat-error>Solo se permiten números</mat-error>
-        } @else if (campoInvalido('costoHoraLider')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('costoHoraLider') && formulario.controls.costoHoraLider.hasError('soloNumeros')">Solo se permiten números</mat-error>
+        <mat-error *ngIf="campoInvalido('costoHoraLider') && !formulario.controls.costoHoraLider.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -157,17 +123,13 @@
           (keydown)="bloquearCaracteresNumericos($event, false)"
           (paste)="bloquearPegadoNoNumerico($event, false)"
         >
-        @if (campoInvalido('horasLider') && (formulario.controls.horasLider.hasError('soloNumeros') || formulario.controls.horasLider.hasError('min'))) {
-          <mat-error>Solo se permiten números</mat-error>
-        } @else if (campoInvalido('horasLider')) {
-          <mat-error>Este campo es obligatorio</mat-error>
-        }
+        <mat-error *ngIf="campoInvalido('horasLider') && (formulario.controls.horasLider.hasError('soloNumeros') || formulario.controls.horasLider.hasError('min'))">Solo se permiten números</mat-error>
+        <mat-error *ngIf="campoInvalido('horasLider') && !formulario.controls.horasLider.hasError('soloNumeros') && !formulario.controls.horasLider.hasError('min')">Este campo es obligatorio</mat-error>
       </mat-form-field>
     </div>
 
     <div class="proyecto-form__resources-header">
       <h4 class="proyecto-form__subtitle">Recursos</h4>
-
       <button
         mat-stroked-button
         type="button"
@@ -179,24 +141,37 @@
     </div>
 
     <div class="proyecto-form__resources" formArrayName="recursos">
-      @for (recurso of recursos.controls; track $index; let index = $index) {
+      <ng-container *ngFor="let recurso of recursos.controls; let index = index">
         <div class="proyecto-form__resource">
           <div class="proyecto-form__resource-row" [formGroupName]="index">
             <div class="proyecto-form__resource-top">
+
+              <!-- Recurso (empleado) -->
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-nombre">
                 <mat-label>Seleccionar recurso</mat-label>
-                <input matInput formControlName="nombre">
-                @if (recursoCampoInvalido(index, 'nombre')) {
-                  <mat-error>Este campo es obligatorio</mat-error>
-                }
+                <mat-select
+                  formControlName="nombre"
+                  (selectionChange)="onEmpleadoChange(index, $event.value)"
+                >
+                  <mat-option *ngFor="let empleado of empleadosDisponibles" [value]="empleado.nombre">
+                    {{ empleado.nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="recursoCampoInvalido(index, 'nombre')">Este campo es obligatorio</mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
-                <mat-label>Seleccionar cargo</mat-label>
-                <input matInput formControlName="rol">
-                @if (recursoCampoInvalido(index, 'rol')) {
-                  <mat-error>Este campo es obligatorio</mat-error>
-                }
+              <!-- Departamento -->
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-departamento">
+                <mat-label>Departamento</mat-label>
+                <mat-select
+                  formControlName="departamento"
+                  (selectionChange)="onDepartamentoChange(index, $event.value)"
+                >
+                  <mat-option [value]="null">— Todos —</mat-option>
+                  <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
+                    {{ dep.nombre }}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
 
               <button
@@ -210,15 +185,26 @@
               </button>
             </div>
 
+            <!-- Cargo filtrado por departamento -->
+            <div class="proyecto-form__resource-middle">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
+                <mat-label>Seleccionar cargo</mat-label>
+                <mat-select formControlName="rol">
+                  <mat-option *ngFor="let cargo of getCargosParaRecurso(index)" [value]="cargo.nombre">
+                    {{ cargo.nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="recursoCampoInvalido(index, 'rol')">Este campo es obligatorio</mat-error>
+              </mat-form-field>
+            </div>
+
             <div class="proyecto-form__resource-bottom">
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
                 <mat-label>Entrada</mat-label>
                 <input matInput [matDatepicker]="entradaDatepicker" formControlName="entrada">
                 <mat-datepicker-toggle matSuffix [for]="entradaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #entradaDatepicker></mat-datepicker>
-                @if (recursoCampoInvalido(index, 'entrada')) {
-                  <mat-error>Este campo es obligatorio</mat-error>
-                }
+                <mat-error *ngIf="recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
@@ -226,51 +212,41 @@
                 <input matInput [matDatepicker]="salidaDatepicker" formControlName="salida">
                 <mat-datepicker-toggle matSuffix [for]="salidaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #salidaDatepicker></mat-datepicker>
-                @if (recursoFechaSalidaInvalida(index)) {
-                  <mat-error>La salida no puede ser menor que la entrada</mat-error>
-                } @else if (recursoCampoInvalido(index, 'salida')) {
-                  <mat-error>Este campo es obligatorio</mat-error>
-                }
+                <mat-error *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</mat-error>
+                <mat-error *ngIf="!recursoFechaSalidaInvalida(index) && recursoCampoInvalido(index, 'salida')">Este campo es obligatorio</mat-error>
               </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-costo">
-              <mat-label>Costo</mat-label>
-              <input
-                matInput
-                type="text"
-                inputmode="decimal"
-                formControlName="costoHora"
-                (keydown)="bloquearCaracteresNumericos($event, true)"
-                (paste)="bloquearPegadoNoNumerico($event, true)"
-              >
-              @if (recursoCampoInvalido(index, 'costoHora') && recursos.at(index).get('costoHora')?.hasError('soloNumeros')) {
-                <mat-error>Solo se permiten números</mat-error>
-              } @else if (recursoCampoInvalido(index, 'costoHora')) {
-                <mat-error>Este campo es obligatorio</mat-error>
-              }
-            </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-costo">
+                <mat-label>Costo</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  inputmode="decimal"
+                  formControlName="costoHora"
+                  (keydown)="bloquearCaracteresNumericos($event, true)"
+                  (paste)="bloquearPegadoNoNumerico($event, true)"
+                >
+                <mat-error *ngIf="recursoCampoInvalido(index, 'costoHora') && recursos.at(index).get('costoHora')?.hasError('soloNumeros')">Solo se permiten números</mat-error>
+                <mat-error *ngIf="recursoCampoInvalido(index, 'costoHora') && !recursos.at(index).get('costoHora')?.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-horas">
-              <mat-label>Horas</mat-label>
-              <input
-                matInput
-                type="text"
-                inputmode="numeric"
-                formControlName="horas"
-                (keydown)="bloquearCaracteresNumericos($event, false)"
-                (paste)="bloquearPegadoNoNumerico($event, false)"
-              >
-              @if (recursoCampoInvalido(index, 'horas') && (recursos.at(index).get('horas')?.hasError('soloNumeros') || recursos.at(index).get('horas')?.hasError('min'))) {
-                <mat-error>Solo se permiten números</mat-error>
-              } @else if (recursoCampoInvalido(index, 'horas')) {
-                <mat-error>Este campo es obligatorio</mat-error>
-              }
-            </mat-form-field>
-
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-horas">
+                <mat-label>Horas</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  inputmode="numeric"
+                  formControlName="horas"
+                  (keydown)="bloquearCaracteresNumericos($event, false)"
+                  (paste)="bloquearPegadoNoNumerico($event, false)"
+                >
+                <mat-error *ngIf="recursoCampoInvalido(index, 'horas') && (recursos.at(index).get('horas')?.hasError('soloNumeros') || recursos.at(index).get('horas')?.hasError('min'))">Solo se permiten números</mat-error>
+                <mat-error *ngIf="recursoCampoInvalido(index, 'horas') && !recursos.at(index).get('horas')?.hasError('soloNumeros') && !recursos.at(index).get('horas')?.hasError('min')">Este campo es obligatorio</mat-error>
+              </mat-form-field>
             </div>
           </div>
         </div>
-      }
+      </ng-container>
     </div>
   </section>
 

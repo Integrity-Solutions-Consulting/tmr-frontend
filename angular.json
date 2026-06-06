@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "19b0e6c8-eefe-4f36-b62a-37198760c921"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -36,7 +36,15 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "exceljs",
+              "html2canvas",
+              "canvg",
+              "rgbcolor",
+              "raf",
+              "core-js"
+            ]
           },
           "configurations": {
             "production": {
@@ -82,9 +90,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "packageManager": "npm",
-    "analytics": false
   }
 }

@@ -4,7 +4,12 @@ import { map, switchMap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { ProyectosService } from '../servicios/proyectos.service';
-import { cargarProyectos, cargarProyectosExito } from './proyectos.actions';
+import { 
+  cargarProyectos, 
+  cargarProyectosExito,
+  agregarProyecto,
+  editarProyecto
+} from './proyectos.actions';
 
 @Injectable()
 export class ProyectosEffects {
@@ -20,6 +25,31 @@ export class ProyectosEffects {
           catchError(() => of(cargarProyectosExito({ proyectos: [] })))
         )
       )
+    )
+  );
+
+  agregarProyecto$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(agregarProyecto),
+      switchMap(({ proyecto }) =>
+        this.proyectosService.crearProyecto(proyecto).pipe(
+          map(() => cargarProyectos()),
+          catchError(() => of(cargarProyectos()))
+        )
+      )
+    )
+  );
+
+  editarProyecto$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(editarProyecto),
+      switchMap(({ proyecto }) => {
+        console.log('effect proyecto.id:', proyecto.id); // ← agrega esto
+        return this.proyectosService.actualizarProyecto(proyecto.id, proyecto).pipe(
+          map(() => cargarProyectos()),
+          catchError(() => of(cargarProyectos()))
+        );
+      })
     )
   );
 }

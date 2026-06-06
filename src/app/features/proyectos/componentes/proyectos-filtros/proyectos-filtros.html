@@ -17,10 +17,9 @@
       (selectionChange)="emitirFiltros()"
     >
       <mat-option value="">Todos</mat-option>
-      <mat-option value="En progreso">En progreso</mat-option>
-      <mat-option value="En espera">En espera</mat-option>
-      <mat-option value="Completado">Completado</mat-option>
-      <mat-option value="Cancelado">Cancelado</mat-option>
+      <mat-option *ngFor="let e of estados" [value]="e.nombre">
+        {{ e.nombre }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
@@ -31,9 +30,9 @@
       (selectionChange)="emitirFiltros()"
     >
       <mat-option value="">Todos</mat-option>
-      <mat-option value="Llave en mano">Llave en mano</mat-option>
-      <mat-option value="Soporte evolutivo">Soporte evolutivo</mat-option>
-      <mat-option value="Consultoria">Consultoria</mat-option>
+      <mat-option *ngFor="let t of tipos" [value]="t.nombre">
+        {{ t.nombre }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
 </div>

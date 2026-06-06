@@ -37,41 +37,32 @@
 
       <div class="form-row">
         <!-- Tipo de líder -->
-        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.tipo">
+        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.tipoId">
           <div class="custom-select" (click)="toggleDropdown('tipo', $event)" [class.open]="dropdownAbierto === 'tipo'">
-            <span class="custom-select-value" [class.placeholder]="!form.tipo">{{ form.tipo || 'Tipo de líder' }}</span>
+            <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
-          <!-- <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
-            <li (click)="seleccionar('tipo', 'Interno', $event)">Interno</li>
-            <li (click)="seleccionar('tipo', 'Externo', $event)">Externo</li>
-          </ul> -->
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
-  @for (opcion of tiposLideres; track opcion.id) {
-    <li (click)="seleccionar('tipo', opcion, $event)">
-      {{ opcion.valor }}
-    </li>
-  }
-</ul>
-          <span class="error-msg" *ngIf="enviado && !form.tipo">Campo requerido</span>
+            <li *ngFor="let opcion of tiposLideres" (click)="seleccionar('tipo', opcion, $event)">
+              {{ opcion.valor }}
+            </li>
+          </ul>
+          <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
         </div>
 
         <!-- Persona -->
-        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.persona">
+        <div class="custom-select-wrapper" *ngIf="!modoEdicion" [class.input-error]="enviado && !form.personaId">
           <div class="custom-select" (click)="toggleDropdown('persona', $event)"
             [class.open]="dropdownAbierto === 'persona'">
-            <span class="custom-select-value" [class.placeholder]="!form.persona">{{ getPersonaNombre() || 'Persona'
-              }}</span>
+            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Persona' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
-            @for (persona of personasDisponibles; track persona.id) {
-              <li (click)="seleccionar('persona', persona, $event)">
-                {{ persona.nombres }} {{ persona.apellidos }}
-              </li>
-            }
+            <li *ngFor="let persona of personasDisponibles" (click)="seleccionar('persona', persona, $event)">
+              {{ persona.nombres }} {{ persona.apellidos }}
+            </li>
           </ul>
-          <span class="error-msg" *ngIf="enviado && !form.persona">Campo requerido</span>
+          <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
         </div>
       </div>
 

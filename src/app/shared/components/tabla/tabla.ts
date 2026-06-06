@@ -84,6 +84,7 @@ export class Tabla implements AfterViewInit {
   proyectosFiltrados = computed(() => {
     const proyectos = this.proyectosSignal();
     const filtros = this._filtros();
+    
 
     return proyectos.filter(proyecto => {
       const busqueda = filtros.busqueda.toLowerCase();
@@ -141,18 +142,41 @@ export class Tabla implements AfterViewInit {
     return Math.min((this.pageIndex + 1) * this.pageSize, this.totalRegistros);
   }
 
-  formatearFecha(fecha?: string): string {
-    if (!fecha) {
+  formatearFecha(fecha?: string | Date | number): string {
+    if (fecha == null || fecha === '') {
       return '-';
     }
 
-    const partes = fecha.split('-');
+    // Si es string, intentamos formatear YYYY-MM-DD o parsear como ISO
+    if (typeof fecha === 'string') {
+      const partes = fecha.split('-');
 
-    if (partes.length !== 3) {
+      if (partes.length === 3 && partes[0].length === 4) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+
+      const parsed = new Date(fecha);
+      if (!isNaN(parsed.getTime())) {
+        const dd = String(parsed.getDate()).padStart(2, '0');
+        const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+        const yyyy = parsed.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
       return fecha;
     }
 
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    // Si es Date o número (timestamp), conviértelo a Date
+    const d = fecha instanceof Date ? fecha : new Date(fecha);
+
+    if (!isNaN(d.getTime())) {
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    return String(fecha);
   }
 
   obtenerAcciones(proyecto: Proyecto): ActionMenuItem[] {

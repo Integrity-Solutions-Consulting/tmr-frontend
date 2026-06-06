@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngrx/store';
 
@@ -18,6 +18,7 @@ import {
 } from '../../componentes/proyectos-filtros/proyectos-filtros';
 
 import { Proyecto } from '../../modelos/proyecto.model';
+import { ProyectosService } from '../../servicios/proyectos.service';
 
 import {
   agregarProyecto,
@@ -43,8 +44,9 @@ import {
   templateUrl: './proyectos-page.html',
   styleUrl: './proyectos-page.scss'
 })
-export class ProyectosPage {
+export class ProyectosPage implements OnDestroy {
   private store = inject(Store);
+  private proyectosService = inject(ProyectosService);
 
   modalCrearVisible = false;
   modalDetalleVisible = false;
@@ -53,6 +55,8 @@ export class ProyectosPage {
   proyectoSeleccionado: Proyecto | null = null;
   proyectoDetalle: Proyecto | null = null;
   codigoPendienteEliminar: string | null = null;
+
+  private successModalTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   filtros: FiltrosProyecto = {
     busqueda: '',
@@ -79,6 +83,12 @@ export class ProyectosPage {
     this.store.dispatch(cargarProyectos());
   }
 
+  ngOnDestroy(): void {
+    if (this.successModalTimeoutId) {
+      clearTimeout(this.successModalTimeoutId);
+    }
+  }
+
   abrirModalCrear(): void {
     this.proyectoSeleccionado = null;
     this.modalCrearVisible = true;
@@ -90,22 +100,48 @@ export class ProyectosPage {
 
   guardarProyecto(proyecto: Proyecto): void {
     if (this.proyectoSeleccionado) {
-      this.store.dispatch(editarProyecto({ proyecto }));
+      const proyectoConId: Proyecto = {
+        ...proyecto,
+        id: this.proyectoSeleccionado.id
+      };
+      this.store.dispatch(editarProyecto({ proyecto: proyectoConId }));
     } else {
+      this.cerrarModalCrear();
       this.store.dispatch(agregarProyecto({ proyecto }));
-      this.successCrearVisible = true;
+      this.mostrarSuccessCrear();
+      return;
     }
 
     this.cerrarModalCrear();
   }
 
+  private mostrarSuccessCrear(): void {
+    if (this.successModalTimeoutId) {
+      clearTimeout(this.successModalTimeoutId);
+    }
+
+    this.successCrearVisible = true;
+    this.successModalTimeoutId = window.setTimeout(() => {
+      this.cerrarSuccessCrear();
+    }, 1000);
+  }
+
   cerrarSuccessCrear(): void {
+    if (this.successModalTimeoutId) {
+      clearTimeout(this.successModalTimeoutId);
+      this.successModalTimeoutId = null;
+    }
     this.successCrearVisible = false;
   }
 
   abrirModalEditar(proyecto: Proyecto): void {
-    this.proyectoSeleccionado = proyecto;
-    this.modalCrearVisible = true;
+    this.proyectosService.obtenerProyecto(proyecto.id).subscribe({
+      next: (proyectoCompleto) => {
+        this.proyectoSeleccionado = proyectoCompleto;
+        this.modalCrearVisible = true;
+      },
+      error: (error) => console.error('Error al obtener proyecto:', error)
+    });
   }
 
   abrirModalDetalle(proyecto: Proyecto): void {
@@ -141,7 +177,7 @@ export class ProyectosPage {
     this.filtros = filtros;
   }
 
-  formatearFecha(fecha?: string): string {
+  formatearFecha(fecha?: string | null): string {
     if (!fecha) {
       return '-';
     }

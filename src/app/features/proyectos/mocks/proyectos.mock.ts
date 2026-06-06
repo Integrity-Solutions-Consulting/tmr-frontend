@@ -2,6 +2,7 @@ import { Proyecto } from '../modelos/proyecto.model';
 
 export const PROYECTOS_MOCK: Proyecto[] = [
   {
+    id: 1,
     codigo: 'PRY-001',
     nombre: 'Sistema TMR',
     cliente: 'Integrity Solutions',
@@ -17,45 +18,14 @@ export const PROYECTOS_MOCK: Proyecto[] = [
     horas: 840,
     estado: 'En progreso',
     recursos: [
-      {
-        tipo: 'Interno',
-        nombre: 'Madeline Cañizares',
-        rol: 'Ingeniería de Seguridad de la Información',
-        entrada: '2025-02-15',
-        salida: '2025-05-20',
-        costoHora: 5,
-        horas: 80
-      },
-      {
-        tipo: 'Externo',
-        nombre: 'Pedro Coello',
-        rol: 'Ingeniería de Seguridad de la Información',
-        entrada: '2025-02-15',
-        salida: '2025-05-20',
-        costoHora: 5,
-        horas: 80
-      },
-      {
-        tipo: 'Externo',
-        nombre: 'Melina Cañar',
-        rol: 'Desarrollador de Software',
-        entrada: '2025-03-03',
-        salida: '2025-04-20',
-        costoHora: 5,
-        horas: 80
-      },
-      {
-        tipo: 'Externo',
-        nombre: 'Marcos Lindao',
-        rol: 'Desarrollador de Software',
-        entrada: '2025-03-03',
-        salida: '2025-04-20',
-        costoHora: 5,
-        horas: 80
-      }
+      { tipo: 'Interno', nombre: 'Madeline Cañizares', rol: 'Ingeniería de Seguridad de la Información', entrada: '2025-02-15', salida: '2025-05-20', costoHora: 5, horas: 80 },
+      { tipo: 'Externo', nombre: 'Pedro Coello', rol: 'Ingeniería de Seguridad de la Información', entrada: '2025-02-15', salida: '2025-05-20', costoHora: 5, horas: 80 },
+      { tipo: 'Externo', nombre: 'Melina Cañar', rol: 'Desarrollador de Software', entrada: '2025-03-03', salida: '2025-04-20', costoHora: 5, horas: 80 },
+      { tipo: 'Externo', nombre: 'Marcos Lindao', rol: 'Desarrollador de Software', entrada: '2025-03-03', salida: '2025-04-20', costoHora: 5, horas: 80 }
     ]
   },
   {
+    id: 2,
     codigo: 'PRY-002',
     nombre: 'Portal Bancario',
     cliente: 'Banco AndeX',
@@ -73,6 +43,7 @@ export const PROYECTOS_MOCK: Proyecto[] = [
     recursos: []
   },
   {
+    id: 3,
     codigo: 'PRY-003',
     nombre: 'Dashboard BI',
     cliente: 'Savage Herb',
@@ -90,6 +61,7 @@ export const PROYECTOS_MOCK: Proyecto[] = [
     recursos: []
   },
   {
+    id: 4,
     codigo: 'PRY-004',
     nombre: 'App Delivery',
     cliente: 'Supermaxi',
@@ -107,6 +79,7 @@ export const PROYECTOS_MOCK: Proyecto[] = [
     recursos: []
   },
   {
+    id: 5,
     codigo: 'PRY-005',
     nombre: 'Sistema Inventario',
     cliente: 'Coca-Cola Ecuador',
@@ -124,6 +97,7 @@ export const PROYECTOS_MOCK: Proyecto[] = [
     recursos: []
   },
   {
+    id: 6,
     codigo: 'PRY-006',
     nombre: 'CRM Empresarial',
     cliente: 'Pronaca',

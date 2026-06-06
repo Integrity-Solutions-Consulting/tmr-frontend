@@ -27,24 +27,24 @@
   height: 7px;
 
   border-radius: 50%;
-}
 
-.progress {
-  background: #1677ff;
-}
+  &.progress {
+    background: #1677ff;
+  }
 
-.completed {
-  background: #22c55e;
-}
+  &.completed {
+    background: #22c55e;
+  }
 
-.cancelled {
-  background: #ef4444;
-}
+  &.cancelled {
+    background: #ef4444;
+  }
 
-.waiting {
-  background: #f97316;
-}
+  &.waiting {
+    background: #f97316;
+  }
 
-.inactive {
-  background: #9ca3af;
+  &.inactive {
+    background: #9ca3af;
+  }
 }

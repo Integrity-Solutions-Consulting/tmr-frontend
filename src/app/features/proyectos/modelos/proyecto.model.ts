@@ -1,28 +1,39 @@
 export interface RecursoProyecto {
+  id?: number;
+  idEmpleado?: number | null;
   tipo: string;
   nombre: string;
+  departamento?: number | null;
   rol: string;
-  entrada: string;
-  salida: string;
+  entrada?: string | null;
+  salida?: string | null;
   costoHora: number;
   horas: number;
 }
 
 export interface Proyecto {
+  id: number;
   codigo: string;
   nombre: string;
-  estado: string;
+  descripcion?: string;
+  idCliente?: number | null;
   cliente?: string;
+  idTipoProyecto?: number | null;
   tipo?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
+  idLider?: number | null;
   lider?: string;
   cargoLider?: string;
   costoHoraLider?: number;
   horasLider?: number;
-  numeroRecursos?: number;
+  idEstadoProyecto?: number;
+  estado: string;
+  fechaInicio?: string | null;
+  fechaFin?: string | null;
   presupuesto?: number;
   horas?: number;
+  numeroRecursos?: number;
+  activo?: boolean;
+  fechaCreacion?: string;
   recursos?: RecursoProyecto[];
 }
 
@@ -31,9 +42,18 @@ export interface LookupOption {
   nombre: string;
 }
 
+export interface CargoLookup {
+  id: number;
+  nombre: string;
+  idDepartamento: number | null;
+}
+
 export interface ProyectoLookups {
   clientes: LookupOption[];
   lideres: LookupOption[];
+  empleados: LookupOption[];
+  cargos: CargoLookup[];
   estados: LookupOption[];
   tipos: LookupOption[];
+  departamentos: LookupOption[];
 }

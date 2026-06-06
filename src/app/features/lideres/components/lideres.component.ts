@@ -72,6 +72,7 @@ export class LideresComponent implements OnInit {
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   liderSeleccionado: any = null;
+  liderParaEditar: any = null;
   modoEdicion = false;
   liderEditando: Lider | null = null;
   liderForm!: FormGroup;
@@ -224,6 +225,7 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
     this.modoEdicion = false;
     this.liderEditando = null;
+    this.liderParaEditar = null;
     this.liderForm.reset({ estado: 'Activo' });
     this.mostrarFormulario = true;
   }
@@ -231,6 +233,7 @@ export class LideresComponent implements OnInit {
   cerrarFormulario(): void {
     this.mostrarFormulario = false;
     this.liderEditando = null;
+    this.liderParaEditar = null;
     this.liderForm.reset();
   }
 
@@ -249,21 +252,56 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
     this.modoEdicion = true;
     this.liderEditando = lider;
-    this.liderForm.patchValue(lider);
+    this.liderParaEditar = lider;
     this.mostrarFormulario = true;
   }
 
-  guardarLider(): void {
-    this.mensajeConfirmacion = this.modoEdicion
-      ? 'Los cambios han sido<br>guardados exitosamente'
-      : 'El nuevo líder ha sido<br>agregado exitosamente';
+  guardarLider(payload: any): void {
+    const solicitud = this.modoEdicion && this.liderParaEditar?.id
+      ? {
+          Nombres: payload.nombres,
+          Apellidos: payload.apellidos,
+          Email: payload.correo,
+          Telefono: payload.telefono,
+          Idtipo: payload.tipoId || undefined,
+          Activo: payload.estado === 'Activo',
+          Usuariomodificacion: 'frontend',
+          Ipmodificacion: '127.0.0.1'
+        }
+      : {
+          Idpersona: payload.personaId,
+          Idtipo: payload.tipoId,
+          Usuariocreacion: 'frontend',
+          Ipcreacion: '127.0.0.1'
+        };
 
-    this.mostrarConfirmacion = true;
-    
-    setTimeout(() => {
-      this.mostrarConfirmacion = false;
-      this.obtenerLideresDelBackend();
-    }, 3000);
+    const request$ = this.modoEdicion && this.liderParaEditar?.id
+      ? this.http.put(`${this.apiUrl}/${this.liderParaEditar.id}`, solicitud)
+      : this.http.post(this.apiUrl, solicitud);
+
+    request$.subscribe({
+      next: () => {
+        this.mensajeConfirmacion = this.modoEdicion
+          ? 'Los cambios han sido<br>guardados exitosamente'
+          : 'El nuevo líder ha sido<br>agregado exitosamente';
+
+        this.mostrarConfirmacion = true;
+        this.mostrarFormulario = false;
+        this.liderParaEditar = null;
+        this.liderEditando = null;
+
+        setTimeout(() => {
+          this.mostrarConfirmacion = false;
+          this.obtenerLideresDelBackend();
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('Error al guardar líder:', err);
+        this.mensajeConfirmacion = 'No se pudo guardar el líder. Intente de nuevo.';
+        this.mostrarConfirmacion = true;
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      }
+    });
   }
 
   abrirDescarga(): void {

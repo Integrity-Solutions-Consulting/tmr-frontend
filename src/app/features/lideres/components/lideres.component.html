@@ -187,8 +187,8 @@
 
 </div>
 
-<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion"
-  (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider()">
+<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion" [lider]="liderParaEditar"
+  (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider($event)">
 </app-modal-lider>
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
