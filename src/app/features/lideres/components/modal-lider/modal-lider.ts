@@ -55,11 +55,11 @@ export class ModalLider implements OnInit {
 
   private loadPersonasDisponibles(): void {
     console.log('👥 Obteniendo personas disponibles...');
-    this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[]>(`${environment.apiUrl}/lideres/personas-disponibles`)
+    this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[] | { data: { id: number, nombres: string, apellidos: string, email: string, telefono: string }[] }>(`${environment.apiUrl}/lideres/personas-disponibles`)
       .subscribe({
         next: (personas: any) => { // ◄ Corregido: Agregado tipo explicitamente
           console.log('✅ Personas disponibles obtenidas:', personas);
-          this.personasDisponibles = personas;
+          this.personasDisponibles = Array.isArray(personas) ? personas : personas?.data ?? [];
         },
         error: (error: any) => console.error('❌ Error al obtener personas disponibles:', error) // ◄ Corregido
       });

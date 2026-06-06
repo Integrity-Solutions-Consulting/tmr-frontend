@@ -67,7 +67,7 @@
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
             @for (persona of personasDisponibles; track persona.id) {
               <li (click)="seleccionar('persona', persona, $event)">
-                {{ persona.nombres }}
+                {{ persona.nombres }} {{ persona.apellidos }}
               </li>
             }
           </ul>

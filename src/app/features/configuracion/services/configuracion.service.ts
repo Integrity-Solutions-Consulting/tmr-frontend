@@ -23,6 +23,12 @@ interface FeriadoBackendPayload {
   descripcion?: string;
 }
 
+export interface CatalogoResponse {
+  id: number;
+  codigovalor: string;
+  valor: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConfiguracionService {
   private http = inject(HttpClient);
@@ -98,6 +104,10 @@ export class ConfiguracionService {
 
   crearUsuarioAdministrativo(payload: RegisterUserRequest): Observable<unknown> {
     return this.http.post(`${environment.apiUrl}/configuracion/usuarios/register-user`, payload);
+  }
+
+  getCatalogo(codigo: string): Observable<CatalogoResponse[]> {
+    return this.http.get<CatalogoResponse[]>(`${environment.apiUrl}/catalogos/${codigo}`);
   }
 
   upsertUsuario(usuario: Usuario): void {
@@ -245,13 +255,6 @@ export class ConfiguracionService {
   }
 
   private mapTipoIdentificacionToFormId(tipo: string, fallback: unknown): string {
-    const map: Record<string, string> = {
-      C: 'cedula',
-      R: 'ruc',
-      P: 'pasaporte',
-      O: 'otro-documento',
-    };
-
-    return map[tipo] ?? String(fallback ?? '');
+    return String(fallback ?? '');
   }
 }

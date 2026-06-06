@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../../../auth/servicios/auth.service';
 import { Rol, Usuario, UsuarioPayload, RegisterUserRequest } from '../../models/configuracion.models';
-import { ConfiguracionService } from '../../services/configuracion.service';
+import { CatalogoResponse, ConfiguracionService } from '../../services/configuracion.service';
 import {
   cedulaEcuatorianaValidator,
   INTERNAL_USERNAME_REGEX,
@@ -14,7 +14,8 @@ import {
   temporaryPasswordValidator,
 } from '../../../../shared/validators/form-validators';
 
-type TipoIdentificacionId = 'cedula' | 'ruc' | 'pasaporte' | 'otro-documento';
+type TipoIdentificacionCode = 'C' | 'R' | 'P' | 'O';
+type CatalogoOption = { id: string; nombre: string; codigo: string };
 const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
 
@@ -36,23 +37,9 @@ export class UsuariosFormModal {
 
   readonly tiposPersona = ['NATURAL', 'JURIDICA'];
 
-  readonly tiposIdentificacion: { id: TipoIdentificacionId; nombre: string }[] = [
-    { id: 'cedula', nombre: 'Cedula' },
-    { id: 'ruc', nombre: 'RUC' },
-    { id: 'pasaporte', nombre: 'Pasaporte' },
-    { id: 'otro-documento', nombre: 'Otro documento' },
-  ];
-
-  readonly generos = [
-    { id: 'masculino', nombre: 'Masculino' },
-    { id: 'femenino', nombre: 'Femenino' },
-    { id: 'prefiero-no-decirlo', nombre: 'Prefiero no decirlo' },
-    { id: 'otro', nombre: 'Otro' },
-  ];
-
-  readonly nacionalidades: { id: string; nombre: string }[] = [
-    { id: '5', nombre: 'Ecuador' },
-  ];
+  tiposIdentificacion: CatalogoOption[] = [];
+  generos: CatalogoOption[] = [];
+  nacionalidades: CatalogoOption[] = [];
 
   readonly rolesList = (this.data.roles ?? [])
     .filter((rol) => rol.activo)
@@ -61,12 +48,12 @@ export class UsuariosFormModal {
   readonly form = this.fb.nonNullable.group({
     tipoPersona: [this.data.usuario?.tipoPersona ?? 'NATURAL', Validators.required],
     idtipoidentificacion: [
-      (this.data.usuario?.idtipoidentificacion as TipoIdentificacionId | undefined) ?? 'cedula',
+      this.data.usuario?.idtipoidentificacion ?? '',
       Validators.required,
     ],
     numeroidentificacion: [
       this.data.usuario?.numeroidentificacion ?? '',
-      [Validators.required, cedulaEcuatorianaValidator()],
+      [Validators.required],
     ],
     nombres: [
       this.data.usuario?.nombres ?? '',
@@ -100,6 +87,8 @@ export class UsuariosFormModal {
   });
 
   constructor() {
+    this.cargarCatalogos();
+
     this.form.controls.idtipoidentificacion.valueChanges.subscribe(() => {
       this.form.controls.numeroidentificacion.setValue('');
       this.configureIdentificationValidator();
@@ -136,13 +125,13 @@ export class UsuariosFormModal {
   }
 
   get identificationMaxLength(): number | null {
-    const type = this.form.controls.idtipoidentificacion.value;
+    const type = this.selectedIdentificationCode();
 
-    if (type === 'cedula') {
+    if (type === 'C') {
       return 10;
     }
 
-    if (type === 'ruc') {
+    if (type === 'R') {
       return 13;
     }
 
@@ -170,9 +159,10 @@ export class UsuariosFormModal {
   sanitizeIdentificationInput(): void {
     const control = this.form.controls.numeroidentificacion;
     const type = this.form.controls.idtipoidentificacion.value;
+    const code = this.identificationCodeById(type);
     const rawValue = control.value ?? '';
     const sanitized =
-      type === 'cedula' || type === 'ruc'
+      code === 'C' || code === 'R'
         ? rawValue.replace(/\D/g, '')
         : rawValue.replace(/[^a-zA-Z0-9\s_-]/g, '');
     const maxLength = this.identificationMaxLength;
@@ -205,7 +195,7 @@ export class UsuariosFormModal {
 
   identificationError(): string {
     const errors = this.form.controls.numeroidentificacion.errors;
-    const type = this.form.controls.idtipoidentificacion.value;
+    const type = this.selectedIdentificationCode();
 
     if (errors?.['required']) {
       return 'Campo requerido';
@@ -224,7 +214,7 @@ export class UsuariosFormModal {
     }
 
     if (errors?.['pattern']) {
-      return type === 'pasaporte'
+      return type === 'P'
         ? 'Use solo letras y numeros'
         : 'Use solo letras, numeros, espacios, guion o guion bajo';
     }
@@ -354,7 +344,7 @@ export class UsuariosFormModal {
       idGenero: this.mapGenderId(payload.idgenero),
       idNacionalidad: Number(payload.idnacionalidad),
       idTipoIdentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
-      tipoIdentificacion: this.mapIdentificationType(payload.idtipoidentificacion as TipoIdentificacionId),
+      tipoIdentificacion: this.mapIdentificationType(payload.idtipoidentificacion),
       numeroidentificacion: payload.numeroidentificacion,
       nombres: payload.nombres,
       apellidos: payload.apellidos,
@@ -411,23 +401,69 @@ export class UsuariosFormModal {
     return 'Error al crear el usuario. Intente nuevamente.';
   }
 
+  private cargarCatalogos(): void {
+    this.configuracionService.getCatalogo('TID').subscribe({
+      next: (data) => {
+        this.tiposIdentificacion = this.mapCatalogoOptions(data);
+        this.ensureDefaultTipoIdentificacion();
+        this.configureIdentificationValidator();
+      },
+      error: (err) => console.error(err),
+    });
+
+    this.configuracionService.getCatalogo('GEN').subscribe({
+      next: (data) => {
+        this.generos = this.mapCatalogoOptions(data);
+      },
+      error: (err) => console.error(err),
+    });
+
+    this.configuracionService.getCatalogo('NAC').subscribe({
+      next: (data) => {
+        this.nacionalidades = this.mapCatalogoOptions(data);
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  private mapCatalogoOptions(data: CatalogoResponse[]): CatalogoOption[] {
+    return (data ?? []).map((item) => ({
+      id: String(item.id),
+      nombre: item.valor,
+      codigo: item.codigovalor,
+    }));
+  }
+
+  private ensureDefaultTipoIdentificacion(): void {
+    if (this.tieneValor('idtipoidentificacion')) {
+      return;
+    }
+
+    const cedula = this.tiposIdentificacion.find((tipo) => tipo.codigo === 'C');
+    const defaultTipo = cedula ?? this.tiposIdentificacion[0];
+
+    if (defaultTipo) {
+      this.form.controls.idtipoidentificacion.setValue(defaultTipo.id, { emitEvent: false });
+    }
+  }
+
   private configureIdentificationValidator(): void {
-    const type = this.form.controls.idtipoidentificacion.value;
+    const type = this.selectedIdentificationCode();
     const validators = [Validators.required];
 
-    if (type === 'cedula') {
+    if (type === 'C') {
       validators.push(cedulaEcuatorianaValidator());
     }
 
-    if (type === 'ruc') {
+    if (type === 'R') {
       validators.push(rucEcuatorianoValidator());
     }
 
-    if (type === 'pasaporte') {
+    if (type === 'P') {
       validators.push(Validators.pattern(/^[a-zA-Z0-9]+$/));
     }
 
-    if (type === 'otro-documento') {
+    if (type === 'O') {
       validators.push(Validators.pattern(SAFE_ALPHANUMERIC_REGEX));
     }
 
@@ -435,37 +471,25 @@ export class UsuariosFormModal {
     this.form.controls.numeroidentificacion.updateValueAndValidity({ emitEvent: false });
   }
 
-  private mapIdentificationType(type: TipoIdentificacionId): 'C' | 'R' | 'P' | 'O' {
-    const map: Record<TipoIdentificacionId, 'C' | 'R' | 'P' | 'O'> = {
-      cedula: 'C',
-      ruc: 'R',
-      pasaporte: 'P',
-      'otro-documento': 'O',
-    };
-
-    return map[type];
+  private mapIdentificationType(type: string): TipoIdentificacionCode {
+    return this.identificationCodeById(type) ?? 'C';
   }
 
   private mapIdentificationTypeId(type: string): number {
-    const map: Record<TipoIdentificacionId, number> = {
-      cedula: 25,
-      ruc: 26,
-      pasaporte: 27,
-      'otro-documento': 28,
-    };
-
-    return map[type as TipoIdentificacionId] ?? Number(type);
+    return Number(type);
   }
 
   private mapGenderId(gender: string): number {
-    const map: Record<string, number> = {
-      masculino: 1,
-      femenino: 2,
-      'prefiero-no-decirlo': 3,
-      otro: 4,
-    };
+    return Number(gender);
+  }
 
-    return map[gender] ?? Number(gender);
+  private selectedIdentificationCode(): TipoIdentificacionCode | null {
+    return this.identificationCodeById(this.form.controls.idtipoidentificacion.value);
+  }
+
+  private identificationCodeById(id: string): TipoIdentificacionCode | null {
+    const code = this.tiposIdentificacion.find((tipo) => tipo.id === String(id))?.codigo;
+    return code === 'R' || code === 'P' || code === 'O' ? code : code === 'C' ? 'C' : null;
   }
 
   private formatBackendDate(value: string | null): string {
