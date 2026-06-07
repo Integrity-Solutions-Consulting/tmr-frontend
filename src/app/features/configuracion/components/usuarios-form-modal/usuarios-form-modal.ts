@@ -78,7 +78,7 @@ export class UsuariosFormModal {
     email: [this.data.usuario?.email ?? '', [Validators.required, Validators.email]],
     password: [
       this.data.usuario?.password ?? this.generateTemporaryPassword(),
-      [Validators.required, temporaryPasswordValidator()],
+      this.data.usuario ? [] : [Validators.required, temporaryPasswordValidator()],
     ],
     debeCambiarPassword: [this.data.usuario?.debeCambiarPassword ?? !this.data.usuario],
     usuarioCreacion: [this.data.usuario?.usuarioCreacion ?? this.getCurrentUserName()],

@@ -29,7 +29,7 @@ export class FeriadosFormModal {
   private readonly dialogRef = inject(MatDialogRef<FeriadosFormModal>);
   readonly data = inject<FeriadoModalData>(MAT_DIALOG_DATA);
 
-  readonly tipos: TipoFeriado[] = ['Nacional', 'Local', 'Institucional'];
+  readonly tipos = ['Nacional', 'Local', 'Religioso'] as TipoFeriado[];
 
   readonly form = this.fb.nonNullable.group({
     tipo: [this.data.feriado?.tipo ?? 'Nacional' as TipoFeriado, Validators.required],
@@ -42,6 +42,12 @@ export class FeriadosFormModal {
     recurrente: [this.data.feriado?.recurrente ?? false],
     activo: [this.data.feriado?.activo ?? true, Validators.required],
   }, { validators: [this.duplicateDateNameValidator()] });
+
+  constructor() {
+    if (this.isEdit) {
+      this.form.controls.activo.disable({ emitEvent: false });
+    }
+  }
 
   get isEdit(): boolean {
     return this.data.mode === 'edit';

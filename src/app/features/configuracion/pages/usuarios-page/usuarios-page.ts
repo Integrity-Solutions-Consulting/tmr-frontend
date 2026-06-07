@@ -50,6 +50,22 @@ export class UsuariosPage {
   }
 
   openModal(usuario?: Usuario): void {
+    if (usuario) {
+      this.editUsuario(usuario);
+      return;
+    }
+
+    this.openUsuarioModal();
+  }
+
+  editUsuario(usuario: Usuario): void {
+    this.configuracionService.getUsuarioDetalle(usuario.id).subscribe({
+      next: (detalle) => this.openUsuarioModal(detalle),
+      error: (err) => console.error(err),
+    });
+  }
+
+  private openUsuarioModal(usuario?: Usuario): void {
     const dialogRef = this.dialog.open<
       UsuariosFormModal,
       { usuario?: Usuario; roles: Rol[]; nextId: number },
@@ -66,7 +82,13 @@ export class UsuariosPage {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         if (usuario && result !== true) {
-          this.configuracionService.upsertUsuario(result as Usuario);
+          const usuarioEditado = result as Usuario;
+          this.configuracionService
+            .updateUsuario(usuarioEditado.id, this.configuracionService.toUpdateUsuarioPayload(usuarioEditado))
+            .subscribe({
+              next: () => this.configuracionService.loadUsuarios(),
+              error: (err) => console.error(err),
+            });
         }
       }
     });
@@ -80,17 +102,19 @@ export class UsuariosPage {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.action === 'editar' && result.usuario) {
-        this.openModal(result.usuario);
+        this.editUsuario(result.usuario);
       }
       if (result?.action === 'toggleEstado' && result.usuario) {
-        const newEstado = result.usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
-        this.configuracionService.setUsuarioEstado(result.usuario.id, newEstado);
+        this.deleteUsuario(result.usuario);
       }
     });
   }
 
   deleteUsuario(usuario: Usuario): void {
-    const newEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
-    this.configuracionService.setUsuarioEstado(usuario.id, newEstado);
+    if (usuario.estado !== 'Activo') {
+      return;
+    }
+
+    this.configuracionService.deleteUsuario(usuario.id);
   }
 }

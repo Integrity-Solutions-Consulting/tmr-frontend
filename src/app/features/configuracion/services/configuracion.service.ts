@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Feriado, Rol, Usuario, EstadoUsuario, RegisterUserRequest } from '../models/configuracion.models';
+import { Observable, map, tap } from 'rxjs';
+import { Feriado, Rol, Usuario, RegisterUserRequest } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
 
 interface ModuloResponse {
@@ -27,6 +27,17 @@ export interface CatalogoResponse {
   id: number;
   codigovalor: string;
   valor: string;
+}
+
+export interface UpdateUsuarioPayload {
+  nombres: string;
+  apellidos: string;
+  idgenero: number | null;
+  idnacionalidad: number | null;
+  fechanacimiento: string | null;
+  telefono: string | null;
+  direccion: string | null;
+  rolesids: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -81,11 +92,10 @@ export class ConfiguracionService {
     }
   }
 
-  setRolEstado(id: number, activo: boolean): void {
-    this.http.patch(`${environment.apiUrl}/configuracion/roles/${id}`, { activo }).subscribe({
-      next: () => this.loadRoles(),
-      error: (err) => console.error(err),
-    });
+  setRolEstado(id: number, activo: boolean): Observable<unknown> {
+    return this.http
+      .patch(`${environment.apiUrl}/configuracion/roles/${id}`, { activo })
+      .pipe(tap(() => this.loadRoles()));
   }
 
   deleteRol(id: number): void {
@@ -110,10 +120,20 @@ export class ConfiguracionService {
     return this.http.get<CatalogoResponse[]>(`${environment.apiUrl}/catalogos/${codigo}`);
   }
 
+  getUsuarioDetalle(id: number): Observable<Usuario> {
+    return this.http
+      .get<unknown>(`${environment.apiUrl}/configuracion/usuarios/${id}`)
+      .pipe(map((item) => this.mapUsuario(item)));
+  }
+
+  updateUsuario(id: number, payload: UpdateUsuarioPayload): Observable<unknown> {
+    return this.http.put(`${environment.apiUrl}/configuracion/usuarios/${id}`, payload);
+  }
+
   upsertUsuario(usuario: Usuario): void {
     const url = `${environment.apiUrl}/configuracion/usuarios`;
     if (this.usuariosState().some((u) => u.id === usuario.id)) {
-      this.http.put(`${url}/${usuario.id}`, usuario).subscribe(() => this.loadUsuarios());
+      this.updateUsuario(usuario.id, this.toUpdateUsuarioPayload(usuario)).subscribe(() => this.loadUsuarios());
     } else {
       this.http.post(url, usuario).subscribe(() => this.loadUsuarios());
     }
@@ -121,12 +141,6 @@ export class ConfiguracionService {
 
   setUsuarios(usuarios: Usuario[]): void {
     this.usuariosState.set(usuarios);
-  }
-
-  setUsuarioEstado(id: number, estado: EstadoUsuario): void {
-    this.usuariosState.update((usuarios) =>
-      usuarios.map((u) => (u.id === id ? { ...u, estado } : u))
-    );
   }
 
   deleteUsuario(id: number): void {
@@ -148,6 +162,8 @@ export class ConfiguracionService {
     const idNacionalidad = d['idNacionalidad'] ?? d['idnacionalidad'] ?? '';
     const fechaNacimiento = d['fechaNacimiento'] ?? d['fechanacimiento'] ?? null;
     const email = String(d['email'] ?? d['correoContacto'] ?? '').trim();
+    const usuario = String(d['usuario'] ?? (email.includes('@') ? email.split('@')[0] : email)).trim();
+    const usuarioInterno = email.toLowerCase().endsWith('@integritysolutions.com.ec');
 
     return {
       id: Number(d['id'] ?? d['idUsuario'] ?? d['idPersona'] ?? 0),
@@ -166,10 +182,10 @@ export class ConfiguracionService {
       idUsuarioCreacion: String(d['idUsuarioCreacion'] ?? ''),
       ip: String(d['ip'] ?? ''),
       email,
-      usuario: String(d['usuario'] ?? email),
+      usuario,
       password: '',
-      debeCambiarPassword: Boolean(d['debeCambiarPassword'] ?? false),
-      usuarioInterno: Boolean(d['usuarioInterno'] ?? true),
+      debeCambiarPassword: Boolean(d['debeCambiarPassword'] ?? d['debecambiarpassword'] ?? false),
+      usuarioInterno: Boolean(d['usuarioInterno'] ?? usuarioInterno),
       idtipoidentificacion: this.mapTipoIdentificacionToFormId(tipoIdentificacion, idTipoIdentificacion),
       idgenero: String(d['idgenero'] ?? d['idGenero'] ?? ''),
       idnacionalidad: String(d['idnacionalidad'] ?? d['idNacionalidad'] ?? ''),
@@ -177,6 +193,19 @@ export class ConfiguracionService {
       telefono: d['telefono'] ? String(d['telefono']) : null,
       direccion: d['direccion'] ? String(d['direccion']) : null,
       rolesids: Array.isArray(roleIds) ? roleIds.map((roleId) => String((roleId as any).id ?? roleId)) : [],
+    };
+  }
+
+  toUpdateUsuarioPayload(usuario: Usuario): UpdateUsuarioPayload {
+    return {
+      nombres: usuario.nombres,
+      apellidos: usuario.apellidos,
+      idgenero: this.toNullableNumber(usuario.idgenero),
+      idnacionalidad: this.toNullableNumber(usuario.idnacionalidad),
+      fechanacimiento: usuario.fechanacimiento,
+      telefono: usuario.telefono?.trim() || null,
+      direccion: usuario.direccion?.trim() || null,
+      rolesids: usuario.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId)),
     };
   }
 
@@ -212,8 +241,10 @@ export class ConfiguracionService {
     );
   }
 
-  deleteFeriado(id: number): void {
-    this.http.delete(`${environment.apiUrl}/configuracion/dias-festivos/${id}`).subscribe(() => this.loadFeriados());
+  deleteFeriado(id: number): Observable<unknown> {
+    return this.http
+      .delete(`${environment.apiUrl}/configuracion/dias-festivos/${id}`)
+      .pipe(tap(() => this.loadFeriados()));
   }
 
   nextId(items: { id: number }[]): number {
@@ -243,10 +274,14 @@ export class ConfiguracionService {
     return {
       nombreFeriado: feriado.nombre,
       fechaFeriado: feriado.fecha,
-      tipoFeriado: feriado.tipo,
+      tipoFeriado: this.normalizeFeriadoTipo(feriado.tipo),
       esRecurrente: feriado.recurrente,
       descripcion: feriado.descripcion,
     };
+  }
+
+  private normalizeFeriadoTipo(tipo: unknown): string {
+    return String(tipo) === 'Institucional' ? 'Religioso' : String(tipo);
   }
 
   private normalizeTipoIdentificacion(value: unknown): 'C' | 'R' | 'P' | 'O' {
@@ -256,5 +291,10 @@ export class ConfiguracionService {
 
   private mapTipoIdentificacionToFormId(tipo: string, fallback: unknown): string {
     return String(fallback ?? '');
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : null;
   }
 }

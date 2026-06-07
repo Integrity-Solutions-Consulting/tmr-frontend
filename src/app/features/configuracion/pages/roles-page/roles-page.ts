@@ -19,6 +19,8 @@ export class RolesPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
   readonly query = signal('');
+  readonly estadoError = signal<string | null>(null);
+  readonly estadoCambiandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
   readonly modulos = this.configuracionService.modulos;
 
@@ -71,7 +73,47 @@ export class RolesPage {
     this.openModal(rol, 'edit');
   }
 
+  visibleModulos(rol: Rol): string[] {
+    return rol.modulos.slice(0, 3);
+  }
+
+  modulosOcultos(rol: Rol): number {
+    return Math.max(rol.modulos.length - 3, 0);
+  }
+
   toggleEstado(rol: Rol): void {
-    this.configuracionService.setRolEstado(rol.id, !rol.activo);
+    this.estadoError.set(null);
+    this.estadoCambiandoId.set(rol.id);
+
+    this.configuracionService.setRolEstado(rol.id, !rol.activo).subscribe({
+      next: () => this.estadoCambiandoId.set(null),
+      error: (err) => {
+        this.estadoCambiandoId.set(null);
+        this.estadoError.set(this.extractEstadoError(err));
+      },
+    });
+  }
+
+  private extractEstadoError(err: unknown): string {
+    const error = (err as { error?: unknown })?.error;
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    const body = error as {
+      errors?: { message?: string }[];
+      message?: string;
+      mensaje?: string;
+      error?: string;
+      title?: string;
+    } | undefined;
+
+    return body?.errors?.[0]?.message
+      ?? body?.message
+      ?? body?.mensaje
+      ?? body?.error
+      ?? body?.title
+      ?? 'No se pudo cambiar el estado del rol. Verifica si es un rol de sistema o si tiene usuarios asignados.';
   }
 }

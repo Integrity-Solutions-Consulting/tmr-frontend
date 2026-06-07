@@ -24,10 +24,16 @@
       <strong>{{ locales() }}</strong>
     </article>
     <article>
-      <span>Institucionales</span>
-      <strong>{{ institucionales() }}</strong>
+      <span>Religiosos</span>
+      <strong>{{ religiosos() }}</strong>
     </article>
   </div>
+
+  @if (eliminarError()) {
+    <div class="error-banner">
+      {{ eliminarError() }}
+    </div>
+  }
 
   <app-feriados-calendar
     [feriados]="feriados()"

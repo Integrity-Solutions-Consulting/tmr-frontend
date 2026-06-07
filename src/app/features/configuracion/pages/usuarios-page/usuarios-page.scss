@@ -64,7 +64,7 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   max-height: calc(100vh - 260px);
 }
 
@@ -73,7 +73,7 @@
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   flex: 1;
   min-height: 0;
 }
@@ -121,6 +121,16 @@
   font-weight: 400;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.usuarios-table th:last-child {
+  width: 56px;
+}
+
+.usuarios-table tbody td:nth-child(4) {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .roles-cell {
@@ -196,9 +206,98 @@
 }
 
 .actions-cell {
-  padding: 13px 16px;
-  text-align: right;
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  width: 56px;
+  min-width: 56px;
+  padding: 8px 10px;
+  text-align: center;
   white-space: nowrap;
+  background: #ffffff;
+  box-shadow: -8px 0 12px rgba(255, 255, 255, 0.9);
+}
+
+.usuarios-table tbody tr:hover .actions-cell {
+  background: #f8faff;
+}
+
+.actions-menu {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.actions-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: #737373;
+  cursor: pointer;
+  list-style: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.actions-menu__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.actions-menu__trigger:hover,
+.actions-menu[open] .actions-menu__trigger {
+  color: #163572;
+  background: #f5f7fb;
+}
+
+.actions-menu__trigger .material-icons {
+  font-size: 20px;
+}
+
+.actions-menu__content {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  min-width: 136px;
+  padding: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+}
+
+.actions-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #374151;
+  background: transparent;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.actions-menu__item:hover:not(:disabled) {
+  color: #163572;
+  background: #f5f7fb;
+}
+
+.actions-menu__item--danger {
+  color: #dc2626;
+}
+
+.actions-menu__item--danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.actions-menu__item:disabled {
+  color: #b6b6b6;
+  cursor: not-allowed;
 }
 
 .empty-state {

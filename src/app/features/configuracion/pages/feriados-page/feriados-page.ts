@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { FeriadosCalendar } from '../../components/feriados-calendar/feriados-calendar';
@@ -17,11 +17,11 @@ export class FeriadosPage {
   private readonly dialog = inject(MatDialog);
 
   readonly feriados = this.configuracionService.feriados;
+  readonly eliminarError = signal<string | null>(null);
 
-  // TODO: cuando exista backend, reemplazar por GET /api/feriados
   readonly nacionales    = computed(() => this.feriados().filter((f) => f.tipo === 'Nacional').length);
   readonly locales       = computed(() => this.feriados().filter((f) => f.tipo === 'Local').length);
-  readonly institucionales = computed(() => this.feriados().filter((f) => f.tipo === 'Institucional').length);
+  readonly religiosos = computed(() => this.feriados().filter((f) => String(f.tipo) === 'Religioso').length);
   readonly activos       = computed(() => this.feriados().filter((f) => f.activo).length);
 
   openModal(feriado?: Feriado, mode: 'create' | 'edit' | 'view' = 'create', fecha?: string): void {
@@ -54,12 +54,34 @@ export class FeriadosPage {
     this.openModal(feriado, 'edit');
   }
 
-  // TODO: conectar con PATCH /api/feriados/{id}/estado cuando exista backend
   toggleEstado(feriado: Feriado): void {
-    this.configuracionService.setFeriadoEstado(feriado.id, !feriado.activo);
+    const confirmado = window.confirm(`¿Desea eliminar el feriado "${feriado.nombre}"?`);
+    if (!confirmado) {
+      return;
+    }
+
+    this.eliminarError.set(null);
+    this.configuracionService.deleteFeriado(feriado.id).subscribe({
+      error: (err) => this.eliminarError.set(this.extractDeleteError(err)),
+    });
   }
 
   openModalForDate(fecha: string): void {
     this.openModal(undefined, 'create', fecha);
+  }
+
+  private extractDeleteError(err: unknown): string {
+    const error = (err as { error?: unknown })?.error;
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    const body = error as { message?: string; mensaje?: string; error?: string; title?: string } | undefined;
+    return body?.message
+      ?? body?.mensaje
+      ?? body?.error
+      ?? body?.title
+      ?? 'No se pudo eliminar el feriado. Intente nuevamente.';
   }
 }
