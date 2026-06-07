@@ -36,7 +36,29 @@ export class SeguimientoService {
 
     this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
-        this._colaboradores.set(data);
+        this._colaboradores.set(data || []);
+
+        // Calcular métricas basadas en el conjunto filtrado
+        const totalRegistradas = (data || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
+        const totalPendientes = (data || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
+        const promedio = (data && data.length > 0) ? (totalRegistradas / data.length) : 0;
+        const activos = (data || []).filter(c => Number(c.nroHoras || 0) > 0).length;
+
+        // Proyectos únicos
+        const proyectosSet = new Set<string>();
+        (data || []).forEach(c => {
+          if (c.proyecto) {
+            c.proyecto.split(',').forEach(p => proyectosSet.add(p.trim()));
+          }
+        });
+
+        this._metricas.set({
+          horasPendientes: totalPendientes,
+          horasRegistradas: totalRegistradas,
+          promedioPorDia: promedio,
+          colaboradoresActivos: activos,
+          proyectosUnicos: proyectosSet.size
+        });
       },
       error: (err) => console.error('Error al cargar seguimiento', err)
     });

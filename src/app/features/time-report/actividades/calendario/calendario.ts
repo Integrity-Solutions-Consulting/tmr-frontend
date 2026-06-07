@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, signal, computed } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,6 +41,13 @@ export class Calendario {
 
     public nombresDias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
     public mesesNombres = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+    constructor() {
+        effect(() => {
+            const fecha = this._fechaActual();
+            this.actividadesService.cargarCalendario(fecha.getFullYear(), fecha.getMonth() + 1);
+        });
+    }
 
     private _fechaActual = signal(new Date());
     public mesSeleccionado = this._fechaActual().getMonth();

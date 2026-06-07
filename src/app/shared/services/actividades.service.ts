@@ -47,7 +47,17 @@ export class ActividadesService {
 
     this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${user.id}&anio=${anio}&mes=${mes}`).subscribe({
       next: (data) => {
-        // Podrías mapear los datos del calendario aquí si es necesario
+        const mapped = (data || []).map(item => ({
+          id: '',
+          tipoActividad: 'Otro',
+          proyectoId: '',
+          proyectoNombre: '',
+          codigoRequerimiento: '',
+          fechaActividad: new Date(item.fecha + 'T00:00:00'),
+          numeroHoras: item.totalHoras,
+          esRecurrente: false
+        } as Actividad));
+        this._actividades.set(mapped);
       },
       error: (err) => console.error('Error al cargar calendario', err)
     });
@@ -76,6 +86,10 @@ export class ActividadesService {
     this.http.post(this.apiUrl, payload).subscribe({
       next: (res) => {
         this.cargarResumen();
+        // Recargar el calendario del mes de la actividad agregada
+        const actDate = new Date(data.fechaActividad);
+        this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+
         if (callback) callback();
       },
       error: (err) => console.error('Error al crear actividad', err)

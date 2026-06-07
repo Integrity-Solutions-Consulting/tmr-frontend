@@ -1,13 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../auth/servicios/auth.service';
+import { environment } from '../../../../../environments/environment';
 import * as XLSX from 'xlsx';
-import { ProyectosService } from '../../../proyectos/servicios/proyectos.service';
-import { LookupOption } from '../../../proyectos/modelos/proyecto.model';
 
 @Component({
     selector: 'app-generar-reporte',
@@ -26,14 +27,16 @@ import { LookupOption } from '../../../proyectos/modelos/proyecto.model';
 export class GenerarReporte implements OnInit {
     private fb = inject(FormBuilder);
     private dialogRef = inject(MatDialogRef<GenerarReporte>);
-    private proyectosService = inject(ProyectosService);
+    private http = inject(HttpClient);
+    private authService = inject(AuthService);
+
+    public clientes = signal<{id: number, nombre: string}[]>([]);
+    public proyectos: any[] = [];
 
     public meses = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
-
-    clientes: LookupOption[] = [];
 
     public form: FormGroup = this.fb.group({
         clienteId: ['all'],
@@ -41,18 +44,21 @@ export class GenerarReporte implements OnInit {
         mes: [4, Validators.required]
     });
 
-    ngOnInit(): void {
-        this.cargarClientes();
-    }
-
-    private cargarClientes(): void {
-        this.proyectosService.obtenerClientes().subscribe({
-            next: (clientes: LookupOption[]) => {
-                this.clientes = clientes;
+    ngOnInit() {
+        this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
+            next: (res) => {
+                if (res && res.clientes) {
+                    this.clientes.set(res.clientes);
+                }
             },
-            error: (error) => {
-                console.error('Error al cargar clientes:', error);
-            }
+            error: (err) => console.error('Error al cargar lookups de clientes', err)
+        });
+
+        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
+            next: (res) => {
+                this.proyectos = res || [];
+            },
+            error: (err) => console.error('Error al cargar proyectos', err)
         });
     }
 
@@ -63,28 +69,55 @@ export class GenerarReporte implements OnInit {
     generar() {
         if (this.form.invalid) return;
 
-        const { mes, anio } = this.form.value;
+        const { mes, anio, clienteId } = this.form.value;
+        const user = this.authService.getCurrentUser();
+        if (!user) return;
 
-        // Simulación de datos (Aquí podrías llamar a un servicio en el futuro)
-        const data = [
-            {
-                Fecha: '06/05/2026',
-                Tipo: 'Desarrollo',
-                Proyecto: 'Proyecto bolsa de empleo',
-                Código: 'ISC_FS_BOLSA_EMPLEO',
-                Descripción: 'Desarrollo de componentes UI',
-                Horas: 2.5
-            }
-        ];
+        // Cargar todas las actividades desde el backend y filtrarlas
+        this.http.get<any[]>(`${environment.apiUrl}/carga-actividades`).subscribe({
+            next: (actividades) => {
+                const mesFiltrado = mes + 1; // formulario es 0-indexed, la BD es 1-indexed
 
-        // Lógica de exportación Excel
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+                const filteredData = (actividades || [])
+                    .filter(a => {
+                        const fecha = new Date(a.fechaactividad + 'T00:00:00');
+                        const matchesUser = Number(a.idempleado) === Number(user.id);
+                        const matchesAnio = fecha.getFullYear() === anio;
+                        const matchesMes = (fecha.getMonth() + 1) === mesFiltrado;
 
-        const fileName = `Reporte_${this.meses[mes]}_${anio}.xlsx`;
-        XLSX.writeFile(wb, fileName);
+                        let matchesCliente = true;
+                        if (clienteId !== 'all') {
+                            const proy = this.proyectos.find(p => p.id === a.idproyecto);
+                            matchesCliente = proy && Number(proy.idCliente) === Number(clienteId);
+                        }
 
-        this.dialogRef.close();
+                        return matchesUser && matchesAnio && matchesMes && matchesCliente;
+                    })
+                    .map(a => {
+                        const proy = this.proyectos.find(p => p.id === a.idproyecto);
+                        return {
+                            'Fecha': a.fechaactividad,
+                            'Colaborador': user.name || 'Usuario',
+                            'Proyecto': proy ? proy.nombre : 'Sin Proyecto',
+                            'Cliente': proy ? proy.cliente : 'Sin Cliente',
+                            'Código Requerimiento': a.codigorequerimiento || '',
+                            'Horas': a.cantidadhoras,
+                            'Descripción': a.descripcionactividad || '',
+                            'Notas': a.notas || '',
+                            'Es Billable': a.esbillable ? 'Sí' : 'No'
+                        };
+                    });
+
+                const ws = XLSX.utils.json_to_sheet(filteredData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+
+                const fileName = `Reporte_${this.meses[mes]}_${anio}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+
+                this.dialogRef.close();
+            },
+            error: (err) => console.error('Error al generar el reporte', err)
+        });
     }
 }

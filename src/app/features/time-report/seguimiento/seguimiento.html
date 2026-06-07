@@ -46,8 +46,8 @@
             <div class="filter-input-wrapper">
                 <select class="filter-select" [(ngModel)]="clienteSeleccionado" (change)="aplicarFiltros()">
                     <option value="">Todos los clientes</option>
-                    @for (cliente of clientes; track cliente.id) {
-                        <option [value]="cliente.nombre">{{ cliente.nombre }}</option>
+                    @for (c of clientes(); track c.id) {
+                        <option [value]="c.nombre">{{ c.nombre }}</option>
                     }
                 </select>
                 <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"

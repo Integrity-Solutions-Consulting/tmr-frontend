@@ -89,17 +89,19 @@ export class AgregarActividad implements OnInit {
     // Cargar listas desplegables desde la Base de Datos
     private cargarCatalogos() {
         // Tipos de Actividad
-        this.http.get<{ id: string, nombre: string }[]>(`${environment.apiUrl}/time-report/tipos-actividad`)
+        this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/tipos-actividad`)
             .subscribe({
-                next: (res) => this.tiposActividad.set(res || []),
-                error: (err) => console.error('Falta endpoint de tipos de actividad en .NET', err)
+                next: (res) => this.tiposActividad.set(res ? res.map(t => ({ id: String(t.id), nombre: t.nombre })) : []),
+                error: (err) => {
+                    console.error('Error al cargar tipos de actividad', err);
+                }
             });
 
         // Proyectos
-        this.http.get<{ id: string, nombre: string }[]>(`${environment.apiUrl}/proyectos`)
+        this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`)
             .subscribe({
-                next: (res) => this.proyectos.set(res || []),
-                error: (err) => console.error('Falta endpoint de proyectos en .NET', err)
+                next: (res) => this.proyectos.set(res ? res.map(p => ({ id: String(p.id), nombre: p.nombre })) : []),
+                error: (err) => console.error('Error al cargar proyectos disponibles', err)
             });
     }
 
