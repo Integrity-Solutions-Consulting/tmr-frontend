@@ -17,11 +17,7 @@ import { environment } from '../../../../../environments/environment';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
-import { ProyectosService } from '../../../proyectos/servicios/proyectos.service';
-import { LookupOption } from '../../../proyectos/modelos/proyecto.model';
 import { TipoActividad } from '../../../../shared/models/actividad.model';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -48,7 +44,6 @@ export class AgregarActividad implements OnInit {
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
     private dialogRef = inject(MatDialogRef<AgregarActividad>);
-    private proyectosService = inject(ProyectosService);
     private http = inject(HttpClient);
 
     public form!: FormGroup;
@@ -56,8 +51,6 @@ export class AgregarActividad implements OnInit {
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
     public proyectos = signal<{ id: string, nombre: string }[]>([]);
-
-    private http = inject(HttpClient);
 
     // Convertimos los cambios del formulario a un Signal para que el computed reaccione
     private formValues = inject(FormBuilder).group({}); // temporal para inicializar

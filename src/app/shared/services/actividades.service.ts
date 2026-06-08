@@ -56,15 +56,15 @@ export class ActividadesService {
           fechaActividad: new Date(item.fecha + 'T00:00:00'),
           numeroHoras: item.totalHoras,
           esRecurrente: false
-        } as Actividad));
+        } as any));
         this._actividades.set(mapped);
       },
       error: (err) => console.error('Error al cargar calendario', err)
     });
   }
 
-  getActividadesPorFecha(fecha: Date): Actividad[] {
-    return this._actividades().filter(a => this.mismaFecha(new Date(a.fechaActividad), fecha));
+  getActividadesPorFecha(fecha: Date): any[] {
+    return this._actividades().filter((a: any) => this.mismaFecha(new Date(a.fechaActividad || a.fechaactividad), fecha));
   }
 
   agregarActividad(data: any, callback?: () => void): void {
