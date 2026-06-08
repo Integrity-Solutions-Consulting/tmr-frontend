@@ -1,8 +1,10 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
 import { ClientesService } from '../servicios/clientes.service';
 import { ClientesActions } from './clientes.actions';
+import { selectFiltros, selectPaginaActual, selectTamanoPagina } from './clientes.reducer';
 
 export const cargarClientesEffect = createEffect(
   (actions$ = inject(Actions), svc = inject(ClientesService)) =>
@@ -61,11 +63,16 @@ export const editarClienteEffect = createEffect(
 );
 
 export const recargarTrasCrearEffect = createEffect(
-  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
+  (actions$ = inject(Actions), svc = inject(ClientesService), store = inject(Store)) =>
     actions$.pipe(
       ofType(ClientesActions.crearClienteExitoso, ClientesActions.editarClienteExitoso),
-      switchMap(() =>
-        svc.getClientes(1, 9, { busqueda: '', estado: 'todos' }).pipe(
+      withLatestFrom(
+        store.select(selectFiltros),
+        store.select(selectTamanoPagina),
+        store.select(selectPaginaActual)
+      ),
+      switchMap(([_, filtros, tamanoPagina, paginaActual]) =>
+        svc.getClientes(paginaActual, tamanoPagina, filtros).pipe(
           map(respuesta => ClientesActions.cargarClientesExitoso({ respuesta })),
           catchError(err  => of(ClientesActions.cargarClientesFallido({ error: err.message })))
         )

@@ -57,7 +57,7 @@ export class LideresComponent implements OnInit {
   // ── Filtros ────────────────────────────────────────────
   busqueda = '';
   tipoFiltro = '';
-  estadoFiltro = '';
+  estadoFiltro: 'Activo' | 'Inactivo' = 'Activo';
 
   // ── Paginación ─────────────────────────────────────────
   paginaActual = 1;
@@ -147,17 +147,21 @@ export class LideresComponent implements OnInit {
   // ── Filtros corregidos ──────────────────────────────────
   filtrarPor(tipo: string): void {
     if (tipo === 'Inactivo') {
-      this.estadoFiltro = 'Inactivo';
+      this.estadoFiltro = this.estadoFiltro === 'Inactivo' ? 'Activo' : 'Inactivo';
       this.tipoFiltro = '';
     } else {
-      this.tipoFiltro = tipo;
-      this.estadoFiltro = '';
+      if (this.tipoFiltro === tipo) {
+        this.tipoFiltro = '';
+        this.estadoFiltro = 'Activo';
+      } else {
+        this.tipoFiltro = tipo;
+      }
     }
     this.aplicarFiltros();
   }
 
-  filtrarEstado(estado: string): void {
-    this.estadoFiltro = estado;
+  filtrarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
+    this.estadoFiltro = estado === 'Inactivo' ? 'Inactivo' : 'Activo';
     this.aplicarFiltros();
   }
 
@@ -165,11 +169,9 @@ export class LideresComponent implements OnInit {
     this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
   }
 
-  seleccionarEstado(estado: string): void {
-    this.estadoFiltro = estado;
-    if (estado === '') {
-      this.mostrarEstadoDropdown = false;
-    }
+  seleccionarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
+    this.estadoFiltro = estado === 'Inactivo' ? 'Inactivo' : 'Activo';
+    this.mostrarEstadoDropdown = false;
     this.aplicarFiltros();
   }
 
@@ -290,9 +292,9 @@ export class LideresComponent implements OnInit {
         this.liderParaEditar = null;
         this.liderEditando = null;
 
+        this.obtenerLideresDelBackend();
         setTimeout(() => {
           this.mostrarConfirmacion = false;
-          this.obtenerLideresDelBackend();
         }, 3000);
       },
       error: (err) => {

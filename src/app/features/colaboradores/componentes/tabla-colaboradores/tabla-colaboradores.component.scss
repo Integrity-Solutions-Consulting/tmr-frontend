@@ -1,8 +1,7 @@
 .tabla-wrapper {
   width: 100%;
-  //overflow-y: auto;
   overflow-x: auto;
- //max-height: calc(100vh - 260px); 
+  overflow-y: visible;
   background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
@@ -32,7 +31,6 @@
     user-select: none;
     background: #f8fafc;
 
-
     &--center  { text-align: center; }
     &--actions { width: 48px; padding: 0; }
   }
@@ -60,7 +58,6 @@
     &--actions {
       padding: 0 8px;
       text-align: right;
-      overflow: visible;
       position: relative;
     }
     &--empty {
@@ -112,23 +109,20 @@
     align-items: center;
     transition: background 0.12s;
 
-    img { transform: rotate(0deg); }
-
     &:hover { background: #f3f4f6; }
   }
 
+  // Posicionado con fixed desde el TS — escapa de cualquier overflow
   &__dropdown {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 4px);
-    width: 140px;
+    position: fixed;
+    min-width: 160px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 20000;
     overflow: hidden;
-    animation: dropFade 0.12s ease;
+    animation: dropFade 0.12s ease forwards;
   }
 
   &__dropdown-item {
@@ -136,13 +130,13 @@
     align-items: center;
     gap: 7px;
     width: 100%;
-    padding: 7px 12px;
+    padding: 9px 14px;
     background: none;
     border: none;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-size: 12.5px;
-    color: #737373;
+    color: #374151;
     text-align: left;
     transition: background 0.1s;
 

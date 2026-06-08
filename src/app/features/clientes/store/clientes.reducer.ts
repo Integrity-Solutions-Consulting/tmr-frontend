@@ -26,7 +26,7 @@ const estadoInicial: ClientesState = {
   totalPaginas:        1,
   paginaActual:        1,
   tamanoPagina:        9,
-  filtros:             { busqueda: '', estado: 'todos' },
+  filtros:             { busqueda: '', estado: 'Activo' },
   cargando:            false,
   error:               null,
   notificacion:        null,

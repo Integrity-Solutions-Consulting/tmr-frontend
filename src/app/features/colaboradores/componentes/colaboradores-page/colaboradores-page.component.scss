@@ -76,11 +76,9 @@
   &__table-container {
     display: flex;
     flex-direction: column;
+    min-height: 0;
     overflow: visible;
-    /*background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);*/
+    width: 100%;
   }
 }
 

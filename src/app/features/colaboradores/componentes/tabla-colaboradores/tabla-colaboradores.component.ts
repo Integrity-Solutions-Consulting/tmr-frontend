@@ -20,13 +20,38 @@ export class TablaColaboradoresComponent {
   @Output() eliminar   = new EventEmitter<Colaborador>();
 
   menuAbierto: string | null = null;
+  dropdownTop  = 0;
+  dropdownLeft = 0;
 
-  toggleMenu(id: string, event: Event): void {
+  toggleMenu(id: string, event: MouseEvent): void {
     event.stopPropagation();
-    this.menuAbierto = this.menuAbierto === id ? null : id;
+
+    if (this.menuAbierto === id) {
+      this.menuAbierto = null;
+      return;
+    }
+
+    const btn  = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    const dropdownWidth  = 160;
+    const dropdownHeight = 108;
+
+    // Siempre a la izquierda del botón
+    const left = rect.right - dropdownWidth - 20;
+    let top = rect.top + rect.height / 2 - dropdownHeight / 2;
+
+    // Ajuste vertical si se sale por abajo
+    if (top + dropdownHeight > window.innerHeight - 8) {
+      top = window.innerHeight - dropdownHeight - 8;
+    }
+    // Ajuste vertical si se sale por arriba
+    if (top < 8) top = 8;
+
+    this.dropdownTop  = top;
+    this.dropdownLeft = left;
+    this.menuAbierto  = id;
   }
 
-  // Cierra el menú al hacer click en cualquier parte del documento.
   @HostListener('document:click')
   cerrarMenu(): void {
     this.menuAbierto = null;

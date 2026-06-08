@@ -74,6 +74,10 @@ export class ColaboradoresService {
       params.push('activo=false');
     }
 
+    if (!params.some(p => p.startsWith('activo=')) && filtros.asignacion) {
+      params.push('activo=true');
+    }
+
     if (filtros.asignacion === 'noAsignado') {
       params.push('asignacion=0');
     } else if (filtros.asignacion === 'asignado') {
