@@ -1,8 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
@@ -11,7 +13,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, MatIconModule, MatMenuModule, MatButtonModule],
+  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -71,6 +73,27 @@ export class RolesPage {
 
   editRol(rol: Rol): void {
     this.openModal(rol, 'edit');
+  }
+
+  obtenerAccionesRol(rol: Rol): ActionMenuItem[] {
+    return [
+      {
+        id: 'ver-mas',
+        label: 'Ver más',
+        action: () => this.viewRol(rol),
+      },
+      {
+        id: 'editar',
+        label: 'Editar',
+        action: () => this.editRol(rol),
+      },
+      {
+        id: rol.activo ? 'inactivar' : 'activar',
+        label: rol.activo ? 'Inactivar' : 'Activar',
+        disabled: this.estadoCambiandoId() === rol.id,
+        action: () => this.toggleEstado(rol),
+      },
+    ];
   }
 
   visibleModulos(rol: Rol): string[] {

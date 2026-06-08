@@ -77,36 +77,10 @@
                 </span>
               </td>
               <td class="actions-cell">
-                <button
-                  mat-icon-button
-                  type="button"
-                  class="menu-trigger"
-                  aria-label="Acciones"
-                  [matMenuTriggerFor]="accionesMenu"
-                >
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-
-                <mat-menu #accionesMenu="matMenu" xPosition="before" yPosition="below">
-                  <button mat-menu-item type="button" (click)="viewRol(rol)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>Ver</span>
-                  </button>
-                  <button mat-menu-item type="button" (click)="editRol(rol)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Editar</span>
-                  </button>
-                  <button
-                    mat-menu-item
-                    type="button"
-                    [class.menu-item--danger]="rol.activo"
-                    [disabled]="estadoCambiandoId() === rol.id"
-                    (click)="toggleEstado(rol)"
-                  >
-                    <mat-icon>{{ rol.activo ? 'block' : 'check_circle' }}</mat-icon>
-                    <span>{{ rol.activo ? 'Inactivar' : 'Activar' }}</span>
-                  </button>
-                </mat-menu>
+                <app-action-menu
+                  [itemId]="rol.id.toString()"
+                  [acciones]="obtenerAccionesRol(rol)"
+                ></app-action-menu>
               </td>
             </tr>
           }

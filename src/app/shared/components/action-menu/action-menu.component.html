@@ -1,6 +1,5 @@
 <div class="action-menu">
   <button
-    mat-icon-button
     class="action-menu__trigger"
     type="button"
     aria-label="Acciones"
@@ -24,6 +23,7 @@
         class="action-menu__item"
         type="button"
         [class.action-menu__item--danger]="accion.danger"
+        [disabled]="accion.disabled"
         (click)="onAccionClick(accion, $event)"
       >
         @if (accion.icon) {
@@ -31,9 +31,13 @@
         } @else if (accion.id === 'ver-mas') {
           <mat-icon aria-hidden="true">visibility</mat-icon>
         } @else if (accion.id === 'editar') {
-          <mat-icon aria-hidden="true">edit</mat-icon>
+          <mat-icon aria-hidden="true">edit_square</mat-icon>
         } @else if (accion.id === 'eliminar') {
           <mat-icon aria-hidden="true">delete</mat-icon>
+        } @else if (accion.id === 'inactivar') {
+          <mat-icon aria-hidden="true">block</mat-icon>
+        } @else if (accion.id === 'activar') {
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
         }
 
         <span>{{ accion.label }}</span>

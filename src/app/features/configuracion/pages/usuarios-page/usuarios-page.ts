@@ -1,5 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
@@ -9,7 +13,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [Boton, SearchInput],
+  imports: [Boton, SearchInput, ActionMenuComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -43,6 +47,29 @@ export class UsuariosPage {
   });
 
   readonly activos = computed(() => this.usuarios().filter((usuario) => usuario.estado === 'Activo').length);
+
+  obtenerAccionesUsuario(usuario: Usuario): ActionMenuItem[] {
+    const activo = usuario.estado === 'Activo';
+
+    return [
+      {
+        id: 'ver-mas',
+        label: 'Ver más',
+        action: () => this.viewUsuario(usuario),
+      },
+      {
+        id: 'editar',
+        label: 'Editar',
+        action: () => this.editUsuario(usuario),
+      },
+      {
+        id: activo ? 'inactivar' : 'activar',
+        label: activo ? 'Inactivar' : 'Activar',
+        danger: activo,
+        action: () => this.toggleEstadoUsuario(usuario),
+      },
+    ];
+  }
 
   resolveRoleNames(roleIds: string[]): string[] {
     const roles = this.roles();
@@ -105,16 +132,19 @@ export class UsuariosPage {
         this.editUsuario(result.usuario);
       }
       if (result?.action === 'toggleEstado' && result.usuario) {
-        this.deleteUsuario(result.usuario);
+        this.toggleEstadoUsuario(result.usuario);
       }
     });
   }
 
-  deleteUsuario(usuario: Usuario): void {
-    if (usuario.estado !== 'Activo') {
+  toggleEstadoUsuario(usuario: Usuario): void {
+    if (usuario.estado === 'Activo') {
+      this.configuracionService.deleteUsuario(usuario.id);
       return;
     }
 
-    this.configuracionService.deleteUsuario(usuario.id);
+    this.configuracionService.setUsuarioEstado(usuario.id, true).subscribe({
+      error: (err) => console.error(err),
+    });
   }
 }

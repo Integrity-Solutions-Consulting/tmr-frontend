@@ -147,6 +147,12 @@ export class ConfiguracionService {
     this.http.delete(`${environment.apiUrl}/configuracion/usuarios/${id}`).subscribe(() => this.loadUsuarios());
   }
 
+  setUsuarioEstado(id: number, activo: boolean): Observable<unknown> {
+    return this.http
+      .patch(`${environment.apiUrl}/configuracion/usuarios/${id}`, { activo })
+      .pipe(tap(() => this.loadUsuarios()));
+  }
+
   getUsuarioById(id: number): Usuario | undefined {
     return this.usuariosState().find((u) => u.id === id);
   }

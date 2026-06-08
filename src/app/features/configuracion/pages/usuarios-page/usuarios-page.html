@@ -69,23 +69,10 @@
                   </span>
                 </td>
                 <td class="actions-cell">
-                  <details class="actions-menu">
-                    <summary class="actions-menu__trigger" aria-label="Acciones de usuario">
-                      <span class="material-icons">more_vert</span>
-                    </summary>
-                    <div class="actions-menu__content">
-                      <button class="actions-menu__item" type="button" (click)="viewUsuario(usuario)">Ver más</button>
-                      <button class="actions-menu__item" type="button" (click)="editUsuario(usuario)">Editar</button>
-                      <button
-                        class="actions-menu__item actions-menu__item--danger"
-                        type="button"
-                        [disabled]="usuario.estado !== 'Activo'"
-                        (click)="deleteUsuario(usuario)"
-                      >
-                        Inactivar
-                      </button>
-                    </div>
-                  </details>
+                  <app-action-menu
+                    [itemId]="usuario.id.toString()"
+                    [acciones]="obtenerAccionesUsuario(usuario)"
+                  ></app-action-menu>
                 </td>
               </tr>
             }

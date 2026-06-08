@@ -9,6 +9,7 @@ export interface ActionMenuItem {
   label: string;
   icon?: string;
   danger?: boolean;
+  disabled?: boolean;
   action?: () => void;
 }
 
@@ -41,6 +42,10 @@ export class ActionMenuComponent {
 
   onAccionClick(accion: ActionMenuItem, event: Event): void {
     event.stopPropagation();
+    if (accion.disabled) {
+      return;
+    }
+
     this.accionSeleccionada.emit(accion);
     accion.action?.();
   }
