@@ -43,3 +43,21 @@
     (deleteFeriado)="toggleEstado($event)"
   />
 </section>
+
+<!-- Confirm dialog — reemplaza window.confirm() -->
+<app-confirm-dialog
+  [visible]="confirmVisible()"
+  titulo="Eliminar feriado"
+  [mensaje]="confirmMensaje()"
+  textoConfirmar="Eliminar"
+  textoCancelar="Cancelar"
+  (confirmar)="onConfirmarEliminar()"
+  (cancelar)="onCancelarEliminar()"
+/>
+
+<!-- Success modal — feedback visual de éxito -->
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

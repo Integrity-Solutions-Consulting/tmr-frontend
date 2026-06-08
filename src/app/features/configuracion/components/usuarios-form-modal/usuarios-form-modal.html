@@ -1,6 +1,11 @@
 <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
   <div class="modal-form__header">
     <div>
+      @if (isEdit) {
+        <span class="modal-form__badge modal-form__badge--edit">Editar</span>
+      } @else {
+        <span class="modal-form__badge modal-form__badge--new">Nuevo</span>
+      }
       <h2 class="modal-form__title">{{ isEdit ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
       <p class="modal-form__subtitle">Complete los datos personales y de acceso del usuario</p>
     </div>

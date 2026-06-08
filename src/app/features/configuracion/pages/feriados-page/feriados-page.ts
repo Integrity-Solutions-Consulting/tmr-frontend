@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Boton } from '../../../../shared/components/boton/boton';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { FeriadosCalendar } from '../../components/feriados-calendar/feriados-calendar';
 import { FeriadosFormModal, FeriadoModalData } from '../../components/feriados-form-modal/feriados-form-modal';
 import { Feriado } from '../../models/configuracion.models';
@@ -8,7 +10,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-feriados-page',
-  imports: [Boton, FeriadosCalendar],
+  imports: [Boton, FeriadosCalendar, ConfirmDialogComponent, SuccessModalComponent],
   templateUrl: './feriados-page.html',
   styleUrl: './feriados-page.scss',
 })
@@ -19,9 +21,18 @@ export class FeriadosPage {
   readonly feriados = this.configuracionService.feriados;
   readonly eliminarError = signal<string | null>(null);
 
+  // ── Confirm dialog ────────────────────────────────────────────
+  readonly confirmVisible = signal(false);
+  readonly confirmMensaje = signal('');
+  private feriadoPendienteEliminar: Feriado | null = null;
+
+  // ── Success modal ─────────────────────────────────────────────
+  readonly exitoVisible = signal(false);
+  readonly exitoMensaje = signal('Operación realizada exitosamente');
+
   readonly nacionales    = computed(() => this.feriados().filter((f) => f.tipo === 'Nacional').length);
   readonly locales       = computed(() => this.feriados().filter((f) => f.tipo === 'Local').length);
-  readonly religiosos = computed(() => this.feriados().filter((f) => String(f.tipo) === 'Religioso').length);
+  readonly religiosos    = computed(() => this.feriados().filter((f) => String(f.tipo) === 'Religioso').length);
   readonly activos       = computed(() => this.feriados().filter((f) => f.activo).length);
 
   openModal(feriado?: Feriado, mode: 'create' | 'edit' | 'view' = 'create', fecha?: string): void {
@@ -38,10 +49,13 @@ export class FeriadosPage {
       { data, panelClass: 'tmr-dialog-panel' },
     );
 
-    // TODO: conectar con POST /api/feriados o PUT /api/feriados/{id} según mode
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        const esNuevo = !this.feriados().some((f) => f.id === result.id);
         this.configuracionService.upsertFeriado(result);
+        this.mostrarExito(
+          esNuevo ? 'Feriado agregado correctamente' : 'Feriado actualizado correctamente',
+        );
       }
     });
   }
@@ -54,20 +68,45 @@ export class FeriadosPage {
     this.openModal(feriado, 'edit');
   }
 
+  /** Muestra el ConfirmDialog antes de eliminar (reemplaza window.confirm). */
   toggleEstado(feriado: Feriado): void {
-    const confirmado = window.confirm(`¿Desea eliminar el feriado "${feriado.nombre}"?`);
-    if (!confirmado) {
-      return;
-    }
+    this.feriadoPendienteEliminar = feriado;
+    this.confirmMensaje.set(`¿Desea eliminar el feriado "${feriado.nombre}"? Esta acción no se puede deshacer.`);
+    this.confirmVisible.set(true);
+  }
+
+  /** El usuario confirmó la eliminación. */
+  onConfirmarEliminar(): void {
+    this.confirmVisible.set(false);
+    const feriado = this.feriadoPendienteEliminar;
+    this.feriadoPendienteEliminar = null;
+    if (!feriado) return;
 
     this.eliminarError.set(null);
     this.configuracionService.deleteFeriado(feriado.id).subscribe({
+      next: () => this.mostrarExito('Feriado eliminado correctamente'),
       error: (err) => this.eliminarError.set(this.extractDeleteError(err)),
     });
   }
 
+  /** El usuario canceló. */
+  onCancelarEliminar(): void {
+    this.confirmVisible.set(false);
+    this.feriadoPendienteEliminar = null;
+  }
+
   openModalForDate(fecha: string): void {
     this.openModal(undefined, 'create', fecha);
+  }
+
+  cerrarExito(): void {
+    this.exitoVisible.set(false);
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.exitoMensaje.set(mensaje);
+    this.exitoVisible.set(true);
+    setTimeout(() => this.exitoVisible.set(false), 3000);
   }
 
   private extractDeleteError(err: unknown): string {

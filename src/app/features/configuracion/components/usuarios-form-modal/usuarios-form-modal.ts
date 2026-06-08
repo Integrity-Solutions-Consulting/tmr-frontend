@@ -360,10 +360,9 @@ export class UsuariosFormModal {
     this.configuracionService.crearUsuarioAdministrativo(registerPayload).subscribe({
       next: () => {
         this.guardando.set(false);
-        window.alert('Usuario creado correctamente.');
         this.configuracionService.loadUsuarios();
         this.form.reset();
-        this.dialogRef.close(true);
+        this.dialogRef.close('creado');
       },
       error: (err) => {
         this.guardando.set(false);

@@ -82,3 +82,9 @@
     </div>
   </div>
 </section>
+
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

@@ -7,13 +7,14 @@ import {
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
+import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent],
+  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -25,6 +26,13 @@ export class RolesPage {
   readonly estadoCambiandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
   readonly modulos = this.configuracionService.modulos;
+
+  /** Controla la visibilidad del modal de éxito. */
+  readonly exitoVisible = signal(false);
+  readonly exitoMensaje = signal('Operación realizada exitosamente');
+
+  /** ID del rol cuya lista de módulos extra está desplegada. null = ninguno. */
+  readonly rolExpandidoId = signal<number | null>(null);
 
   readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
   readonly modulosCubiertos = computed(() =>
@@ -69,7 +77,11 @@ export class RolesPage {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        const esNuevo = !this.roles().some((r) => r.id === result.id);
         this.configuracionService.upsertRol(result);
+        this.mostrarExito(
+          esNuevo ? 'Rol creado correctamente' : 'Rol actualizado correctamente',
+        );
       }
     });
   }
@@ -111,17 +123,58 @@ export class RolesPage {
     return Math.max(rol.modulos.length - 3, 0);
   }
 
+  /** Lista de módulos que están ocultos (índice ≥ 3). */
+  modulosOcultosList(rol: Rol): Modulo[] {
+    return rol.modulos.slice(3);
+  }
+
+  /** Indica si el dropdown de módulos extra está abierto para este rol. */
+  estaExpandido(rolId: number): boolean {
+    return this.rolExpandidoId() === rolId;
+  }
+
+  /**
+   * Alterna el dropdown de módulos ocultos.
+   * Si el rol ya estaba abierto → cierra. Si era otro → abre el nuevo.
+   * El evento se detiene para que no llegue al listener global de document.
+   */
+  toggleModulosExpandidos(event: Event, rolId: number): void {
+    event.stopPropagation();
+    this.rolExpandidoId.set(this.rolExpandidoId() === rolId ? null : rolId);
+  }
+
+  /** Cierra el dropdown cuando se hace clic fuera. */
+  cerrarExpandido(): void {
+    this.rolExpandidoId.set(null);
+  }
+
   toggleEstado(rol: Rol): void {
     this.estadoError.set(null);
     this.estadoCambiandoId.set(rol.id);
 
     this.configuracionService.setRolEstado(rol.id, !rol.activo).subscribe({
-      next: () => this.estadoCambiandoId.set(null),
+      next: () => {
+        this.estadoCambiandoId.set(null);
+        const nuevoEstado = !rol.activo;
+        this.mostrarExito(
+          nuevoEstado ? 'Rol activado correctamente' : 'Rol inactivado correctamente',
+        );
+      },
       error: (err) => {
         this.estadoCambiandoId.set(null);
         this.estadoError.set(this.extractEstadoError(err));
       },
     });
+  }
+
+  cerrarExito(): void {
+    this.exitoVisible.set(false);
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.exitoMensaje.set(mensaje);
+    this.exitoVisible.set(true);
+    setTimeout(() => this.exitoVisible.set(false), 3000);
   }
 
   private extractEstadoError(err: unknown): string {

@@ -1,4 +1,4 @@
-<section class="page">
+<section class="page" (click)="cerrarExpandido()">
   <div class="hero">
     <div>
       <h2>Roles</h2>
@@ -62,12 +62,31 @@
               </td>
               <td>{{ rol.descripcion }}</td>
               <td>
-                <div class="module-list">
-                  @for (modulo of visibleModulos(rol); track modulo.id) {
-                    <span class="module-chip">{{ modulo.nombre }}</span>
-                  }
-                  @if (modulosOcultos(rol) > 0) {
-                    <span class="module-chip module-chip--more">+{{ modulosOcultos(rol) }} más</span>
+                <div class="module-list-wrap">
+                  <div class="module-list">
+                    @for (modulo of visibleModulos(rol); track modulo.id) {
+                      <span class="module-chip">{{ modulo.nombre }}</span>
+                    }
+                    @if (modulosOcultos(rol) > 0) {
+                      <button
+                        type="button"
+                        class="module-chip module-chip--more"
+                        [class.module-chip--more-active]="estaExpandido(rol.id)"
+                        (click)="toggleModulosExpandidos($event, rol.id)"
+                        [attr.aria-expanded]="estaExpandido(rol.id)"
+                        [attr.aria-label]="'Ver ' + modulosOcultos(rol) + ' módulos más de ' + rol.nombre"
+                      >
+                        {{ estaExpandido(rol.id) ? 'Cerrar' : '+' + modulosOcultos(rol) + ' más' }}
+                      </button>
+                    }
+                  </div>
+
+                  @if (estaExpandido(rol.id)) {
+                    <div class="module-expand-list" (click)="$event.stopPropagation()">
+                      @for (modulo of modulosOcultosList(rol); track modulo.id) {
+                        <span class="module-chip module-chip--expand">{{ modulo.nombre }}</span>
+                      }
+                    </div>
                   }
                 </div>
               </td>
@@ -89,3 +108,9 @@
     </div>
   </div>
 </section>
+
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

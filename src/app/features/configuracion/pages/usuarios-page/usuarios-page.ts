@@ -6,6 +6,7 @@ import {
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
+import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
 import { Rol, Usuario } from '../../models/configuracion.models';
@@ -13,7 +14,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [Boton, SearchInput, ActionMenuComponent],
+  imports: [Boton, SearchInput, ActionMenuComponent, SuccessModalComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -23,6 +24,10 @@ export class UsuariosPage {
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
   readonly roles = this.configuracionService.roles;
+
+  /** Controla la visibilidad del modal de éxito. */
+  readonly exitoVisible = signal(false);
+  readonly exitoMensaje = signal('Operación realizada exitosamente');
 
   readonly filteredUsuarios = computed(() => {
     const query = this.query().trim().toLowerCase();
@@ -96,7 +101,7 @@ export class UsuariosPage {
     const dialogRef = this.dialog.open<
       UsuariosFormModal,
       { usuario?: Usuario; roles: Rol[]; nextId: number },
-      Usuario | boolean
+      Usuario | string | boolean
     >(UsuariosFormModal, {
       data: {
         usuario,
@@ -107,16 +112,26 @@ export class UsuariosPage {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (usuario && result !== true) {
-          const usuarioEditado = result as Usuario;
-          this.configuracionService
-            .updateUsuario(usuarioEditado.id, this.configuracionService.toUpdateUsuarioPayload(usuarioEditado))
-            .subscribe({
-              next: () => this.configuracionService.loadUsuarios(),
-              error: (err) => console.error(err),
-            });
-        }
+      if (!result) return;
+
+      // Resultado 'creado' → usuario nuevo creado en backend
+      if (result === 'creado') {
+        this.mostrarExito('Usuario creado correctamente');
+        return;
+      }
+
+      // Resultado objeto Usuario → edición local
+      if (result !== true && typeof result === 'object') {
+        const usuarioEditado = result as Usuario;
+        this.configuracionService
+          .updateUsuario(usuarioEditado.id, this.configuracionService.toUpdateUsuarioPayload(usuarioEditado))
+          .subscribe({
+            next: () => {
+              this.configuracionService.loadUsuarios();
+              this.mostrarExito('Usuario actualizado correctamente');
+            },
+            error: (err) => console.error(err),
+          });
       }
     });
   }
@@ -144,7 +159,18 @@ export class UsuariosPage {
     }
 
     this.configuracionService.setUsuarioEstado(usuario.id, true).subscribe({
+      next: () => this.mostrarExito('Estado del usuario actualizado correctamente'),
       error: (err) => console.error(err),
     });
+  }
+
+  cerrarExito(): void {
+    this.exitoVisible.set(false);
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.exitoMensaje.set(mensaje);
+    this.exitoVisible.set(true);
+    setTimeout(() => this.exitoVisible.set(false), 3000);
   }
 }

@@ -24,11 +24,26 @@
   }
 
   &__title {
-    margin: 0 0 4px;
+    margin: 4px 0 4px;
     color: #163572;
     font-family: 'Inter', sans-serif;
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.04em;
+    width: fit-content;
+    margin-bottom: 2px;
+
+    &--new  { background: #dbeafe; color: #1d4ed8; }
+    &--edit { background: #fef3c7; color: #92400e; }
   }
 
   &__subtitle {
@@ -93,13 +108,13 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    height: 40px;
+    height: 42px;
     padding: 0 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.15s;
 

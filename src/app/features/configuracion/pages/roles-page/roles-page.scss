@@ -146,6 +146,11 @@ p {
   font-weight: 800;
 }
 
+.module-list-wrap {
+  position: relative;
+  min-width: 0;
+}
+
 .module-list {
   display: flex;
   flex-wrap: wrap;
@@ -171,9 +176,65 @@ p {
 }
 
 .module-chip--more {
+  cursor: pointer;
   color: #475569;
   background: #f8fafc;
   border-color: #e5e7eb;
+  border: none;
+  font-family: inherit;
+  letter-spacing: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #cbd5e1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+.module-chip--more-active {
+  color: #0c3b73;
+  background: #dbeafe;
+  border-color: #93c5fd;
+
+  &:hover {
+    background: #bfdbfe;
+  }
+}
+
+.module-expand-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-width: 280px;
+  animation: expandIn 0.15s ease;
+}
+
+.module-chip--expand {
+  color: #334155;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .status-pill {

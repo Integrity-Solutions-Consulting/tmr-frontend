@@ -22,7 +22,7 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
 }
 
 .stats-grid article {
@@ -85,25 +85,25 @@
 }
 
 .usuarios-table thead {
-  background: #ffffff;
-  border-bottom: 2px solid #e5e7eb;
+  background: #f8fafc;
+  border-bottom: 1px solid #eef2f7;
   position: sticky;
   top: 0;
   z-index: 2;
 }
 
 .usuarios-table thead th {
-  padding: 11px 14px;
+  padding: 14px 16px;
   text-align: left;
-  font-weight: 600;
-  color: #737373;
-  font-size: 14px;
+  font-weight: 800;
+  color: #64748b;
+  font-size: 12px;
   white-space: nowrap;
-  background: #ffffff;
+  background: #f8fafc;
 }
 
 .usuarios-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #eef2f7;
   transition: background 0.12s;
 }
 
@@ -112,13 +112,14 @@
 }
 
 .usuarios-table tbody tr:hover {
-  background: rgba(22, 53, 114, 0.04);
+  background: #f8fafc;
 }
 
 .usuarios-table tbody td {
-  padding: 13px 16px;
-  color: #737373;
-  font-weight: 400;
+  padding: 14px 16px;
+  color: #475569;
+  font-weight: 500;
+  font-size: 13px;
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -133,6 +134,7 @@
   text-overflow: ellipsis;
 }
 
+/* ── Roles cell chip ───────────────────────────────────────── */
 .roles-cell {
   display: flex;
   gap: 6px;
@@ -141,70 +143,36 @@
   max-width: 280px;
 }
 
+/* ── Status pills — igual que Roles ─────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 400;
-  color: #737373;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
 }
 
-.badge--activo::before,
-.badge--inactivo::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.badge--activo {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
 }
 
-.badge--activo::before {
-  background: #22c55e;
-}
-
-.badge--inactivo::before {
-  background: #737373;
+.badge--inactivo {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
 }
 
 .badge--role {
-  padding: 4px 10px;
-  background: #eef2ff;
-  color: #1e3a8a;
-  border-color: transparent;
+  color: #0c3b73;
+  background: #eef6ff;
+  border: 1px solid #d8e8fb;
 }
 
-.action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #737373;
-  padding: 6px 10px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, color 0.15s;
-  font-size: 13px;
-}
-
-.action-btn:hover {
-  background: #f5f5f5;
-  color: #163572;
-}
-
-.action-btn--danger {
-  color: #dc2626;
-}
-
-.action-btn--danger:hover {
-  background: #fef2f2;
-}
-
+/* ── Actions cell ─────────────────────────────────────────── */
 .actions-cell {
   position: sticky;
   right: 0;
@@ -219,9 +187,10 @@
 }
 
 .usuarios-table tbody tr:hover .actions-cell {
-  background: #f8faff;
+  background: #f8fafc;
 }
 
+/* ── Empty state ──────────────────────────────────────────── */
 .empty-state {
   text-align: center;
   color: #94a3b8;
@@ -229,6 +198,7 @@
   font-style: italic;
 }
 
+/* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -254,9 +224,5 @@
   .usuarios-table tbody td {
     padding: 12px 10px;
     font-size: 13px;
-  }
-
-  .action-btn {
-    padding: 6px 8px;
   }
 }
