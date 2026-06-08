@@ -47,6 +47,7 @@ export class AgregarActividad implements OnInit {
     private http = inject(HttpClient);
 
     public form!: FormGroup;
+    public esEdicion = false;
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
@@ -61,21 +62,24 @@ export class AgregarActividad implements OnInit {
     ngOnInit() {
         this.cargarCatalogos();
 
+        const act = this.data?.actividad;
+        this.esEdicion = !!act;
+
         this.form = this.fb.group({
-            tipoActividad: [null, Validators.required],
-            proyectoId: [null, Validators.required],
-            codigoRequerimiento: ['', [Validators.required, Validators.maxLength(50)]],
-            descripcion: ['', Validators.maxLength(255)],
-            fechaActividad: [this.data?.fecha || new Date(), Validators.required],
-            numeroHoras: [4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
+            tipoActividad: [act ? String(act.idtipoactividad) : null, Validators.required],
+            proyectoId: [act ? act.idproyecto : null, Validators.required],
+            codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
+            descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
+            fechaActividad: [act ? act.fechaactividad : (this.data?.fecha || new Date()), Validators.required],
+            numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
-            fechaInicio: [this.data?.fecha || new Date()],
+            fechaInicio: [act ? act.fechaactividad : (this.data?.fecha || new Date())],
             fechaFin: [null],
-            horasPorDia: [4],
+            horasPorDia: [act ? act.cantidadhoras : 4],
             incluirFinesDeSemana: [false],
             incluirFeriados: [false],
-            notas: [''],
-            esbillable: [true]
+            notas: [act ? act.notas : ''],
+            esbillable: [act ? act.esbillable : true]
         });
     }
 
@@ -128,9 +132,20 @@ export class AgregarActividad implements OnInit {
 
     cancelar() { this.dialogRef.close(); }
 
+    eliminar() {
+        if (this.esEdicion && confirm('¿Está seguro de que desea eliminar esta actividad?')) {
+            this.actividadesService.eliminarActividad(this.data.actividad.id);
+            this.dialogRef.close();
+        }
+    }
+
     guardar() {
         if (this.form.valid) {
-            this.actividadesService.agregarActividad(this.form.value);
+            if (this.esEdicion) {
+                this.actividadesService.actualizarActividad(this.data.actividad.id, this.form.value);
+            } else {
+                this.actividadesService.agregarActividad(this.form.value);
+            }
             this.dialogRef.close();
         }
     }

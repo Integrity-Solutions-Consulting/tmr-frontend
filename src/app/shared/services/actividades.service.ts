@@ -48,15 +48,19 @@ export class ActividadesService {
     this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${user.id}&anio=${anio}&mes=${mes}`).subscribe({
       next: (data) => {
         const mapped = (data || []).map(item => ({
-          id: '',
-          tipoActividad: 'Otro',
-          proyectoId: '',
-          proyectoNombre: '',
-          codigoRequerimiento: '',
-          fechaActividad: new Date(item.fecha + 'T00:00:00'),
-          numeroHoras: item.totalHoras,
-          esRecurrente: false
-        } as any));
+          id: String(item.id),
+          idempleado: item.idEmpleado,
+          idproyecto: item.idProyecto,
+          proyectoNombre: item.proyectoNombre || 'Sin Proyecto',
+          idtipoactividad: item.idTipoActividad,
+          tipoActividadNombre: item.tipoActividadNombre || 'Otro',
+          codigorequerimiento: item.codigoRequerimiento || '',
+          fechaactividad: new Date(item.fechaActividad + 'T00:00:00'),
+          cantidadhoras: item.cantidadHoras,
+          descripcionactividad: item.descripcionActividad || '',
+          notas: item.notas || '',
+          esbillable: item.esBillable ?? true
+        } as Actividad));
         this._actividades.set(mapped);
       },
       error: (err) => console.error('Error al cargar calendario', err)
@@ -64,7 +68,7 @@ export class ActividadesService {
   }
 
   getActividadesPorFecha(fecha: Date): any[] {
-    return this._actividades().filter((a: any) => this.mismaFecha(new Date(a.fechaActividad || a.fechaactividad), fecha));
+    return this._actividades().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
   }
 
   agregarActividad(data: any, callback?: () => void): void {
@@ -74,13 +78,13 @@ export class ActividadesService {
     const payload = {
       idEmpleado: user.id,
       idProyecto: data.proyectoId,
-      idTipoActividad: data.tipoActividad, // Suponiendo que es el ID en realidad
+      idTipoActividad: Number(data.tipoActividad),
       codigoRequerimiento: data.codigoRequerimiento,
-      cantidadHoras: data.horasPorDia || data.numeroHoras,
+      cantidadHoras: data.numeroHoras,
       fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
       descripcionActividad: data.descripcion,
-      notas: '',
-      esBillable: true
+      notas: data.notas || '',
+      esBillable: data.esbillable ?? true
     };
 
     this.http.post(this.apiUrl, payload).subscribe({
@@ -93,6 +97,47 @@ export class ActividadesService {
         if (callback) callback();
       },
       error: (err) => console.error('Error al crear actividad', err)
+    });
+  }
+
+  actualizarActividad(id: number | string, data: any, callback?: () => void): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const payload = {
+      idProyecto: data.proyectoId,
+      idTipoActividad: Number(data.tipoActividad),
+      codigoRequerimiento: data.codigoRequerimiento,
+      cantidadHoras: data.numeroHoras,
+      fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
+      descripcionActividad: data.descripcion,
+      notas: data.notas || '',
+      esBillable: data.esbillable ?? true
+    };
+
+    this.http.put(`${this.apiUrl}/${id}`, payload).subscribe({
+      next: () => {
+        this.cargarResumen();
+        const actDate = new Date(data.fechaActividad);
+        this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+
+        if (callback) callback();
+      },
+      error: (err) => console.error('Error al actualizar actividad', err)
+    });
+  }
+
+  eliminarActividad(id: number | string, callback?: () => void): void {
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.cargarResumen();
+        // Recargar el calendario actual
+        const hoy = new Date();
+        this.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
+
+        if (callback) callback();
+      },
+      error: (err) => console.error('Error al eliminar actividad', err)
     });
   }
 

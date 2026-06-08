@@ -78,14 +78,14 @@
             <label class="filter-label">Período</label>
             <div class="toggle-group">
                 <button class="toggle-btn" [class.active]="periodo === 'quincena'"
-                    (click)="periodo = 'quincena'; aplicarFiltros()">
+                    (click)="cambiarPeriodo('quincena')">
                     @if (periodo === 'quincena') {
                     <mat-icon class="check-icon">check</mat-icon>
                     }
                     Quincena
                 </button>
                 <button class="toggle-btn" [class.active]="periodo === 'mes-completo'"
-                    (click)="periodo = 'mes-completo'; aplicarFiltros()">
+                    (click)="cambiarPeriodo('mes-completo')">
                     @if (periodo === 'mes-completo') {
                     <mat-icon class="check-icon">check</mat-icon>
                     }

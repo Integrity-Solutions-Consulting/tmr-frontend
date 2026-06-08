@@ -65,8 +65,15 @@ export class SeguimientoComponent implements AfterViewInit {
     public busqueda = '';
     public clienteSeleccionado = '';
     public clientes = signal<{id: number, nombre: string}[]>([]);
-    public fechaDesde = '2026-04-01';
-    public fechaHasta = '2026-04-30';
+    public fechaDesde = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    })();
+    public fechaHasta = (() => {
+        const d = new Date();
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+    })();
     public periodo: 'quincena' | 'mes-completo' = 'mes-completo';
 
     // Paginación (Estado Local para Rango)
@@ -226,5 +233,44 @@ export class SeguimientoComponent implements AfterViewInit {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Detalle');
         XLSX.writeFile(wb, `Detalle_${col.nombre.split(' ')[0]}.xlsx`);
+    }
+
+    private formatDate(date: Date): string {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    public cambiarPeriodo(nuevoPeriodo: 'quincena' | 'mes-completo') {
+        this.periodo = nuevoPeriodo;
+        this.ajustarFechasPorPeriodo();
+        this.aplicarFiltros();
+    }
+
+    private ajustarFechasPorPeriodo() {
+        // Usar la fechaDesde actual si existe para preservar el mes/año consultado, sino usar la fecha actual del sistema
+        const fechaBase = this.fechaDesde ? new Date(this.fechaDesde + 'T00:00:00') : new Date();
+        const anio = fechaBase.getFullYear();
+        const mes = fechaBase.getMonth();
+
+        if (this.periodo === 'quincena') {
+            const dia = fechaBase.getDate();
+            if (dia <= 15) {
+                // Primera Quincena: del 1 al 15
+                this.fechaDesde = this.formatDate(new Date(anio, mes, 1));
+                this.fechaHasta = this.formatDate(new Date(anio, mes, 15));
+            } else {
+                // Segunda Quincena: del 16 al último día del mes
+                this.fechaDesde = this.formatDate(new Date(anio, mes, 16));
+                const ultimoDia = new Date(anio, mes + 1, 0);
+                this.fechaHasta = this.formatDate(ultimoDia);
+            }
+        } else {
+            // Mes Completo: del 1 al último día del mes
+            this.fechaDesde = this.formatDate(new Date(anio, mes, 1));
+            const ultimoDia = new Date(anio, mes + 1, 0);
+            this.fechaHasta = this.formatDate(ultimoDia);
+        }
     }
 }

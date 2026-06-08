@@ -1,5 +1,5 @@
 <div class="modal-wrap">
-    <h2 class="modal-title">Agregar actividad</h2>
+    <h2 class="modal-title">{{ esEdicion ? 'Editar actividad' : 'Agregar actividad' }}</h2>
 
     <div class="modal-body">
         <form [formGroup]="form" class="modal-form">
@@ -87,12 +87,14 @@
             </div>
 
             <!-- Recurrente checkbox -->
+            @if (!esEdicion) {
             <div class="recurrente-row">
                 <mat-checkbox formControlName="esRecurrente" color="primary">
                     Actividad Recurrente
                 </mat-checkbox>
                 <button class="help-btn" type="button">?</button>
             </div>
+            }
 
             <!-- Panel de Recurrencia -->
             @if (form.get('esRecurrente')?.value) {
@@ -152,9 +154,15 @@
 
     <!-- Footer -->
     <div class="modal-footer">
+        @if (esEdicion) {
+        <button mat-flat-button color="warn" class="btn-eliminar" (click)="eliminar()">
+            <mat-icon>delete</mat-icon> Eliminar
+        </button>
+        <div class="spacer"></div>
+        }
         <button mat-button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
         <button mat-flat-button class="btn-agregar" [disabled]="form.invalid" (click)="guardar()">
-            Agregar
+            {{ esEdicion ? 'Actualizar' : 'Agregar' }}
         </button>
     </div>
 </div>

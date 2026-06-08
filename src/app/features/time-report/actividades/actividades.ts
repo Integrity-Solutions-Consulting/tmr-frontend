@@ -60,6 +60,18 @@ export class Actividades implements OnInit {
     }
 
     /**
+     * Al seleccionar una actividad específica para editarla
+     */
+    onEditarActividad(actividad: any) {
+        this.dialog.open(AgregarActividad, {
+            width: '600px',
+            maxHeight: '90vh',
+            data: { actividad },
+            disableClose: false
+        });
+    }
+
+    /**
      * Abre el configurador de reportes
      */
     abrirGenerarReporte() {
