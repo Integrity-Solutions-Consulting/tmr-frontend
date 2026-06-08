@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { Rol } from '../../models/configuracion.models';
+import { Modulo, Rol } from '../../models/configuracion.models';
 import { ONLY_LETTERS_REGEX } from '../../../../shared/validators/form-validators';
 
 export type RolModalMode = 'create' | 'edit' | 'view';
@@ -11,7 +11,7 @@ export interface RolModalData {
   rol?: Rol;
   roles: Rol[];
   nextId: number;
-  modulos?: { id: number; nombre: string }[];
+  modulos?: Modulo[];
   mode?: RolModalMode;
 }
 
@@ -29,8 +29,14 @@ export class RolesFormModal {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<RolesFormModal>);
   readonly data = inject<RolModalData>(MAT_DIALOG_DATA);
-  readonly modulos = this.data.modulos?.map((modulo) => modulo.nombre) ?? [];
 
+  /** Lista completa de módulos disponibles, tal como llegan desde el backend. */
+  readonly modulos: Modulo[] = this.data.modulos ?? [];
+
+  /**
+   * El formulario guarda los IDs seleccionados (number[]) internamente.
+   * Al editar, se pre-cargan los IDs de los módulos ya asignados al rol.
+   */
   readonly form = this.fb.nonNullable.group({
     nombre: [
       this.data.rol?.nombre ?? '',
@@ -42,8 +48,8 @@ export class RolesFormModal {
       ],
     ],
     descripcion: [this.data.rol?.descripcion ?? '', [Validators.required, Validators.minLength(5)]],
-    modulos: this.fb.nonNullable.control<string[]>(
-      this.data.rol?.modulos ?? [],
+    modulosIds: this.fb.nonNullable.control<number[]>(
+      this.data.rol?.modulos.map((m) => m.id) ?? [],
       { validators: [this.requiredModulesValidator] },
     ),
     activo: [this.data.rol?.activo ?? true, Validators.required],
@@ -57,38 +63,54 @@ export class RolesFormModal {
     return this.data.mode === 'view';
   }
 
-  getModuleIcon(modulo: string): string {
+  /**
+   * Devuelve el ícono de Material para un módulo dado su nombre.
+   * El nombre se normaliza (sin tildes, minúsculas) antes de buscar en el mapa.
+   * Este mapper solo afecta al ícono; el texto visible siempre viene del backend.
+   */
+  getModuleIcon(nombre: string): string {
+    const normalizedNombre = this.normalizeModuleName(nombre);
     const map: Record<string, string> = {
-      'Dashboard': 'dashboard',
-      'Proyectos': 'folder_open',
-      'Actividades': 'task_alt',
-      'Seguimiento': 'track_changes',
-      'Colaboradores': 'group',
-      'Clientes': 'business',
-      'Lideres': 'supervisor_account',
-      'Roles': 'admin_panel_settings',
-      'Usuarios': 'manage_accounts',
-      'Dias Festivos': 'event',
-      'Proyecto por horas': 'schedule',
-      'Proyecto por fechas': 'date_range',
-      'Solicitud de requerimiento': 'assignment',
-      'Historial de requerimiento': 'history',
+      'dashboard': 'dashboard',
+      'proyectos': 'folder_open',
+      'actividades': 'task_alt',
+      'seguimiento': 'track_changes',
+      'colaboradores': 'group',
+      'clientes': 'business',
+      // Variantes con y sin tilde — normalizeModuleName quita tildes antes de buscar
+      'lideres': 'supervisor_account',
+      'roles': 'admin_panel_settings',
+      'usuarios': 'manage_accounts',
+      // Feriados: nombre nuevo en BD puede ser "Feriados" o "Dias Festivos"
+      'feriados': 'event',
+      'dias festivos': 'event',
+      'proyecto por horas': 'schedule',
+      'proyecto por fechas': 'date_range',
+      'solicitud de requerimiento': 'assignment',
+      'historial de requerimiento': 'history',
+      // Configuración con tilde se normaliza a "configuracion"
+      'configuracion': 'settings',
+      'reportes': 'bar_chart',
+      'time report': 'timer',
+      'requerimientos': 'assignment_turned_in',
     };
-    return map[modulo] ?? 'extension';
+    return map[normalizedNombre] ?? 'extension';
   }
 
-  toggleModulo(modulo: string, checked: boolean): void {
+  /** Agrega o quita un ID de módulo del listado de IDs seleccionados en el form. */
+  toggleModulo(id: number, checked: boolean): void {
     if (this.isView) return;
-    const current = this.form.controls.modulos.value;
-    const next = checked ? [...current, modulo] : current.filter((item) => item !== modulo);
-    this.form.controls.modulos.setValue(next);
-    this.form.controls.modulos.markAsDirty();
-    this.form.controls.modulos.markAsTouched();
-    this.form.controls.modulos.updateValueAndValidity();
+    const current = this.form.controls.modulosIds.value;
+    const next = checked ? [...current, id] : current.filter((item) => item !== id);
+    this.form.controls.modulosIds.setValue(next);
+    this.form.controls.modulosIds.markAsDirty();
+    this.form.controls.modulosIds.markAsTouched();
+    this.form.controls.modulosIds.updateValueAndValidity();
   }
 
-  isChecked(modulo: string): boolean {
-    return this.form.controls.modulos.value.includes(modulo);
+  /** Comprueba si un módulo (por ID) está seleccionado en el form. */
+  isChecked(id: number): boolean {
+    return this.form.controls.modulosIds.value.includes(id);
   }
 
   save(): void {
@@ -103,9 +125,17 @@ export class RolesFormModal {
     }
 
     const value = this.form.getRawValue();
+
+    // Convertir los IDs seleccionados de vuelta a objetos Modulo completos
+    // para que Rol.modulos sea Modulo[] y el servicio pueda leer m.id directamente.
+    const selectedModulos = this.modulos.filter((m) => value.modulosIds.includes(m.id));
+
     this.dialogRef.close({
       id: this.data.rol?.id ?? this.data.nextId,
-      ...value,
+      nombre: value.nombre,
+      descripcion: value.descripcion,
+      modulos: selectedModulos,
+      activo: value.activo,
     } satisfies Rol);
   }
 
@@ -125,11 +155,20 @@ export class RolesFormModal {
     };
   }
 
-  private requiredModulesValidator(control: AbstractControl<string[]>): ValidationErrors | null {
+  private requiredModulesValidator(control: AbstractControl<number[]>): ValidationErrors | null {
     return control.value.length > 0 ? null : { requiredModules: true };
   }
 
   private normalizeRoleName(value: string): string {
     return value.trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  private normalizeModuleName(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
   }
 }

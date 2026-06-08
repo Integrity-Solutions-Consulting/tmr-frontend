@@ -105,26 +105,26 @@
       </div>
 
       <div class="rol-modal__module-grid">
-        @for (modulo of modulos; track modulo) {
+        @for (modulo of modulos; track modulo.id) {
           <label class="rol-modal__module-item"
-                 [class.rol-modal__module-item--checked]="isChecked(modulo)"
+                 [class.rol-modal__module-item--checked]="isChecked(modulo.id)"
                  [class.rol-modal__module-item--disabled]="isView">
             <input
               type="checkbox"
               class="rol-modal__module-check"
-              [checked]="isChecked(modulo)"
+              [checked]="isChecked(modulo.id)"
               [disabled]="isView"
-              (change)="toggleModulo(modulo, $any($event.target).checked)"
+              (change)="toggleModulo(modulo.id, $any($event.target).checked)"
             />
             <mat-icon class="rol-modal__module-icon">
-              {{ getModuleIcon(modulo) }}
+              {{ getModuleIcon(modulo.nombre) }}
             </mat-icon>
-            <span>{{ modulo }}</span>
+            <span>{{ modulo.nombre }}</span>
           </label>
         }
       </div>
 
-      @if (!isView && form.controls.modulos.errors?.['requiredModules'] && form.controls.modulos.touched) {
+      @if (!isView && form.controls.modulosIds.errors?.['requiredModules'] && form.controls.modulosIds.touched) {
         <p class="rol-modal__error">Selecciona al menos un módulo</p>
       }
     </div>

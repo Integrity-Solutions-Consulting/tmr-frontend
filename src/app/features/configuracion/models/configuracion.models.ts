@@ -1,11 +1,16 @@
 export type EstadoUsuario = 'Activo' | 'Inactivo' | 'Suspendido';
 export type TipoFeriado = 'Nacional' | 'Local' | 'Institucional';
 
+export interface Modulo {
+  id: number;
+  nombre: string;
+}
+
 export interface Rol {
   id: number;
   nombre: string;
   descripcion: string;
-  modulos: string[];
+  modulos: Modulo[];
   activo: boolean;
 }
 

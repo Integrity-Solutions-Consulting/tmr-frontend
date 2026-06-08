@@ -1,13 +1,8 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { Feriado, Rol, Usuario, RegisterUserRequest } from '../models/configuracion.models';
+import { Feriado, Modulo, Rol, Usuario, RegisterUserRequest } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
-
-interface ModuloResponse {
-  id: number;
-  nombre: string;
-}
 
 interface RolBackendPayload {
   nombre: string;
@@ -47,7 +42,7 @@ export class ConfiguracionService {
   private readonly rolesState = signal<Rol[]>([]);
   private readonly usuariosState = signal<Usuario[]>([]);
   private readonly feriadosState = signal<Feriado[]>([]);
-  private readonly modulosState = signal<ModuloResponse[]>([]);
+  private readonly modulosState = signal<Modulo[]>([]);
 
   readonly roles = this.rolesState.asReadonly();
   readonly usuarios = this.usuariosState.asReadonly();
@@ -62,7 +57,7 @@ export class ConfiguracionService {
   }
 
   loadModulos(): void {
-    this.http.get<ModuloResponse[]>(`${environment.apiUrl}/configuracion/roles/modulos`).subscribe({
+    this.http.get<Modulo[]>(`${environment.apiUrl}/configuracion/roles/modulos`).subscribe({
       next: (data) => this.modulosState.set(data ?? []),
       error: (err) => console.error(err),
     });
@@ -74,7 +69,12 @@ export class ConfiguracionService {
         id: d.idRol || d.id,
         nombre: d.nombreRol || d.nombre || '',
         descripcion: d.descripcionRol || d.descripcion || '',
-        modulos: Array.isArray(d.modulos) ? d.modulos.map((m: any) => String(m.nombre ?? m.id ?? m)) : [],
+        modulos: Array.isArray(d.modulos)
+          ? d.modulos.map((m: any) => ({
+              id: Number(m.id ?? m),
+              nombre: String(m.nombre ?? m.id ?? m),
+            }))
+          : [],
         activo: d.activo ?? true,
       }))),
       error: (err) => console.error(err),
@@ -261,19 +261,10 @@ export class ConfiguracionService {
     return {
       nombre: rol.nombre,
       descripcion: rol.descripcion,
-      modulosids: rol.modulos.map((modulo) => this.resolveModuloId(modulo)).filter((id): id is number => id !== null),
+      modulosids: rol.modulos
+        .map((m) => m.id)
+        .filter((id): id is number => Number.isFinite(id) && id > 0),
     };
-  }
-
-  private resolveModuloId(modulo: string): number | null {
-    const numericId = Number(modulo);
-    if (Number.isFinite(numericId) && numericId > 0) {
-      return numericId;
-    }
-
-    const normalized = modulo.trim().toLowerCase();
-    const match = this.modulosState().find((item) => item.nombre.trim().toLowerCase() === normalized);
-    return match?.id ?? null;
   }
 
   private toFeriadoBackendPayload(feriado: Feriado): FeriadoBackendPayload {

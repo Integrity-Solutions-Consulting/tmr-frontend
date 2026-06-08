@@ -63,8 +63,8 @@
               <td>{{ rol.descripcion }}</td>
               <td>
                 <div class="module-list">
-                  @for (modulo of visibleModulos(rol); track modulo) {
-                    <span class="module-chip">{{ modulo }}</span>
+                  @for (modulo of visibleModulos(rol); track modulo.id) {
+                    <span class="module-chip">{{ modulo.nombre }}</span>
                   }
                   @if (modulosOcultos(rol) > 0) {
                     <span class="module-chip module-chip--more">+{{ modulosOcultos(rol) }} más</span>

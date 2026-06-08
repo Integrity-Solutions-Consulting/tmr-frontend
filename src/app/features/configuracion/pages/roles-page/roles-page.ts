@@ -8,7 +8,7 @@ import {
 import { Boton } from '../../../../shared/components/boton/boton';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
-import { Rol } from '../../models/configuracion.models';
+import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
@@ -27,7 +27,9 @@ export class RolesPage {
   readonly modulos = this.configuracionService.modulos;
 
   readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
-  readonly modulosCubiertos = computed(() => new Set(this.roles().flatMap((rol) => rol.modulos)).size);
+  readonly modulosCubiertos = computed(() =>
+    new Set(this.roles().flatMap((rol) => rol.modulos.map((m) => m.id))).size,
+  );
 
   readonly filteredRoles = computed(() => {
     const query = this.query().trim().toLowerCase();
@@ -36,7 +38,12 @@ export class RolesPage {
     }
 
     return this.roles().filter((rol) =>
-      [rol.nombre, rol.descripcion, rol.modulos.join(' '), rol.activo ? 'activo' : 'inactivo']
+      [
+        rol.nombre,
+        rol.descripcion,
+        rol.modulos.map((m) => m.nombre).join(' '),
+        rol.activo ? 'activo' : 'inactivo',
+      ]
         .join(' ')
         .toLowerCase()
         .includes(query),
@@ -96,7 +103,7 @@ export class RolesPage {
     ];
   }
 
-  visibleModulos(rol: Rol): string[] {
+  visibleModulos(rol: Rol): Modulo[] {
     return rol.modulos.slice(0, 3);
   }
 
