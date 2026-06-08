@@ -73,7 +73,11 @@
                 </button>
 
                 @if (menuAbierto === col.id) {
-                  <div class="tabla__dropdown">
+                  <div
+                    class="tabla__dropdown"
+                    [style.top.px]="dropdownTop"
+                    [style.left.px]="dropdownLeft"
+                  >
                     <button class="tabla__dropdown-item" (click)="onVerDetalle(col, $event)">
                       <img src="assets/iconos/eye.svg" alt="ver" width="15" height="15" />
                       Ver más

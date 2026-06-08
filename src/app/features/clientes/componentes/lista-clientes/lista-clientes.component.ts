@@ -76,8 +76,9 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.filtrosForm = this.fb.group({
       busqueda: [''],
-      estado:   ['todos'],
+      estado:   ['Activo'],
     });
+    this.estadoSeleccionado = 'Activo';
 
     // Cargar inicial
     this.despacharCarga();
@@ -134,9 +135,10 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   private getFiltros() {
+    const estado = this.filtrosForm.get('estado')!.value ?? 'Activo';
     return {
       busqueda: this.filtrosForm.get('busqueda')!.value ?? '',
-      estado:   this.filtrosForm.get('estado')!.value   ?? 'todos',
+      estado:   estado === 'todos' ? 'Activo' : estado,
     };
   }
 
@@ -186,9 +188,11 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   seleccionarEstado(estado: string): void {
-    this.estadoSeleccionado    = estado === 'todos' ? 'Estado' : estado;
+    const estadoNormalizado = estado === 'todos' ? 'Activo' : estado;
+    this.estadoSeleccionado    = estadoNormalizado;
     this.dropdownEstadoAbierto = false;
-    this.filtrosForm.get('estado')!.setValue(estado);
+    this.filtrosForm.get('estado')!.setValue(estadoNormalizado);
+    this.estadosSeleccionados = estadoNormalizado === 'Activo' ? [] : [estadoNormalizado];
   }
 
   // ── Dropdown estado con checkboxes ────────────────────────
@@ -196,22 +200,39 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     const idx = this.estadosSeleccionados.indexOf(estado);
     if (idx > -1) {
       this.estadosSeleccionados.splice(idx, 1);
+      if (this.estadosSeleccionados.length === 0) {
+        this.filtrosForm.get('estado')!.setValue('Activo');
+        this.estadoSeleccionado = 'Activo';
+      } else {
+        this.filtrosForm.get('estado')!.setValue(this.estadosSeleccionados[0]);
+        this.estadoSeleccionado = this.estadosSeleccionados[0];
+      }
     } else {
-      this.estadosSeleccionados.push(estado);
-    }
-    // Si hay uno seleccionado filtra, si no muestra todos
-    if (this.estadosSeleccionados.length === 1) {
-      this.filtrosForm.get('estado')!.setValue(this.estadosSeleccionados[0]);
-    } else {
-      this.filtrosForm.get('estado')!.setValue('todos');
+      this.estadosSeleccionados = [estado];
+      this.filtrosForm.get('estado')!.setValue(estado);
+      this.estadoSeleccionado = estado;
     }
   }
 
   limpiarFiltroEstado(): void {
     this.estadosSeleccionados  = [];
     this.busquedaEstado        = '';
-    this.filtrosForm.get('estado')!.setValue('todos');
+    this.filtrosForm.get('estado')!.setValue('Activo');
+    this.estadoSeleccionado    = 'Activo';
     this.dropdownEstadoAbierto = false;
+  }
+
+  toggleFiltroInactivos(): void {
+    const estadoActual = this.filtrosForm.get('estado')!.value;
+    if (estadoActual === 'Inactivo') {
+      this.estadosSeleccionados = [];
+      this.filtrosForm.get('estado')!.setValue('Activo');
+      this.estadoSeleccionado = 'Activo';
+    } else {
+      this.estadosSeleccionados = ['Inactivo'];
+      this.filtrosForm.get('estado')!.setValue('Inactivo');
+      this.estadoSeleccionado = 'Inactivo';
+    }
   }
 
   contarPorEstado(estado: string): number {

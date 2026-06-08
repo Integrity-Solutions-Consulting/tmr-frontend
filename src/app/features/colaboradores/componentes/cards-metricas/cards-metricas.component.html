@@ -12,17 +12,17 @@
           height="20"
         />
         <span class="metricas__numero">
-          {{ mostrandoAsignados ? asignados : noAsignados }}
+          {{ asignacionNumero }}
         </span>
       </div>
       <span class="metricas__label">
-        {{ mostrandoAsignados ? 'Asignados' : 'No asignados' }}
+        {{ asignacionLabel }}
       </span>
     </div>
     <button
       class="metricas__filter-btn"
       (click)="toggleAsignados()"
-      [title]="mostrandoAsignados ? 'Ver no asignados' : 'Ver asignados'"
+      [title]="asignacionTitulo"
     >
       <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
     </button>
@@ -40,17 +40,17 @@
           height="20"
         />
         <span class="metricas__numero">
-          {{ mostrandoActivos ? activos : inactivos }}
+          {{ estadoNumero }}
         </span>
       </div>
       <span class="metricas__label">
-        {{ mostrandoActivos ? 'Activos' : 'Inactivos' }}
+        {{ estadoLabel }}
       </span>
     </div>
     <button
       class="metricas__filter-btn"
       (click)="toggleActivos()"
-      [title]="mostrandoActivos ? 'Ver inactivos' : 'Ver activos'"
+      [title]="estadoTitulo"
     >
       <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
     </button>

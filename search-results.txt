@@ -1,0 +1,120 @@
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.actions.ts|8|'Importar Excel Success': props<{ actividades: Actividad[] }>(),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|50|private obtenerMensajeError(error: any): string {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|56|['message', 'Message', 'mensaje', 'Mensaje', 'title', 'Title'],
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|67|const isSuccess = this.getValue(response, ['isSuccess', 'IsSuccess'], true);
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|69|if (!isSuccess) {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|76|return ActividadesActions.importarExcelSuccess({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.effects.ts|82|error: this.obtenerMensajeError(error),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\core\state\actividades\actividades.reducer.ts|29|on(ActividadesActions.importarExcelSuccess, (state, { actividades }) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\componentes\forgot-password\forgot-password.component.html|18|<!-- Success Message -->
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\componentes\forgot-password\forgot-password.component.html|19|<div class="success-message" *ngIf="successMessage$ | async as message">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\componentes\forgot-password\forgot-password.component.ts|22|successMessage$: Observable<string | null>;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\componentes\forgot-password\forgot-password.component.ts|31|this.successMessage$ = this.store.select(AuthSelectors.selectSuccessMessage);
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\componentes\login\login.component.ts|46|ofType(AuthActions.loginSuccess),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\modelos\auth-status.enum.ts|4|SUCCESS = 'SUCCESS',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\modelos\auth.models.ts|28|successMessage: string | null;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|11|export const loginSuccess = createAction(
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|12|'[Auth] Login Success',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|23|export const logoutSuccess = createAction('[Auth] Logout Success');
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|32|export const refreshTokenSuccess = createAction(
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|33|'[Auth] Refresh Token Success',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|47|export const forgotPasswordSuccess = createAction(
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|48|'[Auth] Forgot Password Success',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.actions.ts|57|export const clearSuccessMessage = createAction('[Auth] Clear Success Message');
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.effects.ts|33|AuthActions.loginSuccess({ response: { token, user } })
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.effects.ts|49|map(() => AuthActions.logoutSuccess()),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.effects.ts|64|map(({ token }) => AuthActions.refreshTokenSuccess({ token })),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.effects.ts|79|AuthActions.forgotPasswordSuccess({ response })
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|11|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|21|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|23|on(AuthActions.loginSuccess, (state, { response }) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|30|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|37|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|44|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|46|on(AuthActions.logoutSuccess, (state) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|53|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|59|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|66|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|68|on(AuthActions.refreshTokenSuccess, (state, { token }) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|73|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|79|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|86|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|88|on(AuthActions.forgotPasswordSuccess, (state, { response }) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|92|successMessage: response.message,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|98|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|100|on(AuthActions.clearSuccessMessage, (state) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.reducer.ts|102|successMessage: null,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.selectors.ts|33|export const selectSuccessMessage = createSelector(
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\auth\store\auth.selectors.ts|35|(state: AuthState) => state.successMessage
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|24|<div class="alert-container">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|26|<div class="alert-error">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|27|<div class="alert-content">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|41|<button class="close-alert" (click)="errorMessage = ''; listaErrores = []">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|47|@if (successMessage) {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|48|<div class="alert-success" style="background: rgba(0, 255, 128, 0.1); border: 1px solid #00ff80; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #00ff80;">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|49|<div class="alert-content" style="display: flex; align-items: center; gap: 8px;">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|51|<span>{{ successMessage }}</span>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.html|53|<button class="close-alert" style="background: none; border: none; color: #00ff80; cursor: pointer;" (click)="successMessage = ''">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.ts|34|successMessage: string = '';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.ts|138|this.successMessage = '';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.ts|154|ActividadesActions.importarExcelSuccess,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.ts|161|if (action.type === ActividadesActions.importarExcelSuccess.type) {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\carga-actividades\carga-actividades.component.ts|163|this.successMessage = total > 0
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\componentes\notificacion\notificacion.component.html|22|<p class="mensaje">{{ notificacion.mensaje }}</p>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\componentes\notificacion\notificacion.component.ts|20|this.timer = setTimeout(() => this.cerrar.emit(), 2500);
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\modelos\cliente.model.ts|74|mensaje: string;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\store\clientes.reducer.ts|82|notificacion:      { tipo: 'exito', mensaje: 'El cliente ha sido agregado exitosamente' },
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\store\clientes.reducer.ts|87|notificacion: { tipo: 'error', mensaje: 'Error al crear el cliente. Intente nuevamente.' },
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\store\clientes.reducer.ts|101|notificacion:        { tipo: 'exito', mensaje: 'El cliente ha sido editado exitosamente' },
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\clientes\store\clientes.reducer.ts|106|notificacion: { tipo: 'error', mensaje: 'Error al editar el cliente. Intente nuevamente.' },
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.html|94|<p class="confirm-card__mensaje">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|173|this.notificacion = { tipo: 'exito', mensaje: 'El nuevo colaborador ha sido agregado exitosamente' };
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|177|// Mostramos el mensaje de error del backend si existe
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|178|const mensaje = err?.error?.detail || 'Error al crear el colaborador';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|179|this.notificacion = { tipo: 'error', mensaje };
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|192|this.notificacion = { tipo: 'exito', mensaje: 'El colaborador ha sido actualizado exitosamente' };
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|195|const mensaje = err?.error?.detail || 'Error al actualizar el colaborador';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\colaboradores-page\colaboradores-page.component.ts|196|this.notificacion = { tipo: 'error', mensaje };
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\modal-editar-colaborador\modal-editar-colaborador.component.ts|121|setTimeout(() => {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\notificacion\notificacion.component.html|22|<p class="mensaje">{{ notificacion.mensaje }}</p>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\componentes\notificacion\notificacion.component.ts|19|this.timer = setTimeout(() => this.cerrar.emit(), 2500);
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\colaboradores\models\colaborador.model.ts|98|mensaje: string;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\configuracion\components\usuarios-form-modal\usuarios-form-modal.ts|373|window.alert('Usuario creado correctamente.');
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\configuracion\services\usuarios.service.ts|23|success?: boolean;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\dashboard\store\dashboard.actions.ts|9|export const loadDashboardDataSuccess = createAction(
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\dashboard\store\dashboard.actions.ts|10|'[Dashboard] Load Dashboard Data Success',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\dashboard\store\dashboard.effects.ts|22|map(data => DashboardActions.loadDashboardDataSuccess({ data })),
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\dashboard\store\dashboard.reducer.ts|24|on(DashboardActions.loadDashboardDataSuccess, (state, { data }) => ({
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\modal-confirmacion\modal-confirmacion.html|6|<p class="confirmacion-texto" [innerHTML]="mensaje"></p>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\modal-confirmacion\modal-confirmacion.ts|13|@Input() mensaje = 'El nuevo líder ha sido<br>agregado exitosamente';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.html|198|[mensaje]="mensajeConfirmacion"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.ts|73|mensajeConfirmacion = '';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.ts|284|this.mensajeConfirmacion = this.modoEdicion
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.ts|293|setTimeout(() => {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.ts|300|this.mensajeConfirmacion = 'No se pudo guardar el líder. Intente de nuevo.';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\lideres\components\lideres.component.ts|302|setTimeout(() => this.mostrarConfirmacion = false, 3000);
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|44|[titulo]="proyectoSeleccionado ? 'Editar Proyecto' : 'Nuevo Proyecto'"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|59|mensaje="Esta accion eliminara el proyecto seleccionado. Deseas continuar?"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|66|<app-success-modal
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|67|[visible]="successCrearVisible"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|68|mensaje="El nuevo proyecto ha sido creado exitosamente"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|69|(cerrar)="cerrarSuccessCrear()"
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.html|70|></app-success-modal>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|9|import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|38|SuccessModalComponent,
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|52|successCrearVisible = false;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|96|this.successCrearVisible = true;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|102|cerrarSuccessCrear(): void {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\features\proyectos\paginas\proyectos-page\proyectos-page.ts|103|this.successCrearVisible = false;
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\confirm-dialog\confirm-dialog.component.ts|26|<p>{{ mensaje }}</p>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\confirm-dialog\confirm-dialog.component.ts|153|@Input() mensaje = 'Esta accion no se puede deshacer.';
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.html|2|<div class="success-modal" role="dialog" aria-modal="true">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.html|3|<div class="success-modal__backdrop" (click)="cerrarModal()"></div>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.html|5|<section class="success-modal__card">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.html|6|<div class="success-modal__icon" aria-hidden="true">
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.html|10|<p>{{ mensaje }}</p>
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.ts|6|selector: 'app-success-modal',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.ts|9|templateUrl: './success-modal.component.html',
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.ts|10|styleUrl: './success-modal.component.scss'
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.ts|12|export class SuccessModalComponent {
+C:\Users\jerenmi.flores\tmr-frontend\src\app\shared\components\success-modal\success-modal.component.ts|14|@Input() mensaje = 'Operacion realizada exitosamente';

@@ -53,7 +53,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   porPagina    = 15;
 
   // ── Filtros ──────────────────────────────────────────────
-  filtros: FiltrosColaborador = { busqueda: '', estado: 'Todos' };
+  filtros: FiltrosColaborador = { busqueda: '', estado: 'Activo' };
 
   // ── Métricas reactivas ───────────────────────────────────
   get noAsignados(): number { return this.svc.getMetricas().noAsignados(); }
@@ -105,30 +105,31 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   // ── Filtros ──────────────────────────────────────────────
   onFiltrosCambian(filtros: FiltrosColaborador): void {
-    this.filtros      = filtros;
+    this.filtros = {
+      ...filtros,
+      estado: filtros.estado === 'Todos' ? 'Activo' : filtros.estado,
+    };
     this.paginaActual = 1;
     this.cargarDatos();
   }
 
   onFiltrarDesdeMetrica(filtro: FiltroMetrica): void {
-  if (filtro.tipo === 'estado') {
-    // Filtra por Activo o Inactivo
-    this.filtros = {
-      ...this.filtros,
-      estado: filtro.valor as 'Activo' | 'Inactivo',
-    };
-  } else if (filtro.tipo === 'asignacion') {
-    // No toca el filtro de estado — filtra internamente por numProyectos
-    // Se maneja en el servicio
-    this.filtros = {
-      ...this.filtros,
-      estado: 'Todos',
-      asignacion: filtro.valor as 'asignado' | 'noAsignado',
-    };
+    if (filtro.tipo === 'estado') {
+      this.filtros = {
+        ...this.filtros,
+        estado: filtro.valor === 'Inactivo' ? 'Inactivo' : 'Activo',
+        asignacion: undefined,
+      };
+    } else if (filtro.tipo === 'asignacion') {
+      this.filtros = {
+        ...this.filtros,
+        estado: 'Activo',
+        asignacion: filtro.valor === null ? undefined : filtro.valor as 'asignado' | 'noAsignado',
+      };
+    }
+    this.paginaActual = 1;
+    this.cargarDatos();
   }
-  this.paginaActual = 1;
-  this.cargarDatos();
-}
 
   // ── Paginación ───────────────────────────────────────────
   onPaginaCambia(pagina: number): void {

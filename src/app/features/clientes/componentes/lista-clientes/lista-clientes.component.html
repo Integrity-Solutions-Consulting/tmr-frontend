@@ -40,7 +40,7 @@
     <div class="card-resumen">
 
       <!-- Ícono filtro arriba derecha -->
-      <button class="card-resumen-filtro" (click)="filtrosForm.get('estado')!.setValue('Inactivo')">
+      <button class="card-resumen-filtro" (click)="toggleFiltroInactivos()" type="button">
         <img src="assets/iconos/filtro-inactivo.svg" width="24" height="24" alt="filtro"/>
       </button>
 
@@ -52,11 +52,11 @@
           <div class="card-resumen-icono">
             <img src="assets/iconos/inactivos.svg" width="25" height="25" alt="inactivos"/>
           </div>
-          <span class="card-resumen-numero">{{ resumen.totalInactivos }}</span>
+          <span class="card-resumen-numero">{{ estadoSeleccionado === 'Inactivo' ? resumen.totalInactivos : resumen.totalActivos }}</span>
         </div>
 
         <!-- Fila inferior: palabra Inactivos -->
-        <span class="card-resumen-label">Inactivos</span>
+        <span class="card-resumen-label">{{ estadoSeleccionado === 'Inactivo' ? 'Inactivos' : 'Activos' }}</span>
 
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -7,10 +7,9 @@ import { NgClass } from '@angular/common';
   imports: [NgClass],
   templateUrl: './badge-estado.html',
   styleUrl: './badge-estado.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class BadgeEstado {
-
   @Input() estado = '';
-
 }

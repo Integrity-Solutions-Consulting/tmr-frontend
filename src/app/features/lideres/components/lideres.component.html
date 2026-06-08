@@ -44,9 +44,9 @@
           <div class="card-icon card-icon--inactive">
             <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
           </div>
-          <span class="card-number">{{ totalInactivos }}</span>
+          <span class="card-number">{{ estadoFiltro === 'Inactivo' ? totalInactivos : totalActivos }}</span>
         </div>
-        <span class="card-label">Inactivos</span>
+        <span class="card-label">{{ estadoFiltro === 'Inactivo' ? 'Inactivos' : 'Activos' }}</span>
       </div>
       <button class="card-filter-btn" (click)="filtrarPor('Inactivo')">
         <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />

@@ -21,22 +21,50 @@ export class CardsMetricasComponent {
 
   @Output() filtrarTabla = new EventEmitter<FiltroMetrica>();
 
-  mostrandoAsignados = false;
-  mostrandoActivos   = false;
+  filtrandoAsignados = false;
+  filtrandoInactivos = false;
 
   toggleAsignados(): void {
-    this.mostrandoAsignados = !this.mostrandoAsignados;
-    this.filtrarTabla.emit({
-      tipo:  'asignacion',
-      valor: this.mostrandoAsignados ? 'asignado' : 'noAsignado',
-    });
+    if (this.filtrandoAsignados) {
+      this.filtrandoAsignados = false;
+      this.filtrarTabla.emit({ tipo: 'asignacion', valor: null });
+    } else {
+      this.filtrandoAsignados = true;
+      this.filtrarTabla.emit({ tipo: 'asignacion', valor: 'asignado' });
+    }
   }
 
   toggleActivos(): void {
-    this.mostrandoActivos = !this.mostrandoActivos;
-    this.filtrarTabla.emit({
-      tipo:  'estado',
-      valor: this.mostrandoActivos ? 'Activo' : 'Inactivo',
-    });
+    if (this.filtrandoInactivos) {
+      this.filtrandoInactivos = false;
+      this.filtrarTabla.emit({ tipo: 'estado', valor: 'Activo' });
+    } else {
+      this.filtrandoInactivos = true;
+      this.filtrarTabla.emit({ tipo: 'estado', valor: 'Inactivo' });
+    }
+  }
+
+  get asignacionNumero(): number {
+    return this.filtrandoAsignados ? this.asignados : this.noAsignados;
+  }
+
+  get asignacionLabel(): string {
+    return this.filtrandoAsignados ? 'Asignados' : 'No asignados';
+  }
+
+  get asignacionTitulo(): string {
+    return this.filtrandoAsignados ? 'Mostrar todos' : 'Ver asignados';
+  }
+
+  get estadoNumero(): number {
+    return this.filtrandoInactivos ? this.inactivos : this.activos;
+  }
+
+  get estadoLabel(): string {
+    return this.filtrandoInactivos ? 'Inactivos' : 'Activos';
+  }
+
+  get estadoTitulo(): string {
+    return this.filtrandoInactivos ? 'Mostrar activos' : 'Ver inactivos';
   }
 }
