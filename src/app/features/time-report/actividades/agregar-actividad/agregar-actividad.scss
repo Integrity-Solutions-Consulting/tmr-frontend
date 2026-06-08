@@ -137,9 +137,24 @@ $border-color: #E5E7EB;
     padding: 16px 24px 20px;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 12px;
     border-top: 1px solid $gray-light;
     flex-shrink: 0;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.btn-eliminar {
+    border-radius: 24px !important;
+    padding: 0 24px !important;
+    height: 40px !important;
+    font-weight: 600 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-cancelar {

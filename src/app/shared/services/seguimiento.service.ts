@@ -9,67 +9,70 @@ import { environment } from '../../../environments/environment';
 })
 export class SeguimientoService {
   private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/time-report/seguimiento`;
+
   private _colaboradores = signal<Colaborador[]>([]);
   public colaboradores = this._colaboradores.asReadonly();
 
-  constructor() {
-    this.cargarSeguimiento();
+  private _metricas = signal<MetricasSeguimiento>({
+    horasPendientes: 0,
+    horasRegistradas: 0,
+    promedioPorDia: 0,
+    colaboradoresActivos: 0,
+    proyectosUnicos: 0
+  });
+
+  getMetricas(): MetricasSeguimiento {
+    return this._metricas();
   }
 
-  cargarSeguimiento(filtros?: SeguimientoFiltros) {
-    let params = new HttpParams();
-    if (filtros) {
-      if (filtros.busqueda) params = params.set('busqueda', filtros.busqueda);
-      if (filtros.fechaDesde) params = params.set('FechaDesde', filtros.fechaDesde.toISOString());
-      if (filtros.fechaHasta) params = params.set('FechaHasta', filtros.fechaHasta.toISOString());
-    } else {
-      // Default dates if needed by backend
-      const hoy = new Date();
-      params = params.set('FechaDesde', new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString());
-      params = params.set('FechaHasta', new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString());
-    }
+  cargarColaboradores(filtros: any): void {
+    let params = new HttpParams()
+      .set('fechaDesde', filtros.fechaDesde || '')
+      .set('fechaHasta', filtros.fechaHasta || '');
+    if (filtros.busqueda) params = params.set('busqueda', filtros.busqueda);
+    if (filtros.clienteSeleccionado) params = params.set('clienteSeleccionado', filtros.clienteSeleccionado);
+    if (filtros.periodo) params = params.set('periodo', filtros.periodo);
 
-    this.http.get<Colaborador[]>(`${environment.apiUrl}/time-report/seguimiento`, { params }).subscribe({
+    this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
-        this._colaboradores.set(data.map(d => ({
-          id: d.id,
-          nombre: d.nombre,
-          proyecto: d.proyecto || 'N/A',
-          cliente: d.cliente || 'N/A',
-          liderTecnico: d.liderTecnico || 'N/A',
-          nroHoras: d.nroHoras || 0,
-          estado: d.estado || 'En progreso',
-          diasConReporte: d.diasConReporte || 0,
-          diasACompletar: d.diasACompletar || 0
-        })));
+        this._colaboradores.set(data || []);
+
+        // Calcular métricas basadas en el conjunto filtrado
+        const totalRegistradas = (data || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
+        const totalPendientes = (data || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
+        const promedio = (data && data.length > 0) ? (totalRegistradas / data.length) : 0;
+        const activos = (data || []).filter(c => Number(c.nroHoras || 0) > 0).length;
+
+        // Proyectos únicos
+        const proyectosSet = new Set<string>();
+        (data || []).forEach(c => {
+          if (c.proyecto) {
+            c.proyecto.split(',').forEach(p => proyectosSet.add(p.trim()));
+          }
+        });
+
+        this._metricas.set({
+          horasPendientes: totalPendientes,
+          horasRegistradas: totalRegistradas,
+          promedioPorDia: promedio,
+          colaboradoresActivos: activos,
+          proyectosUnicos: proyectosSet.size
+        });
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error('Error al cargar seguimiento', err)
     });
   }
 
-  getMetricas(): MetricasSeguimiento {
-    const cols = this._colaboradores();
-    const horasRegistradas = cols.reduce((sum, c) => sum + (c.nroHoras || 0), 0);
-    const colaboradoresActivos = cols.length;
-    
-    // Simplification for metrics until backend provides an endpoint
-    return {
-      horasPendientes: cols.reduce((sum, c) => sum + ((c.diasACompletar || 0) * 8), 0),
-      horasRegistradas,
-      promedioPorDia: colaboradoresActivos ? horasRegistradas / colaboradoresActivos : 0,
-      colaboradoresActivos,
-      proyectosUnicos: new Set(cols.map(c => c.proyecto)).size
-    };
-  }
-
-  aprobarColaboradores(ids: string[]): void {
-    this.http.post(`${environment.apiUrl}/time-report/seguimiento/aprobar`, { ids }).subscribe({
+  aprobarColaboradores(ids: (number | string)[]): void {
+    const idsNum = ids.map(id => Number(id));
+    this.http.post(`${this.apiUrl}/aprobar`, { ids: idsNum }).subscribe({
       next: () => {
-        this._colaboradores.update(prev => 
-          prev.map(c => ids.includes(c.id) ? { ...c, estado: 'Completo' } : c)
+        this._colaboradores.update(prev =>
+          prev.map(c => idsNum.includes(Number(c.id)) ? { ...c, estado: 'Completo' } : c)
         );
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error('Error al aprobar', err)
     });
   }
 }

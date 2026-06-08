@@ -2,7 +2,7 @@
 
     <!-- ===== HEADER ===== -->
     <header class="page-header">
-        <h1 class="page-title">Time Report</h1>
+        <h1 class="page-title">Actividades</h1>
 
         <div class="header-right">
             <div class="horas-badge">
@@ -18,7 +18,7 @@
 
     <!-- ===== CALENDAR CARD ===== -->
     <main class="calendar-card">
-        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)"></app-calendario>
+        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)" (editarActividadEvent)="onEditarActividad($event)"></app-calendario>
     </main>
 
     <!-- ===== FOOTER METRICS ===== -->

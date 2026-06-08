@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, AfterViewInit, computed, OnInit } from '@angular/core';
+import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -14,14 +14,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
 import { Colaborador } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
 import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
-import { ProyectosService } from '../../proyectos/servicios/proyectos.service';
-import { LookupOption } from '../../proyectos/modelos/proyecto.model';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -50,9 +50,9 @@ import * as XLSX from 'xlsx';
     templateUrl: './seguimiento.html',
     styleUrl: './seguimiento.scss'
 })
-export class SeguimientoComponent implements AfterViewInit, OnInit {
+export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
-    private proyectosService = inject(ProyectosService);
+    private http = inject(HttpClient);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -64,9 +64,16 @@ export class SeguimientoComponent implements AfterViewInit, OnInit {
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
     public clienteSeleccionado = '';
-    public clientes: LookupOption[] = [];
-    public fechaDesde = '2026-04-01';
-    public fechaHasta = '2026-04-30';
+    public clientes = signal<{id: number, nombre: string}[]>([]);
+    public fechaDesde = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    })();
+    public fechaHasta = (() => {
+        const d = new Date();
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+    })();
     public periodo: 'quincena' | 'mes-completo' = 'mes-completo';
 
     // Paginación (Estado Local para Rango)
@@ -79,8 +86,10 @@ export class SeguimientoComponent implements AfterViewInit, OnInit {
     // Reactividad vía Signals desde el Servicio de Negocio
     public metricas = computed(() => this.seguimientoService.getMetricas());
 
-    ngOnInit(): void {
-        this.cargarClientes();
+    constructor() {
+        effect(() => {
+            this.dataSource.data = this.seguimientoService.colaboradores();
+        });
     }
 
     ngAfterViewInit() {
@@ -92,16 +101,24 @@ export class SeguimientoComponent implements AfterViewInit, OnInit {
                 || data.proyecto.toLowerCase().includes(f)
                 || data.cliente.toLowerCase().includes(f);
         };
-    }
 
-    private cargarClientes(): void {
-        this.proyectosService.obtenerClientes().subscribe({
-            next: (clientes: LookupOption[]) => {
-                this.clientes = clientes;
+        // Cargar clientes desde lookups
+        this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
+            next: (res) => {
+                if (res && res.clientes) {
+                    this.clientes.set(res.clientes);
+                }
             },
-            error: (error) => {
-                console.error('Error al cargar clientes:', error);
-            }
+            error: (err) => console.error('Error al cargar clientes lookups', err)
+        });
+
+        // Cargar datos inicialmente
+        this.seguimientoService.cargarColaboradores({
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            periodo: this.periodo,
+            busqueda: this.busqueda,
+            clienteSeleccionado: this.clienteSeleccionado
         });
     }
 
@@ -151,6 +168,13 @@ export class SeguimientoComponent implements AfterViewInit, OnInit {
             this.pageIndex = 0;
             this.dataSource.paginator.firstPage();
         }
+        this.seguimientoService.cargarColaboradores({
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            periodo: this.periodo,
+            busqueda: this.busqueda,
+            clienteSeleccionado: this.clienteSeleccionado
+        });
     }
 
     public isAllSelected() {
@@ -209,5 +233,44 @@ export class SeguimientoComponent implements AfterViewInit, OnInit {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Detalle');
         XLSX.writeFile(wb, `Detalle_${col.nombre.split(' ')[0]}.xlsx`);
+    }
+
+    private formatDate(date: Date): string {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    public cambiarPeriodo(nuevoPeriodo: 'quincena' | 'mes-completo') {
+        this.periodo = nuevoPeriodo;
+        this.ajustarFechasPorPeriodo();
+        this.aplicarFiltros();
+    }
+
+    private ajustarFechasPorPeriodo() {
+        // Usar la fechaDesde actual si existe para preservar el mes/año consultado, sino usar la fecha actual del sistema
+        const fechaBase = this.fechaDesde ? new Date(this.fechaDesde + 'T00:00:00') : new Date();
+        const anio = fechaBase.getFullYear();
+        const mes = fechaBase.getMonth();
+
+        if (this.periodo === 'quincena') {
+            const dia = fechaBase.getDate();
+            if (dia <= 15) {
+                // Primera Quincena: del 1 al 15
+                this.fechaDesde = this.formatDate(new Date(anio, mes, 1));
+                this.fechaHasta = this.formatDate(new Date(anio, mes, 15));
+            } else {
+                // Segunda Quincena: del 16 al último día del mes
+                this.fechaDesde = this.formatDate(new Date(anio, mes, 16));
+                const ultimoDia = new Date(anio, mes + 1, 0);
+                this.fechaHasta = this.formatDate(ultimoDia);
+            }
+        } else {
+            // Mes Completo: del 1 al último día del mes
+            this.fechaDesde = this.formatDate(new Date(anio, mes, 1));
+            const ultimoDia = new Date(anio, mes + 1, 0);
+            this.fechaHasta = this.formatDate(ultimoDia);
+        }
     }
 }

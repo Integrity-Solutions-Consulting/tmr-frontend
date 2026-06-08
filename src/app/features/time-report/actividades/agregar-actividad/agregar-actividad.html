@@ -1,5 +1,5 @@
 <div class="modal-wrap">
-    <h2 class="modal-title">Agregar actividad</h2>
+    <h2 class="modal-title">{{ esEdicion ? 'Editar actividad' : 'Agregar actividad' }}</h2>
 
     <div class="modal-body">
         <form [formGroup]="form" class="modal-form">
@@ -8,9 +8,9 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Tipo de Actividad <span class="required">*</span></mat-label>
-                    <mat-select formControlName="idtipoactividad">
-                        @for (tipo of tiposActividad; track tipo.id) {
-                            <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
+                    <mat-select formControlName="tipoActividad">
+                        @for (tipo of tiposActividad(); track tipo.id) {
+                        <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
@@ -21,9 +21,9 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Proyecto <span class="required">*</span></mat-label>
-                    <mat-select formControlName="idproyecto">
-                        @for (proyecto of proyectos; track proyecto.id) {
-                            <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
+                    <mat-select formControlName="proyectoId">
+                        @for (proyecto of proyectos(); track proyecto.id) {
+                        <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
@@ -55,8 +55,7 @@
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Notas</mat-label>
-                    <textarea matInput formControlName="notas" rows="3"
-                        placeholder="Notas adicionales"></textarea>
+                    <textarea matInput formControlName="notas" rows="3" placeholder="Notas adicionales"></textarea>
                 </mat-form-field>
             </div>
 
@@ -88,12 +87,14 @@
             </div>
 
             <!-- Recurrente checkbox -->
+            @if (!esEdicion) {
             <div class="recurrente-row">
                 <mat-checkbox formControlName="esRecurrente" color="primary">
                     Actividad Recurrente
                 </mat-checkbox>
                 <button class="help-btn" type="button">?</button>
             </div>
+            }
 
             <!-- Panel de Recurrencia -->
             @if (form.get('esRecurrente')?.value) {
@@ -153,9 +154,15 @@
 
     <!-- Footer -->
     <div class="modal-footer">
+        @if (esEdicion) {
+        <button mat-flat-button color="warn" class="btn-eliminar" (click)="eliminar()">
+            <mat-icon>delete</mat-icon> Eliminar
+        </button>
+        <div class="spacer"></div>
+        }
         <button mat-button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
         <button mat-flat-button class="btn-agregar" [disabled]="form.invalid" (click)="guardar()">
-            Agregar
+            {{ esEdicion ? 'Actualizar' : 'Agregar' }}
         </button>
     </div>
 </div>

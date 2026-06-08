@@ -5,6 +5,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ONLY_LETTERS_REGEX } from '../../../../shared/validators/form-validators';
 
+const MODULOS_DISPONIBLES = [
+  'Dashboard',
+  'Proyectos',
+  'Actividades',
+  'Seguimiento',
+  'Colaboradores',
+  'Clientes',
+  'Lideres',
+  'Roles',
+  'Usuarios',
+  'Dias Festivos',
+  'Proyecto por horas',
+  'Proyecto por fechas',
+  'Solicitud de requerimiento',
+  'Historial de requerimiento',
+];
+
 export type RolModalMode = 'create' | 'edit' | 'view';
 
 export interface RolModalData {

@@ -47,15 +47,28 @@
             [class.today]="dia.esHoy" [class.other-month]="!dia.esMesActual"
             (click)="dia.esMesActual && seleccionarDia(dia.fecha)">
 
-            <span class="day-number">{{ dia.fecha.getDate() }}</span>
-
-            <!-- El bloque de horas ahora es visible siempre en el mes actual -->
-            <div class="day-hours-block" [class.v-hidden]="!dia.esMesActual">
-                <span class="day-hours-text" [class.blue-text]="dia.horas >= 8 || dia.horas === 0"
-                    [class.yellow-text]="dia.horas > 0 && dia.horas < 8">
-                    {{ dia.horas | horasFormat }}
-                </span>
+            <div class="day-cell-header">
+                <!-- El bloque de horas ahora es visible siempre en el mes actual -->
+                <div class="day-hours-block" [class.v-hidden]="!dia.esMesActual">
+                    <span class="day-hours-text" [class.blue-text]="dia.horas >= 8 || dia.horas === 0"
+                        [class.yellow-text]="dia.horas > 0 && dia.horas < 8">
+                        {{ dia.horas | horasFormat }}
+                    </span>
+                </div>
+                <span class="day-number">{{ dia.fecha.getDate() }}</span>
             </div>
+
+            <!-- Listado de actividades individuales como pastillas (estilo feriados-calendar) -->
+            @if (dia.esMesActual && dia.actividades && dia.actividades.length > 0) {
+            <div class="day-actividades-block">
+                @for (act of dia.actividades; track act.id) {
+                <div class="actividad-chip" [class]="getActividadClass(act)" (click)="editarActividad($event, act)">
+                    <span class="act-hours">{{ act.cantidadhoras }}h - </span>
+                    <span class="act-name">{{ act.proyectoNombre }}</span>
+                </div>
+                }
+            </div>
+            }
         </div>
         }
     </div>
