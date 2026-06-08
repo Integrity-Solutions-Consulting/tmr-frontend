@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Cliente, EstadoProyecto } from '../../modelos/cliente.model';
+import { Cliente } from '../../modelos/cliente.model';
 
 @Component({
   selector: 'app-modal-detalle',
@@ -13,29 +13,27 @@ export class ModalDetalleComponent {
   @Input() cliente!: Cliente;
   @Output() cerrar = new EventEmitter<void>();
 
-  // ── Estado expansión proyectos ────────────────────────────
   expandido = false;
 
-  // ── Toggle proyectos ──────────────────────────────────────
   toggleProyectos(): void {
     this.expandido = !this.expandido;
   }
 
-  // ── Clase CSS según estado proyecto ──────────────────────
-  getClase(estado: EstadoProyecto): string {
-    const mapa: Record<EstadoProyecto, string> = {
-      'En progreso': 'proyecto-estado en-progreso',
-      'Completado':  'proyecto-estado completado',
-      'Pausado':     'proyecto-estado pausado',
-      'Cancelado':   'proyecto-estado cancelado',
-    };
-    return mapa[estado] || 'proyecto-estado';
-  }
-
-  // ── Cerrar con overlay ────────────────────────────────────
   onOverlay(e: MouseEvent): void {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) {
       this.cerrar.emit();
     }
+  }
+
+  getEstadoClass(estado: string): string {
+    const e = estado?.toLowerCase().trim();
+    if (e === 'en progreso')    return 'en-progreso';
+    if (e === 'completado')     return 'completado';
+    if (e === 'cancelado')      return 'cancelado';
+    if (e === 'en espera')      return 'en-espera';
+    if (e === 'pausado')        return 'pausado';
+    if (e === 'planificación')  return 'planning';
+    if (e === 'aplazado')       return 'delayed';
+    return '';
   }
 }

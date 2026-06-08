@@ -36,12 +36,6 @@
   margin-bottom: 6px;
 }
 
-.codigo {
-  font-size: 13px;
-  color: var(--texto-gris);
-  font-weight: 500;
-}
-
 .btn-cerrar {
   background: none;
   border: none;
@@ -76,8 +70,8 @@
   border-radius: 20px;
   border: 1px solid var(--borde);
 
-  &.activo  { color: #22c55e; }
-  &.inactivo { color: #9ca3af; }
+  &.activo  { color: #22c55e; border-color: #bbf7d0; }
+  &.inactivo { color: #9ca3af; border-color: #e5e7eb; }
 }
 
 .dot {
@@ -86,6 +80,7 @@
   border-radius: 50%;
   background: currentColor;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .tipo-row {
@@ -165,14 +160,9 @@
   &.telefono { font-weight: 700; }
 }
 
-// ── Proyectos ─────────────────────────────────────────────
-.proyectos-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
-}
+.campo-full { grid-column: 1 / -1; }
 
+// ── Proyectos ─────────────────────────────────────────────
 .sin-proyectos {
   font-size: 13px;
   color: #9ca3af;
@@ -188,6 +178,7 @@
   border: 1px solid var(--borde);
   border-radius: 10px;
   background: #fafafa;
+  margin-bottom: 10px;
 }
 
 .proyecto-info { display: flex; flex-direction: column; gap: 4px; }
@@ -224,19 +215,17 @@
   font-weight: 500;
   padding: 4px 12px;
   border-radius: 20px;
-  border: 1px solid var(--borde);
+  border: 1px solid #e5e7eb;
   white-space: nowrap;
+  color: #6b7280;
 
-  &.en-progreso { color: #3b82f6; .dot { background: #3b82f6; } }
-  &.completado  { color: #22c55e; .dot { background: #22c55e; } }
-  &.pausado     { color: #f59e0b; .dot { background: #f59e0b; } }
-  &.cancelado   { color: #ef4444; .dot { background: #ef4444; } }
-}
-
-
-
-.campo-full {
-  grid-column: 1 / -1;
+  &.en-progreso { color: #1677ff; border-color: #bfdbfe; }
+  &.completado  { color: #22c55e; border-color: #bbf7d0; }
+  &.cancelado   { color: #ef4444; border-color: #fecaca; }
+  &.en-espera   { color: #f97316; border-color: #fed7aa; }
+  &.pausado     { color: #f97316; border-color: #fed7aa; }
+  &.planning    { color: #06b6d4; border-color: #a5f3fc; }
+  &.delayed     { color: #eab308; border-color: #fef08a; }
 }
 
 // ── Animaciones ───────────────────────────────────────────
@@ -250,9 +239,7 @@
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Responsive
-// ─────────────────────────────────────────────────────────────
+// ── Responsive ────────────────────────────────────────────
 @media (max-width: 720px) {
   .modal-card {
     width: 95vw;
@@ -266,13 +253,9 @@
     border-radius: 14px;
   }
 
-  .nombre {
-    font-size: 20px;
-  }
+  .nombre { font-size: 20px; }
 
-  .contacto-grid {
-    grid-template-columns: 1fr;
-  }
+  .contacto-grid { grid-template-columns: 1fr; }
 
   .header-main {
     flex-direction: column;

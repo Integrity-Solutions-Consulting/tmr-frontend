@@ -1,16 +1,29 @@
-<span class="status-badge">
+<span
+  class="status-badge"
+  [ngClass]="{
+    'progress':    estado === 'En Progreso' || estado === 'En progreso',
+    'completed':   estado === 'Completado',
+    'cancelled':   estado === 'Cancelado',
+    'waiting':     estado === 'En Espera'   || estado === 'En espera',
+    'inactive':    estado === 'Inactivo',
+    'approved':    estado === 'Aprobado',
+    'planning':    estado === 'Planificación',
+    'delayed':     estado === 'Aplazado',
+    'development': estado === 'Desarrollo'
+  }"
+>
   <span
     class="status-dot"
     [ngClass]="{
-      'progress':   estado === 'En Progreso' || estado === 'En progreso',
-      'completed':  estado === 'Completado',
-      'cancelled':  estado === 'Cancelado',
-      'waiting':    estado === 'En Espera'   || estado === 'En espera',
-      'inactive':   estado === 'Inactivo',
-      'approved':   estado === 'Aprobado',
-      'planning':   estado === 'Planificación',
-      'delayed':    estado === 'Aplazado',
-      'development':estado === 'Desarrollo'
+      'progress':    estado === 'En Progreso' || estado === 'En progreso',
+      'completed':   estado === 'Completado',
+      'cancelled':   estado === 'Cancelado',
+      'waiting':     estado === 'En Espera'   || estado === 'En espera',
+      'inactive':    estado === 'Inactivo',
+      'approved':    estado === 'Aprobado',
+      'planning':    estado === 'Planificación',
+      'delayed':     estado === 'Aplazado',
+      'development': estado === 'Desarrollo'
     }"
   ></span>
   {{ estado }}
