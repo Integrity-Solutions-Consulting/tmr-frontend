@@ -6,7 +6,7 @@
   </div>
 
     <!-- ══ Dashboard ══ -->
-    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Dashboard')">
       <!-- Pie chart icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
@@ -17,7 +17,7 @@
     </a>
 
     <!-- ══ Proyectos ══ -->
-    <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Proyectos')">
       <!-- Building / project icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -27,7 +27,7 @@
     </a>
 
     <!-- ══ Time Report ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="trOpen">
+    <div class="sidebar__group" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
       <a class="sidebar__link sidebar__link--parent" (click)="trOpen = !trOpen">
         <!-- Clock icon -->
         <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -41,7 +41,7 @@
       </a>
       <div class="sidebar__submenu" [class.sidebar__submenu--visible]="trOpen">
         <!-- Actividades: persona frente a computadora -->
-        <a routerLink="/time-report/actividades" routerLinkActive="active" class="sidebar__sublink">
+        <a routerLink="/time-report/actividades" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Actividades')">
           <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="13" width="20" height="8" rx="2"/>
             <path d="M12 13V7"/>
@@ -51,7 +51,7 @@
           <span>Actividades</span>
         </a>
         <!-- Seguimiento: calendario con señal/pin -->
-        <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink">
+        <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Seguimiento')">
           <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="17" rx="2"/>
             <line x1="16" y1="2" x2="16" y2="6"/>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- ══ Carga Actividades ══ -->
-    <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Actividades')">
       <!-- Upload/Excel icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -78,7 +78,7 @@
     </a>
 
     <!-- ══ Reportes ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="repOpen">
+    <div class="sidebar__group" [class.sidebar__group--open]="repOpen" *ngIf="hasModule('Reportes')">
       <a class="sidebar__link sidebar__link--parent" (click)="repOpen = !repOpen">
         <!-- Bar chart icon -->
         <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -116,7 +116,7 @@
     </div>
 
     <!-- ══ Líderes: persona con corbata ══ -->
-    <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Lideres')">
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="5" r="3.5"/>
           <!-- Cuerpo -->
@@ -130,7 +130,7 @@
     </a>
 
     <!-- ══ Colaboradores: persona casual (sin corbata) ══ -->
-    <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Colaboradores')">
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="9" cy="8" r="3"/>
         <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
@@ -141,7 +141,7 @@
     </a>
 
     <!-- ══ Clientes ══ -->
-    <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Clientes')">
       <!-- Building / company icon -->
       <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="2" width="16" height="20" rx="1"/>
@@ -153,10 +153,10 @@
     </a>
 
     <!-- Divider -->
-    <div class="sidebar__divider"></div>
+    <div class="sidebar__divider" *ngIf="hasModule('Configuracion')"></div>
 
     <!-- ══ Configuración ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen">
+    <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
       <a class="sidebar__link sidebar__link--parent" (click)="cfgOpen = !cfgOpen">
         <!-- Gear icon -->
         <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">

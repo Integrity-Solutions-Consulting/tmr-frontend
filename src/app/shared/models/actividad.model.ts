@@ -1,13 +1,13 @@
 // src/app/shared/models/actividad.model.ts
 export interface Actividad {
   id?: string;
-  idempleado: number;
-  idproyecto: number;
-  idtipoactividad: number;
-  codigorequerimiento: string;
-  cantidadhoras: number;
-  fechaactividad: Date | string;
-  descripcionactividad: string;
+  idempleado?: number;
+  idproyecto?: number;
+  idtipoactividad?: number;
+  codigorequerimiento?: string;
+  cantidadhoras?: number;
+  fechaactividad?: Date | string;
+  descripcionactividad?: string;
   notas?: string;
   esbillable?: boolean;
   aprobadopor?: number;
@@ -26,6 +26,12 @@ export interface Actividad {
   proyecto?: string;
   nroHoras?: number;
   cliente?: string;
+  fechaActividad: Date;
+  numeroHoras: number;
+  descripcion?: string;
+  proyectoId?: string;
+  tipoActividad?: string;
+  esRecurrente?: boolean;
 }
 
 export interface TipoActividad {

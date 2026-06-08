@@ -41,6 +41,10 @@ export class AuthService {
     );
   }
 
+  getUserModules(): Observable<{ data: string[] }> {
+    return this.http.get<{ data: string[] }>(`${this.API_URL}/modules`);
+  }
+
   getCurrentUser(): User | null {
     const token = localStorage.getItem('accessToken');
     if (!token) {

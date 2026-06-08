@@ -3,7 +3,7 @@
 
   <div class="navbar__user">
     <button type="button" class="navbar__profile-trigger" (click)="togglePerfil()">
-      Hola, Marlene
+      Hola, {{ user.name.split(' ')[0] }}
     </button>
 
     <button type="button" class="navbar__notification" aria-label="Notificaciones">
@@ -12,8 +12,8 @@
 
     <app-profile-popover
       [abierto]="perfilAbierto"
-      nombre="Marlene Canizares"
-      correo="marlene.canizares@integritysolutions.com.ec"
+      [nombre]="user.name"
+      [correo]="user.email"
       (cerrar)="cerrarPerfil()"
       (cerrarSesion)="cerrarSesion()"
     ></app-profile-popover>

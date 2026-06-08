@@ -10,7 +10,7 @@ export const AUTH_CONFIG = {
   TOKEN_KEY: 'accessToken',
 
   // Token JWT válido para desarrollo
-  TOKEN_VALUE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2IiwiZW1haWwiOiJ4YXZpZXJAZ21haWwuY29tIiwiaWF0IjoxNzgwMzMyNjYxLCJleHAiOjE3ODAzMzYyNjEsImlzcyI6InRtci1iYWNrZW5kIiwiYXVkIjoidG1yLXVzdWFyaW9zIn0.sJ_3oZpvNa8UAFuF1yWsEYYuI5nPgbjDOPAz9KZourA',
+  TOKEN_VALUE: '',
   //TOKEN_VALUE: localStorage.getItem('accessToken') || '',
   // URL base de la API de autenticación
   API_URL: environment.apiUrl,
