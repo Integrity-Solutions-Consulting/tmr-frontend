@@ -5,8 +5,6 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +15,6 @@ import { environment } from '../../../../../environments/environment';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
-import { TipoActividad } from '../../../../shared/models/actividad.model';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -29,8 +26,6 @@ import { TipoActividad } from '../../../../shared/models/actividad.model';
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
         MatCheckboxModule,
         MatButtonModule,
         MatIconModule,
@@ -59,22 +54,56 @@ export class AgregarActividad implements OnInit {
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
 
+    private formatFecha(d: Date | string | null | undefined): string {
+        if (!d) return '';
+        if (d instanceof Date) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        const str = String(d).split('T')[0];
+        const parts = str.split('-');
+        if (parts.length === 3) {
+            return str;
+        }
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return '';
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    private parseLocal(d: any): Date {
+        if (d instanceof Date) return d;
+        if (typeof d === 'string') {
+            const parts = d.split('-');
+            if (parts.length === 3) {
+                return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            }
+        }
+        return new Date(d);
+    }
+
     ngOnInit() {
         this.cargarCatalogos();
 
         const act = this.data?.actividad;
         this.esEdicion = !!act;
 
+        const defaultDate = this.formatFecha(act ? act.fechaactividad : (this.data?.fecha || new Date()));
+
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, Validators.required],
             proyectoId: [act ? act.idproyecto : null, Validators.required],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
-            fechaActividad: [act ? act.fechaactividad : (this.data?.fecha || new Date()), Validators.required],
+            fechaActividad: [defaultDate, Validators.required],
             numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
-            fechaInicio: [act ? act.fechaactividad : (this.data?.fecha || new Date())],
-            fechaFin: [null],
+            fechaInicio: [defaultDate],
+            fechaFin: [''],
             horasPorDia: [act ? act.cantidadhoras : 4],
             incluirFinesDeSemana: [false],
             incluirFeriados: [false],
@@ -82,7 +111,7 @@ export class AgregarActividad implements OnInit {
             esbillable: [act ? act.esbillable : true]
         });
 
-        // Escucha cambios en esRecurrente para habilitar/deshabilitar validadores
+        // Escucha cambios en esRecurrente para habilitar/deshabilitar validadores y asignar fecha fin por defecto
         this.form.get('esRecurrente')?.valueChanges.subscribe(isRecurrent => {
             const fechaActividadCtrl = this.form.get('fechaActividad');
             const numeroHorasCtrl = this.form.get('numeroHoras');
@@ -96,6 +125,17 @@ export class AgregarActividad implements OnInit {
                 fechaInicioCtrl?.setValidators(Validators.required);
                 fechaFinCtrl?.setValidators(Validators.required);
                 horasPorDiaCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
+
+                // Asigna por defecto 4 días después si fechaFin no tiene valor
+                if (fechaInicioCtrl?.value && fechaFinCtrl && !fechaFinCtrl.value) {
+                    const inicio = this.parseLocal(fechaInicioCtrl.value);
+                    if (!isNaN(inicio.getTime())) {
+                        const fin = new Date(inicio);
+                        fin.setDate(fin.getDate() + 4);
+                        fechaFinCtrl.setValue(this.formatFecha(fin));
+                        fechaFinCtrl.markAsPristine();
+                    }
+                }
             } else {
                 fechaActividadCtrl?.setValidators(Validators.required);
                 numeroHorasCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
@@ -109,6 +149,24 @@ export class AgregarActividad implements OnInit {
             fechaInicioCtrl?.updateValueAndValidity();
             fechaFinCtrl?.updateValueAndValidity();
             horasPorDiaCtrl?.updateValueAndValidity();
+        });
+
+        // Escucha cambios en fechaInicio para actualizar fechaFin automáticamente si el usuario no la ha tocado manualmente
+        this.form.get('fechaInicio')?.valueChanges.subscribe(fechaInicioValue => {
+            const isRecurrent = this.form.get('esRecurrente')?.value;
+            const fechaFinCtrl = this.form.get('fechaFin');
+
+            if (isRecurrent && fechaInicioValue && fechaFinCtrl) {
+                if (!fechaFinCtrl.value || fechaFinCtrl.pristine) {
+                    const inicio = this.parseLocal(fechaInicioValue);
+                    if (!isNaN(inicio.getTime())) {
+                        const fin = new Date(inicio);
+                        fin.setDate(fin.getDate() + 4);
+                        fechaFinCtrl.setValue(this.formatFecha(fin));
+                        fechaFinCtrl.markAsPristine();
+                    }
+                }
+            }
         });
     }
 
@@ -136,8 +194,8 @@ export class AgregarActividad implements OnInit {
         const v = this.form?.value;
         if (!v?.esRecurrente || !v?.fechaInicio || !v?.fechaFin) return '';
 
-        const inicio = new Date(v.fechaInicio);
-        const fin = new Date(v.fechaFin);
+        const inicio = this.parseLocal(v.fechaInicio);
+        const fin = this.parseLocal(v.fechaFin);
 
         if (fin < inicio) return '';
 
