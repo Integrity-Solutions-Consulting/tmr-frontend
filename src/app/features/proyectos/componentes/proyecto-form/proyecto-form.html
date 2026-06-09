@@ -5,7 +5,7 @@
     <div class="proyecto-form__grid">
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Tipo de proyecto</mat-label>
-        <mat-select formControlName="tipo">
+        <mat-select yPosition="below" formControlName="tipo">
           <mat-option *ngFor="let tipo of tipos" [value]="tipo.nombre">{{ tipo.nombre }}</mat-option>
         </mat-select>
         <mat-error *ngIf="campoInvalido('tipo')">Este campo es obligatorio</mat-error>
@@ -19,7 +19,7 @@
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Cliente</mat-label>
-        <mat-select formControlName="cliente">
+        <mat-select yPosition="below" formControlName="cliente">
           <mat-option *ngFor="let cliente of clientes" [value]="cliente.nombre">{{ cliente.nombre }}</mat-option>
         </mat-select>
         <mat-error *ngIf="campoInvalido('cliente')">Este campo es obligatorio</mat-error>
@@ -33,19 +33,41 @@
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Fecha de inicio</mat-label>
-        <input matInput [matDatepicker]="inicioDatepicker" formControlName="fechaInicio">
+        <input
+          matInput
+          type="text"
+          inputmode="numeric"
+          placeholder="dd/mm/yyyy"
+          autocomplete="off"
+          maxlength="10"
+          [matDatepicker]="inicioDatepicker"
+          formControlName="fechaInicio"
+          (input)="onFechaInput($event, 'fechaInicio')"
+        >
         <mat-datepicker-toggle matSuffix [for]="inicioDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #inicioDatepicker></mat-datepicker>
-        <mat-error *ngIf="campoInvalido('fechaInicio')">Este campo es obligatorio</mat-error>
+        <mat-error *ngIf="formulario.controls.fechaInicio.hasError('fechaInvalida') && (formulario.controls.fechaInicio.touched || intentoGuardar)">Fecha inválida</mat-error>
+        <mat-error *ngIf="!formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Fecha de fin</mat-label>
-        <input matInput [matDatepicker]="finDatepicker" formControlName="fechaFin">
+        <input
+          matInput
+          type="text"
+          inputmode="numeric"
+          placeholder="dd/mm/yyyy"
+          autocomplete="off"
+          maxlength="10"
+          [matDatepicker]="finDatepicker"
+          formControlName="fechaFin"
+          (input)="onFechaInput($event, 'fechaFin')"
+        >
         <mat-datepicker-toggle matSuffix [for]="finDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #finDatepicker></mat-datepicker>
         <mat-error *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</mat-error>
-        <mat-error *ngIf="!fechaFinInvalida() && campoInvalido('fechaFin')">Este campo es obligatorio</mat-error>
+        <mat-error *ngIf="formulario.controls.fechaFin.hasError('fechaInvalida') && (formulario.controls.fechaFin.touched || intentoGuardar)">Fecha inválida</mat-error>
+        <mat-error *ngIf="!fechaFinInvalida() && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
@@ -78,7 +100,7 @@
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Estado</mat-label>
-        <mat-select formControlName="estado">
+        <mat-select yPosition="below" formControlName="estado">
           <mat-option *ngFor="let estado of estados" [value]="estado.nombre">{{ estado.nombre }}</mat-option>
         </mat-select>
         <mat-error *ngIf="campoInvalido('estado')">Este campo es obligatorio</mat-error>
@@ -93,7 +115,7 @@
     <div class="proyecto-form__leader">
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seleccionar líder</mat-label>
-        <mat-select formControlName="lider">
+        <mat-select yPosition="below" formControlName="lider">
           <mat-option *ngFor="let lider of lideres" [value]="lider.nombre">{{ lider.nombre }}</mat-option>
         </mat-select>
         <mat-error *ngIf="campoInvalido('lider')">Este campo es obligatorio</mat-error>
@@ -150,6 +172,7 @@
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-nombre">
                 <mat-label>Seleccionar recurso</mat-label>
                 <mat-select
+                  yPosition="below"
                   formControlName="nombre"
                   (selectionChange)="onEmpleadoChange(index, $event.value)"
                 >
@@ -164,6 +187,7 @@
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-departamento">
                 <mat-label>Departamento</mat-label>
                 <mat-select
+                  yPosition="below"
                   formControlName="departamento"
                   (selectionChange)="onDepartamentoChange(index, $event.value)"
                 >
@@ -189,7 +213,7 @@
             <div class="proyecto-form__resource-middle">
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
                 <mat-label>Seleccionar cargo</mat-label>
-                <mat-select formControlName="rol">
+                <mat-select yPosition="below" formControlName="rol">
                   <mat-option *ngFor="let cargo of getCargosParaRecurso(index)" [value]="cargo.nombre">
                     {{ cargo.nombre }}
                   </mat-option>
@@ -201,7 +225,17 @@
             <div class="proyecto-form__resource-bottom">
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
                 <mat-label>Entrada</mat-label>
-                <input matInput [matDatepicker]="entradaDatepicker" formControlName="entrada">
+                <input
+                  matInput
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="dd/mm/yyyy"
+                  autocomplete="off"
+                  maxlength="10"
+                  [matDatepicker]="entradaDatepicker"
+                  formControlName="entrada"
+                  (input)="onFechaInputRecurso($event, index, 'entrada')"
+                >
                 <mat-datepicker-toggle matSuffix [for]="entradaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #entradaDatepicker></mat-datepicker>
                 <mat-error *ngIf="recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</mat-error>
@@ -209,7 +243,17 @@
 
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
                 <mat-label>Salida</mat-label>
-                <input matInput [matDatepicker]="salidaDatepicker" formControlName="salida">
+                <input
+                  matInput
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="dd/mm/yyyy"
+                  autocomplete="off"
+                  maxlength="10"
+                  [matDatepicker]="salidaDatepicker"
+                  formControlName="salida"
+                  (input)="onFechaInputRecurso($event, index, 'salida')"
+                >
                 <mat-datepicker-toggle matSuffix [for]="salidaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #salidaDatepicker></mat-datepicker>
                 <mat-error *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</mat-error>
