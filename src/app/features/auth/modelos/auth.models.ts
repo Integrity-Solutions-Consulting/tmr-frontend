@@ -6,9 +6,20 @@ export interface User {
   idEmpleado?: number;
 }
 
+/**
+ * AuthResponse - Respuesta del backend para login y refresh-token
+ * Nota: Las propiedades del backend vienen en PascalCase
+ */
 export interface AuthResponse {
+  // Propiedades del nuevo flujo (login y refresh-token) - REQUERIDAS
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string | Date;
+  tokenFamilyId: string;
+  user: User | null;
+
+  // Propiedades legacies para retrocompatibilidad
   token?: string;
-  user?: User | null;
   data?: {
     accessToken?: string;
     token?: string;

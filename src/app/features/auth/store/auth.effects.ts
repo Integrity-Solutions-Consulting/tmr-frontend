@@ -6,12 +6,14 @@ import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../servicios/auth.service';
 import { TokenService } from '../servicios/token.service';
+import { TokenMonitorService } from '../../../core/services/token-monitor.service';
 
 @Injectable()
 export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
+  private tokenMonitor = inject(TokenMonitorService);
   private router = inject(Router);
 
   login$ = createEffect(() =>
@@ -20,20 +22,20 @@ export class AuthEffects {
       switchMap(({ credentials }) =>
         this.authService.login(credentials).pipe(
           switchMap((response) => {
-            const token = response.data?.accessToken ?? response.data?.token ?? response.token ?? '';
-            const user = response.data?.user ?? response.data?.usuario ?? response.user ?? null;
-
-            this.tokenService.setToken(token);
-            if (user) {
-              this.tokenService.setUser(JSON.stringify(user));
-            }
+            // Guardar tokens en localStorage (incluye accessToken, refreshToken y expiresAt)
+            this.authService.updateTokens(response);
 
             return this.authService.getUserModules().pipe(
               tap((modResp) => {
                 console.log("Módulos recibidos desde backend:", modResp);
                 this.tokenService.setUserModules(modResp.data || []);
               }),
-              map(() => AuthActions.loginSuccess({ response: { token, user } })),
+              tap(() => {
+                // IMPORTANTE: Iniciar monitoreo del token después del login exitoso
+                console.log('🔄 Iniciando monitoreo de token...');
+                this.tokenMonitor.startMonitoring();
+              }),
+              map(() => AuthActions.loginSuccess({ response })),
               catchError((error) => {
                 console.error("Error fetching modules", error);
                 this.tokenService.clear();
@@ -71,6 +73,8 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.logoutSuccess, AuthActions.logoutFailure),
         tap(() => {
+          // Detener monitoreo del token
+          this.tokenMonitor.stopMonitoring();
           this.router.navigate(['/auth/login']);
         })
       ),

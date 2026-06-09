@@ -10,11 +10,26 @@ export class JwtInterceptor implements HttpInterceptor {
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
 
+  // Endpoints públicos que NO deben incluir el token JWT
+  private readonly publicEndpoints = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/forgot-password',
+    '/auth/refresh-token',
+  ];
+
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.tokenService.getToken() ?? localStorage.getItem('accessToken');
+    const isPublicEndpoint = this.publicEndpoints.some((endpoint) =>
+      req.url.includes(endpoint)
+    );
 
     let clonedReq = req;
-    if (token && !req.headers.has('Authorization')) {
+    // Solo añadir token si:
+    // 1. Existe un token válido
+    // 2. No es un endpoint público
+    // 3. El header Authorization no existe
+    if (token && !isPublicEndpoint && !req.headers.has('Authorization')) {
       clonedReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,

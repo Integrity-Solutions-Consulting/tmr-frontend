@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { AuthResponse, User, ForgotPasswordResponse, ChangePasswordRequest } from '../modelos/auth.models';
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
+import { TokenService } from './token.service';
 
 import { environment } from '../../../../environments/environment';
 
@@ -13,7 +14,10 @@ import { environment } from '../../../../environments/environment';
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private tokenService: TokenService
+  ) {}
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, {
@@ -26,10 +30,47 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.API_URL}/logout`, {});
   }
 
+  /**
+   * Realiza una solicitud de refresh token al backend
+   * Retorna los nuevos AT, RT y expiración
+   */
+  refreshTokenRequest(): Observable<AuthResponse> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token found'));
+    }
+
+    return this.http.post<AuthResponse>(
+      `${this.API_URL}/refresh-token`,
+      { refreshToken }
+    );
+  }
+
+  /**
+   * Actualiza los tokens en localStorage después de un refresh exitoso
+   */
+  updateTokens(response: AuthResponse): void {
+    console.log('💾 Guardando tokens en localStorage...', {
+      accessToken: response.accessToken ? response.accessToken.substring(0, 20) + '...' : 'N/A',
+      refreshToken: response.refreshToken ? response.refreshToken.substring(0, 20) + '...' : 'N/A',
+      expiresAt: response.expiresAt
+    });
+    
+    this.tokenService.setToken(response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('tokenExpiresAt', new Date(response.expiresAt).getTime().toString());
+    this.tokenService.setUser(JSON.stringify(response.user));
+    
+    console.log('✅ Tokens guardados');
+  }
+
+  /**
+   * @deprecated Usar refreshTokenRequest() en su lugar
+   */
   refreshToken(): Observable<{ token: string }> {
     return this.http.post<{ token: string }>(
       `${this.API_URL}/refresh-token`,
-      {}
+      { RefreshToken: localStorage.getItem('refreshToken') }
     );
   }
 
