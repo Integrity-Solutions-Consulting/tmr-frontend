@@ -27,7 +27,7 @@
                         }
                     </mat-select>
                 </mat-form-field>
-                <button class="help-btn" type="button">?</button>
+                <button class="help-btn" type="button" matTooltip="Seleccione el proyecto asociado a la actividad">?</button>
             </div>
 
             <!-- Código de Requerimiento -->
@@ -37,7 +37,7 @@
                     <input matInput formControlName="codigoRequerimiento" maxlength="50">
                     <mat-hint align="end">{{ form.get('codigoRequerimiento')?.value?.length || 0 }}/50</mat-hint>
                 </mat-form-field>
-                <button class="help-btn" type="button">?</button>
+                <button class="help-btn" type="button" matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">?</button>
             </div>
 
             <!-- Descripción -->
@@ -48,7 +48,7 @@
                         placeholder="Descripción"></textarea>
                     <mat-hint align="end">{{ form.get('descripcion')?.value?.length || 0 }}/255</mat-hint>
                 </mat-form-field>
-                <button class="help-btn help-btn-top" type="button">?</button>
+                <button class="help-btn help-btn-top" type="button" matTooltip="Ingrese la descripción o detalles de la actividad realizada">?</button>
             </div>
 
             <!-- Notas -->
@@ -73,7 +73,7 @@
                         <mat-label>Número de Horas <span class="required">*</span></mat-label>
                         <input matInput type="number" formControlName="numeroHoras" min="0.5" max="24" step="0.5">
                     </mat-form-field>
-                    <button class="help-btn" type="button">?</button>
+                    <button class="help-btn" type="button" matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">?</button>
                 </div>
             </div>
             }
@@ -84,7 +84,7 @@
                 <mat-checkbox formControlName="esRecurrente" color="primary">
                     Actividad Recurrente
                 </mat-checkbox>
-                <button class="help-btn" type="button">?</button>
+                <button class="help-btn" type="button" matTooltip="Marque si desea que esta actividad se repita automáticamente en un rango de fechas">?</button>
             </div>
             }
 
@@ -103,7 +103,7 @@
                             <mat-label>Fecha Fin <span class="required">*</span></mat-label>
                             <input matInput type="date" formControlName="fechaFin">
                         </mat-form-field>
-                        <button class="help-btn" type="button">?</button>
+                        <button class="help-btn" type="button" matTooltip="Especifique la fecha en la que finalizará la recurrencia">?</button>
                     </div>
                 </div>
 
@@ -112,21 +112,21 @@
                         <mat-label>Horas por día <span class="required">*</span></mat-label>
                         <input matInput type="number" formControlName="horasPorDia" min="0.5">
                     </mat-form-field>
-                    <button class="help-btn" type="button">?</button>
+                    <button class="help-btn" type="button" matTooltip="Ingrese las horas que se registrarán por cada día en el rango">?</button>
                 </div>
 
                 <div class="checkbox-item">
                     <mat-checkbox formControlName="incluirFinesDeSemana" color="primary">
                         Incluir fines de semana
                     </mat-checkbox>
-                    <button class="help-btn" type="button">?</button>
+                    <button class="help-btn" type="button" matTooltip="Marque para incluir sábados y domingos en el registro recurrente">?</button>
                 </div>
 
                 <div class="checkbox-item">
                     <mat-checkbox formControlName="incluirFeriados" color="primary">
                         Incluir días feriados
                     </mat-checkbox>
-                    <button class="help-btn" type="button">?</button>
+                    <button class="help-btn" type="button" matTooltip="Marque para registrar horas en días festivos/feriados nacionales">?</button>
                 </div>
 
                 @if (previewText()) {
