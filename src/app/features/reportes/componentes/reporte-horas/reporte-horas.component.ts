@@ -85,10 +85,7 @@ export class ReporteHorasComponent {
     });
   }
 
-  mostrarDatos = computed(() => {
-    const hayFiltros = this.busquedaCliente() !== '' || this.mesSeleccionado() !== '' || this.anioSeleccionado() !== '';
-    return hayFiltros || this.forzarMostrar();
-  });
+  mostrarDatos = computed(() => true);
 
   datosFiltrados = computed(() => this.datos());
 
