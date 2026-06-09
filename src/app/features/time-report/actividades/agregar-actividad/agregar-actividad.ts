@@ -81,6 +81,35 @@ export class AgregarActividad implements OnInit {
             notas: [act ? act.notas : ''],
             esbillable: [act ? act.esbillable : true]
         });
+
+        // Escucha cambios en esRecurrente para habilitar/deshabilitar validadores
+        this.form.get('esRecurrente')?.valueChanges.subscribe(isRecurrent => {
+            const fechaActividadCtrl = this.form.get('fechaActividad');
+            const numeroHorasCtrl = this.form.get('numeroHoras');
+            const fechaInicioCtrl = this.form.get('fechaInicio');
+            const fechaFinCtrl = this.form.get('fechaFin');
+            const horasPorDiaCtrl = this.form.get('horasPorDia');
+
+            if (isRecurrent) {
+                fechaActividadCtrl?.clearValidators();
+                numeroHorasCtrl?.clearValidators();
+                fechaInicioCtrl?.setValidators(Validators.required);
+                fechaFinCtrl?.setValidators(Validators.required);
+                horasPorDiaCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
+            } else {
+                fechaActividadCtrl?.setValidators(Validators.required);
+                numeroHorasCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
+                fechaInicioCtrl?.clearValidators();
+                fechaFinCtrl?.clearValidators();
+                horasPorDiaCtrl?.clearValidators();
+            }
+
+            fechaActividadCtrl?.updateValueAndValidity();
+            numeroHorasCtrl?.updateValueAndValidity();
+            fechaInicioCtrl?.updateValueAndValidity();
+            fechaFinCtrl?.updateValueAndValidity();
+            horasPorDiaCtrl?.updateValueAndValidity();
+        });
     }
 
     // Cargar listas desplegables desde la Base de Datos

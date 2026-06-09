@@ -273,4 +273,30 @@ export class SeguimientoComponent implements AfterViewInit {
             this.fechaHasta = this.formatDate(ultimoDia);
         }
     }
+
+    public onFechaManualChange() {
+        if (this.fechaDesde && this.fechaHasta) {
+            const desde = new Date(this.fechaDesde + 'T00:00:00');
+            const hasta = new Date(this.fechaHasta + 'T00:00:00');
+            const anioDesde = desde.getFullYear();
+            const mesDesde = desde.getMonth();
+
+            const primerDiaMes = this.formatDate(new Date(anioDesde, mesDesde, 1));
+            const dia15Mes = this.formatDate(new Date(anioDesde, mesDesde, 15));
+            const dia16Mes = this.formatDate(new Date(anioDesde, mesDesde, 16));
+            const ultimoDiaMes = this.formatDate(new Date(anioDesde, mesDesde + 1, 0));
+
+            if (this.fechaDesde === primerDiaMes && this.fechaHasta === ultimoDiaMes) {
+                this.periodo = 'mes-completo';
+            } else if (
+                (this.fechaDesde === primerDiaMes && this.fechaHasta === dia15Mes) ||
+                (this.fechaDesde === dia16Mes && this.fechaHasta === ultimoDiaMes)
+            ) {
+                this.periodo = 'quincena';
+            } else {
+                this.periodo = '' as any;
+            }
+        }
+        this.aplicarFiltros();
+    }
 }

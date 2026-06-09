@@ -3,11 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Actividad } from '../models/actividad.model';
 import { AuthService } from '../../features/auth/servicios/auth.service';
 import { environment } from '../../../environments/environment';
+import { FeriadosService } from './feriados.service';
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private feriadosService = inject(FeriadosService);
   private apiUrl = `${environment.apiUrl}/time-report/actividades`;
 
   private _actividades = signal<Actividad[]>([]);
@@ -30,7 +32,8 @@ export class ActividadesService {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
-    this.http.get<any>(`${this.apiUrl}/resumen?idEmpleado=${user.id}`).subscribe({
+    const empId = user.idEmpleado ?? user.id;
+    this.http.get<any>(`${this.apiUrl}/resumen?idEmpleado=${empId}`).subscribe({
       next: (res) => {
         this._horasPorRegistrar.set(res.horasPorRegistrar);
         this._horasRegistradasHoy.set(res.horasRegistradas); // Simplificación
@@ -45,7 +48,8 @@ export class ActividadesService {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
-    this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${user.id}&anio=${anio}&mes=${mes}`).subscribe({
+    const empId = user.idEmpleado ?? user.id;
+    this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${empId}&anio=${anio}&mes=${mes}`).subscribe({
       next: (data) => {
         const mapped = (data || []).map(item => ({
           id: String(item.id),
@@ -75,29 +79,84 @@ export class ActividadesService {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
-    const payload = {
-      idEmpleado: user.id,
-      idProyecto: data.proyectoId,
-      idTipoActividad: Number(data.tipoActividad),
-      codigoRequerimiento: data.codigoRequerimiento,
-      cantidadHoras: data.numeroHoras,
-      fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
-      descripcionActividad: data.descripcion,
-      notas: data.notas || '',
-      esBillable: data.esbillable ?? true
-    };
+    if (data.esRecurrente && data.fechaInicio && data.fechaFin) {
+      const parseLocal = (d: any) => {
+        if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const parts = String(d).split('T')[0].split('-');
+        if (parts.length === 3) {
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        }
+        return new Date(d);
+      };
 
-    this.http.post(this.apiUrl, payload).subscribe({
-      next: (res) => {
-        this.cargarResumen();
-        // Recargar el calendario del mes de la actividad agregada
-        const actDate = new Date(data.fechaActividad);
-        this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+      const inicio = parseLocal(data.fechaInicio);
+      const fin = parseLocal(data.fechaFin);
+      const cur = new Date(inicio);
 
+      const requests: any[] = [];
+      while (cur <= fin) {
+        const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
+        const esFeriado = data.incluirFeriados ? false : this.feriadosService.esFeriado(cur);
+
+        if ((data.incluirFinesDeSemana || !esFDS) && !esFeriado) {
+          const payload = {
+            idEmpleado: user.idEmpleado ?? Number(user.id),
+            idProyecto: data.proyectoId,
+            idTipoActividad: Number(data.tipoActividad),
+            codigoRequerimiento: data.codigoRequerimiento,
+            cantidadHoras: data.horasPorDia,
+            fechaActividad: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`,
+            descripcionActividad: data.descripcion,
+            notas: data.notas || '',
+            esBillable: data.esbillable ?? true
+          };
+          requests.push(this.http.post(this.apiUrl, payload));
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      if (requests.length > 0) {
+        let completed = 0;
+        requests.forEach(req => {
+          req.subscribe({
+            next: () => {
+              completed++;
+              if (completed === requests.length) {
+                this.cargarResumen();
+                const actDate = parseLocal(data.fechaInicio);
+                this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+                if (callback) callback();
+              }
+            },
+            error: (err: any) => console.error('Error al crear actividad recurrente', err)
+          });
+        });
+      } else {
         if (callback) callback();
-      },
-      error: (err) => console.error('Error al crear actividad', err)
-    });
+      }
+    } else {
+      const payload = {
+        idEmpleado: user.idEmpleado ?? Number(user.id),
+        idProyecto: data.proyectoId,
+        idTipoActividad: Number(data.tipoActividad),
+        codigoRequerimiento: data.codigoRequerimiento,
+        cantidadHoras: data.numeroHoras,
+        fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
+        descripcionActividad: data.descripcion,
+        notas: data.notas || '',
+        esBillable: data.esbillable ?? true
+      };
+
+      this.http.post(this.apiUrl, payload).subscribe({
+        next: (res) => {
+          this.cargarResumen();
+          const actDate = new Date(data.fechaActividad);
+          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          if (callback) callback();
+        },
+        error: (err) => console.error('Error al crear actividad', err)
+      });
+    }
   }
 
   actualizarActividad(id: number | string, data: any, callback?: () => void): void {

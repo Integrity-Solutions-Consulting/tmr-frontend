@@ -3,6 +3,7 @@ export interface User {
   email: string;
   name: string;
   modulos?: string[];
+  idEmpleado?: number;
 }
 
 export interface AuthResponse {

@@ -59,7 +59,8 @@
                 </mat-form-field>
             </div>
 
-            <!-- Fecha + Horas -->
+            <!-- Fecha + Horas (Visible solo si NO es recurrente) -->
+            @if (!form.get('esRecurrente')?.value) {
             <div class="two-col">
                 <div class="field-row flex-1">
                     <mat-form-field appearance="outline" class="full-field">
@@ -77,14 +78,7 @@
                     <button class="help-btn" type="button">?</button>
                 </div>
             </div>
-
-            <!-- Billable -->
-            <div class="recurrente-row">
-                <mat-checkbox formControlName="esbillable" color="primary">
-                    Es Billable
-                </mat-checkbox>
-                <button class="help-btn" type="button">?</button>
-            </div>
+            }
 
             <!-- Recurrente checkbox -->
             @if (!esEdicion) {

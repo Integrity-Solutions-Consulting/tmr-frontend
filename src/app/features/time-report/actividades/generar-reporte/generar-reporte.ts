@@ -81,7 +81,7 @@ export class GenerarReporte implements OnInit {
                 const filteredData = (actividades || [])
                     .filter(a => {
                         const fecha = new Date(a.fechaactividad + 'T00:00:00');
-                        const matchesUser = Number(a.idempleado) === Number(user.id);
+                        const matchesUser = Number(a.idempleado) === Number(user.idEmpleado ?? user.id);
                         const matchesAnio = fecha.getFullYear() === anio;
                         const matchesMes = (fecha.getMonth() + 1) === mesFiltrado;
 
