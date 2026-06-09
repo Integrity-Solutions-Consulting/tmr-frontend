@@ -47,4 +47,16 @@
   &.inactive {
     background: #9ca3af;
   }
+
+  &.approved {
+    background: #af52de;
+  }
+
+  &.planning {
+    background: #00c7be;
+  }
+
+  &.delayed {
+    background: #ffd60a;
+  }
 }

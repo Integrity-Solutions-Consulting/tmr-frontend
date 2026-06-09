@@ -13,6 +13,7 @@
   <mat-form-field appearance="outline" class="filtros__select">
     <mat-label>Estado</mat-label>
     <mat-select
+      yPosition="below"
       [(ngModel)]="estado"
       (selectionChange)="emitirFiltros()"
     >
@@ -26,6 +27,7 @@
   <mat-form-field appearance="outline" class="filtros__select">
     <mat-label>Tipo</mat-label>
     <mat-select
+      yPosition="below"
       [(ngModel)]="tipo"
       (selectionChange)="emitirFiltros()"
     >

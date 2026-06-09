@@ -327,13 +327,87 @@ export class ProyectoForm implements OnInit, OnChanges {
     if (!patron.test(texto)) event.preventDefault();
   }
 
+  // Formatea entrada de fecha en tiempo real como dd/mm/yyyy
+  private formatFechaInputRaw(valor: string): string {
+    const digitos = String(valor || '').replace(/\D/g, '').slice(0, 8);
+    if (digitos.length <= 2) return digitos;
+    if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
+    return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
+  }
+
+  onFechaInput(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    const cursorPos = input.selectionStart ?? input.value.length;
+    const beforeValue = input.value;
+    const formatted = this.formatFechaInputRaw(beforeValue);
+
+    if (formatted !== beforeValue) {
+      input.value = formatted;
+    }
+
+    const control = this.formulario.get(controlName);
+    if (control) {
+      control.setValue(formatted, { emitEvent: false, onlySelf: true });
+    }
+
+    requestAnimationFrame(() => {
+      try {
+        const nextPosition = Math.min(formatted.length, cursorPos);
+        input.setSelectionRange(nextPosition, nextPosition);
+      } catch {}
+    });
+  }
+
+  onFechaInputRecurso(event: Event, index: number, field: string): void {
+    const input = event.target as HTMLInputElement;
+    const cursorPos = input.selectionStart ?? input.value.length;
+    const beforeValue = input.value;
+    const formatted = this.formatFechaInputRaw(beforeValue);
+
+    if (formatted !== beforeValue) {
+      input.value = formatted;
+    }
+
+    const control = this.recursos.at(index).get(field);
+    if (control) {
+      control.setValue(formatted, { emitEvent: false, onlySelf: true });
+    }
+
+    requestAnimationFrame(() => {
+      try {
+        const nextPosition = Math.min(formatted.length, cursorPos);
+        input.setSelectionRange(nextPosition, nextPosition);
+      } catch {}
+    });
+  }
+
   private fechaValida(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = control.value;
       if (!valor) return null;
       if (valor instanceof Date && !isNaN(valor.getTime())) return null;
-      return /^\d{4}-\d{2}-\d{2}$/.test(String(valor)) ? null : { fechaInvalida: true };
+      const fecha = this.parseFechaString(String(valor));
+      return fecha && !isNaN(fecha.getTime()) ? null : { fechaInvalida: true };
     };
+  }
+
+  private parseFechaString(valor: string): Date | null {
+    const normalizado = valor.trim();
+    if (!normalizado) {
+      return null;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalizado)) {
+      return new Date(normalizado);
+    }
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(normalizado)) {
+      const [dia, mes, anio] = normalizado.split('/').map(Number);
+      return new Date(anio, mes - 1, dia);
+    }
+
+    const fecha = new Date(normalizado);
+    return isNaN(fecha.getTime()) ? null : fecha;
   }
 
   private numeroValido(permiteDecimal: boolean): ValidatorFn {
@@ -355,10 +429,15 @@ export class ProyectoForm implements OnInit, OnChanges {
     errorKey: string
   ): ValidatorFn {
     return (grupo: AbstractControl): ValidationErrors | null => {
-      const inicio = grupo.get(inicioControl)?.value;
-      const fin = grupo.get(finControl)?.value;
+      const inicioValor = grupo.get(inicioControl)?.value;
+      const finValor = grupo.get(finControl)?.value;
+      if (!inicioValor || !finValor) return null;
+
+      const inicio = this.parseFechaString(String(inicioValor));
+      const fin = this.parseFechaString(String(finValor));
       if (!inicio || !fin) return null;
-      return new Date(fin) < new Date(inicio) ? { [errorKey]: true } : null;
+
+      return fin < inicio ? { [errorKey]: true } : null;
     };
   }
 
@@ -383,7 +462,12 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     const str = String(valor);
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+      const [dia, mes, anio] = str.split('/').map(Number);
+      return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    }
     if (str.includes('T')) return str.split('T')[0];
-    return str;
+    const fecha = this.parseFechaString(str);
+    return fecha ? this.normalizarFecha(fecha) : str;
   }
 }

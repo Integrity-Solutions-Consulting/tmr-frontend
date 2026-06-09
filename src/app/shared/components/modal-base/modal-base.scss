@@ -34,30 +34,13 @@
 .modal--wide {
   width: min(95vw, 680px);
 
-  .modal__header {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-
-    z-index: 1;
-
-    min-height: auto;
-
-    padding: 0;
-
-    border-bottom: 0;
-  }
-
-  .modal__header h2 {
-    display: none;
-  }
-
   .modal__body {
     padding: 28px 32px;
   }
 }
 
 .modal__header {
+  position: relative;
   min-height: 62px;
 
   padding: 28px 32px 10px;
@@ -76,10 +59,14 @@
     font-size: 30px;
     font-weight: 800;
     line-height: 1.1;
+    padding-right: 48px;
   }
 }
 
 .modal__cerrar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
   width: 32px;
   height: 32px;
 
