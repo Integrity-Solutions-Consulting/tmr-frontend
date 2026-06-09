@@ -33,6 +33,10 @@ export interface UpdateUsuarioPayload {
   telefono: string | null;
   direccion: string | null;
   rolesids: number[];
+  // Datos de autenticación
+  email?: string;
+  nombreusuario?: string;
+  password?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -102,14 +106,30 @@ export class ConfiguracionService {
     this.http.delete(`${environment.apiUrl}/configuracion/roles/${id}`).subscribe(() => this.loadRoles());
   }
 
-  loadUsuarios(): void {
-    this.http.get<unknown[] | { items?: unknown[]; data?: unknown[] }>(`${environment.apiUrl}/configuracion/usuarios`).subscribe({
-      next: (response) => {
-        const data = Array.isArray(response) ? response : response.items ?? response.data ?? [];
-        this.usuariosState.set(data.map((item) => this.mapUsuario(item)));
-      },
-      error: (err) => console.error(err),
-    });
+  loadUsuarios(activo?: boolean | null, search?: string): void {
+    const params: Record<string, string> = {};
+    if (activo !== null && activo !== undefined) {
+      params['activo'] = String(activo);
+    }
+    if (search && search.trim()) {
+      params['search'] = search.trim();
+    }
+
+    const queryString = Object.keys(params).length
+      ? '?' + new URLSearchParams(params).toString()
+      : '';
+
+    this.http
+      .get<unknown[] | { items?: unknown[]; data?: unknown[] }>(
+        `${environment.apiUrl}/configuracion/usuarios${queryString}`
+      )
+      .subscribe({
+        next: (response) => {
+          const data = Array.isArray(response) ? response : response.items ?? response.data ?? [];
+          this.usuariosState.set(data.map((item) => this.mapUsuario(item)));
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   crearUsuarioAdministrativo(payload: RegisterUserRequest): Observable<unknown> {
@@ -143,14 +163,16 @@ export class ConfiguracionService {
     this.usuariosState.set(usuarios);
   }
 
-  deleteUsuario(id: number): void {
-    this.http.delete(`${environment.apiUrl}/configuracion/usuarios/${id}`).subscribe(() => this.loadUsuarios());
+  deleteUsuario(id: number, activo?: boolean | null): void {
+    this.http
+      .delete(`${environment.apiUrl}/configuracion/usuarios/${id}`)
+      .subscribe(() => this.loadUsuarios(activo));
   }
 
-  setUsuarioEstado(id: number, activo: boolean): Observable<unknown> {
+  setUsuarioEstado(id: number, activo: boolean, filtroActual?: boolean | null): Observable<unknown> {
     return this.http
       .patch(`${environment.apiUrl}/configuracion/usuarios/${id}`, { activo })
-      .pipe(tap(() => this.loadUsuarios()));
+      .pipe(tap(() => this.loadUsuarios(filtroActual)));
   }
 
   getUsuarioById(id: number): Usuario | undefined {
@@ -202,7 +224,7 @@ export class ConfiguracionService {
     };
   }
 
-  toUpdateUsuarioPayload(usuario: Usuario): UpdateUsuarioPayload {
+  toUpdateUsuarioPayload(usuario: Usuario, passwordNueva?: string | null): UpdateUsuarioPayload {
     return {
       nombres: usuario.nombres,
       apellidos: usuario.apellidos,
@@ -212,6 +234,9 @@ export class ConfiguracionService {
       telefono: usuario.telefono?.trim() || null,
       direccion: usuario.direccion?.trim() || null,
       rolesids: usuario.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId)),
+      email: usuario.email || undefined,
+      nombreusuario: usuario.usuario || undefined,
+      password: passwordNueva || null,
     };
   }
 

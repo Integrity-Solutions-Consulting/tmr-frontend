@@ -77,7 +77,7 @@ export class UsuariosFormModal {
     usuarioInterno: [this.data.usuario?.usuarioInterno ?? true],
     email: [this.data.usuario?.email ?? '', [Validators.required, Validators.email]],
     password: [
-      this.data.usuario?.password ?? this.generateTemporaryPassword(),
+      '',
       this.data.usuario ? [] : [Validators.required, temporaryPasswordValidator()],
     ],
     debeCambiarPassword: [this.data.usuario?.debeCambiarPassword ?? !this.data.usuario],
@@ -324,14 +324,33 @@ export class UsuariosFormModal {
       rolesids: value.roleid ? [String(value.roleid)] : (this.data.usuario?.rolesids ?? []),
     };
 
-    // ── Modo Edición: sigue siendo local hasta implementar PUT ──────────────
+    // ── Modo Edición: llama al backend con datos completos ───────────────────
     if (this.isEdit) {
-      const usuario: Usuario = {
+      this.guardando.set(true);
+      this.errorGuardar.set(null);
+
+      const usuarioEditado: Usuario = {
         id: this.data.usuario!.id,
         estado: this.data.usuario!.estado,
         ...payload,
       };
-      this.dialogRef.close(usuario);
+
+      // Incluir la nueva contraseña solo si el usuario escribió algo
+      const passwordNueva = value.password?.trim() || null;
+
+      const updatePayload = this.configuracionService.toUpdateUsuarioPayload(usuarioEditado, passwordNueva);
+
+      this.configuracionService.updateUsuario(this.data.usuario!.id, updatePayload).subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.configuracionService.loadUsuarios();
+          this.dialogRef.close('actualizado');
+        },
+        error: (err) => {
+          this.guardando.set(false);
+          this.errorGuardar.set(this.extractBackendError(err));
+        },
+      });
       return;
     }
 

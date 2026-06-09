@@ -7,17 +7,43 @@
   </div>
 
   <div class="stats-grid">
-    <article>
+    <article
+      class="stat-card"
+      [class.stat-card--active]="filtroActivo() === 'todos'"
+      (click)="filtrarPorEstado('todos')"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="filtrarPorEstado('todos')"
+      aria-label="Mostrar todos los usuarios"
+    >
       <span>Usuarios</span>
       <strong>{{ usuarios().length }}</strong>
     </article>
-    <article>
+
+    <article
+      class="stat-card"
+      [class.stat-card--active]="filtroActivo() === 'activos'"
+      (click)="filtrarPorEstado('activos')"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="filtrarPorEstado('activos')"
+      aria-label="Filtrar por usuarios activos"
+    >
       <span>Activos</span>
       <strong>{{ activos() }}</strong>
     </article>
-    <article>
-      <span>Roles disponibles</span>
-      <strong>{{ roles().length }}</strong>
+
+    <article
+      class="stat-card"
+      [class.stat-card--active]="filtroActivo() === 'inactivos'"
+      (click)="filtrarPorEstado('inactivos')"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="filtrarPorEstado('inactivos')"
+      aria-label="Filtrar por usuarios inactivos"
+    >
+      <span>Inactivos</span>
+      <strong>{{ inactivos() }}</strong>
     </article>
   </div>
 

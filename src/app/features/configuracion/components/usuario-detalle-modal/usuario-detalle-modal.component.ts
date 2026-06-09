@@ -36,4 +36,13 @@ export class UsuarioDetalleModal {
       .map((id) => roles.find((r: Rol) => r.id.toString() === id.toString())?.nombre ?? id)
       .join(', ');
   }
+
+  /** Convierte "YYYY-MM-DD" o "DD-MM-YYYY" → "DD/MM/YYYY" para mostrar en pantalla */
+  formatFecha(value: string | null | undefined): string {
+    if (!value) return '-';
+    const datePart = value.includes('T') ? value.split('T')[0] : value;
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+    if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+    return datePart;
+  }
 }

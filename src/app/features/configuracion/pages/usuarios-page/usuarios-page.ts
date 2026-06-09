@@ -12,6 +12,8 @@ import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios
 import { Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+type FiltroEstado = 'todos' | 'activos' | 'inactivos';
+
 @Component({
   selector: 'app-usuarios-page',
   imports: [Boton, SearchInput, ActionMenuComponent, SuccessModalComponent],
@@ -21,14 +23,29 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 export class UsuariosPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
   readonly roles = this.configuracionService.roles;
+
+  /** Filtro activo por estado: 'todos' | 'activos' | 'inactivos' */
+  readonly filtroActivo = signal<FiltroEstado>('todos');
 
   /** Controla la visibilidad del modal de éxito. */
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
+  /** Conteo de activos sobre la lista cargada del backend */
+  readonly activos = computed(
+    () => this.usuarios().filter((u) => u.estado === 'Activo').length,
+  );
+
+  /** Conteo de inactivos sobre la lista cargada del backend */
+  readonly inactivos = computed(
+    () => this.usuarios().filter((u) => u.estado !== 'Activo').length,
+  );
+
+  /** Filtrado local por texto (el filtro de estado ya viaja al backend) */
   readonly filteredUsuarios = computed(() => {
     const query = this.query().trim().toLowerCase();
     if (!query) {
@@ -51,7 +68,29 @@ export class UsuariosPage {
     );
   });
 
-  readonly activos = computed(() => this.usuarios().filter((usuario) => usuario.estado === 'Activo').length);
+  // ── Helpers de filtro ──────────────────────────────────────────────────
+
+  /** Convierte el enum interno al valor boolean que espera el backend. */
+  private filtroToParam(filtro: FiltroEstado): boolean | null {
+    if (filtro === 'activos') return true;
+    if (filtro === 'inactivos') return false;
+    return null; // 'todos' → sin parámetro
+  }
+
+  /**
+   * Cambia el filtro activo y recarga desde el backend.
+   * Si se hace clic en el filtro ya activo, regresa a 'todos'.
+   */
+  filtrarPorEstado(tipo: FiltroEstado): void {
+    const nuevo: FiltroEstado = this.filtroActivo() === tipo ? 'todos' : tipo;
+    this.filtroActivo.set(nuevo);
+    this.configuracionService.loadUsuarios(
+      this.filtroToParam(nuevo),
+      this.query() || undefined,
+    );
+  }
+
+  // ── Acciones sobre usuarios ────────────────────────────────────────────
 
   obtenerAccionesUsuario(usuario: Usuario): ActionMenuItem[] {
     const activo = usuario.estado === 'Activo';
@@ -78,7 +117,10 @@ export class UsuariosPage {
 
   resolveRoleNames(roleIds: string[]): string[] {
     const roles = this.roles();
-    return roleIds.map((roleId) => roles.find((rol) => rol.id.toString() === roleId)?.nombre ?? roleId);
+    return roleIds.map(
+      (roleId) =>
+        roles.find((rol) => rol.id.toString() === roleId)?.nombre ?? roleId,
+    );
   }
 
   openModal(usuario?: Usuario): void {
@@ -114,20 +156,33 @@ export class UsuariosPage {
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
+      const filtroParam = this.filtroToParam(this.filtroActivo());
+
       // Resultado 'creado' → usuario nuevo creado en backend
       if (result === 'creado') {
+        this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
         this.mostrarExito('Usuario creado correctamente');
         return;
       }
 
-      // Resultado objeto Usuario → edición local
+      // Resultado 'actualizado' → edición guardada en backend desde el modal
+      if (result === 'actualizado') {
+        this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
+        this.mostrarExito('Usuario actualizado correctamente');
+        return;
+      }
+
+      // Resultado objeto Usuario → edición local legacy (ya no se usa, pero se mantiene por compatibilidad)
       if (result !== true && typeof result === 'object') {
         const usuarioEditado = result as Usuario;
         this.configuracionService
-          .updateUsuario(usuarioEditado.id, this.configuracionService.toUpdateUsuarioPayload(usuarioEditado))
+          .updateUsuario(
+            usuarioEditado.id,
+            this.configuracionService.toUpdateUsuarioPayload(usuarioEditado),
+          )
           .subscribe({
             next: () => {
-              this.configuracionService.loadUsuarios();
+              this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
               this.mostrarExito('Usuario actualizado correctamente');
             },
             error: (err) => console.error(err),
@@ -137,28 +192,36 @@ export class UsuariosPage {
   }
 
   viewUsuario(usuario: Usuario): void {
-    const dialogRef = this.dialog.open(UsuarioDetalleModal, {
-      panelClass: 'tmr-dialog-panel',
-      data: { usuario },
-    });
+    // Cargar detalle completo desde backend para que "Ver más" tenga todos los campos
+    this.configuracionService.getUsuarioDetalle(usuario.id).subscribe({
+      next: (detalle) => {
+        const dialogRef = this.dialog.open(UsuarioDetalleModal, {
+          panelClass: 'tmr-dialog-panel',
+          data: { usuario: detalle },
+        });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.action === 'editar' && result.usuario) {
-        this.editUsuario(result.usuario);
-      }
-      if (result?.action === 'toggleEstado' && result.usuario) {
-        this.toggleEstadoUsuario(result.usuario);
-      }
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result?.action === 'editar' && result.usuario) {
+            this.editUsuario(result.usuario);
+          }
+          if (result?.action === 'toggleEstado' && result.usuario) {
+            this.toggleEstadoUsuario(result.usuario);
+          }
+        });
+      },
+      error: (err) => console.error('Error al cargar detalle de usuario:', err),
     });
   }
 
   toggleEstadoUsuario(usuario: Usuario): void {
+    const filtroParam = this.filtroToParam(this.filtroActivo());
+
     if (usuario.estado === 'Activo') {
-      this.configuracionService.deleteUsuario(usuario.id);
+      this.configuracionService.deleteUsuario(usuario.id, filtroParam);
       return;
     }
 
-    this.configuracionService.setUsuarioEstado(usuario.id, true).subscribe({
+    this.configuracionService.setUsuarioEstado(usuario.id, true, filtroParam).subscribe({
       next: () => this.mostrarExito('Estado del usuario actualizado correctamente'),
       error: (err) => console.error(err),
     });
