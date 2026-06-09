@@ -16,6 +16,12 @@ export class ProfilePopoverComponent {
 
   @Output() cerrar = new EventEmitter<void>();
   @Output() cerrarSesion = new EventEmitter<void>();
+  @Output() cambiarPassword = new EventEmitter<void>();
+
+  onCambiarPassword(): void {
+    this.cambiarPassword.emit();
+    this.cerrar.emit();
+  }
 
   onCerrarSesion(): void {
     this.cerrarSesion.emit();

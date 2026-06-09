@@ -3,6 +3,8 @@ import { ProfilePopoverComponent } from '../../../shared/components/profile-popo
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../../features/auth/store/auth.actions';
 import { AuthService } from '../../../features/auth/servicios/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { CambiarPasswordModalComponent } from '../../../features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
 
 @Component({
   selector: 'app-navbar',
@@ -14,6 +16,7 @@ import { AuthService } from '../../../features/auth/servicios/auth.service';
 export class Navbar implements OnInit {
   private store = inject(Store);
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
   
   perfilAbierto = false;
   user = {
@@ -37,6 +40,14 @@ export class Navbar implements OnInit {
 
   cerrarPerfil(): void {
     this.perfilAbierto = false;
+  }
+
+  abrirCambiarPassword(): void {
+    this.perfilAbierto = false;
+    this.dialog.open(CambiarPasswordModalComponent, {
+      panelClass: 'tmr-dialog-panel',
+      disableClose: true
+    });
   }
 
   cerrarSesion(): void {

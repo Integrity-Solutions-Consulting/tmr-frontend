@@ -6,6 +6,11 @@
       <strong>{{ nombre }}</strong>
       <span>{{ correo }}</span>
 
+      <button mat-button type="button" class="profile-popover__change-password" (click)="onCambiarPassword()">
+        <span class="material-icons">vpn_key</span>
+        Cambiar Contraseña
+      </button>
+
       <button mat-button type="button" class="profile-popover__logout" (click)="onCerrarSesion()">
         <span aria-hidden="true">↪</span>
         Cerrar Sesion

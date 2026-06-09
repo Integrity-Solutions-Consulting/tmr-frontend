@@ -29,3 +29,10 @@ export interface AuthState {
   isAuthenticated: boolean;
   successMessage: string | null;
 }
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+

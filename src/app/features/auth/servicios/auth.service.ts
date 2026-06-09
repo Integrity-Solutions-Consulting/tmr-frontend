@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AuthResponse, User, ForgotPasswordResponse } from '../modelos/auth.models';
+import { AuthResponse, User, ForgotPasswordResponse, ChangePasswordRequest } from '../modelos/auth.models';
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
 
@@ -43,6 +43,10 @@ export class AuthService {
 
   getUserModules(): Observable<{ data: string[] }> {
     return this.http.get<{ data: string[] }>(`${this.API_URL}/modules`);
+  }
+
+  changePassword(payload: ChangePasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/change-password`, payload);
   }
 
   getCurrentUser(): User | null {

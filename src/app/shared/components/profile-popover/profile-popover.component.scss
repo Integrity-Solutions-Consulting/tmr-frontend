@@ -40,9 +40,24 @@
   font-weight: 400;
 }
 
-.profile-popover__logout {
+.profile-popover__change-password {
   justify-content: flex-start;
   margin-top: 12px;
+  padding: 0 !important;
+  color: #737373 !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-popover__change-password span {
+  margin-right: 8px;
+  color: #737373;
+  font-size: 18px;
+}
+
+.profile-popover__logout {
+  justify-content: flex-start;
+  margin-top: 8px;
   padding: 0 !important;
   color: #737373 !important;
   font-size: 13px;
