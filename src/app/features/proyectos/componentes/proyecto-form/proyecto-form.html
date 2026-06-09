@@ -35,14 +35,9 @@
         <mat-label>Fecha de inicio</mat-label>
         <input
           matInput
-          type="text"
-          inputmode="numeric"
-          placeholder="dd/mm/yyyy"
-          autocomplete="off"
-          maxlength="10"
+          type="date"
           [matDatepicker]="inicioDatepicker"
           formControlName="fechaInicio"
-          (input)="onFechaInput($event, 'fechaInicio')"
         >
         <mat-datepicker-toggle matSuffix [for]="inicioDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #inicioDatepicker></mat-datepicker>
@@ -54,14 +49,9 @@
         <mat-label>Fecha de fin</mat-label>
         <input
           matInput
-          type="text"
-          inputmode="numeric"
-          placeholder="dd/mm/yyyy"
-          autocomplete="off"
-          maxlength="10"
+          type="date"
           [matDatepicker]="finDatepicker"
           formControlName="fechaFin"
-          (input)="onFechaInput($event, 'fechaFin')"
         >
         <mat-datepicker-toggle matSuffix [for]="finDatepicker"></mat-datepicker-toggle>
         <mat-datepicker #finDatepicker></mat-datepicker>
@@ -227,14 +217,9 @@
                 <mat-label>Entrada</mat-label>
                 <input
                   matInput
-                  type="text"
-                  inputmode="numeric"
-                  placeholder="dd/mm/yyyy"
-                  autocomplete="off"
-                  maxlength="10"
+                  type="date"
                   [matDatepicker]="entradaDatepicker"
                   formControlName="entrada"
-                  (input)="onFechaInputRecurso($event, index, 'entrada')"
                 >
                 <mat-datepicker-toggle matSuffix [for]="entradaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #entradaDatepicker></mat-datepicker>
@@ -245,14 +230,9 @@
                 <mat-label>Salida</mat-label>
                 <input
                   matInput
-                  type="text"
-                  inputmode="numeric"
-                  placeholder="dd/mm/yyyy"
-                  autocomplete="off"
-                  maxlength="10"
+                  type="date"
                   [matDatepicker]="salidaDatepicker"
                   formControlName="salida"
-                  (input)="onFechaInputRecurso($event, index, 'salida')"
                 >
                 <mat-datepicker-toggle matSuffix [for]="salidaDatepicker"></mat-datepicker-toggle>
                 <mat-datepicker #salidaDatepicker></mat-datepicker>

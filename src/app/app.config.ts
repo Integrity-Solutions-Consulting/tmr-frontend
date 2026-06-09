@@ -1,10 +1,11 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { MAT_DATE_LOCALE, MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
 
 import { routes } from './app.routes';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
@@ -25,11 +26,27 @@ import { ActividadesEffects } from './core/state/actividades/actividades.effects
 import { ProyectosEffects } from './features/proyectos/store/proyectos.effects';
 import { DashboardEffects } from './features/dashboard/store/dashboard.effects';
 
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: ['dd/MM/yyyy', 'd/M/yyyy', 'dd/MM/yy'],
+  },
+  display: {
+    dateInput: 'dd/MM/yyyy',
+    monthYearLabel: 'MMM yyyy',
+    dateA11yLabel: 'dd/MM/yyyy',
+    monthYearA11yLabel: 'MMMM yyyy',
+  },
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimations(),
+    { provide: LOCALE_ID, useValue: 'es-EC' },
+    provideNativeDateAdapter(MY_DATE_FORMATS),
+    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },       // idioma del calendario (meses/días en español)
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }, // formato dd/MM/yyyy
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,

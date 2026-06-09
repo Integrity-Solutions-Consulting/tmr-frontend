@@ -42,7 +42,7 @@ import { ProyectosService } from '../../servicios/proyectos.service';
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
   ],
   templateUrl: './proyecto-form.html',
   styleUrl: './proyecto-form.scss'
@@ -328,59 +328,6 @@ export class ProyectoForm implements OnInit, OnChanges {
   }
 
   // Formatea entrada de fecha en tiempo real como dd/mm/yyyy
-  private formatFechaInputRaw(valor: string): string {
-    const digitos = String(valor || '').replace(/\D/g, '').slice(0, 8);
-    if (digitos.length <= 2) return digitos;
-    if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
-    return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
-  }
-
-  onFechaInput(event: Event, controlName: string): void {
-    const input = event.target as HTMLInputElement;
-    const cursorPos = input.selectionStart ?? input.value.length;
-    const beforeValue = input.value;
-    const formatted = this.formatFechaInputRaw(beforeValue);
-
-    if (formatted !== beforeValue) {
-      input.value = formatted;
-    }
-
-    const control = this.formulario.get(controlName);
-    if (control) {
-      control.setValue(formatted, { emitEvent: false, onlySelf: true });
-    }
-
-    requestAnimationFrame(() => {
-      try {
-        const nextPosition = Math.min(formatted.length, cursorPos);
-        input.setSelectionRange(nextPosition, nextPosition);
-      } catch {}
-    });
-  }
-
-  onFechaInputRecurso(event: Event, index: number, field: string): void {
-    const input = event.target as HTMLInputElement;
-    const cursorPos = input.selectionStart ?? input.value.length;
-    const beforeValue = input.value;
-    const formatted = this.formatFechaInputRaw(beforeValue);
-
-    if (formatted !== beforeValue) {
-      input.value = formatted;
-    }
-
-    const control = this.recursos.at(index).get(field);
-    if (control) {
-      control.setValue(formatted, { emitEvent: false, onlySelf: true });
-    }
-
-    requestAnimationFrame(() => {
-      try {
-        const nextPosition = Math.min(formatted.length, cursorPos);
-        input.setSelectionRange(nextPosition, nextPosition);
-      } catch {}
-    });
-  }
-
   private fechaValida(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = control.value;
