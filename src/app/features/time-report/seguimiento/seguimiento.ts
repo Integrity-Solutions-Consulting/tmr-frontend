@@ -99,7 +99,8 @@ export class SeguimientoComponent implements AfterViewInit {
             const f = filter.toLowerCase();
             return data.nombre.toLowerCase().includes(f)
                 || data.proyecto.toLowerCase().includes(f)
-                || data.cliente.toLowerCase().includes(f);
+                || data.cliente.toLowerCase().includes(f)
+                || data.liderTecnico.toLowerCase().includes(f);
         };
 
         // Cargar clientes desde lookups

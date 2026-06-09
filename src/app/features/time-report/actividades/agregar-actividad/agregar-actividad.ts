@@ -96,7 +96,7 @@ export class AgregarActividad implements OnInit {
 
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, Validators.required],
-            proyectoId: [act ? act.idproyecto : null, Validators.required],
+            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, Validators.required],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
             fechaActividad: [defaultDate, Validators.required],
