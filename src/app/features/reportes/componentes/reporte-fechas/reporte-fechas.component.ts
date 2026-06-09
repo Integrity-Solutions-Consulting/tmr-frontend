@@ -75,10 +75,7 @@ export class ReporteFechasComponent {
     });
   }
 
-  mostrarDatos = computed(() => {
-    const hayFiltros = this.busquedaCliente() !== '' || this.busquedaLider() !== '' || this.fechaInicio() !== '' || this.fechaFin() !== '';
-    return hayFiltros || this.forzarMostrar();
-  });
+  mostrarDatos = computed(() => true);
 
   datosFiltrados = computed(() => this.datos());
 
