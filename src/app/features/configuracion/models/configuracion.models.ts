@@ -11,6 +11,7 @@ export interface Rol {
   nombre: string;
   descripcion: string;
   modulos: Modulo[];
+  modulosids?: number[];
   activo: boolean;
 }
 

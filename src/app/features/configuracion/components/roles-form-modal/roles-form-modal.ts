@@ -66,7 +66,7 @@ export class RolesFormModal {
     ],
     descripcion: [this.data.rol?.descripcion ?? '', [Validators.required, Validators.minLength(5)]],
     modulosIds: this.fb.nonNullable.control<number[]>(
-      this.data.rol?.modulos.map((m) => m.id) ?? [],
+      this.getRolModuloIds(),
       { validators: [this.requiredModulesValidator] },
     ),
     activo: [this.data.rol?.activo ?? true, Validators.required],
@@ -115,10 +115,12 @@ export class RolesFormModal {
   }
 
   /** Agrega o quita un ID de módulo del listado de IDs seleccionados en el form. */
-  toggleModulo(id: number, checked: boolean): void {
+  toggleModulo(id: number): void {
     if (this.isView) return;
     const current = this.form.controls.modulosIds.value;
-    const next = checked ? [...current, id] : current.filter((item) => item !== id);
+    const next = current.includes(id)
+      ? current.filter((item) => item !== id)
+      : [...current, id];
     this.form.controls.modulosIds.setValue(next);
     this.form.controls.modulosIds.markAsDirty();
     this.form.controls.modulosIds.markAsTouched();
@@ -145,13 +147,17 @@ export class RolesFormModal {
 
     // Convertir los IDs seleccionados de vuelta a objetos Modulo completos
     // para que Rol.modulos sea Modulo[] y el servicio pueda leer m.id directamente.
-    const selectedModulos = this.modulos.filter((m) => value.modulosIds.includes(m.id));
+    const selectedModuloIds = value.modulosIds
+      .map((id) => Number(id))
+      .filter((id) => Number.isFinite(id) && id > 0);
+    const selectedModulos = this.modulos.filter((m) => selectedModuloIds.includes(m.id));
 
     this.dialogRef.close({
       id: this.data.rol?.id ?? this.data.nextId,
       nombre: value.nombre,
       descripcion: value.descripcion,
       modulos: selectedModulos,
+      modulosids: selectedModuloIds,
       activo: value.activo,
     } satisfies Rol);
   }
@@ -174,6 +180,13 @@ export class RolesFormModal {
 
   private requiredModulesValidator(control: AbstractControl<number[]>): ValidationErrors | null {
     return control.value.length > 0 ? null : { requiredModules: true };
+  }
+
+  private getRolModuloIds(): number[] {
+    const ids = this.data.rol?.modulosids ?? this.data.rol?.modulos.map((m) => m.id) ?? [];
+    return ids
+      .map((id) => Number(id))
+      .filter((id) => Number.isFinite(id) && id > 0);
   }
 
   private normalizeRoleName(value: string): string {

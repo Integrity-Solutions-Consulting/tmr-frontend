@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -6,6 +6,7 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
@@ -14,18 +15,26 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent, SuccessModalComponent],
+  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent, ConfirmDialogComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
 export class RolesPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+
+  @ViewChildren(ActionMenuComponent)
+  private readonly actionMenus!: QueryList<ActionMenuComponent>;
+
   readonly query = signal('');
   readonly estadoError = signal<string | null>(null);
-  readonly estadoCambiandoId = signal<number | null>(null);
+  readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
   readonly modulos = this.configuracionService.modulos;
+
+  readonly confirmVisible = signal(false);
+  readonly confirmMensaje = signal('');
+  private rolPendienteEliminar: Rol | null = null;
 
   /** Controla la visibilidad del modal de éxito. */
   readonly exitoVisible = signal(false);
@@ -59,6 +68,8 @@ export class RolesPage {
   });
 
   openModal(rol?: Rol, mode: 'create' | 'edit' | 'view' = 'create'): void {
+    this.closeActionsMenu();
+
     const data: RolModalData = {
       rol,
       roles: this.roles(),
@@ -76,9 +87,13 @@ export class RolesPage {
     );
 
     dialogRef.afterClosed().subscribe((result) => {
+      this.closeActionsMenu();
+
       if (result) {
         const esNuevo = !this.roles().some((r) => r.id === result.id);
+        this.closeActionsMenu();
         this.configuracionService.upsertRol(result);
+        this.closeActionsMenu();
         this.mostrarExito(
           esNuevo ? 'Rol creado correctamente' : 'Rol actualizado correctamente',
         );
@@ -87,10 +102,12 @@ export class RolesPage {
   }
 
   viewRol(rol: Rol): void {
+    this.closeActionsMenu();
     this.openModal(rol, 'view');
   }
 
   editRol(rol: Rol): void {
+    this.closeActionsMenu();
     this.openModal(rol, 'edit');
   }
 
@@ -107,10 +124,11 @@ export class RolesPage {
         action: () => this.editRol(rol),
       },
       {
-        id: rol.activo ? 'inactivar' : 'activar',
-        label: rol.activo ? 'Inactivar' : 'Activar',
-        disabled: this.estadoCambiandoId() === rol.id,
-        action: () => this.toggleEstado(rol),
+        id: 'eliminar',
+        label: 'Eliminar',
+        danger: true,
+        disabled: this.rolEliminandoId() === rol.id,
+        action: () => this.solicitarEliminarRol(rol),
       },
     ];
   }
@@ -148,36 +166,61 @@ export class RolesPage {
     this.rolExpandidoId.set(null);
   }
 
-  toggleEstado(rol: Rol): void {
+  solicitarEliminarRol(rol: Rol): void {
+    this.closeActionsMenu();
     this.estadoError.set(null);
-    this.estadoCambiandoId.set(rol.id);
+    this.rolPendienteEliminar = rol;
+    this.confirmMensaje.set(`Se va a eliminar el rol "${rol.nombre}". Esta accion no se puede deshacer.`);
+    this.confirmVisible.set(true);
+  }
 
-    this.configuracionService.setRolEstado(rol.id, !rol.activo).subscribe({
+  confirmarEliminarRol(): void {
+    this.closeActionsMenu();
+    this.confirmVisible.set(false);
+    const rol = this.rolPendienteEliminar;
+    this.rolPendienteEliminar = null;
+    if (!rol) return;
+
+    this.estadoError.set(null);
+    this.rolEliminandoId.set(rol.id);
+
+    this.configuracionService.deleteRol(rol.id).subscribe({
       next: () => {
-        this.estadoCambiandoId.set(null);
-        const nuevoEstado = !rol.activo;
-        this.mostrarExito(
-          nuevoEstado ? 'Rol activado correctamente' : 'Rol inactivado correctamente',
-        );
+        this.rolEliminandoId.set(null);
+        this.closeActionsMenu();
+        this.mostrarExito('Rol eliminado correctamente');
       },
       error: (err) => {
-        this.estadoCambiandoId.set(null);
-        this.estadoError.set(this.extractEstadoError(err));
+        this.rolEliminandoId.set(null);
+        this.estadoError.set(this.extractDeleteError(err));
       },
     });
   }
 
+  cancelarEliminarRol(): void {
+    this.closeActionsMenu();
+    this.confirmVisible.set(false);
+    this.rolPendienteEliminar = null;
+  }
+
   cerrarExito(): void {
+    this.closeActionsMenu();
     this.exitoVisible.set(false);
   }
 
+  closeActionsMenu(): void {
+    this.actionMenus?.forEach((menu) => menu.closeMenu());
+    this.cerrarExpandido();
+  }
+
   private mostrarExito(mensaje: string): void {
+    this.closeActionsMenu();
     this.exitoMensaje.set(mensaje);
     this.exitoVisible.set(true);
     setTimeout(() => this.exitoVisible.set(false), 3000);
   }
 
-  private extractEstadoError(err: unknown): string {
+  private extractDeleteError(err: unknown): string {
     const error = (err as { error?: unknown })?.error;
 
     if (typeof error === 'string') {
@@ -197,6 +240,6 @@ export class RolesPage {
       ?? body?.mensaje
       ?? body?.error
       ?? body?.title
-      ?? 'No se pudo cambiar el estado del rol. Verifica si es un rol de sistema o si tiene usuarios asignados.';
+      ?? 'No se pudo eliminar el rol. Verifica si es un rol de sistema o si tiene usuarios asignados.';
   }
 }

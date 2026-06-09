@@ -2,14 +2,14 @@ export interface Rol {
   id: number;
   nombre: string;
   descripcion: string;
-  modulos: string[];
+  modulos: number[];
   activo: boolean;
 }
 
 export interface RolCreate {
   nombre: string;
   descripcion: string;
-  modulos: string[];
+  modulos: number[];
   activo: boolean;
 }
 

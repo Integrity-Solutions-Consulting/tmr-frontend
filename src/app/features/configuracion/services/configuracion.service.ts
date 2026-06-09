@@ -75,10 +75,16 @@ export class ConfiguracionService {
         descripcion: d.descripcionRol || d.descripcion || '',
         modulos: Array.isArray(d.modulos)
           ? d.modulos.map((m: any) => ({
-              id: Number(m.id ?? m),
-              nombre: String(m.nombre ?? m.id ?? m),
+              id: Number(m.id ?? m.idModulo ?? m.idmodulo ?? m.idRolModulo ?? m),
+              nombre: String(m.nombre ?? m.nombreModulo ?? m.modulo ?? m.id ?? m),
             }))
+              .filter((m: Modulo) => Number.isFinite(m.id) && m.id > 0)
           : [],
+        modulosids: Array.isArray(d.modulosids ?? d.modulosIds ?? d.moduloIds)
+          ? (d.modulosids ?? d.modulosIds ?? d.moduloIds)
+              .map((id: unknown) => Number((id as any)?.id ?? id))
+              .filter((id: number) => Number.isFinite(id) && id > 0)
+          : undefined,
         activo: d.activo ?? true,
       }))),
       error: (err) => console.error(err),
@@ -102,8 +108,10 @@ export class ConfiguracionService {
       .pipe(tap(() => this.loadRoles()));
   }
 
-  deleteRol(id: number): void {
-    this.http.delete(`${environment.apiUrl}/configuracion/roles/${id}`).subscribe(() => this.loadRoles());
+  deleteRol(id: number): Observable<unknown> {
+    return this.http
+      .delete(`${environment.apiUrl}/configuracion/roles/${id}`)
+      .pipe(tap(() => this.loadRoles()));
   }
 
   loadUsuarios(activo?: boolean | null, search?: string): void {
@@ -286,8 +294,8 @@ export class ConfiguracionService {
     return {
       nombre: rol.nombre,
       descripcion: rol.descripcion,
-      modulosids: rol.modulos
-        .map((m) => m.id)
+      modulosids: (rol.modulosids ?? rol.modulos.map((m) => m.id))
+        .map((id) => Number(id))
         .filter((id): id is number => Number.isFinite(id) && id > 0),
     };
   }

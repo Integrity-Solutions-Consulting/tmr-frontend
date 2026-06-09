@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 export interface ActionMenuItem {
   id: string;
@@ -21,6 +21,8 @@ export interface ActionMenuItem {
   styleUrl: './action-menu.component.scss'
 })
 export class ActionMenuComponent {
+  @ViewChild(MatMenuTrigger) private menuTrigger?: MatMenuTrigger;
+
   @Input() itemId = '';
   @Input() menuAbierto: string | null = null;
   @Input() acciones: ActionMenuItem[] = [
@@ -38,6 +40,10 @@ export class ActionMenuComponent {
   onToggleMenu(event: Event): void {
     event.stopPropagation();
     this.toggleMenu.emit({ id: this.itemId, event });
+  }
+
+  closeMenu(): void {
+    this.menuTrigger?.closeMenu();
   }
 
   onAccionClick(accion: ActionMenuItem, event: Event): void {

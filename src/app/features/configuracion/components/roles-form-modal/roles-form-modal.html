@@ -114,7 +114,7 @@
               class="rol-modal__module-check"
               [checked]="isChecked(modulo.id)"
               [disabled]="isView"
-              (change)="toggleModulo(modulo.id, $any($event.target).checked)"
+              (change)="toggleModulo(modulo.id)"
             />
             <mat-icon class="rol-modal__module-icon">
               {{ getModuleIcon(modulo.nombre) }}
