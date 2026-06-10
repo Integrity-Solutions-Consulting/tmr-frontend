@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://dev.api.tmr2.dokploy.integritysolutions.com.ec/",
+    "target": "https://dev.api.tmr2.dokploy.integritysolutions.com.ec",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
