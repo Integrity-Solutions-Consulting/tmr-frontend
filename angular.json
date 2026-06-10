@@ -101,7 +101,7 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": { "buildTarget": "gestion-actividades:build:production" },
-            "development": { "buildTarget": "gestion-actividades:build:development", "proxyConfig": "proxy.conf.json" }
+            "development": { "buildTarget": "gestion-actividades:build:development" }
           },
           "defaultConfiguration": "development"
         }
