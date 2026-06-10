@@ -219,13 +219,14 @@
   white-space: nowrap;
   color: #6b7280;
 
-  &.en-progreso { color: #1677ff; border-color: #bfdbfe; }
-  &.completado  { color: #22c55e; border-color: #bbf7d0; }
-  &.cancelado   { color: #ef4444; border-color: #fecaca; }
-  &.en-espera   { color: #f97316; border-color: #fed7aa; }
-  &.pausado     { color: #f97316; border-color: #fed7aa; }
-  &.planning    { color: #06b6d4; border-color: #a5f3fc; }
-  &.delayed     { color: #eab308; border-color: #fef08a; }
+&.en-progreso   { color: #0078F0; border-color: #bfdbfe; }
+&.completado    { color: #34C759; border-color: #bbf7d0; }
+&.cancelado     { color: #FF383C; border-color: #fecaca; }
+&.en-espera     { color: #FF8D28; border-color: #fed7aa; }
+&.inactivo      { color: #8E8E93; border-color: #e5e7eb; }
+&.aprobado      { color: #AF52DE; border-color: #e9d5ff; }
+&.aplazado      { color: #FFD60A; border-color: #fef08a; }
+&.planificacion { color: #00C7BE; border-color: #a5f3fc; }
 }
 
 // ── Animaciones ───────────────────────────────────────────

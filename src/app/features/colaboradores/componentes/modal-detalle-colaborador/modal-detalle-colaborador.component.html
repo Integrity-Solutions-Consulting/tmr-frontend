@@ -181,10 +181,15 @@
               <span
                 class="detalle-proyectos__item-estado"
                 [ngClass]="{
-                  'estado--progreso':   proy.estado === 'En progreso',
-                  'estado--completado': proy.estado === 'Completado',
-                  'estado--pausa':      proy.estado === 'En pausa',
-                  'estado--cancelado':  proy.estado === 'Cancelado'
+                  'estado--progreso':      proy.estado === 'En progreso',
+                  'estado--completado':    proy.estado === 'Completado',
+                  'estado--pausa':         proy.estado === 'En pausa',
+                  'estado--cancelado':     proy.estado === 'Cancelado',
+                  'estado--inactivo':      proy.estado === 'Inactivo',
+                  'estado--aprobado':      proy.estado === 'Aprobado',
+                  'estado--aplazado':      proy.estado === 'Aplazado',
+                  'estado--planificacion': proy.estado === 'Planificación',
+                  'estado--espera':        proy.estado === 'En espera'
                 }"
               >
                 <span class="detalle-proyectos__item-dot"></span>

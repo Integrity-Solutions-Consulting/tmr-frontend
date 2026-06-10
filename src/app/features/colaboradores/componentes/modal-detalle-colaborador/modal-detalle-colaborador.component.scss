@@ -321,6 +321,52 @@
     background: #f9fafb;
     .detalle-proyectos__item-dot { background: #9ca3af; }
   }
+
+  .estado--progreso {
+  color: #0078F0; border-color: #bfdbfe; background: #eff6ff;
+  .detalle-proyectos__item-dot { background: #0078F0; }
+  }
+
+  .estado--completado {
+    color: #34C759; border-color: #bbf7d0; background: #f0fdf4;
+    .detalle-proyectos__item-dot { background: #34C759; }
+  }
+
+  .estado--pausa {
+    color: #FF8D28; border-color: #fde68a; background: #fffbeb;
+    .detalle-proyectos__item-dot { background: #FF8D28; }
+  }
+
+  .estado--cancelado {
+    color: #FF383C; border-color: #fecaca; background: #fef2f2;
+    .detalle-proyectos__item-dot { background: #FF383C; }
+  }
+
+  .estado--inactivo {
+    color: #8E8E93; border-color: #e5e7eb; background: #f9fafb;
+    .detalle-proyectos__item-dot { background: #8E8E93; }
+  }
+
+  .estado--aprobado {
+    color: #AF52DE; border-color: #e9d5ff; background: #faf5ff;
+    .detalle-proyectos__item-dot { background: #AF52DE; }
+  }
+
+  .estado--aplazado {
+    color: #FFD60A; border-color: #fef08a; background: #fefce8;
+    .detalle-proyectos__item-dot { background: #FFD60A; }
+  }
+
+  .estado--planificacion {
+    color: #00C7BE; border-color: #a5f3fc; background: #ecfeff;
+    .detalle-proyectos__item-dot { background: #00C7BE; }
+  }
+
+  .estado--espera {
+    color: #FF8D28; border-color: #fed7aa; background: #fff7ed;
+    .detalle-proyectos__item-dot { background: #FF8D28; }
+  }
+
 }
 
 @keyframes fadeIn {

@@ -7,9 +7,17 @@ export type EstadoColaborador = 'Activo' | 'Inactivo' | 'Todos';
 export type Modalidad = 'Presencial' | 'Remoto' | 'Híbrida';
 export type Categoria = 'Junior' | 'Semi-senior' | 'Senior' | 'Especialista' | 'Especialista Plus';
 export type Genero = 'Masculino' | 'Femenino' | 'Otro' ;
-export type EstadoProyecto = 'En progreso' | 'Completado' | 'En pausa' | 'Cancelado';
+export type EstadoProyecto = 
+  | 'En progreso' 
+  | 'Completado' 
+  | 'En pausa' 
+  | 'Cancelado'
+  | 'Inactivo'
+  | 'Aprobado'
+  | 'Aplazado'
+  | 'Planificación'
+  | 'En espera';
 
- 
 export interface ProyectoAsignado {
   id: string;
   nombre: string;
