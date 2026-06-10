@@ -32,8 +32,10 @@ export class ModalDetalleComponent {
     if (e === 'cancelado')      return 'cancelado';
     if (e === 'en espera')      return 'en-espera';
     if (e === 'pausado')        return 'pausado';
-    if (e === 'planificación')  return 'planning';
-    if (e === 'aplazado')       return 'delayed';
+    if (e === 'inactivo')       return 'inactivo';
+    if (e === 'aprobado')       return 'aprobado';
+    if (e === 'aplazado')       return 'aplazado';
+    if (e === 'planificación')  return 'planificacion';
     return '';
   }
 }
