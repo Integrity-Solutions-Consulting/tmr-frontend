@@ -93,6 +93,9 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "allowedHosts": ["dev.tmr2.dokploy.integritysolutions.com.ec"]
+          },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": { "buildTarget": "gestion-actividades:build:production" },
