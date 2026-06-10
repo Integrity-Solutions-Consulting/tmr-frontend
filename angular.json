@@ -96,7 +96,7 @@
           "options": {
             "host": "0.0.0.0",
             "port": 3000,
-            "allowedHosts": ["dev.api.tmr2.dokploy.integritysolutions.com.ec","localhost"]
+            "allowedHosts": ["dev.api.tmr2.dokploy.integritysolutions.com.ec","localhost", "dev.tmr2.dokploy.integritysolutions.com.ec"]
           },
           "builder": "@angular/build:dev-server",
           "configurations": {
