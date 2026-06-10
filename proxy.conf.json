@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://localhost:5091",
+    "target": "https://dev.api.tmr2.dokploy.integritysolutions.com.ec/",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

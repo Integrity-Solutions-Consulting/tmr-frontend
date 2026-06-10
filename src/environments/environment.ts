@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5091/api'
+  apiUrl: 'https://dev.api.tmr2.dokploy.integritysolutions.com.ec/api'
 };
