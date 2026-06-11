@@ -45,11 +45,13 @@ export class ConfiguracionService {
 
   private readonly rolesState = signal<Rol[]>([]);
   private readonly usuariosState = signal<Usuario[]>([]);
+  private readonly usuariosTotalesState = signal<Usuario[]>([]);
   private readonly feriadosState = signal<Feriado[]>([]);
   private readonly modulosState = signal<Modulo[]>([]);
 
   readonly roles = this.rolesState.asReadonly();
   readonly usuarios = this.usuariosState.asReadonly();
+  readonly usuariosTotales = this.usuariosTotalesState.asReadonly();
   readonly feriados = this.feriadosState.asReadonly();
   readonly modulos = this.modulosState.asReadonly();
 
@@ -134,7 +136,26 @@ export class ConfiguracionService {
       .subscribe({
         next: (response) => {
           const data = Array.isArray(response) ? response : response.items ?? response.data ?? [];
-          this.usuariosState.set(data.map((item) => this.mapUsuario(item)));
+          const usuarios = data.map((item) => this.mapUsuario(item));
+          this.usuariosState.set(usuarios);
+
+          if ((activo === null || activo === undefined) && !search?.trim()) {
+            this.usuariosTotalesState.set(usuarios);
+          }
+        },
+        error: (err) => console.error(err),
+      });
+  }
+
+  loadUsuariosTotales(): void {
+    this.http
+      .get<unknown[] | { items?: unknown[]; data?: unknown[] }>(
+        `${environment.apiUrl}/configuracion/usuarios`
+      )
+      .subscribe({
+        next: (response) => {
+          const data = Array.isArray(response) ? response : response.items ?? response.data ?? [];
+          this.usuariosTotalesState.set(data.map((item) => this.mapUsuario(item)));
         },
         error: (err) => console.error(err),
       });
@@ -161,26 +182,39 @@ export class ConfiguracionService {
   upsertUsuario(usuario: Usuario): void {
     const url = `${environment.apiUrl}/configuracion/usuarios`;
     if (this.usuariosState().some((u) => u.id === usuario.id)) {
-      this.updateUsuario(usuario.id, this.toUpdateUsuarioPayload(usuario)).subscribe(() => this.loadUsuarios());
+      this.updateUsuario(usuario.id, this.toUpdateUsuarioPayload(usuario)).subscribe(() => {
+        this.loadUsuarios();
+        this.loadUsuariosTotales();
+      });
     } else {
-      this.http.post(url, usuario).subscribe(() => this.loadUsuarios());
+      this.http.post(url, usuario).subscribe(() => {
+        this.loadUsuarios();
+        this.loadUsuariosTotales();
+      });
     }
   }
 
   setUsuarios(usuarios: Usuario[]): void {
     this.usuariosState.set(usuarios);
+    this.usuariosTotalesState.set(usuarios);
   }
 
   deleteUsuario(id: number, activo?: boolean | null): void {
     this.http
       .delete(`${environment.apiUrl}/configuracion/usuarios/${id}`)
-      .subscribe(() => this.loadUsuarios(activo));
+      .subscribe(() => {
+        this.loadUsuarios(activo);
+        this.loadUsuariosTotales();
+      });
   }
 
   setUsuarioEstado(id: number, activo: boolean, filtroActual?: boolean | null): Observable<unknown> {
     return this.http
       .patch(`${environment.apiUrl}/configuracion/usuarios/${id}`, { activo })
-      .pipe(tap(() => this.loadUsuarios(filtroActual)));
+      .pipe(tap(() => {
+        this.loadUsuarios(filtroActual);
+        this.loadUsuariosTotales();
+      }));
   }
 
   getUsuarioById(id: number): Usuario | undefined {

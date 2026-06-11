@@ -52,6 +52,7 @@ export class ActionMenuComponent {
       return;
     }
 
+    this.closeMenu();
     this.accionSeleccionada.emit(accion);
     accion.action?.();
   }
