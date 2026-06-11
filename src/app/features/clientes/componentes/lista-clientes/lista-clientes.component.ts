@@ -71,7 +71,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   // ── Paginación local ──────────────────────────────────────
   paginaActual = 1;
   totalPaginas = 1;
-  tamanoPagina = 9;
+  tamanoPagina = 10;
 
   ngOnInit(): void {
     this.filtrosForm = this.fb.group({

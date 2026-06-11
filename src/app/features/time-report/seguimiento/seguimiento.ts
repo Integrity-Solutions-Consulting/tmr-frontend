@@ -64,7 +64,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
     public clienteSeleccionado = '';
-    public clientes = signal<{id: number, nombre: string}[]>([]);
+    public clientes = signal<{ id: number, nombre: string }[]>([]);
     public fechaDesde = (() => {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;

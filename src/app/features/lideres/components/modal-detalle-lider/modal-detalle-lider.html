@@ -59,5 +59,44 @@
       </div>
     </div>
 
+    <!-- Proyectos vinculados -->
+    <div class="detalle-seccion-titulo">
+      <span class="detalle-linea-azul"></span>
+      Proyectos vinculados
+      <span class="detalle-proyectos__count">{{ lider?.proyectos?.length || 0 }}</span>
+    </div>
+
+    <div class="detalle-proyectos">
+      <div class="detalle-proyectos__lista">
+        <p class="detalle-proyectos__empty" *ngIf="!(lider?.proyectos?.length > 0)">No hay proyectos asignados a este líder.</p>
+
+        <div class="detalle-proyectos__item" *ngFor="let proyecto of lider?.proyectos || []">
+          <div class="detalle-proyectos__item-info">
+            <p class="detalle-proyectos__item-nombre">{{ proyecto.nombre }}</p>
+            <div class="detalle-proyectos__item-cliente">
+              <img src="icons/proyecto.svg" alt="proyecto" width="13" height="13" />
+              {{ proyecto.cliente || 'Sin cliente' }}
+            </div>
+          </div>
+
+          <span class="detalle-proyectos__item-estado"
+            [ngClass]="{
+              'estado--progreso':      proyecto.estado === 'En progreso',
+              'estado--completado':    proyecto.estado === 'Completado',
+              'estado--pausa':         proyecto.estado === 'En pausa',
+              'estado--cancelado':     proyecto.estado === 'Cancelado',
+              'estado--inactivo':      proyecto.estado === 'Inactivo',
+              'estado--aprobado':      proyecto.estado === 'Aprobado',
+              'estado--aplazado':      proyecto.estado === 'Aplazado',
+              'estado--planificacion': proyecto.estado === 'Planificación',
+              'estado--espera':        proyecto.estado === 'En espera'
+            }">
+            <span class="detalle-proyectos__item-dot"></span>
+            {{ proyecto.estado || 'Sin estado' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

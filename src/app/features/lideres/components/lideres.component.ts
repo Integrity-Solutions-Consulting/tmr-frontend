@@ -9,11 +9,20 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http'; 
+import { forkJoin } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
 import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
+
+export interface ProyectoAsignado {
+  id?: number;
+  codigo: string;
+  nombre: string;
+  cliente: string;
+  estado: string;
+}
 
 export interface Lider {
   id?: number;
@@ -24,6 +33,7 @@ export interface Lider {
   correo: string;
   telefono: string;
   estado: 'Activo' | 'Inactivo';
+  proyectos: ProyectoAsignado[];
 }
 
 @Component({
@@ -98,23 +108,52 @@ export class LideresComponent implements OnInit {
 
   // ── Consumir API Real ──────────────────────────────────
   obtenerLideresDelBackend(): void {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (data) => {
-        this.lideres = data.map((l, i) => ({
-          ...l,
-          id: l.id,
-          codigo: String(i + 1).padStart(3, '0'),
-          nombre: `${l.nombres} ${l.apellidos}`,
-          tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
-          correo: l.email,
-          telefono: l.telefono ?? '',  // ← FIX 2: simplificado
-          cliente: '',
-          estado: l.activo ? 'Activo' : 'Inactivo'
-        }));
+    forkJoin({
+      lideres: this.http.get<any[]>(this.apiUrl),
+      proyectos: this.http.get<any[]>(`${environment.apiUrl}/proyectos`)
+    }).subscribe({
+      next: ({ lideres, proyectos }) => {
+        const infoPorLider = new Map<number, { clientes: Set<string>; proyectos: Map<number, ProyectoAsignado> }>();
+
+        proyectos.forEach((proyecto: any) => {
+          const liderId = proyecto.idLider;
+          if (liderId == null) return;
+
+          const entrada = infoPorLider.get(liderId) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+          if (proyecto.cliente) entrada.clientes.add(proyecto.cliente);
+
+          const proyectoId = proyecto.id ?? Math.random();
+          entrada.proyectos.set(proyectoId, {
+            id: proyecto.id,
+            codigo: proyecto.codigo ?? '',
+            nombre: proyecto.nombre ?? '',
+            cliente: proyecto.cliente ?? '',
+            estado: proyecto.estado ?? ''
+          });
+
+          infoPorLider.set(liderId, entrada);
+        });
+
+        this.lideres = lideres.map((l, i) => {
+          const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+          return {
+            ...l,
+            id: l.id,
+            codigo: String(i + 1).padStart(3, '0'),
+            nombre: `${l.nombres} ${l.apellidos}`,
+            tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
+            correo: l.email,
+            telefono: l.telefono ?? '',
+            cliente: Array.from(datos.clientes).join(', '),
+            proyectos: Array.from(datos.proyectos.values()),
+            estado: l.activo ? 'Activo' : 'Inactivo'
+          };
+        });
+
         this.aplicarFiltros();
       },
       error: (err) => {
-        console.error('❌ Error al traer líderes:', err);
+        console.error('❌ Error al traer líderes o proyectos:', err);
       }
     });
   }
@@ -246,6 +285,9 @@ export class LideresComponent implements OnInit {
   verLider(lider: Lider, numero: number): void {
     this.mostrarDescarga = false;
     this.liderSeleccionado = { ...lider, numero };
+    if (!this.liderSeleccionado.proyectos) {
+      this.liderSeleccionado.proyectos = [];
+    }
     this.mostrarDetalle = true;
   }
 

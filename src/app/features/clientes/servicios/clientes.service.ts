@@ -21,7 +21,7 @@ interface ClienteBackendDetalle {
   nombreComercial: string; activo: boolean; nombres: string; apellidos: string;
   email: string; telefono: string; direccion: string; proyectos: ProyectoBackend[];
 }
-interface TipoIdentificacionBackend { id: number; valor: string; }
+export interface TipoIdentificacionBackend { id: number; valor: string; }
 
 @Injectable({ providedIn: 'root' })
 export class ClientesService {
@@ -43,16 +43,19 @@ export class ClientesService {
   private aEstado(activo: boolean): EstadoCliente {
     return activo ? 'Activo' : 'Inactivo';
   }
-
   private aTipoId(valor: string): TipoIdentificacion {
     const v = (valor ?? '').toLowerCase();
+
     if (v.includes('ruc')) return 'RUC';
     if (v.includes('céd') || v.includes('ced')) return 'Cédula';
-    return 'Pasaporte';
+    if (v.includes('pasaporte')) return 'Pasaporte';
+    if (v.includes('otro')) return 'Otro documento';
+
+    return 'Otro documento';
   }
 
   // ── Obtener los tipos del backend (con cache) ─────────────
-  private getTipos(): Observable<TipoIdentificacionBackend[]> {
+  getTiposIdentificacion(): Observable<TipoIdentificacionBackend[]> {
     if (this.tiposCache.length) return of(this.tiposCache);
     return this.http.get<TipoIdentificacionBackend[]>(
       `${this.baseUrl}/tipos-identificacion`, this.options
@@ -61,7 +64,7 @@ export class ClientesService {
 
   // ── Traducir texto del front ('RUC') → Id del backend (26) ─
   private idDeTipo(tipo: TipoIdentificacion): Observable<number> {
-    return this.getTipos().pipe(
+    return this.getTiposIdentificacion().pipe(
       map(tipos => {
         const encontrado = tipos.find(t => this.aTipoId(t.valor) === tipo);
         return encontrado ? encontrado.id : 0;

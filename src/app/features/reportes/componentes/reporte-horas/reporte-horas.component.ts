@@ -21,7 +21,7 @@ export class ReporteHorasComponent {
     { header: 'Mes', property: 'mes', type: 'text' },
     { header: 'Año', property: 'anio', type: 'text' },
     { header: 'Recursos', property: 'recursos', type: 'text' },
-    { header: 'Horas', property: 'horas', type: 'custom' }
+    { header: 'Horas', property: 'horas', type: 'text' }
   ];
 
   Math = Math;
@@ -32,8 +32,8 @@ export class ReporteHorasComponent {
   anios: string[] = [];
 
   busquedaCliente = signal('');
-  mesSeleccionado = signal('');
-  anioSeleccionado = signal('');
+  mesSeleccionado = signal('ALL');
+  anioSeleccionado = signal('ALL');
   forzarMostrar = signal(false);
 
   paginaActual = signal(1);
