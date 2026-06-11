@@ -10,4 +10,8 @@ import { Sidebar } from '../sidebar/sidebar';
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.scss'
 })
-export class AppLayout {}
+export class AppLayout {
+  cerrarSidebar(): void {
+    document.body.classList.remove('sidebar-open');
+  }
+}

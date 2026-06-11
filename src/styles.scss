@@ -333,3 +333,45 @@ body {
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18) !important;
 }
 
+
+/* ============================================================= */
+/*  RESPONSIVE NAVBAR – HAMBURGUESA (PRUEBA) */
+/* ============================================================= */
+
+@media (max-width: 1024px) {
+  .navbar__hamburger {
+    display: block !important;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #163572;
+    margin-right: 8px;
+    z-index: 2000;
+  }
+
+  .navbar__profile-trigger,
+  .navbar__notification {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .navbar__hamburger {
+    display: none !important;
+  }
+}
+
+/* ============================================================= */
+/*  SCROLL RESPONSIVO PARA TABLAS */
+/* ============================================================= */
+
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-container .mat-table,
+.table-scroll-container table {
+  min-width: 100%;
+}
