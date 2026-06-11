@@ -20,6 +20,9 @@ export const PHONE_10_DIGITS_REGEX = /^\d{10}$/;
 /** Letras y numeros, sin simbolos especiales. Permite espacios, guion y guion bajo. */
 export const SAFE_ALPHANUMERIC_REGEX = /^[a-zA-Z0-9\s_-]+$/;
 
+/** Documento internacional: letras, numeros, espacios y guion. */
+export const INTERNATIONAL_DOCUMENT_REGEX = /^[a-zA-Z0-9\s-]+$/;
+
 /** Usuario interno: letras, numeros, punto, guion y guion bajo. */
 export const INTERNAL_USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
 
@@ -67,6 +70,26 @@ export function rucEcuatorianoValidator(): ValidatorFn {
     }
 
     return isValidEcuadorianRuc(value) ? null : { rucEcuador: true };
+  };
+}
+
+export function internationalDocumentValidator(minLength = 4, maxLength = 20): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = String(control.value ?? '').trim();
+
+    if (!value) {
+      return null;
+    }
+
+    if (value.length < minLength) {
+      return { documentMinLength: { requiredLength: minLength } };
+    }
+
+    if (value.length > maxLength) {
+      return { documentMaxLength: { requiredLength: maxLength } };
+    }
+
+    return INTERNATIONAL_DOCUMENT_REGEX.test(value) ? null : { documentCharacters: true };
   };
 }
 

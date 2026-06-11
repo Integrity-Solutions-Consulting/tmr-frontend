@@ -2,21 +2,22 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../../../auth/servicios/auth.service';
-import { Rol, Usuario, UsuarioPayload, RegisterUserRequest } from '../../models/configuracion.models';
+import { Rol, Usuario, UsuarioPayload } from '../../models/configuracion.models';
 import { CatalogoResponse, ConfiguracionService } from '../../services/configuracion.service';
+import { CrearUsuarioRequest, UsuariosService } from '../../services/usuarios.service';
 import {
   cedulaEcuatorianaValidator,
   INTERNAL_USERNAME_REGEX,
   ONLY_LETTERS_REGEX,
   PHONE_10_DIGITS_REGEX,
   rucEcuatorianoValidator,
-  SAFE_ALPHANUMERIC_REGEX,
   temporaryPasswordValidator,
 } from '../../../../shared/validators/form-validators';
 
 type TipoIdentificacionCode = 'C' | 'R' | 'P' | 'O';
 type CatalogoOption = { id: string; nombre: string; codigo: string };
 const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
+const ECUADOR_CODES = ['EC', 'ECU', 'ECUADOR'];
 
 
 @Component({
@@ -30,6 +31,7 @@ export class UsuariosFormModal {
   private readonly dialogRef = inject(MatDialogRef<UsuariosFormModal>);
   private readonly authService = inject(AuthService);
   private readonly configuracionService = inject(ConfiguracionService);
+  private readonly usuariosService = inject(UsuariosService);
   readonly data = inject<{ usuario?: Usuario; roles: Rol[]; nextId: number }>(MAT_DIALOG_DATA);
   showTemporaryPassword = false;
   readonly guardando = signal(false);
@@ -94,6 +96,10 @@ export class UsuariosFormModal {
       this.configureIdentificationValidator();
     });
 
+    this.form.controls.idnacionalidad.valueChanges.subscribe(() => {
+      this.configureIdentificationValidator();
+    });
+
     this.form.controls.usuario.valueChanges.subscribe(() => {
       this.syncInternalEmail();
     });
@@ -113,6 +119,9 @@ export class UsuariosFormModal {
 
     this.configureIdentificationValidator();
     this.configureUserValidators();
+    if (!this.isEdit) {
+      this.regenerateTemporaryPassword();
+    }
     if (this.isInternalUser) {
       this.syncInternalEmail();
     } else {
@@ -128,14 +137,22 @@ export class UsuariosFormModal {
     const type = this.selectedIdentificationCode();
 
     if (type === 'C') {
-      return 10;
+      return this.isEcuadorianNationality() ? 10 : 15;
     }
 
     if (type === 'R') {
-      return 13;
+      return this.isEcuadorianNationality() ? 13 : 20;
     }
 
-    return null;
+    if (type === 'P') {
+      return 20;
+    }
+
+    if (type === 'O') {
+      return 30;
+    }
+
+    return 25;
   }
 
   tieneValor(campo: keyof typeof this.form.controls): boolean {
@@ -161,10 +178,21 @@ export class UsuariosFormModal {
     const type = this.form.controls.idtipoidentificacion.value;
     const code = this.identificationCodeById(type);
     const rawValue = control.value ?? '';
-    const sanitized =
-      code === 'C' || code === 'R'
-        ? rawValue.replace(/\D/g, '')
-        : rawValue.replace(/[^a-zA-Z0-9\s_-]/g, '');
+    let sanitized = rawValue;
+
+    if (code === 'C') {
+      sanitized = rawValue.replace(/\D/g, '');
+    } else if (code === 'R' && this.isEcuadorianNationality()) {
+      sanitized = rawValue.replace(/\D/g, '');
+    } else if (code === 'R') {
+      sanitized = rawValue.replace(/[^a-zA-Z0-9-]/g, '');
+    } else if (code === 'P') {
+      sanitized = rawValue.replace(/[^a-zA-Z0-9-]/g, '');
+    } else if (code === 'O') {
+      sanitized = rawValue.replace(/[^a-zA-Z0-9_-]/g, '');
+    } else {
+      sanitized = rawValue.replace(/[^a-zA-Z0-9\s-]/g, '');
+    }
     const maxLength = this.identificationMaxLength;
     const nextValue = maxLength ? sanitized.slice(0, maxLength) : sanitized;
 
@@ -202,21 +230,57 @@ export class UsuariosFormModal {
     }
 
     if (errors?.['numbersOnly']) {
-      return 'Solo se permiten numeros';
+      return type === 'C'
+        ? 'Ingrese una cedula valida. Solo se permiten numeros.'
+        : 'Solo se permiten numeros';
     }
 
     if (errors?.['cedulaEcuador']) {
-      return 'Cedula ecuatoriana invalida';
+      return 'Ingrese una cedula valida. Solo se permiten numeros.';
     }
 
     if (errors?.['rucEcuador']) {
-      return 'RUC ecuatoriano invalido';
+      return 'Ingrese un RUC valido.';
+    }
+
+    if (errors?.['documentMinLength']) {
+      return `Minimo ${errors['documentMinLength'].requiredLength} caracteres`;
+    }
+
+    if (errors?.['documentMaxLength']) {
+      return `Maximo ${errors['documentMaxLength'].requiredLength} caracteres`;
+    }
+
+    if (errors?.['documentCharacters']) {
+      return 'Use letras, numeros, espacios o guion';
+    }
+
+    if (errors?.['minlength']) {
+      return `Minimo ${errors['minlength'].requiredLength} caracteres`;
+    }
+
+    if (errors?.['maxlength']) {
+      return `Maximo ${errors['maxlength'].requiredLength} caracteres`;
     }
 
     if (errors?.['pattern']) {
-      return type === 'P'
-        ? 'Use solo letras y numeros'
-        : 'Use solo letras, numeros, espacios, guion o guion bajo';
+      if (type === 'C') {
+        return 'Ingrese una cedula valida. Solo se permiten numeros.';
+      }
+
+      if (type === 'P') {
+        return 'Ingrese un pasaporte valido. Puede contener letras, numeros y guion.';
+      }
+
+      if (type === 'R') {
+        return 'Ingrese un RUC valido.';
+      }
+
+      if (type === 'O') {
+        return 'Ingrese un documento valido. Puede contener letras, numeros, guion o guion bajo.';
+      }
+
+      return 'Use letras, numeros, espacios o guion';
     }
 
     return 'Valor invalido';
@@ -343,7 +407,6 @@ export class UsuariosFormModal {
       this.configuracionService.updateUsuario(this.data.usuario!.id, updatePayload).subscribe({
         next: () => {
           this.guardando.set(false);
-          this.configuracionService.loadUsuarios();
           this.dialogRef.close('actualizado');
         },
         error: (err) => {
@@ -358,28 +421,24 @@ export class UsuariosFormModal {
     this.guardando.set(true);
     this.errorGuardar.set(null);
 
-    const registerPayload: RegisterUserRequest = {
-      idRol: Number(value.roleid),
-      idGenero: this.mapGenderId(payload.idgenero),
-      idNacionalidad: Number(payload.idnacionalidad),
-      idTipoIdentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
-      tipoIdentificacion: this.mapIdentificationType(payload.idtipoidentificacion),
+    const registerPayload: CrearUsuarioRequest = {
       numeroidentificacion: payload.numeroidentificacion,
       nombres: payload.nombres,
       apellidos: payload.apellidos,
-      correoContacto: payload.correoContacto || payload.email,
-      tipoPersona: this.mapTipoPersona(payload.tipoPersona),
-      fechaNacimiento: this.formatBackendDate(payload.fechanacimiento),
+      email: payload.email,
+      password: String(payload.password ?? '').trim(),
+      idtipoidentificacion: this.mapIdentificationTypeId(payload.idtipoidentificacion),
+      idgenero: this.mapGenderId(payload.idgenero),
+      idnacionalidad: Number(payload.idnacionalidad),
+      fechanacimiento: payload.fechanacimiento ?? '',
       telefono: payload.telefono?.trim() || null,
       direccion: payload.direccion?.trim() || null,
-      email: payload.email,
-      usuario: this.getAuthenticatedUserForPayload(),
+      rolesids: payload.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId)),
     };
 
-    this.configuracionService.crearUsuarioAdministrativo(registerPayload).subscribe({
+    this.usuariosService.crearUsuario(registerPayload).subscribe({
       next: () => {
         this.guardando.set(false);
-        this.configuracionService.loadUsuarios();
         this.form.reset();
         this.dialogRef.close('creado');
       },
@@ -439,6 +498,7 @@ export class UsuariosFormModal {
     this.configuracionService.getCatalogo('NAC').subscribe({
       next: (data) => {
         this.nacionalidades = this.mapCatalogoOptions(data);
+        this.configureIdentificationValidator();
       },
       error: (err) => console.error(err),
     });
@@ -470,19 +530,43 @@ export class UsuariosFormModal {
     const validators = [Validators.required];
 
     if (type === 'C') {
-      validators.push(cedulaEcuatorianaValidator());
+      if (this.isEcuadorianNationality()) {
+        validators.push(cedulaEcuatorianaValidator());
+      } else {
+        validators.push(
+          Validators.minLength(6),
+          Validators.maxLength(15),
+          Validators.pattern(/^\d{6,15}$/),
+        );
+      }
     }
 
     if (type === 'R') {
-      validators.push(rucEcuatorianoValidator());
+      if (this.isEcuadorianNationality()) {
+        validators.push(rucEcuatorianoValidator());
+      } else {
+        validators.push(
+          Validators.minLength(8),
+          Validators.maxLength(20),
+          Validators.pattern(/^[A-Za-z0-9-]{8,20}$/),
+        );
+      }
     }
 
     if (type === 'P') {
-      validators.push(Validators.pattern(/^[a-zA-Z0-9]+$/));
+      validators.push(
+        Validators.minLength(5),
+        Validators.maxLength(20),
+        Validators.pattern(/^[A-Za-z0-9-]{5,20}$/),
+      );
     }
 
     if (type === 'O') {
-      validators.push(Validators.pattern(SAFE_ALPHANUMERIC_REGEX));
+      validators.push(
+        Validators.minLength(3),
+        Validators.maxLength(30),
+        Validators.pattern(/^[A-Za-z0-9_-]{3,30}$/),
+      );
     }
 
     this.form.controls.numeroidentificacion.setValidators(validators);
@@ -510,23 +594,26 @@ export class UsuariosFormModal {
     return code === 'R' || code === 'P' || code === 'O' ? code : code === 'C' ? 'C' : null;
   }
 
-  private formatBackendDate(value: string | null): string {
-    if (!value) {
-      return '';
+  private isEcuadorianNationality(): boolean {
+    const selectedId = this.form.controls.idnacionalidad.value;
+    const selected = this.nacionalidades.find((nacionalidad) => nacionalidad.id === String(selectedId));
+
+    if (!selected) {
+      return false;
     }
 
-    const datePart = value.includes('T') ? value.split('T')[0] : value;
-    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+    const code = this.normalizeCatalogValue(selected.codigo);
+    const name = this.normalizeCatalogValue(selected.nombre);
 
-    if (isoMatch) {
-      return `${isoMatch[3]}-${isoMatch[2]}-${isoMatch[1]}`;
-    }
-
-    return datePart;
+    return ECUADOR_CODES.includes(code) || name.includes('ECUADOR');
   }
 
-  private mapTipoPersona(value: string): 'NATURAL' | 'JURIDICA' {
-    return value === 'JURIDICA' ? 'JURIDICA' : 'NATURAL';
+  private normalizeCatalogValue(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
   }
 
   private configureUserValidators(): void {
@@ -621,11 +708,6 @@ export class UsuariosFormModal {
   private getCurrentUserName(): string {
     const user = this.authService.getCurrentUser() as { name?: string; nombre?: string; email?: string } | null;
     return user?.name ?? user?.nombre ?? user?.email ?? '';
-  }
-
-  private getAuthenticatedUserForPayload(): string {
-    const user = this.authService.getCurrentUser() as { email?: string } | null;
-    return user?.email || 'admin@isc.local';
   }
 
   private getCurrentUserId(): string {
