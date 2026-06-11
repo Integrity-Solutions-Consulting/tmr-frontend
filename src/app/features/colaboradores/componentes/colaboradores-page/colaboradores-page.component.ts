@@ -50,7 +50,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   // ── Paginación ───────────────────────────────────────────
   paginaActual = 1;
-  porPagina    = 15;
+  porPagina    = 10;
 
   // ── Filtros ──────────────────────────────────────────────
   filtros: FiltrosColaborador = { busqueda: '', estado: 'Activo' };

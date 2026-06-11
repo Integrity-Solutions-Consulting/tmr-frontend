@@ -23,7 +23,7 @@
               (focus)="focusTipo=true" (blur)="focusTipo=false"
               [class.error]="campoInvalido('tipoId')">
               <option value="" disabled></option>
-              <option *ngFor="let t of tipos" [value]="t">{{ t }}</option>
+              <option *ngFor="let t of tipos" [value]="t.valor">{{ t.valor }}</option>
             </select>
             <label class="floating-label">Tipo de Identificador</label>
           </div>
@@ -35,10 +35,13 @@
           <div class="floating-field" [class.focused]="focusIdent || form.get('identificador')?.value">
             <input formControlName="identificador" class="input-field"
               (focus)="focusIdent=true" (blur)="focusIdent=false"
+              (input)="limpiarIdentificador()"
               [class.error]="campoInvalido('identificador')"/>
             <label class="floating-label">Num. Identificación</label>
           </div>
-          <span class="error-msg" *ngIf="campoInvalido('identificador')">Campo requerido</span>
+          <span class="error-msg" *ngIf="campoInvalido('identificador')">
+            {{ mensajeErrorIdentificacion() }}
+          </span>
         </div>
 
         <!-- Nombre Comercial -->
@@ -101,10 +104,13 @@
           <div class="floating-field" [class.focused]="focusTelefono || form.get('telefono')?.value">
             <input formControlName="telefono" class="input-field"
               (focus)="focusTelefono=true" (blur)="focusTelefono=false"
+              (input)="soloNumeros('telefono')"
               [class.error]="campoInvalido('telefono')"/>
             <label class="floating-label">Teléfono</label>
           </div>
-          <span class="error-msg" *ngIf="campoInvalido('telefono')">Campo requerido</span>
+          <span class="error-msg" *ngIf="campoInvalido('telefono')">
+            {{ mensajeErrorTelefono() }}
+          </span>
         </div>
 
         <!-- Dirección -->
