@@ -123,6 +123,16 @@ export class UsuariosPage {
     );
   }
 
+  displayRoleName(roleName: string): string {
+    const normalized = roleName.trim().toUpperCase();
+
+    if (normalized === 'COLABORADOR') {
+      return 'Colaborador';
+    }
+
+    return roleName;
+  }
+
   openModal(usuario?: Usuario): void {
     if (usuario) {
       this.editUsuario(usuario);
@@ -156,18 +166,17 @@ export class UsuariosPage {
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
-      const filtroParam = this.filtroToParam(this.filtroActivo());
 
       // Resultado 'creado' → usuario nuevo creado en backend
       if (result === 'creado') {
-        this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
+        this.reloadUsuarios();
         this.mostrarExito('Usuario creado correctamente');
         return;
       }
 
       // Resultado 'actualizado' → edición guardada en backend desde el modal
       if (result === 'actualizado') {
-        this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
+        this.reloadUsuarios();
         this.mostrarExito('Usuario actualizado correctamente');
         return;
       }
@@ -182,7 +191,7 @@ export class UsuariosPage {
           )
           .subscribe({
             next: () => {
-              this.configuracionService.loadUsuarios(filtroParam, this.query() || undefined);
+              this.reloadUsuarios();
               this.mostrarExito('Usuario actualizado correctamente');
             },
             error: (err) => console.error(err),
@@ -235,5 +244,12 @@ export class UsuariosPage {
     this.exitoMensaje.set(mensaje);
     this.exitoVisible.set(true);
     setTimeout(() => this.exitoVisible.set(false), 3000);
+  }
+
+  private reloadUsuarios(): void {
+    this.configuracionService.loadUsuarios(
+      this.filtroToParam(this.filtroActivo()),
+      this.query() || undefined,
+    );
   }
 }

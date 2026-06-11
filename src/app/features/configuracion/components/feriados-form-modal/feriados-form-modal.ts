@@ -59,7 +59,7 @@ export class FeriadosFormModal {
 
   formatFecha(fecha: string): string {
     if (!fecha) return '';
-    return new Intl.DateTimeFormat('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })
+    return new Intl.DateTimeFormat('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' })
       .format(new Date(`${fecha}T00:00:00`));
   }
 
