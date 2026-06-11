@@ -26,6 +26,7 @@ export class UsuariosPage {
 
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
+  readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
 
   /** Filtro activo por estado: 'todos' | 'activos' | 'inactivos' */
@@ -35,14 +36,16 @@ export class UsuariosPage {
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
-  /** Conteo de activos sobre la lista cargada del backend */
+  readonly totalUsuarios = computed(() => this.usuariosTotales().length);
+
+  /** Conteo global de activos */
   readonly activos = computed(
-    () => this.usuarios().filter((u) => u.estado === 'Activo').length,
+    () => this.usuariosTotales().filter((u) => u.estado === 'Activo').length,
   );
 
-  /** Conteo de inactivos sobre la lista cargada del backend */
+  /** Conteo global de inactivos */
   readonly inactivos = computed(
-    () => this.usuarios().filter((u) => u.estado !== 'Activo').length,
+    () => this.usuariosTotales().filter((u) => u.estado !== 'Activo').length,
   );
 
   /** Filtrado local por texto (el filtro de estado ya viaja al backend) */
@@ -251,5 +254,6 @@ export class UsuariosPage {
       this.filtroToParam(this.filtroActivo()),
       this.query() || undefined,
     );
+    this.configuracionService.loadUsuariosTotales();
   }
 }
