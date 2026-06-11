@@ -300,6 +300,17 @@ $hover-row:     rgba(#163572, 0.04);
   flex: 1;
 }
 
+.create-action {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+::ng-deep .create-action .app-boton {
+  border-radius: 6px !important;
+  height: 40px !important;
+  padding: 0 18px !important;
+}
+
 // ── Panel / Tabla ──────────────────────────────────────────────────────────
 .panel {
   background: $white;
@@ -505,6 +516,9 @@ $hover-row:     rgba(#163572, 0.04);
   .search-bar { flex-direction: column; align-items: stretch; }
   .search-input-wrapper { width: 100%; flex: 1 1 auto; }
   .estado-filter-wrapper { width: 100%; }
+  .create-action,
+  .create-action app-boton,
+  ::ng-deep .create-action .app-boton { width: 100%; }
   .panel { padding: 10px; }
   .roles-table { min-width: 720px; }
 }
