@@ -38,7 +38,6 @@
             [ngModel]="mesSeleccionado()"
             (ngModelChange)="onMesChange($event)"
             class="filter-input filter-select">
-            <option value="">Seleccionar Mes...</option>
             <option value="ALL">Todos los meses</option>
             @for (mes of meses; track mes) {
               <option [value]="mes">{{ mes }}</option>
@@ -55,7 +54,6 @@
             [ngModel]="anioSeleccionado()"
             (ngModelChange)="onAnioChange($event)"
             class="filter-input filter-select">
-            <option value="">Seleccionar Año...</option>
             <option value="ALL">Todos los años</option>
             @for (anio of anios; track anio) {
               <option [value]="anio">{{ anio }}</option>
@@ -69,7 +67,6 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
       </button>
     </div>
-
     @if (!mostrarDatos()) {
       <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white mt-4">
         <div class="empty-content">
@@ -82,8 +79,8 @@
         </div>
       </div>
     } @else {
-      <app-tabla 
-        [datosPaginados]="datosPaginados()" 
+      <app-tabla
+        [datosPaginados]="datosPaginados()"
         [columnas]="columnasTabla"
         [paginaActual]="paginaActual"
         [totalPaginas]="totalPaginas"
@@ -91,19 +88,9 @@
         [porPagina]="itemsPorPagina()"
         [mostrarDatos]="mostrarDatos()"
         (paginaCambia)="paginaActual.set($event)">
-        
-        <ng-template #rowTemplate let-item>
-          <tr style="border-bottom: 1px solid #f1f5f9; height: 50px;">
-            <td style="padding: 16px; font-weight: 700; color: #1e293b;">{{ item.cliente }}</td>
-            <td style="padding: 16px; text-align: center; font-weight: 500;">{{ item.mes }}</td>
-            <td style="padding: 16px; text-align: center; font-weight: 500;">{{ item.anio }}</td>
-            <td style="padding: 16px; text-align: center; font-weight: 500;">{{ item.recursos }}</td>
-            <td style="padding: 16px; text-align: center; color: #163572; font-weight: 800;">
-              {{ item.horas }} h
-            </td>
-          </tr>
-        </ng-template>
       </app-tabla>
     }
+
+    
   </div>
 </div>
