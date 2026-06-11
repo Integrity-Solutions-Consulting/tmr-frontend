@@ -194,3 +194,242 @@ $text-muted: #9CA3AF;
         background-color: $gray-bg;
     }
 }
+
+/* ===== MOBILE ACTIVIDADES DETALLE ===== */
+.mobile-actividades-seccion {
+    display: none;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+    margin-top: 8px;
+
+    .seccion-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: $dark-navy;
+        }
+
+        .btn-agregar-sm {
+            background-color: $primary-blue;
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            height: 32px;
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+}
+
+.actividades-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.actividad-card {
+    border: 1px solid $border-color;
+    border-radius: 10px;
+    padding: 14px;
+    background: #FAFAFA;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &:hover {
+        background: #F3F4F6;
+        border-color: color.adjust($border-color, $lightness: -10%);
+    }
+
+    .actividad-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .actividad-proyecto {
+            font-size: 14px;
+            font-weight: 700;
+            color: $dark-navy;
+        }
+
+        .actividad-horas-badge {
+            background: #EEF4FF;
+            color: $primary-blue;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+    }
+
+    .actividad-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .actividad-desc {
+            margin: 0;
+            font-size: 13px;
+            color: #4B5563;
+            line-height: 1.4;
+        }
+
+        .actividad-tipo {
+            align-self: flex-start;
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+
+            &.type-nacional {
+                color: #0a6f43;
+                border-color: #cbeedb;
+                background: #eaf8f1;
+            }
+
+            &.type-local {
+                color: #1551c8;
+                border-color: #d6e6ff;
+                background: #edf5ff;
+            }
+
+            &.type-religioso {
+                color: #9a4a08;
+                border-color: #f6dfbd;
+                background: #fff4e5;
+            }
+        }
+    }
+
+    .actividad-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: #9CA3AF;
+        font-size: 11px;
+        border-top: 1px dashed #E5E7EB;
+        padding-top: 8px;
+        margin-top: 2px;
+
+        .edit-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+        }
+    }
+}
+
+.no-actividades-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    background: #F9FAFB;
+    border: 1px dashed $border-color;
+    border-radius: 8px;
+    color: #6B7280;
+    font-size: 13.5px;
+
+    mat-icon {
+        color: #9CA3AF;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ===== MEDIA QUERIES RESPONSIVAS ===== */
+@media (max-width: 1024px) {
+    .mobile-actividades-seccion {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .actividades-page {
+        min-height: auto;
+        gap: 16px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+
+        .page-title {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .header-right {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            gap: 10px;
+
+            .horas-badge {
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .btn-agregar {
+                width: 100%;
+                justify-content: center;
+                border-radius: 20px;
+            }
+        }
+    }
+
+    .metrics-footer {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 20px 16px;
+
+        .metric-divider {
+            display: none;
+        }
+
+        .footer-spacer {
+            display: none;
+        }
+
+        .btn-reporte {
+            grid-column: span 2;
+            width: 100%;
+            justify-content: center;
+            border-radius: 20px;
+            margin-top: 6px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-footer {
+        grid-template-columns: 1fr;
+
+        .btn-reporte {
+            grid-column: span 1;
+        }
+    }
+}

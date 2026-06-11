@@ -42,6 +42,10 @@ export class Navbar implements OnInit {
     this.perfilAbierto = false;
   }
 
+  toggleSidebar(): void {
+    document.body.classList.toggle('sidebar-open');
+  }
+
   abrirCambiarPassword(): void {
     this.perfilAbierto = false;
     this.dialog.open(CambiarPasswordModalComponent, {

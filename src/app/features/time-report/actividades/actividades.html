@@ -86,4 +86,37 @@
         </button>
     </footer>
 
+    <!-- ===== MOBILE ACTIVIDADES DETALLE ===== -->
+    <section class="mobile-actividades-seccion" *ngIf="fechaSeleccionada">
+        <div class="seccion-header">
+            <h2>Actividades: {{ fechaFormateada }}</h2>
+            <button mat-flat-button class="btn-agregar-sm" (click)="abrirAgregarActividadConFecha(fechaSeleccionada)">
+                Nueva <mat-icon>add</mat-icon>
+            </button>
+        </div>
+
+        <div class="actividades-list" *ngIf="actividadesService.getActividadesPorFecha(fechaSeleccionada).length > 0; else noActividades">
+            <div class="actividad-card" *ngFor="let act of actividadesService.getActividadesPorFecha(fechaSeleccionada)" (click)="onEditarActividad(act)">
+                <div class="actividad-card-header">
+                    <span class="actividad-proyecto">{{ act.proyectoNombre }}</span>
+                    <span class="actividad-horas-badge">{{ act.cantidadhoras | horasFormat }}</span>
+                </div>
+                <div class="actividad-card-body">
+                    <p class="actividad-desc">{{ act.descripcion || 'Sin descripción' }}</p>
+                    <span class="actividad-tipo" [class]="getActividadClass(act)">{{ act.tipoActividadNombre || 'General' }}</span>
+                </div>
+                <div class="actividad-card-footer">
+                    <span class="material-symbols-outlined edit-icon">edit</span>
+                    <span class="edit-text">Toca para editar</span>
+                </div>
+            </div>
+        </div>
+        <ng-template #noActividades>
+            <div class="no-actividades-msg">
+                <mat-icon>info</mat-icon>
+                <span>No hay actividades registradas en este día.</span>
+            </div>
+        </ng-template>
+    </section>
+
 </div>

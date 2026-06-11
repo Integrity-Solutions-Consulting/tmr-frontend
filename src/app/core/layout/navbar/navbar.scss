@@ -1,3 +1,10 @@
+:host {
+  position: sticky;
+  top: 0;
+  z-index: 990; /* Mantener por encima del contenido en scroll, pero bajo el sidebar/overlay (999/1000) */
+  display: block;
+}
+
 .navbar {
   height: 64px;
   background: #ffffff;
@@ -29,6 +36,17 @@
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__profile-text {
+  display: inline;
+}
+
+.navbar__profile-icon {
+  display: none;
 }
 
 .navbar__notification {
@@ -43,10 +61,10 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.18s ease;
+}
 
-  &:hover {
-    background: #f5f7fb;
-  }
+.navbar__notification:hover {
+  background: #f5f7fb;
 }
 
 .navbar__notification-dot {
@@ -58,49 +76,78 @@
   border-radius: 50% 50% 35% 35% / 60% 60% 30% 30%;
   display: block;
   transform: rotate(-15deg);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: 4px;
-    width: 6px;
-    height: 6px;
-    background: #163572;
-    border-radius: 50%;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 5px;
-    width: 6px;
-    height: 3px;
-    background: #163572;
-    border-radius: 2px;
-  }
 }
 
-@media (max-width: 760px) {
+.navbar__notification-dot::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 4px;
+  width: 6px;
+  height: 6px;
+  background: #163572;
+  border-radius: 50%;
+}
+
+.navbar__notification-dot::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 5px;
+  width: 6px;
+  height: 3px;
+  background: #163572;
+  border-radius: 2px;
+}
+
+/* Desktop hamburger (oculto) */
+.navbar__hamburger {
+  display: none;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #163572;
+}
+
+/* Responsivo - ≤1024px */
+@media (max-width: 1024px) {
   .navbar {
     height: 58px;
     padding: 0 16px;
+    justify-content: space-between;
   }
 
   .navbar__profile-trigger {
+    display: flex !important;
+  }
+
+  .navbar__profile-text {
     display: none;
+  }
+
+  .navbar__profile-icon {
+    display: block;
+    font-size: 28px;
+    color: #163572;
+  }
+
+  .navbar__notification {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: block;
+    font-size: 26px;
+    color: #163572;
+    z-index: 1001;
   }
 }
 
+/* Responsivo - ≤480px */
 @media (max-width: 480px) {
   .navbar {
     height: 54px;
     padding: 0 10px;
-  }
-
-  .navbar__notification {
-    width: 32px;
-    height: 32px;
   }
 }

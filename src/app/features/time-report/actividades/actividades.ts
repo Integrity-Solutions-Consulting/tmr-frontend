@@ -29,6 +29,16 @@ export class Actividades implements OnInit {
     public actividadesService = inject(ActividadesService);
     private dialog = inject(MatDialog);
 
+    fechaSeleccionada: Date = new Date();
+
+    get fechaFormateada(): string {
+        if (!this.fechaSeleccionada) return '';
+        const dia = String(this.fechaSeleccionada.getDate()).padStart(2, '0');
+        const mes = String(this.fechaSeleccionada.getMonth() + 1).padStart(2, '0');
+        const anio = this.fechaSeleccionada.getFullYear();
+        return `${dia}/${mes}/${anio}`;
+    }
+
     ngOnInit() {
         this.actividadesService.cargarResumen();
         // Si tienes el mes y año actual, llama a cargarCalendario también
@@ -43,14 +53,31 @@ export class Actividades implements OnInit {
         this.dialog.open(AgregarActividad, {
             width: '600px',
             maxHeight: '90vh',
+            data: { fecha: this.fechaSeleccionada },
             disableClose: false
         });
     }
 
     /**
-     * Al seleccionar un día en el calendario, abre el modal con esa fecha
+     * Al seleccionar un día en el calendario, actualiza la fecha seleccionada.
+     * En escritorio abre el modal inmediatamente.
      */
     onDiaSeleccionado(fecha: Date) {
+        this.fechaSeleccionada = fecha;
+        if (window.innerWidth > 1024) {
+            this.dialog.open(AgregarActividad, {
+                width: '600px',
+                maxHeight: '90vh',
+                data: { fecha },
+                disableClose: false
+            });
+        }
+    }
+
+    /**
+     * Abre el modal de agregar actividad especificando una fecha determinada
+     */
+    abrirAgregarActividadConFecha(fecha: Date) {
         this.dialog.open(AgregarActividad, {
             width: '600px',
             maxHeight: '90vh',
@@ -69,6 +96,16 @@ export class Actividades implements OnInit {
             data: { actividad },
             disableClose: false
         });
+    }
+
+    /**
+     * Devuelve la clase correspondiente según el tipo de actividad para aplicar estilos en mobile
+     */
+    getActividadClass(act: any): string {
+        const id = Number(act.idtipoactividad || 1);
+        if (id % 3 === 0) return 'type-nacional';
+        if (id % 3 === 1) return 'type-local';
+        return 'type-religioso';
     }
 
     /**
