@@ -5,6 +5,7 @@ import { RouterOutlet } from '@angular/router';
 import { TokenMonitorService } from './core/services/token-monitor.service';
 import { AuthService } from './features/auth/servicios/auth.service';
 import { TokenService } from './features/auth/servicios/token.service';
+import { AuthResponse } from './features/auth/modelos/auth.models';
 import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
 import { Subject } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
@@ -23,6 +24,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private tokenService = inject(TokenService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
+  private currentDialogRef: any; // Referencia al modal abierto
 
   ngOnInit(): void {
     // Iniciar monitoreo si hay token válido
@@ -43,6 +45,11 @@ export class AppComponent implements OnInit, OnDestroy {
       .onTokenExpired()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
+        console.log('⏰ Token expirado detectado');
+        // Si el modal está abierto, cerrarlo y redirigir
+        if (this.currentDialogRef) {
+          this.currentDialogRef.close();
+        }
         this.handleTokenExpired();
       });
   }
@@ -52,13 +59,13 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private showExpirationModal(): void {
     console.log('🔔 Mostrando modal de expiración de sesión...');
-    const dialogRef = this.dialog.open(SessionExpirationModalComponent, {
+    this.currentDialogRef = this.dialog.open(SessionExpirationModalComponent, {
       disableClose: true,
       width: '400px',
       panelClass: 'session-expiration-dialog'
     });
 
-    dialogRef
+    this.currentDialogRef
       .afterClosed()
       .pipe(
         switchMap(result => {
@@ -76,17 +83,19 @@ export class AppComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response) => {
+        next: (response: AuthResponse) => {
           // Actualizar tokens y reiniciar monitoreo
           console.log('✅ Token refrescado, reiniciando monitoreo...');
           this.authService.updateTokens(response);
           this.tokenMonitor.stopMonitoring();
           this.tokenMonitor.startMonitoring();
           console.log('✅ Sesión extendida exitosamente');
+          this.currentDialogRef = null;
         },
-        error: (err) => {
+        error: (err: any) => {
           // Si hay error o usuario rechaza, logout
           console.warn('❌ No se pudo extender la sesión:', err.message);
+          this.currentDialogRef = null;
           this.handleTokenExpired();
         }
       });
@@ -96,6 +105,13 @@ export class AppComponent implements OnInit, OnDestroy {
    * Redirige a login cuando token expira
    */
   private handleTokenExpired(): void {
+    // Cerrar el modal si está abierto
+    if (this.currentDialogRef) {
+      console.log('🔐 Cerrando modal de sesión expirada...');
+      this.currentDialogRef.close();
+      this.currentDialogRef = null;
+    }
+
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {
