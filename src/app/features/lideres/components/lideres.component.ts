@@ -51,7 +51,6 @@ export class LideresComponent implements OnInit {
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
 
-  // Url base de tu backend
   private apiUrl = `${environment.apiUrl}/lideres`;
 
   // ── Filtros ────────────────────────────────────────────
@@ -108,7 +107,7 @@ export class LideresComponent implements OnInit {
           nombre: `${l.nombres} ${l.apellidos}`,
           tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
           correo: l.email,
-          telefono: l.telefono ?? l.Telefono ?? l.telefonoMovil ?? l.celular ?? '',
+          telefono: l.telefono ?? '',  // ← FIX 2: simplificado
           cliente: '',
           estado: l.activo ? 'Activo' : 'Inactivo'
         }));
@@ -120,7 +119,7 @@ export class LideresComponent implements OnInit {
     });
   }
 
-  // ── Contadores cards dinámicos (Con la data real) ───────
+  // ── Contadores cards dinámicos ──────────────────────────
   get totalInternos(): number {
     return this.lideres.filter(l => l.tipo === 'Interno').length;
   }
@@ -146,7 +145,7 @@ export class LideresComponent implements OnInit {
     return Math.min(this.paginaActual * this.porPagina, this.lideresFiltrados.length);
   }
 
-  // ── Filtros corregidos ──────────────────────────────────
+  // ── Filtros ────────────────────────────────────────────
   filtrarPor(tipo: string): void {
     if (tipo === 'Inactivo') {
       this.estadoFiltro = this.estadoFiltro === 'Inactivo' ? 'Activo' : 'Inactivo';
@@ -265,9 +264,7 @@ export class LideresComponent implements OnInit {
   }
 
   guardarLider(payload: any): void {
-    if (this.guardandoLider) {
-      return;
-    }
+    if (this.guardandoLider) return;
 
     if (!this.modoEdicion && this.liderYaExiste(payload)) {
       this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto.';
@@ -292,6 +289,9 @@ export class LideresComponent implements OnInit {
       : {
           Idpersona: payload.personaId,
           Idtipo: payload.tipoId,
+          Nombres: payload.nombres,    // ← FIX 1
+          Apellidos: payload.apellidos, // ← FIX 1
+          Email: payload.correo,        // ← FIX 1
           Telefono: payload.telefono,
           Usuariocreacion: 'frontend',
           Ipcreacion: '127.0.0.1'
@@ -307,15 +307,11 @@ export class LideresComponent implements OnInit {
         this.mensajeConfirmacion = this.modoEdicion
           ? 'Los cambios han sido<br>guardados exitosamente'
           : 'El nuevo líder ha sido<br>agregado exitosamente';
-
         this.mostrarConfirmacion = true;
         this.mostrarFormulario = false;
         this.liderEditando = null;
-
         this.obtenerLideresDelBackend();
-        setTimeout(() => {
-          this.mostrarConfirmacion = false;
-        }, 3000);
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
       },
       error: (err) => {
         this.guardandoLider = false;
@@ -332,11 +328,11 @@ export class LideresComponent implements OnInit {
     const telefono = this.normalizarTexto(payload.telefono);
     const nombreCompleto = this.normalizarTexto(`${payload.nombres ?? ''} ${payload.apellidos ?? ''}`);
 
-    return this.lideres.some(lider => {
-      return this.normalizarTexto(lider.correo) === correo
-        || this.normalizarTexto(lider.telefono) === telefono
-        || this.normalizarTexto(lider.nombre) === nombreCompleto;
-    });
+    return this.lideres.some(lider =>
+      this.normalizarTexto(lider.correo) === correo
+      || this.normalizarTexto(lider.telefono) === telefono
+      || this.normalizarTexto(lider.nombre) === nombreCompleto
+    );
   }
 
   private normalizarTexto(valor: unknown): string {
@@ -367,9 +363,7 @@ export class LideresComponent implements OnInit {
         textColor: [255, 255, 255],
         fontStyle: 'bold'
       },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245]
-      }
+      alternateRowStyles: { fillColor: [245, 245, 245] }
     });
     doc.save('lideres.pdf');
     this.mostrarDescarga = false;
@@ -387,8 +381,8 @@ export class LideresComponent implements OnInit {
     }));
     const ws = XLSX.utils.json_to_sheet(datos);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Líderes'); // ◄ Corregido: XLSX con una sola equis
-    XLSX.writeFile(wb, 'lideres.xlsx');             // ◄ Corregido: XLSX con una sola equis
+    XLSX.utils.book_append_sheet(wb, ws, 'Líderes');
+    XLSX.writeFile(wb, 'lideres.xlsx');
     this.mostrarDescarga = false;
   }
 
@@ -396,9 +390,7 @@ export class LideresComponent implements OnInit {
     if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
       const id = lider.id ?? lider.codigo;
       this.http.delete(`${this.apiUrl}/${id}`).subscribe({
-        next: () => {
-          this.obtenerLideresDelBackend();
-        },
+        next: () => this.obtenerLideresDelBackend(),
         error: (err) => console.error('Error al eliminar líder:', err)
       });
     }
