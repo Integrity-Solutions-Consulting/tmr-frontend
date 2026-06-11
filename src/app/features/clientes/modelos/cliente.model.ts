@@ -2,7 +2,7 @@
 //  MODELOS — Módulo Clientes  |  
 // ─────────────────────────────────────────────────────────────
 
-export type TipoIdentificacion = 'RUC' | 'Cédula' | 'Pasaporte';
+export type TipoIdentificacion = 'RUC' | 'Cédula' | 'Pasaporte' | 'Otro documento';
 export type EstadoCliente      = 'Activo' | 'Inactivo';
 export type EstadoProyecto     = 'En progreso' | 'Completado' | 'Pausado' | 'Cancelado';
 
