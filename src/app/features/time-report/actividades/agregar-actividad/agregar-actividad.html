@@ -7,7 +7,7 @@
             <!-- Tipo de Actividad -->
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
-                    <mat-label>Tipo de Actividad <span class="required">*</span></mat-label>
+                    <mat-label>Tipo de Actividad <span class="required"></span></mat-label>
                     <mat-select formControlName="tipoActividad">
                         @for (tipo of tiposActividad(); track tipo.id) {
                         <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
@@ -20,24 +20,26 @@
             <!-- Proyecto -->
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
-                    <mat-label>Proyecto <span class="required">*</span></mat-label>
+                    <mat-label>Proyecto <span class="required"></span></mat-label>
                     <mat-select formControlName="proyectoId">
                         @for (proyecto of proyectos(); track proyecto.id) {
                         <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
-                <button class="help-btn" type="button" matTooltip="Seleccione el proyecto asociado a la actividad">?</button>
+                <button class="help-btn" type="button"
+                    matTooltip="Seleccione el proyecto asociado a la actividad">?</button>
             </div>
 
             <!-- Código de Requerimiento -->
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
-                    <mat-label>Código de Requerimiento <span class="required">*</span></mat-label>
+                    <mat-label>Código de Requerimiento <span class="required"></span></mat-label>
                     <input matInput formControlName="codigoRequerimiento" maxlength="50">
                     <mat-hint align="end">{{ form.get('codigoRequerimiento')?.value?.length || 0 }}/50</mat-hint>
                 </mat-form-field>
-                <button class="help-btn" type="button" matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">?</button>
+                <button class="help-btn" type="button"
+                    matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">?</button>
             </div>
 
             <!-- Descripción -->
@@ -48,15 +50,18 @@
                         placeholder="Descripción"></textarea>
                     <mat-hint align="end">{{ form.get('descripcion')?.value?.length || 0 }}/255</mat-hint>
                 </mat-form-field>
-                <button class="help-btn help-btn-top" type="button" matTooltip="Ingrese la descripción o detalles de la actividad realizada">?</button>
+                <button class="help-btn help-btn-top" type="button"
+                    matTooltip="Ingrese la descripción o detalles de la actividad realizada">?</button>
             </div>
 
             <!-- Notas -->
             <div class="field-row">
                 <mat-form-field appearance="outline" class="full-field">
                     <mat-label>Notas</mat-label>
-                    <textarea matInput formControlName="notas" rows="3" placeholder="Notas adicionales"></textarea>
+                    <textarea matInput formControlName="notas" rows="5" placeholder="Notas adicionales"></textarea>
                 </mat-form-field>
+                <button class="help-btn help-btn-top" type="button"
+                    matTooltip="Ingrese notas o comentarios adicionales">?</button>
             </div>
 
             <!-- Fecha + Horas (Visible solo si NO es recurrente) -->
@@ -64,16 +69,23 @@
             <div class="two-col">
                 <div class="field-row flex-1">
                     <mat-form-field appearance="outline" class="full-field">
-                        <mat-label>Fecha Actividad <span class="required">*</span></mat-label>
-                        <input matInput type="date" formControlName="fechaActividad">
+                        <mat-label>Fecha Actividad <span class="required"></span></mat-label>
+                        <input matInput [matDatepicker]="pickerFechaActividad" formControlName="fechaActividad"
+                            (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad" [disabled]="!esEdicion"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFechaActividad></mat-datepicker>
+                        @if (form.get('fechaActividad')?.hasError('formatoFecha')) {
+                            <mat-error>El formato debe ser dd/mm/aaaa</mat-error>
+                        }
                     </mat-form-field>
                 </div>
                 <div class="field-row flex-1">
                     <mat-form-field appearance="outline" class="full-field">
-                        <mat-label>Número de Horas <span class="required">*</span></mat-label>
+                        <mat-label>Número de Horas <span class="required"></span></mat-label>
                         <input matInput type="number" formControlName="numeroHoras" min="0.5" max="24" step="0.5">
                     </mat-form-field>
-                    <button class="help-btn" type="button" matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">?</button>
+                    <button class="help-btn" type="button"
+                        matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">?</button>
                 </div>
             </div>
             }
@@ -84,7 +96,8 @@
                 <mat-checkbox formControlName="esRecurrente" color="primary">
                     Actividad Recurrente
                 </mat-checkbox>
-                <button class="help-btn" type="button" matTooltip="Marque si desea que esta actividad se repita automáticamente en un rango de fechas">?</button>
+                <button class="help-btn" type="button"
+                    matTooltip="Marque si desea que esta actividad se repita automáticamente en un rango de fechas">?</button>
             </div>
             }
 
@@ -94,39 +107,55 @@
                 <div class="two-col">
                     <div class="field-row flex-1">
                         <mat-form-field appearance="outline" class="full-field">
-                            <mat-label>Fecha Inicio <span class="required">*</span></mat-label>
-                            <input matInput type="date" formControlName="fechaInicio">
+                            <mat-label>Fecha Inicio <span class="required"></span></mat-label>
+                            <input matInput [matDatepicker]="pickerFechaInicio" formControlName="fechaInicio"
+                                (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)">
+                            <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio" [disabled]="!esEdicion"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFechaInicio></mat-datepicker>
+                            @if (form.get('fechaInicio')?.hasError('formatoFecha')) {
+                                <mat-error>El formato debe ser dd/mm/aaaa</mat-error>
+                            }
                         </mat-form-field>
                     </div>
                     <div class="field-row flex-1">
                         <mat-form-field appearance="outline" class="full-field">
-                            <mat-label>Fecha Fin <span class="required">*</span></mat-label>
-                            <input matInput type="date" formControlName="fechaFin">
+                            <mat-label>Fecha Fin <span class="required"></span></mat-label>
+                            <input matInput [matDatepicker]="pickerFechaFin" formControlName="fechaFin"
+                                (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)">
+                            <mat-datepicker-toggle matSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFechaFin></mat-datepicker>
+                            @if (form.get('fechaFin')?.hasError('formatoFecha')) {
+                                <mat-error>El formato debe ser dd/mm/aaaa</mat-error>
+                            }
                         </mat-form-field>
-                        <button class="help-btn" type="button" matTooltip="Especifique la fecha en la que finalizará la recurrencia">?</button>
+                        <button class="help-btn" type="button"
+                            matTooltip="Especifique la fecha en la que finalizará la recurrencia">?</button>
                     </div>
                 </div>
 
                 <div class="field-row">
                     <mat-form-field appearance="outline" class="full-field">
-                        <mat-label>Horas por día <span class="required">*</span></mat-label>
+                        <mat-label>Horas por día <span class="required"></span></mat-label>
                         <input matInput type="number" formControlName="horasPorDia" min="0.5">
                     </mat-form-field>
-                    <button class="help-btn" type="button" matTooltip="Ingrese las horas que se registrarán por cada día en el rango">?</button>
+                    <button class="help-btn" type="button"
+                        matTooltip="Ingrese las horas que se registrarán por cada día en el rango">?</button>
                 </div>
 
                 <div class="checkbox-item">
                     <mat-checkbox formControlName="incluirFinesDeSemana" color="primary">
                         Incluir fines de semana
                     </mat-checkbox>
-                    <button class="help-btn" type="button" matTooltip="Marque para incluir sábados y domingos en el registro recurrente">?</button>
+                    <button class="help-btn" type="button"
+                        matTooltip="Marque para incluir sábados y domingos en el registro recurrente">?</button>
                 </div>
 
                 <div class="checkbox-item">
                     <mat-checkbox formControlName="incluirFeriados" color="primary">
                         Incluir días feriados
                     </mat-checkbox>
-                    <button class="help-btn" type="button" matTooltip="Marque para registrar horas en días festivos/feriados nacionales">?</button>
+                    <button class="help-btn" type="button"
+                        matTooltip="Marque para registrar horas en días festivos/feriados nacionales">?</button>
                 </div>
 
                 @if (previewText()) {
