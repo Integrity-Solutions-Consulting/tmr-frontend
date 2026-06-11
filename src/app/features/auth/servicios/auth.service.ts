@@ -82,8 +82,12 @@ export class AuthService {
     );
   }
 
-  getUserModules(): Observable<{ data: string[] }> {
-    return this.http.get<{ data: string[] }>(`${this.API_URL}/modules`);
+  /**
+   * Obtiene los módulos asignados al usuario autenticado
+   * NOTA: ApiResponseInterceptor transforma ApiResponse<string[]> -> string[]
+   */
+  getUserModules(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.API_URL}/modules`);
   }
 
   changePassword(payload: ChangePasswordRequest): Observable<void> {

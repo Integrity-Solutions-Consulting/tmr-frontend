@@ -26,9 +26,10 @@ export class AuthEffects {
             this.authService.updateTokens(response);
 
             return this.authService.getUserModules().pipe(
-              tap((modResp) => {
-                console.log("Módulos recibidos desde backend:", modResp);
-                this.tokenService.setUserModules(modResp.data || []);
+              tap((modules) => {
+                console.log("Módulos recibidos desde backend:", modules);
+                // ApiResponseInterceptor ya transformó ApiResponse<string[]> -> string[]
+                this.tokenService.setUserModules(Array.isArray(modules) ? modules : []);
               }),
               tap(() => {
                 // IMPORTANTE: Iniciar monitoreo del token después del login exitoso
