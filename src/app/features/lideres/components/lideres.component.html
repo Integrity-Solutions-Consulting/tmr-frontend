@@ -61,30 +61,29 @@
       <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
         (input)="aplicarFiltros()" />
     </div>
-    <div class="estado-filter-wrapper">
-      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img"
-        (click)="$event.stopPropagation(); toggleEstadoDropdown()" />
+    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
+      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
       <span class="estado-texto">Estado</span>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-search">
           <span class="material-icons dropdown-search-icon">search</span>
           <input type="text" placeholder="Estado" class="dropdown-search-input" />
         </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('Activo')">
+        <div class="dropdown-option" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
           </div>
           <span>Activo</span>
           <span class="dropdown-count">{{ totalActivos }}</span>
         </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('Inactivo')">
+        <div class="dropdown-option" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Inactivo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Inactivo'">check</span>
           </div>
           <span>Inactivo</span>
           <span class="dropdown-count">{{ totalInactivos }}</span>
         </div>
-        <div class="dropdown-limpiar" (click)="seleccionarEstado('')">Limpiar filtro</div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>
     </div>
     <div class="search-spacer"></div>
@@ -188,6 +187,7 @@
 </div>
 
 <app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion" [lider]="liderParaEditar"
+  [guardando]="guardandoLider"
   (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider($event)">
 </app-modal-lider>
 

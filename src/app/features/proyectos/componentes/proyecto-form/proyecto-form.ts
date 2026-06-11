@@ -22,11 +22,11 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 
 import { Proyecto, LookupOption, ProyectoLookups, CargoLookup } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
@@ -38,11 +38,11 @@ import { ProyectosService } from '../../servicios/proyectos.service';
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
   ],
   templateUrl: './proyecto-form.html',
   styleUrl: './proyecto-form.scss'
@@ -65,14 +65,14 @@ export class ProyectoForm implements OnInit, OnChanges {
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
   cargosFiltrados: CargoLookup[][] = [];
-
+  hoy = new Date();
   formulario = this.fb.group({
     codigo: ['', Validators.required],
     nombre: ['', Validators.required],
     cliente: ['', Validators.required],
     tipo: ['', Validators.required],
-    fechaInicio: ['', [Validators.required, this.fechaValida()]],
-    fechaFin: ['', [Validators.required, this.fechaValida()]],
+    fechaInicio: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
+    fechaFin: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
     presupuesto: ['', [Validators.required, this.numeroValido(true)]],
     horas: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]],
     lider: ['', Validators.required],
@@ -114,6 +114,8 @@ export class ProyectoForm implements OnInit, OnChanges {
   private aplicarProyectoAlFormulario(proyecto: Proyecto): void {
     this.formulario.patchValue({
       ...proyecto,
+      fechaInicio: this.normalizarFecha(proyecto.fechaInicio),
+      fechaFin: this.normalizarFecha(proyecto.fechaFin),
       presupuesto: this.valorFormularioNumerico(proyecto.presupuesto),
       horas: this.valorFormularioNumerico(proyecto.horas),
       costoHoraLider: this.valorFormularioNumerico(proyecto.costoHoraLider),
@@ -172,8 +174,8 @@ export class ProyectoForm implements OnInit, OnChanges {
       nombre: ['', Validators.required],
       departamento: [''],
       rol: ['', Validators.required],
-      entrada: ['', [Validators.required, this.fechaValida()]],
-      salida: ['', [Validators.required, this.fechaValida()]],
+      entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
+      salida: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
       costoHora: ['', [Validators.required, this.numeroValido(true)]],
       horas: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]]
     }, { validators: this.rangoFechasValido('entrada', 'salida', 'salidaMenor') });
@@ -227,6 +229,8 @@ export class ProyectoForm implements OnInit, OnChanges {
         ...recurso,
         idEmpleado: recurso.idEmpleado ?? null,
         departamento: idDepartamento,
+        entrada: this.normalizarFecha(recurso.entrada),
+        salida: this.normalizarFecha(recurso.salida),
         costoHora: this.valorFormularioNumerico(recurso.costoHora),
         horas: this.valorFormularioNumerico(recurso.horas)
       });
@@ -345,10 +349,11 @@ export class ProyectoForm implements OnInit, OnChanges {
     }
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(normalizado)) {
-      return new Date(normalizado);
+      const [anio, mes, dia] = normalizado.split('-').map(Number);
+      return new Date(anio, mes - 1, dia);
     }
 
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(normalizado)) {
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalizado)) {
       const [dia, mes, anio] = normalizado.split('/').map(Number);
       return new Date(anio, mes - 1, dia);
     }
@@ -409,7 +414,7 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     const str = String(valor);
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
       const [dia, mes, anio] = str.split('/').map(Number);
       return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     }

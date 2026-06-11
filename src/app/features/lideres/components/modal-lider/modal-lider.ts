@@ -29,6 +29,7 @@ export class ModalLider implements OnInit, OnChanges {
   @Input() mostrarFormulario = false;
   @Input() modoEdicion = false;
   @Input() lider: any | null = null;
+  @Input() guardando = false;
   @Output() cerrarModal = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<any>();
 
@@ -165,6 +166,8 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   onGuardar() {
+    if (this.guardando) return;
+
     this.enviado = true;
     if (!this.formularioValido()) return;
 
