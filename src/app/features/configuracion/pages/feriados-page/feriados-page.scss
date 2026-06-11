@@ -1,10 +1,93 @@
-@use '../roles-page/roles-page.scss';
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary:      #163572;
+$white:        #ffffff;
+$text-light:   #7C7C7C;
+$border:       var(--tmr-border, #e5e7eb);
 
-/* ── Stats grid: 5 columnas ───────────────────────────────────── */
-.stats-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+// ── Layout general ─────────────────────────────────────────────────────────
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+// ── Hero ───────────────────────────────────────────────────────────────────
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid $border;
+  border-radius: 14px;
+  background: $white;
+  padding: 16px 20px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 22px;
+  color: $primary;
+  font-weight: 700;
+}
+
+// ── Stats grid: 5 columnas (override en este archivo) ──────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stats-grid article {
+  position: relative;
+  border-radius: 12px;
+  padding: 14px 18px;
+  border: 1px solid $border;
+  background: $white;
+}
+
+.stats-grid article:hover {
+  border-color: #dbe3ee;
+}
+
+.stats-grid span {
+  color: var(--tmr-muted, #64748b);
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.stats-grid strong {
+  display: block;
+  color: $primary;
+  font-size: 24px;
+  line-height: 1;
+}
+
+// ── Panel ──────────────────────────────────────────────────────────────────
+.panel {
+  border: 1px solid $border;
+  background: $white;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+// ── Error banner ───────────────────────────────────────────────────────────
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  background: #fef2f2;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
 @media (max-width: 1100px) {
   .stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -15,10 +98,22 @@
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px;
+  }
 }
 
 @media (max-width: 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero app-boton {
+    width: 100%;
   }
 }
