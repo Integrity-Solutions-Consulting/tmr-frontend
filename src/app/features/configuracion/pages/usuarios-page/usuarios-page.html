@@ -1,62 +1,115 @@
-<section class="page">
-  <div class="hero">
-    <div class="hero__copy">
-      <h2>Usuarios</h2>
-      
-    </div>
+<section class="page" (click)="cerrarDropdowns()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Usuarios</h1>
     <app-boton label="Crear usuario" icon="person_add" (clicked)="openModal()" />
   </div>
 
-  <div class="stats-grid">
-    <article
-      class="stat-card"
-      [class.stat-card--active]="filtroActivo() === 'todos'"
-      (click)="filtrarPorEstado('todos')"
-      role="button"
-      tabindex="0"
-      (keydown.enter)="filtrarPorEstado('todos')"
-      aria-label="Mostrar todos los usuarios"
-    >
-      <span>Usuarios</span>
-      <strong>{{ totalUsuarios() }}</strong>
-    </article>
+  <!-- Cards resumen -->
+  <div class="cards-row">
 
-    <article
-      class="stat-card"
-      [class.stat-card--active]="filtroActivo() === 'activos'"
-      (click)="filtrarPorEstado('activos')"
-      role="button"
-      tabindex="0"
-      (keydown.enter)="filtrarPorEstado('activos')"
-      aria-label="Filtrar por usuarios activos"
-    >
-      <span>Activos</span>
-      <strong>{{ activos() }}</strong>
-    </article>
+    <!-- Total usuarios -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon">
+            <img src="icons/user.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ totalUsuarios() }}</span>
+        </div>
+        <span class="card-label">Total usuarios</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado('todos'); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
 
-    <article
-      class="stat-card"
-      [class.stat-card--active]="filtroActivo() === 'inactivos'"
-      (click)="filtrarPorEstado('inactivos')"
-      role="button"
-      tabindex="0"
-      (keydown.enter)="filtrarPorEstado('inactivos')"
-      aria-label="Filtrar por usuarios inactivos"
-    >
-      <span>Inactivos</span>
-      <strong>{{ inactivos() }}</strong>
-    </article>
+    <!-- Activos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon">
+            <img src="icons/circle-check.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ activos() }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado('activos'); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--inactive">
+            <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ inactivos() }}</span>
+        </div>
+        <span class="card-label">Inactivos</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado('inactivos'); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
   </div>
 
-  <div class="panel">
-    <div class="toolbar">
-      <app-search-input
-        placeholder="Buscar por nombres, identificacion, correo o rol..."
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por nombres, identificación, correo o rol..."
         [value]="query()"
-        (valueChange)="query.set($event)"
+        (input)="query.set($any($event.target).value)"
       />
     </div>
 
+    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
+      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
+      <span class="estado-texto">{{ labelEstado() }}</span>
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-search">
+          <span class="material-icons dropdown-search-icon">search</span>
+          <input type="text" placeholder="Estado" class="dropdown-search-input" />
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('todos'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'todos'">
+            <span class="material-icons" *ngIf="filtroActivo() === 'todos'">check</span>
+          </div>
+          <span>Todos</span>
+          <span class="dropdown-count">{{ totalUsuarios() }}</span>
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('activos'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'activos'">
+            <span class="material-icons" *ngIf="filtroActivo() === 'activos'">check</span>
+          </div>
+          <span>Activo</span>
+          <span class="dropdown-count">{{ activos() }}</span>
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('inactivos'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'inactivos'">
+            <span class="material-icons" *ngIf="filtroActivo() === 'inactivos'">check</span>
+          </div>
+          <span>Inactivo</span>
+          <span class="dropdown-count">{{ inactivos() }}</span>
+        </div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado('todos'); $event.stopPropagation()">Limpiar filtro</div>
+      </div>
+    </div>
+
+    <div class="search-spacer"></div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="panel">
     <div class="table-scroll-container">
       <div class="table-wrapper">
         <table class="usuarios-table">
@@ -108,6 +161,7 @@
       </div>
     </div>
   </div>
+
 </section>
 
 <app-success-modal

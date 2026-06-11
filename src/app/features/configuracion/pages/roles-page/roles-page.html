@@ -1,35 +1,115 @@
-<section class="page" (click)="cerrarExpandido()">
-  <div class="hero">
-    <div class="hero__copy">
-      <h2>Roles</h2>
-      
-    </div>
+<section class="page" (click)="cerrarExpandido(); cerrarDropdowns()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Roles</h1>
     <app-boton label="Crear rol" icon="add" (clicked)="openModal()" />
   </div>
 
-  <div class="stats-grid">
-    <article>
-      <span>Roles activos</span>
-      <strong>{{ rolesActivos() }}</strong>
-    </article>
-    <article>
-      <span>Módulos cubiertos</span>
-      <strong>{{ modulosCubiertos() }}</strong>
-    </article>
-    <article>
-      <span>Total roles</span>
-      <strong>{{ roles().length }}</strong>
-    </article>
+  <!-- Cards resumen -->
+  <div class="cards-row">
+
+    <!-- Total roles -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon">
+            <img src="icons/user.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ totalRoles() }}</span>
+        </div>
+        <span class="card-label">Total roles</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado(''); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
+    <!-- Activos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon">
+            <img src="icons/circle-check.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ rolesActivos() }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--inactive">
+            <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
+          </div>
+          <span class="card-number">{{ rolesInactivos() }}</span>
+        </div>
+        <span class="card-label">Inactivos</span>
+      </div>
+      <button class="card-filter-btn" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
+        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
+      </button>
+    </div>
+
   </div>
 
-  <div class="panel">
-    <div class="toolbar">
-      <app-search-input
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        class="search-input"
         placeholder="Buscar por nombre de rol, descripción o módulo..."
         [value]="query()"
-        (valueChange)="query.set($event)"
+        (input)="query.set($any($event.target).value)"
       />
     </div>
+
+    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
+      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
+      <span class="estado-texto">{{ labelEstado() }}</span>
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-search">
+          <span class="material-icons dropdown-search-icon">search</span>
+          <input type="text" placeholder="Estado" class="dropdown-search-input" />
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado(''); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroEstado() === ''">
+            <span class="material-icons" *ngIf="filtroEstado() === ''">check</span>
+          </div>
+          <span>Todos</span>
+          <span class="dropdown-count">{{ totalRoles() }}</span>
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Activo'">
+            <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
+          </div>
+          <span>Activo</span>
+          <span class="dropdown-count">{{ rolesActivos() }}</span>
+        </div>
+        <div class="dropdown-option" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Inactivo'">
+            <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
+          </div>
+          <span>Inactivo</span>
+          <span class="dropdown-count">{{ rolesInactivos() }}</span>
+        </div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
+      </div>
+    </div>
+
+    <div class="search-spacer"></div>
+  </div>
+
+  <!-- Panel / Tabla -->
+  <div class="panel">
 
     @if (estadoError()) {
       <div class="error-banner">
@@ -108,6 +188,7 @@
       </table>
     </div>
   </div>
+
 </section>
 
 <app-success-modal

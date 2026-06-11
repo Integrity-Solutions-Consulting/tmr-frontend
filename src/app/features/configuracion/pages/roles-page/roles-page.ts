@@ -1,4 +1,5 @@
 import { Component, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -7,15 +8,16 @@ import {
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
+
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, MatIconModule, ActionMenuComponent, ConfirmDialogComponent, SuccessModalComponent],
+  imports: [CommonModule, Boton, MatIconModule, ActionMenuComponent, ConfirmDialogComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -26,36 +28,67 @@ export class RolesPage {
   @ViewChildren(ActionMenuComponent)
   private readonly actionMenus!: QueryList<ActionMenuComponent>;
 
+  // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
   readonly estadoError = signal<string | null>(null);
   readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
   readonly modulos = this.configuracionService.modulos;
 
+  // ── Filtro por estado ─────────────────────────────────────────────────────
+  readonly filtroEstado = signal<FiltroEstadoRol>('');
+
+  // ── Estado dropdown ───────────────────────────────────────────────────────
+  mostrarEstadoDropdown = false;
+
+  // ── Confirmación y éxito ──────────────────────────────────────────────────
   readonly confirmVisible = signal(false);
   readonly confirmMensaje = signal('');
   private rolPendienteEliminar: Rol | null = null;
 
-  /** Controla la visibilidad del modal de éxito. */
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
-  /** ID del rol cuya lista de módulos extra está desplegada. null = ninguno. */
+  /** ID del rol cuya lista de módulos extra está desplegada */
   readonly rolExpandidoId = signal<number | null>(null);
 
+  // ── Computeds de conteo ───────────────────────────────────────────────────
+  readonly totalRoles = computed(() => this.roles().length);
+
   readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
+
+  readonly rolesInactivos = computed(() => this.roles().filter((rol) => !rol.activo).length);
+
   readonly modulosCubiertos = computed(() =>
     new Set(this.roles().flatMap((rol) => rol.modulos.map((m) => m.id))).size,
   );
 
+  /** Label del botón de filtro estado */
+  readonly labelEstado = computed(() => {
+    const filtro = this.filtroEstado();
+    if (filtro === 'Activo') return 'Activo';
+    if (filtro === 'Inactivo') return 'Inactivo';
+    return 'Estado';
+  });
+
+  /** Filtrado por texto Y por estado */
   readonly filteredRoles = computed(() => {
     const query = this.query().trim().toLowerCase();
-    if (!query) {
-      return this.roles();
-    }
+    const estado = this.filtroEstado();
 
-    return this.roles().filter((rol) =>
-      [
+    return this.roles().filter((rol) => {
+      // Filtro por estado
+      const matchEstado =
+        estado === '' ||
+        (estado === 'Activo' && rol.activo) ||
+        (estado === 'Inactivo' && !rol.activo);
+
+      if (!matchEstado) return false;
+
+      // Filtro por texto
+      if (!query) return true;
+
+      return [
         rol.nombre,
         rol.descripcion,
         rol.modulos.map((m) => m.nombre).join(' '),
@@ -63,9 +96,27 @@ export class RolesPage {
       ]
         .join(' ')
         .toLowerCase()
-        .includes(query),
-    );
+        .includes(query);
+    });
   });
+
+  // ── Control del dropdown Estado ────────────────────────────────────────────
+
+  toggleEstadoDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
+  }
+
+  seleccionarEstado(estado: FiltroEstadoRol): void {
+    this.filtroEstado.set(estado);
+    this.mostrarEstadoDropdown = false;
+  }
+
+  cerrarDropdowns(): void {
+    this.mostrarEstadoDropdown = false;
+  }
+
+  // ── Modales ────────────────────────────────────────────────────────────────
 
   openModal(rol?: Rol, mode: 'create' | 'edit' | 'view' = 'create'): void {
     this.closeActionsMenu();
@@ -133,6 +184,8 @@ export class RolesPage {
     ];
   }
 
+  // ── Módulos expandibles ────────────────────────────────────────────────────
+
   visibleModulos(rol: Rol): Modulo[] {
     return rol.modulos.slice(0, 3);
   }
@@ -141,30 +194,24 @@ export class RolesPage {
     return Math.max(rol.modulos.length - 3, 0);
   }
 
-  /** Lista de módulos que están ocultos (índice ≥ 3). */
   modulosOcultosList(rol: Rol): Modulo[] {
     return rol.modulos.slice(3);
   }
 
-  /** Indica si el dropdown de módulos extra está abierto para este rol. */
   estaExpandido(rolId: number): boolean {
     return this.rolExpandidoId() === rolId;
   }
 
-  /**
-   * Alterna el dropdown de módulos ocultos.
-   * Si el rol ya estaba abierto → cierra. Si era otro → abre el nuevo.
-   * El evento se detiene para que no llegue al listener global de document.
-   */
   toggleModulosExpandidos(event: Event, rolId: number): void {
     event.stopPropagation();
     this.rolExpandidoId.set(this.rolExpandidoId() === rolId ? null : rolId);
   }
 
-  /** Cierra el dropdown cuando se hace clic fuera. */
   cerrarExpandido(): void {
     this.rolExpandidoId.set(null);
   }
+
+  // ── Eliminar rol ──────────────────────────────────────────────────────────
 
   solicitarEliminarRol(rol: Rol): void {
     this.closeActionsMenu();
@@ -202,6 +249,8 @@ export class RolesPage {
     this.confirmVisible.set(false);
     this.rolPendienteEliminar = null;
   }
+
+  // ── Utilidades ────────────────────────────────────────────────────────────
 
   cerrarExito(): void {
     this.closeActionsMenu();

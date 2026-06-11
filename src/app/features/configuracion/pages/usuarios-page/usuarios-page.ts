@@ -1,11 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import {
   ActionMenuComponent,
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
-import { SearchInput } from '../../../../shared/components/search-input/search-input';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
@@ -16,7 +16,7 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [Boton, SearchInput, ActionMenuComponent, SuccessModalComponent],
+  imports: [CommonModule, Boton, ActionMenuComponent, SuccessModalComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -24,31 +24,42 @@ export class UsuariosPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
 
+  // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
   readonly usuarios = this.configuracionService.usuarios;
   readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
 
-  /** Filtro activo por estado: 'todos' | 'activos' | 'inactivos' */
+  // ── Filtro activo por estado ──────────────────────────────────────────────
   readonly filtroActivo = signal<FiltroEstado>('todos');
 
-  /** Controla la visibilidad del modal de éxito. */
+  // ── Estado del dropdown Estado ────────────────────────────────────────────
+  mostrarEstadoDropdown = false;
+
+  // ── Modal de éxito ────────────────────────────────────────────────────────
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
+  // ── Computeds de conteo (basados en usuariosTotales para reflejar el total real) ──
   readonly totalUsuarios = computed(() => this.usuariosTotales().length);
 
-  /** Conteo global de activos */
   readonly activos = computed(
     () => this.usuariosTotales().filter((u) => u.estado === 'Activo').length,
   );
 
-  /** Conteo global de inactivos */
   readonly inactivos = computed(
     () => this.usuariosTotales().filter((u) => u.estado !== 'Activo').length,
   );
 
-  /** Filtrado local por texto (el filtro de estado ya viaja al backend) */
+  /** Texto del label del filtro estado según el filtro activo */
+  readonly labelEstado = computed(() => {
+    const filtro = this.filtroActivo();
+    if (filtro === 'activos') return 'Activo';
+    if (filtro === 'inactivos') return 'Inactivo';
+    return 'Estado';
+  });
+
+  // ── Filtrado local por texto (el filtro de estado viaja al backend) ────────
   readonly filteredUsuarios = computed(() => {
     const query = this.query().trim().toLowerCase();
     if (!query) {
@@ -71,13 +82,13 @@ export class UsuariosPage {
     );
   });
 
-  // ── Helpers de filtro ──────────────────────────────────────────────────
+  // ── Helpers de filtro ──────────────────────────────────────────────────────
 
   /** Convierte el enum interno al valor boolean que espera el backend. */
   private filtroToParam(filtro: FiltroEstado): boolean | null {
     if (filtro === 'activos') return true;
     if (filtro === 'inactivos') return false;
-    return null; // 'todos' → sin parámetro
+    return null;
   }
 
   /**
@@ -93,7 +104,23 @@ export class UsuariosPage {
     );
   }
 
-  // ── Acciones sobre usuarios ────────────────────────────────────────────
+  // ── Control del dropdown Estado ────────────────────────────────────────────
+
+  toggleEstadoDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
+  }
+
+  seleccionarEstado(estado: FiltroEstado): void {
+    this.mostrarEstadoDropdown = false;
+    this.filtrarPorEstado(estado);
+  }
+
+  cerrarDropdowns(): void {
+    this.mostrarEstadoDropdown = false;
+  }
+
+  // ── Acciones sobre usuarios ────────────────────────────────────────────────
 
   obtenerAccionesUsuario(usuario: Usuario): ActionMenuItem[] {
     const activo = usuario.estado === 'Activo';
@@ -169,22 +196,18 @@ export class UsuariosPage {
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
-
-      // Resultado 'creado' → usuario nuevo creado en backend
       if (result === 'creado') {
         this.reloadUsuarios();
         this.mostrarExito('Usuario creado correctamente');
         return;
       }
 
-      // Resultado 'actualizado' → edición guardada en backend desde el modal
       if (result === 'actualizado') {
         this.reloadUsuarios();
         this.mostrarExito('Usuario actualizado correctamente');
         return;
       }
 
-      // Resultado objeto Usuario → edición local legacy (ya no se usa, pero se mantiene por compatibilidad)
       if (result !== true && typeof result === 'object') {
         const usuarioEditado = result as Usuario;
         this.configuracionService
@@ -204,7 +227,6 @@ export class UsuariosPage {
   }
 
   viewUsuario(usuario: Usuario): void {
-    // Cargar detalle completo desde backend para que "Ver más" tenga todos los campos
     this.configuracionService.getUsuarioDetalle(usuario.id).subscribe({
       next: (detalle) => {
         const dialogRef = this.dialog.open(UsuarioDetalleModal, {
