@@ -1,6 +1,6 @@
 import { Component, Inject, inject, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +9,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -29,7 +31,9 @@ import { FeriadosService } from '../../../../shared/services/feriados.service';
         MatCheckboxModule,
         MatButtonModule,
         MatIconModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatDatepickerModule,
+        MatNativeDateModule
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -77,11 +81,15 @@ export class AgregarActividad implements OnInit {
 
     private parseLocal(d: any): Date {
         if (d instanceof Date) return d;
-        if (typeof d === 'string') {
-            const parts = d.split('-');
-            if (parts.length === 3) {
-                return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-            }
+        if (!d) return new Date(NaN);
+        const str = String(d).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            const parts = str.split('-');
+            return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        }
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+            const [dia, mes, anio] = str.split('/').map(Number);
+            return new Date(anio, mes - 1, dia);
         }
         return new Date(d);
     }
@@ -92,18 +100,18 @@ export class AgregarActividad implements OnInit {
         const act = this.data?.actividad;
         this.esEdicion = !!act;
 
-        const defaultDate = this.formatFecha(act ? act.fechaactividad : (this.data?.fecha || new Date()));
+        const defaultDate = this.parseLocal(act ? act.fechaactividad : (this.data?.fecha || new Date()));
 
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, Validators.required],
             proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, Validators.required],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
-            fechaActividad: [defaultDate, Validators.required],
+            fechaActividad: [{ value: defaultDate, disabled: !this.esEdicion }, [Validators.required, this.formatoFechaValidator()]],
             numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
-            fechaInicio: [defaultDate],
-            fechaFin: [''],
+            fechaInicio: [{ value: defaultDate, disabled: !this.esEdicion }, [this.formatoFechaValidator()]],
+            fechaFin: ['', [this.formatoFechaValidator()]],
             horasPorDia: [act ? act.cantidadhoras : 4],
             incluirFinesDeSemana: [false],
             incluirFeriados: [false],
@@ -122,8 +130,8 @@ export class AgregarActividad implements OnInit {
             if (isRecurrent) {
                 fechaActividadCtrl?.clearValidators();
                 numeroHorasCtrl?.clearValidators();
-                fechaInicioCtrl?.setValidators(Validators.required);
-                fechaFinCtrl?.setValidators(Validators.required);
+                fechaInicioCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
+                fechaFinCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
                 horasPorDiaCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
 
                 // Asigna por defecto 4 días después si fechaFin no tiene valor
@@ -132,12 +140,12 @@ export class AgregarActividad implements OnInit {
                     if (!isNaN(inicio.getTime())) {
                         const fin = new Date(inicio);
                         fin.setDate(fin.getDate() + 4);
-                        fechaFinCtrl.setValue(this.formatFecha(fin));
+                        fechaFinCtrl.setValue(fin);
                         fechaFinCtrl.markAsPristine();
                     }
                 }
             } else {
-                fechaActividadCtrl?.setValidators(Validators.required);
+                fechaActividadCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
                 numeroHorasCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
                 fechaInicioCtrl?.clearValidators();
                 fechaFinCtrl?.clearValidators();
@@ -162,12 +170,73 @@ export class AgregarActividad implements OnInit {
                     if (!isNaN(inicio.getTime())) {
                         const fin = new Date(inicio);
                         fin.setDate(fin.getDate() + 4);
-                        fechaFinCtrl.setValue(this.formatFecha(fin));
+                        fechaFinCtrl.setValue(fin);
                         fechaFinCtrl.markAsPristine();
                     }
                 }
             }
         });
+    }
+
+    private formatoFechaValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            const valor = control.value;
+            if (!valor) return null;
+
+            if (valor instanceof Date) {
+                return isNaN(valor.getTime()) ? { formatoFecha: true } : null;
+            }
+
+            const str = String(valor).trim();
+            const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+            if (!regex.test(str)) {
+                return { formatoFecha: true };
+            }
+
+            const parts = str.split('/');
+            const dia = Number(parts[0]);
+            const mes = Number(parts[1]);
+            const anio = Number(parts[2]);
+            const date = new Date(anio, mes - 1, dia);
+
+            if (date.getFullYear() !== anio || date.getMonth() + 1 !== mes || date.getDate() !== dia) {
+                return { formatoFecha: true };
+            }
+
+            return null;
+        };
+    }
+
+    bloquearCaracteresFecha(event: KeyboardEvent): void {
+        const teclasPermitidas = [
+            'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+            'ArrowLeft', 'ArrowRight', 'Home', 'End'
+        ];
+
+        if (teclasPermitidas.includes(event.key) || event.ctrlKey || event.metaKey) return;
+
+        const esNumeroOBarra = /^[0-9/]$/.test(event.key);
+        if (!esNumeroOBarra) {
+            event.preventDefault();
+            return;
+        }
+
+        const input = event.target as HTMLInputElement;
+        if (input.value.length >= 10) {
+            event.preventDefault();
+        }
+    }
+
+    bloquearPegadoNoFecha(event: ClipboardEvent): void {
+        const texto = event.clipboardData?.getData('text') ?? '';
+        const input = event.target as HTMLInputElement;
+        
+        const seleccion = window.getSelection()?.toString() || '';
+        const nuevoLargo = input.value.length - seleccion.length + texto.length;
+        
+        if (!/^[0-9/]+$/.test(texto) || nuevoLargo > 10) {
+            event.preventDefault();
+        }
     }
 
     // Cargar listas desplegables desde la Base de Datos
@@ -228,10 +297,17 @@ export class AgregarActividad implements OnInit {
 
     guardar() {
         if (this.form.valid) {
+            const rawValue = this.form.getRawValue();
+            const formValue = {
+                ...rawValue,
+                fechaActividad: this.formatFecha(rawValue.fechaActividad),
+                fechaInicio: this.formatFecha(rawValue.fechaInicio),
+                fechaFin: this.formatFecha(rawValue.fechaFin)
+            };
             if (this.esEdicion) {
-                this.actividadesService.actualizarActividad(this.data.actividad.id, this.form.value);
+                this.actividadesService.actualizarActividad(this.data.actividad.id, formValue);
             } else {
-                this.actividadesService.agregarActividad(this.form.value);
+                this.actividadesService.agregarActividad(formValue);
             }
             this.dialogRef.close();
         }
