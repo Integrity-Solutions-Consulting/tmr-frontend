@@ -57,7 +57,7 @@ export class LideresComponent implements OnInit {
   // ── Filtros ────────────────────────────────────────────
   busqueda = '';
   tipoFiltro = '';
-  estadoFiltro: 'Activo' | 'Inactivo' = 'Activo';
+  estadoFiltro: 'Activo' | 'Inactivo' | '' = 'Activo';
 
   // ── Paginación ─────────────────────────────────────────
   paginaActual = 1;
@@ -76,6 +76,7 @@ export class LideresComponent implements OnInit {
   modoEdicion = false;
   liderEditando: Lider | null = null;
   liderForm!: FormGroup;
+  guardandoLider = false;
 
   // ── Estado Dropdown ────────────────────────────────────
   mostrarEstadoDropdown = false;
@@ -107,6 +108,7 @@ export class LideresComponent implements OnInit {
           nombre: `${l.nombres} ${l.apellidos}`,
           tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
           correo: l.email,
+          telefono: l.telefono ?? l.Telefono ?? l.telefonoMovil ?? l.celular ?? '',
           cliente: '',
           estado: l.activo ? 'Activo' : 'Inactivo'
         }));
@@ -161,16 +163,17 @@ export class LideresComponent implements OnInit {
   }
 
   filtrarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
-    this.estadoFiltro = estado === 'Inactivo' ? 'Inactivo' : 'Activo';
+    this.estadoFiltro = estado === 'Activo' || estado === 'Inactivo' ? estado : 'Activo';
     this.aplicarFiltros();
   }
 
-  toggleEstadoDropdown(): void {
+  toggleEstadoDropdown(event?: Event): void {
+    event?.stopPropagation();
     this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
   }
 
   seleccionarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
-    this.estadoFiltro = estado === 'Inactivo' ? 'Inactivo' : 'Activo';
+    this.estadoFiltro = estado === 'Activo' || estado === 'Inactivo' ? estado : '';
     this.mostrarEstadoDropdown = false;
     this.aplicarFiltros();
   }
@@ -228,6 +231,7 @@ export class LideresComponent implements OnInit {
     this.modoEdicion = false;
     this.liderEditando = null;
     this.liderParaEditar = null;
+    this.guardandoLider = false;
     this.liderForm.reset({ estado: 'Activo' });
     this.mostrarFormulario = true;
   }
@@ -236,6 +240,7 @@ export class LideresComponent implements OnInit {
     this.mostrarFormulario = false;
     this.liderEditando = null;
     this.liderParaEditar = null;
+    this.guardandoLider = false;
     this.liderForm.reset();
   }
 
@@ -255,10 +260,24 @@ export class LideresComponent implements OnInit {
     this.modoEdicion = true;
     this.liderEditando = lider;
     this.liderParaEditar = lider;
+    this.guardandoLider = false;
     this.mostrarFormulario = true;
   }
 
   guardarLider(payload: any): void {
+    if (this.guardandoLider) {
+      return;
+    }
+
+    if (!this.modoEdicion && this.liderYaExiste(payload)) {
+      this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto.';
+      this.mostrarConfirmacion = true;
+      setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      return;
+    }
+
+    this.guardandoLider = true;
+
     const solicitud = this.modoEdicion && this.liderParaEditar?.id
       ? {
           Nombres: payload.nombres,
@@ -273,6 +292,7 @@ export class LideresComponent implements OnInit {
       : {
           Idpersona: payload.personaId,
           Idtipo: payload.tipoId,
+          Telefono: payload.telefono,
           Usuariocreacion: 'frontend',
           Ipcreacion: '127.0.0.1'
         };
@@ -283,13 +303,13 @@ export class LideresComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
+        this.guardandoLider = false;
         this.mensajeConfirmacion = this.modoEdicion
           ? 'Los cambios han sido<br>guardados exitosamente'
           : 'El nuevo líder ha sido<br>agregado exitosamente';
 
         this.mostrarConfirmacion = true;
         this.mostrarFormulario = false;
-        this.liderParaEditar = null;
         this.liderEditando = null;
 
         this.obtenerLideresDelBackend();
@@ -298,12 +318,29 @@ export class LideresComponent implements OnInit {
         }, 3000);
       },
       error: (err) => {
+        this.guardandoLider = false;
         console.error('Error al guardar líder:', err);
         this.mensajeConfirmacion = 'No se pudo guardar el líder. Intente de nuevo.';
         this.mostrarConfirmacion = true;
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
       }
     });
+  }
+
+  private liderYaExiste(payload: any): boolean {
+    const correo = this.normalizarTexto(payload.correo);
+    const telefono = this.normalizarTexto(payload.telefono);
+    const nombreCompleto = this.normalizarTexto(`${payload.nombres ?? ''} ${payload.apellidos ?? ''}`);
+
+    return this.lideres.some(lider => {
+      return this.normalizarTexto(lider.correo) === correo
+        || this.normalizarTexto(lider.telefono) === telefono
+        || this.normalizarTexto(lider.nombre) === nombreCompleto;
+    });
+  }
+
+  private normalizarTexto(valor: unknown): string {
+    return String(valor ?? '').trim().toLowerCase();
   }
 
   abrirDescarga(): void {

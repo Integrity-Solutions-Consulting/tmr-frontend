@@ -96,7 +96,7 @@
       <div class="button-container">
         <!-- DESPUÉS -->
         <!-- DESPUÉS -->
-        <button class="btn-guardar" (click)="onGuardar()">
+        <button class="btn-guardar" type="button" (click)="onGuardar()" [disabled]="guardando">
           {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
           <span *ngIf="modoEdicion" class="material-icons">save</span>
         </button>

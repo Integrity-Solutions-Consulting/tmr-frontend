@@ -1,4 +1,4 @@
-<form class="proyecto-form" [formGroup]="formulario" (ngSubmit)="guardar()">
+<form class="proyecto-form" [formGroup]="formulario" (ngSubmit)="guardar()" autocomplete="off">
   <section class="proyecto-form__section">
     <h3>Información General</h3>
 
@@ -35,12 +35,14 @@
         <mat-label>Fecha de inicio</mat-label>
         <input
           matInput
-          type="date"
+          type="text"
+          autocomplete="off"
+          placeholder="dd/MM/yyyy"
           [matDatepicker]="inicioDatepicker"
           formControlName="fechaInicio"
         >
         <mat-datepicker-toggle matSuffix [for]="inicioDatepicker"></mat-datepicker-toggle>
-        <mat-datepicker #inicioDatepicker></mat-datepicker>
+        <mat-datepicker #inicioDatepicker [startAt]="hoy" startView="multi-year"></mat-datepicker>
         <mat-error *ngIf="formulario.controls.fechaInicio.hasError('fechaInvalida') && (formulario.controls.fechaInicio.touched || intentoGuardar)">Fecha inválida</mat-error>
         <mat-error *ngIf="!formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">Este campo es obligatorio</mat-error>
       </mat-form-field>
@@ -49,12 +51,14 @@
         <mat-label>Fecha de fin</mat-label>
         <input
           matInput
-          type="date"
+          type="text"
+          autocomplete="off"
+          placeholder="dd/MM/yyyy"
           [matDatepicker]="finDatepicker"
           formControlName="fechaFin"
         >
         <mat-datepicker-toggle matSuffix [for]="finDatepicker"></mat-datepicker-toggle>
-        <mat-datepicker #finDatepicker></mat-datepicker>
+        <mat-datepicker #finDatepicker [startAt]="hoy" startView="multi-year"></mat-datepicker>
         <mat-error *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</mat-error>
         <mat-error *ngIf="formulario.controls.fechaFin.hasError('fechaInvalida') && (formulario.controls.fechaFin.touched || intentoGuardar)">Fecha inválida</mat-error>
         <mat-error *ngIf="!fechaFinInvalida() && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">Este campo es obligatorio</mat-error>
@@ -217,12 +221,14 @@
                 <mat-label>Entrada</mat-label>
                 <input
                   matInput
-                  type="date"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="dd/MM/yyyy"
                   [matDatepicker]="entradaDatepicker"
                   formControlName="entrada"
                 >
                 <mat-datepicker-toggle matSuffix [for]="entradaDatepicker"></mat-datepicker-toggle>
-                <mat-datepicker #entradaDatepicker></mat-datepicker>
+                <mat-datepicker #entradaDatepicker [startAt]="hoy" startView="multi-year"></mat-datepicker>
                 <mat-error *ngIf="recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</mat-error>
               </mat-form-field>
 
@@ -230,12 +236,14 @@
                 <mat-label>Salida</mat-label>
                 <input
                   matInput
-                  type="date"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="dd/MM/yyyy"
                   [matDatepicker]="salidaDatepicker"
                   formControlName="salida"
                 >
                 <mat-datepicker-toggle matSuffix [for]="salidaDatepicker"></mat-datepicker-toggle>
-                <mat-datepicker #salidaDatepicker></mat-datepicker>
+                <mat-datepicker #salidaDatepicker [startAt]="hoy" startView="multi-year"></mat-datepicker>
                 <mat-error *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</mat-error>
                 <mat-error *ngIf="!recursoFechaSalidaInvalida(index) && recursoCampoInvalido(index, 'salida')">Este campo es obligatorio</mat-error>
               </mat-form-field>
