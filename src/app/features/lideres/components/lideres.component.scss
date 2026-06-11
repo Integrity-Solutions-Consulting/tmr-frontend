@@ -266,7 +266,7 @@ $hover-row: rgba(#163572, 0.04);
   border-radius: 10px;
   border: 1px solid #E5E5E5;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto; // permitir scroll horizontal si la tabla es más ancha
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
@@ -306,7 +306,10 @@ $hover-row: rgba(#163572, 0.04);
 }
 
 .lideres-table {
-  width: 100%;
+  /* Permitir que la tabla crezca según su contenido y mostrar scroll horizontal
+     cuando sea necesario, evitando que la última columna quede oculta */
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 
@@ -344,6 +347,9 @@ $hover-row: rgba(#163572, 0.04);
       vertical-align: middle;
       white-space: nowrap;
     }
+    /* Añadir un poco de espacio al final para que la última columna no quede
+       cubierta por una posible scrollbar vertical */
+    td:last-child { padding-right: 24px; }
   }
 }
 
