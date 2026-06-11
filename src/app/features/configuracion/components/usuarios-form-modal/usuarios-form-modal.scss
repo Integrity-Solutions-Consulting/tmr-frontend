@@ -480,6 +480,19 @@
   }
 }
 
+.form-section .form-grid + .form-grid {
+  margin-top: 18px;
+}
+
+.float-field {
+  position: relative;
+}
+
+.float-field__input--password {
+  padding-right: 48px;
+}
+
+
 @media (max-width: 620px) {
   .modal-form {
     max-width: 100vw;

@@ -299,7 +299,7 @@
           @if (isEdit) {
             <div class="float-field">
               <input
-                class="float-field__input"
+                class="float-field__input float-field__input--password"
                 [type]="showTemporaryPassword ? 'text' : 'password'"
                 formControlName="password"
                 placeholder=" "
@@ -308,7 +308,7 @@
               <label class="float-field__label">Contraseña <span class="req">*</span></label>
               <button
                 type="button"
-                class="float-field__btn-toggle"
+                class="password-toggle"
                 (click)="toggleTemporaryPasswordVisibility()"
                 title="Mostrar/ocultar contraseña"
               >
