@@ -38,8 +38,8 @@ export class ProyectosService {
       Lider: proyecto.lider,
       IdEstadoProyecto: proyecto.idEstadoProyecto ?? 0,
       Estado: proyecto.estado,
-      FechaInicio: proyecto.fechaInicio,
-      FechaFin: proyecto.fechaFin,
+      FechaInicio: this.formatearFechaCreacion(proyecto.fechaInicio),
+      FechaFin: this.formatearFechaCreacion(proyecto.fechaFin),
       Presupuesto: proyecto.presupuesto,
       Horas: proyecto.horas,
       LiderCosto: proyecto.costoHoraLider,
@@ -49,14 +49,39 @@ export class ProyectosService {
         Tipo: r.tipo,
         Nombre: r.nombre,
         Rol: r.rol,
-        Entrada: r.entrada,
-        Salida: r.salida,
+        Entrada: this.formatearFechaCreacion(r.entrada),
+        Salida: this.formatearFechaCreacion(r.salida),
         CostoHora: r.costoHora,
         Horas: r.horas
       }))
     };
 
     return this.http.post(this.apiUrl, payload);
+  }
+
+  private formatearFechaCreacion(fecha?: string | Date | null): string | null | undefined {
+    if (!fecha) {
+      return fecha;
+    }
+
+    if (fecha instanceof Date) {
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const anio = fecha.getFullYear();
+      return `${dia}-${mes}-${anio}`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      const [anio, mes, dia] = fecha.split('-');
+      return `${dia}-${mes}-${anio}`;
+    }
+
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(fecha)) {
+      const [dia, mes, anio] = fecha.split('/');
+      return `${dia.padStart(2, '0')}-${mes.padStart(2, '0')}-${anio}`;
+    }
+
+    return fecha;
   }
 
   actualizarProyecto(id: number, proyecto: Proyecto): Observable<any> {
