@@ -345,16 +345,26 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(normalizado)) {
       const [anio, mes, dia] = normalizado.split('-').map(Number);
-      return new Date(anio, mes - 1, dia);
+      return this.crearFechaEstricta(anio, mes, dia);
     }
 
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalizado)) {
       const [dia, mes, anio] = normalizado.split('/').map(Number);
-      return new Date(anio, mes - 1, dia);
+      return this.crearFechaEstricta(anio, mes, dia);
     }
 
     const fecha = new Date(normalizado);
     return isNaN(fecha.getTime()) ? null : fecha;
+  }
+
+  private crearFechaEstricta(anio: number, mes: number, dia: number): Date | null {
+    const fecha = new Date(anio, mes - 1, dia);
+    const fechaValida =
+      fecha.getFullYear() === anio &&
+      fecha.getMonth() === mes - 1 &&
+      fecha.getDate() === dia;
+
+    return fechaValida ? fecha : null;
   }
 
   private numeroValido(permiteDecimal: boolean): ValidatorFn {

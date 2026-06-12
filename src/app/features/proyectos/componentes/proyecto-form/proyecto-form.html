@@ -31,30 +31,32 @@
         <mat-error *ngIf="campoInvalido('nombre')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Fecha de inicio</mat-label>
+      <div class="proyecto-form__field proyecto-form__date-field">
         <input
-          matInput
+          #fechaInicioInput
+          class="proyecto-form__date-control"
           type="date"
           autocomplete="off"
           formControlName="fechaInicio"
         >
-        <mat-error *ngIf="formulario.controls.fechaInicio.hasError('fechaInvalida') && (formulario.controls.fechaInicio.touched || intentoGuardar)">Fecha inválida</mat-error>
-        <mat-error *ngIf="!formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
+        <label class="proyecto-form__date-label">Fecha de inicio <span>*</span></label>
+        <div class="proyecto-form__date-error" *ngIf="(formulario.controls.fechaInicio.hasError('fechaInvalida') || fechaInicioInput.validity.badInput) && (formulario.controls.fechaInicio.touched || intentoGuardar)">Fecha inválida</div>
+        <div class="proyecto-form__date-error" *ngIf="!fechaInicioInput.validity.badInput && !formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">Este campo es obligatorio</div>
+      </div>
 
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Fecha de fin</mat-label>
+      <div class="proyecto-form__field proyecto-form__date-field">
         <input
-          matInput
+          #fechaFinInput
+          class="proyecto-form__date-control"
           type="date"
           autocomplete="off"
           formControlName="fechaFin"
         >
-        <mat-error *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</mat-error>
-        <mat-error *ngIf="formulario.controls.fechaFin.hasError('fechaInvalida') && (formulario.controls.fechaFin.touched || intentoGuardar)">Fecha inválida</mat-error>
-        <mat-error *ngIf="!fechaFinInvalida() && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
+        <label class="proyecto-form__date-label">Fecha de fin <span>*</span></label>
+        <div class="proyecto-form__date-error" *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</div>
+        <div class="proyecto-form__date-error" *ngIf="!fechaFinInvalida() && (formulario.controls.fechaFin.hasError('fechaInvalida') || fechaFinInput.validity.badInput) && (formulario.controls.fechaFin.touched || intentoGuardar)">Fecha inválida</div>
+        <div class="proyecto-form__date-error" *ngIf="!fechaFinInvalida() && !fechaFinInput.validity.badInput && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">Este campo es obligatorio</div>
+      </div>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Presupuesto</mat-label>
@@ -209,30 +211,32 @@
             </div>
 
             <div class="proyecto-form__resource-bottom">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
-                <mat-label>Entrada</mat-label>
+              <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                 <input
-                  matInput
+                  #entradaInput
+                  class="proyecto-form__date-control"
                   type="date"
                   autocomplete="off"
                   formControlName="entrada"
                 >
-                <mat-error *ngIf="recursos.at(index).get('entrada')?.hasError('fechaInvalida') && (recursos.at(index).get('entrada')?.touched || intentoGuardar)">Fecha inválida</mat-error>
-                <mat-error *ngIf="!recursos.at(index).get('entrada')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
+                <label class="proyecto-form__date-label">Entrada <span>*</span></label>
+                <div class="proyecto-form__date-error" *ngIf="(recursos.at(index).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (recursos.at(index).get('entrada')?.touched || intentoGuardar)">Fecha inválida</div>
+                <div class="proyecto-form__date-error" *ngIf="!entradaInput.validity.badInput && !recursos.at(index).get('entrada')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</div>
+              </div>
 
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-fecha">
-                <mat-label>Salida</mat-label>
+              <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                 <input
-                  matInput
+                  #salidaInput
+                  class="proyecto-form__date-control"
                   type="date"
                   autocomplete="off"
                   formControlName="salida"
                 >
-                <mat-error *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</mat-error>
-                <mat-error *ngIf="!recursoFechaSalidaInvalida(index) && recursos.at(index).get('salida')?.hasError('fechaInvalida') && (recursos.at(index).get('salida')?.touched || intentoGuardar)">Fecha inválida</mat-error>
-                <mat-error *ngIf="!recursoFechaSalidaInvalida(index) && !recursos.at(index).get('salida')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'salida')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
+                <label class="proyecto-form__date-label">Salida <span>*</span></label>
+                <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</div>
+                <div class="proyecto-form__date-error" *ngIf="!recursoFechaSalidaInvalida(index) && (recursos.at(index).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (recursos.at(index).get('salida')?.touched || intentoGuardar)">Fecha inválida</div>
+                <div class="proyecto-form__date-error" *ngIf="!recursoFechaSalidaInvalida(index) && !salidaInput.validity.badInput && !recursos.at(index).get('salida')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'salida')">Este campo es obligatorio</div>
+              </div>
 
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-costo">
                 <mat-label>Costo</mat-label>
