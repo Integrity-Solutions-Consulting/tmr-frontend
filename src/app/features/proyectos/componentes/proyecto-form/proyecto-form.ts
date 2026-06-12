@@ -22,8 +22,6 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -38,8 +36,6 @@ import { ProyectosService } from '../../servicios/proyectos.service';
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -65,7 +61,6 @@ export class ProyectoForm implements OnInit, OnChanges {
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
   cargosFiltrados: CargoLookup[][] = [];
-  hoy = new Date();
   formulario = this.fb.group({
     codigo: ['', Validators.required],
     nombre: ['', Validators.required],
