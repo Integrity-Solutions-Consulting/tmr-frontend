@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { UserModulesService } from './user-modules.service';
 
 @Injectable({
   providedIn: 'root',
@@ -6,6 +7,8 @@ import { Injectable } from '@angular/core';
 export class TokenService {
   private readonly TOKEN_KEY = 'accessToken';
   private readonly USER_KEY = 'currentUser';
+
+  constructor(private userModulesService: UserModulesService) {}
 
   setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
@@ -48,6 +51,7 @@ export class TokenService {
   clear(): void {
     this.removeToken();
     this.removeUser();
+    this.removeModules();
   }
 
   decodeToken(token: string): any {
@@ -125,28 +129,24 @@ export class TokenService {
 
   // Módulos
   getUserModules(): string[] {
-    const modulesJson = localStorage.getItem('userModules');
-    if (modulesJson) {
-      try {
-        const modules = JSON.parse(modulesJson);
-        return Array.isArray(modules) ? modules : [];
-      } catch (e) {}
-    }
-    return [];
+    // ✅ CAMBIO: Obtener módulos del servicio en memoria, no de localStorage
+    return this.userModulesService.getModules();
   }
 
   setUserModules(modules: string[]): void {
-    localStorage.setItem('userModules', JSON.stringify(modules));
+    // ✅ CAMBIO: Guardar módulos en el servicio en memoria, no en localStorage
+    this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
   }
 
   hasModule(moduleName: string): boolean {
     if (this.isAdmin()) return true;
-    const modules = this.getUserModules().map((m) => m.toUpperCase());
-    return modules.includes(moduleName.toUpperCase());
+    // ✅ CAMBIO: Usar el método del servicio en memoria
+    return this.userModulesService.hasModule(moduleName);
   }
 
   removeModules(): void {
-    localStorage.removeItem('userModules');
+    // ✅ CAMBIO: Limpiar módulos del servicio en memoria, no de localStorage
+    this.userModulesService.clearModules();
   }
 
   clearToken(): void {

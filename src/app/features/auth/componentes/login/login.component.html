@@ -50,7 +50,7 @@
         class="submit-button"
         [disabled]="loginForm.invalid || (loading$ | async)"
       >
-        <span *ngIf="!(loading$ | async)">Iniciar Sesión</span>
+        <span *ngIf="!(loading$ | async)">Ingresar</span>
         <span *ngIf="loading$ | async">Cargando...</span>
       </button>
     </form>
@@ -60,11 +60,5 @@
       <a routerLink="/auth/forgot-password">¿Olvidaste tu contraseña?</a>
     </div>
 
-    <!-- Acceso Demo (sin backend) -->
-    <div class="demo-access">
-      <button type="button" class="demo-button" (click)="onLoginDemo()">
-        ▶ Acceso Demo (sin backend)
-      </button>
-    </div>
   </div>
 </div>

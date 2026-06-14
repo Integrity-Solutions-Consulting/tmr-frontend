@@ -6,6 +6,7 @@ import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../servicios/auth.service';
 import { TokenService } from '../servicios/token.service';
+import { UserModulesService } from '../servicios/user-modules.service';
 import { TokenMonitorService } from '../../../core/services/token-monitor.service';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
+  private userModulesService = inject(UserModulesService);
   private tokenMonitor = inject(TokenMonitorService);
   private router = inject(Router);
 
@@ -29,7 +31,8 @@ export class AuthEffects {
               tap((modules) => {
                 console.log("Módulos recibidos desde backend:", modules);
                 // ApiResponseInterceptor ya transformó ApiResponse<string[]> -> string[]
-                this.tokenService.setUserModules(Array.isArray(modules) ? modules : []);
+                // CAMBIO: Usar UserModulesService (en memoria) en lugar de localStorage
+                this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
               }),
               tap(() => {
                 // IMPORTANTE: Iniciar monitoreo del token después del login exitoso
@@ -57,11 +60,16 @@ export class AuthEffects {
       ofType(AuthActions.logout),
       switchMap(() =>
         this.authService.logout().pipe(
-          tap(() => this.tokenService.clear()),
+          tap(() => {
+            this.tokenService.clear();
+            // ✅ CAMBIO: Limpiar módulos del servicio en memoria
+            this.userModulesService.clearModules();
+          }),
           map(() => AuthActions.logoutSuccess()),
           catchError((error) => {
             console.warn('Backend logout request failed or expired, clearing local session anyway.', error);
             this.tokenService.clear();
+            this.userModulesService.clearModules();
             return of(AuthActions.logoutSuccess());
           })
         )

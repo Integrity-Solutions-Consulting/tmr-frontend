@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TokenService } from '../../features/auth/servicios/token.service';
+import { UserModulesService } from '../../features/auth/servicios/user-modules.service';
 
 /** Guard que protege rutas según el Rol del usuario.
  *  - Configuración: Solo accesible por Administradores.
@@ -8,6 +9,7 @@ import { TokenService } from '../../features/auth/servicios/token.service';
  */
 export const roleGuard: CanActivateFn = (route) => {
   const tokenService = inject(TokenService);
+  const userModulesService = inject(UserModulesService);
   const router = inject(Router);
 
   if (!tokenService.isTokenValid()) {
@@ -35,7 +37,8 @@ export const roleGuard: CanActivateFn = (route) => {
 
   if (path && pathModuleMap[path]) {
     const requiredModule = pathModuleMap[path];
-    if (!tokenService.hasModule(requiredModule)) {
+    // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
+    if (!userModulesService.hasModule(requiredModule)) {
       console.warn(`Acceso denegado a la ruta ${path}. Se requiere el módulo ${requiredModule}`);
       
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
