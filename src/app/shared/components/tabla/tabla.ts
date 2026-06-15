@@ -23,7 +23,8 @@ import {
   ActionMenuComponent,
   ActionMenuItem
 } from '../action-menu/action-menu.component';
-import { Proyecto } from '../../../features/proyectos/modelos/proyecto.model';
+import { Proyecto, LookupOption } from '../../../features/proyectos/modelos/proyecto.model';
+import { ProyectosService } from '../../../features/proyectos/servicios/proyectos.service';
 import { FiltrosProyecto } from '../../../features/proyectos/componentes/proyectos-filtros/proyectos-filtros';
 import { selectProyectos } from '../../../features/proyectos/store/proyectos.selectors';
 
@@ -54,6 +55,8 @@ export class Tabla implements AfterViewInit {
   paginator!: MatPaginator;
 
   private store = inject(Store);
+  private proyectosService = inject(ProyectosService);
+  seguimientoOpciones: LookupOption[] = [];
 
   private proyectosSignal = toSignal(
     this.store.select(selectProyectos),
@@ -63,6 +66,7 @@ export class Tabla implements AfterViewInit {
   private _filtros = signal<FiltrosProyecto>({
     busqueda: '',
     estados: [],
+    seguimiento: [],
     tipos: []
   });
 
@@ -70,6 +74,7 @@ export class Tabla implements AfterViewInit {
     'codigo',
     'nombre',
     'cliente',
+    'seguimiento',
     'fechas',
     'lideres',
     'numeroRecursos',
@@ -104,11 +109,18 @@ export class Tabla implements AfterViewInit {
         !filtros.tipos.length ||
         filtros.tipos.includes(proyecto.tipo ?? '');
 
-      return coincideBusqueda && coincideEstado && coincideTipo;
+      // Filtro de seguimiento (ids de estado)
+      const coincideSeguimiento =
+        !(filtros.seguimiento && filtros.seguimiento.length) ||
+        (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
+
+      return coincideBusqueda && coincideEstado && coincideTipo && coincideSeguimiento;
     });
   });
 
   constructor() {
+    this.cargarSeguimientoOpciones();
+
     effect(() => {
       this.dataSource.data = this.proyectosFiltrados();
 
@@ -117,6 +129,37 @@ export class Tabla implements AfterViewInit {
         this.dataSource.paginator.firstPage();
       }
     });
+  }
+
+  private cargarSeguimientoOpciones(): void {
+    this.proyectosService.obtenerLookups().subscribe({
+      next: (lookups) => {
+        this.seguimientoOpciones = lookups.estados;
+      },
+      error: (error) => console.error('Error al cargar seguimiento:', error)
+    });
+  }
+
+  obtenerSeguimiento(proyecto: Proyecto): string {
+    if (!proyecto.idEstadoProyecto) {
+      return 'Sin seguimiento';
+    }
+    return this.seguimientoOpciones.find(o => o.id === proyecto.idEstadoProyecto)?.nombre ?? 'Sin seguimiento';
+  }
+
+  obtenerSeguimientoClase(proyecto: Proyecto): string {
+    const seguimiento = this.obtenerSeguimiento(proyecto).toLowerCase();
+    if (seguimiento.includes('complet')) return 'seguimiento-completado';
+    if (seguimiento.includes('cancel')) return 'seguimiento-cancelado';
+    if (seguimiento.includes('espera')) return 'seguimiento-espera';
+    if (seguimiento.includes('progreso')) return 'seguimiento-progreso';
+    if (seguimiento.includes('activo')) return 'seguimiento-activo';
+    if (seguimiento.includes('aprob')) return 'seguimiento-aprobado';
+    if (seguimiento.includes('plan') || seguimiento.includes('planificación')) return 'seguimiento-planificacion';
+    if (seguimiento.includes('desarrollo')) return 'seguimiento-desarrollo';
+    if (seguimiento.includes('aplaz') || seguimiento.includes('delay')) return 'seguimiento-aplazado';
+    if (seguimiento.includes('sin seguimiento')) return 'seguimiento-inactivo';
+    return 'seguimiento-inactivo';
   }
 
   ngAfterViewInit(): void {

@@ -34,6 +34,30 @@
     }
   </div>
 
+  <!-- Filtro Seguimiento -->
+  <div class="filtros__dropdown-wrapper" [class.active]="seguimientoSeleccionados.length > 0" (click)="toggleSeguimientoDropdown($event)">
+    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="filtros__dropdown-label">{{ labelSeguimiento }}</span>
+    @if (mostrarSeguimientoDropdown) {
+      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
+        @for (e of seguimientoOpciones; track e.id) {
+          <div class="filtros__dropdown-option" (click)="toggleSeguimiento(e.id, $event)">
+            <div class="filtros__checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
+              @if (estaSeguimientoSeleccionado(e.id)) {
+                <span class="material-icons">check</span>
+              }
+            </div>
+            <span>{{ e.nombre }}</span>
+          </div>
+        }
+        <div class="filtros__dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
+      </div>
+    }
+  </div>
+
   <!-- Filtro Tipo -->
   <div class="filtros__dropdown-wrapper" [class.active]="tiposSeleccionados.length > 0" (click)="toggleTipoDropdown($event)">
     <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

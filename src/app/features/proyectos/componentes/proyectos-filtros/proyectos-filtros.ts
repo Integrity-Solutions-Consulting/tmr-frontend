@@ -9,6 +9,7 @@ import { LookupOption } from '../../modelos/proyecto.model';
 export interface FiltrosProyecto {
   busqueda: string;
   estados: string[];
+  seguimiento?: number[];
   tipos: string[];
 }
 
@@ -26,13 +27,19 @@ export class ProyectosFiltros implements OnInit {
 
   busqueda = '';
   estadosSeleccionados: string[] = [];
+  seguimientoSeleccionados: number[] = [];
   tiposSeleccionados: string[] = [];
 
   estados: LookupOption[] = [];
   tipos: LookupOption[] = [];
 
   mostrarEstadoDropdown = false;
+  mostrarSeguimientoDropdown = false;
   mostrarTipoDropdown = false;
+
+  get seguimientoOpciones(): LookupOption[] {
+    return this.estados.filter(e => e.nombre !== 'Activo');
+  }
 
   get labelEstado(): string {
     if (!this.estadosSeleccionados.length) return 'Estado';
@@ -44,6 +51,12 @@ export class ProyectosFiltros implements OnInit {
     if (!this.tiposSeleccionados.length) return 'Tipo';
     if (this.tiposSeleccionados.length === 1) return this.tiposSeleccionados[0];
     return `${this.tiposSeleccionados.length} tipos`;
+  }
+
+  get labelSeguimiento(): string {
+    if (!this.seguimientoSeleccionados.length) return 'Seguimiento';
+    if (this.seguimientoSeleccionados.length === 1) return this.estados.find(e => e.id === this.seguimientoSeleccionados[0])?.nombre ?? 'Seguimiento';
+    return `${this.seguimientoSeleccionados.length} seguimiento`;
   }
 
   ngOnInit(): void {
@@ -59,12 +72,21 @@ export class ProyectosFiltros implements OnInit {
   toggleEstadoDropdown(event: Event): void {
     event.stopPropagation();
     this.mostrarTipoDropdown = false;
+    this.mostrarSeguimientoDropdown = false;
     this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
+  }
+
+  toggleSeguimientoDropdown(event: Event): void {
+    event.stopPropagation();
+    this.mostrarEstadoDropdown = false;
+    this.mostrarTipoDropdown = false;
+    this.mostrarSeguimientoDropdown = !this.mostrarSeguimientoDropdown;
   }
 
   toggleTipoDropdown(event: Event): void {
     event.stopPropagation();
     this.mostrarEstadoDropdown = false;
+    this.mostrarSeguimientoDropdown = false;
     this.mostrarTipoDropdown = !this.mostrarTipoDropdown;
   }
 
@@ -75,6 +97,17 @@ export class ProyectosFiltros implements OnInit {
       this.estadosSeleccionados = [...this.estadosSeleccionados, valor];
     } else {
       this.estadosSeleccionados = this.estadosSeleccionados.filter(e => e !== valor);
+    }
+    this.emitirFiltros();
+  }
+
+  toggleSeguimiento(valorId: number, event: Event): void {
+    event.stopPropagation();
+    const idx = this.seguimientoSeleccionados.indexOf(valorId);
+    if (idx === -1) {
+      this.seguimientoSeleccionados = [...this.seguimientoSeleccionados, valorId];
+    } else {
+      this.seguimientoSeleccionados = this.seguimientoSeleccionados.filter(e => e !== valorId);
     }
     this.emitirFiltros();
   }
@@ -96,6 +129,12 @@ export class ProyectosFiltros implements OnInit {
     this.emitirFiltros();
   }
 
+  limpiarSeguimientos(event: Event): void {
+    event.stopPropagation();
+    this.seguimientoSeleccionados = [];
+    this.emitirFiltros();
+  }
+
   limpiarTipos(event: Event): void {
     event.stopPropagation();
     this.tiposSeleccionados = [];
@@ -105,10 +144,15 @@ export class ProyectosFiltros implements OnInit {
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
     this.mostrarTipoDropdown = false;
+    this.mostrarSeguimientoDropdown = false;
   }
 
   estaEstadoSeleccionado(valor: string): boolean {
     return this.estadosSeleccionados.includes(valor);
+  }
+
+  estaSeguimientoSeleccionado(valorId: number): boolean {
+    return this.seguimientoSeleccionados.includes(valorId);
   }
 
   estaTipoSeleccionado(valor: string): boolean {
@@ -119,7 +163,8 @@ export class ProyectosFiltros implements OnInit {
     this.filtrosChange.emit({
       busqueda: this.busqueda,
       estados: this.estadosSeleccionados,
-      tipos: this.tiposSeleccionados
+      tipos: this.tiposSeleccionados,
+      seguimiento: this.seguimientoSeleccionados
     });
   }
 }

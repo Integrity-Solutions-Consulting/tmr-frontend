@@ -24,6 +24,15 @@
       </td>
     </ng-container>
 
+    <ng-container matColumnDef="seguimiento">
+      <th mat-header-cell *matHeaderCellDef>Seguimiento</th>
+      <td mat-cell *matCellDef="let proyecto">
+        <span class="seguimiento-badge" [class]="'seguimiento-badge ' + obtenerSeguimientoClase(proyecto)">
+          {{ obtenerSeguimiento(proyecto) }}
+        </span>
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="fechas">
       <th mat-header-cell *matHeaderCellDef>Fechas de inicio/finalización</th>
       <td mat-cell *matCellDef="let proyecto">
