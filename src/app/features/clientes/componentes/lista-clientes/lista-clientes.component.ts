@@ -67,7 +67,6 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   // ── Dropdown estado personalizado ─────────────────────────
   dropdownEstadoAbierto    = false;
   estadoSeleccionado       = 'Estado';
-  busquedaEstado           = '';
   estadosSeleccionados: string[] = [];
 
   // ── Paginación local ──────────────────────────────────────
@@ -79,11 +78,12 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.filtrosForm = this.fb.group({
       busqueda: [''],
-      estado:   ['Activo'],
+      estado:   ['todos'],
     });
-    this.estadoSeleccionado = 'Activo';
+    this.estadoSeleccionado = 'todos';
 
     // Cargar inicial
+    this.store.dispatch(ClientesActions.cargarResumenClientes());
     this.despacharCarga();
 
     // Reaccionar a cambios en búsqueda con debounce
@@ -139,10 +139,10 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   private getFiltros() {
-    const estado = this.filtrosForm.get('estado')!.value ?? 'Activo';
+    const estado = this.filtrosForm.get('estado')!.value ?? 'todos';
     return {
       busqueda: this.filtrosForm.get('busqueda')!.value ?? '',
-      estado:   estado === 'todos' ? 'Activo' : estado,
+      estado,
     };
   }
 
@@ -192,11 +192,10 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   seleccionarEstado(estado: string): void {
-    const estadoNormalizado = estado === 'todos' ? 'Activo' : estado;
-    this.estadoSeleccionado    = estadoNormalizado;
+    this.estadoSeleccionado    = estado;
     this.dropdownEstadoAbierto = false;
-    this.filtrosForm.get('estado')!.setValue(estadoNormalizado);
-    this.estadosSeleccionados = estadoNormalizado === 'Activo' ? [] : [estadoNormalizado];
+    this.filtrosForm.get('estado')!.setValue(estado);
+    this.estadosSeleccionados = estado === 'todos' ? [] : [estado];
   }
 
   // ── Dropdown estado con checkboxes ────────────────────────
@@ -205,8 +204,8 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     if (idx > -1) {
       this.estadosSeleccionados.splice(idx, 1);
       if (this.estadosSeleccionados.length === 0) {
-        this.filtrosForm.get('estado')!.setValue('Activo');
-        this.estadoSeleccionado = 'Activo';
+        this.filtrosForm.get('estado')!.setValue('todos');
+        this.estadoSeleccionado = 'todos';
       } else {
         this.filtrosForm.get('estado')!.setValue(this.estadosSeleccionados[0]);
         this.estadoSeleccionado = this.estadosSeleccionados[0];
@@ -220,31 +219,9 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
 
   limpiarFiltroEstado(): void {
     this.estadosSeleccionados  = [];
-    this.busquedaEstado        = '';
-    this.filtrosForm.get('estado')!.setValue('Activo');
-    this.estadoSeleccionado    = 'Activo';
+    this.filtrosForm.get('estado')!.setValue('todos');
+    this.estadoSeleccionado    = 'todos';
     this.dropdownEstadoAbierto = false;
-  }
-
-  toggleFiltroInactivos(): void {
-    const estadoActual = this.filtrosForm.get('estado')!.value;
-    if (estadoActual === 'Inactivo') {
-      this.estadosSeleccionados = [];
-      this.filtrosForm.get('estado')!.setValue('Activo');
-      this.estadoSeleccionado = 'Activo';
-    } else {
-      this.estadosSeleccionados = ['Inactivo'];
-      this.filtrosForm.get('estado')!.setValue('Inactivo');
-      this.estadoSeleccionado = 'Inactivo';
-    }
-  }
-
-  contarPorEstado(estado: string): number {
-    let count = 0;
-    this.clientes$.subscribe(c => {
-      count = c.filter(x => x.estado === estado).length;
-    }).unsubscribe();
-    return count;
   }
 
   // ── Acciones tabla ────────────────────────────────────────

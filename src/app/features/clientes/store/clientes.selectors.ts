@@ -3,11 +3,7 @@ import { selectClientesState } from './clientes.reducer';
 
 export const selectResumenClientes = createSelector(
   selectClientesState,
-  state => ({
-    totalInactivos: state.clientes.filter(c => c.estado === 'Inactivo').length,
-    totalActivos:   state.clientes.filter(c => c.estado === 'Activo').length,
-    total:          state.clientes.length,
-  })
+  state => state.resumen
 );
 
 export const selectPaginacionInfo = createSelector(

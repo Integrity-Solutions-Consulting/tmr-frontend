@@ -1,7 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import {
   Cliente, CrearClienteRequest, EditarClienteRequest,
-  PaginacionResponse, FiltrosCliente
+  PaginacionResponse, FiltrosCliente, ResumenClientes
 } from '../modelos/cliente.model';
 
 export const ClientesActions = createActionGroup({
@@ -12,6 +12,10 @@ export const ClientesActions = createActionGroup({
     'Cargar Clientes': props<{ pagina: number; tamanoPagina: number; filtros: FiltrosCliente }>(),
     'Cargar Clientes Exitoso': props<{ respuesta: PaginacionResponse<Cliente> }>(),
     'Cargar Clientes Fallido': props<{ error: string }>(),
+
+    'Cargar Resumen Clientes': emptyProps(),
+    'Cargar Resumen Clientes Exitoso': props<{ resumen: ResumenClientes }>(),
+    'Cargar Resumen Clientes Fallido': props<{ error: string }>(),
 
     // ── Cargar detalle ──────────────────────────────────────
     'Cargar Cliente Por Id': props<{ id: number }>(),

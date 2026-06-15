@@ -4,7 +4,7 @@ import { Observable, map, switchMap, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   Cliente, CrearClienteRequest, EditarClienteRequest,
-  PaginacionResponse, FiltrosCliente,
+  PaginacionResponse, FiltrosCliente, ResumenClientes,
   TipoIdentificacion, EstadoCliente, EstadoProyecto
 } from '../modelos/cliente.model';
 
@@ -89,15 +89,9 @@ export class ClientesService {
 
     return this.http.get<ClienteBackendLista[]>(url, this.options).pipe(
       map(lista => {
-        const clientes: Cliente[] = lista.map(c => ({
-          id: c.id,
-          tipoId: this.aTipoId(c.tipoIdentificacion),
-          identificador: c.numeroIdentificacion,
-          nombreComercial: c.nombreComercial,
-          correoElectronico: c.email,
-          telefono: c.telefono,
-          estado: this.aEstado(c.activo),
-        }));
+        const clientes = this.ordenarActivosPrimero(
+          lista.map(c => this.mapListaACliente(c))
+        );
         const totalItems   = clientes.length;
         const totalPaginas = Math.ceil(totalItems / tamanoPagina) || 1;
         const inicio       = (pagina - 1) * tamanoPagina;
@@ -110,6 +104,41 @@ export class ClientesService {
   // ─────────────────────────────────────────────────────────
   //  POR ID
   // ─────────────────────────────────────────────────────────
+  getResumenClientes(): Observable<ResumenClientes> {
+    return this.http.get<ClienteBackendLista[]>(this.baseUrl, this.options).pipe(
+      map(lista => {
+        const clientes = lista.map(c => this.mapListaACliente(c));
+        const totalActivos = clientes.filter(c => c.estado === 'Activo').length;
+        const totalInactivos = clientes.filter(c => c.estado === 'Inactivo').length;
+
+        return {
+          totalActivos,
+          totalInactivos,
+          total: totalActivos + totalInactivos,
+        };
+      })
+    );
+  }
+
+  private mapListaACliente(c: ClienteBackendLista): Cliente {
+    return {
+      id: c.id,
+      tipoId: this.aTipoId(c.tipoIdentificacion),
+      identificador: c.numeroIdentificacion,
+      nombreComercial: c.nombreComercial,
+      correoElectronico: c.email,
+      telefono: c.telefono,
+      estado: this.aEstado(c.activo),
+    };
+  }
+
+  private ordenarActivosPrimero(clientes: Cliente[]): Cliente[] {
+    return [...clientes].sort((a, b) => {
+      if (a.estado === b.estado) return 0;
+      return a.estado === 'Activo' ? -1 : 1;
+    });
+  }
+
   getClientePorId(id: number): Observable<Cliente> {
     return this.http.get<ClienteBackendDetalle>(
       `${this.baseUrl}/${id}`, this.options

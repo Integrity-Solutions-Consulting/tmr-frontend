@@ -1,59 +1,48 @@
 <div class="metricas">
 
-  <!-- Card 1: No asignados / Asignados -->
   <div class="metricas__card">
     <div class="metricas__card-content">
       <div class="metricas__top">
-        <img
-          src="assets/iconos/card-project.svg"
-          alt="proyectos"
-          class="metricas__icon"
-          width="20"
-          height="20"
-        />
-        <span class="metricas__numero">
-          {{ asignacionNumero }}
-        </span>
+        <span class="metricas__numero">{{ totalColaboradores }}</span>
       </div>
-      <span class="metricas__label">
-        {{ asignacionLabel }}
-      </span>
+      <span class="metricas__label">Total colaboradores</span>
     </div>
-    <button
-      class="metricas__filter-btn"
-      (click)="toggleAsignados()"
-      [title]="asignacionTitulo"
-    >
-      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
-    </button>
   </div>
 
-  <!-- Card 2: Inactivos / Activos -->
   <div class="metricas__card">
     <div class="metricas__card-content">
       <div class="metricas__top">
-        <img
-          src="assets/iconos/card-user.svg"
-          alt="usuarios"
-          class="metricas__icon"
-          width="20"
-          height="20"
-        />
-        <span class="metricas__numero">
-          {{ estadoNumero }}
-        </span>
+        <span class="metricas__numero">{{ activos }}</span>
       </div>
-      <span class="metricas__label">
-        {{ estadoLabel }}
-      </span>
+      <span class="metricas__label">Activos</span>
     </div>
-    <button
-      class="metricas__filter-btn"
-      (click)="toggleActivos()"
-      [title]="estadoTitulo"
-    >
-      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
-    </button>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__numero">{{ inactivos }}</span>
+      </div>
+      <span class="metricas__label">Inactivos</span>
+    </div>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__numero">{{ asignados }}</span>
+      </div>
+      <span class="metricas__label">Asignados</span>
+    </div>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__numero">{{ noAsignados }}</span>
+      </div>
+      <span class="metricas__label">No asignados</span>
+    </div>
   </div>
 
 </div>

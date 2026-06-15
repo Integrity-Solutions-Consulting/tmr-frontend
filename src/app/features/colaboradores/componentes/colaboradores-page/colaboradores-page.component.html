@@ -7,11 +7,11 @@
   <!-- Cards métricas -->
   <div class="colabs-page__metricas">
     <app-cards-metricas
+      [totalColaboradores]="totalColaboradores"
       [noAsignados]="noAsignados"
       [asignados]="asignados"
       [inactivos]="inactivos"
       [activos]="activos"
-      (filtrarTabla)="onFiltrarDesdeMetrica($event)"
     />
   </div>
 

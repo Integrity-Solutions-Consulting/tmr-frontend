@@ -34,6 +34,20 @@ export const cargarClientePorIdEffect = createEffect(
   { functional: true }
 );
 
+export const cargarResumenClientesEffect = createEffect(
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
+    actions$.pipe(
+      ofType(ClientesActions.cargarResumenClientes),
+      switchMap(() =>
+        svc.getResumenClientes().pipe(
+          map(resumen => ClientesActions.cargarResumenClientesExitoso({ resumen })),
+          catchError(err => of(ClientesActions.cargarResumenClientesFallido({ error: err.message })))
+        )
+      )
+    ),
+  { functional: true }
+);
+
 export const crearClienteEffect = createEffect(
   (actions$ = inject(Actions), svc = inject(ClientesService)) =>
     actions$.pipe(
@@ -75,6 +89,20 @@ export const recargarTrasCrearEffect = createEffect(
         svc.getClientes(paginaActual, tamanoPagina, filtros).pipe(
           map(respuesta => ClientesActions.cargarClientesExitoso({ respuesta })),
           catchError(err  => of(ClientesActions.cargarClientesFallido({ error: err.message })))
+        )
+      )
+    ),
+  { functional: true }
+);
+
+export const recargarResumenTrasGuardarEffect = createEffect(
+  (actions$ = inject(Actions), svc = inject(ClientesService)) =>
+    actions$.pipe(
+      ofType(ClientesActions.crearClienteExitoso, ClientesActions.editarClienteExitoso),
+      switchMap(() =>
+        svc.getResumenClientes().pipe(
+          map(resumen => ClientesActions.cargarResumenClientesExitoso({ resumen })),
+          catchError(err => of(ClientesActions.cargarResumenClientesFallido({ error: err.message })))
         )
       )
     ),
