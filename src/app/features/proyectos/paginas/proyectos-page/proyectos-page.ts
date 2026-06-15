@@ -58,6 +58,8 @@ export class ProyectosPage implements OnDestroy {
   private store = inject(Store);
   private proyectosService = inject(ProyectosService);
 
+  seguimientoMap: Record<number, string> = {};
+
   modalCrearVisible = false;
   modalDetalleVisible = false;
   confirmEliminarVisible = false;
@@ -71,6 +73,7 @@ export class ProyectosPage implements OnDestroy {
   filtros: FiltrosProyecto = {
     busqueda: '',
     estados: [],
+    seguimiento: [],
     tipos: []
   };
 
@@ -91,6 +94,24 @@ export class ProyectosPage implements OnDestroy {
 
   constructor() {
     this.store.dispatch(cargarProyectos());
+    this.cargarSeguimientoLookups();
+  }
+
+  private cargarSeguimientoLookups(): void {
+    this.proyectosService.obtenerLookups().pipe(take(1)).subscribe({
+      next: (lookups) => {
+        this.seguimientoMap = lookups.estados.reduce((map, estado) => {
+          map[estado.id] = estado.nombre;
+          return map;
+        }, {} as Record<number, string>);
+      },
+      error: (error) => console.error('Error al cargar estados de seguimiento:', error)
+    });
+  }
+
+  private obtenerSeguimientoNombre(idEstadoProyecto?: number | null): string {
+    if (!idEstadoProyecto) return 'Sin seguimiento';
+    return this.seguimientoMap[idEstadoProyecto] ?? 'Sin seguimiento';
   }
 
   ngOnDestroy(): void {
@@ -205,6 +226,7 @@ export class ProyectosPage implements OnDestroy {
       { header: 'Nombre',      key: 'nombre',      width: 28 },
       { header: 'Cliente',     key: 'cliente',     width: 24 },
       { header: 'Tipo',        key: 'tipo',        width: 20 },
+      { header: 'Seguimiento', key: 'seguimiento', width: 20 },
       { header: 'Estado',      key: 'estado',      width: 14 },
       { header: 'Inicio',      key: 'inicio',      width: 14 },
       { header: 'Fin',         key: 'fin',         width: 14 },
@@ -218,6 +240,7 @@ export class ProyectosPage implements OnDestroy {
         nombre:      p.nombre,
         cliente:     p.cliente ?? '-',
         tipo:        p.tipo ?? '-',
+        seguimiento: this.obtenerSeguimientoNombre(p.idEstadoProyecto),
         estado:      p.estado ?? '-',
         inicio:      this.formatearFecha(p.fechaInicio),
         fin:         this.formatearFecha(p.fechaFin),
@@ -227,7 +250,7 @@ export class ProyectosPage implements OnDestroy {
     });
 
     // Estado ahora está en la columna 5
-    this.aplicarEstiloHoja(wsResumen, 5);
+    this.aplicarEstiloHoja(wsResumen, 6);
 
     // ── Hoja 2: Líderes y Recursos ──
     const wsDetalle = workbook.addWorksheet('Líderes y Recursos');
@@ -396,12 +419,13 @@ export class ProyectosPage implements OnDestroy {
 
     autoTable(doc, {
       startY: 30,
-      head: [['Código', 'Nombre', 'Cliente', 'Tipo', 'Estado', 'Inicio', 'Fin', 'Horas', 'Presupuesto']],
+      head: [['Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado', 'Inicio', 'Fin', 'Horas', 'Presupuesto']],
       body: proyectos.map(p => [
         p.codigo,
         p.nombre,
         p.cliente ?? '-',
         p.tipo ?? '-',
+        this.obtenerSeguimientoNombre(p.idEstadoProyecto),
         p.estado ?? '-',
         this.formatearFecha(p.fechaInicio),
         this.formatearFecha(p.fechaFin),
@@ -417,15 +441,16 @@ export class ProyectosPage implements OnDestroy {
         1: { cellWidth: 42 },
         2: { cellWidth: 32 },
         3: { cellWidth: 24 },
-        4: { cellWidth: 20 }, // Estado
-        5: { cellWidth: 18 },
+        4: { cellWidth: 20 }, // Seguimiento
+        5: { cellWidth: 20 }, // Estado
         6: { cellWidth: 18 },
-        7: { cellWidth: 14 },
-        8: { cellWidth: 20 },
+        7: { cellWidth: 18 },
+        8: { cellWidth: 14 },
+        9: { cellWidth: 20 },
       },
       didParseCell: (data) => {
-        // Estado ahora está en la columna índice 4
-        if (data.section === 'body' && data.column.index === 4) {
+        // Estado ahora está en la columna índice 5
+        if (data.section === 'body' && data.column.index === 5) {
           const val = String(data.cell.raw ?? '').toLowerCase();
           data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
           data.cell.styles.fontStyle = 'bold';

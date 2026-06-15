@@ -69,7 +69,10 @@ export class ProyectoForm implements OnInit, OnChanges {
   empleadosDisponibles: LookupOption[] = [];
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
-
+  estadoOptions: string[] = ['Activo', 'Inactivo'];
+  get seguimientoOpciones(): LookupOption[] {
+    return this.estados.filter(e => e.nombre !== 'Activo');
+  }
   // cargosFiltrados[liderIndex][recursoIndex]
   cargosFiltrados: CargoLookup[][][] = [];
 

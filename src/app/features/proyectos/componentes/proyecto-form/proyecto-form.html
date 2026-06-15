@@ -100,16 +100,19 @@
         </mat-error>
       </mat-form-field>
 
-      <div class="proyecto-form__status-card" *ngIf="!proyecto">
-        <span>Estado</span>
-        <strong>{{ formulario.controls.estado.value || 'Activo' }}</strong>
-      </div>
+      <mat-form-field appearance="outline" class="proyecto-form__field">
+        <mat-label>Estado</mat-label>
+        <mat-select yPosition="below" formControlName="estado">
+          <mat-option *ngFor="let estado of estadoOptions" [value]="estado">{{ estado }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="campoInvalido('estado')">Este campo es obligatorio</mat-error>
+      </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seguimiento</mat-label>
         <mat-select yPosition="below" formControlName="idEstadoProyecto">
           <mat-option [value]="null">Sin seguimiento</mat-option>
-          <mat-option *ngFor="let e of estados" [value]="e.id">{{ e.nombre }}</mat-option>
+          <mat-option *ngFor="let e of seguimientoOpciones" [value]="e.id">{{ e.nombre }}</mat-option>
         </mat-select>
         <mat-hint>Opcional</mat-hint>
       </mat-form-field>
@@ -326,7 +329,7 @@
   <!-- ── Acciones ──────────────────────────────────────────────────────── -->
   <div class="proyecto-form__actions">
     <button mat-flat-button type="submit">
-      {{ proyecto ? 'Guardar cambios' : 'Crear Proyecto' }}
+      Guardar
     </button>
   </div>
 
