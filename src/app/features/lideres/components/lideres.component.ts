@@ -316,8 +316,9 @@ export class LideresComponent implements OnInit {
   guardarLider(payload: any): void {
     if (this.guardandoLider) return;
 
+    // Solo validamos duplicados en registros nuevos para no truncar las ediciones
     if (!this.modoEdicion && this.liderYaExiste(payload)) {
-      this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto.';
+      this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto o colaborador asignado.';
       this.mostrarConfirmacion = true;
       setTimeout(() => this.mostrarConfirmacion = false, 3000);
       return;
@@ -327,22 +328,26 @@ export class LideresComponent implements OnInit {
 
     const solicitud = this.modoEdicion && this.liderParaEditar?.id
       ? {
-          Nombres: payload.nombres,
-          Apellidos: payload.apellidos,
-          Email: payload.correo,
-          Telefono: payload.telefono,
-          Idtipo: payload.tipoId || undefined,
+          Idlider: Number(this.liderParaEditar.id),
+          Idpersona: payload.personaId ? Number(payload.personaId) : null,
+          Nombres: payload.nombres.trim(),
+          Apellidos: payload.apellidos.trim(),
+          Email: payload.correo ? payload.correo.trim() : null,
+          Telefono: payload.telefono ? payload.telefono.trim() : null,
+          Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
           Activo: payload.estado === 'Activo',
+          NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
           Usuariomodificacion: 'frontend',
           Ipmodificacion: '127.0.0.1'
         }
       : {
-          Idpersona: payload.personaId,
-          Idtipo: payload.tipoId,
-          Nombres: payload.nombres,    // ← FIX 1
-          Apellidos: payload.apellidos, // ← FIX 1
-          Email: payload.correo,        // ← FIX 1
-          Telefono: payload.telefono,
+          Idpersona: payload.personaId ? Number(payload.personaId) : null,
+          Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
+          Nombres: payload.nombres.trim(),    
+          Apellidos: payload.apellidos.trim(), 
+          Email: payload.correo ? payload.correo.trim() : null,        
+          Telefono: payload.telefono ? payload.telefono.trim() : null,
+          NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
           Usuariocreacion: 'frontend',
           Ipcreacion: '127.0.0.1'
         };
@@ -360,12 +365,12 @@ export class LideresComponent implements OnInit {
         this.mostrarConfirmacion = true;
         this.mostrarFormulario = false;
         this.liderEditando = null;
-        this.obtenerLideresDelBackend();
+        this.obtenerLideresDelBackend(); 
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
       },
       error: (err) => {
         this.guardandoLider = false;
-        console.error('Error al guardar líder:', err);
+        console.error('❌ Error al guardar líder en el servidor:', err);
         this.mensajeConfirmacion = 'No se pudo guardar el líder. Intente de nuevo.';
         this.mostrarConfirmacion = true;
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
@@ -374,14 +379,18 @@ export class LideresComponent implements OnInit {
   }
 
   private liderYaExiste(payload: any): boolean {
+    if (payload.personaId) {
+      return this.lideres.some(lider => lider.id === Number(payload.personaId));
+    }
+
     const correo = this.normalizarTexto(payload.correo);
     const telefono = this.normalizarTexto(payload.telefono);
     const nombreCompleto = this.normalizarTexto(`${payload.nombres ?? ''} ${payload.apellidos ?? ''}`);
 
     return this.lideres.some(lider =>
-      this.normalizarTexto(lider.correo) === correo
-      || this.normalizarTexto(lider.telefono) === telefono
-      || this.normalizarTexto(lider.nombre) === nombreCompleto
+      (lider.correo && this.normalizarTexto(lider.correo) === correo)
+      || (lider.telefono && this.normalizarTexto(lider.telefono) === telefono)
+      || (lider.nombre && this.normalizarTexto(lider.nombre) === nombreCompleto)
     );
   }
 
@@ -436,7 +445,7 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
   }
 
- toggleEstadoLider(lider: Lider): void {
+  toggleEstadoLider(lider: Lider): void {
     const nuevoEstado = lider.estado !== 'Activo';
     const solicitud = {
       Activo: nuevoEstado,

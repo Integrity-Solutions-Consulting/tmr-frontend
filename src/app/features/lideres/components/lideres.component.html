@@ -179,10 +179,13 @@
 
 </div>
 
-<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion"
-  [lider]="liderParaEditar" [guardando]="guardandoLider" (cerrarModal)="cerrarFormulario()"
-  (guardar)="guardarLider($event)">
-</app-modal-lider>
+<app-modal-lider 
+  [mostrarFormulario]="mostrarFormulario"
+  [modoEdicion]="modoEdicion"
+  [lider]="liderParaEditar"
+  [guardando]="guardandoLider" 
+  (cerrarModal)="cerrarFormulario()"
+  (guardar)="guardarLider($event)"> </app-modal-lider>
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
 </app-modal-detalle-lider>
