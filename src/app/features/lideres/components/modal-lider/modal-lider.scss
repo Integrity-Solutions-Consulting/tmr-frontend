@@ -268,3 +268,9 @@ $text-light: #7C7C7C;
   cursor: default;
   &:hover { background: transparent !important; color: #737373 !important; }
 }
+.form-input:disabled {
+  background: #f5f5f5;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  border-color: #e5e5e5;
+}
