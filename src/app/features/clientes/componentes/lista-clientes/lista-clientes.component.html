@@ -139,7 +139,7 @@
     <table class="tabla">
       <thead>
         <tr>
-          <th>Tipo Id</th>
+          <th>Tipo</th>
           <th>Identificador</th>
           <th>Nombre Comercial</th>
           <th>Correo electrónico</th>
@@ -197,32 +197,13 @@
     </table>
   </div>
 
-  <!-- Paginación -->
-  <div class="paginacion" *ngIf="paginacion$ | async as pag">
-    <span class="pag-info">Página {{ pag.paginaActual }} de {{ pag.totalPaginas }}</span>
-
-    <div class="pag-controles">
-      <!-- Primera -->
-      <button class="pag-btn" (click)="irAPagina(1)" [disabled]="paginaActual === 1">«</button>
-      <!-- Anterior -->
-      <button class="pag-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">‹</button>
-
-      <!-- Páginas -->
-      <ng-container *ngFor="let p of paginas">
-        <span *ngIf="p === -1" class="pag-ellipsis">…</span>
-        <button *ngIf="p !== -1"
-          class="pag-btn pag-numero"
-          [class.activo]="p === paginaActual"
-          (click)="irAPagina(p)">
-          {{ p }}
-        </button>
-      </ng-container>
-
-      <!-- Siguiente -->
-      <button class="pag-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">›</button>
-      <!-- Última -->
-      <button class="pag-btn" (click)="irAPagina(totalPaginas)" [disabled]="paginaActual === totalPaginas">»</button>
-    </div>
-  </div>
+  <!-- Paginación compartida -->
+  <app-paginacion
+    [paginaActual]="paginaActual"
+    [totalPaginas]="totalPaginas"
+    [total]="total"
+    [porPagina]="tamanoPagina"
+    (paginaCambia)="irAPagina($event)">
+  </app-paginacion>
 
 </div>
