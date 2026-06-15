@@ -256,8 +256,8 @@
     height: 16px;
 }
 
-/* Aprobar button */
-.btn-aprobar {
+/* Descargar button */
+.btn-descargar {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -279,12 +279,12 @@
     }
 
     &.enabled {
-        background: #22C55E;
+        background: #163572;
         color: white;
         cursor: pointer;
 
         &:hover {
-            background: #16A34A;
+            background: #0c3b73;
         }
     }
 }
@@ -410,8 +410,8 @@ tr.selected-row {
 
 
 
-/* ---- METRICS FOOTER ---- */
-.metrics-footer {
+/* ---- METRICS BAR ---- */
+.metrics-bar {
     background: white;
     border-radius: 10px;
     padding: 16px 24px;

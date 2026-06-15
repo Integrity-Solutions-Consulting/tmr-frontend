@@ -3,11 +3,6 @@
   <!-- Header -->
   <div class="actividad-modal__header">
     <div class="actividad-modal__header-text">
-      @if (esEdicion) {
-        <span class="actividad-modal__badge actividad-modal__badge--edit">Editar</span>
-      } @else {
-        <span class="actividad-modal__badge actividad-modal__badge--new">Nuevo</span>
-      }
       <h2 class="actividad-modal__title">
         {{ esEdicion ? 'Editar actividad' : 'Agregar actividad' }}
       </h2>
@@ -24,51 +19,70 @@
   <div class="actividad-modal__body">
 
     <!-- Tipo de Actividad -->
-    <div class="actividad-modal__field">
+    <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Tipo de Actividad <span class="req">*</span></label>
         <mat-icon class="actividad-modal__info-icon" matTooltip="Seleccione el tipo de actividad">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__select-wrap" [class.actividad-modal__select-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
-        <select class="actividad-modal__select" formControlName="tipoActividad">
-          <option [ngValue]="null" disabled selected hidden>Seleccione un tipo</option>
-          @for (tipo of tiposActividad(); track tipo.id) {
-            <option [value]="tipo.id">{{ tipo.nombre }}</option>
+      <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
+        <mat-icon class="actividad-modal__input-icon">category</mat-icon>
+        <input
+          class="actividad-modal__input"
+          type="text"
+          placeholder="Busque y seleccione un tipo"
+          [matAutocomplete]="autoTipo"
+          formControlName="tipoActividad"
+        />
+        <mat-autocomplete #autoTipo="matAutocomplete" [displayWith]="displayTipoActividadFn.bind(this)">
+          @for (tipo of tiposActividadFiltrados(); track tipo.id) {
+            <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
           }
-        </select>
+        </mat-autocomplete>
       </div>
       @if (form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched) {
-        <span class="actividad-modal__error">Campo requerido</span>
+        <span class="actividad-modal__error">
+          @if (form.get('tipoActividad')?.errors?.['required']) { Campo requerido }
+          @else if (form.get('tipoActividad')?.errors?.['invalidOption']) { Seleccione una opción válida }
+        </span>
       }
     </div>
 
     <!-- Proyecto -->
-    <div class="actividad-modal__field">
+    <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Proyecto <span class="req">*</span></label>
         <mat-icon class="actividad-modal__info-icon" matTooltip="Seleccione el proyecto asociado a la actividad">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__select-wrap" [class.actividad-modal__select-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
-        <select class="actividad-modal__select" formControlName="proyectoId">
-          <option [ngValue]="null" disabled selected hidden>Seleccione un proyecto</option>
-          @for (proyecto of proyectos(); track proyecto.id) {
-            <option [value]="proyecto.id">{{ proyecto.nombre }}</option>
+      <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
+        <mat-icon class="actividad-modal__input-icon">folder</mat-icon>
+        <input
+          class="actividad-modal__input"
+          type="text"
+          placeholder="Busque y seleccione un proyecto"
+          [matAutocomplete]="autoProyecto"
+          formControlName="proyectoId"
+        />
+        <mat-autocomplete #autoProyecto="matAutocomplete" [displayWith]="displayProyectoFn.bind(this)">
+          @for (proyecto of proyectosFiltrados(); track proyecto.id) {
+            <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
           }
-        </select>
+        </mat-autocomplete>
       </div>
       @if (form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched) {
-        <span class="actividad-modal__error">Campo requerido</span>
+        <span class="actividad-modal__error">
+          @if (form.get('proyectoId')?.errors?.['required']) { Campo requerido }
+          @else if (form.get('proyectoId')?.errors?.['invalidOption']) { Seleccione una opción válida }
+        </span>
       }
     </div>
 
     <!-- Código de Requerimiento -->
-    <div class="actividad-modal__field">
+    <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Código de Requerimiento <span class="req">*</span></label>
         <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">info_outline</mat-icon>
       </div>
       <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched">
-        <mat-icon class="actividad-modal__input-icon">tag</mat-icon>
         <input
           class="actividad-modal__input"
           formControlName="codigoRequerimiento"
@@ -86,7 +100,7 @@
     </div>
 
     <!-- Descripción -->
-    <div class="actividad-modal__field">
+    <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Descripción</label>
         <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese la descripción o detalles de la actividad realizada">info_outline</mat-icon>
@@ -104,34 +118,18 @@
       </div>
     </div>
 
-    <!-- Notas -->
-    <div class="actividad-modal__field">
-      <div class="actividad-modal__label-row">
-        <label class="actividad-modal__label">Notas</label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese notas o comentarios adicionales">info_outline</mat-icon>
-      </div>
-      <div class="actividad-modal__input-wrap actividad-modal__input-wrap--textarea">
-        <mat-icon class="actividad-modal__input-icon">rate_review</mat-icon>
-        <textarea
-          class="actividad-modal__input actividad-modal__textarea"
-          formControlName="notas"
-          rows="3"
-          placeholder="Notas adicionales"
-        ></textarea>
-      </div>
-    </div>
+
 
     <!-- Fecha + Horas (Visible solo si NO es recurrente) -->
     @if (!form.get('esRecurrente')?.value) {
-      <div class="actividad-modal__two-col">
+      <div class="actividad-modal__two-col actividad-modal__field--width-80">
         
         <!-- Fecha Actividad -->
-        <div class="actividad-modal__field flex-1">
+        <div class="actividad-modal__field fecha-field">
           <div class="actividad-modal__label-row">
             <label class="actividad-modal__label">Fecha Actividad <span class="req">*</span></label>
           </div>
           <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched">
-            <mat-icon class="actividad-modal__input-icon">calendar_today</mat-icon>
             <input
               class="actividad-modal__input"
               [matDatepicker]="pickerFechaActividad"
@@ -140,7 +138,7 @@
               (paste)="bloquearPegadoNoFecha($event)"
               placeholder="dd/mm/aaaa"
             />
-            <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad" [disabled]="!esEdicion"></mat-datepicker-toggle>
+            <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad"></mat-datepicker-toggle>
             <mat-datepicker #pickerFechaActividad></mat-datepicker>
           </div>
           @if (form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) {
@@ -152,7 +150,7 @@
         </div>
 
         <!-- Número de Horas -->
-        <div class="actividad-modal__field flex-1">
+        <div class="actividad-modal__field horas-field">
           <div class="actividad-modal__label-row">
             <label class="actividad-modal__label">Número de Horas <span class="req">*</span></label>
             <mat-icon class="actividad-modal__info-icon" matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">info_outline</mat-icon>
@@ -196,7 +194,7 @@
     @if (form.get('esRecurrente')?.value) {
       <div class="actividad-modal__recurrence-panel">
         
-        <div class="actividad-modal__two-col">
+        <div class="actividad-modal__two-col actividad-modal__field--width-80">
           
           <!-- Fecha Inicio -->
           <div class="actividad-modal__field flex-1">
@@ -204,7 +202,6 @@
               <label class="actividad-modal__label">Fecha Inicio <span class="req">*</span></label>
             </div>
             <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched">
-              <mat-icon class="actividad-modal__input-icon">calendar_today</mat-icon>
               <input
                 class="actividad-modal__input"
                 [matDatepicker]="pickerFechaInicio"
@@ -213,7 +210,7 @@
                 (paste)="bloquearPegadoNoFecha($event)"
                 placeholder="dd/mm/aaaa"
               />
-              <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio" [disabled]="!esEdicion"></mat-datepicker-toggle>
+              <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerFechaInicio></mat-datepicker>
             </div>
             @if (form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) {
@@ -231,7 +228,6 @@
               <mat-icon class="actividad-modal__info-icon" matTooltip="Especifique la fecha en la que finalizará la recurrencia">info_outline</mat-icon>
             </div>
             <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched">
-              <mat-icon class="actividad-modal__input-icon">event</mat-icon>
               <input
                 class="actividad-modal__input"
                 [matDatepicker]="pickerFechaFin"
@@ -254,7 +250,7 @@
         </div>
 
         <!-- Horas por día -->
-        <div class="actividad-modal__field">
+        <div class="actividad-modal__field actividad-modal__field--width-80">
           <div class="actividad-modal__label-row">
             <label class="actividad-modal__label">Horas por día <span class="req">*</span></label>
             <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese las horas que se registrarán por cada día en el rango">info_outline</mat-icon>
@@ -319,12 +315,9 @@
       </button>
       <div class="spacer"></div>
     }
-    <button class="actividad-modal__btn actividad-modal__btn--cancel" type="button" (click)="cancelar()">
-      Cancelar
-    </button>
     <button class="actividad-modal__btn actividad-modal__btn--save" type="submit" [disabled]="form.invalid" (click)="guardar()">
-      <mat-icon>{{ esEdicion ? 'save' : 'add_circle' }}</mat-icon>
-      {{ esEdicion ? 'Actualizar' : 'Agregar' }}
+      <mat-icon>save</mat-icon>
+      Guardar
     </button>
   </div>
 

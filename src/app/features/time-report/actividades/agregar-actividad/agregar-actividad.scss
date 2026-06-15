@@ -78,12 +78,12 @@ $error-color: #dc2626;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #94a3b8;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid #0f172a;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -97,7 +97,8 @@ $error-color: #dc2626;
 
   &:hover {
     background: #f1f5f9;
-    color: #334155;
+    border-color: $focus-blue;
+    color: $focus-blue;
   }
 }
 
@@ -127,6 +128,10 @@ $error-color: #dc2626;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.actividad-modal__field--width-80 {
+  width: 100% !important;
 }
 
 .actividad-modal__label-row {
@@ -305,6 +310,14 @@ $error-color: #dc2626;
 .actividad-modal__two-col {
   display: flex;
   gap: 14px;
+}
+
+.fecha-field {
+  flex: 1.2;
+}
+
+.horas-field {
+  flex: 0.9;
 }
 
 .flex-1 {
@@ -528,8 +541,12 @@ $error-color: #dc2626;
   .actividad-modal__header,
   .actividad-modal__body,
   .actividad-modal__footer {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  .actividad-modal__field--width-80 {
+    width: 100% !important;
   }
 
   .actividad-modal__two-col {

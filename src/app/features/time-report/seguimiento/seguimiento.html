@@ -4,22 +4,76 @@
     <div class="page-header">
         <h1 class="page-title">Seguimiento</h1>
         <div class="header-right">
-            <div class="horas-badge">
-                <mat-icon>schedule</mat-icon>
-                <span>Horas por registrar: {{ metricas().horasPendientes | horasFormat }}</span>
-            </div>
             <button mat-flat-button class="btn-reporte" [matMenuTriggerFor]="reporteMenu">
                 <span>Reporte</span>
                 <mat-icon class="expand-icon">expand_more</mat-icon>
             </button>
             <mat-menu #reporteMenu="matMenu">
                 <button mat-menu-item (click)="exportarExcel()">
-                    <mat-icon>table_view</mat-icon> Exportar Excel (.xlsx)
+                    <mat-icon>table_view</mat-icon> Descargar Excel (.xlsx)
                 </button>
-                <button mat-menu-item (click)="exportarCSV()">
-                    <mat-icon>description</mat-icon> Exportar CSV
+                <button mat-menu-item (click)="exportarPDF()">
+                    <mat-icon>picture_as_pdf</mat-icon> Descargar PDF
                 </button>
             </mat-menu>
+        </div>
+    </div>
+
+    <!-- ===== METRICS BAR ===== -->
+    <div class="metrics-bar">
+        <div class="metric-item">
+            <div class="metric-icon-wrap blue">
+                <mat-icon>schedule</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
+                <span class="metric-name">Horas por registrar</span>
+                <span class="metric-desc">Pendientes por completar</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap green">
+                <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
+                <span class="metric-name">Horas registradas</span>
+                <span class="metric-desc">Total del periodo</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap purple">
+                <mat-icon>calendar_today</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
+                <span class="metric-name">Promedio por día</span>
+                <span class="metric-desc">Horas registradas</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap orange">
+                <mat-icon>groups</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
+                <span class="metric-name">Colaboradores activos</span>
+                <span class="metric-desc">Con reporte en el periodo</span>
+            </div>
+        </div>
+
+        <div class="metric-item">
+            <div class="metric-icon-wrap gray">
+                <mat-icon>folder</mat-icon>
+            </div>
+            <div class="metric-texts">
+                <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
+                <span class="metric-name">Proyectos</span>
+                <span class="metric-desc">Con actividades</span>
+            </div>
         </div>
     </div>
 
@@ -44,12 +98,14 @@
         <div class="filter-group">
             <label class="filter-label">Cliente</label>
             <div class="filter-input-wrapper">
-                <select class="filter-select" [(ngModel)]="clienteSeleccionado" (change)="aplicarFiltros()">
-                    <option value="">Todos los clientes</option>
-                    @for (c of clientes(); track c.id) {
-                    <option [value]="c.nombre">{{ c.nombre }}</option>
-                    }
-                </select>
+                <input
+                    class="filter-input"
+                    type="text"
+                    placeholder="Todos los clientes"
+                    [(ngModel)]="clienteSeleccionado"
+                    (input)="filtrarClientes($event); aplicarFiltros()"
+                    [matAutocomplete]="autoCliente"
+                />
                 <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="9" cy="7" r="4" />
@@ -58,6 +114,12 @@
                     <path d="m18 15 4 4-4 4" />
                 </svg>
                 <mat-icon class="select-chevron">expand_more</mat-icon>
+                <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="aplicarFiltros()">
+                    <mat-option value="">Todos los clientes</mat-option>
+                    @for (c of clientesFiltrados(); track c.id) {
+                    <mat-option [value]="c.nombre">{{ c.nombre }}</mat-option>
+                    }
+                </mat-autocomplete>
             </div>
         </div>
 
@@ -73,31 +135,11 @@
             <input class="filter-input" type="date" [(ngModel)]="fechaHasta" (ngModelChange)="onFechaManualChange()">
         </div>
 
-        <!-- Período toggle -->
-        <div class="filter-group periodo-group">
-            <label class="filter-label">Período</label>
-            <div class="toggle-group">
-                <button class="toggle-btn" [class.active]="periodo === 'quincena'" (click)="cambiarPeriodo('quincena')">
-                    @if (periodo === 'quincena') {
-                    <mat-icon class="check-icon">check</mat-icon>
-                    }
-                    Quincena
-                </button>
-                <button class="toggle-btn" [class.active]="periodo === 'mes-completo'"
-                    (click)="cambiarPeriodo('mes-completo')">
-                    @if (periodo === 'mes-completo') {
-                    <mat-icon class="check-icon">check</mat-icon>
-                    }
-                    Mes Completo
-                </button>
-            </div>
-        </div>
-
-        <!-- Aprobar -->
-        <button class="btn-aprobar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
-            (click)="aprobarSeleccionados()">
-            <mat-icon>check_circle</mat-icon>
-            Aprobar
+        <!-- Descargar -->
+        <button class="btn-descargar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
+            (click)="descargarSeleccionados()">
+            <mat-icon>download</mat-icon>
+            Descargar
         </button>
     </div>
 
@@ -199,63 +241,4 @@
             [total]="totalRegistros" [porPagina]="pageSize" (paginaCambia)="onCustomPageChange($event)">
         </app-paginacion>
     </div>
-
-    <!-- ===== FOOTER METRICS ===== -->
-    <div class="metrics-footer">
-        <div class="metric-item">
-            <div class="metric-icon-wrap blue">
-                <mat-icon>schedule</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
-                <span class="metric-name">Horas por registrar</span>
-                <span class="metric-desc">Pendientes por completar</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap green">
-                <mat-icon>check_circle</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
-                <span class="metric-name">Horas registradas</span>
-                <span class="metric-desc">Total del periodo</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap purple">
-                <mat-icon>calendar_today</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
-                <span class="metric-name">Promedio por día</span>
-                <span class="metric-desc">Horas registradas</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap orange">
-                <mat-icon>groups</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
-                <span class="metric-name">Colaboradores activos</span>
-                <span class="metric-desc">Con reporte en el periodo</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap gray">
-                <mat-icon>folder</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
-                <span class="metric-name">Proyectos</span>
-                <span class="metric-desc">Con actividades</span>
-            </div>
-        </div>
-    </div>
-
 </div>

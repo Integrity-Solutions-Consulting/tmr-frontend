@@ -5,24 +5,14 @@
         <h1 class="page-title">Actividades</h1>
 
         <div class="header-right">
-            <div class="horas-badge">
-                <mat-icon>schedule</mat-icon>
-                <span>Horas Registradas: {{ actividadesService.horasRegistradasHoy() | horasFormat }}</span>
-            </div>
-
             <button mat-flat-button class="btn-agregar" (click)="abrirAgregarActividad()">
                 <mat-icon>add</mat-icon> Agregar Actividad
             </button>
         </div>
     </header>
 
-    <!-- ===== CALENDAR CARD ===== -->
-    <main class="calendar-card">
-        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)" (editarActividadEvent)="onEditarActividad($event)"></app-calendario>
-    </main>
-
-    <!-- ===== FOOTER METRICS ===== -->
-    <footer class="metrics-footer">
+    <!-- ===== METRICS BAR ===== -->
+    <div class="metrics-bar">
 
         <!-- Horas por registrar -->
         <div class="metric-item">
@@ -84,7 +74,13 @@
             <mat-icon>description</mat-icon>
             Generar Reporte
         </button>
-    </footer>
+    </div>
+
+    <!-- ===== CALENDAR CARD ===== -->
+    <main class="calendar-card">
+        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)" (editarActividadEvent)="onEditarActividad($event)"></app-calendario>
+    </main>
+
 
     <!-- ===== MOBILE ACTIVIDADES DETALLE ===== -->
     <section class="mobile-actividades-seccion" *ngIf="fechaSeleccionada">

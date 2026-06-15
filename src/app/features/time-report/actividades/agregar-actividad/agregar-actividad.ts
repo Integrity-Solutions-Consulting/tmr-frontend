@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -33,7 +34,8 @@ import { FeriadosService } from '../../../../shared/services/feriados.service';
         MatIconModule,
         MatTooltipModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        MatAutocompleteModule
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -50,7 +52,23 @@ export class AgregarActividad implements OnInit {
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
-    public proyectos = signal<{ id: string, nombre: string }[]>([]);
+    public proyectos = signal<{ id: string, nombre: string, codigo?: string | null }[]>([]);
+
+    // Autocomplete filter signals
+    public proyectoFilter = signal('');
+    public tipoActividadFilter = signal('');
+
+    public proyectosFiltrados = computed(() => {
+        const q = this.proyectoFilter().toLowerCase().trim();
+        if (!q) return this.proyectos();
+        return this.proyectos().filter(p => p.nombre.toLowerCase().includes(q));
+    });
+
+    public tiposActividadFiltrados = computed(() => {
+        const q = this.tipoActividadFilter().toLowerCase().trim();
+        if (!q) return this.tiposActividad();
+        return this.tiposActividad().filter(t => t.nombre.toLowerCase().includes(q));
+    });
 
     // Convertimos los cambios del formulario a un Signal para que el computed reaccione
     private formValues = inject(FormBuilder).group({}); // temporal para inicializar
@@ -103,20 +121,42 @@ export class AgregarActividad implements OnInit {
         const defaultDate = this.parseLocal(act ? act.fechaactividad : (this.data?.fecha || new Date()));
 
         this.form = this.fb.group({
-            tipoActividad: [act ? String(act.idtipoactividad) : null, Validators.required],
-            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, Validators.required],
+            tipoActividad: [act ? String(act.idtipoactividad) : null, [Validators.required, this.autocompleteValidator(this.tiposActividad)]],
+            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, [Validators.required, this.autocompleteValidator(this.proyectos)]],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
-            fechaActividad: [{ value: defaultDate, disabled: !this.esEdicion }, [Validators.required, this.formatoFechaValidator()]],
+            fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator()]],
             numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
-            fechaInicio: [{ value: defaultDate, disabled: !this.esEdicion }, [this.formatoFechaValidator()]],
+            fechaInicio: [defaultDate, [this.formatoFechaValidator()]],
             fechaFin: ['', [this.formatoFechaValidator()]],
             horasPorDia: [act ? act.cantidadhoras : 4],
             incluirFinesDeSemana: [false],
             incluirFeriados: [false],
             notas: [act ? act.notas : ''],
             esbillable: [act ? act.esbillable : true]
+        });
+
+        // Listen for autocomplete search typing/value changes
+        this.form.get('proyectoId')?.valueChanges.subscribe(val => {
+            const selectedProy = this.proyectos().find(p => String(p.id) === String(val));
+            if (!selectedProy) {
+                this.proyectoFilter.set(val || '');
+            } else {
+                this.proyectoFilter.set('');
+                if (!this.esEdicion && selectedProy.codigo) {
+                    this.form.get('codigoRequerimiento')?.setValue(selectedProy.codigo);
+                }
+            }
+        });
+
+        this.form.get('tipoActividad')?.valueChanges.subscribe(val => {
+            const isId = this.tiposActividad().some(t => String(t.id) === String(val));
+            if (!isId) {
+                this.tipoActividadFilter.set(val || '');
+            } else {
+                this.tipoActividadFilter.set('');
+            }
         });
 
         // Escucha cambios en esRecurrente para habilitar/deshabilitar validadores y asignar fecha fin por defecto
@@ -244,7 +284,24 @@ export class AgregarActividad implements OnInit {
         // Tipos de Actividad
         this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/tipos-actividad`)
             .subscribe({
-                next: (res) => this.tiposActividad.set(res ? res.map(t => ({ id: String(t.id), nombre: t.nombre })) : []),
+                next: (res) => {
+                    if (res) {
+                        const mapped = res.map(t => ({ id: String(t.id), nombre: (t.nombre || '').trim() }));
+                        const unique: typeof mapped = [];
+                        const seen = new Set<string>();
+                        for (const item of mapped) {
+                            const nameLower = item.nombre.toLowerCase();
+                            if (!seen.has(nameLower)) {
+                                seen.add(nameLower);
+                                unique.push(item);
+                            }
+                        }
+                        this.tiposActividad.set(unique);
+                    } else {
+                        this.tiposActividad.set([]);
+                    }
+                    this.form?.get('tipoActividad')?.updateValueAndValidity();
+                },
                 error: (err) => {
                     console.error('Error al cargar tipos de actividad', err);
                 }
@@ -253,9 +310,47 @@ export class AgregarActividad implements OnInit {
         // Proyectos
         this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`)
             .subscribe({
-                next: (res) => this.proyectos.set(res ? res.map(p => ({ id: String(p.id), nombre: p.nombre })) : []),
+                next: (res) => {
+                    if (res) {
+                        const mapped = res.map(p => ({ id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo }));
+                        const unique: typeof mapped = [];
+                        const seen = new Set<string>();
+                        for (const item of mapped) {
+                            const nameLower = item.nombre.toLowerCase();
+                            if (!seen.has(nameLower)) {
+                                seen.add(nameLower);
+                                unique.push(item);
+                            }
+                        }
+                        this.proyectos.set(unique);
+                    } else {
+                        this.proyectos.set([]);
+                    }
+                    this.form?.get('proyectoId')?.updateValueAndValidity();
+                },
                 error: (err) => console.error('Error al cargar proyectos disponibles', err)
             });
+    }
+
+    displayProyectoFn(val: any): string {
+        if (!val) return '';
+        const p = this.proyectos().find(x => String(x.id) === String(val));
+        return p ? p.nombre : val;
+    }
+
+    displayTipoActividadFn(val: any): string {
+        if (!val) return '';
+        const t = this.tiposActividad().find(x => String(x.id) === String(val));
+        return t ? t.nombre : val;
+    }
+
+    autocompleteValidator(listSignal: () => { id: string, nombre: string }[]): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            const val = control.value;
+            if (!val) return null;
+            const exists = listSignal().some(item => String(item.id) === String(val));
+            return exists ? null : { invalidOption: true };
+        };
     }
 
     // Preview dinámico usando lógica de negocio
