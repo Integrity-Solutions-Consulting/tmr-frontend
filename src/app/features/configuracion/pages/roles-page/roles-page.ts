@@ -66,8 +66,8 @@ export class RolesPage {
   /** Label del botón de filtro estado */
   readonly labelEstado = computed(() => {
     const filtro = this.filtroEstado();
-    if (filtro === 'Activo') return 'Activo';
-    if (filtro === 'Inactivo') return 'Inactivo';
+    if (filtro === 'Activo') return 'Activos';
+    if (filtro === 'Inactivo') return 'Inactivos';
     return 'Estado';
   });
 

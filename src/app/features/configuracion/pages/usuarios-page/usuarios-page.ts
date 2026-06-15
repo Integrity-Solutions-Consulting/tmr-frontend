@@ -1,11 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
   ActionMenuComponent,
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
+import {
+  DescargaMenuComponent,
+  DescargaOpcion,
+} from '../../../../shared/components/descarga-menu/descarga-menu.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
@@ -16,7 +22,7 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [CommonModule, Boton, ActionMenuComponent, SuccessModalComponent],
+  imports: [CommonModule, Boton, ActionMenuComponent, DescargaMenuComponent, SuccessModalComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -40,6 +46,21 @@ export class UsuariosPage {
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
+  readonly opcionesDescarga: DescargaOpcion[] = [
+    {
+      id: 'excel',
+      label: 'Exportar Excel',
+      icon: 'assets/iconos/download.svg',
+      action: () => this.descargarUsuariosExcel(),
+    },
+    {
+      id: 'pdf',
+      label: 'Exportar PDF',
+      icon: 'assets/iconos/download.svg',
+      action: () => this.descargarUsuariosPdf(),
+    },
+  ];
+
   // ── Computeds de conteo (basados en usuariosTotales para reflejar el total real) ──
   readonly totalUsuarios = computed(() => this.usuariosTotales().length);
 
@@ -54,8 +75,8 @@ export class UsuariosPage {
   /** Texto del label del filtro estado según el filtro activo */
   readonly labelEstado = computed(() => {
     const filtro = this.filtroActivo();
-    if (filtro === 'activos') return 'Activo';
-    if (filtro === 'inactivos') return 'Inactivo';
+    if (filtro === 'activos') return 'Activos';
+    if (filtro === 'inactivos') return 'Inactivos';
     return 'Estado';
   });
 
@@ -161,6 +182,90 @@ export class UsuariosPage {
     }
 
     return roleName;
+  }
+
+  displayUsuarioNombre(usuario: Usuario): string {
+    const nombreCompleto = [usuario.nombres, usuario.apellidos]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+
+    return nombreCompleto || 'Usuario externo';
+  }
+
+  displayIdentificacion(usuario: Usuario): string {
+    return usuario.numeroidentificacion || '-';
+  }
+
+  descargarUsuariosExcel(): void {
+    this.descargarCSV(this.obtenerUsuariosExportables(), 'Usuarios', 'csv');
+  }
+
+  descargarUsuariosPdf(): void {
+    this.descargarPDF(this.obtenerUsuariosExportables(), 'Usuarios');
+  }
+
+  private obtenerUsuariosExportables(): Usuario[] {
+    return this.filteredUsuarios();
+  }
+
+  private displayRolesUsuario(usuario: Usuario): string {
+    const roles = this.resolveRoleNames(usuario.rolesids)
+      .map((role) => this.displayRoleName(role))
+      .filter(Boolean);
+
+    return roles.length ? roles.join(', ') : '-';
+  }
+
+  private obtenerFilasExportacion(usuarios: Usuario[]): string[][] {
+    return usuarios.map((usuario) => [
+      usuario.usuario || '-',
+      this.displayUsuarioNombre(usuario),
+      usuario.email || '-',
+      this.displayRolesUsuario(usuario),
+      usuario.estado === 'Activo' ? 'Activo' : 'Inactivo',
+    ]);
+  }
+
+  private descargarCSV(usuarios: Usuario[], nombreBase: string, extension: string): void {
+    const encabezados = ['Usuario', 'Nombre', 'Correo electrónico', 'Roles', 'Estado'];
+    const filas = this.obtenerFilasExportacion(usuarios);
+    const contenido = [encabezados, ...filas]
+      .map((fila) => fila.map((valor) => `"${String(valor).replace(/"/g, '""')}"`).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+    this.crearDescarga(blob, `${nombreBase}_${new Date().toISOString().slice(0, 10)}.${extension}`);
+  }
+
+  private descargarPDF(usuarios: Usuario[], nombreBase: string): void {
+    const doc = new jsPDF({ orientation: 'landscape' });
+
+    doc.setFontSize(16);
+    doc.setTextColor(22, 53, 114);
+    doc.text('Listado de Usuarios', 14, 16);
+
+    autoTable(doc, {
+      startY: 24,
+      head: [['Usuario', 'Nombre', 'Correo electrónico', 'Roles', 'Estado']],
+      body: this.obtenerFilasExportacion(usuarios),
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [22, 53, 114], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+    });
+
+    doc.save(`${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  private crearDescarga(blob: Blob, nombreArchivo: string): void {
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   openModal(usuario?: Usuario): void {

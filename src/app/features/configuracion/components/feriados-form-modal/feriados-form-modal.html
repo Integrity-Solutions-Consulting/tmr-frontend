@@ -5,10 +5,6 @@
     <div class="feriado-modal__header-text">
       @if (isView) {
         <span class="feriado-modal__badge feriado-modal__badge--view">Solo lectura</span>
-      } @else if (isEdit) {
-        <span class="feriado-modal__badge feriado-modal__badge--edit">Editar</span>
-      } @else {
-        <span class="feriado-modal__badge feriado-modal__badge--new">Nuevo</span>
       }
       <h2 class="feriado-modal__title">
         {{ isView ? data.feriado!.nombre : isEdit ? 'Editar Feriado' : 'Agregar Feriado' }}
@@ -178,16 +174,12 @@
         Cerrar
       </button>
     } @else {
-      <button class="feriado-modal__btn feriado-modal__btn--cancel" type="button" mat-dialog-close>
-        Cancelar
-      </button>
       <button
         class="feriado-modal__btn feriado-modal__btn--save"
         type="submit"
         [disabled]="form.invalid && form.touched"
       >
-        <mat-icon>{{ isEdit ? 'save' : 'event_available' }}</mat-icon>
-        {{ isEdit ? 'Guardar cambios' : 'Guardar feriado' }}
+        Guardar
       </button>
     }
   </div>

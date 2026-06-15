@@ -1,13 +1,8 @@
 <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
   <div class="modal-form__header">
     <div>
-      @if (isEdit) {
-        <span class="modal-form__badge modal-form__badge--edit">Editar</span>
-      } @else {
-        <span class="modal-form__badge modal-form__badge--new">Nuevo</span>
-      }
       <h2 class="modal-form__title">{{ isEdit ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
-      <p class="modal-form__subtitle">Complete los datos personales y de acceso del usuario</p>
+      <p class="modal-form__subtitle">Configure acceso, roles y vinculo opcional con colaborador</p>
     </div>
     <button class="modal-form__close" type="button" (click)="cancel()">
       <span class="material-icons">close</span>
@@ -18,247 +13,51 @@
     <div class="form-section">
       <div class="form-section__title">
         <span class="form-section__bar"></span>
-        Datos personales
+        Tipo de usuario
       </div>
 
       <div class="form-grid form-grid--2">
-        <div class="form-field">
-          <div class="float-select">
-            <select
-              class="float-select__input"
-              formControlName="tipoPersona"
-              [class.float-select__input--error]="campoInvalido('tipoPersona')"
-            >
-              @for (tipoPersona of tiposPersona; track tipoPersona) {
-                <option [value]="tipoPersona">{{ tipoPersona }}</option>
-              }
-            </select>
-            <label class="float-select__label" [class.float-select__label--up]="tieneValor('tipoPersona')">
-              Tipo de persona <span class="req">*</span>
-            </label>
-          </div>
-          @if (campoInvalido('tipoPersona')) {
-            <span class="form-field__error">Campo requerido</span>
-          }
-        </div>
+        <label class="check-field form-field--full">
+          <input type="checkbox" formControlName="usuarioInterno" />
+          <span>Usuario Interno</span>
+        </label>
 
-        <div class="form-field">
-          <div class="float-select">
-            <select
-              class="float-select__input"
-              formControlName="idtipoidentificacion"
-              [class.float-select__input--error]="campoInvalido('idtipoidentificacion')"
-            >
-              @for (tipo of tiposIdentificacion; track tipo.id) {
-                <option [value]="tipo.id">{{ tipo.nombre }}</option>
-              }
-            </select>
-            <label
-              class="float-select__label"
-              [class.float-select__label--up]="tieneValor('idtipoidentificacion')"
-            >
-              Tipo de identificacion <span class="req">*</span>
-            </label>
+        @if (isInternalUser) {
+          <div class="form-field form-field--full">
+            <div class="float-select">
+              <select
+                class="float-select__input"
+                formControlName="idColaborador"
+                [class.float-select__input--error]="campoInvalido('idColaborador')"
+              >
+                <option value="">Seleccione un colaborador</option>
+                @for (colaborador of colaboradores; track colaborador.id) {
+                  <option [value]="colaborador.id">
+                    {{ colaborador.nombreCompleto }} - {{ colaborador.numeroIdentificacion || colaborador.codigoEmpleado || 'Sin identificacion' }}
+                  </option>
+                }
+              </select>
+              <label class="float-select__label float-select__label--up">
+                Colaborador <span class="req">*</span>
+              </label>
+            </div>
+            @if (cargandoColaboradores()) {
+              <span class="form-field__hint">Cargando colaboradores...</span>
+            }
+            @if (campoInvalido('idColaborador')) {
+              <span class="form-field__error">{{ colaboradorError() }}</span>
+            }
           </div>
-          @if (campoInvalido('idtipoidentificacion')) {
-            <span class="form-field__error">Campo requerido</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="text"
-              formControlName="numeroidentificacion"
-              placeholder=" "
-              [attr.maxlength]="identificationMaxLength"
-              [class.float-field__input--error]="campoInvalido('numeroidentificacion')"
-              (input)="sanitizeIdentificationInput()"
-            />
-            <label class="float-field__label">Numero de identificacion <span class="req">*</span></label>
-          </div>
-          @if (campoInvalido('numeroidentificacion')) {
-            <span class="form-field__error">{{ identificationError() }}</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="text"
-              formControlName="nombres"
-              placeholder=" "
-              [class.float-field__input--error]="campoInvalido('nombres')"
-              (input)="sanitizeNameInput('nombres')"
-            />
-            <label class="float-field__label">Nombres <span class="req">*</span></label>
-          </div>
-          @if (campoInvalido('nombres')) {
-            <span class="form-field__error">
-              @if (form.controls.nombres.errors?.['required']) { Campo requerido }
-              @else if (form.controls.nombres.errors?.['pattern']) { Solo letras y espacios }
-              @else { Minimo 3 caracteres }
-            </span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="text"
-              formControlName="apellidos"
-              placeholder=" "
-              [class.float-field__input--error]="campoInvalido('apellidos')"
-              (input)="sanitizeNameInput('apellidos')"
-            />
-            <label class="float-field__label">Apellidos <span class="req">*</span></label>
-          </div>
-          @if (campoInvalido('apellidos')) {
-            <span class="form-field__error">
-              @if (form.controls.apellidos.errors?.['required']) { Campo requerido }
-              @else if (form.controls.apellidos.errors?.['pattern']) { Solo letras y espacios }
-              @else { Minimo 3 caracteres }
-            </span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-select">
-            <select
-              class="float-select__input"
-              formControlName="idgenero"
-              [class.float-select__input--error]="campoInvalido('idgenero')"
-            >
-              <option value=""></option>
-              @for (genero of generos; track genero.id) {
-                <option [value]="genero.id">{{ genero.nombre }}</option>
-              }
-            </select>
-            <label class="float-select__label" [class.float-select__label--up]="tieneValor('idgenero')">
-              Genero <span class="req">*</span>
-            </label>
-          </div>
-          @if (campoInvalido('idgenero')) {
-            <span class="form-field__error">Campo requerido</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-select">
-            <select class="float-select__input" formControlName="idnacionalidad">
-              <option value=""></option>
-              @for (nacionalidad of nacionalidades; track nacionalidad.id) {
-                <option [value]="nacionalidad.id">{{ nacionalidad.nombre }}</option>
-              }
-            </select>
-            <label
-              class="float-select__label"
-              [class.float-select__label--up]="tieneValor('idnacionalidad')"
-            >
-              Nacionalidad
-              <span class="req">*</span>
-            </label>
-          </div>
-                    @if (campoInvalido('idnacionalidad')) {
-            <span class="form-field__error">Campo requerido</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input float-field__input--date"
-              type="date"
-              formControlName="fechanacimiento"
-              placeholder=" "
-            />
-            <label class="float-field__label float-field__label--always">Fecha de nacimiento</label>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="text"
-              formControlName="telefono"
-              placeholder=" "
-              maxlength="10"
-              [class.float-field__input--error]="campoInvalido('telefono')"
-              (input)="sanitizePhoneInput()"
-            />
-            <label class="float-field__label">Telefono</label>
-          </div>
-          @if (campoInvalido('telefono')) {
-            <span class="form-field__error">{{ phoneError() }}</span>
-          }
-        </div>
-
-        <div class="form-field form-field--full">
-          <div class="float-field">
-            <input class="float-field__input" type="text" formControlName="direccion" placeholder=" " />
-            <label class="float-field__label">Direccion</label>
-          </div>
-        </div>
-
-        <div class="form-field form-field--full">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="email"
-              formControlName="correoContacto"
-              placeholder=" "
-              [class.float-field__input--error]="campoInvalido('correoContacto')"
-            />
-            <label class="float-field__label">Correo de contacto</label>
-          </div>
-          @if (campoInvalido('correoContacto')) {
-            <span class="form-field__error">Formato de correo invalido</span>
-          }
-        </div>
-
-        <div class="form-field form-field--full">
-          <div class="float-select">
-            <select
-              class="float-select__input"
-              formControlName="roleid"
-              [class.float-select__input--error]="campoInvalido('roleid')"
-            >
-              <option value="">Seleccione un rol</option>
-              @for (r of rolesList; track r.id) {
-                <option [value]="r.id">{{ r.nombre }}</option>
-              }
-            </select>
-            <label class="float-select__label" [class.float-select__label--up]="tieneValor('roleid')">
-              Rol <span class="req">*</span>
-            </label>
-          </div>
-          @if (campoInvalido('roleid')) {
-            <span class="form-field__error">Seleccione un rol</span>
-          }
-        </div>
-
+        }
       </div>
     </div>
 
     <div class="form-section">
       <div class="form-section__title">
         <span class="form-section__bar"></span>
-        Datos de usuario
+        Datos de acceso
       </div>
 
-      <!-- Row 1: Usuario Interno Checkbox -->
-      <div class="form-grid form-grid--2">
-        <label class="check-field form-field--full">
-          <input type="checkbox" formControlName="usuarioInterno" />
-          <span>Usuario Interno</span>
-        </label>
-      </div>
-
-      <!-- Row 2: Email/Usuario -->
       <div class="form-grid form-grid--2">
         <div class="form-field form-field--full">
           @if (isInternalUser) {
@@ -284,17 +83,40 @@
                 placeholder=" "
                 [class.float-field__input--error]="campoInvalido('email')"
               />
-              <label class="float-field__label">Usuario <span class="req">*</span></label>
+              <label class="float-field__label">Email <span class="req">*</span></label>
             </div>
           }
           @if (campoInvalido('email')) {
             <span class="form-field__error">{{ emailError() }}</span>
           }
         </div>
-      </div>
 
-      <!-- Row 3: Password -->
-      <div class="form-grid form-grid--2">
+        <div class="form-field form-field--full">
+          <div class="float-select">
+            <select
+              class="float-select__input"
+              formControlName="roleid"
+              [class.float-select__input--error]="campoInvalido('roleid')"
+            >
+              <option value="">Seleccione un rol</option>
+              @for (r of rolesList; track r.id) {
+                <option [value]="r.id">{{ r.nombre }}</option>
+              }
+            </select>
+            <label class="float-select__label float-select__label--up">
+              Rol <span class="req">*</span>
+            </label>
+          </div>
+          @if (campoInvalido('roleid')) {
+            <span class="form-field__error">Seleccione un rol</span>
+          }
+        </div>
+
+        <label class="check-field form-field--full">
+          <input type="checkbox" formControlName="debeCambiarPassword" />
+          <span>Debe cambiar contrasena en el proximo acceso</span>
+        </label>
+
         <div class="form-field form-field--full">
           @if (isEdit) {
             <div class="float-field">
@@ -305,12 +127,12 @@
                 placeholder=" "
                 [class.float-field__input--error]="campoInvalido('password')"
               />
-              <label class="float-field__label">Contraseña <span class="req">*</span></label>
+              <label class="float-field__label">Nueva contrasena</label>
               <button
                 type="button"
                 class="password-toggle"
                 (click)="toggleTemporaryPasswordVisibility()"
-                title="Mostrar/ocultar contraseña"
+                title="Mostrar/ocultar contrasena"
               >
                 <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
               </button>
@@ -319,11 +141,10 @@
               <span class="form-field__error">{{ passwordError() }}</span>
             }
           } @else {
-            <p class="form-field__hint">Se generó una contraseña temporal. El usuario deberá cambiarla en el primer acceso.</p>
+            <p class="form-field__hint">Se genero una contrasena temporal. El usuario debera cambiarla en el primer acceso.</p>
           }
         </div>
       </div>
-
     </div>
   </div>
 
@@ -335,14 +156,12 @@
   }
 
   <div class="modal-form__footer">
-    <button class="modal-form__btn modal-form__btn--cancel" type="button" (click)="cancel()" [disabled]="guardando()">Cancelar</button>
     <button class="modal-form__btn modal-form__btn--save" type="submit" [disabled]="guardando()">
       @if (guardando()) {
         <span class="modal-form__spinner"></span>
         Guardando...
       } @else {
-        <span class="material-icons">person_add</span>
-        {{ isEdit ? 'Guardar cambios' : 'Crear usuario' }}
+        Guardar
       }
     </button>
   </div>

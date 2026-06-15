@@ -6,6 +6,8 @@
   max-height: 90vh;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: #ffffff;
+  border-radius: 16px;
 }
 
 /* ── Header ───────────────────────────────────────────────────── */
@@ -22,7 +24,7 @@
 .rol-modal__header-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
 }
 
 .rol-modal__badge {
@@ -52,7 +54,7 @@
 }
 
 .rol-modal__title {
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 22px;
   font-weight: 800;
   color: #163572;
@@ -97,7 +99,7 @@
 .rol-modal__body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   padding: 20px 28px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -122,10 +124,10 @@
 }
 
 .rol-modal__label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #334155;
-  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 600;
+  color: #163572;
+  letter-spacing: 0;
 
   .req {
     color: #dc2626;
@@ -138,8 +140,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1.5px solid #d6e0ec;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
   padding: 0 14px;
   background: #ffffff;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -231,8 +233,8 @@
 .rol-modal__select {
   width: 100%;
   min-height: 46px;
-  border: 1.5px solid #d6e0ec;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
   padding: 0 40px 0 14px;
   color: #1e293b;
   background: #ffffff;
@@ -257,7 +259,7 @@
 
 /* ── Modules section ──────────────────────────────────────────── */
 .rol-modal__modules {
-  border: 1.5px solid #e2e8f0;
+  border: 1px solid #e8edf5;
   border-radius: 12px;
   padding: 14px;
   background: #f8fbff;
@@ -370,6 +372,7 @@
 /* ── Footer ───────────────────────────────────────────────────── */
 .rol-modal__footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 28px 22px;
@@ -380,9 +383,11 @@
 .rol-modal__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  height: 42px;
-  padding: 0 20px;
+  min-width: 132px;
+  height: 40px;
+  padding: 0 22px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 700;

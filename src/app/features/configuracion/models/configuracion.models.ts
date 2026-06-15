@@ -16,36 +16,37 @@ export interface Rol {
 }
 
 export interface UsuarioPayload {
-  idGenero: number | string;
-  idNacionalidad: number | string;
-  idTipoIdentificacion: number | string;
-  tipoIdentificacion: 'C' | 'R' | 'P' | 'O' | string;
-  numeroidentificacion: string;
-  nombres: string;
-  apellidos: string;
-  correoContacto: string;
-  tipoPersona: 'NATURAL' | 'JURIDICA' | string;
-  fechaNacimiento: string | null;
-  usuarioCreacion: string;
-  idUsuarioCreacion: string;
-  ip: string;
+  idPersona: number | null;
   email: string;
   usuario: string;
   password?: string;
   debeCambiarPassword: boolean;
   usuarioInterno: boolean;
-  idtipoidentificacion: string;
-  idgenero: string;
-  idnacionalidad: string;
-  fechanacimiento: string | null;
-  telefono: string | null;
-  direccion: string | null;
   rolesids: string[];
 }
 
 export interface Usuario extends UsuarioPayload {
   id: number;
+  idUsuario: number;
   estado: EstadoUsuario;
+  numeroidentificacion?: string | null;
+  nombres?: string | null;
+  apellidos?: string | null;
+  telefono?: string | null;
+  direccion?: string | null;
+  fechanacimiento?: string | null;
+  ultimologin?: string | null;
+}
+
+export interface ColaboradorUsuarioOption {
+  id: number;
+  idPersona?: number | null;
+  codigoEmpleado?: string;
+  numeroIdentificacion?: string;
+  nombreCompleto: string;
+  email?: string;
+  cargo?: string;
+  activo?: boolean;
 }
 
 export interface RegisterUserRequest {

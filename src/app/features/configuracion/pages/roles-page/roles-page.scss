@@ -107,30 +107,10 @@ $hover-row:     rgba(#163572, 0.04);
   margin-top: 0;
 }
 
-.card-filter-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  display: flex;
-  align-items: flex-start;
-  align-self: flex-start;
-  transition: background 0.15s;
-
-  &:hover { background: $secondary; }
-}
-
 .card-svg {
   width: 22px;
   height: 22px;
   filter: brightness(0) saturate(100%) invert(15%) sepia(61%) saturate(1200%) hue-rotate(203deg) brightness(95%);
-}
-
-.filter-svg {
-  width: 10px;
-  height: 10px;
-  filter: brightness(0) saturate(100%) invert(46%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%);
 }
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────
@@ -219,31 +199,6 @@ $hover-row:     rgba(#163572, 0.04);
   padding: 8px;
 }
 
-.dropdown-search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border: 1px solid $border;
-  border-radius: 6px;
-  margin-bottom: 6px;
-}
-
-.dropdown-search-icon {
-  font-size: 16px;
-  color: $text-light;
-}
-
-.dropdown-search-input {
-  border: none;
-  outline: none;
-  font-size: 13px;
-  color: $text-dark;
-  width: 100%;
-  background: transparent;
-  &::placeholder { color: $text-light; }
-}
-
 .dropdown-option {
   display: flex;
   align-items: center;
@@ -282,18 +237,6 @@ $hover-row:     rgba(#163572, 0.04);
   margin-left: auto;
   font-size: 13px;
   color: $text-light;
-}
-
-.dropdown-limpiar {
-  padding: 8px;
-  font-size: 13px;
-  color: #737373;
-  cursor: pointer;
-  border-top: 1px solid $border;
-  margin-top: 4px;
-  text-align: center;
-
-  &:hover { background: $secondary; border-radius: 6px; }
 }
 
 .search-spacer {
@@ -341,16 +284,26 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .roles-table-wrap {
+  overflow-y: auto;
   overflow-x: auto;
+  max-height: calc(100vh - 320px);
+  background: $white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  background: $white;
+  scrollbar-width: thin;
+  scrollbar-color: #D4D4D4 transparent;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 4px; }
+  &::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
 }
 
 .roles-table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+  font-size: 14px;
 
   th,
   td {
@@ -365,12 +318,17 @@ $hover-row:     rgba(#163572, 0.04);
     background: #f8fafc;
     font-size: 12px;
     font-weight: 800;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
 
   td {
     color: #475569;
     font-size: 13px;
     font-weight: 500;
+    white-space: nowrap;
   }
 
   tr:last-child td {
@@ -381,6 +339,8 @@ $hover-row:     rgba(#163572, 0.04);
     transition: background 0.12s;
     &:hover { background: $hover-row; }
   }
+
+  th:last-child { width: 56px; }
 }
 
 .role-name {
@@ -493,9 +453,15 @@ $hover-row:     rgba(#163572, 0.04);
   z-index: 1;
   width: 56px;
   min-width: 56px;
+  padding: 8px 10px !important;
   text-align: center;
+  white-space: nowrap;
   background: $white;
   box-shadow: -8px 0 12px rgba(255, 255, 255, 0.9);
+}
+
+.roles-table tbody tr:hover .actions-cell {
+  background: #f8fafc;
 }
 
 // ── Empty state ────────────────────────────────────────────────────────────
