@@ -4,34 +4,42 @@ $white:        #ffffff;
 $text-light:   #7C7C7C;
 $border:       var(--tmr-border, #e5e7eb);
 
-// ── Layout general ─────────────────────────────────────────────────────────
+// ── Contenedor principal — tarjeta blanca (igual que Proyectos) ─────────────
 .page {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: $white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  padding: 28px 28px 22px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-// ── Hero ───────────────────────────────────────────────────────────────────
+// ── Hero — header con título y botón ───────────────────────────────────────
 .hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  border: 1px solid $border;
-  border-radius: 14px;
-  background: $white;
-  padding: 16px 20px;
+  // Sin fondo/borde propio: ya está dentro de la tarjeta blanca
 }
 
 h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: clamp(28px, 3vw, 34px);
   color: $primary;
-  font-weight: 700;
+  font-weight: 800;
+  line-height: 1.1;
+  font-family: 'Inter', sans-serif;
 }
 
-// ── Stats grid: 5 columnas (override en este archivo) ──────────────────────
+// ── Stats grid: 5 columnas ─────────────────────────────────────────────────
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -44,10 +52,12 @@ h2 {
   padding: 14px 18px;
   border: 1px solid $border;
   background: $white;
-}
+  transition: border-color 0.2s, box-shadow 0.2s;
 
-.stats-grid article:hover {
-  border-color: #dbe3ee;
+  &:hover {
+    border-color: #dbe3ee;
+    box-shadow: 0 4px 14px rgba(22, 53, 114, 0.08);
+  }
 }
 
 .stats-grid span {
@@ -65,14 +75,6 @@ h2 {
   line-height: 1;
 }
 
-// ── Panel ──────────────────────────────────────────────────────────────────
-.panel {
-  border: 1px solid $border;
-  background: $white;
-  border-radius: 14px;
-  padding: 18px;
-}
-
 // ── Error banner ───────────────────────────────────────────────────────────
 .error-banner {
   display: flex;
@@ -88,32 +90,25 @@ h2 {
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
-@media (max-width: 1100px) {
-  .stats-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+@media (max-width: 1024px) {
+  .page { padding: 24px 22px 20px; }
 }
 
-@media (max-width: 760px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
-  .hero {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 14px;
-  }
+@media (max-width: 768px) {
+  .page { border-radius: 14px; padding: 20px 14px 18px; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero { align-items: flex-start; flex-direction: column; }
 }
 
 @media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+  .page { padding: 16px 10px; }
+  .stats-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 420px) {
-  .hero app-boton {
-    width: 100%;
-  }
+  .hero app-boton { width: 100%; }
 }

@@ -29,7 +29,6 @@ export interface Usuario extends UsuarioPayload {
   id: number;
   idUsuario: number;
   estado: EstadoUsuario;
-  numeroidentificacion?: string | null;
   nombres?: string | null;
   apellidos?: string | null;
   telefono?: string | null;
@@ -42,29 +41,10 @@ export interface ColaboradorUsuarioOption {
   id: number;
   idPersona?: number | null;
   codigoEmpleado?: string;
-  numeroIdentificacion?: string;
   nombreCompleto: string;
   email?: string;
   cargo?: string;
   activo?: boolean;
-}
-
-export interface RegisterUserRequest {
-  idRol: number;
-  idGenero: number;
-  idNacionalidad: number;
-  idTipoIdentificacion: number;
-  tipoIdentificacion: 'C' | 'R' | 'P' | 'O';
-  numeroidentificacion: string;
-  nombres: string;
-  apellidos: string;
-  correoContacto: string;
-  tipoPersona: 'NATURAL' | 'JURIDICA';
-  fechaNacimiento: string;
-  telefono: string | null;
-  direccion: string | null;
-  email: string;
-  usuario: string;
 }
 
 export interface Feriado {

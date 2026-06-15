@@ -4,6 +4,7 @@ export interface User {
   name: string;
   modulos?: string[];
   idEmpleado?: number;
+  debeCambiarPassword?: boolean;
 }
 
 /**
@@ -17,6 +18,8 @@ export interface AuthResponse {
   expiresAt: string | Date;
   tokenFamilyId: string;
   user: User | null;
+  debeCambiarPassword?: boolean;
+  debeCambiarContrasena?: boolean;
 
   // Propiedades legacies para retrocompatibilidad
   token?: string;

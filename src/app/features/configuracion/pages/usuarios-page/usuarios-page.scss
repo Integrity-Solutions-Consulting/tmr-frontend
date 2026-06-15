@@ -11,15 +11,21 @@ $activo:        #22c55e;
 $inactivo:      #ef4444;
 $hover-row:     rgba(#163572, 0.04);
 
-// ── Layout general ─────────────────────────────────────────────────────────
+// ── Contenedor principal — tarjeta blanca (igual que Proyectos) ─────────────
 .page {
-  padding: 16px 24px;
-  background: transparent;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: $white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  padding: 28px 28px 22px;
+  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  gap: 12px;
+  gap: 20px;
 }
 
 // ── Header ─────────────────────────────────────────────────────────────────
@@ -31,12 +37,11 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .page-title {
-  font-size: 36px;
+  font-size: clamp(28px, 3vw, 34px);
   font-weight: 800;
   color: $primary;
   margin: 0;
-  letter-spacing: 0;
-  line-height: 40px;
+  line-height: 1.1;
   font-family: 'Inter', sans-serif;
 }
 
@@ -239,9 +244,7 @@ $hover-row:     rgba(#163572, 0.04);
   color: $text-light;
 }
 
-.search-spacer {
-  flex: 1;
-}
+.search-spacer { flex: 1; }
 
 .usuarios-actions {
   display: flex;
@@ -256,12 +259,11 @@ $hover-row:     rgba(#163572, 0.04);
   padding: 0 18px !important;
 }
 
-// ── Panel / Tabla ──────────────────────────────────────────────────────────
+// ── Panel / Tabla — integrado dentro de la tarjeta blanca ──────────────────
 .panel {
-  background: $white;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 18px;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .table-scroll-container {
@@ -291,6 +293,7 @@ $hover-row:     rgba(#163572, 0.04);
 
 .usuarios-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 14px;
 
@@ -331,9 +334,21 @@ $hover-row:     rgba(#163572, 0.04);
     }
   }
 
-  th:last-child { width: 56px; }
+  th:nth-child(1) { width: 18%; }
+  th:nth-child(2) { width: 22%; }
+  th:nth-child(3) { width: 26%; }
+  th:nth-child(4) { width: 22%; }
+  th:nth-child(5) { width: 12%; }
+  th:last-child   { width: 56px; }
 
-  tbody td:nth-child(4) {
+  tbody td:nth-child(1),
+  tbody td:nth-child(2),
+  tbody td:nth-child(3) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tbody td:nth-child(3) {
     max-width: 240px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -365,23 +380,9 @@ $hover-row:     rgba(#163572, 0.04);
   box-sizing: border-box;
 }
 
-.badge--activo {
-  color: #166534;
-  background: #dcfce7;
-  border: 1px solid #bbf7d0;
-}
-
-.badge--inactivo {
-  color: #991b1b;
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-}
-
-.badge--role {
-  color: #0c3b73;
-  background: #eef6ff;
-  border: 1px solid #d8e8fb;
-}
+.badge--activo  { color: #166534; background: #dcfce7; border: 1px solid #bbf7d0; }
+.badge--inactivo { color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; }
+.badge--role    { color: #0c3b73; background: #eef6ff; border: 1px solid #d8e8fb; }
 
 // ── Celda acciones ─────────────────────────────────────────────────────────
 .actions-cell {
@@ -397,9 +398,7 @@ $hover-row:     rgba(#163572, 0.04);
   box-shadow: -8px 0 12px rgba(255, 255, 255, 0.9);
 }
 
-.usuarios-table tbody tr:hover .actions-cell {
-  background: #f8fafc;
-}
+.usuarios-table tbody tr:hover .actions-cell { background: #f8fafc; }
 
 // ── Empty state ────────────────────────────────────────────────────────────
 .empty-state {
@@ -410,8 +409,12 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .page { padding: 24px 22px 20px; }
+}
+
 @media (max-width: 768px) {
-  .page { padding: 16px; }
+  .page { border-radius: 14px; padding: 20px 14px 18px; }
   .cards-row { flex-wrap: wrap; }
   .summary-card { width: 100%; flex: 1 1 100%; }
   .page-title { font-size: 28px; }
@@ -419,13 +422,12 @@ $hover-row:     rgba(#163572, 0.04);
   .search-bar { flex-direction: column; align-items: stretch; }
   .search-input-wrapper { width: 100%; flex: 1 1 auto; }
   .estado-filter-wrapper { width: 100%; }
-  .usuarios-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-  }
+  .usuarios-actions { width: 100%; flex-direction: column; align-items: stretch; }
   .usuarios-actions app-descarga-menu,
   .usuarios-actions app-boton,
   ::ng-deep .usuarios-actions .app-boton { width: 100%; }
-  .panel { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 16px 10px; }
 }

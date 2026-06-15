@@ -7,8 +7,10 @@ import { AuthService } from './features/auth/servicios/auth.service';
 import { TokenService } from './features/auth/servicios/token.service';
 import { AuthResponse } from './features/auth/modelos/auth.models';
 import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
+import { CambiarPasswordModalComponent } from './features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
 import { Subject } from 'rxjs';
-import { takeUntil, switchMap } from 'rxjs/operators';
+import { filter, takeUntil, switchMap } from 'rxjs/operators';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -25,12 +27,21 @@ export class AppComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private router = inject(Router);
   private currentDialogRef: any; // Referencia al modal abierto
+  private passwordDialogRef: any;
 
   ngOnInit(): void {
     // Iniciar monitoreo si hay token válido
     if (this.tokenService.isTokenValid()) {
       this.tokenMonitor.startMonitoring();
+      this.enforcePasswordChange();
     }
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => this.enforcePasswordChange());
 
     // Escuchar advertencia de expiración (1 minuto antes)
     this.tokenMonitor
@@ -117,6 +128,32 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.navigate(['/auth/login'], {
       queryParams: { reason: 'session-expired' }
     });
+  }
+
+  private enforcePasswordChange(): void {
+    if (!this.tokenService.isTokenValid() || !this.authService.debeCambiarPassword()) {
+      return;
+    }
+
+    if (this.router.url.startsWith('/auth/login') || this.passwordDialogRef) {
+      return;
+    }
+
+    this.passwordDialogRef = this.dialog.open(CambiarPasswordModalComponent, {
+      panelClass: 'tmr-dialog-panel',
+      disableClose: true,
+      data: { obligatorio: true },
+    });
+
+    this.passwordDialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((actualizado: boolean) => {
+        this.passwordDialogRef = null;
+        if (!actualizado && this.authService.debeCambiarPassword()) {
+          this.enforcePasswordChange();
+        }
+      });
   }
 
   ngOnDestroy(): void {
