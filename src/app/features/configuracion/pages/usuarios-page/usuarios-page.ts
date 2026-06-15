@@ -290,7 +290,11 @@ export class UsuariosPage {
         roles: this.roles(),
         nextId: this.configuracionService.nextId(this.usuarios()),
       },
-      panelClass: 'tmr-dialog-panel',
+      panelClass: ['tmr-dialog-panel', 'usuarios-dialog-panel'],
+      width: '560px',
+      height: '640px',
+      maxWidth: 'calc(100vw - 32px)',
+      maxHeight: 'calc(100dvh - 32px)',
     });
 
     dialogRef.afterClosed().subscribe((result) => {
