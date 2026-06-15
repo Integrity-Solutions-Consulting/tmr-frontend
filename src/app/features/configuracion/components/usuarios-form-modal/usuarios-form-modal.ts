@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 import { catchError, forkJoin, map, of } from 'rxjs';
 import { ColaboradorUsuarioOption, Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
@@ -14,7 +16,7 @@ const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
 @Component({
   selector: 'app-usuarios-form-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatSelectModule, MatOptionModule],
   templateUrl: './usuarios-form-modal.html',
   styleUrl: './usuarios-form-modal.scss',
 })

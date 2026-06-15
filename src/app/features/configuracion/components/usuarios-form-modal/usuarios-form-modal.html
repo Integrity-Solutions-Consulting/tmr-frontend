@@ -24,19 +24,21 @@
 
         @if (isInternalUser) {
           <div class="form-field form-field--full">
-            <div class="float-select">
-              <select
-                class="float-select__input"
+            <div class="float-select mat-select-wrapper">
+              <mat-select
+                class="float-select__mat-input"
                 formControlName="idColaborador"
                 [class.float-select__input--error]="campoInvalido('idColaborador')"
+                panelWidth="null"
+                placeholder="Seleccione un colaborador"
               >
-                <option value="">Seleccione un colaborador</option>
+                <mat-option value="">Seleccione un colaborador</mat-option>
                 @for (colaborador of colaboradores; track colaborador.id) {
-                  <option [value]="colaborador.id">
+                  <mat-option [value]="colaborador.id">
                     {{ colaborador.nombreCompleto }}
-                  </option>
+                  </mat-option>
                 }
-              </select>
+              </mat-select>
               <label class="float-select__label float-select__label--up">
                 Colaborador <span class="req">*</span>
               </label>
