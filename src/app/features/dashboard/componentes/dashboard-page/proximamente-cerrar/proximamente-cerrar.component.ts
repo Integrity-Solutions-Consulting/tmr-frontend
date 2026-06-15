@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProyectoResumen } from '../../../modelos/dashboard.model';
+import { BadgeEstadoComponent } from '../../../../../shared/components/badge-estado/badge-estado.component';
 
 @Component({
   selector: 'app-proximamente-cerrar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BadgeEstadoComponent],
   templateUrl: './proximamente-cerrar.component.html',
   styleUrls: ['./proximamente-cerrar.component.scss']
 })
