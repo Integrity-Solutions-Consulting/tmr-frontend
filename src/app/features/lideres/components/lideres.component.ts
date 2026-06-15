@@ -447,8 +447,21 @@ export class LideresComponent implements OnInit {
 
   toggleEstadoLider(lider: Lider): void {
     const nuevoEstado = lider.estado !== 'Activo';
+    const nombres = (lider as any).nombres || '';
+    const apellidos = (lider as any).apellidos || '';
+    const email = (lider as any).email || (lider as any).correo || null;
+    const telefono = (lider as any).telefono || null;
+    const numeroIdentificacion = (lider as any).numeroIdentificacion || null;
+    const idTipo = (lider as any).idtipo || null;
+
     const solicitud = {
+      Nombres: nombres,
+      Apellidos: apellidos,
+      Email: email,
+      Telefono: telefono,
+      Idtipo: idTipo,
       Activo: nuevoEstado,
+      NumeroIdentificacion: numeroIdentificacion,
       Usuariomodificacion: 'frontend',
       Ipmodificacion: '127.0.0.1'
     };

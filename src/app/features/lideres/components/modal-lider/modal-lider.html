@@ -39,8 +39,10 @@
 
           <!-- Tipo de líder -->
           <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
-            <div class="custom-select" (click)="toggleDropdown('tipo', $event)" [class.open]="dropdownAbierto === 'tipo'">
-              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
+            <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
+              [class.open]="dropdownAbierto === 'tipo'">
+              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de
+                líder' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
             <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
@@ -56,8 +58,10 @@
         <ng-container *ngIf="!modoEdicion">
           <!-- Tipo de líder -->
           <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
-            <div class="custom-select" (click)="toggleDropdown('tipo', $event)" [class.open]="dropdownAbierto === 'tipo'">
-              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
+            <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
+              [class.open]="dropdownAbierto === 'tipo'">
+              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de
+                líder' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
             <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
@@ -73,7 +77,8 @@
             [class.input-error]="enviado && !form.personaId">
             <div class="custom-select" (click)="toggleDropdown('persona', $event)"
               [class.open]="dropdownAbierto === 'persona'">
-              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
+              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() ||
+                'Colaborador' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
             <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
@@ -102,7 +107,8 @@
         <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.personaId">
           <div class="custom-select" (click)="toggleDropdown('persona', $event)"
             [class.open]="dropdownAbierto === 'persona'">
-            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
+            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() ||
+              'Colaborador' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
           <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
@@ -130,30 +136,35 @@
       </div>
 
       <div class="form-row">
-        <div class="input-wrapper" [class.input-error]="enviado && !form.nombres">
-          <input type="text" class="form-input" placeholder="Nombres" [(ngModel)]="form.nombres">
-          <span class="error-msg" *ngIf="enviado && !form.nombres">Campo requerido</span>
+        <div class="input-wrapper" [class.input-error]="enviado && !isNombresValid(form.nombres)">
+          <input type="text" class="form-input" placeholder="Nombres" [(ngModel)]="form.nombres"
+            (keypress)="soloLetras($event)" (input)="onInputNombres($event)" maxlength="100">
+          <span class="error-msg" *ngIf="enviado && (!form.nombres || form.nombres.trim().length === 0)">Campo requerido</span>
+          <span class="error-msg" *ngIf="enviado && form.nombres && form.nombres.trim().length > 100">Máximo 100 caracteres</span>
         </div>
-        <div class="input-wrapper" [class.input-error]="enviado && !form.apellidos">
-          <input type="text" class="form-input" placeholder="Apellidos" [(ngModel)]="form.apellidos">
-          <span class="error-msg" *ngIf="enviado && !form.apellidos">Campo requerido</span>
+        <div class="input-wrapper" [class.input-error]="enviado && !isApellidosValid(form.apellidos)">
+          <input type="text" class="form-input" placeholder="Apellidos" [(ngModel)]="form.apellidos"
+            (keypress)="soloLetras($event)" (input)="onInputApellidos($event)" maxlength="100">
+          <span class="error-msg" *ngIf="enviado && (!form.apellidos || form.apellidos.trim().length === 0)">Campo requerido</span>
+          <span class="error-msg" *ngIf="enviado && form.apellidos && form.apellidos.trim().length > 100">Máximo 100 caracteres</span>
         </div>
       </div>
 
       <div class="form-row">
-        <div class="input-wrapper" [class.input-error]="enviado && !form.correo">
-          <input type="email" class="form-input" placeholder="Correo electrónico" [(ngModel)]="form.correo">
-          <span class="error-msg" *ngIf="enviado && !form.correo">Campo requerido</span>
+        <div class="input-wrapper" [class.input-error]="enviado && !isEmailValid(form.correo)">
+          <input type="email" class="form-input" placeholder="Correo electrónico" [(ngModel)]="form.correo" maxlength="100">
+          <span class="error-msg" *ngIf="enviado && !isEmailValid(form.correo)">Correo electrónico inválido</span>
         </div>
-        <div class="input-wrapper" [class.input-error]="enviado && !form.telefono">
-          <input type="text" class="form-input" placeholder="Teléfono" [(ngModel)]="form.telefono">
-          <span class="error-msg" *ngIf="enviado && !form.telefono">Campo requerido</span>
+        <div class="input-wrapper" [class.input-error]="enviado && !isTelefonoValid(form.telefono)">
+          <input type="text" class="form-input" placeholder="Teléfono" [(ngModel)]="form.telefono"
+            (keypress)="soloNumerosYSignos($event)" (input)="onInputTelefono($event)" maxlength="20">
+          <span class="error-msg" *ngIf="enviado && !isTelefonoValid(form.telefono)">Teléfono inválido (debe tener entre 7 y 20 dígitos)</span>
         </div>
       </div>
 
       <div class="button-container">
         <button class="btn-guardar" type="button" (click)="onGuardar()" [disabled]="guardando">
-          {{ modoEdicion ? 'Guardar cambios' : 'Guardar líder' }}
+          {{ modoEdicion ? 'Guardar' : 'Guardar' }}
         </button>
       </div>
     </div>

@@ -182,10 +182,32 @@ export class ModalLider implements OnInit, OnChanges {
     this.cerrarModal.emit();
   }
 
+  isEmailValid(email: string): boolean {
+    if (!email) return true;
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email.trim());
+  }
+
+  isTelefonoValid(telefono: string): boolean {
+    if (!telefono) return true;
+    const regex = /^[+0-9\s\-()]{7,20}$/;
+    return regex.test(telefono.trim());
+  }
+
+  isNombresValid(nombres: string): boolean {
+    return !!nombres && nombres.trim().length > 0 && nombres.trim().length <= 100;
+  }
+
+  isApellidosValid(apellidos: string): boolean {
+    return !!apellidos && apellidos.trim().length > 0 && apellidos.trim().length <= 100;
+  }
+
   formularioValido(): boolean {
     const baseValid = !!this.form.tipoId && 
-                      !!this.form.nombres && 
-                      !!this.form.apellidos;
+                      this.isNombresValid(this.form.nombres) && 
+                      this.isApellidosValid(this.form.apellidos) &&
+                      this.isEmailValid(this.form.correo) &&
+                      this.isTelefonoValid(this.form.telefono);
 
     if (this.modoEdicion) {
       return baseValid && !!this.form.estado;
@@ -211,12 +233,41 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   // VALIDACIÓN ADICIONAL EN TIEMPO REAL PARA EL TECLADO
-  soloNumeros(event: KeyboardEvent): boolean {
-    const charCode = event.key;
-    if (!/^[0-9]$/.test(charCode)) {
+  soloLetras(event: KeyboardEvent): boolean {
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]$/;
+    if (event.key.length > 1) return true;
+    if (!regex.test(event.key)) {
       event.preventDefault();
       return false;
     }
     return true;
+  }
+
+  soloNumerosYSignos(event: KeyboardEvent): boolean {
+    const regex = /^[0-9+\s\-()]$/;
+    if (event.key.length > 1) return true;
+    if (!regex.test(event.key)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  onInputNombres(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+    this.form.nombres = input.value;
+  }
+
+  onInputApellidos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+    this.form.apellidos = input.value;
+  }
+
+  onInputTelefono(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9+\s\-()]/g, '');
+    this.form.telefono = input.value;
   }
 }
