@@ -15,6 +15,10 @@ export class ActividadesService {
   private _actividades = signal<Actividad[]>([]);
   public readonly actividades = this._actividades.asReadonly();
 
+  // Variables de estado del mes activo en el calendario
+  private currentAnio = signal<number>(new Date().getFullYear());
+  private currentMes = signal<number>(new Date().getMonth() + 1);
+
   // Signals para métricas
   private _horasRegistradasHoy = signal<number>(0);
   public readonly horasRegistradasHoy = this._horasRegistradasHoy.asReadonly();
@@ -28,15 +32,19 @@ export class ActividadesService {
   private _horasPorRegistrar = signal<number>(0);
   public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
 
-  cargarResumen(): void {
+  cargarResumen(anio?: number, mes?: number): void {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
     const empId = user.idEmpleado ?? user.id;
-    this.http.get<any>(`${this.apiUrl}/resumen?idEmpleado=${empId}`).subscribe({
+    let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
+    if (anio && mes) {
+      url += `&anio=${anio}&mes=${mes}`;
+    }
+    this.http.get<any>(url).subscribe({
       next: (res) => {
         this._horasPorRegistrar.set(res.horasPorRegistrar);
-        this._horasRegistradasHoy.set(res.horasRegistradas); // Simplificación
+        this._horasRegistradasHoy.set(res.horasRegistradas);
         this._horasSemanaActual.set(res.horasSemana);
         this._horasMesActual.set(res.horasMes);
       },
@@ -45,6 +53,8 @@ export class ActividadesService {
   }
 
   cargarCalendario(anio: number, mes: number): void {
+    this.currentAnio.set(anio);
+    this.currentMes.set(mes);
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
@@ -122,7 +132,7 @@ export class ActividadesService {
             next: () => {
               completed++;
               if (completed === requests.length) {
-                this.cargarResumen();
+                this.cargarResumen(this.currentAnio(), this.currentMes());
                 const actDate = parseLocal(data.fechaInicio);
                 this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
                 if (callback) callback();
@@ -149,7 +159,7 @@ export class ActividadesService {
 
       this.http.post(this.apiUrl, payload).subscribe({
         next: (res) => {
-          this.cargarResumen();
+          this.cargarResumen(this.currentAnio(), this.currentMes());
           const actDate = new Date(data.fechaActividad);
           this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
           if (callback) callback();
@@ -176,7 +186,7 @@ export class ActividadesService {
 
     this.http.put(`${this.apiUrl}/${id}`, payload).subscribe({
       next: () => {
-        this.cargarResumen();
+        this.cargarResumen(this.currentAnio(), this.currentMes());
         const actDate = new Date(data.fechaActividad);
         this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
 
@@ -189,7 +199,7 @@ export class ActividadesService {
   eliminarActividad(id: number | string, callback?: () => void): void {
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
-        this.cargarResumen();
+        this.cargarResumen(this.currentAnio(), this.currentMes());
         // Recargar el calendario actual
         const hoy = new Date();
         this.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
