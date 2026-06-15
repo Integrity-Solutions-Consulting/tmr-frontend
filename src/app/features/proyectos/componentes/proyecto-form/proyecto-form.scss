@@ -12,20 +12,42 @@
   h3 {
     margin: 0 0 20px;
     padding-left: 0;
-
     color: #163572;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
   }
 }
 
+.proyecto-form__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0;
+  }
+
+  button {
+    width: 140px;
+    height: 36px;
+    border-radius: 10px;
+    background: #163572 !important;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none !important;
+
+    &:hover {
+      background: #162056 !important;
+    }
+  }
+}
+
 .proyecto-form__subtitle {
   margin: 0 0 14px;
-
   color: #163572;
-
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
@@ -35,6 +57,35 @@
 .proyecto-form__leader .mat-mdc-form-field,
 .proyecto-form__resource-row .mat-mdc-form-field {
   width: 100%;
+}
+
+.proyecto-form__search-wrapper {
+  width: 100%;
+}
+
+.proyecto-form__search-wrapper--compact {
+  margin-bottom: 12px;
+}
+
+.proyecto-form__search {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 38px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+  }
 }
 
 .proyecto-form__date-field {
@@ -95,7 +146,6 @@
     width: 100%;
     --mat-form-field-container-height: 42px;
     --mat-form-field-container-vertical-padding: 8px;
-
     font-size: 13.5px;
   }
 
@@ -196,11 +246,96 @@
   }
 }
 
+// ── Grid info general ────────────────────────────────────────────────────────
+
 .proyecto-form__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
+
+.proyecto-form__status-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+
+  span {
+    color: #737373;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  strong {
+    color: #163572;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  small {
+    color: #6b7280;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+}
+
+// ── Bloque líder ─────────────────────────────────────────────────────────────
+
+.proyecto-form__leader-block {
+  width: min(100%, 827px);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.proyecto-form__leader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+
+  h4 {
+    margin: 0;
+    color: #163572;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    color: #ef4444 !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+
+    &:hover {
+      background: #fee2e2 !important;
+    }
+  }
+}
+
+// ── Campos del líder ─────────────────────────────────────────────────────────
 
 .proyecto-form__leader {
   display: grid;
@@ -208,7 +343,7 @@
   gap: 16px;
   align-items: start;
 
-  width: min(100%, 827px);
+  width: 100%;
   min-height: 72px;
   margin-bottom: 20px;
   padding: 16px;
@@ -219,27 +354,25 @@
   box-sizing: border-box;
 }
 
+// ── Cabecera de recursos ──────────────────────────────────────────────────────
+
 .proyecto-form__resources-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  width: min(100%, 827px);
+  width: 100%;
   margin-bottom: 10px;
 }
 
 .proyecto-form__add {
-  width: 173px;
-  height: 40px;
-
+  width: 160px;
+  height: 36px;
   border-radius: 10px;
-
   background: #163572 !important;
   color: #ffffff !important;
-
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-
   box-shadow: none !important;
 
   &:hover {
@@ -247,18 +380,19 @@
   }
 }
 
+// ── Lista de recursos ─────────────────────────────────────────────────────────
+
 .proyecto-form__resources {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: min(100%, 827px);
+  width: 100%;
 }
 
 .proyecto-form__resource {
-  width: min(100%, 827px);
+  width: 100%;
   min-height: 127px;
   padding: 16px;
-
   border: 1px solid #e8edf5;
   border-radius: 12px;
   background: #f8fafc;
@@ -279,17 +413,14 @@
   align-items: center;
 }
 
-/* Fila 1: Recurso (empleado) + Departamento + botón X */
 .proyecto-form__resource-top {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
 }
 
-/* Fila 2: Cargo (ocupa todo el ancho) */
 .proyecto-form__resource-middle {
   grid-template-columns: 1fr;
 }
 
-/* Fila 3: Entrada + Salida + Costo + Horas */
 .proyecto-form__resource-bottom {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 150px 150px;
 }
@@ -315,14 +446,10 @@
 .proyecto-form__remove {
   width: 36px !important;
   height: 40px !important;
-
   margin-top: 0;
-
   border-radius: 8px !important;
-
   color: #ef4444 !important;
   background: transparent !important;
-
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -332,24 +459,21 @@
   }
 }
 
+// ── Acciones ──────────────────────────────────────────────────────────────────
+
 .proyecto-form__actions {
   display: flex;
   justify-content: flex-end;
-
   margin-top: 24px;
 
   button {
     width: 173px;
     height: 40px;
-
     border-radius: 10px;
-
     background: #163572 !important;
     color: #ffffff !important;
-
     font-size: 14px;
     font-weight: 600;
-
     box-shadow: none !important;
 
     &:hover {
@@ -358,9 +482,15 @@
   }
 }
 
+// ── Responsive ────────────────────────────────────────────────────────────────
+
 @media (max-width: 1024px) {
   .proyecto-form__grid {
     grid-template-columns: 1fr;
+  }
+
+  .proyecto-form__leader-block {
+    width: 100%;
   }
 
   .proyecto-form__leader {
@@ -401,6 +531,16 @@
     grid-template-columns: 1fr;
   }
 
+  .proyecto-form__section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    button {
+      width: 100%;
+    }
+  }
+
   .proyecto-form__resources-header {
     align-items: flex-start;
     flex-direction: column;
@@ -411,7 +551,6 @@
     grid-template-columns: minmax(0, 1fr) 36px;
   }
 
-  /* En móvil el departamento baja a segunda fila */
   .proyecto-form__resource-departamento {
     grid-column: 1 / -1;
   }
@@ -430,10 +569,8 @@
     min-height: auto;
   }
 
-  .proyecto-form__actions {
-    button {
-      width: 100%;
-    }
+  .proyecto-form__actions button {
+    width: 100%;
   }
 
   .proyecto-form__add {
@@ -452,6 +589,10 @@
 
   .proyecto-form__leader {
     padding: 12px;
+  }
+
+  .proyecto-form__leader-block {
+    padding: 14px;
   }
 
   .proyecto-form__resource-bottom {

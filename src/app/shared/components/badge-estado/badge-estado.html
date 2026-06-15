@@ -1,6 +1,7 @@
 <span
   class="status-badge"
   [ngClass]="{
+    'active':      estado === 'Activo' || estado === 'ACTIVO',
     'progress':    estado === 'En Progreso' || estado === 'En progreso',
     'completed':   estado === 'Completado',
     'cancelled':   estado === 'Cancelado',
@@ -15,6 +16,7 @@
   <span
     class="status-dot"
     [ngClass]="{
+      'active':      estado === 'Activo' || estado === 'ACTIVO',
       'progress':    estado === 'En Progreso' || estado === 'En progreso',
       'completed':   estado === 'Completado',
       'cancelled':   estado === 'Cancelado',

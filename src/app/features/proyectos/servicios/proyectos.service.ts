@@ -11,6 +11,57 @@ export class ProyectosService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/proyectos`;
 
+  private construirPayload(proyecto: Proyecto, esEdicion = false): any {
+    const fmt = (f: any) => esEdicion ? f : this.formatearFechaCreacion(f);
+
+    const lideres = proyecto.lideres?.length
+      ? proyecto.lideres
+      : [{
+          idLider: proyecto.idLider ?? null,
+          lider: proyecto.lider ?? null,
+          costoHoraLider: proyecto.costoHoraLider ?? null,
+          horasLider: proyecto.horasLider ?? null,
+          recursos: proyecto.recursos ?? []
+        }];
+
+    const payload: any = {
+      Codigo: proyecto.codigo,
+      Nombre: proyecto.nombre,
+      Descripcion: proyecto.descripcion ?? null,
+      IdCliente: proyecto.idCliente ?? null,
+      Cliente: proyecto.cliente ?? null,
+      IdTipoProyecto: proyecto.idTipoProyecto ?? null,
+      Tipo: proyecto.tipo ?? null,
+      Estado: proyecto.estado || 'Activo',
+      FechaInicio: fmt(proyecto.fechaInicio),
+      FechaFin: fmt(proyecto.fechaFin),
+      Presupuesto: proyecto.presupuesto ?? null,
+      Horas: proyecto.horas ?? null,
+      Lideres: lideres.map(l => ({
+        IdLider: l.idLider ?? null,
+        Lider: l.lider ?? null,
+        LiderCosto: l.costoHoraLider ?? null,
+        LiderHoras: l.horasLider ?? null,
+        Recursos: (l.recursos ?? []).map(r => ({
+          IdEmpleado: r.idEmpleado ?? null,
+          Tipo: r.tipo,
+          Nombre: r.nombre,
+          Rol: r.rol,
+          Entrada: fmt(r.entrada),
+          Salida: fmt(r.salida),
+          CostoHora: r.costoHora,
+          Horas: r.horas
+        }))
+      }))
+    };
+
+    if (proyecto.idEstadoProyecto) {
+      payload.IdEstadoProyecto = proyecto.idEstadoProyecto;
+    }
+
+    return payload;
+  }
+
   obtenerProyectos(): Observable<Proyecto[]> {
     return this.http.get<Proyecto[]>(this.apiUrl);
   }
@@ -20,55 +71,28 @@ export class ProyectosService {
   }
 
   obtenerClientes(): Observable<LookupOption[]> {
-    return this.obtenerLookups().pipe(
-      map(data => data.clientes)
-    );
+    return this.obtenerLookups().pipe(map(data => data.clientes));
   }
 
   crearProyecto(proyecto: Proyecto): Observable<any> {
-    const payload: any = {
-      Codigo: proyecto.codigo,
-      Nombre: proyecto.nombre,
-      Descripcion: proyecto.descripcion,
-      IdCliente: proyecto.idCliente,
-      Cliente: proyecto.cliente,
-      IdTipoProyecto: proyecto.idTipoProyecto,
-      Tipo: proyecto.tipo,
-      IdLider: proyecto.idLider,
-      Lider: proyecto.lider,
-      IdEstadoProyecto: proyecto.idEstadoProyecto ?? 0,
-      Estado: proyecto.estado,
-      FechaInicio: this.formatearFechaCreacion(proyecto.fechaInicio),
-      FechaFin: this.formatearFechaCreacion(proyecto.fechaFin),
-      Presupuesto: proyecto.presupuesto,
-      Horas: proyecto.horas,
-      LiderCosto: proyecto.costoHoraLider,
-      LiderHoras: proyecto.horasLider,
-      Recursos: (proyecto.recursos || []).map(r => ({
-        IdEmpleado: r.idEmpleado ?? null,
-        Tipo: r.tipo,
-        Nombre: r.nombre,
-        Rol: r.rol,
-        Entrada: this.formatearFechaCreacion(r.entrada),
-        Salida: this.formatearFechaCreacion(r.salida),
-        CostoHora: r.costoHora,
-        Horas: r.horas
-      }))
-    };
+    return this.http.post(this.apiUrl, this.construirPayload(proyecto));
+  }
 
-    return this.http.post(this.apiUrl, payload);
+  actualizarProyecto(id: number, proyecto: Proyecto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, this.construirPayload(proyecto, true));
+  }
+
+  obtenerProyecto(id: number): Observable<Proyecto> {
+    return this.http.get<Proyecto>(`${this.apiUrl}/${id}`);
   }
 
   private formatearFechaCreacion(fecha?: string | Date | null): string | null | undefined {
-    if (!fecha) {
-      return fecha;
-    }
+    if (!fecha) return fecha;
 
     if (fecha instanceof Date) {
       const dia = String(fecha.getDate()).padStart(2, '0');
       const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-      const anio = fecha.getFullYear();
-      return `${dia}-${mes}-${anio}`;
+      return `${dia}-${mes}-${fecha.getFullYear()}`;
     }
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
@@ -83,43 +107,4 @@ export class ProyectosService {
 
     return fecha;
   }
-
-  actualizarProyecto(id: number, proyecto: Proyecto): Observable<any> {
-    const payload: any = {
-      Codigo: proyecto.codigo,
-      Nombre: proyecto.nombre,
-      Descripcion: proyecto.descripcion,
-      IdCliente: proyecto.idCliente,
-      Cliente: proyecto.cliente,
-      IdTipoProyecto: proyecto.idTipoProyecto,
-      Tipo: proyecto.tipo,
-      IdLider: proyecto.idLider,
-      Lider: proyecto.lider,
-      IdEstadoProyecto: proyecto.idEstadoProyecto ?? 0,
-      Estado: proyecto.estado,
-      FechaInicio: proyecto.fechaInicio,
-      FechaFin: proyecto.fechaFin,
-      Presupuesto: proyecto.presupuesto,
-      Horas: proyecto.horas,
-      LiderCosto: proyecto.costoHoraLider,
-      LiderHoras: proyecto.horasLider,
-      Recursos: (proyecto.recursos || []).map(r => ({
-        IdEmpleado: r.idEmpleado ?? null,
-        Tipo: r.tipo,
-        Nombre: r.nombre,
-        Rol: r.rol,
-        Entrada: r.entrada,
-        Salida: r.salida,
-        CostoHora: r.costoHora,
-        Horas: r.horas
-      }))
-    };
-
-    return this.http.put(`${this.apiUrl}/${id}`, payload);
-  }
-
-  obtenerProyecto(id: number): Observable<Proyecto> {
-    return this.http.get<Proyecto>(`${this.apiUrl}/${id}`);
-  }
 }
-

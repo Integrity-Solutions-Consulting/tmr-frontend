@@ -176,8 +176,31 @@
   }
 }
 
+.proyecto-detalle__leaders {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.proyecto-detalle__leader-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
 .proyecto-detalle__leader-grid {
   grid-template-columns: 1fr 140px 120px;
+}
+
+.proyecto-detalle__resources h5 {
+  margin: 0 0 10px;
+  color: #163572;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .proyecto-detalle span {
