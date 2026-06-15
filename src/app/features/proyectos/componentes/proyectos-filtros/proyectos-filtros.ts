@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy, Output, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +20,7 @@ export interface FiltrosProyecto {
   templateUrl: './proyectos-filtros.html',
   styleUrl: './proyectos-filtros.scss'
 })
-export class ProyectosFiltros implements OnInit {
+export class ProyectosFiltros implements OnInit, OnDestroy {
   @Output() filtrosChange = new EventEmitter<FiltrosProyecto>();
 
   private proyectosService = inject(ProyectosService);
@@ -36,6 +36,11 @@ export class ProyectosFiltros implements OnInit {
   mostrarEstadoDropdown = false;
   mostrarSeguimientoDropdown = false;
   mostrarTipoDropdown = false;
+
+  dropdownTop = 0;
+  dropdownLeft = 0;
+
+  private scrollHandler = () => this.cerrarDropdowns();
 
   get seguimientoOpciones(): LookupOption[] {
     return this.estados.filter(e => e.nombre !== 'Activo');
@@ -55,7 +60,8 @@ export class ProyectosFiltros implements OnInit {
 
   get labelSeguimiento(): string {
     if (!this.seguimientoSeleccionados.length) return 'Seguimiento';
-    if (this.seguimientoSeleccionados.length === 1) return this.estados.find(e => e.id === this.seguimientoSeleccionados[0])?.nombre ?? 'Seguimiento';
+    if (this.seguimientoSeleccionados.length === 1)
+      return this.estados.find(e => e.id === this.seguimientoSeleccionados[0])?.nombre ?? 'Seguimiento';
     return `${this.seguimientoSeleccionados.length} seguimiento`;
   }
 
@@ -67,59 +73,79 @@ export class ProyectosFiltros implements OnInit {
       },
       error: (err) => console.error('Error al cargar lookups:', err)
     });
+    window.addEventListener('scroll', this.scrollHandler, true);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.scrollHandler, true);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.cerrarDropdowns();
+  }
+
+  private calcularPosicion(event: Event): void {
+    const el = event.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    this.dropdownTop = rect.bottom + 6;
+    this.dropdownLeft = rect.left;
   }
 
   toggleEstadoDropdown(event: Event): void {
     event.stopPropagation();
-    this.mostrarTipoDropdown = false;
-    this.mostrarSeguimientoDropdown = false;
-    this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
+    const abriendo = !this.mostrarEstadoDropdown;
+    this.cerrarDropdowns();
+    if (abriendo) {
+      this.calcularPosicion(event);
+      this.mostrarEstadoDropdown = true;
+    }
   }
 
   toggleSeguimientoDropdown(event: Event): void {
     event.stopPropagation();
-    this.mostrarEstadoDropdown = false;
-    this.mostrarTipoDropdown = false;
-    this.mostrarSeguimientoDropdown = !this.mostrarSeguimientoDropdown;
+    const abriendo = !this.mostrarSeguimientoDropdown;
+    this.cerrarDropdowns();
+    if (abriendo) {
+      this.calcularPosicion(event);
+      this.mostrarSeguimientoDropdown = true;
+    }
   }
 
   toggleTipoDropdown(event: Event): void {
     event.stopPropagation();
-    this.mostrarEstadoDropdown = false;
-    this.mostrarSeguimientoDropdown = false;
-    this.mostrarTipoDropdown = !this.mostrarTipoDropdown;
+    const abriendo = !this.mostrarTipoDropdown;
+    this.cerrarDropdowns();
+    if (abriendo) {
+      this.calcularPosicion(event);
+      this.mostrarTipoDropdown = true;
+    }
   }
 
   toggleEstado(valor: string, event: Event): void {
     event.stopPropagation();
     const idx = this.estadosSeleccionados.indexOf(valor);
-    if (idx === -1) {
-      this.estadosSeleccionados = [...this.estadosSeleccionados, valor];
-    } else {
-      this.estadosSeleccionados = this.estadosSeleccionados.filter(e => e !== valor);
-    }
+    this.estadosSeleccionados = idx === -1
+      ? [...this.estadosSeleccionados, valor]
+      : this.estadosSeleccionados.filter(e => e !== valor);
     this.emitirFiltros();
   }
 
   toggleSeguimiento(valorId: number, event: Event): void {
     event.stopPropagation();
     const idx = this.seguimientoSeleccionados.indexOf(valorId);
-    if (idx === -1) {
-      this.seguimientoSeleccionados = [...this.seguimientoSeleccionados, valorId];
-    } else {
-      this.seguimientoSeleccionados = this.seguimientoSeleccionados.filter(e => e !== valorId);
-    }
+    this.seguimientoSeleccionados = idx === -1
+      ? [...this.seguimientoSeleccionados, valorId]
+      : this.seguimientoSeleccionados.filter(e => e !== valorId);
     this.emitirFiltros();
   }
 
   toggleTipo(valor: string, event: Event): void {
     event.stopPropagation();
     const idx = this.tiposSeleccionados.indexOf(valor);
-    if (idx === -1) {
-      this.tiposSeleccionados = [...this.tiposSeleccionados, valor];
-    } else {
-      this.tiposSeleccionados = this.tiposSeleccionados.filter(t => t !== valor);
-    }
+    this.tiposSeleccionados = idx === -1
+      ? [...this.tiposSeleccionados, valor]
+      : this.tiposSeleccionados.filter(t => t !== valor);
     this.emitirFiltros();
   }
 

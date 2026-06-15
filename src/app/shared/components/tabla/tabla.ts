@@ -35,7 +35,6 @@ import { selectProyectos } from '../../../features/proyectos/store/proyectos.sel
     MatTableModule,
     MatButtonModule,
     MatPaginatorModule,
-    BadgeEstado,
     ActionMenuComponent
   ],
   templateUrl: './tabla.html',
@@ -78,7 +77,6 @@ export class Tabla implements AfterViewInit {
     'fechas',
     'lideres',
     'numeroRecursos',
-    'estado',
     'acciones'
   ];
 

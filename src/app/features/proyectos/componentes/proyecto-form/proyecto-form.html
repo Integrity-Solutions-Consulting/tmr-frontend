@@ -29,7 +29,9 @@
           [readonly]="!!proyecto"
           [matAutocomplete]="clienteAuto"
           matAutocompletePosition="below"
+          autocomplete="off"
           (input)="onClienteInput()"
+          (focus)="onClienteFocus()"
         >
         <mat-autocomplete #clienteAuto="matAutocomplete" (optionSelected)="onClienteChange($event.option.value)">
           <mat-option *ngFor="let c of getClientesFiltrados()" [value]="c.nombre">
@@ -100,13 +102,15 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Estado</mat-label>
-        <mat-select yPosition="below" formControlName="estado">
-          <mat-option *ngFor="let estado of estadoOptions" [value]="estado">{{ estado }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="campoInvalido('estado')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
+      @if (proyecto) {
+        <mat-form-field>
+          <mat-label>Estado</mat-label>
+          <mat-select yPosition="below" formControlName="estado">
+            <mat-option value="ACTIVO">Activo</mat-option>
+            <mat-option value="INACTIVO">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seguimiento</mat-label>
@@ -151,7 +155,9 @@
                 formControlName="lider"
                 [matAutocomplete]="liderAuto"
                 matAutocompletePosition="below"
+                autocomplete="off"
                 (input)="onLiderInput(li)"
+                (focus)="onLiderFocus(li, $event)"
               >
               <mat-autocomplete #liderAuto="matAutocomplete" (optionSelected)="onLiderChange(li, $event.option.value)">
                 <mat-option *ngFor="let l of getLideresFiltrados(li)" [value]="l.nombre">
@@ -213,7 +219,9 @@
                         formControlName="nombre"
                         [matAutocomplete]="recursoAuto"
                         matAutocompletePosition="below"
+                        autocomplete="off"
                         (input)="onRecursoInput(li, ri)"
+                        (focus)="onRecursoFocus(li, ri)"
                       >
                       <mat-autocomplete #recursoAuto="matAutocomplete" (optionSelected)="onEmpleadoChange(li, ri, $event.option.value)">
                         <mat-option *ngFor="let emp of getRecursosFiltrados(li, ri)" [value]="emp.nombre">
@@ -334,3 +342,5 @@
   </div>
 
 </form>
+
+
