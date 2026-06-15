@@ -39,7 +39,8 @@
         <!-- Tipo de líder -->
         <div class="custom-select-wrapper" [class.input-error]="enviado && !form.tipoId">
           <div class="custom-select" (click)="toggleDropdown('tipo', $event)" [class.open]="dropdownAbierto === 'tipo'">
-            <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
+            <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de
+              líder' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
           <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
@@ -50,18 +51,29 @@
           <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
         </div>
 
-        <!-- Persona -->
-        <div class="custom-select-wrapper" *ngIf="!modoEdicion" [class.input-error]="enviado && !form.personaId">
+        <!-- Colaborador -->
+        <div class="custom-select-wrapper" [class.input-error]="enviado && !form.personaId">
           <div class="custom-select" (click)="toggleDropdown('persona', $event)"
             [class.open]="dropdownAbierto === 'persona'">
-            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Persona' }}</span>
+            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() ||
+              'Colaborador' }}</span>
             <span class="material-icons custom-select-arrow">expand_more</span>
           </div>
-          <ul class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
-            <li *ngFor="let persona of personasDisponibles" (click)="seleccionar('persona', persona, $event)">
-              {{ persona.nombres }} {{ persona.apellidos }}
-            </li>
-          </ul>
+          <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
+            <div class="dropdown-search-box" (click)="$event.stopPropagation()">
+              <span class="material-icons dropdown-search-icon">search</span>
+              <input type="text" class="dropdown-search-input" placeholder="Buscar colaborador..."
+                [(ngModel)]="busquedaPersona" (input)="filtrarPersonas()" />
+            </div>
+            <ul class="dropdown-list">
+              <li *ngFor="let persona of personasFiltradas" (click)="seleccionar('persona', persona, $event)">
+                {{ persona.nombreCompleto }}
+              </li>
+              <li *ngIf="personasFiltradas.length === 0" class="dropdown-empty">
+                No se encontraron resultados
+              </li>
+            </ul>
+          </div>
           <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
         </div>
       </div>
@@ -94,11 +106,9 @@
       </div>
 
       <div class="button-container">
-        <!-- DESPUÉS -->
-        <!-- DESPUÉS -->
         <button class="btn-guardar" type="button" (click)="onGuardar()" [disabled]="guardando">
-          {{ modoEdicion ? 'Guardar cambios' : 'Agregar líder +' }}
           <span *ngIf="modoEdicion" class="material-icons">save</span>
+          {{ modoEdicion ? 'Guardar cambios' : 'Guardar líder' }}
         </button>
       </div>
     </div>

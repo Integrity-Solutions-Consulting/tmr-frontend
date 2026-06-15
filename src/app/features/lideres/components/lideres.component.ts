@@ -108,54 +108,62 @@ export class LideresComponent implements OnInit {
 
   // ── Consumir API Real ──────────────────────────────────
   obtenerLideresDelBackend(): void {
-    forkJoin({
-      lideres: this.http.get<any[]>(this.apiUrl),
-      proyectos: this.http.get<any[]>(`${environment.apiUrl}/proyectos`)
-    }).subscribe({
-      next: ({ lideres, proyectos }) => {
-        const infoPorLider = new Map<number, { clientes: Set<string>; proyectos: Map<number, ProyectoAsignado> }>();
-
-        proyectos.forEach((proyecto: any) => {
-          const liderId = proyecto.idLider;
-          if (liderId == null) return;
-
-          const entrada = infoPorLider.get(liderId) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
-          if (proyecto.cliente) entrada.clientes.add(proyecto.cliente);
-
-          const proyectoId = proyecto.id ?? Math.random();
-          entrada.proyectos.set(proyectoId, {
-            id: proyecto.id,
-            codigo: proyecto.codigo ?? '',
-            nombre: proyecto.nombre ?? '',
-            cliente: proyecto.cliente ?? '',
-            estado: proyecto.estado ?? ''
-          });
-
-          infoPorLider.set(liderId, entrada);
+    this.http.get<any[]>(this.apiUrl).subscribe({
+      next: (lideres) => {
+        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
+          next: (proyectos) => {
+            this.procesarLideres(lideres, proyectos);
+          },
+          error: () => {
+            this.procesarLideres(lideres, []);
+          }
         });
-
-        this.lideres = lideres.map((l, i) => {
-          const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
-          return {
-            ...l,
-            id: l.id,
-            codigo: String(i + 1).padStart(3, '0'),
-            nombre: `${l.nombres} ${l.apellidos}`,
-            tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
-            correo: l.email,
-            telefono: l.telefono ?? '',
-            cliente: Array.from(datos.clientes).join(', '),
-            proyectos: Array.from(datos.proyectos.values()),
-            estado: l.activo ? 'Activo' : 'Inactivo'
-          };
-        });
-
-        this.aplicarFiltros();
       },
       error: (err) => {
-        console.error('❌ Error al traer líderes o proyectos:', err);
+        console.error('❌ Error al traer líderes:', err);
       }
     });
+  }
+
+  private procesarLideres(lideres: any[], proyectos: any[]): void {
+    const infoPorLider = new Map<number, { clientes: Set<string>; proyectos: Map<number, ProyectoAsignado> }>();
+
+    proyectos.forEach((proyecto: any) => {
+      const liderId = proyecto.idLider;
+      if (liderId == null) return;
+
+      const entrada = infoPorLider.get(liderId) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+      if (proyecto.cliente) entrada.clientes.add(proyecto.cliente);
+
+      const proyectoId = proyecto.id ?? Math.random();
+      entrada.proyectos.set(proyectoId, {
+        id: proyecto.id,
+        codigo: proyecto.codigo ?? '',
+        nombre: proyecto.nombre ?? '',
+        cliente: proyecto.cliente ?? '',
+        estado: proyecto.estado ?? ''
+      });
+
+      infoPorLider.set(liderId, entrada);
+    });
+
+    this.lideres = lideres.map((l, i) => {
+      const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+      return {
+        ...l,
+        id: l.id,
+        codigo: String(i + 1),
+        nombre: `${l.nombres} ${l.apellidos}`,
+        tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
+        correo: l.email,
+        telefono: l.telefono ?? '',
+        cliente: Array.from(datos.clientes).join(', '),
+        proyectos: Array.from(datos.proyectos.values()),
+        estado: l.activo ? 'Activo' : 'Inactivo'
+      };
+    });
+
+    this.aplicarFiltros();
   }
 
   // ── Contadores cards dinámicos ──────────────────────────
@@ -426,6 +434,27 @@ export class LideresComponent implements OnInit {
     XLSX.utils.book_append_sheet(wb, ws, 'Líderes');
     XLSX.writeFile(wb, 'lideres.xlsx');
     this.mostrarDescarga = false;
+  }
+
+ toggleEstadoLider(lider: Lider): void {
+    const nuevoEstado = lider.estado !== 'Activo';
+    const solicitud = {
+      Activo: nuevoEstado,
+      Usuariomodificacion: 'frontend',
+      Ipmodificacion: '127.0.0.1'
+    };
+
+    this.http.put(`${this.apiUrl}/${lider.id}`, solicitud).subscribe({
+      next: () => {
+        this.mensajeConfirmacion = nuevoEstado
+          ? 'El líder ha sido activado exitosamente'
+          : 'El líder ha sido desactivado exitosamente';
+        this.mostrarConfirmacion = true;
+        this.obtenerLideresDelBackend();
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      },
+      error: (err) => console.error('Error al cambiar estado del líder:', err)
+    });
   }
 
   eliminarLider(lider: Lider): void {

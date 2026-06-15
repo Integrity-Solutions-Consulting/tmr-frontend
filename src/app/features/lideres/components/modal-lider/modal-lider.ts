@@ -12,10 +12,9 @@ interface TipoLider {
 
 interface PersonaDisponible {
   id: number;
-  nombres: string;
-  apellidos: string;
+  nombreCompleto: string;
   email: string;
-  telefono: string;
+  activo: boolean;
 }
 
 @Component({
@@ -38,6 +37,8 @@ export class ModalLider implements OnInit, OnChanges {
 
   tiposLideres: TipoLider[] = [];
   personasDisponibles: PersonaDisponible[] = [];
+  busquedaPersona = '';
+  personasFiltradas: PersonaDisponible[] = [];
 
   form = {
     tipoId: '' as any,
@@ -103,18 +104,19 @@ export class ModalLider implements OnInit, OnChanges {
       });
   }
 
-  private loadPersonasDisponibles(): void {
-    this.http.get<PersonaDisponible[]>(`${environment.apiUrl}/lideres/personas-disponibles`)
-      .subscribe({
-        next: (personas) => {
-          this.personasDisponibles = personas ?? [];
-          if (this.modoEdicion && this.lider) {
-            this.syncFormWithLider();
-          }
-        },
-        error: (error) => console.error('Error al obtener personas disponibles:', error)
-      });
-  }
+private loadPersonasDisponibles(): void {
+  this.http.get<PersonaDisponible[]>(`${environment.apiUrl}/colaboradores`)
+    .subscribe({
+      next: (colaboradores) => {
+        this.personasDisponibles = colaboradores ?? [];
+        this.personasFiltradas = [...this.personasDisponibles];
+        if (this.modoEdicion && this.lider) {
+          this.syncFormWithLider();
+        }
+      },
+      error: (error) => console.error('Error al obtener colaboradores:', error)
+    });
+}    
 
   @HostListener('document:click')
   onClickFuera() {
@@ -122,9 +124,19 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   toggleDropdown(nombre: string, event: Event) {
-    event.stopPropagation();
-    this.dropdownAbierto = this.dropdownAbierto === nombre ? null : nombre;
+  event.stopPropagation();
+  this.dropdownAbierto = this.dropdownAbierto === nombre ? null : nombre;
+  if (nombre === 'persona' && this.dropdownAbierto === 'persona') {
+    this.busquedaPersona = '';
+    this.personasFiltradas = [...this.personasDisponibles];
   }
+}
+  filtrarPersonas() {
+  const busqueda = this.busquedaPersona.toLowerCase().trim();
+  this.personasFiltradas = this.personasDisponibles.filter(p =>
+    p.nombreCompleto.toLowerCase().includes(busqueda)
+  );
+}
 
   seleccionar(campo: string, valor: any, event: Event) {
     event.stopPropagation();
@@ -132,23 +144,23 @@ export class ModalLider implements OnInit, OnChanges {
     if (campo === 'tipo' && valor && typeof valor === 'object') {
       this.form.tipoId = valor.id.toString();
       this.form.tipoNombre = valor.valor;
-    } else if (campo === 'persona' && valor && typeof valor === 'object') {
-      this.form.personaId = valor.id.toString();
-      this.form.nombres = valor.nombres;
-      this.form.apellidos = valor.apellidos;
-      this.form.correo = valor.email;
-      this.form.telefono = valor.telefono;
-    } else {
-      (this.form as any)[campo] = valor;
-    }
+   } else if (campo === 'persona' && valor && typeof valor === 'object') {
+  this.form.personaId = valor.id.toString();
+  this.form.nombres = valor.nombreCompleto.split(' ')[0];
+  this.form.apellidos = valor.nombreCompleto.split(' ').slice(1).join(' ');
+  this.form.correo = valor.email;
+  this.form.telefono = '';
+} else {
+  (this.form as any)[campo] = valor;
+}
 
-    this.dropdownAbierto = null;
-  }
+this.dropdownAbierto = null;
+}
 
   getPersonaNombre(): string {
-    const persona = this.personasDisponibles.find(p => p.id.toString() === this.form.personaId);
-    return persona ? `${persona.nombres} ${persona.apellidos}` : '';
-  }
+  const persona = this.personasDisponibles.find(p => p.id.toString() === this.form.personaId);
+  return persona ? persona.nombreCompleto : '';
+}
 
   cerrar() {
     this.enviado = false;
