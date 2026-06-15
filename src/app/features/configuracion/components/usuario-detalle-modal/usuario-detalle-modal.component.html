@@ -7,24 +7,24 @@
 
   <div class="modal-card__header">
     <div class="modal-card__title-row">
-      <h2 class="modal-card__nombre">{{ usuario.nombres }} {{ usuario.apellidos }}</h2>
+      <h2 class="modal-card__nombre">{{ (usuario.nombres || usuario.apellidos) ? ((usuario.nombres || '') + ' ' + (usuario.apellidos || '')).trim() : usuario.email }}</h2>
       <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
     </div>
-    <p class="modal-card__subtitle">Detalle de cuenta, identidad, roles y estado.</p>
+    <p class="modal-card__subtitle">Detalle de cuenta, vinculo de persona, roles y estado.</p>
   </div>
 
   <div class="modal-card__body">
 
-    <!-- SECCIÓN: IDENTIDAD -->
+    <!-- SECCION: VINCULO DE PERSONA -->
     <div class="detalle-section">
       <div class="detalle-section__header">
         <span class="detalle-section__bar"></span>
-        <span class="detalle-section__title">Identidad</span>
+        <span class="detalle-section__title">Vinculo de persona</span>
       </div>
       <div class="detalle-grid">
         <div class="detalle-field">
-          <p class="detalle-field__label">Identificación</p>
-          <p class="detalle-field__value">{{ usuario.numeroidentificacion }}</p>
+          <p class="detalle-field__label">Identificacion</p>
+          <p class="detalle-field__value">{{ usuario.numeroidentificacion || '-' }}</p>
         </div>
 
         <div class="detalle-field">
@@ -33,8 +33,8 @@
         </div>
 
         <div class="detalle-field">
-          <p class="detalle-field__label">Tipo de persona</p>
-          <p class="detalle-field__value">{{ usuario.tipoPersona || 'NATURAL' }}</p>
+          <p class="detalle-field__label">Tipo de usuario</p>
+          <p class="detalle-field__value">{{ usuario.idPersona ? 'Interno' : 'Externo' }}</p>
         </div>
 
         <div class="detalle-field">

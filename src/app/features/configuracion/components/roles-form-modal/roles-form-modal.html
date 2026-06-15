@@ -5,10 +5,6 @@
     <div class="rol-modal__header-text">
       @if (isView) {
         <span class="rol-modal__badge rol-modal__badge--view">Solo lectura</span>
-      } @else if (isEdit) {
-        <span class="rol-modal__badge rol-modal__badge--edit">Editar</span>
-      } @else {
-        <span class="rol-modal__badge rol-modal__badge--new">Nuevo</span>
       }
       <h2 class="rol-modal__title">
         {{ isView ? data.rol!.nombre : isEdit ? 'Editar Rol' : 'Crear Nuevo Rol' }}
@@ -138,12 +134,8 @@
         Cerrar
       </button>
     } @else {
-      <button class="rol-modal__btn rol-modal__btn--cancel" type="button" mat-dialog-close>
-        Cancelar
-      </button>
       <button class="rol-modal__btn rol-modal__btn--save" type="submit">
-        <mat-icon>{{ isEdit ? 'save' : 'add_circle' }}</mat-icon>
-        {{ isEdit ? 'Guardar cambios' : 'Crear rol' }}
+        Guardar
       </button>
     }
   </div>

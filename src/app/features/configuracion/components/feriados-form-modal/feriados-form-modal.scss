@@ -2,10 +2,12 @@
 .feriado-modal {
   display: flex;
   flex-direction: column;
-  width: min(95vw, 540px);
+  width: min(95vw, 560px);
   max-height: 90vh;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: #ffffff;
+  border-radius: 16px;
 }
 
 /* ── Header ───────────────────────────────────────────────────── */
@@ -14,7 +16,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 22px 26px 14px;
+  padding: 24px 28px 16px;
   border-bottom: 1px solid #e8edf5;
   flex-shrink: 0;
 }
@@ -22,7 +24,7 @@
 .feriado-modal__header-text {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 0;
 }
 
 .feriado-modal__badge {
@@ -41,8 +43,8 @@
 }
 
 .feriado-modal__title {
-  margin: 0;
-  font-size: 20px;
+  margin: 0 0 4px;
+  font-size: 22px;
   font-weight: 800;
   color: #163572;
   line-height: 1.2;
@@ -59,8 +61,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -79,8 +81,8 @@
 .feriado-modal__body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 26px;
+  gap: 20px;
+  padding: 20px 28px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -94,7 +96,7 @@
 .feriado-modal__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 20px;
 
   &--checks {
     align-items: end;
@@ -105,14 +107,14 @@
 .feriado-modal__field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .feriado-modal__label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #334155;
-  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 600;
+  color: #163572;
+  letter-spacing: 0;
 
   .req { color: #dc2626; margin-left: 2px; }
 }
@@ -128,8 +130,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1.5px solid #d6e0ec;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
   padding: 0 14px;
   background: #ffffff;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -161,11 +163,11 @@
 
 .feriado-modal__input {
   flex: 1;
-  min-height: 42px;
+  min-height: 44px;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 13px;
+  font-size: 13.5px;
   color: #1e293b;
   font-family: inherit;
   width: 100%;
@@ -220,13 +222,13 @@
 
 .feriado-modal__select {
   width: 100%;
-  min-height: 44px;
-  border: 1.5px solid #d6e0ec;
-  border-radius: 10px;
+  min-height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
   padding: 0 14px 0 38px;
   color: #1e293b;
   background: #ffffff;
-  font-size: 13px;
+  font-size: 13.5px;
   font-family: inherit;
   outline: none;
   appearance: none;
@@ -358,9 +360,10 @@
 /* ── Footer ───────────────────────────────────────────────────── */
 .feriado-modal__footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  padding: 14px 26px 20px;
+  padding: 16px 28px 22px;
   border-top: 1px solid #e8edf5;
   flex-shrink: 0;
 }
@@ -368,9 +371,11 @@
 .feriado-modal__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
+  min-width: 132px;
   height: 40px;
-  padding: 0 18px;
+  padding: 0 22px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 700;

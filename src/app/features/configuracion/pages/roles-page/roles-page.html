@@ -19,9 +19,6 @@
         </div>
         <span class="card-label">Total roles</span>
       </div>
-      <button class="card-filter-btn" (click)="seleccionarEstado(''); $event.stopPropagation()">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
     <!-- Activos -->
@@ -35,9 +32,6 @@
         </div>
         <span class="card-label">Activos</span>
       </div>
-      <button class="card-filter-btn" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
     <!-- Inactivos -->
@@ -51,9 +45,6 @@
         </div>
         <span class="card-label">Inactivos</span>
       </div>
-      <button class="card-filter-btn" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
   </div>
@@ -75,10 +66,6 @@
       <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
       <span class="estado-texto">{{ labelEstado() }}</span>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-search">
-          <span class="material-icons dropdown-search-icon">search</span>
-          <input type="text" placeholder="Estado" class="dropdown-search-input" />
-        </div>
         <div class="dropdown-option" (click)="seleccionarEstado(''); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="filtroEstado() === ''">
             <span class="material-icons" *ngIf="filtroEstado() === ''">check</span>
@@ -90,17 +77,16 @@
           <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Activo'">
             <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
           </div>
-          <span>Activo</span>
+          <span>Activos</span>
           <span class="dropdown-count">{{ rolesActivos() }}</span>
         </div>
         <div class="dropdown-option" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Inactivo'">
             <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
           </div>
-          <span>Inactivo</span>
+          <span>Inactivos</span>
           <span class="dropdown-count">{{ rolesInactivos() }}</span>
         </div>
-        <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>
     </div>
 
@@ -129,7 +115,7 @@
             <th>Descripción</th>
             <th>Módulos accesibles</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>

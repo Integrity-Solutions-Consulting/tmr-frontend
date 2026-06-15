@@ -25,18 +25,12 @@ export interface CatalogoResponse {
 }
 
 export interface UpdateUsuarioPayload {
-  nombres: string;
-  apellidos: string;
-  idgenero: number | null;
-  idnacionalidad: number | null;
-  fechanacimiento: string | null;
-  telefono: string | null;
-  direccion: string | null;
+  idPersona: number | null;
   rolesids: number[];
-  // Datos de autenticación
   email?: string;
   nombreusuario?: string;
   password?: string | null;
+  debeCambiarPassword?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -224,61 +218,46 @@ export class ConfiguracionService {
   mapUsuario(item: unknown): Usuario {
     const d = item as Record<string, any>;
     const roleIds = d['rolesids'] ?? d['rolesIds'] ?? d['roles'] ?? (d['rol'] ? [d['rol']] : []);
-    const nombres = String(d['nombres'] ?? d['nombre'] ?? '').trim();
-    const apellidos = String(d['apellidos'] ?? '').trim();
-    const tipoIdentificacion = this.normalizeTipoIdentificacion(d['tipoIdentificacion']);
-    const idTipoIdentificacion = d['idTipoIdentificacion'] ?? d['idtipoidentificacion'] ?? '';
-    const idGenero = d['idGenero'] ?? d['idgenero'] ?? '';
-    const idNacionalidad = d['idNacionalidad'] ?? d['idnacionalidad'] ?? '';
-    const fechaNacimiento = d['fechaNacimiento'] ?? d['fechanacimiento'] ?? null;
-    const email = String(d['email'] ?? d['correoContacto'] ?? '').trim();
+    const idUsuario = Number(d['idUsuario'] ?? d['idusuario'] ?? d['id'] ?? 0);
+    const idPersonaRaw = d['idPersona'] ?? d['idpersona'];
+    const idPersona = idPersonaRaw === null || idPersonaRaw === undefined ? null : Number(idPersonaRaw);
+    const nombres = d['nombres'] ?? d['nombre'] ?? null;
+    const apellidos = d['apellidos'] ?? null;
+    const email = String(d['email'] ?? '').trim();
     const usuario = String(d['usuario'] ?? (email.includes('@') ? email.split('@')[0] : email)).trim();
-    const usuarioInterno = email.toLowerCase().endsWith('@integritysolutions.com.ec');
+    const usuarioInterno = idPersona !== null;
 
     return {
-      id: Number(d['id'] ?? d['idUsuario'] ?? d['idPersona'] ?? 0),
+      id: idUsuario,
+      idUsuario,
+      idPersona,
       estado: d['estado'] ?? (d['activo'] === false ? 'Inactivo' : 'Activo'),
-      idGenero,
-      idNacionalidad,
-      idTipoIdentificacion,
-      tipoIdentificacion,
-      numeroidentificacion: String(d['numeroidentificacion'] ?? d['numeroIdentificacion'] ?? ''),
+      numeroidentificacion: d['numeroidentificacion'] ?? d['numeroIdentificacion'] ?? null,
       nombres,
       apellidos,
-      correoContacto: String(d['correoContacto'] ?? email),
-      tipoPersona: d['tipoPersona'] ?? 'NATURAL',
-      fechaNacimiento,
-      usuarioCreacion: String(d['usuarioCreacion'] ?? ''),
-      idUsuarioCreacion: String(d['idUsuarioCreacion'] ?? ''),
-      ip: String(d['ip'] ?? ''),
       email,
       usuario,
       password: '',
       debeCambiarPassword: Boolean(d['debeCambiarPassword'] ?? d['debecambiarpassword'] ?? false),
       usuarioInterno: Boolean(d['usuarioInterno'] ?? usuarioInterno),
-      idtipoidentificacion: this.mapTipoIdentificacionToFormId(tipoIdentificacion, idTipoIdentificacion),
-      idgenero: String(d['idgenero'] ?? d['idGenero'] ?? ''),
-      idnacionalidad: String(d['idnacionalidad'] ?? d['idNacionalidad'] ?? ''),
-      fechanacimiento: fechaNacimiento,
+      fechanacimiento: d['fechaNacimiento'] ?? d['fechanacimiento'] ?? null,
       telefono: d['telefono'] ? String(d['telefono']) : null,
       direccion: d['direccion'] ? String(d['direccion']) : null,
-      rolesids: Array.isArray(roleIds) ? roleIds.map((roleId) => String((roleId as any).id ?? roleId)) : [],
+      rolesids: Array.isArray(roleIds)
+        ? roleIds.map((roleId) => String((roleId as any).id ?? (roleId as any).idRol ?? roleId))
+        : [],
+      ultimologin: d['ultimologin'] ?? d['ultimoLogin'] ?? null,
     };
   }
 
   toUpdateUsuarioPayload(usuario: Usuario, passwordNueva?: string | null): UpdateUsuarioPayload {
     return {
-      nombres: usuario.nombres,
-      apellidos: usuario.apellidos,
-      idgenero: this.toNullableNumber(usuario.idgenero),
-      idnacionalidad: this.toNullableNumber(usuario.idnacionalidad),
-      fechanacimiento: usuario.fechanacimiento,
-      telefono: usuario.telefono?.trim() || null,
-      direccion: usuario.direccion?.trim() || null,
+      idPersona: usuario.usuarioInterno ? usuario.idPersona : null,
       rolesids: usuario.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId)),
       email: usuario.email || undefined,
       nombreusuario: usuario.usuario || undefined,
       password: passwordNueva || null,
+      debeCambiarPassword: usuario.debeCambiarPassword,
     };
   }
 
@@ -346,19 +325,5 @@ export class ConfiguracionService {
 
   private normalizeFeriadoTipo(tipo: unknown): string {
     return String(tipo) === 'Institucional' ? 'Religioso' : String(tipo);
-  }
-
-  private normalizeTipoIdentificacion(value: unknown): 'C' | 'R' | 'P' | 'O' {
-    const tipo = String(value ?? 'C').toUpperCase();
-    return tipo === 'R' || tipo === 'P' || tipo === 'O' ? tipo : 'C';
-  }
-
-  private mapTipoIdentificacionToFormId(tipo: string, fallback: unknown): string {
-    return String(fallback ?? '');
-  }
-
-  private toNullableNumber(value: unknown): number | null {
-    const numberValue = Number(value);
-    return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : null;
   }
 }
