@@ -30,12 +30,13 @@ import {
 } from '../../store/proyectos.actions';
 
 // Colores corporativos
-const COLOR_PRIMARIO   = 'FF163572';
-const COLOR_LIDER      = 'FFE8EEF9';   // azul claro para filas de líder
-const COLOR_RECURSO    = 'FFFFFFFF';   // blanco para recursos
-const COLOR_RECURSO_ALT= 'FFF8FAFC';  // gris muy claro alternado
-const COLOR_TEXTO      = 'FF334155';
-const COLOR_BORDE      = 'FFE2E8F0';
+const COLOR_PRIMARIO    = 'FF163572';
+const COLOR_LIDER       = 'FFE8EEF9';
+const COLOR_RECURSO     = 'FFFFFFFF';
+const COLOR_RECURSO_ALT = 'FFF8FAFC';
+const COLOR_TEXTO       = 'FF334155';
+const COLOR_BORDE       = 'FFE2E8F0';
+const COLOR_SEPARADOR   = 'FFE2E8F0';
 
 @Component({
   selector: 'app-proyectos-page',
@@ -223,15 +224,15 @@ export class ProyectosPage implements OnDestroy {
     const wsResumen = workbook.addWorksheet('Proyectos');
     wsResumen.columns = [
       { header: 'Código',      key: 'codigo',      width: 16 },
-      { header: 'Nombre',      key: 'nombre',      width: 28 },
-      { header: 'Cliente',     key: 'cliente',     width: 24 },
-      { header: 'Tipo',        key: 'tipo',        width: 20 },
-      { header: 'Seguimiento', key: 'seguimiento', width: 20 },
-      { header: 'Estado',      key: 'estado',      width: 14 },
-      { header: 'Inicio',      key: 'inicio',      width: 14 },
-      { header: 'Fin',         key: 'fin',         width: 14 },
-      { header: 'Horas',       key: 'horas',       width: 10 },
-      { header: 'Presupuesto', key: 'presupuesto', width: 16 },
+      { header: 'Nombre',      key: 'nombre',      width: 40 },
+      { header: 'Cliente',     key: 'cliente',     width: 40 },
+      { header: 'Tipo',        key: 'tipo',        width: 25 },
+      { header: 'Seguimiento', key: 'seguimiento', width: 25 },
+      { header: 'Estado',      key: 'estado',      width: 18 },
+      { header: 'Inicio',      key: 'inicio',      width: 15 },
+      { header: 'Fin',         key: 'fin',         width: 15 },
+      { header: 'Horas',       key: 'horas',       width: 12 },
+      { header: 'Presupuesto', key: 'presupuesto', width: 20 },
     ];
 
     proyectos.forEach(p => {
@@ -249,27 +250,35 @@ export class ProyectosPage implements OnDestroy {
       });
     });
 
-    // Estado ahora está en la columna 5
     this.aplicarEstiloHoja(wsResumen, 6);
 
-    // ── Hoja 2: Líderes y Recursos ──
+    // ── Hoja 2: Líderes y Recursos (estructura plana, sin filas vacías intermedias) ──
     const wsDetalle = workbook.addWorksheet('Líderes y Recursos');
     wsDetalle.columns = [
-      { header: 'Código Proyecto', key: 'codigoProyecto', width: 18 },
-      { header: 'Nombre Proyecto', key: 'nombreProyecto', width: 28 },
-      { header: 'Líder',           key: 'lider',          width: 28 },
-      { header: 'Costo/h Líder',   key: 'costoLider',     width: 14 },
-      { header: 'Horas Líder',     key: 'horasLider',     width: 13 },
-      { header: 'Recurso',         key: 'recurso',        width: 28 },
-      { header: 'Tipo',            key: 'tipoRecurso',    width: 12 },
-      { header: 'Rol',             key: 'rol',            width: 24 },
-      { header: 'Entrada',         key: 'entrada',        width: 13 },
-      { header: 'Salida',          key: 'salida',         width: 13 },
-      { header: 'Costo/h Recurso', key: 'costoRecurso',   width: 15 },
-      { header: 'Horas Recurso',   key: 'horasRecurso',   width: 14 },
+      { header: 'Código Proyecto', key: 'codigoProyecto', width: 20 },
+      { header: 'Nombre Proyecto', key: 'nombreProyecto', width: 40 },
+      { header: 'Tipo Fila',       key: 'tipoFila',       width: 15 },
+      { header: 'Líder',           key: 'lider',          width: 40 },
+      { header: 'Costo/h Líder',   key: 'costoLider',     width: 18 },
+      { header: 'Horas Líder',     key: 'horasLider',     width: 15 },
+      { header: 'Recurso',         key: 'recurso',        width: 40 },
+      { header: 'Tipo Recurso',    key: 'tipoRecurso',    width: 20 },
+      { header: 'Rol',             key: 'rol',            width: 40 },
+      { header: 'Entrada',         key: 'entrada',        width: 15 },
+      { header: 'Salida',          key: 'salida',         width: 15 },
+      { header: 'Costo/h Recurso', key: 'costoRecurso',   width: 18 },
+      { header: 'Horas Recurso',   key: 'horasRecurso',   width: 15 },
     ];
 
-    let recursoRowIndex = 1;
+    // Estilo header hoja detalle
+    const headerDetalle = wsDetalle.getRow(1);
+    headerDetalle.height = 22;
+    headerDetalle.eachCell((cell: any) => {
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border    = this.bordeDelgado();
+    });
 
     proyectos.forEach(proyecto => {
       const lideres = proyecto.lideres?.length
@@ -278,35 +287,72 @@ export class ProyectosPage implements OnDestroy {
           ? [{ lider: proyecto.lider, costoHoraLider: proyecto.costoHoraLider, horasLider: proyecto.horasLider, recursos: proyecto.recursos ?? [] }]
           : [];
 
-      lideres.forEach(lider => {
+      // Deduplicar líderes por nombre para evitar repeticiones
+      const lideresUnicos = lideres.filter((l, i, arr) =>
+        arr.findIndex(x => x.lider === l.lider) === i
+      );
+
+      lideresUnicos.forEach((lider, liderIdx) => {
+        // ── Fila LÍDER ──
+        const filaLider = wsDetalle.addRow({
+          codigoProyecto: liderIdx === 0 ? proyecto.codigo : '',
+          nombreProyecto: liderIdx === 0 ? proyecto.nombre : '',
+          tipoFila:       'LÍDER',
+          lider:          lider.lider ?? '-',
+          costoLider:     lider.costoHoraLider ?? '',
+          horasLider:     lider.horasLider ?? '',
+          recurso:        '',
+          tipoRecurso:    '',
+          rol:            '',
+          entrada:        '',
+          salida:         '',
+          costoRecurso:   '',
+          horasRecurso:   '',
+        });
+        filaLider.height = 22;
+        filaLider.eachCell((cell: any) => {
+          cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_LIDER } };
+          cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: COLOR_PRIMARIO } };
+          cell.border    = this.bordeDelgado(COLOR_BORDE);
+          cell.alignment = { vertical: 'middle', horizontal: 'left' };
+        });
+
         const recursos = lider.recursos ?? [];
 
         if (!recursos.length) {
-          // Líder sin recursos → una sola fila
-          const row = wsDetalle.addRow({
-            codigoProyecto: proyecto.codigo,
-            nombreProyecto: proyecto.nombre,
-            lider:          lider.lider ?? '-',
-            costoLider:     lider.costoHoraLider ?? '',
-            horasLider:     lider.horasLider ?? '',
-            recurso:        '-',
-            tipoRecurso:    '-',
-            rol:            '-',
-            entrada:        '-',
-            salida:         '-',
+          // Fila "sin recursos" directamente sin filas vacías previas
+          const filaVacia = wsDetalle.addRow({
+            codigoProyecto: '',
+            nombreProyecto: '',
+            tipoFila:       '',
+            lider:          '',
+            costoLider:     '',
+            horasLider:     '',
+            recurso:        'Sin recursos asignados',
+            tipoRecurso:    '',
+            rol:            '',
+            entrada:        '',
+            salida:         '',
             costoRecurso:   '',
             horasRecurso:   '',
           });
-          this.aplicarFilaLider(row);
+          filaVacia.height = 18;
+          filaVacia.eachCell((cell: any) => {
+            cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_RECURSO } };
+            cell.font      = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
+            cell.border    = this.bordeDelgado(COLOR_BORDE);
+            cell.alignment = { vertical: 'middle', horizontal: 'left' };
+          });
         } else {
           recursos.forEach((recurso, idx) => {
-            const esFirst = idx === 0;
-            const row = wsDetalle.addRow({
-              codigoProyecto: esFirst ? proyecto.codigo : '',
-              nombreProyecto: esFirst ? proyecto.nombre : '',
-              lider:          esFirst ? (lider.lider ?? '-') : '',
-              costoLider:     esFirst ? (lider.costoHoraLider ?? '') : '',
-              horasLider:     esFirst ? (lider.horasLider ?? '') : '',
+            const alterno = idx % 2 === 0;
+            const fila = wsDetalle.addRow({
+              codigoProyecto: '',
+              nombreProyecto: '',
+              tipoFila:       'Recurso',
+              lider:          '',
+              costoLider:     '',
+              horasLider:     '',
               recurso:        recurso.nombre ?? '-',
               tipoRecurso:    recurso.tipo ?? '-',
               rol:            recurso.rol ?? '-',
@@ -315,22 +361,24 @@ export class ProyectosPage implements OnDestroy {
               costoRecurso:   recurso.costoHora ?? '',
               horasRecurso:   recurso.horas ?? '',
             });
-
-            recursoRowIndex++;
-            this.aplicarFilaRecurso(row, recursoRowIndex % 2 === 0);
+            fila.height = 19;
+            fila.eachCell((cell: any) => {
+              cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: alterno ? COLOR_RECURSO : COLOR_RECURSO_ALT } };
+              cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+              cell.border    = this.bordeDelgado(COLOR_BORDE);
+              cell.alignment = { vertical: 'middle', horizontal: 'left' };
+            });
           });
         }
       });
-    });
 
-    // Estilo header hoja detalle
-    const headerDetalle = wsDetalle.getRow(1);
-    headerDetalle.height = 22;
-    headerDetalle.eachCell(cell => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border = this.bordeDelgado();
+      // ── Fila separadora entre proyectos (UNA sola, al final de cada proyecto) ──
+      const filaSep = wsDetalle.addRow({});
+      filaSep.height = 5;
+      for (let c = 1; c <= 13; c++) {
+        const cell = filaSep.getCell(c);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
+      }
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -344,10 +392,10 @@ export class ProyectosPage implements OnDestroy {
     const header = ws.getRow(1);
     header.height = 22;
     header.eachCell((cell: any) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font      = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border = this.bordeDelgado();
+      cell.border    = this.bordeDelgado();
     });
 
     ws.eachRow((row: any, rowNumber: number) => {
@@ -355,9 +403,9 @@ export class ProyectosPage implements OnDestroy {
       const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
       row.height = 20;
       row.eachCell((cell: any, colNumber: number) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-        cell.border = this.bordeDelgado(COLOR_BORDE);
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        cell.border    = this.bordeDelgado(COLOR_BORDE);
         cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
 
         if (colNumber === colEstado) {
@@ -373,26 +421,6 @@ export class ProyectosPage implements OnDestroy {
     });
   }
 
-  private aplicarFilaLider(row: any): void {
-    row.height = 20;
-    row.eachCell((cell: any) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_LIDER } };
-      cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: COLOR_PRIMARIO } };
-      cell.border = this.bordeDelgado(COLOR_BORDE);
-      cell.alignment = { vertical: 'middle', horizontal: 'left' };
-    });
-  }
-
-  private aplicarFilaRecurso(row: any, alternado: boolean): void {
-    row.height = 19;
-    row.eachCell((cell: any) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: alternado ? COLOR_RECURSO_ALT : COLOR_RECURSO } };
-      cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-      cell.border = this.bordeDelgado(COLOR_BORDE);
-      cell.alignment = { vertical: 'middle', horizontal: 'left' };
-    });
-  }
-
   private bordeDelgado(color = COLOR_PRIMARIO): any {
     const b = { style: 'thin', color: { argb: color } };
     return { top: b, left: b, bottom: b, right: b };
@@ -400,25 +428,43 @@ export class ProyectosPage implements OnDestroy {
 
   // ─── PDF ─────────────────────────────────────────────────────────────────
   private descargarPDF(proyectos: Proyecto[], nombreBase: string): void {
-    const doc = new jsPDF({ orientation: 'landscape' });
-    const fecha = new Date().toLocaleDateString('es-EC');
+    const doc      = new jsPDF({ orientation: 'landscape' });
+    const fecha    = new Date().toLocaleDateString('es-EC');
+    const pageW    = 297;
+    const pageH    = 210;  // alto landscape en mm
+    const marginX  = 12;
+    const footerY  = pageH - 8; // coordenada fija para el pie
 
-    // ── Portada / título ──
-    doc.setFillColor(22, 53, 114);
-    doc.rect(0, 0, 297, 18, 'F');
-    doc.setFontSize(13);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Reporte de Proyectos', 14, 12);
-    doc.setFontSize(9);
-    doc.text(`Generado: ${fecha}`, 250, 12);
+    // ── Helper: cabecera reutilizable ──
+    const dibujarCabecera = () => {
+      doc.setFillColor(22, 53, 114);
+      doc.rect(0, 0, pageW, 22, 'F');
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Reporte de Proyectos', marginX, 14);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
+      doc.setDrawColor(99, 135, 190);
+      doc.setLineWidth(0.5);
+      doc.line(0, 22, pageW, 22);
+    };
 
-    // ── Tabla resumen de proyectos ──
+    dibujarCabecera();
+
+    // ── Subtítulo sección resumen ──
     doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(22, 53, 114);
-    doc.text('Resumen de Proyectos', 14, 26);
+    doc.text('Resumen de Proyectos', marginX, 32);
+    doc.setDrawColor(22, 53, 114);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, 34, marginX + 60, 34);
 
+    // ── Tabla resumen ──
     autoTable(doc, {
-      startY: 30,
+      startY: 37,
       head: [['Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado', 'Inicio', 'Fin', 'Horas', 'Presupuesto']],
       body: proyectos.map(p => [
         p.codigo,
@@ -432,34 +478,64 @@ export class ProyectosPage implements OnDestroy {
         String(p.horas ?? '-'),
         p.presupuesto ? `$${p.presupuesto}` : '-',
       ]),
-      styles: { fontSize: 8, cellPadding: 3, valign: 'middle', overflow: 'linebreak', font: 'helvetica' },
-      headStyles: { fillColor: [22, 53, 114], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-      bodyStyles: { textColor: [55, 65, 81] },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
+      styles: {
+        fontSize: 8,
+        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        valign: 'middle',
+        overflow: 'linebreak',
+        font: 'helvetica',
+        lineColor: [226, 232, 240],
+        lineWidth: 0.2,
+      },
+      headStyles: {
+        fillColor: [22, 53, 114],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 8,
+        halign: 'center',
+        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+      },
+      bodyStyles: { textColor: [51, 65, 85] },
+      alternateRowStyles: { fillColor: [245, 248, 255] },
       columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 42 },
-        2: { cellWidth: 32 },
-        3: { cellWidth: 24 },
-        4: { cellWidth: 20 }, // Seguimiento
-        5: { cellWidth: 20 }, // Estado
-        6: { cellWidth: 18 },
-        7: { cellWidth: 18 },
-        8: { cellWidth: 14 },
-        9: { cellWidth: 20 },
+        0: { cellWidth: 18,  halign: 'center' },
+        1: { cellWidth: 44 },
+        2: { cellWidth: 34 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 24,  halign: 'center' },
+        5: { cellWidth: 20,  halign: 'center' },
+        6: { cellWidth: 18,  halign: 'center' },
+        7: { cellWidth: 18,  halign: 'center' },
+        8: { cellWidth: 14,  halign: 'center' },
+        9: { cellWidth: 22,  halign: 'right'  },
       },
       didParseCell: (data) => {
-        // Estado ahora está en la columna índice 5
         if (data.section === 'body' && data.column.index === 5) {
           const val = String(data.cell.raw ?? '').toLowerCase();
           data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
           data.cell.styles.fontStyle = 'bold';
         }
       },
-      margin: { left: 10, right: 10 }
+      margin: { left: marginX, right: marginX, bottom: 18 },
+      didDrawPage: () => dibujarCabecera(),
     });
 
-    // ── Tabla de líderes y recursos por proyecto ──
+    // ── Sección detalle: siempre empieza en página nueva ──
+    doc.addPage();
+    dibujarCabecera();
+
+    let currentY = 30;
+
+    // Subtítulo detalle
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(22, 53, 114);
+    doc.text('Detalle de Líderes y Recursos', marginX, currentY);
+    doc.setDrawColor(22, 53, 114);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, currentY + 2, marginX + 70, currentY + 2);
+    currentY += 10;
+
     proyectos.forEach(proyecto => {
       const lideres = proyecto.lideres?.length
         ? proyecto.lideres
@@ -469,87 +545,165 @@ export class ProyectosPage implements OnDestroy {
 
       if (!lideres.length) return;
 
-      const lastY = (doc as any).lastAutoTable?.finalY ?? 30;
+      // Deduplicar líderes por nombre
+      const lideresUnicos = lideres.filter((l, i, arr) =>
+        arr.findIndex(x => x.lider === l.lider) === i
+      );
 
-      // Nueva página si no hay espacio
-      if (lastY > 175) doc.addPage();
-
-      const yPos = (doc as any).lastAutoTable?.finalY
-        ? (doc as any).lastAutoTable.finalY + 10
-        : 30;
-
-      doc.setFontSize(9);
-      doc.setTextColor(22, 53, 114);
-      doc.text(`${proyecto.codigo} — ${proyecto.nombre}`, 10, yPos);
-
-      // Construir filas: líder + sus recursos
+      // Construir body de la tabla del proyecto
       const body: any[] = [];
 
-      lideres.forEach(lider => {
+      lideresUnicos.forEach((lider, liderIdx) => {
         const recursos = lider.recursos ?? [];
 
-        // Fila del líder
+        // Separador visual entre líderes del mismo proyecto
+        if (liderIdx > 0) {
+          body.push([{
+            content: '',
+            colSpan: 9,
+            styles: { fillColor: [226, 232, 240], cellPadding: 1 }
+          }]);
+        }
+
+        // ── Fila LÍDER ──
+        const estiloLider: any = {
+          fontStyle:  'bold',
+          fillColor:  [210, 222, 245],
+          textColor:  [22, 53, 114],
+          fontSize:   8,
+        };
         body.push([
-          { content: 'LÍDER', styles: { fontStyle: 'bold', fillColor: [232, 238, 249], textColor: [22, 53, 114], fontSize: 7 } },
-          { content: lider.lider ?? '-', styles: { fontStyle: 'bold', fillColor: [232, 238, 249], textColor: [22, 53, 114] } },
-          { content: lider.costoHoraLider ? `$${lider.costoHoraLider}/h` : '-', styles: { fillColor: [232, 238, 249], textColor: [22, 53, 114] } },
-          { content: lider.horasLider ? `${lider.horasLider}h` : '-', styles: { fillColor: [232, 238, 249], textColor: [22, 53, 114] } },
-          { content: '', styles: { fillColor: [232, 238, 249] } },
-          { content: '', styles: { fillColor: [232, 238, 249] } },
-          { content: '', styles: { fillColor: [232, 238, 249] } },
-          { content: '', styles: { fillColor: [232, 238, 249] } },
-          { content: '', styles: { fillColor: [232, 238, 249] } },
+          { content: 'LÍDER',                                                    styles: { ...estiloLider, halign: 'center' } },
+          { content: lider.lider ?? '-',                                         styles: estiloLider },
+          { content: lider.costoHoraLider ? `$${lider.costoHoraLider}/h` : '-', styles: { ...estiloLider, halign: 'right' } },
+          { content: lider.horasLider ? `${lider.horasLider}h` : '-',           styles: { ...estiloLider, halign: 'center' } },
+          { content: '', styles: { fillColor: [210, 222, 245] } },
+          { content: '', styles: { fillColor: [210, 222, 245] } },
+          { content: '', styles: { fillColor: [210, 222, 245] } },
+          { content: '', styles: { fillColor: [210, 222, 245] } },
+          { content: '', styles: { fillColor: [210, 222, 245] } },
         ]);
 
-        // Filas de recursos
-        recursos.forEach(recurso => {
-          body.push([
-            { content: 'RECURSO', styles: { fontSize: 7, textColor: [107, 114, 128] } },
-            recurso.nombre ?? '-',
-            '-',
-            '-',
-            recurso.tipo ?? '-',
-            recurso.rol ?? '-',
-            this.formatearFecha(recurso.entrada ?? null),
-            this.formatearFecha(recurso.salida ?? null),
-            recurso.costoHora ? `$${recurso.costoHora}/h` : '-',
-          ]);
-        });
-
+        // ── Filas RECURSOS ──
         if (!recursos.length) {
-          body.push(['', '(Sin recursos asignados)', '', '', '', '', '', '', '']);
+          body.push([
+            { content: '', styles: { fillColor: [255, 255, 255] } },
+            {
+              content: 'Sin recursos asignados',
+              colSpan: 8,
+              styles: {
+                fontStyle:  'italic',
+                textColor:  [156, 163, 175],
+                fillColor:  [255, 255, 255],
+                fontSize:   7.5,
+              }
+            }
+          ]);
+        } else {
+          recursos.forEach((recurso, idx) => {
+            const bg: [number, number, number] = idx % 2 === 0 ? [255, 255, 255] : [248, 250, 252];
+            body.push([
+              { content: 'Recurso',                                              styles: { fontSize: 7, textColor: [148, 163, 184], fillColor: bg, halign: 'center' } },
+              { content: recurso.nombre ?? '-',                                  styles: { fillColor: bg, textColor: [51, 65, 85] } },
+              { content: recurso.costoHora ? `$${recurso.costoHora}/h` : '-',   styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'right' } },
+              { content: recurso.horas ? `${recurso.horas}h` : '-',             styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'center' } },
+              { content: recurso.tipo ?? '-',                                    styles: { fillColor: bg, textColor: [51, 65, 85] } },
+              { content: recurso.rol ?? '-',                                     styles: { fillColor: bg, textColor: [51, 65, 85] } },
+              { content: this.formatearFecha(recurso.entrada ?? null),           styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center' } },
+              { content: this.formatearFecha(recurso.salida ?? null),            styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center' } },
+              { content: '-',                                                    styles: { fillColor: bg, textColor: [156, 163, 175], halign: 'center' } },
+            ]);
+          });
         }
       });
 
+
+      // Calcular altura aproximada del bloque completo del proyecto
+      const alturaEstimadaProyecto =
+        18 +               // encabezado proyecto
+        (body.length * 8) + // filas
+        12;                // margen seguridad
+
+      // Si no cabe completo, empezar en una página nueva
+      if (currentY + alturaEstimadaProyecto > footerY - 10) {
+        doc.addPage();
+        dibujarCabecera();
+        currentY = 30;
+     }
+
+      // ── Encabezado del proyecto ──
+      doc.setFillColor(232, 238, 249);
+      doc.roundedRect(marginX, currentY, pageW - marginX * 2, 8, 1, 1, 'F');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(22, 53, 114);
+      doc.text(`${proyecto.codigo}  —  ${proyecto.nombre}`, marginX + 3, currentY + 5.5);
+      doc.setFont('helvetica', 'normal');
+
       autoTable(doc, {
-        startY: yPos + 4,
+        startY: currentY + 10,
         head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Tipo Rec.', 'Rol', 'Entrada', 'Salida', 'Costo Rec.']],
         body,
-        styles: { fontSize: 7.5, cellPadding: 2.5, valign: 'middle', overflow: 'linebreak' },
-        headStyles: { fillColor: [51, 65, 85], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+        styles: {
+          fontSize: 7.5,
+          cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 },
+          valign: 'middle',
+          overflow: 'linebreak',
+          lineColor: [226, 232, 240],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor:   [51, 65, 85],
+          textColor:   255,
+          fontStyle:   'bold',
+          fontSize:    7.5,
+          halign:      'center',
+          cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        },
         bodyStyles: { textColor: [55, 65, 81] },
         columnStyles: {
-          0: { cellWidth: 16 },
-          1: { cellWidth: 46 },
-          2: { cellWidth: 18 },
-          3: { cellWidth: 14 },
-          4: { cellWidth: 18 },
-          5: { cellWidth: 36 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 20 },
-          8: { cellWidth: 20 },
+          0: { cellWidth: 14, halign: 'center' },
+          1: { cellWidth: 65 },
+          2: { cellWidth: 18, halign: 'right'  },
+          3: { cellWidth: 12, halign: 'center' },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 55 },
+          6: { cellWidth: 18, halign: 'center' },
+          7: { cellWidth: 18, halign: 'center' },
+          8: { cellWidth: 18, halign: 'center' },
         },
-        margin: { left: 10, right: 10 }
+        margin: { left: marginX, right: marginX, bottom: 18 },
+        didDrawPage: (data) => {
+          dibujarCabecera();
+          // Re-dibujar encabezado del proyecto si la tabla continúa en página nueva
+          if (data.pageNumber > 1) {
+            const yHead = 28;
+            doc.setFillColor(232, 238, 249);
+            doc.roundedRect(marginX, yHead, pageW - marginX * 2, 7, 1, 1, 'F');
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(22, 53, 114);
+            doc.text(`${proyecto.codigo}  —  ${proyecto.nombre} (cont.)`, marginX + 3, yHead + 5);
+          }
+        },
       });
+
+      currentY = (doc as any).lastAutoTable.finalY + 10;
     });
 
-    // ── Pie de página ──
+    // ── Pie de página en TODAS las páginas ──
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(marginX, footerY, pageW - marginX, footerY);
       doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(156, 163, 175);
-      doc.text(`Página ${i} de ${pageCount}`, 148, 208, { align: 'center' });
+      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
+      doc.text('TMR — Reporte de Proyectos', marginX, footerY + 4);
+      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
     }
 
     doc.save(`${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -557,8 +711,8 @@ export class ProyectosPage implements OnDestroy {
 
   private crearDescarga(blob: Blob, nombreArchivo: string): void {
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
+    const url  = URL.createObjectURL(blob);
+    link.href     = url;
     link.download = nombreArchivo;
     document.body.appendChild(link);
     link.click();
@@ -577,7 +731,7 @@ export class ProyectosPage implements OnDestroy {
 
     const parsed = new Date(fecha);
     if (!isNaN(parsed.getTime())) {
-      return `${String(parsed.getDate()).padStart(2,'0')}/${String(parsed.getMonth()+1).padStart(2,'0')}/${parsed.getFullYear()}`;
+      return `${String(parsed.getDate()).padStart(2, '0')}/${String(parsed.getMonth() + 1).padStart(2, '0')}/${parsed.getFullYear()}`;
     }
     return fecha;
   }

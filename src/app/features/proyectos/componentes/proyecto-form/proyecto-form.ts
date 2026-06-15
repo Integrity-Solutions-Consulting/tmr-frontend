@@ -70,9 +70,11 @@ export class ProyectoForm implements OnInit, OnChanges {
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
   estadoOptions: string[] = ['Activo', 'Inactivo'];
+
   get seguimientoOpciones(): LookupOption[] {
     return this.estados.filter(e => e.nombre !== 'Activo');
   }
+
   // cargosFiltrados[liderIndex][recursoIndex]
   cargosFiltrados: CargoLookup[][][] = [];
 
@@ -160,8 +162,6 @@ export class ProyectoForm implements OnInit, OnChanges {
       idEstadoProyecto: proyecto.idEstadoProyecto ?? null
     });
 
-    // Construir lista de líderes: usar proyecto.lideres si existe,
-    // sino armar uno desde los campos raíz por compatibilidad
     const lideresData: LiderProyecto[] = proyecto.lideres?.length
       ? proyecto.lideres
       : proyecto.lider
@@ -181,11 +181,12 @@ export class ProyectoForm implements OnInit, OnChanges {
       this.lideres.push(this.crearLider());
       this.cargosFiltrados.push([]);
     } else {
-      lideresData.forEach((l, li) => {
+      lideresData.forEach((l) => {
         const liderGroup = this.crearLider();
+        const idLider = l.idLider ?? this.obtenerIdLiderPorNombre(l.lider);
         liderGroup.patchValue({
-          idLider: l.idLider ?? null,
-          lider: l.lider ?? '',
+          idLider,
+          lider: this.obtenerNombreLiderPorId(idLider) ?? l.lider ?? '',
           costoHoraLider: this.valorFormularioNumerico(l.costoHoraLider),
           horasLider: this.valorFormularioNumerico(l.horasLider)
         });
@@ -253,7 +254,7 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   crearLider(): FormGroup {
     return this.fb.group({
-      idLider: [null],
+      idLider: [null as number | null],
       lider: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.lideresOpciones)]],
       costoHoraLider: ['', [this.numeroValido(true)]],
       horasLider: ['', [this.numeroValido(false), Validators.min(0)]],
@@ -311,46 +312,42 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.actualizarNumeroRecursos();
   }
 
-  // ── Eventos de selección ──────────────────────────────────────────────────
-
-  onLiderChange(li: number, nombreLider: string): void {
-    const found = this.lideresOpciones.find(l => l.nombre === nombreLider);
-    this.lideres.at(li).get('idLider')?.setValue(found?.id ?? null);
-  }
+  // ── Eventos de autocomplete ───────────────────────────────────────────────
 
   onClienteInput(): void {
     this.formulario.controls.idCliente.setValue(null);
+  }
+
+  onClienteFocus(): void {
+    this.formulario.controls.cliente.setValue('', { emitEvent: false });
+    this.formulario.controls.idCliente.setValue(null);
+  }
+
+  onClienteChange(nombreCliente: string): void {
+    const encontrado = this.clientesOpciones.find(c => c.nombre === nombreCliente);
+    this.formulario.controls.idCliente.setValue(encontrado?.id ?? null);
   }
 
   onLiderInput(li: number): void {
     this.lideres.at(li).get('idLider')?.setValue(null);
   }
 
+  onLiderFocus(_li: number, event: FocusEvent): void {
+    (event.target as HTMLInputElement | null)?.select();
+  }
+
+  onLiderChange(li: number, nombreLider: string): void {
+    const found = this.lideresOpciones.find(l => l.nombre === nombreLider);
+    this.lideres.at(li).get('idLider')?.setValue(found?.id ?? null);
+  }
+
   onRecursoInput(li: number, ri: number): void {
     this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
   }
 
-  getClientesFiltrados(): LookupOption[] {
-    const filtro = String(this.formulario.controls.cliente.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.clientesOpciones;
-    return this.clientesOpciones.filter(cliente => cliente.nombre.toLowerCase().includes(filtro));
-  }
-
-  getLideresFiltrados(li: number): LookupOption[] {
-    const filtro = String(this.lideres.at(li).get('lider')?.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.lideresOpciones;
-    return this.lideresOpciones.filter(lider => lider.nombre.toLowerCase().includes(filtro));
-  }
-
-  getRecursosFiltrados(li: number, ri: number): LookupOption[] {
-    const filtro = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.empleadosDisponibles;
-    return this.empleadosDisponibles.filter(emp => emp.nombre.toLowerCase().includes(filtro));
-  }
-
-  onClienteChange(nombreCliente: string): void {
-    const encontrado = this.clientesOpciones.find(c => c.nombre === nombreCliente);
-    this.formulario.controls.idCliente.setValue(encontrado?.id ?? null);
+  onRecursoFocus(li: number, ri: number): void {
+    this.getRecursosDelLider(li).at(ri).get('nombre')?.setValue('', { emitEvent: false });
+    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
   }
 
   onEmpleadoChange(li: number, ri: number, nombreEmpleado: string): void {
@@ -366,6 +363,28 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.getRecursosDelLider(li).at(ri).get('rol')?.setValue('');
   }
 
+  // ── Filtros de autocomplete ───────────────────────────────────────────────
+
+  getClientesFiltrados(): LookupOption[] {
+    const filtro = String(this.formulario.controls.cliente.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.clientesOpciones;
+    return this.clientesOpciones.filter(c => c.nombre.toLowerCase().includes(filtro));
+  }
+
+  getLideresFiltrados(li: number): LookupOption[] {
+    const filtro = String(this.lideres.at(li).get('lider')?.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.lideresOpciones;
+    return this.lideresOpciones.filter(l => l.nombre.toLowerCase().includes(filtro));
+  }
+
+  getRecursosFiltrados(li: number, ri: number): LookupOption[] {
+    const filtro = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.empleadosDisponibles;
+    return this.empleadosDisponibles.filter(e => e.nombre.toLowerCase().includes(filtro));
+  }
+
+  // ── Cargos ────────────────────────────────────────────────────────────────
+
   tieneDepartamentoSeleccionado(li: number, ri: number): boolean {
     return Boolean(this.getRecursosDelLider(li).at(ri).get('departamento')?.value);
   }
@@ -373,7 +392,6 @@ export class ProyectoForm implements OnInit, OnChanges {
   getCargosParaRecurso(li: number, ri: number): CargoLookup[] {
     const departamento = this.getRecursosDelLider(li).at(ri).get('departamento')?.value;
     if (!departamento) return [];
-
     return this.cargosFiltrados[li]?.[ri] ?? this.todosLosCargos.filter(c => c.idDepartamento === departamento);
   }
 
@@ -419,22 +437,26 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     const valor = this.formulario.getRawValue() as any;
 
-    const lideresPayload: LiderProyecto[] = (valor.lideres ?? []).map((l: any) => ({
-      idLider: l.idLider ?? this.obtenerIdLiderPorNombre(l.lider),
-      lider: l.lider,
-      costoHoraLider: this.normalizarNumero(l.costoHoraLider),
-      horasLider: this.normalizarNumero(l.horasLider),
-      recursos: (l.recursos ?? []).map((r: any) => ({
-        idEmpleado: r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre),
-        tipo: r.tipo,
-        nombre: r.nombre,
-        rol: r.rol,
-        entrada: this.normalizarFecha(r.entrada),
-        salida: this.normalizarFecha(r.salida),
-        costoHora: this.normalizarNumero(r.costoHora),
-        horas: this.normalizarNumero(r.horas)
-      } as any))
-    }));
+    const lideresPayload: LiderProyecto[] = (valor.lideres ?? []).map((l: any) => {
+      const idLider = l.idLider ?? this.obtenerIdLiderPorNombre(l.lider);
+
+      return {
+        idLider,
+        lider: this.obtenerNombreLiderPorId(idLider) ?? l.lider,
+        costoHoraLider: this.normalizarNumero(l.costoHoraLider),
+        horasLider: this.normalizarNumero(l.horasLider),
+        recursos: (l.recursos ?? []).map((r: any) => ({
+          idEmpleado: r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre),
+          tipo: r.tipo,
+          nombre: r.nombre,
+          rol: r.rol,
+          entrada: this.normalizarFecha(r.entrada),
+          salida: this.normalizarFecha(r.salida),
+          costoHora: this.normalizarNumero(r.costoHora),
+          horas: this.normalizarNumero(r.horas)
+        } as any))
+      };
+    });
 
     const primerLider = lideresPayload[0];
     const todosRecursos = lideresPayload.flatMap(l => l.recursos ?? []);
@@ -452,7 +474,6 @@ export class ProyectoForm implements OnInit, OnChanges {
       horas: this.normalizarNumeroOpcional(valor.horas),
       estado: this.proyecto ? (valor.estado || 'Activo') : 'Activo',
       idEstadoProyecto: valor.idEstadoProyecto ?? undefined,
-      // campos raíz del primer líder (compatibilidad con vista detalle)
       idLider: primerLider?.idLider ?? null,
       lider: primerLider?.lider ?? '',
       costoHoraLider: primerLider?.costoHoraLider ?? 0,
@@ -511,18 +532,19 @@ export class ProyectoForm implements OnInit, OnChanges {
   }
 
   private obtenerIdClientePorNombre(nombre?: string | null): number | null {
-    const encontrado = this.clientesOpciones.find(cliente => cliente.nombre === nombre);
-    return encontrado?.id ?? null;
+    return this.clientesOpciones.find(c => c.nombre === nombre)?.id ?? null;
   }
 
   private obtenerIdLiderPorNombre(nombre?: string | null): number | null {
-    const encontrado = this.lideresOpciones.find(lider => lider.nombre === nombre);
-    return encontrado?.id ?? null;
+    return this.lideresOpciones.find(l => l.nombre === nombre)?.id ?? null;
+  }
+
+  private obtenerNombreLiderPorId(id?: number | null): string | null {
+    return this.lideresOpciones.find(l => l.id === id)?.nombre ?? null;
   }
 
   private obtenerIdEmpleadoPorNombre(nombre?: string | null): number | null {
-    const encontrado = this.empleadosDisponibles.find(empleado => empleado.nombre === nombre);
-    return encontrado?.id ?? null;
+    return this.empleadosDisponibles.find(e => e.nombre === nombre)?.id ?? null;
   }
 
   private parseFechaString(valor: string): Date | null {
