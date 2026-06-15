@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
  
 @Component({
@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './descargar-menu.component.scss',
 })
 export class DescargarMenuComponent {
+  @Input()  disabled       = false;
   @Output() descargarPDF   = new EventEmitter<void>();
   @Output() descargarExcel = new EventEmitter<void>();
  

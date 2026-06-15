@@ -8,7 +8,7 @@
       <div class="grafico-bars">
         <div class="bar-item" *ngFor="let item of horasData">
           <div class="bar-column">
-            <div class="bar-value" [style.height.%]="getAltura(item.horas)">
+            <div class="bar-value" [style.height.%]="getAltura(item)">
               <span class="valor-texto" *ngIf="item.horas > 0">{{ getPorcentajeProyecto(item) | number: '1.0-0' }}%</span>
             </div>
           </div>

@@ -7,17 +7,20 @@ import { ReportesService } from '../../servicios/reportes.service';
 
 import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla.component';
 import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
+import { MatIconModule } from '@angular/material/icon';
+import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 
 @Component({
   selector: 'app-reporte-horas',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
   templateUrl: './reporte-horas.component.html',
   styleUrl: './reporte-horas.component.scss'
 })
 export class ReporteHorasComponent {
   columnasTabla: ColumnDefinition[] = [
     { header: 'Cliente', property: 'cliente', type: 'text' },
+    { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado' },
     { header: 'Mes', property: 'mes', type: 'text' },
     { header: 'Año', property: 'anio', type: 'text' },
     { header: 'Recursos', property: 'recursos', type: 'text' },
@@ -166,6 +169,7 @@ export class ReporteHorasComponent {
     // 1. Columnas y anchos recomendados
     worksheet.columns = [
       { header: 'Cliente', key: 'cliente', width: 30 },
+      { header: 'Estado Cliente', key: 'estadoCliente', width: 18 },
       { header: 'Mes', key: 'mes', width: 15 },
       { header: 'Año', key: 'anio', width: 15 },
       { header: 'Recursos', key: 'recursos', width: 15 },
@@ -176,6 +180,7 @@ export class ReporteHorasComponent {
     data.forEach(item => {
       worksheet.addRow({
         cliente: item.cliente,
+        estadoCliente: item.estadoCliente,
         mes: item.mes,
         anio: item.anio,
         recursos: item.recursos,
@@ -231,8 +236,8 @@ export class ReporteHorasComponent {
           right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
         };
         
-        // Centrar las columnas numéricas y de fechas, texto alineado a la izquierda
-        if (cell.address.startsWith('B') || cell.address.startsWith('C') || cell.address.startsWith('D') || cell.address.startsWith('E')) {
+        // Centrar las columnas numéricas, de fechas y estados; el cliente (Columna A) alineado a la izquierda
+        if (!cell.address.startsWith('A')) {
           cell.alignment = {
             vertical: 'middle',
             horizontal: 'center'
@@ -255,5 +260,108 @@ export class ReporteHorasComponent {
     link.download = `Reporte_Horas_${new Date().toISOString().slice(0, 10)}.xlsx`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  async exportarPDF() {
+    const data = this.datosFiltrados();
+    if (data.length === 0) return;
+
+    // Carga dinámica de jsPDF y jspdf-autotable
+    const jsPDF = (await import('jspdf')).default;
+    const autoTable = (await import('jspdf-autotable')).default;
+
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    // Encabezado
+    doc.setFillColor(22, 53, 114);
+    doc.rect(0, 0, 297, 20, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REPORTE DE HORAS POR CLIENTE', 148, 13, { align: 'center' });
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const fecha = new Date().toLocaleDateString('es-EC', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    doc.text(`Generado el: ${fecha}`, 285, 13, { align: 'right' });
+
+    // AutoTable
+    autoTable(doc, {
+      startY: 26,
+      head: [[
+        'Cliente', 'Estado Cliente', 'Mes', 'Año', 'Recursos', 'Horas'
+      ]],
+      body: data.map(item => [
+        item.cliente,
+        item.estadoCliente,
+        item.mes,
+        item.anio,
+        item.recursos.toString(),
+        Number(item.horas).toFixed(1)
+      ]),
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 4,
+        valign: 'middle',
+      },
+      headStyles: {
+        fillColor: [22, 53, 114],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+        halign: 'center',
+      },
+      bodyStyles: {
+        textColor: [55, 65, 81],
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 255],
+      },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        1: { halign: 'center', cellWidth: 37 },
+        2: { halign: 'center', cellWidth: 40 },
+        3: { halign: 'center', cellWidth: 30 },
+        4: { halign: 'center', cellWidth: 45 },
+        5: { halign: 'center', cellWidth: 45 },
+      },
+      willDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 1) {
+          const estado = data.cell.raw as string;
+          data.cell.styles.textColor = estado === 'Activo'
+            ? [22, 163, 74]
+            : [107, 114, 128];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+      margin: { left: 10, right: 10 },
+      tableLineColor: [229, 231, 235],
+      tableLineWidth: 0.1,
+    });
+
+    // Pie de página
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(156, 163, 175);
+      doc.text(
+        `Página ${i} de ${pageCount} — Integrity Solutions`,
+        148, 205, { align: 'center' }
+      );
+    }
+
+    // Guardar archivo
+    const formatFecha = () => {
+      const now = new Date();
+      const d = now.getDate().toString().padStart(2, '0');
+      const m = (now.getMonth() + 1).toString().padStart(2, '0');
+      const y = now.getFullYear();
+      return `${d}-${m}-${y}`;
+    };
+    doc.save(`reporte_horas_${formatFecha()}.pdf`);
   }
 }

@@ -29,10 +29,11 @@
         <div class="detail-item align-right">
           <span class="detail-label">Finalización</span>
           <span class="detail-value">
-            <ng-container *ngIf="parseFecha(proyecto.fechaFinPlaneada) as fecha; else sinFecha">
+            @if (parseFecha(proyecto.fechaFinPlaneada); as fecha) {
               {{ fecha | date: 'dd/MM/yyyy' }}
-            </ng-container>
-            <ng-template #sinFecha>No definida</ng-template>
+            } @else {
+              No definida
+            }
           </span>
         </div>
       </div>

@@ -295,3 +295,114 @@ input.filter-input {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+// Estilos de Tarjetas de Métricas (Consistente con Dashboard)
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metrica-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.metrica-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metrica-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #163572; // Color de marca principal
+  line-height: 1;
+}
+
+.metrica-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.metrica-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+  }
+  
+  &.horas {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+  
+  &.colaboradores {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+  }
+  
+  &.clientes {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+  }
+}
+
+@media (max-width: 768px) {
+  .metricas-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .metrica-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .metrica-valor {
+    font-size: 1.5rem;
+  }
+  
+  .metrica-label {
+    font-size: 0.75rem;
+  }
+  
+  .metrica-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.btn-pdf {
+  &:hover:not(:disabled) {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.05) !important;
+  }
+}
+
