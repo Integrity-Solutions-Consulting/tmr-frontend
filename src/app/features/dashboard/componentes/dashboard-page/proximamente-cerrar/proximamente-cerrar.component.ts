@@ -27,18 +27,33 @@ export class ProximosACerrarComponent {
   }
 
   /**
-   * Convierte una fecha en formato dd-MM-yyyy (backend) a Date.
+   * Convierte una fecha en formato yyyy-MM-dd o dd-MM-yyyy a Date.
    * Devuelve null si la cadena es nula, vacía o tiene formato inválido,
-   * evitando que DatePipe lance NG02100.
+   * evitando que DatePipe lance NG02100 y previniendo desfases de zona horaria.
    */
   parseFecha(fecha?: string): Date | null {
     if (!fecha || typeof fecha !== 'string') return null;
 
-    // Soporta dd-MM-yyyy y dd/MM/yyyy
+    // Soporta dd-MM-yyyy, dd/MM/yyyy y yyyy-MM-dd
     const partes = fecha.split(/[-\/]/);
     if (partes.length !== 3) return null;
 
-    const [dia, mes, anio] = partes.map(Number);
+    let dia: number;
+    let mes: number;
+    let anio: number;
+
+    // Si la primera parte tiene 4 dígitos, asumimos formato ISO (yyyy-MM-dd)
+    if (partes[0].length === 4) {
+      anio = Number(partes[0]);
+      mes = Number(partes[1]);
+      dia = Number(partes[2]);
+    } else {
+      // De lo contrario, asumimos formato tradicional (dd-MM-yyyy)
+      dia = Number(partes[0]);
+      mes = Number(partes[1]);
+      anio = Number(partes[2]);
+    }
+
     if (isNaN(dia) || isNaN(mes) || isNaN(anio)) return null;
 
     // Construimos la fecha en UTC para evitar desfases de timezone

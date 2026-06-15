@@ -33,57 +33,119 @@
 
 
 
-.metrics-grid {
+// Estilos de Tarjetas de Métricas (Consistente con Dashboard y Reporte de Horas)
+.metricas-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-  animation: slideIn 0.5s ease-out;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(4, 1fr);
+.metrica-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
-.metric-card {
-  border: 1px solid #f1f5f9;
-  border-radius: 16px;
-  padding: 16px;
+.metrica-content {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  background-color: #ffffff;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.metric-icon-box {
-  width: 40px;
-  height: 40px;
-  background-color: #f8fafc;
-  border-radius: 12px;
+.metrica-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #163572; // Color de marca principal
+  line-height: 1;
+}
+
+.metrica-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.metrica-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+  }
+  
+  &.asignaciones {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+  
+  &.lideres {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+  }
+  
+  &.colaboradores {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+  }
+  
+  &.clientes {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+  }
 }
 
-.metric-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-
-.metric-value {
-  font-size: 24px;
-  font-weight: 800;
-  color: #163572;
-  line-height: 1;
-  margin: 0;
-}
-
-.metric-label {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
-  margin: 4px 0 0 0;
+@media (max-width: 768px) {
+  .metricas-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .metrica-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .metrica-valor {
+    font-size: 1.5rem;
+  }
+  
+  .metrica-label {
+    font-size: 0.75rem;
+  }
+  
+  .metrica-icon {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .filters-container {
@@ -357,5 +419,13 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.btn-pdf {
+  &:hover:not(:disabled) {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.05) !important;
   }
 }

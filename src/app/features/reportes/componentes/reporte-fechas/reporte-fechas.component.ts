@@ -7,11 +7,13 @@ import { ReportesService } from '../../servicios/reportes.service';
 
 import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla.component';
 import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
+import { MatIconModule } from '@angular/material/icon';
+import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 
 @Component({
   selector: 'app-reporte-fechas',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
   templateUrl: './reporte-fechas.component.html',
   styleUrl: './reporte-fechas.component.scss'
 })
@@ -246,5 +248,99 @@ export class ReporteFechasComponent {
     link.download = `Reporte_Fechas_${new Date().toISOString().slice(0, 10)}.xlsx`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  async exportarPDF() {
+    const data = this.datosFiltrados();
+    if (data.length === 0) return;
+
+    // Carga dinámica de jsPDF y jspdf-autotable
+    const jsPDF = (await import('jspdf')).default;
+    const autoTable = (await import('jspdf-autotable')).default;
+
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    // Encabezado
+    doc.setFillColor(22, 53, 114);
+    doc.rect(0, 0, 297, 20, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REPORTE POR FECHAS DE ASIGNACIÓN', 148, 13, { align: 'center' });
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const fecha = new Date().toLocaleDateString('es-EC', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    doc.text(`Generado el: ${fecha}`, 285, 13, { align: 'right' });
+
+    // AutoTable
+    autoTable(doc, {
+      startY: 26,
+      head: [[
+        'Cliente', 'Líder', 'Recurso', 'Cargo', 'Inicio', 'Fin'
+      ]],
+      body: data.map(item => [
+        item.cliente,
+        item.lider,
+        item.recurso,
+        item.cargo,
+        item.fechaInicio ? item.fechaInicio.toLocaleDateString() : '',
+        item.fechaFin ? item.fechaFin.toLocaleDateString() : ''
+      ]),
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 4,
+        valign: 'middle',
+      },
+      headStyles: {
+        fillColor: [22, 53, 114],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+        halign: 'center',
+      },
+      bodyStyles: {
+        textColor: [55, 65, 81],
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 255],
+      },
+      columnStyles: {
+        0: { cellWidth: 52 },
+        1: { cellWidth: 50 },
+        2: { cellWidth: 55 },
+        3: { cellWidth: 45 },
+        4: { halign: 'center', cellWidth: 37 },
+        5: { halign: 'center', cellWidth: 38 },
+      },
+      margin: { left: 10, right: 10 },
+      tableLineColor: [229, 231, 235],
+      tableLineWidth: 0.1,
+    });
+
+    // Pie de página
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(156, 163, 175);
+      doc.text(
+        `Página ${i} de ${pageCount} — Integrity Solutions`,
+        148, 205, { align: 'center' }
+      );
+    }
+
+    // Guardar archivo
+    const formatFecha = () => {
+      const now = new Date();
+      const d = now.getDate().toString().padStart(2, '0');
+      const m = (now.getMonth() + 1).toString().padStart(2, '0');
+      const y = now.getFullYear();
+      return `${d}-${m}-${y}`;
+    };
+    doc.save(`reporte_fechas_${formatFecha()}.pdf`);
   }
 }

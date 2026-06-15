@@ -30,9 +30,9 @@ export class GraficoHorasComponent {
     }
   }
 
-  getAltura(horas: number): number {
-    if (this.maximo === 0) return 0;
-    return (horas / this.maximo) * 100;
+  getAltura(item: HorasPorProyecto): number {
+    const porcentaje = this.getPorcentajeProyecto(item);
+    return Math.min(porcentaje, 100);
   }
 
   getNombreProyectoCorto(nombre: string): string {

@@ -1,6 +1,6 @@
 <div class="descargar">
 
-  <button class="descargar__btn" [class.descargar__btn--open]="abierto" (click)="toggle()" type="button">
+  <button class="descargar__btn" [class.descargar__btn--open]="abierto" (click)="toggle()" [disabled]="disabled" type="button">
     <span>Descargar</span>
     <img src="assets/iconos/download.svg" alt="descargar" width="16" height="16" />
   </button>

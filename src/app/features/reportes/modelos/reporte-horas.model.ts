@@ -5,6 +5,7 @@ export interface ReporteHoras {
   horas: number;
   mes: string;
   anio: string;
+  estadoCliente: string;
   ultimoReporte?: Date;
 }
 
