@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
-  CatalogosService, CatalogoItem, CargoItem, PersonaItem
+  CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
 
 @Component({
@@ -14,7 +14,7 @@ import {
 })
 export class ModalCrearColaboradorComponent implements OnInit {
   @Output() cerrar  = new EventEmitter<void>();
-  // Ahora emitimos el objeto que espera el backend (con IDs).
+  // Emitimos el objeto que espera el backend para crear Persona + Empleado.
   @Output() guardar = new EventEmitter<any>();
 
   private fb = inject(FormBuilder);
@@ -23,33 +23,44 @@ export class ModalCrearColaboradorComponent implements OnInit {
   form!: FormGroup;
   enviado = false;
 
+  // ── Tipos de persona permitidos por la tabla persona ──
+  tiposPersona = [
+    { valor: 'NATURAL', texto: 'Natural' },
+    { valor: 'JURIDICA', texto: 'Jurídica' },
+  ];
+
   // ── Listas cargadas desde el backend (con id + valor) ──
-  personas: PersonaItem[] = [];
-  asociaciones: CatalogoItem[] = [];   // EMP
-  tiposContrato: CatalogoItem[] = [];  // TCT
-  generos: CatalogoItem[] = [];        // GEN
-  departamentos: CatalogoItem[] = [];  // DEP
-  modalidades: CatalogoItem[] = [];    // MDT
-  categorias: CatalogoItem[] = [];     // CAT
-  cargosDisponibles: CargoItem[] = []; // cargos del departamento elegido
+  empresas: CatalogoItem[] = [];              // EMP
+  tiposContrato: CatalogoItem[] = [];         // TCT
+  tiposIdentificacion: CatalogoItem[] = [];   // TID
+  generos: CatalogoItem[] = [];               // GEN
+  departamentos: CatalogoItem[] = [];         // DEP
+  modalidades: CatalogoItem[] = [];           // MDT
+  categorias: CatalogoItem[] = [];            // CAT
+  cargosDisponibles: CargoItem[] = [];        // cargos del departamento elegido
 
   ngOnInit(): void {
-    // Construimos el formulario con IDs (numéricos) en vez de textos.
+    // Construimos el formulario.
     this.form = this.fb.group({
-      idEmpresaCatalogo:   ['', Validators.required],  // Asociación
+      // ── Contrato ──────────────────────────────────────
+      idEmpresaCatalogo:   ['', Validators.required],  // Empresa
       idTipoContrato:      ['', Validators.required],
-      idPersona:           ['', Validators.required],
-      // Datos personales (autocompletados, solo lectura)
-      nombres:             [{ value: '', disabled: true }],
-      apellidos:           [{ value: '', disabled: true }],
-      identificacion:      [{ value: '', disabled: true }],
-      fechaNacimiento:     [{ value: '', disabled: true }],
-      idGenero:            [{ value: '', disabled: true }],
-      // Datos de contacto (autocompletados, solo lectura)
-      correoElectronico:   [{ value: '', disabled: true }],
-      telefono:            [{ value: '', disabled: true }],
-      direccion:           [{ value: '', disabled: true }],
-      // Datos laborales
+
+      // ── Datos personales ──────────────────────────────
+      tipoPersona:         ['NATURAL', Validators.required],
+      idTipoIdentificacion:['', Validators.required],
+      identificacion:      ['', [Validators.required, Validators.maxLength(20)]],
+      nombres:             ['', [Validators.required, Validators.maxLength(100)]],
+      apellidos:           ['', [Validators.required, Validators.maxLength(100)]],
+      fechaNacimiento:     [''],
+      idGenero:            [''],
+
+      // ── Datos de contacto ─────────────────────────────
+      correoElectronico:   ['', [Validators.email, Validators.maxLength(100)]],
+      telefono:            ['', [Validators.maxLength(20)]],
+      direccion:           ['', [Validators.maxLength(255)]],
+
+      // ── Datos laborales ───────────────────────────────
       idDepartamento:      ['', Validators.required],
       fechaContratacion:   ['', Validators.required],
       idCargo:             ['', Validators.required],
@@ -65,6 +76,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
     this.form.get('idDepartamento')?.valueChanges.subscribe(idDep => {
       this.form.patchValue({ idCargo: '' });
       this.cargosDisponibles = [];
+
       if (idDep) {
         this.catalogosService.getCargosPorDepartamento(Number(idDep)).subscribe(cargos => {
           this.cargosDisponibles = cargos;
@@ -72,49 +84,46 @@ export class ModalCrearColaboradorComponent implements OnInit {
       }
     });
 
-    // Al elegir persona → autocompletar sus datos personales y de contacto.
-    this.form.get('idPersona')?.valueChanges.subscribe(id => {
-      this.aplicarPersona(id);
+    // Al cambiar el tipo de persona:
+    // NATURAL  → habilita tipo de identificación.
+    // JURIDICA → deshabilita tipo de identificación.
+    this.form.get('tipoPersona')?.valueChanges.subscribe(tipo => {
+      this.aplicarReglasTipoPersona(tipo);
     });
+
+    // Aplicamos la regla inicial porque por defecto es NATURAL.
+    this.aplicarReglasTipoPersona(this.form.get('tipoPersona')?.value);
   }
 
   // Carga los catálogos desde el backend.
   private cargarCatalogos(): void {
-    this.catalogosService.getCatalogo('EMP').subscribe(d => this.asociaciones = d);
+    this.catalogosService.getCatalogo('EMP').subscribe(d => this.empresas = d);
     this.catalogosService.getCatalogo('TCT').subscribe(d => this.tiposContrato = d);
+    this.catalogosService.getCatalogo('TID').subscribe(d => this.tiposIdentificacion = d);
     this.catalogosService.getCatalogo('GEN').subscribe(d => this.generos = d);
     this.catalogosService.getCatalogo('DEP').subscribe(d => this.departamentos = d);
     this.catalogosService.getCatalogo('MDT').subscribe(d => this.modalidades = d);
     this.catalogosService.getCatalogo('CAT').subscribe(d => this.categorias = d);
-    this.catalogosService.getPersonas().subscribe(d => this.personas = d);
   }
 
-  // Autocompleta los datos de la persona seleccionada.
-  private aplicarPersona(idPersona: string): void {
-    if (!idPersona) {
-      this.form.patchValue({
-        nombres: '', apellidos: '', identificacion: '',
-        fechaNacimiento: '', idGenero: '',
-        correoElectronico: '', telefono: '', direccion: '',
-      });
-      return;
+ 
+  // si es NATURAL se habilita tipo de identificación;
+  // si es JURIDICA se deshabilita.
+  private aplicarReglasTipoPersona(tipoPersona: string): void {
+    const tipoIdentificacionCtrl = this.form.get('idTipoIdentificacion');
+
+    if (!tipoIdentificacionCtrl) return;
+
+    if (tipoPersona === 'JURIDICA') {
+      tipoIdentificacionCtrl.clearValidators();
+      tipoIdentificacionCtrl.setValue('');
+      tipoIdentificacionCtrl.disable();
+    } else {
+      tipoIdentificacionCtrl.enable();
+      tipoIdentificacionCtrl.setValidators([Validators.required]);
     }
 
-    const persona = this.personas.find(p => p.id === Number(idPersona));
-    if (!persona) return;
-
-    // Llenamos los campos personales (vienen de la persona).
-    this.form.patchValue({
-      nombres:         persona.nombres,
-      apellidos:       persona.apellidos,
-      identificacion:  persona.numeroIdentificacion,
-      fechaNacimiento: persona.fechaNacimiento ?? '',
-      idGenero:        persona.idGenero ?? '',
-      correoElectronico: persona.email ?? '',
-      telefono:          persona.telefono ?? '',
-      direccion:         persona.direccion ?? '',
-    });
-
+    tipoIdentificacionCtrl.updateValueAndValidity();
   }
 
   tieneValor(campo: string): boolean {
@@ -129,19 +138,42 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
   onGuardar(): void {
     this.enviado = true;
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const v = this.form.getRawValue();
 
-    // Objeto que espera el backend (CrearColaboradorRequest).
+    // Objeto que espera el backend.
+    // Ahora contiene datos de Persona + datos de Empleado.
     const request = {
+      // ── Datos de persona ──────────────────────────────
+      numeroIdentificacion: String(v.identificacion).trim(),
+      idTipoIdentificacion: v.tipoPersona === 'NATURAL'
+        ? Number(v.idTipoIdentificacion)
+        : null,
+      tipoPersona: v.tipoPersona,
+      idGenero: v.idGenero ? Number(v.idGenero) : null,
+      nombres: String(v.nombres).trim(),
+      apellidos: String(v.apellidos).trim(),
+      fechaNacimiento: v.fechaNacimiento || null,
+
+      // ── Datos de contacto ─────────────────────────────
+      email: v.correoElectronico ? String(v.correoElectronico).trim() : null,
+      telefono: v.telefono ? String(v.telefono).trim() : null,
+      direccion: v.direccion ? String(v.direccion).trim() : null,
+
+      // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo:   Number(v.idEmpresaCatalogo),
       idTipoContrato:      Number(v.idTipoContrato),
-      idPersona:           Number(v.idPersona),
+
+      // ── Datos laborales ───────────────────────────────
       idDepartamento:      Number(v.idDepartamento),
       fechaIngreso:        v.fechaContratacion || null,
       idCargo:             Number(v.idCargo),
-      aniosExperiencia:    v.aniosExperiencia,
+      aniosExperiencia:    Number(v.aniosExperiencia),
       idModoTrabajo:       Number(v.idModoTrabajo),
       idCategoriaEmpleado: Number(v.idCategoriaEmpleado),
     };
@@ -149,5 +181,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
     this.guardar.emit(request);
   }
 
-  onCerrar(): void { this.cerrar.emit(); }
+  onCerrar(): void {
+    this.cerrar.emit();
+  }
 }

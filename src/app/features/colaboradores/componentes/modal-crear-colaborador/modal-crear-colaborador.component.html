@@ -19,20 +19,22 @@
           <span class="form-section__bar"></span>
           Contrato
         </div>
+
         <div class="form-grid form-grid--2">
 
+          <!-- Empresa: antes decía Asociación -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idEmpresaCatalogo"
                 [class.float-select__input--error]="campoInvalido('idEmpresaCatalogo')">
                 <option value=""></option>
-                @for (a of asociaciones; track a.id) {
-                  <option [value]="a.id">{{ a.valor }}</option>
+                @for (e of empresas; track e.id) {
+                  <option [value]="e.id">{{ e.valor }}</option>
                 }
               </select>
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idEmpresaCatalogo')">
-                Asociación <span class="req">*</span>
+                Empresa <span class="req">*</span>
               </label>
             </div>
             @if (campoInvalido('idEmpresaCatalogo')) {
@@ -68,54 +70,94 @@
           <span class="form-section__bar"></span>
           Datos personales
         </div>
+
         <div class="form-grid form-grid--2">
 
-          <!-- Fila 1: Persona | Identificación -->
+          <!-- Fila 1: Tipo de persona | Tipo de identificación -->
           <div class="form-field">
             <div class="float-select">
-              <select class="float-select__input" formControlName="idPersona"
-                [class.float-select__input--error]="campoInvalido('idPersona')">
-                <option value=""></option>
-                @for (p of personas; track p.id) {
-                  <option [value]="p.id">{{ p.nombres }} {{ p.apellidos }} — {{ p.numeroIdentificacion }}</option>
+              <select class="float-select__input" formControlName="tipoPersona"
+                [class.float-select__input--error]="campoInvalido('tipoPersona')">
+                @for (tp of tiposPersona; track tp.valor) {
+                  <option [value]="tp.valor">{{ tp.texto }}</option>
                 }
               </select>
               <label class="float-select__label"
-                [class.float-select__label--up]="tieneValor('idPersona')">
-                Persona <span class="req">*</span>
+                [class.float-select__label--up]="tieneValor('tipoPersona')">
+                Tipo de persona <span class="req">*</span>
               </label>
             </div>
-            @if (campoInvalido('idPersona')) {
+            @if (campoInvalido('tipoPersona')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idTipoIdentificacion"
+                [class.float-select__input--error]="campoInvalido('idTipoIdentificacion')">
+                <option value=""></option>
+                @for (tid of tiposIdentificacion; track tid.id) {
+                  <option [value]="tid.id">{{ tid.valor }}</option>
+                }
+              </select>
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idTipoIdentificacion')">
+                Tipo de identificación
+                @if (form.get('tipoPersona')?.value === 'NATURAL') {
+                  <span class="req">*</span>
+                }
+              </label>
+            </div>
+            @if (campoInvalido('idTipoIdentificacion')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Fila 2: Identificación | Nombres -->
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="identificacion"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('identificacion')"/>
+              <label class="float-field__label">
+                Identificación <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('identificacion')) {
               <span class="form-field__error">Campo requerido</span>
             }
           </div>
 
           <div class="form-field">
             <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="identificacion"
-                placeholder=" "/>
-              <label class="float-field__label">Identificación</label>
-            </div>
-          </div>
-
-          <!-- Fila 2: Nombres | Apellidos -->
-          <div class="form-field">
-            <div class="float-field">
               <input class="float-field__input" type="text" formControlName="nombres"
-                placeholder=" "/>
-              <label class="float-field__label">Nombres</label>
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('nombres')"/>
+              <label class="float-field__label">
+                Nombres <span class="req">*</span>
+              </label>
             </div>
+            @if (campoInvalido('nombres')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
           </div>
 
+          <!-- Fila 3: Apellidos | Fecha de nacimiento -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input" type="text" formControlName="apellidos"
-                placeholder=" "/>
-              <label class="float-field__label">Apellidos</label>
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('apellidos')"/>
+              <label class="float-field__label">
+                Apellidos <span class="req">*</span>
+              </label>
             </div>
+            @if (campoInvalido('apellidos')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
           </div>
 
-          <!-- Fila 3: Fecha de nacimiento | Género -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input float-field__input--date" type="date"
@@ -126,6 +168,7 @@
             </div>
           </div>
 
+          <!-- Fila 4: Género -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idGenero">
@@ -150,14 +193,19 @@
           <span class="form-section__bar"></span>
           Datos de contacto
         </div>
+
         <div class="form-grid form-grid--2">
 
           <div class="form-field form-field--full">
             <div class="float-field">
               <input class="float-field__input" type="email" formControlName="correoElectronico"
-                placeholder=" "/>
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('correoElectronico')"/>
               <label class="float-field__label">Correo electrónico</label>
             </div>
+            @if (campoInvalido('correoElectronico')) {
+              <span class="form-field__error">Correo inválido</span>
+            }
           </div>
 
           <div class="form-field">
@@ -185,6 +233,7 @@
           <span class="form-section__bar"></span>
           Datos laborales
         </div>
+
         <div class="form-grid form-grid--2">
 
           <div class="form-field">
@@ -249,7 +298,9 @@
               <input class="float-field__input" type="number" formControlName="aniosExperiencia"
                 placeholder=" " min="0" max="50"
                 [class.float-field__input--error]="campoInvalido('aniosExperiencia')"/>
-              <label class="float-field__label">Años de experiencia <span class="req">*</span></label>
+              <label class="float-field__label">
+                Años de experiencia <span class="req">*</span>
+              </label>
             </div>
             @if (campoInvalido('aniosExperiencia')) {
               <span class="form-field__error">
