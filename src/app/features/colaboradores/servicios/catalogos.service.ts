@@ -69,13 +69,6 @@ export class CatalogosService {
     );
   }
 
-  // ── Personas para el ComboBox ──
-  getPersonas(): Observable<PersonaItem[]> {
-    return this.http.get<PersonaItem[]>(
-      `${this.apiUrl}/personas`,
-      this.httpOptions
-    );
-  }
 
   // ── Empleados para el ComboBox de recursos del proyecto ──
   // Debe leer de la tabla administracion.tbl_administracion_empleado.
