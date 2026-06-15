@@ -47,7 +47,10 @@ export class Calendario {
     constructor() {
         effect(() => {
             const fecha = this._fechaActual();
-            this.actividadesService.cargarCalendario(fecha.getFullYear(), fecha.getMonth() + 1);
+            const y = fecha.getFullYear();
+            const m = fecha.getMonth() + 1;
+            this.actividadesService.cargarCalendario(y, m);
+            this.actividadesService.cargarResumen(y, m);
         });
     }
 
