@@ -41,8 +41,9 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(DashboardActions.loadDashboardData({ rango: 'mes' }));
   }
 
-  onRangoCambia(rango: string): void {
-    this.store.dispatch(DashboardActions.loadDashboardData({ rango }));
+  onRangoChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.store.dispatch(DashboardActions.loadDashboardData({ rango: select.value }));
   }
 
   ngOnDestroy(): void {

@@ -22,11 +22,15 @@
         </div>
         <div class="detail-item">
           <span class="detail-label">Horas</span>
-          <span class="detail-value">{{ proyecto.horas | number: '1.2-2' }} h</span>
+          <span class="detail-value">{{ proyecto.horas | number: '1.0-0' }} h</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">Presupuesto</span>
           <span class="detail-value">${{ proyecto.presupuesto | number }}</span>
+        </div>
+        <div class="detail-item align-right">
+          <span class="detail-label">Finalización</span>
+          <span class="detail-value">{{ proyecto.fechaFinPlaneada ? (proyecto.fechaFinPlaneada | date: 'dd/MM/yyyy') : 'No definida' }}</span>
         </div>
       </div>
     </div>

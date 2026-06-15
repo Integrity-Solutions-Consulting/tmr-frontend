@@ -2,6 +2,13 @@
   <!-- Título -->
   <div class="dashboard-header">
     <h1>Dashboard</h1>
+    <div class="header-controls">
+      <select class="rango-select" (change)="onRangoChange($event)">
+        <option value="mes">Este mes</option>
+        <option value="trimestre">Este trimestre</option>
+        <option value="anio">Este año</option>
+      </select>
+    </div>
   </div>
 
   <!-- Métricas -->
@@ -19,7 +26,7 @@
 
     <!-- Gráfico de Horas -->
     <div class="section-grafico" *ngIf="horasPorProyecto$ | async as horasData">
-      <app-grafico-horas [horasData]="horasData" (rangoCambia)="onRangoCambia($event)"></app-grafico-horas>
+      <app-grafico-horas [horasData]="horasData"></app-grafico-horas>
     </div>
   </div>
 </div>

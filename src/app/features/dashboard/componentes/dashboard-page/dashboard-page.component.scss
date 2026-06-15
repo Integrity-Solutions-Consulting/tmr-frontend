@@ -6,12 +6,40 @@
 
 .dashboard-header {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   h1 {
     font-size: 2rem;
     font-weight: 600;
     color: #1a202c;
     margin: 0;
+  }
+}
+
+.header-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rango-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
   }
 }
 

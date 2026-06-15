@@ -64,15 +64,32 @@
   flex-direction: column;
   justify-content: flex-end;
   min-height: 200px;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
 }
 
 .grafico-bars {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-  gap: 1rem;
+  display: flex;
+  gap: 1.5rem;
   align-items: flex-end;
   height: 100%;
   padding: 1rem 0;
+  min-width: max-content;
 }
 
 .bar-item {
@@ -81,6 +98,8 @@
   align-items: center;
   gap: 0.5rem;
   height: 100%;
+  width: 70px;
+  flex-shrink: 0;
 }
 
 .bar-column {
