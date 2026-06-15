@@ -61,14 +61,11 @@
       <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
         (input)="aplicarFiltros()" />
     </div>
+
     <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
       <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
       <span class="estado-texto">Estado</span>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-search">
-          <span class="material-icons dropdown-search-icon">search</span>
-          <input type="text" placeholder="Estado" class="dropdown-search-input" />
-        </div>
         <div class="dropdown-option" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
@@ -86,6 +83,7 @@
         <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>
     </div>
+
     <div class="search-spacer"></div>
 
     <div class="descarga-wrapper">
@@ -99,7 +97,7 @@
     </div>
 
     <button class="btn btn-primary" (click)="abrirFormulario()">
-      Agregar
+      Agregar Líder
       <span class="material-icons">add</span>
     </button>
   </div>
@@ -147,6 +145,10 @@
                   <span class="material-symbols-outlined">edit_square</span>
                   Editar
                 </button>
+                <button mat-menu-item (click)="toggleEstadoLider(lider)">
+                  <span class="material-symbols-outlined">{{ lider.estado === 'Activo' ? 'person_off' : 'person' }}</span>
+                  {{ lider.estado === 'Activo' ? 'Desactivar' : 'Activar' }}
+                </button>
               </mat-menu>
             </td>
           </tr>
@@ -186,15 +188,14 @@
 
 </div>
 
-<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion" [lider]="liderParaEditar"
-  [guardando]="guardandoLider"
-  (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider($event)">
+<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion"
+  [lider]="liderParaEditar" [guardando]="guardandoLider" (cerrarModal)="cerrarFormulario()"
+  (guardar)="guardarLider($event)">
 </app-modal-lider>
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
 </app-modal-detalle-lider>
-<app-modal-confirmacion 
-  [mostrar]="mostrarConfirmacion" 
-  [mensaje]="mensajeConfirmacion"
+
+<app-modal-confirmacion [mostrar]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion"
   (cerrarModal)="mostrarConfirmacion = false">
 </app-modal-confirmacion>
