@@ -1,13 +1,6 @@
 <div class="grafico-card">
   <div class="card-header">
     <h2>Horas reportadas por proyecto</h2>
-    <div class="header-controls">
-      <select class="rango-select" (change)="onRangoChange($event)">
-        <option value="mes">Este mes</option>
-        <option value="trimestre">Este trimestre</option>
-        <option value="anio">Este año</option>
-      </select>
-    </div>
   </div>
 
   <div class="grafico-container" *ngIf="horasData.length > 0; else noData">
@@ -16,7 +9,7 @@
         <div class="bar-item" *ngFor="let item of horasData">
           <div class="bar-column">
             <div class="bar-value" [style.height.%]="getAltura(item.horas)">
-              <span class="valor-texto" *ngIf="item.horas > 0">{{ item.horas | number: '1.2-2' }}</span>
+              <span class="valor-texto" *ngIf="item.horas > 0">{{ item.horas | number: '1.0-0' }}</span>
             </div>
           </div>
           <div class="bar-label">
@@ -28,16 +21,16 @@
 
     <div class="grafico-stats">
       <div class="stat-item">
-        <span class="stat-label">Total Horas</span>
-        <span class="stat-value">{{ (horasData | reduce: 'horas' : 0) | number: '1.2-2' }}</span>
+        <span class="stat-label">Total de horas</span>
+        <span class="stat-value">{{ (horasData | reduce: 'horas' : 0) | number: '1.0-0' }} h</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Promedio</span>
-        <span class="stat-value">{{ ((horasData | reduce: 'horas' : 0) / horasData.length) | number: '1.2-2' }}</span>
+        <span class="stat-label">Promedio de horas</span>
+        <span class="stat-value">{{ ((horasData | reduce: 'horas' : 0) / horasData.length) | number: '1.0-0' }} h</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Máximo</span>
-        <span class="stat-value">{{ maximo | number: '1.2-2' }}</span>
+        <span class="stat-label">Avance de jornada</span>
+        <span class="stat-value">{{ getAvanceJornada() | number: '1.0-0' }}%</span>
       </div>
     </div>
   </div>

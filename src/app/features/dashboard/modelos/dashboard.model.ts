@@ -16,12 +16,14 @@ export interface ProyectoResumen {
   estado: string;
   horas: number;
   presupuesto: number;
+  fechaFinPlaneada?: string;
 }
 
 export interface HorasPorProyecto {
   proyecto: string;
   horas: number;
   codigo: string;
+  horasAsignadas: number;
 }
 
 export interface DashboardData {
