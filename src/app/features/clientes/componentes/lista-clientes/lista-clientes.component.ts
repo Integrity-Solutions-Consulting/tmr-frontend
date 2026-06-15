@@ -19,6 +19,7 @@ import { ModalEditarComponent }   from '../modal-editar/modal-editar.component';
 import { ModalDetalleComponent }  from '../modal-detalle/modal-detalle.component';
 import { ModalDescargaComponent } from '../modal-descarga/modal-descarga.component';
 import { NotificacionComponent }  from '../notificacion/notificacion.component';
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
 
 @Component({
   selector: 'app-lista-clientes',
@@ -32,6 +33,7 @@ import { NotificacionComponent }  from '../notificacion/notificacion.component';
     ModalDetalleComponent,
     ModalDescargaComponent,
     NotificacionComponent,
+    PaginacionComponent,
   ],
   templateUrl: './lista-clientes.component.html',
   styleUrls: ['./lista-clientes.component.scss'],
@@ -72,6 +74,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   paginaActual = 1;
   totalPaginas = 1;
   tamanoPagina = 10;
+  total = 0;
 
   ngOnInit(): void {
     this.filtrosForm = this.fb.group({
@@ -101,11 +104,12 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
       this.despacharFiltros();
     });
 
-    // Sincronizar paginación desde el store
-    this.paginacion$.pipe(takeUntil(this.destroy$)).subscribe(p => {
+
+    this.paginacion$.pipe(takeUntil(this.destroy$)).subscribe((p: any) => {
       this.paginaActual = p.paginaActual;
       this.totalPaginas = p.totalPaginas;
       this.tamanoPagina = p.tamanoPagina;
+      this.total = p.total ?? p.totalRegistros ?? p.totalItems ?? 0;
     });
   }
 
@@ -298,7 +302,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
 
       autoTable(doc, {
         startY: 24,
-        head: [['Tipo ID', 'Identificador', 'Nombre Comercial', 'Correo electrónico', 'Teléfono', 'Estado']],
+        head: [['Tipo', 'Identificador', 'Nombre Comercial', 'Correo electrónico', 'Teléfono', 'Estado']],
         body: clientes.map(c => [
           c.tipoId, c.identificador,
           c.nombreComercial, c.correoElectronico, c.telefono, c.estado,
@@ -315,7 +319,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   private descargarExcel(): void {
     this.clientes$.subscribe(clientes => {
       const datos = clientes.map(c => ({
-        'Tipo ID':          c.tipoId,
+        'Tipo':          c.tipoId,
         'Identificador':    c.identificador,
         'Nombre Comercial': c.nombreComercial,
         'Correo':           c.correoElectronico,

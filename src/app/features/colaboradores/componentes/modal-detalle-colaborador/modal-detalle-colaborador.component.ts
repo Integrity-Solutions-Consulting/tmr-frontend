@@ -15,7 +15,6 @@ export class ModalDetalleColaboradorComponent {
   @Output() cerrar = new EventEmitter<void>();
   @Output() editar = new EventEmitter<Colaborador>();
 
-  // Controla qué secciones están desplegadas.
   seccionesExpandido = {
     laborales: true,
     personales: true,
@@ -23,34 +22,61 @@ export class ModalDetalleColaboradorComponent {
     proyectos: false,
   };
 
-  toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos'): void {
-    this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
+  get codigoColaborador(): string {
+    const c: any = this.colaborador;
+    return c?.codigoEmpleado ?? c?.codigoColaborador ?? c?.id ?? '—';
   }
 
-  onEditar(): void {
-    this.editar.emit(this.colaborador);
+  get contratoTipo(): string {
+    const c: any = this.colaborador;
+    return c?.tipoContrato ?? '—';
+  }
+
+  get totalProyectos(): number {
+    return this.colaborador?.proyectosAsignados?.length ?? this.colaborador?.numProyectos ?? 0;
+  }
+
+  toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos'): void {
+    this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
   }
 
   onCerrar(): void {
     this.cerrar.emit();
   }
 
-  formatFecha(fecha: string): string {
+  onEditar(): void {
+    this.editar.emit(this.colaborador);
+  }
+
+  formatFecha(fecha?: string | Date | null): string {
     if (!fecha) return '—';
 
-    const [y, m, d] = fecha.split('-');
-    return `${d}/${m}/${y}`;
-  }
+    if (fecha instanceof Date && !Number.isNaN(fecha.getTime())) {
+      const d = String(fecha.getDate()).padStart(2, '0');
+      const m = String(fecha.getMonth() + 1).padStart(2, '0');
+      const y = fecha.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
 
-  get contratoTipo(): string {
-    return this.colaborador?.tipoContrato ?? '';
-  }
+    const valor = String(fecha).trim();
 
-  get codigoColaborador(): string {
-    return this.colaborador?.codigoEmpleado ?? '';
-  }
+    // Si viene como 2026-06-14 o 2026-06-14T00:00:00
+    if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+      const [y, m, d] = valor.substring(0, 10).split('-');
+      return `${d}/${m}/${y}`;
+    }
 
-  get totalProyectos(): number {
-    return this.colaborador?.proyectosAsignados?.length ?? this.colaborador?.numProyectos ?? 0;
+    // Si viene como 14-06-2026
+    if (/^\d{2}-\d{2}-\d{4}$/.test(valor)) {
+      const [d, m, y] = valor.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    // Si ya viene como 14/06/2026
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) {
+      return valor;
+    }
+
+    return '—';
   }
 }
