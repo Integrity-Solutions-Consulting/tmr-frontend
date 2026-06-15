@@ -14,6 +14,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -43,6 +46,7 @@ import * as XLSX from 'xlsx';
         MatIconModule,
         MatCheckboxModule,
         MatMenuModule,
+        MatAutocompleteModule,
         HorasFormatPipe,
         PaginacionComponent,
         BadgeEstadoComponent
@@ -65,6 +69,13 @@ export class SeguimientoComponent implements AfterViewInit {
     public busqueda = '';
     public clienteSeleccionado = '';
     public clientes = signal<{ id: number, nombre: string }[]>([]);
+    public clienteFilter = signal('');
+
+    public clientesFiltrados = computed(() => {
+        const q = this.clienteFilter().toLowerCase().trim();
+        if (!q) return this.clientes();
+        return this.clientes().filter(c => c.nombre.toLowerCase().includes(q));
+    });
     public fechaDesde = (() => {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
@@ -188,11 +199,12 @@ export class SeguimientoComponent implements AfterViewInit {
             : this.dataSource.data.forEach(row => this.selection.select(row));
     }
 
-    public aprobarSeleccionados() {
-        const ids = this.selection.selected.map(s => s.id);
-        this.seguimientoService.aprobarColaboradores(ids);
+    public descargarSeleccionados() {
+        if (!this.selection.hasValue()) return;
+        this.selection.selected.forEach(col => {
+            this.descargarDetalle(col);
+        });
         this.selection.clear();
-        this.dataSource.data = this.seguimientoService.colaboradores();
     }
 
     public exportarExcel() {
@@ -212,20 +224,98 @@ export class SeguimientoComponent implements AfterViewInit {
         XLSX.writeFile(wb, 'Seguimiento.xlsx');
     }
 
-    public exportarCSV() {
+    public exportarPDF() {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        doc.setFillColor(22, 53, 114);
+        doc.rect(0, 0, 297, 20, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('REPORTE DE SEGUIMIENTO', 148, 13, { align: 'center' });
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        const fecha = new Date().toLocaleDateString('es-EC', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        doc.text(`Generado el: ${fecha}`, 285, 13, { align: 'right' });
+
         const rows = this.dataSource.filteredData;
-        const headers = ['Colaborador', 'Proyecto', 'Cliente', 'Líder', 'Horas', 'Estado'];
-        const csv = [
-            headers.join(','),
-            ...rows.map(c => `"${c.nombre}","${c.proyecto}","${c.cliente}","${c.liderTecnico}",${c.nroHoras},"${c.estado}"`)
-        ].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'seguimiento.csv';
-        a.click();
-        URL.revokeObjectURL(url);
+
+        autoTable(doc, {
+            startY: 26,
+            head: [[
+                'Colaborador', 'Proyecto', 'Cliente', 'Líder Técnico', 'Nro Horas', 'Estado'
+            ]],
+            body: rows.map(c => [
+                c.nombre,
+                c.proyecto,
+                c.cliente,
+                c.liderTecnico,
+                c.nroHoras,
+                c.estado
+            ]),
+            styles: {
+                font: 'helvetica',
+                fontSize: 8,
+                cellPadding: 4,
+                valign: 'middle',
+            },
+            headStyles: {
+                fillColor: [22, 53, 114],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 8.5,
+                halign: 'center',
+            },
+            bodyStyles: {
+                textColor: [55, 65, 81],
+            },
+            alternateRowStyles: {
+                fillColor: [245, 247, 255],
+            },
+            columnStyles: {
+                0: { cellWidth: 55 },
+                1: { cellWidth: 55 },
+                2: { cellWidth: 55 },
+                3: { cellWidth: 55 },
+                4: { halign: 'center', cellWidth: 25 },
+                5: { halign: 'center', cellWidth: 32 }
+            },
+            willDrawCell: (data) => {
+                if (data.section === 'body' && data.column.index === 5) {
+                    const estado = data.cell.raw as string;
+                    if (estado === 'Aprobado' || estado === 'Activo') {
+                        data.cell.styles.textColor = [22, 163, 74];
+                    } else {
+                        data.cell.styles.textColor = [220, 38, 38];
+                    }
+                }
+            },
+            margin: { left: 10, right: 10 },
+            tableLineColor: [229, 231, 235],
+            tableLineWidth: 0.1,
+        });
+
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(156, 163, 175);
+            doc.text(
+                `Página ${i} de ${pageCount} — Integrity Solutions`,
+                148, 205, { align: 'center' }
+            );
+        }
+
+        const dateStr = new Date().toLocaleDateString('es-EC').replace(/\//g, '-');
+        doc.save(`seguimiento_${dateStr}.pdf`);
+    }
+
+    public filtrarClientes(event: any) {
+        const val = event?.target ? event.target.value : event;
+        this.clienteFilter.set(val || '');
     }
 
     public descargarDetalle(col: Colaborador) {
