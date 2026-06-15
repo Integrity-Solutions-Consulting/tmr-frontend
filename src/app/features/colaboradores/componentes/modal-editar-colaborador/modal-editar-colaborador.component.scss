@@ -14,8 +14,8 @@
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-  width: 680px;
-  max-width: calc(100vw - 32px);
+  width: 860px;
+  max-width: calc(100vw - 48px);
   max-height: 92vh;
   display: flex;
   flex-direction: column;
@@ -112,7 +112,7 @@
 
 // ── Sección ──────────────────────────────────────────
 .form-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 
   &__title {
     display: flex;
@@ -123,6 +123,12 @@
     font-weight: 600;
     color: #163572;
     margin-bottom: 18px;
+  }
+
+  // Cuando una sección tiene varias filas separadas con form-grid,
+  // agrega espacio entre cada fila.
+  .form-grid + .form-grid {
+    margin-top: 18px;
   }
 
   &__bar {
@@ -137,8 +143,12 @@
 // ── Grid ─────────────────────────────────────────────
 .form-grid {
   display: grid;
-  gap: 20px;
-  &--2 { grid-template-columns: 1fr 1fr; }
+  column-gap: 26px;
+  row-gap: 20px;
+
+  &--2 {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 .form-field {
@@ -170,7 +180,7 @@
 
   &__input {
     width: 100%;
-    height: 42px;
+    height: 48px;
     padding: 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
@@ -247,7 +257,7 @@
 
   &__input {
     width: 100%;
-    height: 46px;
+    height: 48px;
     padding: 0 36px 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 12px;

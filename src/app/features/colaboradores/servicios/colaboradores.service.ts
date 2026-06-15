@@ -152,36 +152,59 @@ export class ColaboradoresService {
   }
 
   // ── Convierte el detalle del backend al modelo del frontend ──
-  private mapDetalleAColaborador(api: any): Colaborador {
-    return {
-      id: api.id?.toString() ?? '',
-      codigoEmpleado: api.codigoEmpleado ?? '',
-      tipoContrato: api.tipoContrato ?? '',
-      identificacion: api.numeroIdentificacion ?? '',
-      tipoIdentificacion: api.asociacion as any,
-      nombreCompleto: `${api.nombres ?? ''} ${api.apellidos ?? ''}`.trim(),
-      departamento: api.departamento ?? '',
-      fechaContratacion: api.fechaIngreso ?? '',
-      cargo: api.cargo ?? '',
-      aniosExperiencia: api.aniosExperiencia ?? 0,
-      modalidad: api.modalidad as any,
-      categoria: api.categoria as any,
-      correoElectronico: api.email ?? '',
-      fechaNacimiento: api.fechaNacimiento ?? '',
-      telefono: api.telefono ?? '',
-      genero: api.genero as any,
-      direccion: api.direccion ?? '',
-      estado: api.activo ? 'Activo' : 'Inactivo',
-      proyectosAsignados: (api.proyectos ?? []).map((p: any) => ({
-        id: p.id?.toString() ?? '',
-        nombre: p.nombre ?? '',
-        cliente: p.cliente ?? '',
-        estado: p.estado as any,
-      })),
-      numProyectos: (api.proyectos ?? []).length,
-    };
-  }
+private mapDetalleAColaborador(api: any): Colaborador {
+  return {
+    id: api.id?.toString() ?? '',
+    codigoEmpleado: api.codigoEmpleado ?? '',
 
+    // ── IDs necesarios para editar ─────────────────────
+    idEmpresaCatalogo: api.idEmpresaCatalogo ?? null,
+    tipoPersona: api.tipoPersona ?? 'NATURAL',
+    idTipoIdentificacion: api.idTipoIdentificacion ?? null,
+    idGenero: api.idGenero ?? null,
+    idNacionalidad: api.idNacionalidad ?? null,
+    idTipoContrato: api.idTipoContrato ?? null,
+    idModoTrabajo: api.idModoTrabajo ?? null,
+    idCategoriaEmpleado: api.idCategoriaEmpleado ?? null,
+
+    // ── Contrato / empresa ─────────────────────────────
+    tipoContrato: api.tipoContrato ?? '',
+    tipoIdentificacion: api.asociacion as any,
+
+    // ── Datos personales ───────────────────────────────
+    identificacion: api.numeroIdentificacion ?? '',
+    numeroIdentificacion: api.numeroIdentificacion ?? '',
+    nombres: api.nombres ?? '',
+    apellidos: api.apellidos ?? '',
+    nombreCompleto: `${api.nombres ?? ''} ${api.apellidos ?? ''}`.trim(),
+    fechaNacimiento: api.fechaNacimiento ?? '',
+    genero: api.genero as any,
+    nacionalidad: api.nacionalidad ?? '',
+
+    // ── Datos laborales ────────────────────────────────
+    departamento: api.departamento ?? '',
+    fechaContratacion: api.fechaIngreso ?? '',
+    cargo: api.cargo ?? '',
+    aniosExperiencia: api.aniosExperiencia ?? 0,
+    modalidad: api.modalidad as any,
+    categoria: api.categoria as any,
+
+    // ── Contacto ───────────────────────────────────────
+    correoElectronico: api.email ?? '',
+    telefono: api.telefono ?? '',
+    direccion: api.direccion ?? '',
+
+    // ── Estado / proyectos ─────────────────────────────
+    estado: api.activo ? 'Activo' : 'Inactivo',
+    proyectosAsignados: (api.proyectos ?? []).map((p: any) => ({
+      id: p.id?.toString() ?? '',
+      nombre: p.nombre ?? '',
+      cliente: p.cliente ?? '',
+      estado: p.estado as any,
+    })),
+    numProyectos: (api.proyectos ?? []).length,
+  };
+}
   // =========================================================================
   // CREAR — llama al backend con cookies
   // =========================================================================

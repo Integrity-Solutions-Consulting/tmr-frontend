@@ -34,6 +34,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
   tiposContrato: CatalogoItem[] = [];         // TCT
   tiposIdentificacion: CatalogoItem[] = [];   // TID
   generos: CatalogoItem[] = [];               // GEN
+  nacionalidades: CatalogoItem[] = [];        // NAC
   departamentos: CatalogoItem[] = [];         // DEP
   modalidades: CatalogoItem[] = [];           // MDT
   categorias: CatalogoItem[] = [];            // CAT
@@ -54,6 +55,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
       apellidos:           ['', [Validators.required, Validators.maxLength(100)]],
       fechaNacimiento:     [''],
       idGenero:            [''],
+      idNacionalidad:      [''],
 
       // ── Datos de contacto ─────────────────────────────
       correoElectronico:   ['', [Validators.email, Validators.maxLength(100)]],
@@ -101,6 +103,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
     this.catalogosService.getCatalogo('TCT').subscribe(d => this.tiposContrato = d);
     this.catalogosService.getCatalogo('TID').subscribe(d => this.tiposIdentificacion = d);
     this.catalogosService.getCatalogo('GEN').subscribe(d => this.generos = d);
+    this.catalogosService.getCatalogo('NAC').subscribe(d => this.nacionalidades = d);
     this.catalogosService.getCatalogo('DEP').subscribe(d => this.departamentos = d);
     this.catalogosService.getCatalogo('MDT').subscribe(d => this.modalidades = d);
     this.catalogosService.getCatalogo('CAT').subscribe(d => this.categorias = d);
@@ -156,6 +159,7 @@ export class ModalCrearColaboradorComponent implements OnInit {
         : null,
       tipoPersona: v.tipoPersona,
       idGenero: v.idGenero ? Number(v.idGenero) : null,
+      idNacionalidad: v.idNacionalidad ? Number(v.idNacionalidad) : null,
       nombres: String(v.nombres).trim(),
       apellidos: String(v.apellidos).trim(),
       fechaNacimiento: v.fechaNacimiento || null,
