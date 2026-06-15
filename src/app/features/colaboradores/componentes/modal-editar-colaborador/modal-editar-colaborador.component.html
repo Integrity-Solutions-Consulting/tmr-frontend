@@ -6,6 +6,7 @@
         <h2 class="modal-form__title">Editar Colaborador</h2>
         <p class="modal-form__subtitle">{{ colaborador.nombreCompleto }}</p>
       </div>
+
       <button class="modal-form__close" (click)="onCerrar()" type="button">
         <span class="material-icons">close</span>
       </button>
@@ -19,8 +20,28 @@
           <span class="form-section__bar"></span>
           Contrato
         </div>
+
         <div class="form-grid form-grid--2">
 
+
+          <!-- Empresa -->
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idEmpresaCatalogo">
+                <option [ngValue]="null"></option>
+                @for (empresa of empresas; track empresa.id) {
+                  <option [ngValue]="empresa.id">{{ empresa.valor }}</option>
+                }
+              </select>
+
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idEmpresaCatalogo')">
+                Empresa
+              </label>
+            </div>
+          </div>
+
+          <!-- Tipo de contrato -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idTipoContrato"
@@ -30,29 +51,35 @@
                   <option [value]="t.id">{{ t.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idTipoContrato')">
                 Tipo de contrato <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('idTipoContrato')) {
               <span class="form-field__error">Campo requerido</span>
             }
           </div>
 
+          <!-- Estado -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="estado"
                 [class.float-select__input--error]="campoInvalido('estado')">
+                <option value=""></option>
                 @for (e of estados; track e) {
                   <option [value]="e">{{ e }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('estado')">
                 Estado <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('estado')) {
               <span class="form-field__error">Campo requerido</span>
             }
@@ -61,56 +88,174 @@
         </div>
       </div>
 
-      <!-- DATOS PERSONALES (deshabilitados, solo lectura) -->
+      <!-- DATOS PERSONALES -->
       <div class="form-section">
         <div class="form-section__title">
           <span class="form-section__bar"></span>
           Datos personales
         </div>
+
+        <!-- Fila 1: Tipo persona | Tipo identificación -->
         <div class="form-grid form-grid--2">
 
           <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="nombres" placeholder=" "/>
-              <label class="float-field__label">Nombres</label>
-            </div>
-          </div>
+            <div class="float-select">
+              <select class="float-select__input" formControlName="tipoPersona">
+                @for (tipo of tiposPersona; track tipo.valor) {
+                  <option [value]="tipo.valor">{{ tipo.texto }}</option>
+                }
+              </select>
 
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="apellidos" placeholder=" "/>
-              <label class="float-field__label">Apellidos</label>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="identificacion" placeholder=" "/>
-              <label class="float-field__label">Identificación</label>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input float-field__input--date" type="date"
-                formControlName="fechaNacimiento" placeholder=" "/>
-              <label class="float-field__label float-field__label--always">
-                Fecha de nacimiento
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('tipoPersona')">
+                Tipo de persona
               </label>
             </div>
           </div>
 
           <div class="form-field">
             <div class="float-select">
-              <select class="float-select__input" formControlName="genero">
-                <option value=""></option>
-                @for (g of generos; track g.id) {
-                  <option [value]="g.valor">{{ g.valor }}</option>
+              <select class="float-select__input" formControlName="idTipoIdentificacion">
+                <option [ngValue]="null"></option>
+                @for (tipo of tiposIdentificacion; track tipo.id) {
+                  <option [ngValue]="tipo.id">{{ tipo.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
-                [class.float-select__label--up]="tieneValor('genero')">
+                [class.float-select__label--up]="tieneValor('idTipoIdentificacion')">
+                Tipo de identificación
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Fila 2: Identificación | Nombres -->
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="identificacion" placeholder=" " />
+
+              <label class="float-field__label">
+                Identificación
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="nombres" placeholder=" " />
+
+              <label class="float-field__label">
+                Nombres
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Fila 3: Apellidos | Fecha nacimiento -->
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="apellidos" placeholder=" " />
+
+              <label class="float-field__label">
+                Apellidos
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input float-field__input--date" type="date"
+                formControlName="fechaNacimiento" placeholder=" " />
+
+              <label class="float-field__label float-field__label--always">
+                Fecha de nacimiento
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Fila 4: Género | Nacionalidad -->
+        <div class="form-grid form-grid--2">
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idGenero">
+                <option [ngValue]="null"></option>
+                @for (g of generos; track g.id) {
+                  <option [ngValue]="g.id">{{ g.valor }}</option>
+                }
+              </select>
+
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idGenero')">
                 Género
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idNacionalidad">
+                <option [ngValue]="null"></option>
+                @for (nacionalidad of nacionalidades; track nacionalidad.id) {
+                  <option [ngValue]="nacionalidad.id">{{ nacionalidad.valor }}</option>
+                }
+              </select>
+
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idNacionalidad')">
+                Nacionalidad
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- DATOS DE CONTACTO -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos de contacto
+        </div>
+
+        <div class="form-grid form-grid--2">
+
+          <!-- Correo electrónico -->
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <input class="float-field__input" type="email" formControlName="correoElectronico" placeholder=" " />
+              <label class="float-field__label">
+                Correo electrónico
+              </label>
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="telefono" placeholder=" " />
+              <label class="float-field__label">
+                Teléfono
+              </label>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div class="form-field">
+            <div class="float-field">
+              <input class="float-field__input" type="text" formControlName="direccion" placeholder=" " />
+              <label class="float-field__label">
+                Dirección
               </label>
             </div>
           </div>
@@ -118,46 +263,16 @@
         </div>
       </div>
 
-      <!-- DATOS DE CONTACTO (deshabilitados, solo lectura) -->
-      <div class="form-section">
-        <div class="form-section__title">
-          <span class="form-section__bar"></span>
-          Datos de contacto
-        </div>
-        <div class="form-grid form-grid--2">
-
-          <div class="form-field form-field--full">
-            <div class="float-field">
-              <input class="float-field__input" type="email" formControlName="correoElectronico" placeholder=" "/>
-              <label class="float-field__label">Correo electrónico</label>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="telefono" placeholder=" "/>
-              <label class="float-field__label">Teléfono</label>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <div class="float-field">
-              <input class="float-field__input" type="text" formControlName="direccion" placeholder=" "/>
-              <label class="float-field__label">Dirección</label>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- DATOS LABORALES (editables) -->
+      <!-- DATOS LABORALES -->
       <div class="form-section">
         <div class="form-section__title">
           <span class="form-section__bar"></span>
           Datos laborales
         </div>
+
         <div class="form-grid form-grid--2">
 
+          <!-- Departamento -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idDepartamento"
@@ -167,69 +282,85 @@
                   <option [value]="dep.id">{{ dep.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idDepartamento')">
                 Departamento <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('idDepartamento')) {
               <span class="form-field__error">Campo requerido</span>
             }
           </div>
 
+          <!-- Fecha de contratación -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input float-field__input--date" type="date"
                 formControlName="fechaContratacion" placeholder=" "
-                [class.float-field__input--error]="campoInvalido('fechaContratacion')"/>
+                [class.float-field__input--error]="campoInvalido('fechaContratacion')" />
+
               <label class="float-field__label float-field__label--always">
                 Fecha de contratación <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('fechaContratacion')) {
               <span class="form-field__error">Campo requerido</span>
             }
           </div>
 
-          <!-- Cargo — depende del departamento -->
+          <!-- Cargo -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idCargo"
-                [class.float-select__input--error]="campoInvalido('idCargo')"
-                [disabled]="!tieneValor('idDepartamento')">
+                [class.float-select__input--error]="campoInvalido('idCargo')">
                 <option value=""></option>
                 @for (c of cargosDisponibles; track c.id) {
                   <option [value]="c.id">{{ c.nombreCargo }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idCargo')">
                 Cargo <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('idCargo')) {
               <span class="form-field__error">Campo requerido</span>
             }
+
             @if (!tieneValor('idDepartamento')) {
               <span class="form-field__hint">Seleccione un departamento primero</span>
             }
           </div>
 
+          <!-- Años de experiencia -->
           <div class="form-field">
             <div class="float-field">
               <input class="float-field__input" type="number" formControlName="aniosExperiencia"
                 placeholder=" " min="0" max="50"
-                [class.float-field__input--error]="campoInvalido('aniosExperiencia')"/>
-              <label class="float-field__label">Años de experiencia <span class="req">*</span></label>
+                [class.float-field__input--error]="campoInvalido('aniosExperiencia')" />
+
+              <label class="float-field__label">
+                Años de experiencia <span class="req">*</span>
+              </label>
             </div>
+
             @if (campoInvalido('aniosExperiencia')) {
               <span class="form-field__error">
-                @if (form.get('aniosExperiencia')?.errors?.['required']) { Campo requerido }
-                @else { Entre 0 y 50 años }
+                @if (form.get('aniosExperiencia')?.errors?.['required']) {
+                  Campo requerido
+                } @else {
+                  Entre 0 y 50 años
+                }
               </span>
             }
           </div>
 
+          <!-- Modalidad -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idModoTrabajo"
@@ -239,16 +370,19 @@
                   <option [value]="m.id">{{ m.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idModoTrabajo')">
                 Modalidad <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('idModoTrabajo')) {
               <span class="form-field__error">Campo requerido</span>
             }
           </div>
 
+          <!-- Categoría -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idCategoriaEmpleado"
@@ -258,11 +392,13 @@
                   <option [value]="c.id">{{ c.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idCategoriaEmpleado')">
                 Categoría <span class="req">*</span>
               </label>
             </div>
+
             @if (campoInvalido('idCategoriaEmpleado')) {
               <span class="form-field__error">Campo requerido</span>
             }
@@ -277,6 +413,7 @@
       <button class="modal-form__btn modal-form__btn--cancel" (click)="onCerrar()" type="button">
         Cancelar
       </button>
+
       <button class="modal-form__btn modal-form__btn--save" (click)="onGuardar()" type="button">
         <span class="material-icons">save</span>
         Guardar cambios
@@ -285,4 +422,3 @@
 
   </div>
 </div>
-

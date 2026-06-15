@@ -168,15 +168,16 @@
             </div>
           </div>
 
-          <!-- Fila 4: Género -->
+          <!-- Fila 4: Género | Nacionalidad -->
           <div class="form-field">
             <div class="float-select">
               <select class="float-select__input" formControlName="idGenero">
                 <option value=""></option>
-                @for (g of generos; track g.id) {
-                  <option [value]="g.id">{{ g.valor }}</option>
+                @for (genero of generos; track genero.id) {
+                  <option [value]="genero.id">{{ genero.valor }}</option>
                 }
               </select>
+
               <label class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idGenero')">
                 Género
@@ -184,9 +185,26 @@
             </div>
           </div>
 
-        </div>
-      </div>
+          <div class="form-field">
+            <div class="float-select">
+              <select class="float-select__input" formControlName="idNacionalidad">
+                <option value=""></option>
+                @for (nacionalidad of nacionalidades; track nacionalidad.id) {
+                  <option [value]="nacionalidad.id">{{ nacionalidad.valor }}</option>
+                }
+              </select>
 
+              <label class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idNacionalidad')">
+                Nacionalidad
+              </label>
+            </div>
+          </div>
+
+                  </div>
+                </div>
+
+      
       <!-- DATOS DE CONTACTO -->
       <div class="form-section">
         <div class="form-section__title">
