@@ -62,15 +62,16 @@ export class Tabla implements AfterViewInit {
 
   private _filtros = signal<FiltrosProyecto>({
     busqueda: '',
-    estado: '',
-    tipo: ''
+    estados: [],
+    tipos: []
   });
 
   columnas: string[] = [
     'codigo',
     'nombre',
+    'cliente',
     'fechas',
-    'lider',
+    'lideres',
     'numeroRecursos',
     'estado',
     'acciones'
@@ -84,7 +85,6 @@ export class Tabla implements AfterViewInit {
   proyectosFiltrados = computed(() => {
     const proyectos = this.proyectosSignal();
     const filtros = this._filtros();
-    
 
     return proyectos.filter(proyecto => {
       const busqueda = filtros.busqueda.toLowerCase();
@@ -94,13 +94,15 @@ export class Tabla implements AfterViewInit {
         proyecto.nombre.toLowerCase().includes(busqueda) ||
         (proyecto.cliente ?? '').toLowerCase().includes(busqueda);
 
+      // Si no hay estados seleccionados → pasa todos
       const coincideEstado =
-        !filtros.estado ||
-        proyecto.estado === filtros.estado;
+        !filtros.estados.length ||
+        filtros.estados.includes(proyecto.estado ?? '');
 
+      // Si no hay tipos seleccionados → pasa todos
       const coincideTipo =
-        !filtros.tipo ||
-        proyecto.tipo === filtros.tipo;
+        !filtros.tipos.length ||
+        filtros.tipos.includes(proyecto.tipo ?? '');
 
       return coincideBusqueda && coincideEstado && coincideTipo;
     });
@@ -131,10 +133,7 @@ export class Tabla implements AfterViewInit {
   }
 
   get registroDesde(): number {
-    if (!this.totalRegistros) {
-      return 0;
-    }
-
+    if (!this.totalRegistros) return 0;
     return this.pageIndex * this.pageSize + 1;
   }
 
@@ -143,60 +142,54 @@ export class Tabla implements AfterViewInit {
   }
 
   formatearFecha(fecha?: string | Date | number): string {
-    if (fecha == null || fecha === '') {
-      return '-';
-    }
+    if (fecha == null || fecha === '') return '-';
 
-    // Si es string, intentamos formatear YYYY-MM-DD o parsear como ISO
     if (typeof fecha === 'string') {
-      const partes = fecha.split('-');
+      const iso = fecha.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
 
-      if (partes.length === 3 && partes[0].length === 4) {
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-      }
+      const dmy = fecha.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+      if (dmy) return `${dmy[1]}/${dmy[2]}/${dmy[3]}`;
 
       const parsed = new Date(fecha);
       if (!isNaN(parsed.getTime())) {
         const dd = String(parsed.getDate()).padStart(2, '0');
         const mm = String(parsed.getMonth() + 1).padStart(2, '0');
-        const yyyy = parsed.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
+        return `${dd}/${mm}/${parsed.getFullYear()}`;
       }
-
       return fecha;
     }
 
-    // Si es Date o número (timestamp), conviértelo a Date
     const d = fecha instanceof Date ? fecha : new Date(fecha);
-
     if (!isNaN(d.getTime())) {
       const dd = String(d.getDate()).padStart(2, '0');
       const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const yyyy = d.getFullYear();
-      return `${dd}/${mm}/${yyyy}`;
+      return `${dd}/${mm}/${d.getFullYear()}`;
+    }
+    return String(fecha);
+  }
+
+  obtenerLideres(proyecto: Proyecto): { nombre: string; detalle: string }[] {
+    if (proyecto.lideres?.length) {
+      return proyecto.lideres.map((lider) => ({
+        nombre: lider.lider || '-',
+        detalle: `${lider.recursos?.length ?? 0} recurso${(lider.recursos?.length ?? 0) === 1 ? '' : 's'}`
+      }));
     }
 
-    return String(fecha);
+    return proyecto.lider
+      ? [{
+          nombre: proyecto.lider,
+          detalle: `${proyecto.recursos?.length ?? 0} recurso${(proyecto.recursos?.length ?? 0) === 1 ? '' : 's'}`
+        }]
+      : [];
   }
 
   obtenerAcciones(proyecto: Proyecto): ActionMenuItem[] {
     return [
-      {
-        id: 'ver-mas',
-        label: 'Ver más',
-        action: () => this.verMas.emit(proyecto)
-      },
-      {
-        id: 'editar',
-        label: 'Editar',
-        action: () => this.editar.emit(proyecto)
-      },
-      {
-        id: 'eliminar',
-        label: 'Eliminar',
-        danger: true,
-        action: () => this.eliminar.emit(proyecto.codigo)
-      }
+      { id: 'ver-mas', label: 'Ver más', action: () => this.verMas.emit(proyecto) },
+      { id: 'editar', label: 'Editar', action: () => this.editar.emit(proyecto) },
+      { id: 'eliminar', label: 'Eliminar', danger: true, action: () => this.eliminar.emit(proyecto.codigo) }
     ];
   }
 

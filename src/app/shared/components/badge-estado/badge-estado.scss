@@ -20,6 +20,12 @@
   font-weight: 500;
 
   color: #6b7280;
+
+  &.active {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #166534;
+  }
 }
 
 .status-dot {
@@ -30,6 +36,10 @@
 
   &.progress {
     background: #1677ff;
+  }
+
+  &.active {
+    background: #22c55e;
   }
 
   &.completed {

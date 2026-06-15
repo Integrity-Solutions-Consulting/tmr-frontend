@@ -22,11 +22,19 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
-import { Proyecto, LookupOption, ProyectoLookups, CargoLookup } from '../../modelos/proyecto.model';
+import {
+  Proyecto,
+  LiderProyecto,
+  LookupOption,
+  ProyectoLookups,
+  CargoLookup
+} from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
 
 @Component({
@@ -36,6 +44,8 @@ import { ProyectosService } from '../../servicios/proyectos.service';
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatAutocompleteModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -52,46 +62,70 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   intentoGuardar = false;
 
-  clientes: LookupOption[] = [];
-  lideres: LookupOption[] = [];
+  clientesOpciones: LookupOption[] = [];
+  lideresOpciones: LookupOption[] = [];
   estados: LookupOption[] = [];
   tipos: LookupOption[] = [];
   empleadosDisponibles: LookupOption[] = [];
-  cargosDisponibles: LookupOption[] = [];
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
-  cargosFiltrados: CargoLookup[][] = [];
+
+  // cargosFiltrados[liderIndex][recursoIndex]
+  cargosFiltrados: CargoLookup[][][] = [];
+
   formulario = this.fb.group({
     codigo: ['', Validators.required],
     nombre: ['', Validators.required],
-    cliente: ['', Validators.required],
+    cliente: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.clientesOpciones)]],
+    idCliente: [null as number | null],
     tipo: ['', Validators.required],
     fechaInicio: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
     fechaFin: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
-    presupuesto: ['', [Validators.required, this.numeroValido(true)]],
-    horas: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]],
-    lider: ['', Validators.required],
-    costoHoraLider: ['', [Validators.required, this.numeroValido(true)]],
-    horasLider: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]],
+    presupuesto: ['', [this.numeroValido(true)]],
+    horas: ['', [this.numeroValido(false), Validators.min(0)]],
     numeroRecursos: [0],
-    estado: ['', Validators.required],
-    recursos: this.fb.array([
-      this.crearRecurso()
-    ])
+    estado: ['Activo'],
+    idEstadoProyecto: this.fb.control<number | null>(null),
+    lideres: this.fb.array([this.crearLider()])
   }, { validators: this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor') });
+
+  // ── Getters ──────────────────────────────────────────────────────────────
+
+  get lideres(): FormArray<FormGroup> {
+    return this.formulario.get('lideres') as FormArray<FormGroup>;
+  }
+
+  getRecursosDelLider(li: number): FormArray<FormGroup> {
+    return this.lideres.at(li).get('recursos') as FormArray<FormGroup>;
+  }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.cargarLookups();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['proyecto']) {
+      if (this.proyecto) {
+        if (this.lideresOpciones.length > 0) {
+          this.aplicarProyectoAlFormulario(this.proyecto);
+        }
+      } else {
+        this.resetFormulario();
+      }
+    }
+  }
+
+  // ── Lookups ───────────────────────────────────────────────────────────────
+
   private cargarLookups(): void {
     this.proyectosService.obtenerLookups().subscribe({
       next: (lookups: ProyectoLookups) => {
-        this.clientes = lookups.clientes;
-        this.lideres = lookups.lideres;
+        this.clientesOpciones = lookups.clientes;
+        this.lideresOpciones = lookups.lideres;
         this.empleadosDisponibles = lookups.empleados;
         this.todosLosCargos = lookups.cargos;
-        this.cargosDisponibles = lookups.cargos;
         this.departamentos = lookups.departamentos;
         this.estados = lookups.estados;
         this.tipos = lookups.tipos;
@@ -99,153 +133,277 @@ export class ProyectoForm implements OnInit, OnChanges {
         if (this.proyecto) {
           this.aplicarProyectoAlFormulario(this.proyecto);
         }
+
+        this.revalidarSeleccionables();
       },
-      error: (error) => {
-        console.error('Error al cargar los lookups:', error);
-      }
+      error: (err) => console.error('Error al cargar lookups:', err)
     });
   }
 
+  // ── Cargar proyecto al editar ─────────────────────────────────────────────
+
   private aplicarProyectoAlFormulario(proyecto: Proyecto): void {
     this.formulario.patchValue({
-      ...proyecto,
+      codigo: proyecto.codigo,
+      nombre: proyecto.nombre,
+      cliente: proyecto.cliente ?? '',
+      idCliente: proyecto.idCliente ?? null,
+      tipo: proyecto.tipo ?? '',
       fechaInicio: this.normalizarFecha(proyecto.fechaInicio),
       fechaFin: this.normalizarFecha(proyecto.fechaFin),
       presupuesto: this.valorFormularioNumerico(proyecto.presupuesto),
       horas: this.valorFormularioNumerico(proyecto.horas),
-      costoHoraLider: this.valorFormularioNumerico(proyecto.costoHoraLider),
-      horasLider: this.valorFormularioNumerico(proyecto.horasLider)
+      estado: proyecto.estado || 'Activo',
+      idEstadoProyecto: proyecto.idEstadoProyecto ?? null
     });
-    this.reemplazarRecursos(proyecto.recursos ?? []);
 
+    // Construir lista de líderes: usar proyecto.lideres si existe,
+    // sino armar uno desde los campos raíz por compatibilidad
+    const lideresData: LiderProyecto[] = proyecto.lideres?.length
+      ? proyecto.lideres
+      : proyecto.lider
+        ? [{
+            idLider: proyecto.idLider ?? null,
+            lider: proyecto.lider,
+            costoHoraLider: proyecto.costoHoraLider,
+            horasLider: proyecto.horasLider,
+            recursos: proyecto.recursos ?? []
+          }]
+        : [];
+
+    this.lideres.clear();
+    this.cargosFiltrados = [];
+
+    if (!lideresData.length) {
+      this.lideres.push(this.crearLider());
+      this.cargosFiltrados.push([]);
+    } else {
+      lideresData.forEach((l, li) => {
+        const liderGroup = this.crearLider();
+        liderGroup.patchValue({
+          idLider: l.idLider ?? null,
+          lider: l.lider ?? '',
+          costoHoraLider: this.valorFormularioNumerico(l.costoHoraLider),
+          horasLider: this.valorFormularioNumerico(l.horasLider)
+        });
+
+        const recursosArr = liderGroup.get('recursos') as FormArray;
+        recursosArr.clear();
+        const cargosLider: CargoLookup[][] = [];
+
+        const recursosData = l.recursos ?? [];
+        if (!recursosData.length) {
+          recursosArr.push(this.crearRecurso());
+          cargosLider.push([]);
+        } else {
+          recursosData.forEach(r => {
+            const rg = this.crearRecurso();
+            const cargoEncontrado = this.todosLosCargos.find(c => c.nombre === r.rol);
+            const idDep = cargoEncontrado?.idDepartamento ?? null;
+            rg.patchValue({
+              idEmpleado: r.idEmpleado ?? null,
+              tipo: r.tipo,
+              nombre: r.nombre,
+              departamento: idDep,
+              rol: r.rol,
+              entrada: this.normalizarFecha(r.entrada),
+              salida: this.normalizarFecha(r.salida),
+              costoHora: this.valorFormularioNumerico(r.costoHora),
+              horas: this.valorFormularioNumerico(r.horas)
+            });
+            recursosArr.push(rg);
+            cargosLider.push(idDep
+              ? this.todosLosCargos.filter(c => c.idDepartamento === idDep)
+              : []
+            );
+          });
+        }
+
+        this.lideres.push(liderGroup);
+        this.cargosFiltrados.push(cargosLider);
+      });
+    }
+
+    this.actualizarNumeroRecursos();
     this.intentoGuardar = false;
     this.formulario.markAsPristine();
     this.formulario.markAsUntouched();
-    this.recursos.controls.forEach(recurso => {
-      recurso.markAsPristine();
-      recurso.markAsUntouched();
+  }
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+
+  private resetFormulario(): void {
+    this.formulario.reset({
+      codigo: '', nombre: '', cliente: '', tipo: '',
+      idCliente: null, fechaInicio: '', fechaFin: '', presupuesto: '', horas: '',
+      numeroRecursos: 0, estado: 'Activo', idEstadoProyecto: null
     });
+    this.lideres.clear();
+    this.lideres.push(this.crearLider());
+    this.cargosFiltrados = [[]];
+    this.intentoGuardar = false;
+    this.formulario.markAsPristine();
+    this.formulario.markAsUntouched();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['proyecto']) {
-      if (this.proyecto) {
-        if (this.lideres.length > 0) {
-          this.aplicarProyectoAlFormulario(this.proyecto);
-        }
-      } else {
-        this.formulario.reset();
-        this.reemplazarRecursos([]);
-        this.intentoGuardar = false;
-        this.formulario.markAsPristine();
-        this.formulario.markAsUntouched();
-      }
-    }
-  }
+  // ── Crear grupos ──────────────────────────────────────────────────────────
 
-  onDepartamentoChange(index: number, idDepartamento: number): void {
-    this.cargosFiltrados[index] = this.todosLosCargos
-      .filter(c => c.idDepartamento === idDepartamento);
-    this.recursos.at(index).get('rol')?.setValue('');
-  }
-
-  onEmpleadoChange(index: number, nombreEmpleado: string): void {
-    const empleado = this.empleadosDisponibles.find(e => e.nombre === nombreEmpleado);
-    this.recursos.at(index).get('idEmpleado')?.setValue(empleado?.id ?? null);
-  }
-
-  getCargosParaRecurso(index: number): CargoLookup[] {
-    return this.cargosFiltrados[index] ?? this.todosLosCargos;
-  }
-
-  get recursos(): FormArray<FormGroup> {
-    return this.formulario.controls.recursos as FormArray<FormGroup>;
+  crearLider(): FormGroup {
+    return this.fb.group({
+      idLider: [null],
+      lider: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.lideresOpciones)]],
+      costoHoraLider: ['', [this.numeroValido(true)]],
+      horasLider: ['', [this.numeroValido(false), Validators.min(0)]],
+      recursos: this.fb.array([this.crearRecurso()])
+    });
   }
 
   crearRecurso(): FormGroup {
     return this.fb.group({
       idEmpleado: [null],
       tipo: ['Interno', Validators.required],
-      nombre: ['', Validators.required],
-      departamento: [''],
+      nombre: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.empleadosDisponibles)]],
+      departamento: [null],
       rol: ['', Validators.required],
       entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
       salida: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
-      costoHora: ['', [Validators.required, this.numeroValido(true)]],
-      horas: ['', [Validators.required, this.numeroValido(false), Validators.min(0)]]
+      costoHora: ['', [this.numeroValido(true)]],
+      horas: ['', [this.numeroValido(false), Validators.min(0)]]
     }, { validators: this.rangoFechasValido('entrada', 'salida', 'salidaMenor') });
   }
 
-  agregarRecurso(): void {
-    this.recursos.push(this.crearRecurso());
-    this.cargosFiltrados.push([...this.todosLosCargos]);
+  // ── Líderes: agregar / eliminar ───────────────────────────────────────────
+
+  agregarLider(): void {
+    this.lideres.push(this.crearLider());
+    this.cargosFiltrados.push([]);
+  }
+
+  eliminarLider(li: number): void {
+    if (this.lideres.length === 1) return;
+    this.lideres.removeAt(li);
+    this.cargosFiltrados.splice(li, 1);
+  }
+
+  // ── Recursos: agregar / eliminar ──────────────────────────────────────────
+
+  agregarRecursoALider(li: number): void {
+    this.getRecursosDelLider(li).push(this.crearRecurso());
+    if (!this.cargosFiltrados[li]) this.cargosFiltrados[li] = [];
+    this.cargosFiltrados[li].push([]);
     this.actualizarNumeroRecursos();
   }
 
-  eliminarRecurso(index: number): void {
-    if (this.recursos.length === 1) {
-      this.recursos.at(0).reset({
-        idEmpleado: null,
-        tipo: 'Interno',
-        nombre: '',
-        departamento: '',
-        rol: '',
-        entrada: '',
-        salida: '',
-        costoHora: '',
-        horas: ''
+  eliminarRecursoDelLider(li: number, ri: number): void {
+    const arr = this.getRecursosDelLider(li);
+    if (arr.length === 1) {
+      arr.at(0).reset({
+        idEmpleado: null, tipo: 'Interno', nombre: '',
+        departamento: null, rol: '', entrada: '', salida: '', costoHora: '', horas: ''
       });
     } else {
-      this.recursos.removeAt(index);
-      this.cargosFiltrados.splice(index, 1);
+      arr.removeAt(ri);
+      this.cargosFiltrados[li]?.splice(ri, 1);
     }
-
     this.actualizarNumeroRecursos();
   }
 
-  private reemplazarRecursos(recursos: Proyecto['recursos']): void {
-    this.recursos.clear();
-    this.cargosFiltrados = [];
+  // ── Eventos de selección ──────────────────────────────────────────────────
 
-    if (!recursos?.length) {
-      this.recursos.push(this.crearRecurso());
-      this.cargosFiltrados.push([...this.todosLosCargos]);
-      return;
-    }
-
-    recursos.forEach(recurso => {
-      const grupo = this.crearRecurso();
-
-      // Inferir departamento desde el cargo guardado
-      const cargoEncontrado = this.todosLosCargos.find(c => c.nombre === recurso.rol);
-      const idDepartamento = cargoEncontrado?.idDepartamento ?? null;
-
-      grupo.patchValue({
-        ...recurso,
-        idEmpleado: recurso.idEmpleado ?? null,
-        departamento: idDepartamento,
-        entrada: this.normalizarFecha(recurso.entrada),
-        salida: this.normalizarFecha(recurso.salida),
-        costoHora: this.valorFormularioNumerico(recurso.costoHora),
-        horas: this.valorFormularioNumerico(recurso.horas)
-      });
-      this.recursos.push(grupo);
-
-      if (idDepartamento) {
-        this.cargosFiltrados.push(
-          this.todosLosCargos.filter(c => c.idDepartamento === idDepartamento)
-        );
-      } else {
-        this.cargosFiltrados.push([...this.todosLosCargos]);
-      }
-    });
-
-    this.actualizarNumeroRecursos();
+  onLiderChange(li: number, nombreLider: string): void {
+    const found = this.lideresOpciones.find(l => l.nombre === nombreLider);
+    this.lideres.at(li).get('idLider')?.setValue(found?.id ?? null);
   }
 
-  private actualizarNumeroRecursos(): void {
-    this.formulario.controls.numeroRecursos.setValue(this.recursos.length);
+  onClienteInput(): void {
+    this.formulario.controls.idCliente.setValue(null);
   }
+
+  onLiderInput(li: number): void {
+    this.lideres.at(li).get('idLider')?.setValue(null);
+  }
+
+  onRecursoInput(li: number, ri: number): void {
+    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
+  }
+
+  getClientesFiltrados(): LookupOption[] {
+    const filtro = String(this.formulario.controls.cliente.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.clientesOpciones;
+    return this.clientesOpciones.filter(cliente => cliente.nombre.toLowerCase().includes(filtro));
+  }
+
+  getLideresFiltrados(li: number): LookupOption[] {
+    const filtro = String(this.lideres.at(li).get('lider')?.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.lideresOpciones;
+    return this.lideresOpciones.filter(lider => lider.nombre.toLowerCase().includes(filtro));
+  }
+
+  getRecursosFiltrados(li: number, ri: number): LookupOption[] {
+    const filtro = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim().toLowerCase();
+    if (!filtro) return this.empleadosDisponibles;
+    return this.empleadosDisponibles.filter(emp => emp.nombre.toLowerCase().includes(filtro));
+  }
+
+  onClienteChange(nombreCliente: string): void {
+    const encontrado = this.clientesOpciones.find(c => c.nombre === nombreCliente);
+    this.formulario.controls.idCliente.setValue(encontrado?.id ?? null);
+  }
+
+  onEmpleadoChange(li: number, ri: number, nombreEmpleado: string): void {
+    const emp = this.empleadosDisponibles.find(e => e.nombre === nombreEmpleado);
+    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(emp?.id ?? null);
+  }
+
+  onDepartamentoChange(li: number, ri: number, idDep: number): void {
+    if (!this.cargosFiltrados[li]) this.cargosFiltrados[li] = [];
+    this.cargosFiltrados[li][ri] = idDep
+      ? this.todosLosCargos.filter(c => c.idDepartamento === idDep)
+      : [];
+    this.getRecursosDelLider(li).at(ri).get('rol')?.setValue('');
+  }
+
+  tieneDepartamentoSeleccionado(li: number, ri: number): boolean {
+    return Boolean(this.getRecursosDelLider(li).at(ri).get('departamento')?.value);
+  }
+
+  getCargosParaRecurso(li: number, ri: number): CargoLookup[] {
+    const departamento = this.getRecursosDelLider(li).at(ri).get('departamento')?.value;
+    if (!departamento) return [];
+
+    return this.cargosFiltrados[li]?.[ri] ?? this.todosLosCargos.filter(c => c.idDepartamento === departamento);
+  }
+
+  // ── Validaciones de template ──────────────────────────────────────────────
+
+  campoInvalido(nombre: string): boolean {
+    const c = this.formulario.get(nombre);
+    return Boolean(c?.invalid && (c.touched || this.intentoGuardar));
+  }
+
+  liderCampoInvalido(li: number, campo: string): boolean {
+    const c = this.lideres.at(li).get(campo);
+    return Boolean(c?.invalid && (c.touched || this.intentoGuardar));
+  }
+
+  recursoLiderCampoInvalido(li: number, ri: number, campo: string): boolean {
+    const c = this.getRecursosDelLider(li).at(ri).get(campo);
+    return Boolean(c?.invalid && (c.touched || this.intentoGuardar));
+  }
+
+  recursoFechaSalidaInvalida(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('salidaMenor') && (g.get('salida')?.touched || this.intentoGuardar));
+  }
+
+  fechaFinInvalida(): boolean {
+    return Boolean(
+      this.formulario.hasError('fechaFinMenor') &&
+      (this.formulario.controls.fechaFin.touched || this.intentoGuardar)
+    );
+  }
+
+  // ── Guardar ───────────────────────────────────────────────────────────────
 
   guardar(): void {
     this.actualizarNumeroRecursos();
@@ -253,71 +411,65 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
-      this.recursos.controls.forEach(recurso => recurso.markAllAsTouched());
       return;
     }
 
-    const valor = this.formulario.getRawValue() as unknown as Proyecto;
-    const recursos = (valor.recursos ?? []).map(recurso => ({
-      ...recurso,
-      idEmpleado: recurso.idEmpleado ?? null,
-      entrada: this.normalizarFecha(recurso.entrada),
-      salida: this.normalizarFecha(recurso.salida),
-      costoHora: this.normalizarNumero(recurso.costoHora),
-      horas: this.normalizarNumero(recurso.horas)
+    const valor = this.formulario.getRawValue() as any;
+
+    const lideresPayload: LiderProyecto[] = (valor.lideres ?? []).map((l: any) => ({
+      idLider: l.idLider ?? this.obtenerIdLiderPorNombre(l.lider),
+      lider: l.lider,
+      costoHoraLider: this.normalizarNumero(l.costoHoraLider),
+      horasLider: this.normalizarNumero(l.horasLider),
+      recursos: (l.recursos ?? []).map((r: any) => ({
+        idEmpleado: r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre),
+        tipo: r.tipo,
+        nombre: r.nombre,
+        rol: r.rol,
+        entrada: this.normalizarFecha(r.entrada),
+        salida: this.normalizarFecha(r.salida),
+        costoHora: this.normalizarNumero(r.costoHora),
+        horas: this.normalizarNumero(r.horas)
+      } as any))
     }));
 
-    const proyecto = {
-      ...valor,
+    const primerLider = lideresPayload[0];
+    const todosRecursos = lideresPayload.flatMap(l => l.recursos ?? []);
+
+    const proyecto: Proyecto = {
       id: this.proyecto?.id ?? 0,
+      codigo: this.proyecto?.codigo ?? valor.codigo,
+      nombre: this.proyecto?.nombre ?? valor.nombre,
+      cliente: this.proyecto?.cliente ?? valor.cliente,
+      idCliente: valor.idCliente ?? this.obtenerIdClientePorNombre(valor.cliente) ?? this.proyecto?.idCliente ?? null,
+      tipo: valor.tipo,
       fechaInicio: this.normalizarFecha(valor.fechaInicio),
       fechaFin: this.normalizarFecha(valor.fechaFin),
-      presupuesto: this.normalizarNumero(valor.presupuesto),
-      horas: this.normalizarNumero(valor.horas),
-      costoHoraLider: this.normalizarNumero(valor.costoHoraLider),
-      horasLider: this.normalizarNumero(valor.horasLider),
-      recursos,
-      numeroRecursos: recursos.length
-    } as Proyecto;
+      presupuesto: this.normalizarNumeroOpcional(valor.presupuesto),
+      horas: this.normalizarNumeroOpcional(valor.horas),
+      estado: this.proyecto ? (valor.estado || 'Activo') : 'Activo',
+      idEstadoProyecto: valor.idEstadoProyecto ?? undefined,
+      // campos raíz del primer líder (compatibilidad con vista detalle)
+      idLider: primerLider?.idLider ?? null,
+      lider: primerLider?.lider ?? '',
+      costoHoraLider: primerLider?.costoHoraLider ?? 0,
+      horasLider: primerLider?.horasLider ?? 0,
+      lideres: lideresPayload,
+      recursos: todosRecursos as any,
+      numeroRecursos: todosRecursos.length
+    };
 
     this.guardarProyecto.emit(proyecto);
-
-    this.formulario.reset();
-    this.intentoGuardar = false;
   }
 
-  campoInvalido(nombre: string): boolean {
-    const control = this.formulario.get(nombre);
-    return Boolean(control?.invalid && (control.touched || this.intentoGuardar));
-  }
-
-  recursoCampoInvalido(index: number, nombre: string): boolean {
-    const control = this.recursos.at(index).get(nombre);
-    return Boolean(control?.invalid && (control.touched || this.intentoGuardar));
-  }
-
-  recursoFechaSalidaInvalida(index: number): boolean {
-    const recurso = this.recursos.at(index);
-    return Boolean(recurso.hasError('salidaMenor') && (recurso.get('salida')?.touched || this.intentoGuardar));
-  }
-
-  fechaFinInvalida(): boolean {
-    return Boolean(this.formulario.hasError('fechaFinMenor') && (this.formulario.controls.fechaFin.touched || this.intentoGuardar));
-  }
+  // ── Helpers de teclado ────────────────────────────────────────────────────
 
   bloquearCaracteresNumericos(event: KeyboardEvent, permiteDecimal: boolean): void {
-    const teclasPermitidas = [
-      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-      'ArrowLeft', 'ArrowRight', 'Home', 'End'
-    ];
-
-    if (teclasPermitidas.includes(event.key) || event.ctrlKey || event.metaKey) return;
-
-    const esNumero = /^[0-9]$/.test(event.key);
-    const esDecimal = permiteDecimal && event.key === '.' &&
-      !(event.target as HTMLInputElement).value.includes('.');
-
-    if (!esNumero && !esDecimal) event.preventDefault();
+    const permitidas = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','Home','End'];
+    if (permitidas.includes(event.key) || event.ctrlKey || event.metaKey) return;
+    const esNum = /^[0-9]$/.test(event.key);
+    const esDec = permiteDecimal && event.key === '.' && !(event.target as HTMLInputElement).value.includes('.');
+    if (!esNum && !esDec) event.preventDefault();
   }
 
   bloquearPegadoNoNumerico(event: ClipboardEvent, permiteDecimal: boolean): void {
@@ -326,7 +478,15 @@ export class ProyectoForm implements OnInit, OnChanges {
     if (!patron.test(texto)) event.preventDefault();
   }
 
-  // Formatea entrada de fecha en tiempo real como dd/mm/yyyy
+  // ── Helpers privados ──────────────────────────────────────────────────────
+
+  private actualizarNumeroRecursos(): void {
+    const total = this.lideres.controls.reduce(
+      (acc, l) => acc + (l.get('recursos') as FormArray).length, 0
+    );
+    this.formulario.controls.numeroRecursos.setValue(total);
+  }
+
   private fechaValida(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = control.value;
@@ -337,94 +497,118 @@ export class ProyectoForm implements OnInit, OnChanges {
     };
   }
 
-  private parseFechaString(valor: string): Date | null {
-    const normalizado = valor.trim();
-    if (!normalizado) {
-      return null;
-    }
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(normalizado)) {
-      const [anio, mes, dia] = normalizado.split('-').map(Number);
-      return this.crearFechaEstricta(anio, mes, dia);
-    }
-
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalizado)) {
-      const [dia, mes, anio] = normalizado.split('/').map(Number);
-      return this.crearFechaEstricta(anio, mes, dia);
-    }
-
-    const fecha = new Date(normalizado);
-    return isNaN(fecha.getTime()) ? null : fecha;
+  private valorDebeCoincidirConLookup(obtenerOpciones: () => LookupOption[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = String(control.value ?? '').trim();
+      if (!valor) return null;
+      const opciones = obtenerOpciones();
+      if (!opciones.length) return null;
+      return opciones.some(opcion => opcion.nombre === valor) ? null : { opcionInvalida: true };
+    };
   }
 
-  private crearFechaEstricta(anio: number, mes: number, dia: number): Date | null {
-    const fecha = new Date(anio, mes - 1, dia);
-    const fechaValida =
-      fecha.getFullYear() === anio &&
-      fecha.getMonth() === mes - 1 &&
-      fecha.getDate() === dia;
+  private obtenerIdClientePorNombre(nombre?: string | null): number | null {
+    const encontrado = this.clientesOpciones.find(cliente => cliente.nombre === nombre);
+    return encontrado?.id ?? null;
+  }
 
-    return fechaValida ? fecha : null;
+  private obtenerIdLiderPorNombre(nombre?: string | null): number | null {
+    const encontrado = this.lideresOpciones.find(lider => lider.nombre === nombre);
+    return encontrado?.id ?? null;
+  }
+
+  private obtenerIdEmpleadoPorNombre(nombre?: string | null): number | null {
+    const encontrado = this.empleadosDisponibles.find(empleado => empleado.nombre === nombre);
+    return encontrado?.id ?? null;
+  }
+
+  private parseFechaString(valor: string): Date | null {
+    const n = valor.trim();
+    if (!n) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(n)) {
+      const [a, m, d] = n.split('-').map(Number);
+      return this.crearFechaEstricta(a, m, d);
+    }
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(n)) {
+      const [d, m, a] = n.split('/').map(Number);
+      return this.crearFechaEstricta(a, m, d);
+    }
+    const f = new Date(n);
+    return isNaN(f.getTime()) ? null : f;
+  }
+
+  private crearFechaEstricta(a: number, m: number, d: number): Date | null {
+    const f = new Date(a, m - 1, d);
+    return f.getFullYear() === a && f.getMonth() === m - 1 && f.getDate() === d ? f : null;
   }
 
   private numeroValido(permiteDecimal: boolean): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const valor = control.value;
-      if (valor === null || valor === undefined || valor === '') return null;
-
-      const texto = String(valor);
+      const v = control.value;
+      if (v === null || v === undefined || v === '') return null;
       const patron = permiteDecimal ? /^\d+(\.\d+)?$/ : /^\d+$/;
-
-      if (!patron.test(texto)) return { soloNumeros: true };
-      return Number(texto) >= 0 ? null : { min: true };
+      if (!patron.test(String(v))) return { soloNumeros: true };
+      return Number(v) >= 0 ? null : { min: true };
     };
   }
 
-  private rangoFechasValido(
-    inicioControl: string,
-    finControl: string,
-    errorKey: string
-  ): ValidatorFn {
-    return (grupo: AbstractControl): ValidationErrors | null => {
-      const inicioValor = grupo.get(inicioControl)?.value;
-      const finValor = grupo.get(finControl)?.value;
-      if (!inicioValor || !finValor) return null;
-
-      const inicio = this.parseFechaString(String(inicioValor));
-      const fin = this.parseFechaString(String(finValor));
-      if (!inicio || !fin) return null;
-
-      return fin < inicio ? { [errorKey]: true } : null;
+  private rangoFechasValido(ini: string, fin: string, key: string): ValidatorFn {
+    return (g: AbstractControl): ValidationErrors | null => {
+      const iv = g.get(ini)?.value;
+      const fv = g.get(fin)?.value;
+      if (!iv || !fv) return null;
+      const i = this.parseFechaString(String(iv));
+      const f = this.parseFechaString(String(fv));
+      if (!i || !f) return null;
+      return f < i ? { [key]: true } : null;
     };
   }
 
   private normalizarNumero(valor: unknown): number {
-    const numero = Number(valor);
-    return Number.isFinite(numero) ? numero : 0;
+    const n = Number(valor);
+    return Number.isFinite(n) ? n : 0;
   }
 
-  private valorFormularioNumerico(valor: number | undefined): string {
+  private normalizarNumeroOpcional(valor: unknown): number | null {
+    if (valor === null || valor === undefined || valor === '') return null;
+    const n = Number(valor);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private valorFormularioNumerico(valor: number | null | undefined): string {
     return valor === undefined || valor === null ? '' : String(valor);
   }
 
   private normalizarFecha(valor: unknown): string | null {
     if (!valor) return null;
-
     if (valor instanceof Date) {
       const y = valor.getFullYear();
       const m = String(valor.getMonth() + 1).padStart(2, '0');
       const d = String(valor.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     }
-
-    const str = String(valor);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
-      const [dia, mes, anio] = str.split('/').map(Number);
+    const s = String(valor);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    if (/^\d{2}-\d{2}-\d{4}$/.test(s)) {
+      const [dia, mes, anio] = s.split('-').map(Number);
       return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     }
-    if (str.includes('T')) return str.split('T')[0];
-    const fecha = this.parseFechaString(str);
-    return fecha ? this.normalizarFecha(fecha) : str;
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+      const [d, m, a] = s.split('/').map(Number);
+      return `${a}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    }
+    if (s.includes('T')) return s.split('T')[0];
+    const f = this.parseFechaString(s);
+    return f ? this.normalizarFecha(f) : s;
+  }
+
+  private revalidarSeleccionables(): void {
+    this.formulario.controls.cliente.updateValueAndValidity({ emitEvent: false });
+    this.lideres.controls.forEach((liderGroup) => {
+      liderGroup.get('lider')?.updateValueAndValidity({ emitEvent: false });
+      (liderGroup.get('recursos') as FormArray<FormGroup>).controls.forEach((recursoGroup) => {
+        recursoGroup.get('nombre')?.updateValueAndValidity({ emitEvent: false });
+      });
+    });
   }
 }

@@ -11,6 +11,15 @@ export interface RecursoProyecto {
   horas: number;
 }
 
+export interface LiderProyecto {
+  idLider?: number | null;
+  lider?: string;
+  cargoLider?: string;
+  costoHoraLider?: number;
+  horasLider?: number;
+  recursos?: RecursoProyecto[];
+}
+
 export interface Proyecto {
   id: number;
   codigo: string;
@@ -20,17 +29,20 @@ export interface Proyecto {
   cliente?: string;
   idTipoProyecto?: number | null;
   tipo?: string;
+  // Primer líder (compatibilidad con vista detalle)
   idLider?: number | null;
   lider?: string;
   cargoLider?: string;
   costoHoraLider?: number;
   horasLider?: number;
+  // Lista completa de líderes
+  lideres?: LiderProyecto[];
   idEstadoProyecto?: number;
   estado: string;
   fechaInicio?: string | null;
   fechaFin?: string | null;
-  presupuesto?: number;
-  horas?: number;
+  presupuesto?: number | null;
+  horas?: number | null;
   numeroRecursos?: number;
   activo?: boolean;
   fechaCreacion?: string;

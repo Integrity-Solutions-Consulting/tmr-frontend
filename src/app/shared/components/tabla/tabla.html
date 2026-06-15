@@ -12,9 +12,15 @@
       <th mat-header-cell *matHeaderCellDef>Nombre del proyecto</th>
       <td mat-cell *matCellDef="let proyecto">
         <div class="tabla__proyecto">
-          <strong>{{ proyecto.nombre }}</strong>
-          <span>{{ proyecto.cliente || 'Sin cliente' }}</span>
+          <span class="tabla__proyecto-nombre">{{ proyecto.nombre }}</span>
         </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="cliente">
+      <th mat-header-cell *matHeaderCellDef>Cliente</th>
+      <td mat-cell *matCellDef="let proyecto">
+        <span class="tabla__cliente">{{ proyecto.cliente || 'Sin cliente' }}</span>
       </td>
     </ng-container>
 
@@ -25,12 +31,20 @@
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="lider">
-      <th mat-header-cell *matHeaderCellDef>Lider</th>
+    <ng-container matColumnDef="lideres">
+      <th mat-header-cell *matHeaderCellDef>Líderes</th>
       <td mat-cell *matCellDef="let proyecto">
-        <div class="tabla__proyecto">
-          <strong>{{ proyecto.lider || '-' }}</strong>
-          <span>{{ proyecto.cargoLider || 'Responsable' }}</span>
+        <div class="tabla__lista">
+          @if (obtenerLideres(proyecto).length) {
+            @for (lider of obtenerLideres(proyecto); track lider.nombre) {
+              <span class="tabla__lista-item">
+                <span>{{ lider.nombre }}</span>
+                <small>{{ lider.detalle }}</small>
+              </span>
+            }
+          } @else {
+            <span class="tabla__lista-item">-</span>
+          }
         </div>
       </td>
     </ng-container>

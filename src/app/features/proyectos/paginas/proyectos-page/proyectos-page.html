@@ -107,64 +107,73 @@
         </div>
 
         <div>
+          <span>Cliente</span>
+          <strong>{{ proyectoDetalle.cliente || 'Sin cliente' }}</strong>
+        </div>
+
+        <div>
           <span>Rango de fechas</span>
           <strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong>
         </div>
       </section>
 
-      <section class="proyecto-detalle__leader">
-        <h4>Lider</h4>
+      <section class="proyecto-detalle__leaders">
+        <h4>Líderes</h4>
 
-        <div class="proyecto-detalle__leader-grid">
-          <div>
-            <span>Nombre</span>
-            <strong>{{ proyectoDetalle.lider || '-' }}</strong>
+        @for (lider of proyectoDetalle.lideres || []; track lider.lider) {
+        <div class="proyecto-detalle__leader-card">
+          <div class="proyecto-detalle__leader-grid">
+            <div>
+              <span>Nombre</span>
+              <strong>{{ lider.lider || '-' }}</strong>
+            </div>
+
+            <div>
+              <span>Costo/hora</span>
+              <strong>${{ lider.costoHoraLider || 0 }}/hora</strong>
+            </div>
+
+            <div>
+              <span>Horas</span>
+              <strong>{{ lider.horasLider || 0 }}</strong>
+            </div>
           </div>
 
-          <div>
-            <span>Costo/hora</span>
-            <strong>${{ proyectoDetalle.costoHoraLider || 0 }}/hora</strong>
-          </div>
+          <div class="proyecto-detalle__resources">
+            <h5>Recursos asignados</h5>
 
-          <div>
-            <span>Horas</span>
-            <strong>{{ proyectoDetalle.horasLider || 0 }}</strong>
+            <div class="proyecto-detalle__table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Nombre</th>
+                    <th>Rol asignado</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Costo/hora</th>
+                    <th>Horas</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  @for (recurso of lider.recursos || []; track recurso.nombre) {
+                    <tr>
+                      <td>{{ recurso.tipo }}</td>
+                      <td>{{ recurso.nombre }}</td>
+                      <td>{{ recurso.rol }}</td>
+                      <td>{{ formatearFecha(recurso.entrada) }}</td>
+                      <td>{{ formatearFecha(recurso.salida) }}</td>
+                      <td>${{ recurso.costoHora }}/hora</td>
+                      <td>{{ recurso.horas }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </section>
-
-      <section class="proyecto-detalle__resources">
-        <h4>Recursos</h4>
-
-        <div class="proyecto-detalle__table">
-          <table>
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Nombre</th>
-                <th>Rol asignado</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-                <th>Costo/hora</th>
-                <th>Horas</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              @for (recurso of proyectoDetalle.recursos || []; track recurso.nombre) {
-                <tr>
-                  <td>{{ recurso.tipo }}</td>
-                  <td>{{ recurso.nombre }}</td>
-                  <td>{{ recurso.rol }}</td>
-                  <td>{{ formatearFecha(recurso.entrada) }}</td>
-                  <td>{{ formatearFecha(recurso.salida) }}</td>
-                  <td>${{ recurso.costoHora }}/hora</td>
-                  <td>{{ recurso.horas }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        }
       </section>
     </article>
   }

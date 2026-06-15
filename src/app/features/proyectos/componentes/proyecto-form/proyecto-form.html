@@ -1,4 +1,6 @@
 <form class="proyecto-form" [formGroup]="formulario" (ngSubmit)="guardar()" autocomplete="off">
+
+  <!-- ── Información General ───────────────────────────────────────────── -->
   <section class="proyecto-form__section">
     <h3>Información General</h3>
 
@@ -6,275 +8,326 @@
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Tipo de proyecto</mat-label>
         <mat-select yPosition="below" formControlName="tipo">
-          <mat-option *ngFor="let tipo of tipos" [value]="tipo.nombre">{{ tipo.nombre }}</mat-option>
+          <mat-option *ngFor="let t of tipos" [value]="t.nombre">{{ t.nombre }}</mat-option>
         </mat-select>
         <mat-error *ngIf="campoInvalido('tipo')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Código</mat-label>
-        <input matInput formControlName="codigo">
+        <input matInput formControlName="codigo" [readonly]="!!proyecto">
+        @if (proyecto) { <mat-hint>El código no se puede modificar al editar</mat-hint> }
         <mat-error *ngIf="campoInvalido('codigo')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Cliente</mat-label>
-        <mat-select yPosition="below" formControlName="cliente">
-          <mat-option *ngFor="let cliente of clientes" [value]="cliente.nombre">{{ cliente.nombre }}</mat-option>
-        </mat-select>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          formControlName="cliente"
+          [readonly]="!!proyecto"
+          [matAutocomplete]="clienteAuto"
+          matAutocompletePosition="below"
+          (input)="onClienteInput()"
+        >
+        <mat-autocomplete #clienteAuto="matAutocomplete" (optionSelected)="onClienteChange($event.option.value)">
+          <mat-option *ngFor="let c of getClientesFiltrados()" [value]="c.nombre">
+            {{ c.nombre }}
+          </mat-option>
+        </mat-autocomplete>
+        @if (proyecto) { <mat-hint>El cliente no se puede modificar al editar</mat-hint> }
         <mat-error *ngIf="campoInvalido('cliente')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Nombre del Proyecto</mat-label>
-        <input matInput formControlName="nombre">
+        <input matInput formControlName="nombre" [readonly]="!!proyecto">
+        @if (proyecto) { <mat-hint>El nombre no se puede modificar al editar</mat-hint> }
         <mat-error *ngIf="campoInvalido('nombre')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input
-          #fechaInicioInput
-          class="proyecto-form__date-control"
-          type="date"
-          autocomplete="off"
-          formControlName="fechaInicio"
-        >
+        <input #fechaInicioInput class="proyecto-form__date-control" type="date"
+          autocomplete="off" formControlName="fechaInicio">
         <label class="proyecto-form__date-label">Fecha de inicio <span>*</span></label>
-        <div class="proyecto-form__date-error" *ngIf="(formulario.controls.fechaInicio.hasError('fechaInvalida') || fechaInicioInput.validity.badInput) && (formulario.controls.fechaInicio.touched || intentoGuardar)">Fecha inválida</div>
-        <div class="proyecto-form__date-error" *ngIf="!fechaInicioInput.validity.badInput && !formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">Este campo es obligatorio</div>
+        <div class="proyecto-form__date-error"
+          *ngIf="(formulario.controls.fechaInicio.hasError('fechaInvalida') || fechaInicioInput.validity.badInput) && (formulario.controls.fechaInicio.touched || intentoGuardar)">
+          Fecha inválida
+        </div>
+        <div class="proyecto-form__date-error"
+          *ngIf="!fechaInicioInput.validity.badInput && !formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">
+          Este campo es obligatorio
+        </div>
       </div>
 
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input
-          #fechaFinInput
-          class="proyecto-form__date-control"
-          type="date"
-          autocomplete="off"
-          formControlName="fechaFin"
-        >
+        <input #fechaFinInput class="proyecto-form__date-control" type="date"
+          autocomplete="off" formControlName="fechaFin">
         <label class="proyecto-form__date-label">Fecha de fin <span>*</span></label>
-        <div class="proyecto-form__date-error" *ngIf="fechaFinInvalida()">La fecha fin no puede ser menor que la fecha de inicio</div>
-        <div class="proyecto-form__date-error" *ngIf="!fechaFinInvalida() && (formulario.controls.fechaFin.hasError('fechaInvalida') || fechaFinInput.validity.badInput) && (formulario.controls.fechaFin.touched || intentoGuardar)">Fecha inválida</div>
-        <div class="proyecto-form__date-error" *ngIf="!fechaFinInvalida() && !fechaFinInput.validity.badInput && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">Este campo es obligatorio</div>
+        <div class="proyecto-form__date-error" *ngIf="fechaFinInvalida()">
+          La fecha fin no puede ser menor que la fecha de inicio
+        </div>
+        <div class="proyecto-form__date-error"
+          *ngIf="!fechaFinInvalida() && (formulario.controls.fechaFin.hasError('fechaInvalida') || fechaFinInput.validity.badInput) && (formulario.controls.fechaFin.touched || intentoGuardar)">
+          Fecha inválida
+        </div>
+        <div class="proyecto-form__date-error"
+          *ngIf="!fechaFinInvalida() && !fechaFinInput.validity.badInput && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">
+          Este campo es obligatorio
+        </div>
       </div>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Presupuesto</mat-label>
-        <input
-          matInput
-          type="text"
-          inputmode="decimal"
-          formControlName="presupuesto"
+        <input matInput type="text" inputmode="decimal" formControlName="presupuesto"
           (keydown)="bloquearCaracteresNumericos($event, true)"
-          (paste)="bloquearPegadoNoNumerico($event, true)"
-        >
-        <mat-error *ngIf="campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')">Solo se permiten números</mat-error>
-        <mat-error *ngIf="campoInvalido('presupuesto') && !formulario.controls.presupuesto.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
+          (paste)="bloquearPegadoNoNumerico($event, true)">
+        <mat-hint>Opcional</mat-hint>
+        <mat-error *ngIf="campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')">
+          Solo se permiten números
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Horas</mat-label>
-        <input
-          matInput
-          type="text"
-          inputmode="numeric"
-          formControlName="horas"
+        <input matInput type="text" inputmode="numeric" formControlName="horas"
           (keydown)="bloquearCaracteresNumericos($event, false)"
-          (paste)="bloquearPegadoNoNumerico($event, false)"
-        >
-        <mat-error *ngIf="campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))">Solo se permiten números</mat-error>
-        <mat-error *ngIf="campoInvalido('horas') && !formulario.controls.horas.hasError('soloNumeros') && !formulario.controls.horas.hasError('min')">Este campo es obligatorio</mat-error>
+          (paste)="bloquearPegadoNoNumerico($event, false)">
+        <mat-hint>Opcional</mat-hint>
+        <mat-error *ngIf="campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))">
+          Solo se permiten números
+        </mat-error>
       </mat-form-field>
 
+      <div class="proyecto-form__status-card" *ngIf="!proyecto">
+        <span>Estado</span>
+        <strong>{{ formulario.controls.estado.value || 'Activo' }}</strong>
+      </div>
+
       <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Estado</mat-label>
-        <mat-select yPosition="below" formControlName="estado">
-          <mat-option *ngFor="let estado of estados" [value]="estado.nombre">{{ estado.nombre }}</mat-option>
+        <mat-label>Seguimiento</mat-label>
+        <mat-select yPosition="below" formControlName="idEstadoProyecto">
+          <mat-option [value]="null">Sin seguimiento</mat-option>
+          <mat-option *ngFor="let e of estados" [value]="e.id">{{ e.nombre }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="campoInvalido('estado')">Este campo es obligatorio</mat-error>
+        <mat-hint>Opcional</mat-hint>
       </mat-form-field>
     </div>
   </section>
 
+  <!-- ── Asignación: líderes + recursos ───────────────────────────────── -->
   <section class="proyecto-form__section">
-    <h3>Asignación</h3>
-    <h4 class="proyecto-form__subtitle">Líder</h4>
-
-    <div class="proyecto-form__leader">
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Seleccionar líder</mat-label>
-        <mat-select yPosition="below" formControlName="lider">
-          <mat-option *ngFor="let lider of lideres" [value]="lider.nombre">{{ lider.nombre }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="campoInvalido('lider')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Costo</mat-label>
-        <input
-          matInput
-          type="text"
-          inputmode="decimal"
-          formControlName="costoHoraLider"
-          (keydown)="bloquearCaracteresNumericos($event, true)"
-          (paste)="bloquearPegadoNoNumerico($event, true)"
-        >
-        <mat-error *ngIf="campoInvalido('costoHoraLider') && formulario.controls.costoHoraLider.hasError('soloNumeros')">Solo se permiten números</mat-error>
-        <mat-error *ngIf="campoInvalido('costoHoraLider') && !formulario.controls.costoHoraLider.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Horas</mat-label>
-        <input
-          matInput
-          type="text"
-          inputmode="numeric"
-          formControlName="horasLider"
-          (keydown)="bloquearCaracteresNumericos($event, false)"
-          (paste)="bloquearPegadoNoNumerico($event, false)"
-        >
-        <mat-error *ngIf="campoInvalido('horasLider') && (formulario.controls.horasLider.hasError('soloNumeros') || formulario.controls.horasLider.hasError('min'))">Solo se permiten números</mat-error>
-        <mat-error *ngIf="campoInvalido('horasLider') && !formulario.controls.horasLider.hasError('soloNumeros') && !formulario.controls.horasLider.hasError('min')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
-    </div>
-
-    <div class="proyecto-form__resources-header">
-      <h4 class="proyecto-form__subtitle">Recursos</h4>
-      <button
-        mat-stroked-button
-        type="button"
-        class="proyecto-form__add"
-        (click)="agregarRecurso()"
-      >
-        + Añadir recurso
+    <div class="proyecto-form__section-header">
+      <h3>Asignación</h3>
+      <button mat-stroked-button type="button" (click)="agregarLider()">
+        + Añadir líder
       </button>
     </div>
 
-    <div class="proyecto-form__resources" formArrayName="recursos">
-      <ng-container *ngFor="let recurso of recursos.controls; let index = index">
-        <div class="proyecto-form__resource">
-          <div class="proyecto-form__resource-row" [formGroupName]="index">
-            <div class="proyecto-form__resource-top">
+    <div formArrayName="lideres">
+      <ng-container *ngFor="let liderGroup of lideres.controls; let li = index">
+        <div class="proyecto-form__leader-block" [formGroupName]="li">
 
-              <!-- Recurso (empleado) -->
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-nombre">
-                <mat-label>Seleccionar recurso</mat-label>
-                <mat-select
-                  yPosition="below"
-                  formControlName="nombre"
-                  (selectionChange)="onEmpleadoChange(index, $event.value)"
-                >
-                  <mat-option *ngFor="let empleado of empleadosDisponibles" [value]="empleado.nombre">
-                    {{ empleado.nombre }}
-                  </mat-option>
-                </mat-select>
-                <mat-error *ngIf="recursoCampoInvalido(index, 'nombre')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
-
-              <!-- Departamento -->
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-departamento">
-                <mat-label>Departamento</mat-label>
-                <mat-select
-                  yPosition="below"
-                  formControlName="departamento"
-                  (selectionChange)="onDepartamentoChange(index, $event.value)"
-                >
-                  <mat-option [value]="null">— Todos —</mat-option>
-                  <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
-                    {{ dep.nombre }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <button
-                mat-icon-button
-                type="button"
-                class="proyecto-form__remove"
-                aria-label="Eliminar recurso"
-                (click)="eliminarRecurso(index)"
-              >
-                &times;
-              </button>
-            </div>
-
-            <!-- Cargo filtrado por departamento -->
-            <div class="proyecto-form__resource-middle">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-rol">
-                <mat-label>Seleccionar cargo</mat-label>
-                <mat-select yPosition="below" formControlName="rol">
-                  <mat-option *ngFor="let cargo of getCargosParaRecurso(index)" [value]="cargo.nombre">
-                    {{ cargo.nombre }}
-                  </mat-option>
-                </mat-select>
-                <mat-error *ngIf="recursoCampoInvalido(index, 'rol')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="proyecto-form__resource-bottom">
-              <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                <input
-                  #entradaInput
-                  class="proyecto-form__date-control"
-                  type="date"
-                  autocomplete="off"
-                  formControlName="entrada"
-                >
-                <label class="proyecto-form__date-label">Entrada <span>*</span></label>
-                <div class="proyecto-form__date-error" *ngIf="(recursos.at(index).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (recursos.at(index).get('entrada')?.touched || intentoGuardar)">Fecha inválida</div>
-                <div class="proyecto-form__date-error" *ngIf="!entradaInput.validity.badInput && !recursos.at(index).get('entrada')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'entrada')">Este campo es obligatorio</div>
-              </div>
-
-              <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                <input
-                  #salidaInput
-                  class="proyecto-form__date-control"
-                  type="date"
-                  autocomplete="off"
-                  formControlName="salida"
-                >
-                <label class="proyecto-form__date-label">Salida <span>*</span></label>
-                <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(index)">La salida no puede ser menor que la entrada</div>
-                <div class="proyecto-form__date-error" *ngIf="!recursoFechaSalidaInvalida(index) && (recursos.at(index).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (recursos.at(index).get('salida')?.touched || intentoGuardar)">Fecha inválida</div>
-                <div class="proyecto-form__date-error" *ngIf="!recursoFechaSalidaInvalida(index) && !salidaInput.validity.badInput && !recursos.at(index).get('salida')?.hasError('fechaInvalida') && recursoCampoInvalido(index, 'salida')">Este campo es obligatorio</div>
-              </div>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-costo">
-                <mat-label>Costo</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  inputmode="decimal"
-                  formControlName="costoHora"
-                  (keydown)="bloquearCaracteresNumericos($event, true)"
-                  (paste)="bloquearPegadoNoNumerico($event, true)"
-                >
-                <mat-error *ngIf="recursoCampoInvalido(index, 'costoHora') && recursos.at(index).get('costoHora')?.hasError('soloNumeros')">Solo se permiten números</mat-error>
-                <mat-error *ngIf="recursoCampoInvalido(index, 'costoHora') && !recursos.at(index).get('costoHora')?.hasError('soloNumeros')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="proyecto-form__resource-horas">
-                <mat-label>Horas</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  inputmode="numeric"
-                  formControlName="horas"
-                  (keydown)="bloquearCaracteresNumericos($event, false)"
-                  (paste)="bloquearPegadoNoNumerico($event, false)"
-                >
-                <mat-error *ngIf="recursoCampoInvalido(index, 'horas') && (recursos.at(index).get('horas')?.hasError('soloNumeros') || recursos.at(index).get('horas')?.hasError('min'))">Solo se permiten números</mat-error>
-                <mat-error *ngIf="recursoCampoInvalido(index, 'horas') && !recursos.at(index).get('horas')?.hasError('soloNumeros') && !recursos.at(index).get('horas')?.hasError('min')">Este campo es obligatorio</mat-error>
-              </mat-form-field>
-            </div>
+          <!-- Cabecera del bloque líder -->
+          <div class="proyecto-form__leader-header">
+            <h4>Líder{{ lideres.length > 1 ? ' ' + (li + 1) : '' }}</h4>
+            <button *ngIf="lideres.length > 1" mat-icon-button type="button"
+              (click)="eliminarLider(li)" aria-label="Eliminar líder">
+              &times;
+            </button>
           </div>
+
+          <!-- Campos del líder -->
+          <div class="proyecto-form__leader">
+            <mat-form-field appearance="outline" class="proyecto-form__field">
+              <mat-label>Seleccionar líder</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input
+                matInput
+                formControlName="lider"
+                [matAutocomplete]="liderAuto"
+                matAutocompletePosition="below"
+                (input)="onLiderInput(li)"
+              >
+              <mat-autocomplete #liderAuto="matAutocomplete" (optionSelected)="onLiderChange(li, $event.option.value)">
+                <mat-option *ngFor="let l of getLideresFiltrados(li)" [value]="l.nombre">
+                  {{ l.nombre }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="liderCampoInvalido(li, 'lider')">Este campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="proyecto-form__field">
+              <mat-label>Costo</mat-label>
+              <input matInput type="text" inputmode="decimal" formControlName="costoHoraLider"
+                (keydown)="bloquearCaracteresNumericos($event, true)"
+                (paste)="bloquearPegadoNoNumerico($event, true)">
+              <mat-error *ngIf="liderCampoInvalido(li, 'costoHoraLider') && lideres.at(li).get('costoHoraLider')?.hasError('soloNumeros')">
+                Solo se permiten números
+              </mat-error>
+              <mat-error *ngIf="liderCampoInvalido(li, 'costoHoraLider') && !lideres.at(li).get('costoHoraLider')?.hasError('soloNumeros')">
+                Este campo es obligatorio
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="proyecto-form__field">
+              <mat-label>Horas</mat-label>
+              <input matInput type="text" inputmode="numeric" formControlName="horasLider"
+                (keydown)="bloquearCaracteresNumericos($event, false)"
+                (paste)="bloquearPegadoNoNumerico($event, false)">
+              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && (lideres.at(li).get('horasLider')?.hasError('soloNumeros') || lideres.at(li).get('horasLider')?.hasError('min'))">
+                Solo se permiten números
+              </mat-error>
+              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && !lideres.at(li).get('horasLider')?.hasError('soloNumeros') && !lideres.at(li).get('horasLider')?.hasError('min')">
+                Este campo es obligatorio
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Recursos de este líder -->
+          <div class="proyecto-form__resources-header">
+            <h5 class="proyecto-form__subtitle">Recursos</h5>
+            <button mat-stroked-button type="button" class="proyecto-form__add"
+              (click)="agregarRecursoALider(li)">
+              + Añadir recurso
+            </button>
+          </div>
+
+          <div class="proyecto-form__resources" formArrayName="recursos">
+            <ng-container *ngFor="let recurso of getRecursosDelLider(li).controls; let ri = index">
+              <div class="proyecto-form__resource">
+                <div class="proyecto-form__resource-row" [formGroupName]="ri">
+
+                  <div class="proyecto-form__resource-top">
+
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                      class="proyecto-form__resource-nombre">
+                      <mat-label>Seleccionar recurso</mat-label>
+                      <mat-icon matPrefix>search</mat-icon>
+                      <input
+                        matInput
+                        formControlName="nombre"
+                        [matAutocomplete]="recursoAuto"
+                        matAutocompletePosition="below"
+                        (input)="onRecursoInput(li, ri)"
+                      >
+                      <mat-autocomplete #recursoAuto="matAutocomplete" (optionSelected)="onEmpleadoChange(li, ri, $event.option.value)">
+                        <mat-option *ngFor="let emp of getRecursosFiltrados(li, ri)" [value]="emp.nombre">
+                          {{ emp.nombre }}
+                        </mat-option>
+                      </mat-autocomplete>
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'nombre')">Obligatorio</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                      class="proyecto-form__resource-departamento">
+                      <mat-label>Departamento</mat-label>
+                      <mat-select yPosition="below" formControlName="departamento"
+                        (selectionChange)="onDepartamentoChange(li, ri, $event.value)">
+                        <mat-option [value]="null">— Todos —</mat-option>
+                        <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
+                          {{ dep.nombre }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <button mat-icon-button type="button" class="proyecto-form__remove"
+                      aria-label="Eliminar recurso" (click)="eliminarRecursoDelLider(li, ri)">
+                      &times;
+                    </button>
+                  </div>
+
+                  <div class="proyecto-form__resource-middle">
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                      class="proyecto-form__resource-rol">
+                      <mat-label>Seleccionar cargo</mat-label>
+                      <mat-select yPosition="below" formControlName="rol"
+                        [disabled]="!tieneDepartamentoSeleccionado(li, ri)">
+                        <mat-option *ngFor="let cargo of getCargosParaRecurso(li, ri)" [value]="cargo.nombre">
+                          {{ cargo.nombre }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'rol')">Obligatorio</mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="proyecto-form__resource-bottom">
+                    <div class="proyecto-form__resource-fecha proyecto-form__date-field">
+                      <input #entradaInput class="proyecto-form__date-control" type="date"
+                        autocomplete="off" formControlName="entrada">
+                      <label class="proyecto-form__date-label">Entrada <span>*</span></label>
+                      <div class="proyecto-form__date-error"
+                        *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
+                        Fecha inválida
+                      </div>
+                      <div class="proyecto-form__date-error"
+                        *ngIf="!entradaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'entrada')">
+                        Este campo es obligatorio
+                      </div>
+                    </div>
+
+                    <div class="proyecto-form__resource-fecha proyecto-form__date-field">
+                      <input #salidaInput class="proyecto-form__date-control" type="date"
+                        autocomplete="off" formControlName="salida">
+                      <label class="proyecto-form__date-label">Salida <span>*</span></label>
+                      <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
+                        La salida no puede ser menor que la entrada
+                      </div>
+                      <div class="proyecto-form__date-error"
+                        *ngIf="!recursoFechaSalidaInvalida(li, ri) && (getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('salida')?.touched || intentoGuardar)">
+                        Fecha inválida
+                      </div>
+                      <div class="proyecto-form__date-error"
+                        *ngIf="!recursoFechaSalidaInvalida(li, ri) && !salidaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'salida')">
+                        Este campo es obligatorio
+                      </div>
+                    </div>
+
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                      class="proyecto-form__resource-costo">
+                      <mat-label>Costo</mat-label>
+                      <input matInput type="text" inputmode="decimal" formControlName="costoHora"
+                        (keydown)="bloquearCaracteresNumericos($event, true)"
+                        (paste)="bloquearPegadoNoNumerico($event, true)">
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
+                        Solo se permiten números
+                      </mat-error>
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && !getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
+                        Este campo es obligatorio
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                      class="proyecto-form__resource-horas">
+                      <mat-label>Horas</mat-label>
+                      <input matInput type="text" inputmode="numeric" formControlName="horas"
+                        (keydown)="bloquearCaracteresNumericos($event, false)"
+                        (paste)="bloquearPegadoNoNumerico($event, false)">
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && (getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros') || getRecursosDelLider(li).at(ri).get('horas')?.hasError('min'))">
+                        Solo se permiten números
+                      </mat-error>
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && !getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros') && !getRecursosDelLider(li).at(ri).get('horas')?.hasError('min')">
+                        Este campo es obligatorio
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
         </div>
       </ng-container>
     </div>
   </section>
 
+  <!-- ── Acciones ──────────────────────────────────────────────────────── -->
   <div class="proyecto-form__actions">
     <button mat-flat-button type="submit">
-      {{ proyecto ? 'Guardar cambios' : 'Crear proyecto +' }}
+      {{ proyecto ? 'Guardar cambios' : 'Crear Proyecto' }}
     </button>
   </div>
+
 </form>
