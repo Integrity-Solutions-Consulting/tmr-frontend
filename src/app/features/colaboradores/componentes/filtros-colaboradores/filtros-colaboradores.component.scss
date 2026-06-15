@@ -103,25 +103,6 @@
     overflow: hidden;
     animation: dropdownFade 0.15s ease;
 
-    &-search {
-      display: flex;
-      align-items: center;
-      padding: 8px 14px;
-      gap: 8px;
-      border-bottom: 1px solid #f3f4f6;
-      
-      .material-icons { font-size: 18px; color: #9ca3af; }
-      input { 
-        border: none; 
-        outline: none; 
-        font-family: 'Inter', sans-serif;
-        font-size: 13.5px; 
-        width: 100%; 
-        color: #9ca3af;
-      }
-      input::placeholder { color: #9ca3af; }
-    }
-
     &-list {
       padding: 0;
       display: flex;
@@ -173,11 +154,6 @@
       font-size: 13.5px;
       color: #374151;
       text-align: left;
-    }
-
-    &-count {
-      font-size: 13px;
-      color: #9ca3af;
     }
 
     &-clear {

@@ -26,11 +26,6 @@
 
     @if (estadoAbierto) {
       <div class="filtros__dropdown">
-        <div class="filtros__dropdown-search">
-          <img src="assets/iconos/buscar.svg" alt="buscar" width="14" height="14" />
-          <input type="text" placeholder="Estado" readonly />
-        </div>
-
         <div class="filtros__dropdown-list">
           @for (opcion of opcionesEstado; track opcion.valor) {
             @if (opcion.valor !== 'Todos') {
@@ -46,7 +41,6 @@
                   }
                 </div>
                 <span class="filtros__dropdown-label">{{ opcion.label }}</span>
-                <span class="filtros__dropdown-count">{{ opcion.valor === 'Activo' ? '44' : '13' }}</span>
               </button>
             }
           }

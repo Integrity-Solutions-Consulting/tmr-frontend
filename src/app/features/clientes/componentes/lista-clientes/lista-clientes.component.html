@@ -40,24 +40,38 @@
     <div class="card-resumen">
 
       <!-- Ícono filtro arriba derecha -->
-      <button class="card-resumen-filtro" (click)="toggleFiltroInactivos()" type="button">
-        <img src="assets/iconos/filtro-inactivo.svg" width="24" height="24" alt="filtro"/>
-      </button>
-
       <!-- Contenido -->
       <div class="card-resumen-body">
 
         <!-- Fila superior: ícono + número -->
         <div class="card-resumen-top">
-          <div class="card-resumen-icono">
-            <img src="assets/iconos/inactivos.svg" width="25" height="25" alt="inactivos"/>
-          </div>
-          <span class="card-resumen-numero">{{ estadoSeleccionado === 'Inactivo' ? resumen.totalInactivos : resumen.totalActivos }}</span>
+          
+          <span class="card-resumen-numero">{{ resumen.total }}</span>
         </div>
 
         <!-- Fila inferior: palabra Inactivos -->
-        <span class="card-resumen-label">{{ estadoSeleccionado === 'Inactivo' ? 'Inactivos' : 'Activos' }}</span>
+        <span class="card-resumen-label">Total clientes</span>
 
+      </div>
+    </div>
+
+    <div class="card-resumen">
+      <div class="card-resumen-body">
+        <div class="card-resumen-top">
+          
+          <span class="card-resumen-numero">{{ resumen.totalActivos }}</span>
+        </div>
+        <span class="card-resumen-label">Activos</span>
+      </div>
+    </div>
+
+    <div class="card-resumen">
+      <div class="card-resumen-body">
+        <div class="card-resumen-top">
+          
+          <span class="card-resumen-numero">{{ resumen.totalInactivos }}</span>
+        </div>
+        <span class="card-resumen-label">Inactivos</span>
       </div>
     </div>
   </div>
@@ -80,12 +94,6 @@
       <span class="select-estado-texto">Estado</span>
 
       <div class="dropdown-estado" *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
-        <!-- Buscador -->
-        <div class="dropdown-search-wrap">
-          <img src="assets/iconos/busqueda.svg" width="13" height="13" alt="buscar"/>
-          <input class="dropdown-search" placeholder="Estado" [(ngModel)]="busquedaEstado" (click)="$event.stopPropagation()"/>
-        </div>
-
         <!-- Opciones con checkbox -->
         <div class="dropdown-opcion" (click)="toggleEstado('Activo')">
           <span class="checkbox" [class.checked]="estadosSeleccionados.includes('Activo')">
@@ -94,7 +102,6 @@
             </svg>
           </span>
           <span class="opcion-label">Activo</span>
-          <span class="opcion-count">{{ contarPorEstado('Activo') }}</span>
         </div>
 
         <div class="dropdown-opcion" (click)="toggleEstado('Inactivo')">
@@ -104,7 +111,6 @@
             </svg>
           </span>
           <span class="opcion-label">Inactivo</span>
-          <span class="opcion-count">{{ contarPorEstado('Inactivo') }}</span>
         </div>
 
         <!-- Limpiar filtro -->

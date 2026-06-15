@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { FiltroMetrica } from '../cards-metricas/cards-metricas.component';
 import { ExportarService }                  from '../../servicios/exportar.service';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
 import {
@@ -53,13 +52,14 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   porPagina    = 10;
 
   // ── Filtros ──────────────────────────────────────────────
-  filtros: FiltrosColaborador = { busqueda: '', estado: 'Activo' };
+  filtros: FiltrosColaborador = { busqueda: '', estado: 'Todos' };
 
   // ── Métricas reactivas ───────────────────────────────────
   get noAsignados(): number { return this.svc.getMetricas().noAsignados(); }
   get asignados():   number { return this.svc.getMetricas().asignados();   }
   get inactivos():   number { return this.svc.getMetricas().inactivos();   }
   get activos():     number { return this.svc.getMetricas().activos();     }
+  get totalColaboradores(): number { return this.activos + this.inactivos; }
 
   // ── Modales ──────────────────────────────────────────────
   modalDetalle: Colaborador | null = null;
@@ -80,6 +80,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.cargarMetricas();
     this.cargarDatos();
   }
 
@@ -103,30 +104,18 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Filtros ──────────────────────────────────────────────
-  onFiltrosCambian(filtros: FiltrosColaborador): void {
-    this.filtros = {
-      ...filtros,
-      estado: filtros.estado === 'Todos' ? 'Activo' : filtros.estado,
-    };
-    this.paginaActual = 1;
-    this.cargarDatos();
+  cargarMetricas(): void {
+    this.svc
+      .getMetricasGenerales()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        error: () => console.error('Error al cargar las métricas de colaboradores'),
+      });
   }
 
-  onFiltrarDesdeMetrica(filtro: FiltroMetrica): void {
-    if (filtro.tipo === 'estado') {
-      this.filtros = {
-        ...this.filtros,
-        estado: filtro.valor === 'Inactivo' ? 'Inactivo' : 'Activo',
-        asignacion: undefined,
-      };
-    } else if (filtro.tipo === 'asignacion') {
-      this.filtros = {
-        ...this.filtros,
-        estado: 'Activo',
-        asignacion: filtro.valor === null ? undefined : filtro.valor as 'asignado' | 'noAsignado',
-      };
-    }
+  // ── Filtros ──────────────────────────────────────────────
+  onFiltrosCambian(filtros: FiltrosColaborador): void {
+    this.filtros = { ...filtros };
     this.paginaActual = 1;
     this.cargarDatos();
   }
@@ -171,6 +160,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           this.cerrarCrear();
           this.paginaActual = 1;
           this.cargarDatos();
+          this.cargarMetricas();
           this.notificacion = { tipo: 'exito', mensaje: 'El nuevo colaborador ha sido agregado exitosamente' };
         },
         error: (err) => {
@@ -190,6 +180,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           next: () => {
             this.cerrarEditar();
             this.cargarDatos();
+            this.cargarMetricas();
             this.notificacion = { tipo: 'exito', mensaje: 'El colaborador ha sido actualizado exitosamente' };
           },
           error: (err) => {
@@ -215,6 +206,7 @@ confirmarEliminar(): void {
       next: () => {
         this.colaboradorAEliminar = null;
         this.cargarDatos();
+        this.cargarMetricas();
         console.log('Colaborador eliminado correctamente');
       },
       error: () => console.error('Error al eliminar el colaborador'),

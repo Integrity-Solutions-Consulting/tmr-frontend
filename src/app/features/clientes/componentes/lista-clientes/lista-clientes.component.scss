@@ -41,49 +41,27 @@ $blanco:      #ffffff;
 // ─────────────────────────────────────────────────────────────
 .cards-resumen {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .card-resumen {
-  position: relative;
-  width: 203px;
-  height: 84px;
-  background: #ffffff;
-  border: 1px solid #E5E5E5;
-  border-radius: 15px;
-  box-shadow: 0px 1px 5px 0px #0000000D;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.card-resumen-filtro {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 24px;
-  height: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #6b7280;
-  padding: 0;
-  z-index: 1;
-
-  &:hover { background: #f5f5f5; color: #163572; }
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  padding: 18px 22px;
+  flex-shrink: 0;
 }
 
 .card-resumen-body {
-  position: absolute;
-  top: 18px;
-  left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .card-resumen-top {
@@ -99,16 +77,13 @@ $blanco:      #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  svg {
-    width: 25px;
-    height: 25px;
-  }
+  font-size: 20px;
+  line-height: 1;
 }
 
 .card-resumen-numero {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
   color: #163572;
   line-height: 1;
   font-family: 'Inter', sans-serif;
@@ -117,8 +92,8 @@ $blanco:      #ffffff;
 .card-resumen-label {
   font-size: 14px;
   font-weight: 500;
-  color: #737373;
-  line-height: 1;
+  color: #6b7280;
+  line-height: 1.2;
   font-family: 'Inter', sans-serif;
 }
 
@@ -211,29 +186,8 @@ $blanco:      #ffffff;
   box-shadow: 0px 4px 12px rgba(175, 155, 155, 0.08);
   z-index: 300;
   width: 143px;
-  min-height: 121px;
   overflow: hidden;
   animation: fadeIn 0.15s ease;
-}
-
-.dropdown-search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #E5E5E5;
-}
-
-.dropdown-search {
-  border: none;
-  outline: none;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  color: #111827;
-  width: 100%;
-  background: transparent;
-
-  &::placeholder { color: #9ca3af; }
 }
 
 .dropdown-opcion {
@@ -272,12 +226,6 @@ $blanco:      #ffffff;
   font-weight: 500;
   color: #737373;
   flex: 1;
-}
-
-.opcion-count {
-  font-size: 12px;
-  color: #9ca3af;
-  font-family: 'Inter', sans-serif;
 }
 
 .dropdown-limpiar {
@@ -647,7 +595,6 @@ td {
 
   .card-resumen {
     width: 160px;
-    height: 76px;
   }
 
   .barra-acciones {
@@ -691,7 +638,8 @@ td {
 
   .card-resumen {
     width: 140px;
-    height: 70px;
+    min-width: 140px;
+    padding: 16px 18px;
   }
 
   .card-resumen-numero {

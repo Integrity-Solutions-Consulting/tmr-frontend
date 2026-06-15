@@ -52,6 +52,18 @@ export class ColaboradoresService {
     };
   }
 
+  getMetricasGenerales(): Observable<void> {
+    return this.http.get<ColaboradorListaApi[]>(
+      this.apiUrl,
+      this.httpOptions
+    ).pipe(
+      map(respuesta => {
+        const todos = respuesta.map(api => this.mapApiAColaborador(api));
+        this._colaboradores.set(this.ordenarActivosPrimero(todos));
+      })
+    );
+  }
+
   // =========================================================================
   // LISTAR — llama al backend real
   // =========================================================================
@@ -73,10 +85,6 @@ export class ColaboradoresService {
       params.push('activo=false');
     }
 
-    if (!params.some(p => p.startsWith('activo=')) && filtros.asignacion) {
-      params.push('activo=true');
-    }
-
     if (filtros.asignacion === 'noAsignado') {
       params.push('asignacion=0');
     } else if (filtros.asignacion === 'asignado') {
@@ -90,9 +98,9 @@ export class ColaboradoresService {
       this.httpOptions
     ).pipe(
       map(respuesta => {
-        const todos = respuesta.map(api => this.mapApiAColaborador(api));
-
-        this._colaboradores.set(todos);
+        const todos = this.ordenarActivosPrimero(
+          respuesta.map(api => this.mapApiAColaborador(api))
+        );
 
         const total = todos.length;
         const totalPaginas = Math.ceil(total / porPagina) || 1;
@@ -111,6 +119,13 @@ export class ColaboradoresService {
   }
 
   // ── Convierte el item del backend al modelo del frontend ──
+  private ordenarActivosPrimero(colaboradores: Colaborador[]): Colaborador[] {
+    return [...colaboradores].sort((a, b) => {
+      if (a.estado === b.estado) return 0;
+      return a.estado === 'Activo' ? -1 : 1;
+    });
+  }
+
   private mapApiAColaborador(api: ColaboradorListaApi): Colaborador {
     return {
       id: api.id.toString(),
