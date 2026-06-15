@@ -519,6 +519,82 @@
   padding-right: 48px;
 }
 
+// ── mat-select para colaboradores (reemplaza native select dentro del modal) ─
+.mat-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.float-select__mat-input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  box-sizing: border-box;
+  background: #ffffff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 13.5px;
+  color: #374151;
+  padding: 0 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  // Ocultar el underline de Material
+  ::ng-deep .mat-mdc-select-trigger {
+    height: 100%;
+    padding: 0;
+  }
+
+  ::ng-deep .mdc-line-ripple,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-select-arrow-wrapper {
+    padding-right: 4px;
+  }
+
+  &.mat-focused,
+  &:focus-within {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    outline: none;
+  }
+
+  &.float-select__input--error {
+    border-color: #dc2626;
+  }
+}
+
+// Panel del mat-select — se asegura que no desborde el modal
+::ng-deep .cdk-overlay-pane:has(mat-select) {
+  max-width: min(480px, 90vw) !important;
+}
+
+::ng-deep .mat-mdc-select-panel {
+  max-width: min(480px, 90vw);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.12);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  max-height: 240px;
+
+  mat-option {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-size: 13.5px;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  mat-option.mat-mdc-option-active,
+  mat-option:hover {
+    background: #eef2ff;
+    color: #163572;
+  }
+}
+
 
 @media (max-width: 620px) {
   .modal-form {
