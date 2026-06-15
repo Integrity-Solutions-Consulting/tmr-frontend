@@ -56,7 +56,7 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Buscar por usuario, identificacion, correo o rol..."
+        placeholder="Buscar por usuario, nombre, correo o rol..."
         [value]="query()"
         (input)="query.set($any($event.target).value)"
       />
@@ -109,7 +109,6 @@
         <table class="usuarios-table">
           <thead>
             <tr>
-              <th>Identificacion</th>
               <th>Usuario</th>
               <th>Nombre</th>
               <th>Correo electrónico</th>
@@ -121,12 +120,11 @@
           <tbody>
             @if ($any(filteredUsuarios()).length === 0) {
               <tr>
-                <td colspan="7" class="empty-state">No se encontraron usuarios</td>
+                <td colspan="6" class="empty-state">No se encontraron usuarios</td>
               </tr>
             }
             @for (usuario of filteredUsuarios(); track usuario.id) {
               <tr>
-                <td>{{ displayIdentificacion(usuario) }}</td>
                 <td>{{ usuario.usuario }}</td>
                 <td>{{ displayUsuarioNombre(usuario) }}</td>
                 <td>{{ usuario.email }}</td>

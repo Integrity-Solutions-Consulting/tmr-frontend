@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../servicios/auth.service';
@@ -30,8 +30,10 @@ const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): Validat
 })
 export class CambiarPasswordModalComponent {
   private dialogRef = inject(MatDialogRef<CambiarPasswordModalComponent>);
+  private data = inject<{ obligatorio?: boolean } | null>(MAT_DIALOG_DATA, { optional: true });
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  readonly esObligatorio = Boolean(this.data?.obligatorio);
 
   readonly form: FormGroup = this.fb.group({
     oldPassword: ['', [Validators.required]],
@@ -67,6 +69,8 @@ export class CambiarPasswordModalComponent {
   }
 
   cancel(): void {
+    if (this.esObligatorio) return;
+
     this.dialogRef.close(false);
   }
 
@@ -87,6 +91,7 @@ export class CambiarPasswordModalComponent {
 
     this.authService.changePassword(payload).subscribe({
       next: () => {
+        this.authService.marcarPasswordActualizado();
         this.guardando.set(false);
         this.cambiadoExitosamente.set(true);
         setTimeout(() => {

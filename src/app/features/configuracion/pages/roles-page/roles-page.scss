@@ -11,15 +11,21 @@ $activo:        #22c55e;
 $inactivo:      #ef4444;
 $hover-row:     rgba(#163572, 0.04);
 
-// ── Layout general ─────────────────────────────────────────────────────────
+// ── Layout general — tarjeta blanca (igual que Proyectos) ──────────────────
 .page {
-  padding: 16px 24px;
-  background: transparent;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: $white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  padding: 28px 28px 22px;
+  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  gap: 12px;
+  gap: 20px;
 }
 
 // ── Header ─────────────────────────────────────────────────────────────────
@@ -31,12 +37,11 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .page-title {
-  font-size: 36px;
+  font-size: clamp(28px, 3vw, 34px);
   font-weight: 800;
   color: $primary;
   margin: 0;
-  letter-spacing: 0;
-  line-height: 40px;
+  line-height: 1.1;
   font-family: 'Inter', sans-serif;
 }
 
@@ -254,12 +259,11 @@ $hover-row:     rgba(#163572, 0.04);
   padding: 0 18px !important;
 }
 
-// ── Panel / Tabla ──────────────────────────────────────────────────────────
+// ── Panel / Tabla — integrado dentro de la tarjeta blanca ──────────────────
 .panel {
-  background: $white;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 18px;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .error-banner {
@@ -473,8 +477,12 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .page { padding: 24px 22px 20px; }
+}
+
 @media (max-width: 768px) {
-  .page { padding: 16px; }
+  .page { border-radius: 14px; padding: 20px 14px 18px; }
   .cards-row { flex-wrap: wrap; }
   .summary-card { width: 100%; flex: 1 1 100%; }
   .page-title { font-size: 28px; }
@@ -485,10 +493,14 @@ $hover-row:     rgba(#163572, 0.04);
   .create-action,
   .create-action app-boton,
   ::ng-deep .create-action .app-boton { width: 100%; }
-  .panel { padding: 10px; }
   .roles-table { min-width: 720px; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 16px 10px; }
 }
 
 @media (max-width: 420px) {
   .page-header app-boton { width: 100%; }
 }
+

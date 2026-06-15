@@ -89,7 +89,6 @@ export class UsuariosPage {
 
     return this.usuarios().filter((usuario) =>
       [
-        usuario.numeroidentificacion,
         usuario.nombres,
         usuario.apellidos,
         usuario.usuario,
@@ -191,10 +190,6 @@ export class UsuariosPage {
       .trim();
 
     return nombreCompleto || 'Usuario externo';
-  }
-
-  displayIdentificacion(usuario: Usuario): string {
-    return usuario.numeroidentificacion || '-';
   }
 
   descargarUsuariosExcel(): void {

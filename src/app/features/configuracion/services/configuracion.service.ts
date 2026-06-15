@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { Feriado, Modulo, Rol, Usuario, RegisterUserRequest } from '../models/configuracion.models';
+import { Feriado, Modulo, Rol, Usuario } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
 
 interface RolBackendPayload {
@@ -155,10 +155,6 @@ export class ConfiguracionService {
       });
   }
 
-  crearUsuarioAdministrativo(payload: RegisterUserRequest): Observable<unknown> {
-    return this.http.post(`${environment.apiUrl}/configuracion/usuarios/register-user`, payload);
-  }
-
   getCatalogo(codigo: string): Observable<CatalogoResponse[]> {
     return this.http.get<CatalogoResponse[]>(`${environment.apiUrl}/catalogos/${codigo}`);
   }
@@ -232,7 +228,6 @@ export class ConfiguracionService {
       idUsuario,
       idPersona,
       estado: d['estado'] ?? (d['activo'] === false ? 'Inactivo' : 'Activo'),
-      numeroidentificacion: d['numeroidentificacion'] ?? d['numeroIdentificacion'] ?? null,
       nombres,
       apellidos,
       email,

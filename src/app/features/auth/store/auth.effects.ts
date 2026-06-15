@@ -3,11 +3,33 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../servicios/auth.service';
 import { TokenService } from '../servicios/token.service';
 import { UserModulesService } from '../servicios/user-modules.service';
 import { TokenMonitorService } from '../../../core/services/token-monitor.service';
+
+/** Extrae el mensaje legible del error HTTP del backend */
+function extractLoginError(error: unknown): string {
+  if (error instanceof HttpErrorResponse) {
+    const body = error.error;
+    if (body) {
+      // Intenta leer errors[0].message
+      if (Array.isArray(body.errors) && body.errors.length > 0 && body.errors[0].message) {
+        return body.errors[0].message;
+      }
+      // Intenta leer message directo
+      if (typeof body.message === 'string' && body.message) {
+        return body.message;
+      }
+    }
+    // Fallback segun status
+    if (error.status === 401) return 'Credenciales inválidas. Verifique su usuario y contraseña.';
+    if (error.status === 0) return 'No se pudo conectar al servidor. Verifique su conexión.';
+  }
+  return (error as any)?.message || 'Error al iniciar sesión.';
+}
 
 @Injectable()
 export class AuthEffects {
@@ -30,16 +52,27 @@ export class AuthEffects {
             return this.authService.getUserModules().pipe(
               tap((modules) => {
                 console.log("Módulos recibidos desde backend:", modules);
-                // ApiResponseInterceptor ya transformó ApiResponse<string[]> -> string[]
-                // CAMBIO: Usar UserModulesService (en memoria) en lugar de localStorage
                 this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
               }),
               tap(() => {
-                // IMPORTANTE: Iniciar monitoreo del token después del login exitoso
                 console.log('🔄 Iniciando monitoreo de token...');
                 this.tokenMonitor.startMonitoring();
               }),
-              map(() => AuthActions.loginSuccess({ response })),
+              switchMap(() => {
+                // El endpoint de login NO devuelve debeCambiarPassword.
+                // Lo obtenemos de /configuracion/usuarios/{id} que sí lo incluye.
+                const userId = (response.user as any)?.id as number | undefined;
+                if (!userId) {
+                  return of(AuthActions.loginSuccess({ response }));
+                }
+                return this.authService.getUserProfileById(userId).pipe(
+                  tap((profile) => {
+                    this.authService.actualizarDebeCambiarPassword(profile.debeCambiarPassword);
+                  }),
+                  map(() => AuthActions.loginSuccess({ response })),
+                  catchError(() => of(AuthActions.loginSuccess({ response })))
+                );
+              }),
               catchError((error) => {
                 console.error("Error fetching modules", error);
                 this.tokenService.clear();
@@ -48,7 +81,7 @@ export class AuthEffects {
             );
           }),
           catchError((error) =>
-            of(AuthActions.loginFailure({ error: error.message }))
+            of(AuthActions.loginFailure({ error: extractLoginError(error) }))
           )
         )
       )

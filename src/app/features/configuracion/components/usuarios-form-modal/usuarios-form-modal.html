@@ -33,7 +33,7 @@
                 <option value="">Seleccione un colaborador</option>
                 @for (colaborador of colaboradores; track colaborador.id) {
                   <option [value]="colaborador.id">
-                    {{ colaborador.nombreCompleto }} - {{ colaborador.numeroIdentificacion || colaborador.codigoEmpleado || 'Sin identificacion' }}
+                    {{ colaborador.nombreCompleto }}
                   </option>
                 }
               </select>
@@ -119,6 +119,7 @@
 
         <div class="form-field form-field--full">
           @if (isEdit) {
+            <!-- Editar usuario: campo opcional para nueva contraseña -->
             <div class="float-field">
               <input
                 class="float-field__input float-field__input--password"
@@ -141,7 +142,33 @@
               <span class="form-field__error">{{ passwordError() }}</span>
             }
           } @else {
-            <p class="form-field__hint">Se genero una contrasena temporal. El usuario debera cambiarla en el primer acceso.</p>
+            <!-- Nuevo usuario: mostrar contraseña temporal para que el admin pueda copiarla -->
+            <div class="float-field">
+              <input
+                class="float-field__input float-field__input--password"
+                [type]="showTemporaryPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('password')"
+                readonly
+              />
+              <label class="float-field__label float-field__label--always">Contrasena temporal <span class="req">*</span></label>
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleTemporaryPasswordVisibility()"
+                title="Mostrar/ocultar contrasena"
+              >
+                <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            <p class="form-field__hint">
+              Copie esta contrasena antes de guardar.
+              <button type="button" class="btn-regenerar" (click)="regenerateTemporaryPassword()">↺ Regenerar</button>
+            </p>
+            @if (campoInvalido('password')) {
+              <span class="form-field__error">{{ passwordError() }}</span>
+            }
           }
         </div>
       </div>

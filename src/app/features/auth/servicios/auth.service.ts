@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthResponse, User, ForgotPasswordResponse, ChangePasswordRequest } from '../modelos/auth.models';
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
@@ -47,21 +48,46 @@ export class AuthService {
   }
 
   /**
-   * Actualiza los tokens en localStorage después de un refresh exitoso
+   * Actualiza los tokens en localStorage después de un login o refresh exitoso
    */
   updateTokens(response: AuthResponse): void {
-    console.log('💾 Guardando tokens en localStorage...', {
-      accessToken: response.accessToken ? response.accessToken.substring(0, 20) + '...' : 'N/A',
-      refreshToken: response.refreshToken ? response.refreshToken.substring(0, 20) + '...' : 'N/A',
-      expiresAt: response.expiresAt
-    });
-    
+    const debeCambiar = this.resolveDebeCambiarPassword(response);
+    const user = response.user
+      ? { ...response.user, debeCambiarPassword: debeCambiar }
+      : response.user;
+
     this.tokenService.setToken(response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
     localStorage.setItem('tokenExpiresAt', new Date(response.expiresAt).getTime().toString());
-    this.tokenService.setUser(JSON.stringify(response.user));
-    
-    console.log('✅ Tokens guardados');
+    this.tokenService.setUser(JSON.stringify(user));
+  }
+
+  /**
+   * Obtiene el perfil completo del usuario desde /configuracion/usuarios/{id}
+   * para leer debeCambiarPassword, que el endpoint de login no devuelve.
+   */
+  getUserProfileById(userId: number): Observable<{ debeCambiarPassword: boolean }> {
+    return this.http
+      .get<any>(`${environment.apiUrl}/configuracion/usuarios/${userId}`)
+      .pipe(
+        map((data) => ({
+          debeCambiarPassword: Boolean(
+            data?.debeCambiarPassword ?? data?.debecambiarpassword ?? false
+          ),
+        })),
+        catchError(() => of({ debeCambiarPassword: false }))
+      );
+  }
+
+  /**
+   * Actualiza únicamente el flag debeCambiarPassword en el currentUser de localStorage.
+   * No toca ni tokens ni ningún otro campo.
+   */
+  actualizarDebeCambiarPassword(valor: boolean): void {
+    const user = this.getCurrentUser();
+    if (!user) return;
+    this.tokenService.setUser(JSON.stringify({ ...user, debeCambiarPassword: valor }));
+    console.log('🔐 debeCambiarPassword actualizado en localStorage:', valor);
   }
 
   /**
@@ -99,8 +125,35 @@ export class AuthService {
     if (!token) {
       return null;
     }
-    // In a real app, you'd decode the JWT here
     const userJson = localStorage.getItem('currentUser');
     return userJson ? JSON.parse(userJson) : null;
+  }
+
+  debeCambiarPassword(): boolean {
+    return Boolean(this.getCurrentUser()?.debeCambiarPassword);
+  }
+
+  marcarPasswordActualizado(): void {
+    const user = this.getCurrentUser();
+    if (!user) return;
+
+    this.tokenService.setUser(JSON.stringify({
+      ...user,
+      debeCambiarPassword: false,
+    }));
+  }
+
+  private resolveDebeCambiarPassword(response: AuthResponse): boolean {
+    const responseRecord = response as AuthResponse & Record<string, unknown>;
+    const userRecord = response.user as (User & Record<string, unknown>) | null;
+    const value =
+      userRecord?.['debeCambiarPassword'] ??
+      userRecord?.['debecambiarpassword'] ??
+      userRecord?.['debeCambiarContrasena'] ??
+      responseRecord['debeCambiarPassword'] ??
+      responseRecord['debecambiarpassword'] ??
+      responseRecord['debeCambiarContrasena'];
+
+    return value === true || value === 'true' || value === 1 || value === '1';
   }
 }
