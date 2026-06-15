@@ -10,9 +10,7 @@
           <div class="project-codigo">{{ proyecto.codigo }}</div>
           <div class="project-nombre">{{ proyecto.nombre }}</div>
         </div>
-        <span class="estado-badge" [ngClass]="getEstadoBadgeClass(proyecto.estado)">
-          {{ proyecto.estado }}
-        </span>
+        <app-badge-estado [estado]="proyecto.estado"></app-badge-estado>
       </div>
 
       <div class="project-details">

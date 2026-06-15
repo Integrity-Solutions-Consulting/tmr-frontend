@@ -47,4 +47,9 @@ export class GraficoHorasComponent {
     if (totalAsignadas === 0) return 0;
     return (totalReportadas / totalAsignadas) * 100;
   }
+
+  getPorcentajeProyecto(item: HorasPorProyecto): number {
+    if (!item.horasAsignadas || item.horasAsignadas === 0) return 0;
+    return (item.horas / item.horasAsignadas) * 100;
+  }
 }

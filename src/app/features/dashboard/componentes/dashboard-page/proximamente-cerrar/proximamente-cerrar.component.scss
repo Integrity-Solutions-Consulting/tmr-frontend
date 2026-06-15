@@ -95,8 +95,13 @@
 
 .project-details {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2fr 0.7fr 0.9fr 1.1fr;
   gap: 1rem;
+  background: #fafafa;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
 }
 
 .detail-item {
@@ -111,14 +116,14 @@
 }
 
 .detail-label {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: #94a3b8;
   font-weight: 500;
   text-transform: uppercase;
 }
 
 .detail-value {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #1a202c;
   font-weight: 600;
 }
