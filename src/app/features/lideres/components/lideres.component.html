@@ -17,9 +17,6 @@
         </div>
         <span class="card-label">Internos</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Interno')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
     <div class="summary-card">
@@ -33,9 +30,6 @@
         </div>
         <span class="card-label">Externos</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Externo')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
     <div class="summary-card">
@@ -48,9 +42,6 @@
         </div>
         <span class="card-label">{{ estadoFiltro === 'Inactivo' ? 'Inactivos' : 'Activos' }}</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Inactivo')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
   </div>
 
