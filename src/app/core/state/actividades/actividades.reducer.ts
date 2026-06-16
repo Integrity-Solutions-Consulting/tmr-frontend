@@ -2,42 +2,44 @@ import { createReducer, on } from '@ngrx/store';
 import { ActividadesActions } from './actividades.actions';
 import { Actividad } from '../../models/actividad.model';
 
-const STORAGE_KEY = 'actividades_items';
-
-function cargarDesdeStorage(): Actividad[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Actividad[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function guardarEnStorage(items: Actividad[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    // cuota excedida u otro error: ignorar silenciosamente
-  }
-}
-
 export interface ActividadesState {
   items: Actividad[];
+  cargando: boolean;
   importing: boolean;
   error: any;
-  horasPendientes: string;
 }
 
 export const initialState: ActividadesState = {
-  items: cargarDesdeStorage(),   // <-- rehidrata al arrancar
+  items: [],
+  cargando: false,
   importing: false,
   error: null,
-  horasPendientes: '96,50 h'
 };
 
 export const actividadesReducer = createReducer(
   initialState,
 
+  // Carga inicial
+  on(ActividadesActions.cargarActividades, (state) => ({
+    ...state,
+    cargando: true,
+    error: null
+  })),
+
+  on(ActividadesActions.cargarActividadesSuccess, (state, { actividades }) => ({
+    ...state,
+    items: actividades,
+    cargando: false,
+    error: null
+  })),
+
+  on(ActividadesActions.cargarActividadesFailure, (state, { error }) => ({
+    ...state,
+    cargando: false,
+    error
+  })),
+
+  // Importar Excel
   on(ActividadesActions.importarExcel, (state) => ({
     ...state,
     importing: true,
@@ -45,15 +47,12 @@ export const actividadesReducer = createReducer(
   })),
 
   on(ActividadesActions.importarExcelSuccess, (state, { actividades }) => {
+    // Acumula evitando duplicados por id (los nuevos tienen prioridad)
     const existingIds = new Set(actividades.map(a => a.id));
     const previosSinDuplicados = state.items.filter(a => !existingIds.has(a.id));
-    const itemsAcumulados = [...previosSinDuplicados, ...actividades];
-
-    guardarEnStorage(itemsAcumulados);   // <-- persiste
-
     return {
       ...state,
-      items: itemsAcumulados,
+      items: [...previosSinDuplicados, ...actividades],
       importing: false,
       error: null
     };
@@ -62,11 +61,8 @@ export const actividadesReducer = createReducer(
   on(ActividadesActions.importarExcelFailure, (state, { error }) => ({
     ...state,
     importing: false,
-    error: error
+    error
   })),
 
-  on(ActividadesActions.resetEstado, () => {
-    localStorage.removeItem(STORAGE_KEY);   // <-- limpia storage al resetear
-    return { ...initialState, items: [] };
-  })
+  on(ActividadesActions.resetEstado, () => ({ ...initialState }))
 );
