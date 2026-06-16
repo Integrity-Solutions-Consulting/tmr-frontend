@@ -13,7 +13,7 @@
       <div class="card-left">
         <div class="card-top-row">
           <div class="card-icon">
-            <img src="icons/user.svg" class="card-svg" />
+            <img src="assets/iconos/user.svg" class="card-svg" />
           </div>
           <span class="card-number">{{ totalUsuarios() }}</span>
         </div>
@@ -26,7 +26,7 @@
       <div class="card-left">
         <div class="card-top-row">
           <div class="card-icon">
-            <img src="icons/circle-check.svg" class="card-svg" />
+            <img src="assets/iconos/circle-check.svg" class="card-svg" />
           </div>
           <span class="card-number">{{ activos() }}</span>
         </div>
@@ -39,7 +39,7 @@
       <div class="card-left">
         <div class="card-top-row">
           <div class="card-icon card-icon--inactive">
-            <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
+            <img src="assets/iconos/user-close-svgrepo-com.svg" class="card-svg" />
           </div>
           <span class="card-number">{{ inactivos() }}</span>
         </div>
@@ -63,7 +63,7 @@
     </div>
 
     <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
-      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
+      <img src="assets/iconos/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
       <span class="estado-texto">{{ labelEstado() }}</span>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-option" (click)="seleccionarEstado('todos'); $event.stopPropagation()">
