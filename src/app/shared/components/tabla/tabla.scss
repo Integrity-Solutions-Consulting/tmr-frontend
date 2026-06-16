@@ -1,8 +1,8 @@
 .tabla-shell {
-  overflow-x: auto;
+  overflow-x: hidden;
   max-width: 100%;
   border: 1px solid #e5e7eb;
-  border-radius: 12px 12px 0 0;
+  border-radius: 10px 10px 0 0;
   background: #ffffff;
 }
 
@@ -17,30 +17,42 @@
 
 .tabla {
   width: 100%;
-  min-width: 1220px;
   table-layout: fixed;
   background: #ffffff;
+  border-collapse: collapse;
+  border-spacing: 0;
 
   th {
     height: 46px;
-    padding: 14px 14px;
+    padding: 11px 14px;
+    text-align: left;
     color: #737373;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-bottom: 2px solid #e5e7eb;
     white-space: nowrap;
   }
 
   td {
     height: 54px;
-    padding: 14px 14px;
+    padding: 13px 16px;
     color: #737373;
-    font-size: 13px;
-    font-weight: 500;
-    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    font-weight: 400;
+    border-bottom: 1px solid #e5e7eb;
     white-space: nowrap;
     vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tr {
+    transition: background 0.12s;
+
+    &:hover {
+      background: rgba(22, 53, 114, 0.04);
+    }
   }
 
   tr:last-child td {
@@ -59,7 +71,7 @@
   }
 
   ::ng-deep .mat-column-codigo {
-    width: 96px;
+    width: 80px;
   }
 
   ::ng-deep .mat-column-nombre {
@@ -67,12 +79,11 @@
   }
 
   ::ng-deep .mat-column-cliente {
-    width: 170px;
+    width: 140px;
   }
 
   ::ng-deep .mat-column-seguimiento {
     width: 160px;
-    min-width: 160px;
   }
 
   .seguimiento-badge {
@@ -128,41 +139,34 @@
 
   ::ng-deep .mat-column-fechas {
     width: 180px;
-    min-width: 180px;
   }
 
   ::ng-deep .mat-column-lideres {
-    width: 180px;
-    min-width: 180px;
+    width: 200px;
   }
 
   ::ng-deep .mat-column-numeroRecursos {
-    width: 108px;
+    width: 100px;
     text-align: center;
   }
 
   ::ng-deep .mat-column-estado {
     width: 150px;
-    min-width: 150px;
-    max-width: 150px;
     padding-right: 18px;
     overflow: visible;
   }
 
   ::ng-deep .mat-column-acciones {
-    width: 72px;
-    min-width: 72px;
-    max-width: 72px;
-    padding-left: 0;
-    padding-right: 0;
+    width: 80px;
     text-align: center;
     vertical-align: middle;
   }
 }
 
 .tabla__codigo {
-  color: #555555;
+  color: #737373;
   font-weight: 400;
+  font-size: 14px;
 }
 
 .tabla__proyecto {
@@ -172,8 +176,8 @@
   min-width: 0;
 
   .tabla__proyecto-nombre {
-    color: #555555;
-    font-size: 13px;
+    color: #737373;
+    font-size: 14px;
     font-weight: 400;
     line-height: 1.2;
     overflow: hidden;
@@ -182,8 +186,8 @@
   }
 
   .tabla__proyecto-cliente {
-    color: #555555;
-    font-size: 12px;
+    color: #737373;
+    font-size: 13px;
     font-weight: 400;
     line-height: 1.2;
     overflow: hidden;
@@ -193,34 +197,43 @@
 }
 
 .tabla__cliente {
-  color: #555555;
+  color: #737373;
   font-weight: 400;
+  font-size: 14px;
 }
 
 .tabla__lista {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 
 .tabla__lista-item {
   display: flex;
   flex-direction: column;
-  color: #555555;
+  color: #737373;
   font-weight: 400;
   line-height: 1.05;
+  min-width: 0;
 
   span {
-    color: #555555;
-    font-size: 13px;
+    color: #737373;
+    font-size: 14px;
     font-weight: 400;
     line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   small {
-    color: #555555;
-    font-size: 10.5px;
+    color: #737373;
+    font-size: 12px;
     font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -229,8 +242,9 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #555555;
+  color: #737373;
   font-weight: 400;
+  font-size: 14px;
 
   &::before {
     content: '';
@@ -259,8 +273,8 @@
   gap: 16px;
   border: 1px solid #e5e7eb;
   border-top: 0;
-  border-radius: 0 0 12px 12px;
-  padding: 9px 12px 9px 16px;
+  border-radius: 0 0 10px 10px;
+  padding: 12px 16px;
   background: #ffffff;
 
   p {
@@ -306,38 +320,18 @@
 }
 
 @media (max-width: 1440px) {
-  .tabla {
-    min-width: 1150px;
-
-    th {
-      padding: 14px 16px;
-    }
-
-    td {
-      padding: 16px;
-    }
+  .tabla-footer {
+    flex-wrap: wrap;
   }
 }
 
 @media (max-width: 1024px) {
-  .tabla {
-    min-width: 1150px;
-
-    th {
-      padding: 13px 14px;
-    }
-
-    td {
-      padding: 14px;
-    }
+  .tabla-footer {
+    flex-wrap: wrap;
   }
 }
 
 @media (max-width: 768px) {
-  .tabla {
-    min-width: 1150px;
-  }
-
   .tabla-footer {
     align-items: flex-start;
     flex-direction: column;
@@ -351,10 +345,6 @@
 }
 
 @media (max-width: 480px) {
-  .tabla {
-    min-width: 1150px;
-  }
-
   .tabla-footer {
     padding: 10px;
   }
