@@ -7,11 +7,12 @@
         {{ esEdicion ? 'Editar actividad' : 'Agregar actividad' }}
       </h2>
       <p class="actividad-modal__subtitle">
-        {{ esEdicion ? 'Modifica los detalles de la actividad seleccionada.' : 'Registra el tiempo y detalles de tu actividad.' }}
+        {{ esEdicion ? 'Modifica los detalles de la actividad seleccionada.' : 'Registra el tiempo y detalles de tu
+        actividad.' }}
       </p>
     </div>
     <button class="actividad-modal__close" type="button" (click)="cancelar()" aria-label="Cerrar">
-      <mat-icon>close</mat-icon>
+      <img src="assets/iconos/x.svg" alt="Cerrar" />
     </button>
   </div>
 
@@ -22,28 +23,26 @@
     <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Tipo de Actividad <span class="req">*</span></label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Seleccione el tipo de actividad">info_outline</mat-icon>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Seleccione el tipo de actividad">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
-        <mat-icon class="actividad-modal__input-icon">category</mat-icon>
-        <input
-          class="actividad-modal__input"
-          type="text"
-          placeholder="Busque y seleccione un tipo"
-          [matAutocomplete]="autoTipo"
-          formControlName="tipoActividad"
-        />
+      <div class="actividad-modal__input-wrap"
+        [class.actividad-modal__input-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
+        <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/actividades.svg"
+          alt="tipo" />
+        <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un tipo"
+          [matAutocomplete]="autoTipo" formControlName="tipoActividad" />
         <mat-autocomplete #autoTipo="matAutocomplete" [displayWith]="displayTipoActividadFn.bind(this)">
           @for (tipo of tiposActividadFiltrados(); track tipo.id) {
-            <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
+          <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
           }
         </mat-autocomplete>
       </div>
       @if (form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched) {
-        <span class="actividad-modal__error">
-          @if (form.get('tipoActividad')?.errors?.['required']) { Campo requerido }
-          @else if (form.get('tipoActividad')?.errors?.['invalidOption']) { Seleccione una opción válida }
-        </span>
+      <span class="actividad-modal__error">
+        @if (form.get('tipoActividad')?.errors?.['required']) { Campo requerido }
+        @else if (form.get('tipoActividad')?.errors?.['invalidOption']) { Seleccione una opción válida }
+      </span>
       }
     </div>
 
@@ -51,28 +50,26 @@
     <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Proyecto <span class="req">*</span></label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Seleccione el proyecto asociado a la actividad">info_outline</mat-icon>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Seleccione el proyecto asociado a la actividad">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
-        <mat-icon class="actividad-modal__input-icon">folder</mat-icon>
-        <input
-          class="actividad-modal__input"
-          type="text"
-          placeholder="Busque y seleccione un proyecto"
-          [matAutocomplete]="autoProyecto"
-          formControlName="proyectoId"
-        />
+      <div class="actividad-modal__input-wrap"
+        [class.actividad-modal__input-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
+        <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
+          alt="proyecto" />
+        <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un proyecto"
+          [matAutocomplete]="autoProyecto" formControlName="proyectoId" />
         <mat-autocomplete #autoProyecto="matAutocomplete" [displayWith]="displayProyectoFn.bind(this)">
           @for (proyecto of proyectosFiltrados(); track proyecto.id) {
-            <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
+          <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
           }
         </mat-autocomplete>
       </div>
       @if (form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched) {
-        <span class="actividad-modal__error">
-          @if (form.get('proyectoId')?.errors?.['required']) { Campo requerido }
-          @else if (form.get('proyectoId')?.errors?.['invalidOption']) { Seleccione una opción válida }
-        </span>
+      <span class="actividad-modal__error">
+        @if (form.get('proyectoId')?.errors?.['required']) { Campo requerido }
+        @else if (form.get('proyectoId')?.errors?.['invalidOption']) { Seleccione una opción válida }
+      </span>
       }
     </div>
 
@@ -80,22 +77,19 @@
     <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Código de Requerimiento <span class="req">*</span></label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">info_outline</mat-icon>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Ingrese el código del requerimiento (ej: REQ-101)">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched">
-        <input
-          class="actividad-modal__input"
-          formControlName="codigoRequerimiento"
-          maxlength="50"
-          placeholder="Ej. REQ-101"
-          autocomplete="off"
-        />
+      <div class="actividad-modal__input-wrap"
+        [class.actividad-modal__input-wrap--error]="form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched">
+        <input class="actividad-modal__input" formControlName="codigoRequerimiento" maxlength="50"
+          placeholder="Ej. REQ-101" autocomplete="off" />
         <span class="actividad-modal__input-hint">{{ form.get('codigoRequerimiento')?.value?.length || 0 }}/50</span>
       </div>
       @if (form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched) {
-        <span class="actividad-modal__error">
-          @if (form.get('codigoRequerimiento')?.errors?.['required']) { Campo requerido }
-        </span>
+      <span class="actividad-modal__error">
+        @if (form.get('codigoRequerimiento')?.errors?.['required']) { Campo requerido }
+      </span>
       }
     </div>
 
@@ -103,17 +97,14 @@
     <div class="actividad-modal__field actividad-modal__field--width-80">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Descripción</label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese la descripción o detalles de la actividad realizada">info_outline</mat-icon>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Ingrese la descripción o detalles de la actividad realizada">info_outline</mat-icon>
       </div>
-      <div class="actividad-modal__input-wrap actividad-modal__input-wrap--textarea" [class.actividad-modal__input-wrap--error]="form.get('descripcion')?.invalid && form.get('descripcion')?.touched">
-        <mat-icon class="actividad-modal__input-icon">notes</mat-icon>
-        <textarea
-          class="actividad-modal__input actividad-modal__textarea"
-          formControlName="descripcion"
-          rows="3"
-          maxlength="255"
-          placeholder="Descripción de la actividad"
-        ></textarea>
+      <div class="actividad-modal__input-wrap actividad-modal__input-wrap--textarea"
+        [class.actividad-modal__input-wrap--error]="form.get('descripcion')?.invalid && form.get('descripcion')?.touched">
+        <img class="actividad-modal__input-icon" src="assets/iconos/cargo.svg" alt="descripcion" />
+        <textarea class="actividad-modal__input actividad-modal__textarea" formControlName="descripcion" rows="3"
+          maxlength="255" placeholder="Descripción de la actividad"></textarea>
         <span class="actividad-modal__input-hint">{{ form.get('descripcion')?.value?.length || 0 }}/255</span>
       </div>
     </div>
@@ -122,187 +113,171 @@
 
     <!-- Fecha + Horas (Visible solo si NO es recurrente) -->
     @if (!form.get('esRecurrente')?.value) {
-      <div class="actividad-modal__two-col actividad-modal__field--width-80">
-        
-        <!-- Fecha Actividad -->
-        <div class="actividad-modal__field fecha-field">
-          <div class="actividad-modal__label-row">
-            <label class="actividad-modal__label">Fecha Actividad <span class="req">*</span></label>
-          </div>
-          <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched">
-            <input
-              class="actividad-modal__input"
-              [matDatepicker]="pickerFechaActividad"
-              formControlName="fechaActividad"
-              (keydown)="bloquearCaracteresFecha($event)"
-              (paste)="bloquearPegadoNoFecha($event)"
-              placeholder="dd/mm/aaaa"
-            />
-            <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad"></mat-datepicker-toggle>
-            <mat-datepicker #pickerFechaActividad></mat-datepicker>
-          </div>
-          @if (form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) {
-            <span class="actividad-modal__error">
-              @if (form.get('fechaActividad')?.errors?.['required']) { Campo requerido }
-              @else if (form.get('fechaActividad')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
-            </span>
-          }
-        </div>
+    <div class="actividad-modal__two-col actividad-modal__field--width-80">
 
-        <!-- Número de Horas -->
-        <div class="actividad-modal__field horas-field">
-          <div class="actividad-modal__label-row">
-            <label class="actividad-modal__label">Número de Horas <span class="req">*</span></label>
-            <mat-icon class="actividad-modal__info-icon" matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">info_outline</mat-icon>
-          </div>
-          <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('numeroHoras')?.invalid && form.get('numeroHoras')?.touched">
-            <mat-icon class="actividad-modal__input-icon">schedule</mat-icon>
-            <input
-              class="actividad-modal__input"
-              type="number"
-              formControlName="numeroHoras"
-              min="0.5"
-              max="24"
-              step="0.5"
-              placeholder="4"
-            />
-          </div>
-          @if (form.get('numeroHoras')?.invalid && form.get('numeroHoras')?.touched) {
-            <span class="actividad-modal__error">
-              @if (form.get('numeroHoras')?.errors?.['required']) { Campo requerido }
-              @else { Mínimo 0.5 y máximo 24 horas }
-            </span>
-          }
+      <!-- Fecha Actividad -->
+      <div class="actividad-modal__field fecha-field">
+        <div class="actividad-modal__label-row">
+          <label class="actividad-modal__label">Fecha Actividad <span class="req">*</span></label>
         </div>
-
+        <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
+          [class.actividad-modal__input-wrap--error]="form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched">
+          <input class="actividad-modal__input" [matDatepicker]="pickerFechaActividad" formControlName="fechaActividad"
+            (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)"
+            placeholder="dd/mm/aaaa" />
+          <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFechaActividad></mat-datepicker>
+        </div>
+        @if (form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) {
+        <span class="actividad-modal__error">
+          @if (form.get('fechaActividad')?.errors?.['required']) { Campo requerido }
+          @else if (form.get('fechaActividad')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
+        </span>
+        }
       </div>
+
+      <!-- Número de Horas -->
+      <div class="actividad-modal__field horas-field">
+        <div class="actividad-modal__label-row">
+          <label class="actividad-modal__label">Número de Horas <span class="req">*</span></label>
+          <mat-icon class="actividad-modal__info-icon"
+            matTooltip="Especifique la cantidad de horas dedicadas (ej: 4 o 4.5)">info_outline</mat-icon>
+        </div>
+        <div class="actividad-modal__input-wrap"
+          [class.actividad-modal__input-wrap--error]="form.get('numeroHoras')?.invalid && form.get('numeroHoras')?.touched">
+          <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg"
+            alt="horas" />
+          <input class="actividad-modal__input" type="number" formControlName="numeroHoras" min="0.5" max="24"
+            step="0.5" placeholder="4" />
+        </div>
+        @if (form.get('numeroHoras')?.invalid && form.get('numeroHoras')?.touched) {
+        <span class="actividad-modal__error">
+          @if (form.get('numeroHoras')?.errors?.['required']) { Campo requerido }
+          @else { Mínimo 0.5 y máximo 24 horas }
+        </span>
+        }
+      </div>
+
+    </div>
     }
 
     <!-- Recurrente Checkbox (sólo si no es edición) -->
     @if (!esEdicion) {
-      <div class="actividad-modal__recurrente-row">
-        <label class="actividad-modal__checkbox-container">
-          <input type="checkbox" formControlName="esRecurrente" />
-          <span class="actividad-modal__checkmark"></span>
-          <span class="actividad-modal__checkbox-text">Actividad Recurrente</span>
-        </label>
-        <mat-icon class="actividad-modal__info-icon" matTooltip="Marque si desea que esta actividad se repita automáticamente en un rango de fechas">info_outline</mat-icon>
-      </div>
+    <div class="actividad-modal__recurrente-row">
+      <label class="actividad-modal__checkbox-container">
+        <input type="checkbox" formControlName="esRecurrente" />
+        <span class="actividad-modal__checkmark"></span>
+        <span class="actividad-modal__checkbox-text">Actividad Recurrente</span>
+      </label>
+      <mat-icon class="actividad-modal__info-icon"
+        matTooltip="Marque si desea que esta actividad se repita automáticamente en un rango de fechas">info_outline</mat-icon>
+    </div>
     }
 
     <!-- Panel de Recurrencia -->
     @if (form.get('esRecurrente')?.value) {
-      <div class="actividad-modal__recurrence-panel">
-        
-        <div class="actividad-modal__two-col actividad-modal__field--width-80">
-          
-          <!-- Fecha Inicio -->
-          <div class="actividad-modal__field flex-1">
-            <div class="actividad-modal__label-row">
-              <label class="actividad-modal__label">Fecha Inicio <span class="req">*</span></label>
-            </div>
-            <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched">
-              <input
-                class="actividad-modal__input"
-                [matDatepicker]="pickerFechaInicio"
-                formControlName="fechaInicio"
-                (keydown)="bloquearCaracteresFecha($event)"
-                (paste)="bloquearPegadoNoFecha($event)"
-                placeholder="dd/mm/aaaa"
-              />
-              <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFechaInicio></mat-datepicker>
-            </div>
-            @if (form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) {
-              <span class="actividad-modal__error">
-                @if (form.get('fechaInicio')?.errors?.['required']) { Campo requerido }
-                @else if (form.get('fechaInicio')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
-              </span>
-            }
-          </div>
+    <div class="actividad-modal__recurrence-panel">
 
-          <!-- Fecha Fin -->
-          <div class="actividad-modal__field flex-1">
-            <div class="actividad-modal__label-row">
-              <label class="actividad-modal__label">Fecha Fin <span class="req">*</span></label>
-              <mat-icon class="actividad-modal__info-icon" matTooltip="Especifique la fecha en la que finalizará la recurrencia">info_outline</mat-icon>
-            </div>
-            <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date" [class.actividad-modal__input-wrap--error]="form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched">
-              <input
-                class="actividad-modal__input"
-                [matDatepicker]="pickerFechaFin"
-                formControlName="fechaFin"
-                (keydown)="bloquearCaracteresFecha($event)"
-                (paste)="bloquearPegadoNoFecha($event)"
-                placeholder="dd/mm/aaaa"
-              />
-              <mat-datepicker-toggle matSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFechaFin></mat-datepicker>
-            </div>
-            @if (form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched) {
-              <span class="actividad-modal__error">
-                @if (form.get('fechaFin')?.errors?.['required']) { Campo requerido }
-                @else if (form.get('fechaFin')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
-              </span>
-            }
-          </div>
+      <div class="actividad-modal__two-col actividad-modal__field--width-80">
 
-        </div>
-
-        <!-- Horas por día -->
-        <div class="actividad-modal__field actividad-modal__field--width-80">
+        <!-- Fecha Inicio -->
+        <div class="actividad-modal__field flex-1">
           <div class="actividad-modal__label-row">
-            <label class="actividad-modal__label">Horas por día <span class="req">*</span></label>
-            <mat-icon class="actividad-modal__info-icon" matTooltip="Ingrese las horas que se registrarán por cada día en el rango">info_outline</mat-icon>
+            <label class="actividad-modal__label">Fecha Inicio <span class="req">*</span></label>
           </div>
-          <div class="actividad-modal__input-wrap" [class.actividad-modal__input-wrap--error]="form.get('horasPorDia')?.invalid && form.get('horasPorDia')?.touched">
-            <mat-icon class="actividad-modal__input-icon">timer</mat-icon>
-            <input
-              class="actividad-modal__input"
-              type="number"
-              formControlName="horasPorDia"
-              min="0.5"
-              max="24"
-              step="0.5"
-              placeholder="4"
-            />
+          <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
+            [class.actividad-modal__input-wrap--error]="form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched">
+            <input class="actividad-modal__input" [matDatepicker]="pickerFechaInicio" formControlName="fechaInicio"
+              (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)"
+              placeholder="dd/mm/aaaa" />
+            <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaInicio></mat-datepicker>
           </div>
-          @if (form.get('horasPorDia')?.invalid && form.get('horasPorDia')?.touched) {
-            <span class="actividad-modal__error">
-              @if (form.get('horasPorDia')?.errors?.['required']) { Campo requerido }
-              @else { Mínimo 0.5 y máximo 24 horas }
-            </span>
+          @if (form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) {
+          <span class="actividad-modal__error">
+            @if (form.get('fechaInicio')?.errors?.['required']) { Campo requerido }
+            @else if (form.get('fechaInicio')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
+          </span>
           }
         </div>
 
-        <!-- Checkboxes de configuración de días -->
-        <div class="actividad-modal__checkbox-item">
-          <label class="actividad-modal__checkbox-container">
-            <input type="checkbox" formControlName="incluirFinesDeSemana" />
-            <span class="actividad-modal__checkmark"></span>
-            <span class="actividad-modal__checkbox-text">Incluir fines de semana</span>
-          </label>
-          <mat-icon class="actividad-modal__info-icon" matTooltip="Marque para incluir sábados y domingos en el registro recurrente">info_outline</mat-icon>
-        </div>
-
-        <div class="actividad-modal__checkbox-item">
-          <label class="actividad-modal__checkbox-container">
-            <input type="checkbox" formControlName="incluirFeriados" />
-            <span class="actividad-modal__checkmark"></span>
-            <span class="actividad-modal__checkbox-text">Incluir días feriados</span>
-          </label>
-          <mat-icon class="actividad-modal__info-icon" matTooltip="Marque para registrar horas en días festivos/feriados nacionales">info_outline</mat-icon>
-        </div>
-
-        <!-- Banner de vista previa -->
-        @if (previewText()) {
-          <div class="actividad-modal__preview-banner">
-            <mat-icon class="actividad-modal__preview-icon">info</mat-icon>
-            <span>{{ previewText() }}</span>
+        <!-- Fecha Fin -->
+        <div class="actividad-modal__field flex-1">
+          <div class="actividad-modal__label-row">
+            <label class="actividad-modal__label">Fecha Fin <span class="req">*</span></label>
+            <mat-icon class="actividad-modal__info-icon"
+              matTooltip="Especifique la fecha en la que finalizará la recurrencia">info_outline</mat-icon>
           </div>
-        }
+          <div class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
+            [class.actividad-modal__input-wrap--error]="form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched">
+            <input class="actividad-modal__input" [matDatepicker]="pickerFechaFin" formControlName="fechaFin"
+              (keydown)="bloquearCaracteresFecha($event)" (paste)="bloquearPegadoNoFecha($event)"
+              placeholder="dd/mm/aaaa" />
+            <mat-datepicker-toggle matSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaFin></mat-datepicker>
+          </div>
+          @if (form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched) {
+          <span class="actividad-modal__error">
+            @if (form.get('fechaFin')?.errors?.['required']) { Campo requerido }
+            @else if (form.get('fechaFin')?.errors?.['formatoFecha']) { El formato debe ser dd/mm/aaaa }
+          </span>
+          }
+        </div>
 
       </div>
+
+      <!-- Horas por día -->
+      <div class="actividad-modal__field actividad-modal__field--width-80">
+        <div class="actividad-modal__label-row">
+          <label class="actividad-modal__label">Horas por día <span class="req">*</span></label>
+          <mat-icon class="actividad-modal__info-icon"
+            matTooltip="Ingrese las horas que se registrarán por cada día en el rango">info_outline</mat-icon>
+        </div>
+        <div class="actividad-modal__input-wrap"
+          [class.actividad-modal__input-wrap--error]="form.get('horasPorDia')?.invalid && form.get('horasPorDia')?.touched">
+          <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg"
+            alt="timer" />
+          <input class="actividad-modal__input" type="number" formControlName="horasPorDia" min="0.5" max="24"
+            step="0.5" placeholder="4" />
+        </div>
+        @if (form.get('horasPorDia')?.invalid && form.get('horasPorDia')?.touched) {
+        <span class="actividad-modal__error">
+          @if (form.get('horasPorDia')?.errors?.['required']) { Campo requerido }
+          @else { Mínimo 0.5 y máximo 24 horas }
+        </span>
+        }
+      </div>
+
+      <!-- Checkboxes de configuración de días -->
+      <div class="actividad-modal__checkbox-item">
+        <label class="actividad-modal__checkbox-container">
+          <input type="checkbox" formControlName="incluirFinesDeSemana" />
+          <span class="actividad-modal__checkmark"></span>
+          <span class="actividad-modal__checkbox-text">Incluir fines de semana</span>
+        </label>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Marque para incluir sábados y domingos en el registro recurrente">info_outline</mat-icon>
+      </div>
+
+      <div class="actividad-modal__checkbox-item">
+        <label class="actividad-modal__checkbox-container">
+          <input type="checkbox" formControlName="incluirFeriados" />
+          <span class="actividad-modal__checkmark"></span>
+          <span class="actividad-modal__checkbox-text">Incluir días feriados</span>
+        </label>
+        <mat-icon class="actividad-modal__info-icon"
+          matTooltip="Marque para registrar horas en días festivos/feriados nacionales">info_outline</mat-icon>
+      </div>
+
+      <!-- Banner de vista previa -->
+      @if (previewText()) {
+      <div class="actividad-modal__preview-banner">
+        <mat-icon class="actividad-modal__preview-icon">info</mat-icon>
+        <span>{{ previewText() }}</span>
+      </div>
+      }
+
+    </div>
     }
 
   </div>
@@ -310,13 +285,14 @@
   <!-- Footer -->
   <div class="actividad-modal__footer">
     @if (esEdicion) {
-      <button class="actividad-modal__btn actividad-modal__btn--delete" type="button" (click)="eliminar()">
-        <mat-icon>delete</mat-icon> Eliminar
-      </button>
-      <div class="spacer"></div>
+    <button class="actividad-modal__btn actividad-modal__btn--delete" type="button" (click)="eliminar()">
+      <img src="assets/iconos/btn-eliminar.svg" alt="eliminar" /> Eliminar
+    </button>
+    <div class="spacer"></div>
     }
-    <button class="actividad-modal__btn actividad-modal__btn--save" type="submit" [disabled]="form.invalid" (click)="guardar()">
-      <mat-icon>save</mat-icon>
+    <button class="actividad-modal__btn actividad-modal__btn--save" type="submit" [disabled]="form.invalid"
+      (click)="guardar()">
+      <img src="assets/iconos/circle-check.svg" alt="guardar" />
       Guardar
     </button>
   </div>

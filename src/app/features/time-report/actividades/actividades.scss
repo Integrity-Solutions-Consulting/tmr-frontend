@@ -15,23 +15,10 @@ $text-muted: #9CA3AF;
 }
 
 /* ---- HEADER ---- */
-.page-header {
+.header-right {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-
-    .page-title {
-        margin: 0;
-        font-size: 28px;
-        font-weight: 700;
-        color: $dark-navy;
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
+    gap: 12px;
 }
 
 .horas-badge {
@@ -382,31 +369,35 @@ $text-muted: #9CA3AF;
         gap: 16px;
     }
 
-    .page-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+    ::ng-deep .header-container {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
 
-        .page-title {
-            font-size: 24px;
-            text-align: center;
+        .header-title {
+            font-size: 24px !important;
+            text-align: center !important;
         }
 
-        .header-right {
-            flex-direction: column-reverse;
-            align-items: stretch;
-            gap: 10px;
+        .header-subtitle {
+            text-align: center !important;
+        }
+    }
 
-            .horas-badge {
-                justify-content: center;
-                padding: 10px;
-            }
+    .header-right {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 10px;
 
-            .btn-agregar {
-                width: 100%;
-                justify-content: center;
-                border-radius: 20px;
-            }
+        .horas-badge {
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .btn-agregar {
+            width: 100%;
+            justify-content: center;
+            border-radius: 20px;
         }
     }
 

@@ -24,7 +24,7 @@ import { SeguimientoService } from '../../../shared/services/seguimiento.service
 import { Colaborador } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
-import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -47,9 +47,9 @@ import * as XLSX from 'xlsx';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
-        HorasFormatPipe,
         PaginacionComponent,
-        BadgeEstadoComponent
+        HeaderComponent,
+        HorasFormatPipe
     ],
     templateUrl: './seguimiento.html',
     styleUrl: './seguimiento.scss'
@@ -97,9 +97,66 @@ export class SeguimientoComponent implements AfterViewInit {
     // Reactividad vía Signals desde el Servicio de Negocio
     public metricas = computed(() => this.seguimientoService.getMetricas());
 
+    // Ordenación manual para tabla HTML nativa
+    public sortField: keyof Colaborador | '' = '';
+    public sortAsc = true;
+
+    private toTitleCase(str: string): string {
+        if (!str) return '';
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    get colaboradoresPaginados(): Colaborador[] {
+        const start = this.pageIndex * this.pageSize;
+        return this.dataSource.filteredData.slice(start, start + this.pageSize);
+    }
+
+    public ordenar(campo: keyof Colaborador) {
+        if (this.sortField === campo) {
+            this.sortAsc = !this.sortAsc;
+        } else {
+            this.sortField = campo;
+            this.sortAsc = true;
+        }
+        this.aplicarOrdenamiento();
+    }
+
+    private aplicarOrdenamiento() {
+        if (!this.sortField) return;
+        const data = [...this.dataSource.data];
+        data.sort((a, b) => {
+            const valA = a[this.sortField as keyof Colaborador];
+            const valB = b[this.sortField as keyof Colaborador];
+            
+            if (typeof valA === 'number' && typeof valB === 'number') {
+                return this.sortAsc ? valA - valB : valB - valA;
+            }
+            
+            const strA = String(valA || '').toLowerCase();
+            const strB = String(valB || '').toLowerCase();
+            return this.sortAsc 
+                ? strA.localeCompare(strB) 
+                : strB.localeCompare(strA);
+        });
+        this.dataSource.data = data;
+    }
+
     constructor() {
         effect(() => {
-            this.dataSource.data = this.seguimientoService.colaboradores();
+            const raw = this.seguimientoService.colaboradores();
+            const formatted = raw.map(c => ({
+                ...c,
+                nombre: this.toTitleCase(c.nombre),
+                proyecto: this.toTitleCase(c.proyecto),
+                cliente: this.toTitleCase(c.cliente),
+                liderTecnico: this.toTitleCase(c.liderTecnico)
+            }));
+            this.dataSource.data = formatted;
+            this.aplicarOrdenamiento();
         });
     }
 

@@ -65,41 +65,46 @@
   <!-- Barra de búsqueda -->
   <div class="search-bar">
     <div class="search-input-wrapper">
-      <span class="material-icons search-icon">search</span>
+      <img src="assets/iconos/buscar.svg" alt="buscar" class="search-icon" width="16" height="16" />
       <input
         type="text"
         class="search-input"
         placeholder="Buscar por usuario, nombre, correo o rol..."
         [value]="query()"
         (input)="setQuery($any($event.target).value)"
+        autocomplete="off"
       />
+      @if (query()) {
+        <button class="search-clear" (click)="setQuery('')" type="button">
+          <span class="material-icons">close</span>
+        </button>
+      }
     </div>
 
-    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
-      <img src="assets/iconos/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
-      <span class="estado-texto">{{ labelEstado() }}</span>
+    <div class="estado-filter">
+      <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
+        <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
+        <span>Estado</span>
+      </button>
+
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-option" (click)="seleccionarEstado('todos'); $event.stopPropagation()">
-          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'todos'">
-            <span class="material-icons" *ngIf="filtroActivo() === 'todos'">check</span>
-          </div>
-          <span>Todos</span>
-          <span class="dropdown-count">{{ totalUsuarios() }}</span>
+        <div class="estado-dropdown-list">
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('activos'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroActivo() === 'activos'">
+              <span class="material-icons" *ngIf="filtroActivo() === 'activos'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Activos</span>
+          </button>
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('inactivos'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroActivo() === 'inactivos'">
+              <span class="material-icons" *ngIf="filtroActivo() === 'inactivos'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Inactivos</span>
+          </button>
         </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('activos'); $event.stopPropagation()">
-          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'activos'">
-            <span class="material-icons" *ngIf="filtroActivo() === 'activos'">check</span>
-          </div>
-          <span>Activos</span>
-          <span class="dropdown-count">{{ activos() }}</span>
-        </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('inactivos'); $event.stopPropagation()">
-          <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'inactivos'">
-            <span class="material-icons" *ngIf="filtroActivo() === 'inactivos'">check</span>
-          </div>
-          <span>Inactivos</span>
-          <span class="dropdown-count">{{ inactivos() }}</span>
-        </div>
+        <button class="estado-dropdown-clear" (click)="seleccionarEstado('todos'); $event.stopPropagation()" type="button">
+          Limpiar filtro
+        </button>
       </div>
     </div>
 
@@ -111,7 +116,17 @@
         etiquetaBoton="Descargar"
       ></app-descarga-menu>
 
-      <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
+      <button
+        mat-flat-button
+        type="button"
+        class="page-create"
+        (click)="openModal()"
+      >
+        <span class="page-create-content">
+          Agregar
+          <img src="assets/iconos/btn-agregar.svg" alt="">
+        </span>
+      </button>
     </div>
   </div>
 
