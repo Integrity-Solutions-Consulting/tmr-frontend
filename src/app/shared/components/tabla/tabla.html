@@ -87,14 +87,11 @@
 </div>
 
 <div class="tabla-footer">
-  <p>
-    Mostrando registros del {{ registroDesde }} al {{ registroHasta }}
-  </p>
-
-  <mat-paginator
-    [pageSize]="pageSize"
-    [pageSizeOptions]="[5, 10, 20]"
-    showFirstLastButtons
-    (page)="onPageChange($event)"
-  ></mat-paginator>
+  <app-paginacion
+    [paginaActual]="paginaActual()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalRegistros"
+    [porPagina]="porPagina"
+    (paginaCambia)="onPaginaCambia($event)"
+  ></app-paginacion>
 </div>
