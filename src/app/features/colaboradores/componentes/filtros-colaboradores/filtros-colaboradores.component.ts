@@ -46,17 +46,24 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
     return this.form.get('estado')?.value ?? 'Todos';
   }
 
-  toggleEstado(): void {
+  toggleEstado(event?: MouseEvent): void {
+    event?.stopPropagation();
     this.estadoAbierto = !this.estadoAbierto;
   }
 
-  seleccionarEstado(valor: EstadoColaborador | 'Todos'): void {
-    this.form.patchValue({ estado: valor });
-    this.estadoAbierto = false;
+  seleccionarEstado(valor: EstadoColaborador | 'Todos', event?: MouseEvent): void {
+    event?.stopPropagation();
+    const nuevoEstado = this.estadoSeleccionado === valor ? 'Todos' : valor;
+    this.form.patchValue({ estado: nuevoEstado });
   }
 
-  limpiarBusqueda(valor: EstadoColaborador | 'Todos'): void{
-    this.form.patchValue({ estado: valor});
+  limpiarFiltroEstado(event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.form.patchValue({ estado: 'Todos' });
+  }
+
+  limpiarBusqueda(valor: EstadoColaborador | 'Todos'): void {
+    this.form.patchValue({ estado: valor });
   }
 
   ngOnDestroy(): void {

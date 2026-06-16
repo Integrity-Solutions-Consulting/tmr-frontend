@@ -37,24 +37,28 @@ $blanco:      #ffffff;
 
 
 // ─────────────────────────────────────────────────────────────
-//  Card resumen inactivos
+//  Cards resumen clientes
 // ─────────────────────────────────────────────────────────────
 .cards-resumen {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin: 24px 0 24px;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .card-resumen {
   display: flex;
   align-items: center;
-  min-width: 180px;
+  justify-content: flex-start;
+  min-width: 220px;
+  min-height: 82px;
+  padding: 18px 26px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
-  padding: 18px 22px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  cursor: default;
   flex-shrink: 0;
 }
 
@@ -68,33 +72,52 @@ $blanco:      #ffffff;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .card-resumen-icono {
-  width: 25px;
-  height: 25px;
-  display: flex;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  line-height: 1;
+  flex-shrink: 0;
+
+  img {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  &--total {
+    background: #f6eefe;
+  }
+
+  &--activos {
+    background: #e6fdee;
+  }
+
+  &--inactivos {
+    background: #F3F4F6;
+  }
 }
 
 .card-resumen-numero {
-  font-size: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
   font-weight: 700;
   color: #163572;
   line-height: 1;
-  font-family: 'Inter', sans-serif;
 }
 
 .card-resumen-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  line-height: 1.2;
   font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 
@@ -149,7 +172,7 @@ $blanco:      #ffffff;
   width: 110px;
   height: 40px;
   padding: 0 12px;
-  border: 1px dashed #E5E5E5;
+  border: 1px solid #E5E5E5;
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
@@ -301,60 +324,71 @@ $blanco:      #ffffff;
 // ─────────────────────────────────────────────────────────────
 
 .tabla-wrap {
-  border: 1px solid $borde;
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border: 1px solid #E5E5E5;
   border-radius: 10px;
   overflow: visible;
 }
 .tabla {
   width: 100%;
   border-collapse: collapse;
+  border-spacing: 0;
   font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  border-radius: 10px;
   overflow: visible;
 }
 thead tr { 
-  background: $fondo; 
-  border-bottom: 1px solid $borde; 
+  background: #ffffff; 
+  border-bottom: 2px solid #E5E5E5; 
 }
 
   th {
-    padding: 12px 16px;
+    padding: 11px 14px;
     text-align: left;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #737373;
     white-space: nowrap;
+    background: #ffffff;
+    line-height: 1.2;
   }
 
   tbody tr {
-    height: 54px;
-    border-bottom: 1px solid #F1F1F1;
-    transition: background 0.15s;
+    border-bottom: 1px solid #E5E5E5;
+    transition: background 0.12s;
 
     &:last-child {
       border-bottom: none;
     }
 
     &:hover {
-      background: #FCFCFC;
+      background: rgba(22, 53, 114, 0.04);
     }
   }
 
 td { 
   padding: 13px 16px; 
-  font-size: 13px; 
+  font-size: 14px; 
   color: #737373; 
+  font-weight: 400;
   vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
    
 }
 
 .td-codigo {
-  font-weight: 600;
-  color: #404040;
+  font-weight: 400;
+  color: #737373;
 }
 
 .td-nombre {
-  font-weight: 500;
-  color: #404040;
+  font-weight: 400;
+  color: #737373;
 }
 
 .td-email {
@@ -429,11 +463,17 @@ td {
 // ─────────────────────────────────────────────────────────────
 //  Menú tres puntos
 // ─────────────────────────────────────────────────────────────
-.td-acciones { width: 48px; }
+.td-acciones {
+  position: relative;
+  width: 48px;
+  overflow: visible;
+  text-align: right;
+}
 
 .menu-wrap {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  overflow: visible;
 }
 
 .btn-menu {
@@ -454,14 +494,14 @@ td {
 .menu-desplegable {
   position: absolute;
   right: 0;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);
   background: $blanco;
   border: 1px solid $borde;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  z-index: 200;
-  min-width: 130px;
-  overflow: hidden;
+  z-index: 9999;
+  min-width: 145px;
+  overflow: visible;
   animation: fadeIn 0.15s ease;
 }
 
@@ -594,7 +634,8 @@ td {
   }
 
   .card-resumen {
-    width: 160px;
+    min-width: 180px;
+    width: auto;
   }
 
   .barra-acciones {
@@ -637,8 +678,8 @@ td {
   }
 
   .card-resumen {
-    width: 140px;
-    min-width: 140px;
+    width: 100%;
+    min-width: 100%;
     padding: 16px 18px;
   }
 
