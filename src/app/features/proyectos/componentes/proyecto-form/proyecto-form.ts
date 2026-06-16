@@ -218,7 +218,7 @@ export class ProyectoForm implements OnInit, OnChanges {
             recursosArr.push(rg);
             cargosLider.push(idDep
               ? this.todosLosCargos.filter(c => c.idDepartamento === idDep)
-              : []
+              : this.todosLosCargos
             );
           });
         }
@@ -269,8 +269,8 @@ export class ProyectoForm implements OnInit, OnChanges {
       nombre: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.empleadosDisponibles)]],
       departamento: [null],
       rol: ['', Validators.required],
-      entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
-      salida: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
+      entrada: this.fb.control<string | null>('', [this.fechaValida()]),
+      salida: this.fb.control<string | null>('', [this.fechaValida()]),
       costoHora: ['', [this.numeroValido(true)]],
       horas: ['', [this.numeroValido(false), Validators.min(0)]]
     }, { validators: this.rangoFechasValido('entrada', 'salida', 'salidaMenor') });
@@ -318,9 +318,8 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.formulario.controls.idCliente.setValue(null);
   }
 
-  onClienteFocus(): void {
-    this.formulario.controls.cliente.setValue('', { emitEvent: false });
-    this.formulario.controls.idCliente.setValue(null);
+  onClienteFocus(event: FocusEvent): void {
+    (event.target as HTMLInputElement | null)?.select();
   }
 
   onClienteChange(nombreCliente: string): void {
@@ -345,9 +344,8 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
   }
 
-  onRecursoFocus(li: number, ri: number): void {
-    this.getRecursosDelLider(li).at(ri).get('nombre')?.setValue('', { emitEvent: false });
-    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
+  onRecursoFocus(li: number, ri: number, event: FocusEvent): void {
+    (event.target as HTMLInputElement | null)?.select();
   }
 
   onEmpleadoChange(li: number, ri: number, nombreEmpleado: string): void {
@@ -391,7 +389,14 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   getCargosParaRecurso(li: number, ri: number): CargoLookup[] {
     const departamento = this.getRecursosDelLider(li).at(ri).get('departamento')?.value;
-    if (!departamento) return [];
+    if (!departamento) {
+      const rolActual = this.getRecursosDelLider(li).at(ri).get('rol')?.value;
+      const cargos = [...this.todosLosCargos];
+      if (rolActual && !cargos.some(c => c.nombre === rolActual)) {
+        cargos.push({ id: 0, nombre: rolActual, idDepartamento: null });
+      }
+      return cargos;
+    }
     return this.cargosFiltrados[li]?.[ri] ?? this.todosLosCargos.filter(c => c.idDepartamento === departamento);
   }
 
