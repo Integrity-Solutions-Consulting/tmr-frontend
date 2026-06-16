@@ -114,6 +114,15 @@ export class RolesFormModal {
     return map[normalizedNombre] ?? 'extension';
   }
 
+  seccionesExpandido = {
+    info: true,
+    modulos: true
+  };
+
+  toggleSeccion(seccion: 'info' | 'modulos'): void {
+    this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
+  }
+
   /** Agrega o quita un ID de módulo del listado de IDs seleccionados en el form. */
   toggleModulo(id: number): void {
     if (this.isView) return;

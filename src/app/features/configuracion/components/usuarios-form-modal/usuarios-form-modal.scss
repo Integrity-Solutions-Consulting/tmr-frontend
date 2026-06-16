@@ -670,8 +670,6 @@
 ::ng-deep .usuarios-dialog-panel .mat-mdc-dialog-container,
 ::ng-deep .usuarios-dialog-panel .mat-mdc-dialog-surface {
   width: 100% !important;
-  height: 640px !important;
-  min-height: 640px !important;
   max-height: calc(100dvh - 32px) !important;
   overflow: hidden !important;
   border-radius: 16px !important;
