@@ -681,3 +681,18 @@ $hover-row: rgba(#163572, 0.04);
 @media (max-width: 480px) {
   .lideres-container { padding: 16px 10px; }
 }
+.card-icon--active,
+.card-icon--inactive {
+  position: relative;
+}
+
+.card-svg-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 13px;
+  height: 13px;
+}
+.card-icon--internal {
+  position: relative;
+}

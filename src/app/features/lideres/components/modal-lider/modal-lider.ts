@@ -32,10 +32,12 @@ export class ModalLider implements OnInit, OnChanges {
   @Input() lider: any | null = null;
   @Input() guardando = false;
   @Output() cerrarModal = new EventEmitter<void>();
-  @Output() guardar = new EventEmitter<any>(); // Sigue emitiendo para refrescar la tabla del padre
+  @Output() guardar = new EventEmitter<any>();
 
   enviado = false;
   dropdownAbierto: string | null = null;
+  nombresInvalido = false;
+  apellidosInvalido = false;
 
   tiposLideres: TipoLider[] = [];
   personasDisponibles: PersonaDisponible[] = [];
@@ -121,7 +123,7 @@ export class ModalLider implements OnInit, OnChanges {
         },
         error: (error) => console.error('Error al obtener colaboradores:', error)
       });
-  }    
+  }
 
   @HostListener('document:click')
   onClickFuera() {
@@ -178,6 +180,8 @@ export class ModalLider implements OnInit, OnChanges {
   cerrar() {
     this.enviado = false;
     this.dropdownAbierto = null;
+    this.nombresInvalido = false;
+    this.apellidosInvalido = false;
     this.syncFormWithLider();
     this.cerrarModal.emit();
   }
@@ -189,10 +193,10 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   isTelefonoValid(telefono: string): boolean {
-    if (!telefono) return true;
-    const regex = /^[+0-9\s\-()]{7,20}$/;
-    return regex.test(telefono.trim());
-  }
+  if (!telefono || telefono.trim().length === 0) return false;
+  const regex = /^(09\d{8}|0[2-7]\d{7})$/;
+  return regex.test(telefono.trim());
+}
 
   isNombresValid(nombres: string): boolean {
     return !!nombres && nombres.trim().length > 0 && nombres.trim().length <= 100;
@@ -203,8 +207,8 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   formularioValido(): boolean {
-    const baseValid = !!this.form.tipoId && 
-                      this.isNombresValid(this.form.nombres) && 
+    const baseValid = !!this.form.tipoId &&
+                      this.isNombresValid(this.form.nombres) &&
                       this.isApellidosValid(this.form.apellidos) &&
                       this.isEmailValid(this.form.correo) &&
                       this.isTelefonoValid(this.form.telefono);
@@ -217,57 +221,52 @@ export class ModalLider implements OnInit, OnChanges {
       return baseValid && !!this.form.personaId;
     }
 
-    return baseValid; 
+    return baseValid;
   }
 
-  // NUEVO MÉTODO ONGUARDAR CONECTADO DIRECTAMENTE AL BACKEND
   onGuardar() {
     if (this.guardando) return;
-
     this.enviado = true;
     if (!this.formularioValido()) return;
-
-    // Emit the form values directly to the parent component
     this.guardar.emit(this.form);
     this.cerrar();
   }
 
-  // VALIDACIÓN ADICIONAL EN TIEMPO REAL PARA EL TECLADO
-  soloLetras(event: KeyboardEvent): boolean {
-    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]$/;
-    if (event.key.length > 1) return true;
-    if (!regex.test(event.key)) {
-      event.preventDefault();
-      return false;
-    }
-    return true;
-  }
-
   soloNumerosYSignos(event: KeyboardEvent): boolean {
-    const regex = /^[0-9+\s\-()]$/;
-    if (event.key.length > 1) return true;
-    if (!regex.test(event.key)) {
-      event.preventDefault();
-      return false;
-    }
-    return true;
+  const regex = /^[0-9]$/;
+  if (event.key.length > 1) return true;
+  if (!regex.test(event.key)) {
+    event.preventDefault();
+    return false;
   }
+  return true;
+}
 
   onInputNombres(event: Event) {
     const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+    const valorOriginal = input.value;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/gu, '');
+    this.nombresInvalido = valorOriginal !== input.value;
     this.form.nombres = input.value;
+    if (this.nombresInvalido) {
+      setTimeout(() => this.nombresInvalido = false, 2000);
+    }
   }
 
   onInputApellidos(event: Event) {
     const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+    const valorOriginal = input.value;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/gu, '');
+    this.apellidosInvalido = valorOriginal !== input.value;
     this.form.apellidos = input.value;
+    if (this.apellidosInvalido) {
+      setTimeout(() => this.apellidosInvalido = false, 2000);
+    }
   }
 
-  onInputTelefono(event: Event) {
-    const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^0-9+\s\-()]/g, '');
-    this.form.telefono = input.value;
-  }
+ onInputTelefono(event: Event) {
+  const input = event.target as HTMLInputElement;
+  input.value = input.value.replace(/[^0-9]/g, '');
+  this.form.telefono = input.value;
+}
 }
