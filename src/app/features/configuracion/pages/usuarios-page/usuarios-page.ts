@@ -7,7 +7,7 @@ import {
   ActionMenuComponent,
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
-import { Boton } from '../../../../shared/components/boton/boton';
+
 import {
   DescargaMenuComponent,
   DescargaOpcion,
@@ -23,7 +23,7 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [CommonModule, Boton, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent],
+  imports: [CommonModule, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -222,7 +222,7 @@ export class UsuariosPage {
   }
 
   descargarUsuariosExcel(): void {
-    this.descargarCSV(this.obtenerUsuariosExportables(), 'Usuarios', 'csv');
+    this.descargarXlsx(this.obtenerUsuariosExportables(), 'Usuarios');
   }
 
   descargarUsuariosPdf(): void {
@@ -251,32 +251,166 @@ export class UsuariosPage {
     ]);
   }
 
-  private descargarCSV(usuarios: Usuario[], nombreBase: string, extension: string): void {
-    const encabezados = ['Usuario', 'Nombre', 'Correo electrónico', 'Roles', 'Estado'];
-    const filas = this.obtenerFilasExportacion(usuarios);
-    const contenido = [encabezados, ...filas]
-      .map((fila) => fila.map((valor) => `"${String(valor).replace(/"/g, '""')}"`).join(','))
-      .join('\r\n');
+  private async descargarXlsx(usuarios: Usuario[], nombreBase: string): Promise<void> {
+    const { Workbook } = await import('exceljs');
+    const workbook = new Workbook();
 
-    const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
-    this.crearDescarga(blob, `${nombreBase}_${new Date().toISOString().slice(0, 10)}.${extension}`);
+    const COLOR_PRIMARIO    = 'FF163572';
+    const COLOR_RECURSO     = 'FFFFFFFF';
+    const COLOR_RECURSO_ALT = 'FFF8FAFC';
+    const COLOR_TEXTO       = 'FF334155';
+    const COLOR_BORDE       = 'FFE2E8F0';
+
+    const ws = workbook.addWorksheet('Usuarios');
+    ws.columns = [
+      { header: 'Usuario',            key: 'usuario', width: 25 },
+      { header: 'Nombre',             key: 'nombre',  width: 40 },
+      { header: 'Correo electrónico', key: 'correo',  width: 40 },
+      { header: 'Roles',              key: 'roles',   width: 40 },
+      { header: 'Estado',             key: 'estado',  width: 18 },
+    ];
+
+    usuarios.forEach(u => {
+      ws.addRow({
+        usuario: u.usuario || '-',
+        nombre: this.displayUsuarioNombre(u),
+        correo: u.email || '-',
+        roles: this.displayRolesUsuario(u),
+        estado: u.estado === 'Activo' ? 'Activo' : 'Inactivo',
+      });
+    });
+
+    const header = ws.getRow(1);
+    header.height = 22;
+    header.eachCell((cell: any) => {
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font      = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      const b = { style: 'thin', color: { argb: COLOR_PRIMARIO } };
+      cell.border    = { top: b, left: b, bottom: b, right: b };
+    });
+
+    ws.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber === 1) return;
+      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
+      row.height = 20;
+      row.eachCell((cell: any, colNumber: number) => {
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        const b = { style: 'thin', color: { argb: COLOR_BORDE } };
+        cell.border    = { top: b, left: b, bottom: b, right: b };
+        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+        if (colNumber === 5) {
+          const val = cell.value?.toString() ?? '';
+          const esActivo = val.toLowerCase() === 'activo';
+          cell.font = {
+            name: 'Segoe UI', size: 10, bold: true,
+            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    this.crearDescarga(blob, `${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   private descargarPDF(usuarios: Usuario[], nombreBase: string): void {
-    const doc = new jsPDF({ orientation: 'landscape' });
+    const doc      = new jsPDF({ orientation: 'landscape' });
+    const fecha    = new Date().toLocaleDateString('es-EC');
+    const pageW    = 297;
+    const pageH    = 210;  // alto landscape en mm
+    const marginX  = 12;
+    const footerY  = pageH - 8; // coordenada fija para el pie
 
-    doc.setFontSize(16);
+    // ── Helper: cabecera reutilizable ──
+    const dibujarCabecera = () => {
+      doc.setFillColor(22, 53, 114);
+      doc.rect(0, 0, pageW, 22, 'F');
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Reporte de Usuarios', marginX, 14);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
+      doc.setDrawColor(99, 135, 190);
+      doc.setLineWidth(0.5);
+      doc.line(0, 22, pageW, 22);
+    };
+
+    dibujarCabecera();
+
+    // ── Subtítulo sección resumen ──
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(22, 53, 114);
-    doc.text('Listado de Usuarios', 14, 16);
+    doc.text('Listado de Usuarios', marginX, 32);
+    doc.setDrawColor(22, 53, 114);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, 34, marginX + 60, 34);
 
+    // ── Tabla resumen ──
     autoTable(doc, {
-      startY: 24,
+      startY: 37,
       head: [['Usuario', 'Nombre', 'Correo electrónico', 'Roles', 'Estado']],
       body: this.obtenerFilasExportacion(usuarios),
-      styles: { fontSize: 9, cellPadding: 4 },
-      headStyles: { fillColor: [22, 53, 114], textColor: 255, fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
+      styles: {
+        fontSize: 8,
+        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        valign: 'middle',
+        overflow: 'linebreak',
+        font: 'helvetica',
+        lineColor: [226, 232, 240],
+        lineWidth: 0.2,
+      },
+      headStyles: {
+        fillColor: [22, 53, 114],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 8,
+        halign: 'center',
+        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+      },
+      bodyStyles: { textColor: [51, 65, 85] },
+      alternateRowStyles: { fillColor: [245, 248, 255] },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 60 },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 85 },
+        4: { cellWidth: 28,  halign: 'center' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          const val = String(data.cell.raw ?? '').toLowerCase();
+          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+      margin: { left: marginX, right: marginX, bottom: 18 },
+      didDrawPage: () => dibujarCabecera(),
     });
+
+    // ── Pie de página en TODAS las páginas ──
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(marginX, footerY, pageW - marginX, footerY);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(156, 163, 175);
+      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
+      doc.text('TMR — Reporte de Usuarios', marginX, footerY + 4);
+      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
+    }
 
     doc.save(`${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
