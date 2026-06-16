@@ -31,7 +31,7 @@
           matAutocompletePosition="below"
           autocomplete="off"
           (input)="onClienteInput()"
-          (focus)="onClienteFocus()"
+          (focus)="onClienteFocus($event)"
         >
         <mat-autocomplete #clienteAuto="matAutocomplete" (optionSelected)="onClienteChange($event.option.value)">
           <mat-option *ngFor="let c of getClientesFiltrados()" [value]="c.nombre">
@@ -175,8 +175,8 @@
               <mat-error *ngIf="liderCampoInvalido(li, 'costoHoraLider') && lideres.at(li).get('costoHoraLider')?.hasError('soloNumeros')">
                 Solo se permiten números
               </mat-error>
-              <mat-error *ngIf="liderCampoInvalido(li, 'costoHoraLider') && !lideres.at(li).get('costoHoraLider')?.hasError('soloNumeros')">
-                Este campo es obligatorio
+              <mat-error *ngIf="liderCampoInvalido(li, 'costoHoraLider') && lideres.at(li).get('costoHoraLider')?.hasError('min')">
+                El valor no puede ser negativo
               </mat-error>
             </mat-form-field>
 
@@ -185,11 +185,11 @@
               <input matInput type="text" inputmode="numeric" formControlName="horasLider"
                 (keydown)="bloquearCaracteresNumericos($event, false)"
                 (paste)="bloquearPegadoNoNumerico($event, false)">
-              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && (lideres.at(li).get('horasLider')?.hasError('soloNumeros') || lideres.at(li).get('horasLider')?.hasError('min'))">
+              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && lideres.at(li).get('horasLider')?.hasError('soloNumeros')">
                 Solo se permiten números
               </mat-error>
-              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && !lideres.at(li).get('horasLider')?.hasError('soloNumeros') && !lideres.at(li).get('horasLider')?.hasError('min')">
-                Este campo es obligatorio
+              <mat-error *ngIf="liderCampoInvalido(li, 'horasLider') && lideres.at(li).get('horasLider')?.hasError('min')">
+                El valor no puede ser negativo
               </mat-error>
             </mat-form-field>
           </div>
@@ -221,7 +221,7 @@
                         matAutocompletePosition="below"
                         autocomplete="off"
                         (input)="onRecursoInput(li, ri)"
-                        (focus)="onRecursoFocus(li, ri)"
+                        (focus)="onRecursoFocus(li, ri, $event)"
                       >
                       <mat-autocomplete #recursoAuto="matAutocomplete" (optionSelected)="onEmpleadoChange(li, ri, $event.option.value)">
                         <mat-option *ngFor="let emp of getRecursosFiltrados(li, ri)" [value]="emp.nombre">
@@ -253,8 +253,7 @@
                     <mat-form-field appearance="outline" subscriptSizing="dynamic"
                       class="proyecto-form__resource-rol">
                       <mat-label>Seleccionar cargo</mat-label>
-                      <mat-select yPosition="below" formControlName="rol"
-                        [disabled]="!tieneDepartamentoSeleccionado(li, ri)">
+                      <mat-select yPosition="below" formControlName="rol">
                         <mat-option *ngFor="let cargo of getCargosParaRecurso(li, ri)" [value]="cargo.nombre">
                           {{ cargo.nombre }}
                         </mat-option>
@@ -267,31 +266,23 @@
                     <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                       <input #entradaInput class="proyecto-form__date-control" type="date"
                         autocomplete="off" formControlName="entrada">
-                      <label class="proyecto-form__date-label">Entrada <span>*</span></label>
+                      <label class="proyecto-form__date-label">Entrada</label>
                       <div class="proyecto-form__date-error"
                         *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
                         Fecha inválida
-                      </div>
-                      <div class="proyecto-form__date-error"
-                        *ngIf="!entradaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'entrada')">
-                        Este campo es obligatorio
                       </div>
                     </div>
 
                     <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                       <input #salidaInput class="proyecto-form__date-control" type="date"
                         autocomplete="off" formControlName="salida">
-                      <label class="proyecto-form__date-label">Salida <span>*</span></label>
+                      <label class="proyecto-form__date-label">Salida</label>
                       <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
                         La salida no puede ser menor que la entrada
                       </div>
                       <div class="proyecto-form__date-error"
                         *ngIf="!recursoFechaSalidaInvalida(li, ri) && (getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('salida')?.touched || intentoGuardar)">
                         Fecha inválida
-                      </div>
-                      <div class="proyecto-form__date-error"
-                        *ngIf="!recursoFechaSalidaInvalida(li, ri) && !salidaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'salida')">
-                        Este campo es obligatorio
                       </div>
                     </div>
 
@@ -304,8 +295,8 @@
                       <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
                         Solo se permiten números
                       </mat-error>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && !getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
-                        Este campo es obligatorio
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('min')">
+                        El valor no puede ser negativo
                       </mat-error>
                     </mat-form-field>
 
@@ -315,11 +306,11 @@
                       <input matInput type="text" inputmode="numeric" formControlName="horas"
                         (keydown)="bloquearCaracteresNumericos($event, false)"
                         (paste)="bloquearPegadoNoNumerico($event, false)">
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && (getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros') || getRecursosDelLider(li).at(ri).get('horas')?.hasError('min'))">
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros')">
                         Solo se permiten números
                       </mat-error>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && !getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros') && !getRecursosDelLider(li).at(ri).get('horas')?.hasError('min')">
-                        Este campo es obligatorio
+                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('min')">
+                        El valor no puede ser negativo
                       </mat-error>
                     </mat-form-field>
                   </div>
