@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterOutlet } from '@angular/router';
@@ -20,6 +20,8 @@ import { NavigationEnd } from '@angular/router';
   styleUrl: './app.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
+  invalidCharacterMessageVisible = false;
+
   private destroy$ = new Subject<void>();
   private tokenMonitor = inject(TokenMonitorService);
   private authService = inject(AuthService);
@@ -28,6 +30,36 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private currentDialogRef: any; // Referencia al modal abierto
   private passwordDialogRef: any;
+  private invalidCharacterTimeoutId: number | null = null;
+
+  @HostListener('document:beforeinput', ['$event'])
+  onBeforeInput(event: InputEvent): void {
+    if (!this.isEditableElement(event.target) || !event.data || !this.hasEmoji(event.data)) {
+      return;
+    }
+
+    event.preventDefault();
+    this.showInvalidCharacterMessage();
+  }
+
+  @HostListener('document:input', ['$event'])
+  onInput(event: Event): void {
+    const target = event.target;
+
+    if (!this.isEditableElement(target)) {
+      return;
+    }
+
+    const currentValue = this.getEditableValue(target);
+
+    if (!this.hasEmoji(currentValue)) {
+      return;
+    }
+
+    this.setEditableValue(target, this.removeEmojis(currentValue));
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    this.showInvalidCharacterMessage();
+  }
 
   ngOnInit(): void {
     // Iniciar monitoreo si hay token válido
@@ -158,7 +190,67 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.tokenMonitor.stopMonitoring();
+    if (this.invalidCharacterTimeoutId) {
+      window.clearTimeout(this.invalidCharacterTimeoutId);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  private hasEmoji(value: string): boolean {
+    return /[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\uFE0F]/u.test(value);
+  }
+
+  private removeEmojis(value: string): string {
+    return value.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\uFE0F]/gu, '');
+  }
+
+  private isEditableElement(target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement | HTMLElement {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    if (target instanceof HTMLTextAreaElement) {
+      return true;
+    }
+
+    if (target instanceof HTMLInputElement) {
+      return !this.ignoredInputTypes.has(target.type);
+    }
+
+    return target.isContentEditable;
+  }
+
+  private getEditableValue(target: HTMLInputElement | HTMLTextAreaElement | HTMLElement): string {
+    return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+      ? target.value
+      : target.textContent ?? '';
+  }
+
+  private setEditableValue(target: HTMLInputElement | HTMLTextAreaElement | HTMLElement, value: string): void {
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      target.value = value;
+      return;
+    }
+
+    target.textContent = value;
+  }
+
+  private showInvalidCharacterMessage(): void {
+    this.invalidCharacterMessageVisible = true;
+
+    if (this.invalidCharacterTimeoutId) {
+      window.clearTimeout(this.invalidCharacterTimeoutId);
+    }
+
+    this.invalidCharacterTimeoutId = window.setTimeout(() => {
+      this.invalidCharacterMessageVisible = false;
+      this.invalidCharacterTimeoutId = null;
+    }, 2500);
+  }
+
+  private readonly ignoredInputTypes = new Set([
+    'button', 'checkbox', 'color', 'date', 'file', 'hidden', 'image', 'radio',
+    'range', 'reset', 'submit',
+  ]);
 }

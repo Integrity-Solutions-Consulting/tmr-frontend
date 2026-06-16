@@ -32,6 +32,7 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
 
   estados: LookupOption[] = [];
   tipos: LookupOption[] = [];
+  estadosFiltro = ['Activo', 'Inactivo'];
 
   mostrarEstadoDropdown = false;
   mostrarSeguimientoDropdown = false;
@@ -43,7 +44,7 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
   private scrollHandler = () => this.cerrarDropdowns();
 
   get seguimientoOpciones(): LookupOption[] {
-    return this.estados.filter(e => e.nombre !== 'Activo');
+    return this.estados.filter(e => !this.estadosFiltro.includes(e.nombre));
   }
 
   get labelEstado(): string {

@@ -19,14 +19,14 @@
     <span class="filtros__dropdown-label">{{ labelEstado }}</span>
     @if (mostrarEstadoDropdown) {
       <div class="filtros__dropdown" (click)="$event.stopPropagation()">
-        @for (e of estados; track e.id) {
-          <div class="filtros__dropdown-option" (click)="toggleEstado(e.nombre, $event)">
-            <div class="filtros__checkbox" [class.checked]="estaEstadoSeleccionado(e.nombre)">
-              @if (estaEstadoSeleccionado(e.nombre)) {
+        @for (estado of estadosFiltro; track estado) {
+          <div class="filtros__dropdown-option" (click)="toggleEstado(estado, $event)">
+            <div class="filtros__checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
+              @if (estaEstadoSeleccionado(estado)) {
                 <span class="material-icons">check</span>
               }
             </div>
-            <span>{{ e.nombre }}</span>
+            <span>{{ estado }}</span>
           </div>
         }
         <div class="filtros__dropdown-limpiar" (click)="limpiarEstados($event)">Limpiar filtro</div>
