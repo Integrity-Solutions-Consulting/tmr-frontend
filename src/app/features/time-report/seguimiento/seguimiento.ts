@@ -24,6 +24,7 @@ import { SeguimientoService } from '../../../shared/services/seguimiento.service
 import { Colaborador } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -46,8 +47,9 @@ import * as XLSX from 'xlsx';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
-        HorasFormatPipe,
-        PaginacionComponent
+        PaginacionComponent,
+        HeaderComponent,
+        HorasFormatPipe
     ],
     templateUrl: './seguimiento.html',
     styleUrl: './seguimiento.scss'

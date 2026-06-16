@@ -12,7 +12,7 @@
       </p>
     </div>
     <button class="actividad-modal__close" type="button" (click)="cancelar()" aria-label="Cerrar">
-      <mat-icon>close</mat-icon>
+      <img src="assets/iconos/x.svg" alt="Cerrar" />
     </button>
   </div>
 
@@ -28,7 +28,8 @@
       </div>
       <div class="actividad-modal__input-wrap"
         [class.actividad-modal__input-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
-        <mat-icon class="actividad-modal__input-icon">category</mat-icon>
+        <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/actividades.svg"
+          alt="tipo" />
         <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un tipo"
           [matAutocomplete]="autoTipo" formControlName="tipoActividad" />
         <mat-autocomplete #autoTipo="matAutocomplete" [displayWith]="displayTipoActividadFn.bind(this)">
@@ -54,7 +55,8 @@
       </div>
       <div class="actividad-modal__input-wrap"
         [class.actividad-modal__input-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
-        <mat-icon class="actividad-modal__input-icon">folder</mat-icon>
+        <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
+          alt="proyecto" />
         <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un proyecto"
           [matAutocomplete]="autoProyecto" formControlName="proyectoId" />
         <mat-autocomplete #autoProyecto="matAutocomplete" [displayWith]="displayProyectoFn.bind(this)">
@@ -100,7 +102,7 @@
       </div>
       <div class="actividad-modal__input-wrap actividad-modal__input-wrap--textarea"
         [class.actividad-modal__input-wrap--error]="form.get('descripcion')?.invalid && form.get('descripcion')?.touched">
-        <mat-icon class="actividad-modal__input-icon">notes</mat-icon>
+        <img class="actividad-modal__input-icon" src="assets/iconos/cargo.svg" alt="descripcion" />
         <textarea class="actividad-modal__input actividad-modal__textarea" formControlName="descripcion" rows="3"
           maxlength="255" placeholder="Descripción de la actividad"></textarea>
         <span class="actividad-modal__input-hint">{{ form.get('descripcion')?.value?.length || 0 }}/255</span>
@@ -143,7 +145,8 @@
         </div>
         <div class="actividad-modal__input-wrap"
           [class.actividad-modal__input-wrap--error]="form.get('numeroHoras')?.invalid && form.get('numeroHoras')?.touched">
-          <mat-icon class="actividad-modal__input-icon">schedule</mat-icon>
+          <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg"
+            alt="horas" />
           <input class="actividad-modal__input" type="number" formControlName="numeroHoras" min="0.5" max="24"
             step="0.5" placeholder="4" />
         </div>
@@ -232,7 +235,8 @@
         </div>
         <div class="actividad-modal__input-wrap"
           [class.actividad-modal__input-wrap--error]="form.get('horasPorDia')?.invalid && form.get('horasPorDia')?.touched">
-          <mat-icon class="actividad-modal__input-icon">timer</mat-icon>
+          <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg"
+            alt="timer" />
           <input class="actividad-modal__input" type="number" formControlName="horasPorDia" min="0.5" max="24"
             step="0.5" placeholder="4" />
         </div>
@@ -282,12 +286,13 @@
   <div class="actividad-modal__footer">
     @if (esEdicion) {
     <button class="actividad-modal__btn actividad-modal__btn--delete" type="button" (click)="eliminar()">
-      <mat-icon>delete</mat-icon> Eliminar
+      <img src="assets/iconos/btn-eliminar.svg" alt="eliminar" /> Eliminar
     </button>
     <div class="spacer"></div>
     }
     <button class="actividad-modal__btn actividad-modal__btn--save" type="submit" [disabled]="form.invalid"
       (click)="guardar()">
+      <img src="assets/iconos/circle-check.svg" alt="guardar" />
       Guardar
     </button>
   </div>

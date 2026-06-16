@@ -5,20 +5,6 @@
 }
 
 /* ---- HEADER ---- */
-.page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.page-title {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1A1A2E;
-    font-family: 'Inter', sans-serif;
-}
-
 .header-right {
     display: flex;
     align-items: center;
@@ -642,4 +628,62 @@
         opacity: 0.4 !important;
         cursor: not-allowed !important;
     }
+}
+
+/* ---- CUSTOM SVG ICONS ---- */
+.expand-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.select-chevron-img {
+    position: absolute !important;
+    right: 12px !important;
+    top: 11px !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+.filter-icon-img {
+    position: absolute !important;
+    left: 12px !important;
+    top: 11px !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+.download-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.action-icon-img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.menu-icon-img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.metric-icon-img {
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
 }

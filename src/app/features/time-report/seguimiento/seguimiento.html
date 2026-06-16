@@ -1,29 +1,28 @@
 <div class="seguimiento-page">
 
     <!-- ===== HEADER ===== -->
-    <div class="page-header">
-        <h1 class="page-title">Seguimiento</h1>
+    <app-header title="Seguimiento" subtitle="Monitoreo y control general de horas del periodo">
         <div class="header-right">
             <button mat-flat-button class="btn-reporte" [matMenuTriggerFor]="reporteMenu">
                 <span>Reporte</span>
-                <mat-icon class="expand-icon">expand_more</mat-icon>
             </button>
             <mat-menu #reporteMenu="matMenu">
                 <button mat-menu-item (click)="exportarExcel()">
-                    <mat-icon>table_view</mat-icon> Descargar Excel (.xlsx)
+                    <img class="menu-icon-img" src="assets/iconos/descargar.svg" alt="excel" /> Descargar Excel (.xlsx)
                 </button>
                 <button mat-menu-item (click)="exportarPDF()">
-                    <mat-icon>picture_as_pdf</mat-icon> Descargar PDF
+                    <img class="menu-icon-img" src="assets/iconos/descargar.svg" alt="pdf" /> Descargar PDF
                 </button>
             </mat-menu>
         </div>
-    </div>
+    </app-header>
 
     <!-- ===== METRICS BAR ===== -->
     <div class="metrics-bar">
         <div class="metric-item">
             <div class="metric-icon-wrap blue">
-                <mat-icon>schedule</mat-icon>
+                <img class="metric-icon-img blue-icon"
+                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
             </div>
             <div class="metric-texts">
                 <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
@@ -34,7 +33,7 @@
 
         <div class="metric-item">
             <div class="metric-icon-wrap green">
-                <mat-icon>check_circle</mat-icon>
+                <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
             </div>
             <div class="metric-texts">
                 <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
@@ -45,7 +44,8 @@
 
         <div class="metric-item">
             <div class="metric-icon-wrap purple">
-                <mat-icon>calendar_today</mat-icon>
+                <img class="metric-icon-img purple-icon"
+                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
             </div>
             <div class="metric-texts">
                 <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
@@ -56,7 +56,8 @@
 
         <div class="metric-item">
             <div class="metric-icon-wrap orange">
-                <mat-icon>groups</mat-icon>
+                <img class="metric-icon-img orange-icon"
+                    src="assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg" alt="colaboradores" />
             </div>
             <div class="metric-texts">
                 <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
@@ -67,7 +68,8 @@
 
         <div class="metric-item">
             <div class="metric-icon-wrap gray">
-                <mat-icon>folder</mat-icon>
+                <img class="metric-icon-img gray-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
+                    alt="proyectos" />
             </div>
             <div class="metric-texts">
                 <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
@@ -86,11 +88,7 @@
             <div class="filter-input-wrapper">
                 <input class="filter-input" type="text" placeholder="Buscar colaborador, proyecto, cliente..."
                     [(ngModel)]="busqueda" (input)="aplicarFiltros()" />
-                <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                </svg>
+                <img class="filter-icon-img" src="assets/iconos/buscar.svg" alt="buscar" />
             </div>
         </div>
 
@@ -101,14 +99,8 @@
                 <input class="filter-input" type="text" placeholder="Todos los clientes"
                     [(ngModel)]="clienteSeleccionado" (input)="filtrarClientes($event); aplicarFiltros()"
                     [matAutocomplete]="autoCliente" />
-                <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M10 14H6a4 4 0 0 0-4 4v2" />
-                    <path d="M12 21h10" />
-                    <path d="m18 15 4 4-4 4" />
-                </svg>
-                <mat-icon class="select-chevron">expand_more</mat-icon>
+                <img class="filter-icon-img" src="assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg"
+                    alt="cliente" />
                 <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="aplicarFiltros()">
                     <mat-option value="">Todos los clientes</mat-option>
                     @for (c of clientesFiltrados(); track c.id) {
@@ -133,7 +125,7 @@
         <!-- Descargar -->
         <button class="btn-descargar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
             (click)="descargarSeleccionados()">
-            <mat-icon>download</mat-icon>
+            <img class="download-icon" src="assets/iconos/descargar.svg" alt="descargar" />
             Descargar
         </button>
     </div>

@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
         <h1 class="header-title">{{ title() }}</h1>
         <p class="header-subtitle">{{ subtitle() }}</p>
       </div>
+      <ng-content></ng-content>
     </div>
   `,
   styles: [`
