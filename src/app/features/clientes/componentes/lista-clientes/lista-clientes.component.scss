@@ -13,10 +13,13 @@ $blanco:      #ffffff;
 //  Contenedor
 // ─────────────────────────────────────────────────────────────
 .clientes-container {
-  padding: 28px 32px;
-  background: $blanco;
-  min-height: 100vh;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  padding: 28px 28px 22px;
   font-family: 'Inter', sans-serif;
+  margin: 16px 20px;
 }
 
 
