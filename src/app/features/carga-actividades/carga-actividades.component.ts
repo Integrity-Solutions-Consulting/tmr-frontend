@@ -1,19 +1,23 @@
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AsyncPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { combineLatest, map, startWith, take, BehaviorSubject, tap, Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { BehaviorSubject, combineLatest, map, Observable, shareReplay, startWith, take, tap } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
 import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
 import { selectActividadesList } from '../../core/state/actividades/actividades.selectors';
 
+const COLOR_PRIMARIO = 'FF163572';
+const COLOR_RECURSO = 'FFFFFFFF';
+const COLOR_RECURSO_ALT = 'FFF8FAFC';
+const COLOR_TEXTO = 'FF334155';
+const COLOR_BORDE = 'FFE2E8F0';
+
 @Component({
   selector: 'app-carga-actividades',
   standalone: true,
-  imports: [AsyncPipe, DatePipe, ReactiveFormsModule], // 🚀 CORREGIDO: Agregado DatePipe aquí
+  imports: [AsyncPipe, ReactiveFormsModule],
   templateUrl: './carga-actividades.component.html',
   styleUrls: ['./carga-actividades.component.scss']
 })
@@ -21,14 +25,11 @@ export class CargaActividadesComponent {
   protected Math = Math;
   private store = inject(Store);
   private actions$ = inject(Actions);
-  private http = inject(HttpClient);
   
-  searchControl = new FormControl(''); 
-  clienteControl = new FormControl('');
-  
-  // Rango de Mayo de 2026 para tus datos reales
-  fechaDesdeControl = new FormControl('2026-05-01');
-  fechaHastaControl = new FormControl('2026-05-31');
+  searchControl = new FormControl('', { nonNullable: true });
+  clienteControl = new FormControl('', { nonNullable: true });
+  fechaDesdeControl = new FormControl('', { nonNullable: true });
+  fechaHastaControl = new FormControl('', { nonNullable: true });
   
   errorMessage: string = '';
   successMessage: string = '';
@@ -40,7 +41,6 @@ export class CargaActividadesComponent {
 
   private actividadesRaw$: Observable<Actividad[]> = this.store.select(selectActividadesList) as Observable<Actividad[]>;
 
-  // 🚀 CORREGIDO: Usamos 'nroHoras' que es la propiedad real en tu TypeScript model
   horasPorRegistrar$: Observable<string> = this.actividadesRaw$.pipe(
     map((actividades: Actividad[]) => {
       const total = actividades.reduce((acc, curr) => acc + (Number(curr.nroHoras) || 0), 0);
@@ -48,76 +48,79 @@ export class CargaActividadesComponent {
     })
   );
 
-  // 🚀 CORREGIDO: Usamos 'cliente' en minúscula
   clientes$ = this.actividadesRaw$.pipe(
     map((actividades: Actividad[]) => {
-      const lista = actividades.map(a => a.cliente || 'SIN CLIENTE');
-      return [...new Set(lista)];
+      const lista = actividades.map(a => a.cliente?.trim() || 'SIN CLIENTE');
+      return [...new Set(lista)].sort((a, b) => a.localeCompare(b, 'es'));
     })
   );
 
-  // 🚀 CORREGIDO: Filtros adaptados exactamente a tu interfaz de Angular (colaborador, proyecto, cliente, fecha)
-  private aplicarFiltros(actividades: Actividad[], term: string | null, clienteSelected: string | null, desde: string | null, hasta: string | null) {
-    let filtrados = actividades;
+  private actividadesFiltradasTodas$ = combineLatest([
+    this.actividadesRaw$,
+    this.cambioFiltro(this.searchControl),
+    this.cambioFiltro(this.clienteControl),
+    this.cambioFiltro(this.fechaDesdeControl),
+    this.cambioFiltro(this.fechaHastaControl)
+  ]).pipe(
+    map(([actividades, searchTerm, clienteSelected, desde, hasta]) => {
+      return this.aplicarFiltros(actividades, searchTerm, clienteSelected, desde, hasta);
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
 
-    if (term) {
-      const t = term.toLowerCase();
+  totalItemsFiltrados$ = this.actividadesFiltradasTodas$.pipe(
+    map(actividades => actividades.length)
+  );
+
+  actividadesFiltradas$ = combineLatest([
+    this.actividadesFiltradasTodas$,
+    this.paginaActual$
+  ]).pipe(
+    map(([actividades, pagina]) => {
+      const inicio = (pagina - 1) * this.itemsPorPagina;
+      return actividades.slice(inicio, inicio + this.itemsPorPagina);
+    })
+  );
+
+  private cambioFiltro(control: FormControl<string>): Observable<string> {
+    return control.valueChanges.pipe(
+      startWith(control.value),
+      tap(() => this.paginaActual$.next(1))
+    );
+  }
+
+  private aplicarFiltros(actividades: Actividad[], term: string, clienteSelected: string, desde: string, hasta: string): Actividad[] {
+    let filtrados = actividades;
+    const busqueda = term.trim().toLowerCase();
+    const cliente = clienteSelected.trim();
+    const fechaDesde = this.parseFechaLocal(desde);
+    const fechaHasta = this.parseFechaLocal(hasta);
+
+    if (busqueda) {
       filtrados = filtrados.filter(a => 
-        (a.colaborador && a.colaborador.toLowerCase().includes(t)) || 
-        (a.proyecto && a.proyecto.toLowerCase().includes(t))
+        (a.colaborador && a.colaborador.toLowerCase().includes(busqueda)) || 
+        (a.proyecto && a.proyecto.toLowerCase().includes(busqueda))
       );
     }
 
-    if (clienteSelected) {
-      filtrados = filtrados.filter(a => a.cliente === clienteSelected);
+    if (cliente) {
+      filtrados = filtrados.filter(a => (a.cliente?.trim() || 'SIN CLIENTE') === cliente);
     }
 
-    if (desde) {
+    if (fechaDesde || fechaHasta) {
       filtrados = filtrados.filter(a => {
-        if (!a.fecha) return true;
-        const fecha = new Date(a.fecha);
-        if (Number.isNaN(fecha.getTime())) return true;
-        return fecha >= new Date(desde + 'T00:00:00');
-      });
-    }
-    if (hasta) {
-      filtrados = filtrados.filter(a => {
-        if (!a.fecha) return true;
-        const fecha = new Date(a.fecha);
-        if (Number.isNaN(fecha.getTime())) return true;
-        return fecha <= new Date(hasta + 'T23:59:59');
+        const fecha = this.parseFechaLocal(a.fecha);
+
+        if (!fecha) return false;
+        if (fechaDesde && fecha < fechaDesde) return false;
+        if (fechaHasta && fecha > fechaHasta) return false;
+
+        return true;
       });
     }
 
     return filtrados;
   }
-
-  totalItemsFiltrados$ = combineLatest([
-    this.actividadesRaw$,
-    this.searchControl.valueChanges.pipe(startWith(''), tap(() => this.paginaActual$.next(1))),
-    this.clienteControl.valueChanges.pipe(startWith(''), tap(() => this.paginaActual$.next(1))),
-    this.fechaDesdeControl.valueChanges.pipe(startWith('2026-05-01'), tap(() => this.paginaActual$.next(1))),
-    this.fechaHastaControl.valueChanges.pipe(startWith('2026-05-31'), tap(() => this.paginaActual$.next(1)))
-  ]).pipe(
-    map(([actividades, searchTerm, clienteSelected, desde, hasta]) => {
-      return this.aplicarFiltros(actividades, searchTerm, clienteSelected, desde, hasta).length;
-    })
-  );
-
-  actividadesFiltradas$ = combineLatest([
-    this.actividadesRaw$,
-    this.searchControl.valueChanges.pipe(startWith('')),
-    this.clienteControl.valueChanges.pipe(startWith('')),
-    this.fechaDesdeControl.valueChanges.pipe(startWith('2026-05-01')),
-    this.fechaHastaControl.valueChanges.pipe(startWith('2026-05-31')),
-    this.paginaActual$
-  ]).pipe(
-    map(([actividades, searchTerm, clienteSelected, desde, hasta, pagina]) => {
-      const filtrados = this.aplicarFiltros(actividades, searchTerm, clienteSelected, desde, hasta);
-      const inicio = (pagina - 1) * this.itemsPorPagina;
-      return filtrados.slice(inicio, inicio + this.itemsPorPagina);
-    })
-  );
 
   paginaSiguiente() {
     this.totalItemsFiltrados$.pipe(take(1)).subscribe(total => {
@@ -141,8 +144,8 @@ export class CargaActividadesComponent {
     if (!file) return;
     
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!['xlsx', 'xls', 'xlm'].includes(ext!)) {
-      this.errorMessage = 'Formato no válido. Use .xlsx, .xls o .xlm';
+    if (!['xlsx', 'csv'].includes(ext!)) {
+      this.errorMessage = 'Formato no válido. Use .xlsx o .csv';
       event.target.value = '';
       return;
     }
@@ -178,29 +181,150 @@ export class CargaActividadesComponent {
     event.target.value = '';
   }
 
-  descargarExcel() {
-    this.http.get(`${environment.apiUrl}/carga-actividades/download`, {
-      responseType: 'blob'
-    }).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Reporte_Actividades_${new Date().toISOString().slice(0,10)}.xlsx`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        this.errorMessage = 'No se pudo descargar el reporte.';
-        console.error(err);
+  descargarExcel(): void {
+    this.actividadesFiltradasTodas$.pipe(take(1)).subscribe({
+      next: actividades => void this.descargarActividadesExcel(actividades),
+      error: error => {
+        this.errorMessage = 'No se pudo preparar el reporte.';
+        console.error(error);
       }
     });
   }
 
-  private formatearFecha(fecha?: string | Date) {
-    if (!fecha) return '';
-    const valor = new Date(fecha);
-    if (Number.isNaN(valor.getTime())) return '';
-    return valor.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  private async descargarActividadesExcel(actividades: Actividad[]): Promise<void> {
+    try {
+      const { Workbook } = await import('exceljs');
+      const workbook = new Workbook();
+      const worksheet = workbook.addWorksheet('Actividades');
+
+      worksheet.columns = [
+        { header: 'Fecha', key: 'fecha', width: 15 },
+        { header: 'Colaborador', key: 'colaborador', width: 36 },
+        { header: 'Proyecto', key: 'proyecto', width: 42 },
+        { header: 'Cliente', key: 'cliente', width: 36 },
+        { header: 'Lider Tecnico', key: 'liderTecnico', width: 30 },
+        { header: 'Horas', key: 'horas', width: 12 },
+        { header: 'Estado', key: 'estado', width: 18 },
+      ];
+
+      actividades.forEach(actividad => {
+        worksheet.addRow({
+          fecha: this.formatearFecha(actividad.fecha),
+          colaborador: actividad.colaborador || 'Sin colaborador',
+          proyecto: actividad.proyecto || 'Sin proyecto',
+          cliente: actividad.cliente || 'Sin cliente',
+          liderTecnico: actividad.liderTecnico || '-',
+          horas: Number(actividad.nroHoras) || 0,
+          estado: actividad.estado || 'Pendiente'
+        });
+      });
+
+      worksheet.getColumn('horas').numFmt = '#,##0.00';
+      this.aplicarEstiloHoja(worksheet, 7);
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      this.crearDescarga(blob, `Reporte_Actividades_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (error) {
+      this.errorMessage = 'No se pudo descargar el reporte.';
+      console.error(error);
+    }
+  }
+
+  private aplicarEstiloHoja(ws: any, colEstado: number): void {
+    const header = ws.getRow(1);
+    header.height = 22;
+    header.eachCell((cell: any) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = this.bordeDelgado();
+    });
+
+    ws.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber === 1) return;
+      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
+      row.height = 20;
+      row.eachCell((cell: any, colNumber: number) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        cell.border = this.bordeDelgado(COLOR_BORDE);
+        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+        if (colNumber === colEstado) {
+          const estado = cell.value?.toString().toLowerCase() ?? '';
+          const cargado = estado === 'cargado';
+          const error = estado === 'error';
+
+          cell.font = {
+            name: 'Segoe UI',
+            size: 10,
+            bold: true,
+            color: { argb: cargado ? 'FF16A34A' : error ? 'FFDC2626' : 'FFB45309' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+    });
+  }
+
+  private bordeDelgado(color = COLOR_PRIMARIO): any {
+    const borde = { style: 'thin', color: { argb: color } };
+    return { top: borde, left: borde, bottom: borde, right: borde };
+  }
+
+  private crearDescarga(blob: Blob, nombreArchivo: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  formatearFecha(fecha?: string | Date | null): string {
+    const valor = this.parseFechaLocal(fecha);
+
+    if (!valor) return '-';
+
+    const dia = String(valor.getDate()).padStart(2, '0');
+    const mes = String(valor.getMonth() + 1).padStart(2, '0');
+
+    return `${dia}/${mes}/${valor.getFullYear()}`;
+  }
+
+  private parseFechaLocal(fecha?: string | Date | null): Date | null {
+    if (!fecha) return null;
+
+    if (fecha instanceof Date) {
+      return Number.isNaN(fecha.getTime())
+        ? null
+        : new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+    }
+
+    const texto = String(fecha).trim();
+    const iso = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (iso) {
+      return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    }
+
+    const dmy = texto.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+
+    if (dmy) {
+      return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+    }
+
+    const valor = new Date(texto);
+
+    return Number.isNaN(valor.getTime())
+      ? null
+      : new Date(valor.getFullYear(), valor.getMonth(), valor.getDate());
   }
 }

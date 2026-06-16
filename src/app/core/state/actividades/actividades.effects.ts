@@ -11,8 +11,17 @@ export class ActividadesEffects {
   private excelService = inject(ExcelService);
 
   private getValue(source: any, keys: string[], fallback: any = '') {
-    const key = keys.find(k => source?.[k] !== undefined && source?.[k] !== null);
-    return key ? source[key] : fallback;
+    const key = keys.find(k => {
+      const value = source?.[k];
+
+      return value !== undefined &&
+        value !== null &&
+        (typeof value !== 'string' || value.trim() !== '');
+    });
+
+    const value = key ? source[key] : fallback;
+
+    return typeof value === 'string' ? value.trim() : value;
   }
 
   private normalizarActividad(item: any): Actividad {
