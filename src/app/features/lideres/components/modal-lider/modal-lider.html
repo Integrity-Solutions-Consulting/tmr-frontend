@@ -19,49 +19,13 @@
         Información General
       </div>
 
-      <!-- Información General -->
-      <div class="form-row">
-        <!-- En edición: primera columna es Estado, segunda columna es Tipo de líder -->
-        <ng-container *ngIf="modoEdicion">
-          <!-- Estado -->
-          <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.estado">
-            <div class="custom-select" (click)="toggleDropdown('estado', $event)"
-              [class.open]="dropdownAbierto === 'estado'">
-              <span class="custom-select-value" [class.placeholder]="!form.estado">{{ form.estado || 'Estado' }}</span>
-              <span class="material-icons custom-select-arrow">expand_more</span>
-            </div>
-            <ul class="custom-select-options" *ngIf="dropdownAbierto === 'estado'">
-              <li (click)="seleccionar('estado', 'Activo', $event)">Activo</li>
-              <li (click)="seleccionar('estado', 'Inactivo', $event)">Inactivo</li>
-            </ul>
-            <span class="error-msg" *ngIf="enviado && !form.estado">Campo requerido</span>
-          </div>
-
-          <!-- Tipo de líder -->
+      <!-- MODO EDICIÓN -->
+      <ng-container *ngIf="modoEdicion">
+        <div class="form-row">
           <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
             <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
               [class.open]="dropdownAbierto === 'tipo'">
-              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de
-                líder' }}</span>
-              <span class="material-icons custom-select-arrow">expand_more</span>
-            </div>
-            <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
-              <li *ngFor="let opcion of tiposLideres" (click)="seleccionar('tipo', opcion, $event)">
-                {{ opcion.valor }}
-              </li>
-            </ul>
-            <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
-          </div>
-        </ng-container>
-
-        <!-- En creación: primera columna es Tipo de líder, segunda columna es Colaborador (si es Interno) -->
-        <ng-container *ngIf="!modoEdicion">
-          <!-- Tipo de líder -->
-          <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
-            <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
-              [class.open]="dropdownAbierto === 'tipo'">
-              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de
-                líder' }}</span>
+              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
             <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
@@ -72,13 +36,12 @@
             <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
           </div>
 
-          <!-- Colaborador - solo visible cuando es Interno -->
-          <div class="custom-select-wrapper select-wrapper--half" *ngIf="form.tipoNombre === 'Interno'"
+          <div class="custom-select-wrapper select-wrapper--half"
+            *ngIf="form.tipoNombre === 'Interno'"
             [class.input-error]="enviado && !form.personaId">
             <div class="custom-select" (click)="toggleDropdown('persona', $event)"
               [class.open]="dropdownAbierto === 'persona'">
-              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() ||
-                'Colaborador' }}</span>
+              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
             <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
@@ -98,37 +61,52 @@
             </div>
             <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
           </div>
-        </ng-container>
-      </div>
+        </div>
+      </ng-container>
 
-      <!-- Fila 2 (solo en edición si el líder es Interno) -->
-      <div class="form-row" *ngIf="modoEdicion && form.tipoNombre === 'Interno'">
-        <!-- Colaborador - solo visible cuando es Interno -->
-        <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.personaId">
-          <div class="custom-select" (click)="toggleDropdown('persona', $event)"
-            [class.open]="dropdownAbierto === 'persona'">
-            <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() ||
-              'Colaborador' }}</span>
-            <span class="material-icons custom-select-arrow">expand_more</span>
-          </div>
-          <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
-            <div class="dropdown-search-box" (click)="$event.stopPropagation()">
-              <span class="material-icons dropdown-search-icon">search</span>
-              <input type="text" class="dropdown-search-input" placeholder="Buscar colaborador..."
-                [(ngModel)]="busquedaPersona" (input)="filtrarPersonas()" />
+      <!-- MODO CREAR -->
+      <ng-container *ngIf="!modoEdicion">
+        <div class="form-row">
+          <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
+            <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
+              [class.open]="dropdownAbierto === 'tipo'">
+              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
+              <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
-            <ul class="dropdown-list">
-              <li *ngFor="let persona of personasFiltradas" (click)="seleccionar('persona', persona, $event)">
-                {{ persona.nombreCompleto }}
-              </li>
-              <li *ngIf="personasFiltradas.length === 0" class="dropdown-empty">
-                No se encontraron resultados
+            <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
+              <li *ngFor="let opcion of tiposLideres" (click)="seleccionar('tipo', opcion, $event)">
+                {{ opcion.valor }}
               </li>
             </ul>
+            <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
           </div>
-          <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
+
+          <div class="custom-select-wrapper select-wrapper--half" *ngIf="form.tipoNombre === 'Interno'"
+            [class.input-error]="enviado && !form.personaId">
+            <div class="custom-select" (click)="toggleDropdown('persona', $event)"
+              [class.open]="dropdownAbierto === 'persona'">
+              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
+              <span class="material-icons custom-select-arrow">expand_more</span>
+            </div>
+            <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
+              <div class="dropdown-search-box" (click)="$event.stopPropagation()">
+                <span class="material-icons dropdown-search-icon">search</span>
+                <input type="text" class="dropdown-search-input" placeholder="Buscar colaborador..."
+                  [(ngModel)]="busquedaPersona" (input)="filtrarPersonas()" />
+              </div>
+              <ul class="dropdown-list">
+                <li *ngFor="let persona of personasFiltradas" (click)="seleccionar('persona', persona, $event)">
+                  {{ persona.nombreCompleto }}
+                </li>
+                <li *ngIf="personasFiltradas.length === 0" class="dropdown-empty">
+                  No se encontraron resultados
+                </li>
+              </ul>
+            </div>
+            <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
+          </div>
         </div>
-      </div>
+      </ng-container>
 
       <div class="section-title">
         <span class="section-line"></span>
@@ -136,29 +114,31 @@
       </div>
 
       <div class="form-row">
-        <div class="input-wrapper" [class.input-error]="enviado && !isNombresValid(form.nombres)">
+        <div class="input-wrapper" [class.input-error]="(enviado && !isNombresValid(form.nombres)) || nombresInvalido">
           <input type="text" class="form-input" placeholder="Nombres" [(ngModel)]="form.nombres"
-            (keypress)="soloLetras($event)" (input)="onInputNombres($event)" maxlength="100">
-          <span class="error-msg" *ngIf="enviado && (!form.nombres || form.nombres.trim().length === 0)">Campo requerido</span>
-          <span class="error-msg" *ngIf="enviado && form.nombres && form.nombres.trim().length > 100">Máximo 100 caracteres</span>
+            (input)="onInputNombres($event)" maxlength="100">
+          <span class="error-msg" *ngIf="nombresInvalido">Solo se permiten letras, sin números ni emojis</span>
+          <span class="error-msg" *ngIf="enviado && !nombresInvalido && (!form.nombres || form.nombres.trim().length === 0)">Campo requerido</span>
         </div>
-        <div class="input-wrapper" [class.input-error]="enviado && !isApellidosValid(form.apellidos)">
+        <div class="input-wrapper" [class.input-error]="(enviado && !isApellidosValid(form.apellidos)) || apellidosInvalido">
           <input type="text" class="form-input" placeholder="Apellidos" [(ngModel)]="form.apellidos"
-            (keypress)="soloLetras($event)" (input)="onInputApellidos($event)" maxlength="100">
-          <span class="error-msg" *ngIf="enviado && (!form.apellidos || form.apellidos.trim().length === 0)">Campo requerido</span>
-          <span class="error-msg" *ngIf="enviado && form.apellidos && form.apellidos.trim().length > 100">Máximo 100 caracteres</span>
+            (input)="onInputApellidos($event)" maxlength="100">
+          <span class="error-msg" *ngIf="apellidosInvalido">Solo se permiten letras, sin números ni emojis</span>
+          <span class="error-msg" *ngIf="enviado && !apellidosInvalido && (!form.apellidos || form.apellidos.trim().length === 0)">Campo requerido</span>
         </div>
       </div>
 
       <div class="form-row">
         <div class="input-wrapper" [class.input-error]="enviado && !isEmailValid(form.correo)">
           <input type="email" class="form-input" placeholder="Correo electrónico" [(ngModel)]="form.correo" maxlength="100">
-          <span class="error-msg" *ngIf="enviado && !isEmailValid(form.correo)">Correo electrónico inválido</span>
+          <span class="error-msg" *ngIf="enviado && (!form.correo || form.correo.trim().length === 0)">Campo requerido</span>
+          <span class="error-msg" *ngIf="enviado && form.correo && form.correo.trim().length > 0 && !isEmailValid(form.correo)">Correo electrónico inválido</span>
         </div>
         <div class="input-wrapper" [class.input-error]="enviado && !isTelefonoValid(form.telefono)">
           <input type="text" class="form-input" placeholder="Teléfono" [(ngModel)]="form.telefono"
-            (keypress)="soloNumerosYSignos($event)" (input)="onInputTelefono($event)" maxlength="20">
-          <span class="error-msg" *ngIf="enviado && !isTelefonoValid(form.telefono)">Teléfono inválido (debe tener entre 7 y 20 dígitos)</span>
+            (keypress)="soloNumerosYSignos($event)" (input)="onInputTelefono($event)" maxlength="10">
+          <span class="error-msg" *ngIf="enviado && (!form.telefono || form.telefono.trim().length === 0)">Campo requerido</span>
+          <span class="error-msg" *ngIf="enviado && form.telefono && form.telefono.trim().length > 0 && !isTelefonoValid(form.telefono)">Teléfono inválido (debe tener 10 dígitos y empezar en 09 o 02-07)</span>
         </div>
       </div>
 
