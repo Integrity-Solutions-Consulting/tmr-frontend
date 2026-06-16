@@ -1,10 +1,8 @@
 import {
-  AfterViewInit,
   Component,
   EventEmitter,
   Input,
   Output,
-  ViewChild,
   computed,
   effect,
   inject,
@@ -12,13 +10,13 @@ import {
 } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { BadgeEstado } from '../badge-estado/badge-estado';
+import { PaginacionComponent } from '../paginacion/paginacion.component';
 import {
   ActionMenuComponent,
   ActionMenuItem
@@ -34,13 +32,13 @@ import { selectProyectos } from '../../../features/proyectos/store/proyectos.sel
   imports: [
     MatTableModule,
     MatButtonModule,
-    MatPaginatorModule,
+    PaginacionComponent,
     ActionMenuComponent
   ],
   templateUrl: './tabla.html',
   styleUrl: './tabla.scss'
 })
-export class Tabla implements AfterViewInit {
+export class Tabla {
   @Input()
   set filtros(value: FiltrosProyecto) {
     this._filtros.set(value);
@@ -49,9 +47,6 @@ export class Tabla implements AfterViewInit {
   @Output() editar = new EventEmitter<Proyecto>();
   @Output() eliminar = new EventEmitter<string>();
   @Output() verMas = new EventEmitter<Proyecto>();
-
-  @ViewChild(MatPaginator)
-  paginator!: MatPaginator;
 
   private store = inject(Store);
   private proyectosService = inject(ProyectosService);
@@ -80,9 +75,9 @@ export class Tabla implements AfterViewInit {
     'acciones'
   ];
 
+  paginaActual = signal(1);
+  porPagina = 5;
   dataSource = new MatTableDataSource<Proyecto>([]);
-  pageIndex = 0;
-  pageSize = 5;
   menuAbierto: string | null = null;
 
   proyectosFiltrados = computed(() => {
@@ -116,16 +111,37 @@ export class Tabla implements AfterViewInit {
     });
   });
 
+  filtrosAplicados = signal<string>('');
+
+  totalPaginas = computed(() => {
+    const total = this.proyectosFiltrados().length;
+    return Math.ceil(total / this.porPagina) || 1;
+  });
+
+  proyectosEnPagina = computed(() => {
+    const proyectos = this.proyectosFiltrados();
+    const inicio = (this.paginaActual() - 1) * this.porPagina;
+    return proyectos.slice(inicio, inicio + this.porPagina);
+  });
+
   constructor() {
     this.cargarSeguimientoOpciones();
 
+    // Effect para resetear página cuando cambian los FILTROS (no cuando cambia paginaActual)
     effect(() => {
-      this.dataSource.data = this.proyectosFiltrados();
-
-      if (this.dataSource.paginator) {
-        this.pageIndex = 0;
-        this.dataSource.paginator.firstPage();
+      const filtros = this._filtros();
+      const filtroKey = JSON.stringify(filtros);
+      const filtroAntKey = this.filtrosAplicados();
+      
+      if (filtroAntKey && filtroKey !== filtroAntKey) {
+        this.paginaActual.set(1);
       }
+      this.filtrosAplicados.set(filtroKey);
+    });
+
+    // Effect para actualizar el datasource cuando cambia la página o los datos
+    effect(() => {
+      this.dataSource.data = this.proyectosEnPagina();
     });
   }
 
@@ -179,25 +195,24 @@ export class Tabla implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
+  onPaginaCambia(nuevaPagina: number): void {
+    this.paginaActual.set(nuevaPagina);
+    this.dataSource.data = this.proyectosEnPagina();
   }
 
   get totalRegistros(): number {
-    return this.dataSource.filteredData.length || this.dataSource.data.length;
+    return this.proyectosFiltrados().length;
   }
 
   get registroDesde(): number {
     if (!this.totalRegistros) return 0;
-    return this.pageIndex * this.pageSize + 1;
+    return (this.paginaActual() - 1) * this.porPagina + 1;
   }
 
   get registroHasta(): number {
-    return Math.min((this.pageIndex + 1) * this.pageSize, this.totalRegistros);
+    return Math.min(this.paginaActual() * this.porPagina, this.totalRegistros);
   }
 
   formatearFecha(fecha?: string | Date | number): string {
