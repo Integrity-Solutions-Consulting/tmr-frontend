@@ -297,6 +297,12 @@ export class AgregarActividad implements OnInit {
                             }
                         }
                         this.tiposActividad.set(unique);
+                        
+                        // Refrescar el valor para forzar el repintado del displayWith
+                        const currentVal = this.form?.get('tipoActividad')?.value;
+                        if (currentVal) {
+                            this.form.get('tipoActividad')?.setValue(currentVal, { emitEvent: false });
+                        }
                     } else {
                         this.tiposActividad.set([]);
                     }
@@ -323,6 +329,12 @@ export class AgregarActividad implements OnInit {
                             }
                         }
                         this.proyectos.set(unique);
+                        
+                        // Refrescar el valor para forzar el repintado del displayWith
+                        const currentVal = this.form?.get('proyectoId')?.value;
+                        if (currentVal) {
+                            this.form.get('proyectoId')?.setValue(currentVal, { emitEvent: false });
+                        }
                     } else {
                         this.proyectos.set([]);
                     }
