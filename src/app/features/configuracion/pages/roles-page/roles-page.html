@@ -118,74 +118,76 @@
       </div>
     }
 
-    <div class="roles-table-wrap">
-      <table class="roles-table">
-        <thead>
-          <tr>
-            <th>Rol</th>
-            <th>Descripción</th>
-            <th>Módulos accesibles</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (filteredRoles().length === 0) {
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="roles-table">
+          <thead>
             <tr>
-              <td colspan="5" class="empty-state">No se encontraron roles.</td>
+              <th>Rol</th>
+              <th>Descripción</th>
+              <th>Módulos accesibles</th>
+              <th>Estado</th>
+              <th></th>
             </tr>
-          }
+          </thead>
+          <tbody>
+            @if (filteredRoles().length === 0) {
+              <tr>
+                <td colspan="5" class="empty-state">No se encontraron roles.</td>
+              </tr>
+            }
 
-          @for (rol of rolesPaginados(); track rol.id) {
-            <tr>
-              <td>
-                <strong class="role-name">{{ rol.nombre }}</strong>
-              </td>
-              <td>{{ rol.descripcion }}</td>
-              <td>
-                <div class="module-list-wrap">
-                  <div class="module-list">
-                    @for (modulo of visibleModulos(rol); track modulo.id) {
-                      <span class="module-chip">{{ modulo.nombre }}</span>
-                    }
-                    @if (modulosOcultos(rol) > 0) {
-                      <button
-                        type="button"
-                        class="module-chip module-chip--more"
-                        [class.module-chip--more-active]="estaExpandido(rol.id)"
-                        (click)="toggleModulosExpandidos($event, rol.id)"
-                        [attr.aria-expanded]="estaExpandido(rol.id)"
-                        [attr.aria-label]="'Ver ' + modulosOcultos(rol) + ' módulos más de ' + rol.nombre"
-                      >
-                        {{ estaExpandido(rol.id) ? 'Cerrar' : '+' + modulosOcultos(rol) + ' más' }}
-                      </button>
-                    }
-                  </div>
-
-                  @if (estaExpandido(rol.id)) {
-                    <div class="module-expand-list" (click)="$event.stopPropagation()">
-                      @for (modulo of modulosOcultosList(rol); track modulo.id) {
-                        <span class="module-chip module-chip--expand">{{ modulo.nombre }}</span>
+            @for (rol of rolesPaginados(); track rol.id) {
+              <tr>
+                <td>
+                  <strong class="role-name">{{ rol.nombre }}</strong>
+                </td>
+                <td>{{ rol.descripcion }}</td>
+                <td>
+                  <div class="module-list-wrap">
+                    <div class="module-list">
+                      @for (modulo of visibleModulos(rol); track modulo.id) {
+                        <span class="module-chip">{{ modulo.nombre }}</span>
+                      }
+                      @if (modulosOcultos(rol) > 0) {
+                        <button
+                          type="button"
+                          class="module-chip module-chip--more"
+                          [class.module-chip--more-active]="estaExpandido(rol.id)"
+                          (click)="toggleModulosExpandidos($event, rol.id)"
+                          [attr.aria-expanded]="estaExpandido(rol.id)"
+                          [attr.aria-label]="'Ver ' + modulosOcultos(rol) + ' módulos más de ' + rol.nombre"
+                        >
+                          {{ estaExpandido(rol.id) ? 'Cerrar' : '+' + modulosOcultos(rol) + ' más' }}
+                        </button>
                       }
                     </div>
-                  }
-                </div>
-              </td>
-              <td>
-                <span class="status-pill" [class.status-pill--inactive]="!rol.activo">
-                  {{ rol.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="actions-cell">
-                <app-action-menu
-                  [itemId]="rol.id.toString()"
-                  [acciones]="obtenerAccionesRol(rol)"
-                ></app-action-menu>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+
+                    @if (estaExpandido(rol.id)) {
+                      <div class="module-expand-list" (click)="$event.stopPropagation()">
+                        @for (modulo of modulosOcultosList(rol); track modulo.id) {
+                          <span class="module-chip module-chip--expand">{{ modulo.nombre }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [class.status-pill--inactive]="!rol.activo">
+                    {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <app-action-menu
+                    [itemId]="rol.id.toString()"
+                    [acciones]="obtenerAccionesRol(rol)"
+                  ></app-action-menu>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 

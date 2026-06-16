@@ -314,13 +314,25 @@ $hover-row:     rgba(#163572, 0.04);
   }
 }
 
-.roles-table-wrap {
-  overflow-y: auto;
-  overflow-x: auto;
+// ── Wrapper externo para tabla + scrollbar (estilo líderes) ────────────────
+.table-scroll-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+  overflow: hidden;
   max-height: calc(100vh - 320px);
+}
+
+.table-wrapper {
   background: $white;
-  border: 1px solid #E5E5E5;
   border-radius: 10px;
+  border: 1px solid #E5E5E5;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: #D4D4D4 transparent;
 
@@ -332,43 +344,65 @@ $hover-row:     rgba(#163572, 0.04);
 
 .roles-table {
   width: 100%;
-  min-width: 760px;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 14px;
+  border-spacing: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  border-radius: 10px;
+  overflow: hidden;
 
-  th,
-  td {
-    padding: 13px 16px;
-    border-bottom: 1px solid $border;
-    text-align: left;
-    vertical-align: middle;
-  }
-
-  th {
-    color: #737373;
-    background: $white;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
+  thead {
+    background: #f8fafc;
+    border-bottom: 2px solid $border;
     position: sticky;
     top: 0;
     z-index: 2;
+
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: #737373;
+      font-size: 12px;
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+      background: #f8fafc;
+      user-select: none;
+    }
+
+    tr:first-child th:first-child { border-top-left-radius: 10px; }
+    tr:first-child th:last-child { border-top-right-radius: 10px; }
   }
 
-  td {
-    color: #737373;
-    font-size: 14px;
-    font-weight: 400;
-    white-space: nowrap;
-  }
+  tbody {
+    tr {
+      border-bottom: 1px solid $border;
+      transition: background 0.12s;
 
-  tr:last-child td {
-    border-bottom: 0;
-  }
+      &:last-child { border-bottom: none; }
+      &:last-child td:first-child { border-bottom-left-radius: 10px; }
+      &:last-child td:last-child { border-bottom-right-radius: 10px; }
+      &:hover { background: $hover-row; }
+    }
 
-  tbody tr {
-    transition: background 0.12s;
-    &:hover { background: $hover-row; }
+    td {
+      padding: 6px 14px;
+      color: #737373;
+      font-size: 12px;
+      font-weight: 400;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // Anchos de columna (estilo líderes — table-layout fixed)
+    th:nth-child(1), td:nth-child(1) { width: 140px; }   // Rol
+    th:nth-child(2), td:nth-child(2) { width: auto; }     // Descripción
+    th:nth-child(3), td:nth-child(3) { width: 280px; }    // Módulos
+    th:nth-child(4), td:nth-child(4) { width: 100px; }    // Estado
+    th:nth-child(5), td:nth-child(5) { width: 56px; }     // Acciones
   }
 
   th:last-child { width: 56px; }
@@ -376,7 +410,8 @@ $hover-row:     rgba(#163572, 0.04);
 
 .role-name {
   color: $primary;
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 13px;
 }
 
 // ── Módulos ────────────────────────────────────────────────────────────────
@@ -397,9 +432,10 @@ $hover-row:     rgba(#163572, 0.04);
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 400;
   line-height: 1;
+  font-family: 'Inter', sans-serif;
 }
 
 .module-chip {
@@ -463,13 +499,14 @@ $hover-row:     rgba(#163572, 0.04);
   to   { opacity: 1; transform: translateY(0); }
 }
 
-// ── Estado pills ───────────────────────────────────────────────────────────
+// ── Estado pills (estilo líderes badge) ────────────────────────────────────
 .status-pill {
   gap: 5px;
   padding: 3px 10px;
   color: #737373;
   background: #ffffff;
   border: 1px solid #E5E5E5;
+  font-size: 12px;
 
   &::before {
     content: '';
