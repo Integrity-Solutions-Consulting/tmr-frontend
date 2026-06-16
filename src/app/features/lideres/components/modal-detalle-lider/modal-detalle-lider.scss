@@ -354,4 +354,12 @@ $inactivo: #ef4444;
     background: #fff7ed;
     .detalle-proyectos__item-dot { background: #FF8D28; }
   }
+
+  .estado--activo {
+    color: #15803d;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    .detalle-proyectos__item-dot { background: #26BF4D; }
+  }
 }
+
