@@ -25,17 +25,12 @@ export class ModalDetalleComponent {
     }
   }
 
-  getEstadoClass(estado: string): string {
-    const e = estado?.toLowerCase().trim();
-    if (e === 'en progreso')    return 'en-progreso';
-    if (e === 'completado')     return 'completado';
-    if (e === 'cancelado')      return 'cancelado';
-    if (e === 'en espera')      return 'en-espera';
-    if (e === 'pausado')        return 'pausado';
-    if (e === 'inactivo')       return 'inactivo';
-    if (e === 'aprobado')       return 'aprobado';
-    if (e === 'aplazado')       return 'aplazado';
-    if (e === 'planificación')  return 'planificacion';
-    return '';
+  getEstadoClass(estado?: string | null): string {
+    return (estado ?? 'sin seguimiento')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-');
   }
 }

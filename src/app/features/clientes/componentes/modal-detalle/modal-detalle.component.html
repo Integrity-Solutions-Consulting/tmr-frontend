@@ -104,7 +104,7 @@
           </div>
           <span class="proyecto-estado"
                 [ngClass]="getEstadoClass(p.estado)">
-            <span class="dot"></span>{{ p.estado }}
+            <span class="dot"></span>{{ p.estado || 'Sin seguimiento' }}
           </span>
         </div>
       </div>

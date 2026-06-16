@@ -323,15 +323,20 @@
   &__item-estado {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 6px;
+    min-height: 26px;
+    padding: 0 14px;
+    background: #ffffff;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1;
     white-space: nowrap;
     flex-shrink: 0;
-    padding: 3px 10px;
-    border-radius: 20px;
+    border-radius: 999px;
     border: 1px solid;
+    color: #6b7280;
   }
 
   &__item-dot {
@@ -342,93 +347,102 @@
   }
 
   // ── Colores estado ────────────────────────────────
-  .estado--progreso {
+  .en-progreso {
     color: #0078f0;
     border-color: #bfdbfe;
-    background: #eff6ff;
 
     .detalle-proyectos__item-dot {
       background: #0078f0;
     }
   }
 
-  .estado--completado {
+  .completado {
     color: #34c759;
     border-color: #bbf7d0;
-    background: #f0fdf4;
 
     .detalle-proyectos__item-dot {
       background: #34c759;
     }
   }
 
-  .estado--pausa {
+  .en-pausa {
     color: #ff8d28;
-    border-color: #fde68a;
-    background: #fffbeb;
+    border-color: #fed7aa;
 
     .detalle-proyectos__item-dot {
       background: #ff8d28;
     }
   }
 
-  .estado--cancelado {
+  .cancelado {
     color: #ff383c;
     border-color: #fecaca;
-    background: #fef2f2;
 
     .detalle-proyectos__item-dot {
       background: #ff383c;
     }
   }
 
-  .estado--inactivo {
+  .inactivo {
     color: #8e8e93;
     border-color: #e5e7eb;
-    background: #f9fafb;
 
     .detalle-proyectos__item-dot {
       background: #8e8e93;
     }
   }
 
-  .estado--aprobado {
+  .aprobado {
     color: #af52de;
     border-color: #e9d5ff;
-    background: #faf5ff;
 
     .detalle-proyectos__item-dot {
       background: #af52de;
     }
   }
 
-  .estado--aplazado {
+  .aplazado {
     color: #ffd60a;
     border-color: #fef08a;
-    background: #fefce8;
 
     .detalle-proyectos__item-dot {
       background: #ffd60a;
     }
   }
 
-  .estado--planificacion {
+  .planificacion {
     color: #00c7be;
     border-color: #a5f3fc;
-    background: #ecfeff;
 
     .detalle-proyectos__item-dot {
       background: #00c7be;
     }
   }
 
-  .estado--espera {
+  .en-espera {
     color: #ff8d28;
     border-color: #fed7aa;
-    background: #fff7ed;
 
     .detalle-proyectos__item-dot {
       background: #ff8d28;
+    }
+  }
+
+  .activo {
+    color: #22c55e;
+    border-color: #bbf7d0;
+
+    .detalle-proyectos__item-dot {
+      background: #22c55e;
+    }
+  }
+
+  .sin-seguimiento {
+    color: #6b7280;
+    border-color: #e5e7eb;
+
+    .detalle-proyectos__item-dot {
+      background: #6b7280;
     }
   }
 }

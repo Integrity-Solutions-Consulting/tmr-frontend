@@ -48,6 +48,15 @@ export class ModalDetalleColaboradorComponent {
     this.editar.emit(this.colaborador);
   }
 
+  getEstadoClass(estado?: string | null): string {
+    return (estado ?? 'sin seguimiento')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-');
+  }
+
   formatFecha(fecha?: string | Date | null): string {
     if (!fecha) return '—';
 
