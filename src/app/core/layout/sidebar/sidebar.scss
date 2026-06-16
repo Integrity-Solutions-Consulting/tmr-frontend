@@ -37,18 +37,38 @@
   flex: 1;
 }
 
-/* ── SVG icons ── */
+/* ── Iconos (SVG como máscara) ── */
 .sidebar__svg {
+  display: inline-block;
   width: 17px;
   height: 17px;
   flex-shrink: 0;
-  color: currentColor;
-  transition: color 0.18s;
+  background-color: currentColor;        // Hereda el color del enlace
+  mask: var(--icon) no-repeat center / contain;
+  -webkit-mask: var(--icon) no-repeat center / contain;
+  transition: background-color 0.16s;
 }
 
 .sidebar__svg--sm {
   width: 14px;
   height: 14px;
+}
+
+/* ── Chevron (misma técnica) ── */
+.sidebar__chevron {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask: var(--icon) no-repeat center / contain;
+  -webkit-mask: var(--icon) no-repeat center / contain;
+  transition: transform 0.22s ease, background-color 0.16s;
+  margin-left: auto;
+}
+
+.sidebar__chevron--up {
+  transform: rotate(180deg);
 }
 
 /* ── Links principales ── */
@@ -61,13 +81,14 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: #64748b;               // Color base (gris)
   text-decoration: none;
   cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
   user-select: none;
+  line-height: 1;               // Evita espacio extra en el texto
 
-  span:first-of-type {
+  span:nth-of-type(2) {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -76,12 +97,12 @@
 
   &:hover {
     background: #f5f7fb;
-    color: #163572;
+    color: #163572;             // Azul en hover
   }
 
   &.active {
     background: #eef4ff;
-    color: #163572;
+    color: #163572;             // Azul en activo
     font-weight: 600;
   }
 }
@@ -96,21 +117,7 @@
   position: relative;
 }
 
-/* Chevron animado */
-.sidebar__chevron {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  color: #9ca3af;
-  margin-left: auto;
-  transition: transform 0.22s ease;
-}
-
-.sidebar__chevron--up {
-  transform: rotate(180deg);
-}
-
-/* Submenu con animación suave */
+/* ── Submenu ── */
 .sidebar__submenu {
   display: flex;
   flex-direction: column;
@@ -140,6 +147,14 @@
   cursor: pointer;
   transition: background 0.14s, color 0.14s;
   user-select: none;
+  line-height: 1;               // Evita espacio extra en el texto
+
+  span:nth-of-type(2) {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &:hover {
     background: #f5f7fb;
@@ -160,7 +175,7 @@
   margin: 8px 4px;
 }
 
-/* ── Responsive Drawer (≤1024px) ── */
+/* ── Responsive Drawer (sin cambios) ── */
 @media (max-width: 1024px) {
   .sidebar {
     position: fixed;
