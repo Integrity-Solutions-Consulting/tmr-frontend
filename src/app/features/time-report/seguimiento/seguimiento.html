@@ -98,14 +98,9 @@
         <div class="filter-group">
             <label class="filter-label">Cliente</label>
             <div class="filter-input-wrapper">
-                <input
-                    class="filter-input"
-                    type="text"
-                    placeholder="Todos los clientes"
-                    [(ngModel)]="clienteSeleccionado"
-                    (input)="filtrarClientes($event); aplicarFiltros()"
-                    [matAutocomplete]="autoCliente"
-                />
+                <input class="filter-input" type="text" placeholder="Todos los clientes"
+                    [(ngModel)]="clienteSeleccionado" (input)="filtrarClientes($event); aplicarFiltros()"
+                    [matAutocomplete]="autoCliente" />
                 <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="9" cy="7" r="4" />
@@ -144,94 +139,74 @@
     </div>
 
     <!-- ===== TABLE ===== -->
-    <div class="table-card">
-        <table mat-table [dataSource]="dataSource" matSort class="data-table">
-
-            <!-- Checkbox col -->
-            <ng-container matColumnDef="select">
-                <th mat-header-cell *matHeaderCellDef>
-                    <mat-checkbox color="primary" (change)="$event ? masterToggle() : null"
-                        [checked]="selection.hasValue() && isAllSelected()"
-                        [indeterminate]="selection.hasValue() && !isAllSelected()">
-                    </mat-checkbox>
-                </th>
-                <td mat-cell *matCellDef="let row">
-                    <mat-checkbox color="primary" (click)="$event.stopPropagation()"
-                        (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
-                    </mat-checkbox>
-                </td>
-            </ng-container>
-
-            <!-- Colaborador -->
-            <ng-container matColumnDef="nombre">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Colaborador</th>
-                <td mat-cell *matCellDef="let el"><strong>{{ el.nombre }}</strong></td>
-            </ng-container>
-
-            <!-- Proyecto -->
-            <ng-container matColumnDef="proyecto">
-                <th mat-header-cell *matHeaderCellDef>Proyecto</th>
-                <td mat-cell *matCellDef="let el">{{ el.proyecto }}</td>
-            </ng-container>
-
-            <!-- Cliente -->
-            <ng-container matColumnDef="cliente">
-                <th mat-header-cell *matHeaderCellDef>Cliente</th>
-                <td mat-cell *matCellDef="let el">{{ el.cliente }}</td>
-            </ng-container>
-
-            <!-- Líder -->
-            <ng-container matColumnDef="liderTecnico">
-                <th mat-header-cell *matHeaderCellDef>Líder Técnico</th>
-                <td mat-cell *matCellDef="let el">{{ el.liderTecnico }}</td>
-            </ng-container>
-
-            <!-- Horas -->
-            <ng-container matColumnDef="nroHoras">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Nro de Horas</th>
-                <td mat-cell *matCellDef="let el">{{ el.nroHoras | horasFormat }}</td>
-            </ng-container>
-
-            <!-- Estado -->
-            <ng-container matColumnDef="estado">
-                <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let el">
-                    <app-badge-estado [estado]="el.estado"></app-badge-estado>
-                </td>
-            </ng-container>
-
-            <!-- Días con reporte -->
-            <ng-container matColumnDef="diasConReporte">
-                <th mat-header-cell *matHeaderCellDef>Días con Reporte</th>
-                <td mat-cell *matCellDef="let el" class="center">{{ el.diasConReporte }}</td>
-            </ng-container>
-
-            <!-- Días a completar -->
-            <ng-container matColumnDef="diasACompletar">
-                <th mat-header-cell *matHeaderCellDef>Días a Completar</th>
-                <td mat-cell *matCellDef="let el" class="center">{{ el.diasACompletar }}</td>
-            </ng-container>
-
-            <!-- Acciones -->
-            <ng-container matColumnDef="acciones">
-                <th mat-header-cell *matHeaderCellDef>Acciones</th>
-                <td mat-cell *matCellDef="let el">
-                    <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()">
-                        <mat-icon>more_vert</mat-icon>
-                    </button>
-                    <mat-menu #rowMenu="matMenu">
-                        <button mat-menu-item (click)="descargarDetalle(el)">
-                            <mat-icon>download</mat-icon> Descargar detalle
-                        </button>
-                    </mat-menu>
-                </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnas;" (click)="selection.toggle(row)"
-                [class.selected-row]="selection.isSelected(row)">
-            </tr>
-        </table>
+    <div class="table-scroll-container">
+        <div class="table-wrapper">
+            <table class="seguimiento-table">
+                <thead>
+                    <tr>
+                        <th class="col-select">
+                            <mat-checkbox color="primary" (change)="$event ? masterToggle() : null"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                            </mat-checkbox>
+                        </th>
+                        <th class="col-nombre" (click)="ordenar('nombre')">
+                            Colaborador
+                            <span class="sort-icon" *ngIf="sortField === 'nombre'">{{ sortAsc ? '↑' : '↓' }}</span>
+                        </th>
+                        <th class="col-proyecto">Proyecto</th>
+                        <th class="col-cliente">Cliente</th>
+                        <th class="col-lider">Líder Técnico</th>
+                        <th class="col-horas" (click)="ordenar('nroHoras')">
+                            Nro de Horas
+                            <span class="sort-icon" *ngIf="sortField === 'nroHoras'">{{ sortAsc ? '↑' : '↓' }}</span>
+                        </th>
+                        <th class="col-estado">Seguimiento</th>
+                        <th class="col-dias-reporte">Días con Reporte</th>
+                        <th class="col-dias-completar">Días a Completar</th>
+                        <th class="col-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let el of colaboradoresPaginados" (click)="selection.toggle(el)"
+                        [class.selected-row]="selection.isSelected(el)">
+                        <td class="col-select" (click)="$event.stopPropagation()">
+                            <mat-checkbox color="primary" (change)="$event ? selection.toggle(el) : null"
+                                [checked]="selection.isSelected(el)">
+                            </mat-checkbox>
+                        </td>
+                        <td class="col-nombre">{{ el.nombre }}</td>
+                        <td class="col-proyecto" [title]="el.proyecto">{{ el.proyecto }}</td>
+                        <td class="col-cliente" [title]="el.cliente">{{ el.cliente }}</td>
+                        <td class="col-lider" [title]="el.liderTecnico">{{ el.liderTecnico }}</td>
+                        <td class="col-horas">{{ el.nroHoras | horasFormat }}</td>
+                        <td class="col-estado">
+                            <span class="badge" [ngClass]="{
+                                'badge--activo': el.estado === 'Completo',
+                                'badge--inactivo': el.estado !== 'Completo'
+                            }">
+                                {{ el.estado }}
+                            </span>
+                        </td>
+                        <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>
+                        <td class="col-dias-completar center">{{ el.diasACompletar }}</td>
+                        <td class="col-acciones" (click)="$event.stopPropagation()">
+                            <button class="action-btn" [matMenuTriggerFor]="rowMenu">
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <mat-menu #rowMenu="matMenu">
+                                <button mat-menu-item (click)="descargarDetalle(el)">
+                                    <mat-icon>download</mat-icon> Descargar detalle
+                                </button>
+                            </mat-menu>
+                        </td>
+                    </tr>
+                    <tr *ngIf="totalRegistros === 0">
+                        <td colspan="10" class="empty-state">No se encontraron registros</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <mat-paginator [style.display]="'none'" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
