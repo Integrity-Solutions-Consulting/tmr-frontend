@@ -176,8 +176,10 @@ $hover-row: rgba(#163572, 0.04);
 
 .search-input-wrapper {
   position: relative;
-  width: 392px;
-  flex: 0 0 392px;
+  width: 500px;
+  flex: 0 px;
+
+  margin-left: -4px;
 }
 
 .search-icon {
@@ -214,9 +216,16 @@ $hover-row: rgba(#163572, 0.04);
   position: relative;
   display: flex;
   align-items: center;
-  width: 120px;
-  flex: 0 0 120px;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $white;
   cursor: pointer;
+  user-select: none;
+
+  margin-left: -4px;
 }
 
 .estado-icon-img {
@@ -477,7 +486,6 @@ $hover-row: rgba(#163572, 0.04);
 .card-svg {
   width: 22px;
   height: 22px;
-  filter: brightness(0) saturate(100%) invert(15%) sepia(61%) saturate(1200%) hue-rotate(203deg) brightness(95%);
 }
 
 .card-svg-arrow {
@@ -486,7 +494,7 @@ $hover-row: rgba(#163572, 0.04);
   position: absolute;
   top: 7px;
   right: -2px;
-  filter: brightness(0) saturate(100%) invert(15%) sepia(61%) saturate(1200%) hue-rotate(203deg) brightness(95%);
+
 }
 .card-left {
   flex: 1;
@@ -681,18 +689,44 @@ $hover-row: rgba(#163572, 0.04);
 @media (max-width: 480px) {
   .lideres-container { padding: 16px 10px; }
 }
-.card-icon--active,
-.card-icon--inactive {
+
+// ── Colores por tipo de card ──────────────────────────────
+.card-icon--internal {
+  background: #EEF3FB;
+  border-radius: 8px;
   position: relative;
+
+  svg {
+    stroke: #163572;
+  }
 }
 
-.card-svg-badge {
-  position: absolute;
-  bottom: -2px;
-  right: -4px;
-  width: 13px;
-  height: 13px;
-}
-.card-icon--internal {
+.card-icon--external {
+  background: #F6EEFE;
+  border-radius: 8px;
   position: relative;
+
+  svg {
+    stroke: #A855F7;
+  }
+}
+
+.card-icon--active {
+  background: #e6fdee;
+  border-radius: 8px;
+  position: relative;
+
+  svg {
+    stroke: #34c759;;
+  }
+}
+
+.card-icon--inactive {
+  background: #F3F4F6;
+  border-radius: 8px;
+  position: relative;
+
+  svg {
+    stroke: #6B7280;
+  }
 }
