@@ -10,6 +10,7 @@ import { GenerarReporte } from './generar-reporte/generar-reporte';
 
 import { ActividadesService } from '../../../shared/services/actividades.service';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 
 @Component({
     selector: 'app-actividades',
@@ -20,7 +21,8 @@ import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
         MatIconModule,
         MatDialogModule,
         Calendario,
-        HorasFormatPipe
+        HorasFormatPipe,
+        HeaderComponent
     ],
     templateUrl: './actividades.html',
     styleUrls: ['./actividades.scss']
@@ -53,7 +55,7 @@ export class Actividades implements OnInit {
         this.dialog.open(AgregarActividad, {
             maxHeight: '90vh',
             data: { fecha: this.fechaSeleccionada },
-            disableClose: false,
+            disableClose: true,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -68,7 +70,7 @@ export class Actividades implements OnInit {
             this.dialog.open(AgregarActividad, {
                 maxHeight: '90vh',
                 data: { fecha },
-                disableClose: false,
+                disableClose: true,
                 panelClass: 'tmr-dialog-panel'
             });
         }
@@ -81,7 +83,7 @@ export class Actividades implements OnInit {
         this.dialog.open(AgregarActividad, {
             maxHeight: '90vh',
             data: { fecha },
-            disableClose: false,
+            disableClose: true,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -93,7 +95,7 @@ export class Actividades implements OnInit {
         this.dialog.open(AgregarActividad, {
             maxHeight: '90vh',
             data: { actividad },
-            disableClose: false,
+            disableClose: true,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -114,6 +116,7 @@ export class Actividades implements OnInit {
     abrirGenerarReporte() {
         this.dialog.open(GenerarReporte, {
             width: '460px',
+            disableClose: true
         });
     }
 }

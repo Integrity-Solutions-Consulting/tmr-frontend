@@ -89,7 +89,7 @@ $error-color: #dc2626;
   flex-shrink: 0;
   margin-top: 2px;
 
-  mat-icon {
+  mat-icon, img {
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -464,10 +464,11 @@ $error-color: #dc2626;
   border: none;
   transition: all 0.15s ease;
 
-  mat-icon {
+  mat-icon, img {
     font-size: 18px;
     width: 18px;
     height: 18px;
+    vertical-align: middle;
   }
 
   &--cancel {
