@@ -349,10 +349,13 @@ input.filter-input {
   justify-content: center;
   flex-shrink: 0;
   
-  svg {
+  .metrica-icon-svg {
+    display: inline-block;
     width: 24px;
     height: 24px;
-    stroke-width: 2;
+    background-color: currentColor;
+    mask: var(--icon) no-repeat center / contain;
+    -webkit-mask: var(--icon) no-repeat center / contain;
   }
   
   &.horas {
@@ -362,12 +365,12 @@ input.filter-input {
   
   &.colaboradores {
     background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+    color: #f97316;
   }
   
   &.clientes {
     background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
+    color: #a855f7;
   }
 }
 
