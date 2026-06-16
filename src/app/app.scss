@@ -1,1 +1,31 @@
 /* Global styles for the app component */
+
+.app-character-alert {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  max-width: min(340px, calc(100vw - 32px));
+  padding: 14px 18px;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  background: #fef2f2;
+  color: #991b1b;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  .app-character-alert {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    max-width: none;
+    text-align: center;
+  }
+}

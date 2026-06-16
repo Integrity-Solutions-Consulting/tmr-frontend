@@ -100,7 +100,7 @@ export class Tabla implements AfterViewInit {
       // Si no hay estados seleccionados → pasa todos
       const coincideEstado =
         !filtros.estados.length ||
-        filtros.estados.includes(proyecto.estado ?? '');
+        filtros.estados.includes(this.normalizarEstadoProyecto(proyecto));
 
       // Si no hay tipos seleccionados → pasa todos
       const coincideTipo =
@@ -136,6 +136,24 @@ export class Tabla implements AfterViewInit {
       },
       error: (error) => console.error('Error al cargar seguimiento:', error)
     });
+  }
+
+  private normalizarEstadoProyecto(proyecto: Proyecto): string {
+    if (typeof proyecto.activo === 'boolean') {
+      return proyecto.activo ? 'Activo' : 'Inactivo';
+    }
+
+    const estado = (proyecto.estado ?? '').trim().toLowerCase();
+
+    if (estado === 'activo') {
+      return 'Activo';
+    }
+
+    if (estado === 'inactivo') {
+      return 'Inactivo';
+    }
+
+    return proyecto.estado ?? '';
   }
 
   obtenerSeguimiento(proyecto: Proyecto): string {
