@@ -1,5 +1,5 @@
-<div class="modal-overlay" *ngIf="mostrarFormulario" (click)="cerrar()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+<div class="modal-overlay" *ngIf="mostrarFormulario">
+<div class="modal-card" (click)="$event.stopPropagation()">
 
     <!-- HEADER -->
     <div class="modal-header">
@@ -35,7 +35,6 @@
             </ul>
             <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
           </div>
-
           <div class="custom-select-wrapper select-wrapper--half"
             *ngIf="form.tipoNombre === 'Interno'"
             [class.input-error]="enviado && !form.personaId">
