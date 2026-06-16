@@ -168,12 +168,8 @@
   </div>
 
   <!-- Footer -->
-  <div class="feriado-modal__footer">
-    @if (isView) {
-      <button class="feriado-modal__btn feriado-modal__btn--cancel" type="button" mat-dialog-close>
-        Cerrar
-      </button>
-    } @else {
+  @if (!isView) {
+    <div class="feriado-modal__footer">
       <button
         class="feriado-modal__btn feriado-modal__btn--save"
         type="submit"
@@ -181,7 +177,7 @@
       >
         Guardar
       </button>
-    }
-  </div>
+    </div>
+  }
 
 </form>

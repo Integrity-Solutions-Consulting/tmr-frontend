@@ -93,10 +93,25 @@ $hover-row:     rgba(#163572, 0.04);
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: transparent;
+  border-radius: 8px;
+  background: #EEF3FB;
+  color: #163572;
   align-self: center;
 
-  &--inactive { background: transparent; }
+  &--total-roles {
+    background: #FFEFEF;
+    color: #E57373;
+  }
+
+  &--active {
+    background: #BBF7D0;
+    color: #34C759;
+  }
+
+  &--inactive {
+    background: #F3F4F6;
+    color: #6B7280;
+  }
 }
 
 .card-number {
@@ -113,9 +128,10 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .card-svg {
-  width: 22px;
-  height: 22px;
-  filter: brightness(0) saturate(100%) invert(15%) sepia(61%) saturate(1200%) hue-rotate(203deg) brightness(95%);
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  stroke: currentColor;
 }
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────
@@ -148,8 +164,9 @@ $hover-row:     rgba(#163572, 0.04);
   height: 40px;
   padding: 10px 12px 10px 36px;
   border: 1px solid $border;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
   background: $white;
   color: $text-dark;
   outline: none;
@@ -172,11 +189,20 @@ $hover-row:     rgba(#163572, 0.04);
   height: 40px;
   padding: 0 12px;
   border: 1px solid $border;
-  border-radius: 6px;
+  border-radius: 8px;
   background: $white;
   cursor: pointer;
   user-select: none;
   min-width: 120px;
+  color: #737373;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+  &:hover,
+  &:focus-within {
+    border-color: $primary;
+    background: #f0f4ff;
+    color: $primary;
+  }
 }
 
 .estado-icon-img {
@@ -187,7 +213,8 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .estado-texto {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   color: #737373;
 }
 
@@ -292,8 +319,8 @@ $hover-row:     rgba(#163572, 0.04);
   overflow-x: auto;
   max-height: calc(100vh - 320px);
   background: $white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 10px;
   scrollbar-width: thin;
   scrollbar-color: #D4D4D4 transparent;
 
@@ -311,17 +338,17 @@ $hover-row:     rgba(#163572, 0.04);
 
   th,
   td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #eef2f7;
+    padding: 13px 16px;
+    border-bottom: 1px solid $border;
     text-align: left;
     vertical-align: middle;
   }
 
   th {
-    color: #64748b;
-    background: #f8fafc;
-    font-size: 12px;
-    font-weight: 800;
+    color: #737373;
+    background: $white;
+    font-size: 14px;
+    font-weight: 600;
     white-space: nowrap;
     position: sticky;
     top: 0;
@@ -329,9 +356,9 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   td {
-    color: #475569;
-    font-size: 13px;
-    font-weight: 500;
+    color: #737373;
+    font-size: 14px;
+    font-weight: 400;
     white-space: nowrap;
   }
 
@@ -370,15 +397,15 @@ $hover-row:     rgba(#163572, 0.04);
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 400;
   line-height: 1;
 }
 
 .module-chip {
-  padding: 6px 9px;
-  color: #0c3b73;
-  background: #eef6ff;
+  padding: 3px 10px;
+  color: #163572;
+  background: #EEF3FB;
   border: 1px solid #d8e8fb;
 }
 
@@ -438,16 +465,30 @@ $hover-row:     rgba(#163572, 0.04);
 
 // ── Estado pills ───────────────────────────────────────────────────────────
 .status-pill {
-  padding: 7px 10px;
-  color: #166534;
-  background: #dcfce7;
-  border: 1px solid #bbf7d0;
+  gap: 5px;
+  padding: 3px 10px;
+  color: #737373;
+  background: #ffffff;
+  border: 1px solid #E5E5E5;
+
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+  }
 }
 
 .status-pill--inactive {
-  color: #991b1b;
-  background: #fee2e2;
-  border-color: #fecaca;
+  color: #737373;
+  background: #ffffff;
+  border-color: #E5E5E5;
+
+  &::before {
+    background: #737373;
+  }
 }
 
 // ── Celda acciones ─────────────────────────────────────────────────────────

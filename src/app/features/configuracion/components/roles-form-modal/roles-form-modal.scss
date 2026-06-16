@@ -358,15 +358,15 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  color: #166534;
-  background: #dcfce7;
-  border: 1px solid #bbf7d0;
+  color: #34C759;
+  background: #BBF7D0;
+  border: 1px solid #BBF7D0;
 }
 
 .status-pill--inactive {
-  color: #991b1b;
-  background: #fee2e2;
-  border-color: #fecaca;
+  color: #6B7280;
+  background: #F3F4F6;
+  border-color: #F3F4F6;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */
@@ -388,10 +388,10 @@
   min-width: 132px;
   height: 40px;
   padding: 0 22px;
-  border-radius: 10px;
+  border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   border: none;
   transition: all 0.15s ease;
@@ -414,12 +414,12 @@
   }
 
   &--save {
-    background: #0c3b73;
+    background: #163572;
     color: #ffffff;
 
     &:hover {
-      background: #0a3267;
-      box-shadow: 0 4px 14px rgba(12, 59, 115, 0.22);
+      background: #162C56;
+      box-shadow: 0 4px 12px rgba(22, 53, 114, 0.3);
     }
   }
 }

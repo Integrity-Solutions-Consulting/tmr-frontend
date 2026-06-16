@@ -46,7 +46,7 @@ export class FeriadosPage {
 
     const dialogRef = this.dialog.open<FeriadosFormModal, FeriadoModalData, Feriado>(
       FeriadosFormModal,
-      { data, panelClass: 'tmr-dialog-panel' },
+      { data, panelClass: 'tmr-dialog-panel', disableClose: true },
     );
 
     dialogRef.afterClosed().subscribe((result) => {

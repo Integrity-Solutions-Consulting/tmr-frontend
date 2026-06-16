@@ -111,7 +111,7 @@ export class ConfiguracionService {
   }
 
   loadUsuarios(activo?: boolean | null, search?: string): void {
-    const params: Record<string, string> = {};
+    const params: Record<string, string> = { pageSize: '1000' };
     if (activo !== null && activo !== undefined) {
       params['activo'] = String(activo);
     }
@@ -119,9 +119,7 @@ export class ConfiguracionService {
       params['search'] = search.trim();
     }
 
-    const queryString = Object.keys(params).length
-      ? '?' + new URLSearchParams(params).toString()
-      : '';
+    const queryString = '?' + new URLSearchParams(params).toString();
 
     this.http
       .get<unknown[] | { items?: unknown[]; data?: unknown[] }>(
@@ -144,7 +142,7 @@ export class ConfiguracionService {
   loadUsuariosTotales(): void {
     this.http
       .get<unknown[] | { items?: unknown[]; data?: unknown[] }>(
-        `${environment.apiUrl}/configuracion/usuarios`
+        `${environment.apiUrl}/configuracion/usuarios?pageSize=1000`
       )
       .subscribe({
         next: (response) => {

@@ -175,14 +175,14 @@
         </div>
       </div>
     </div>
-  </div>
 
-  @if (errorGuardar()) {
-    <div class="modal-form__error-banner">
-      <span class="material-icons">error_outline</span>
-      {{ errorGuardar() }}
-    </div>
-  }
+    @if (errorGuardar()) {
+      <div class="modal-form__error-banner">
+        <span class="material-icons">error_outline</span>
+        {{ errorGuardar() }}
+      </div>
+    }
+  </div>
 
   <div class="modal-form__footer">
     <button class="modal-form__btn modal-form__btn--save" type="submit" [disabled]="guardando()">
@@ -194,4 +194,5 @@
       }
     </button>
   </div>
+
 </form>

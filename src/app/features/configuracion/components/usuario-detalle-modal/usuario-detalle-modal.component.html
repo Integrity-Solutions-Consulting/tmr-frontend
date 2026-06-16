@@ -1,7 +1,7 @@
-<div class="modal-backdrop" (click)="onCerrar()"></div>
+<div class="modal-backdrop"></div>
 
 <div class="modal-card">
-  <button class="modal-card__close" (click)="onCerrar()">
+  <button class="modal-card__close" type="button" (click)="onCerrar()">
     <span class="material-icons">close</span>
   </button>
 
@@ -10,7 +10,7 @@
       <h2 class="modal-card__nombre">{{ (usuario.nombres || usuario.apellidos) ? ((usuario.nombres || '') + ' ' + (usuario.apellidos || '')).trim() : usuario.email }}</h2>
       <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
     </div>
-    <p class="modal-card__subtitle">Detalle de cuenta, vinculo de persona, roles y estado.</p>
+
   </div>
 
   <div class="modal-card__body">
@@ -65,11 +65,5 @@
       </div>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn btn--secondary" (click)="onEditar()">Editar</button>
-      <button class="btn btn--outline" (click)="onToggleEstado()">
-        {{ usuario.estado === 'Activo' ? 'Inactivar' : 'Activar' }}
-      </button>
-    </div>
   </div>
 </div>

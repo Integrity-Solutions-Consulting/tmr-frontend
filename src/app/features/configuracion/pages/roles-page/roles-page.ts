@@ -8,6 +8,7 @@ import {
 } from '../../../../shared/components/action-menu/action-menu.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
 import { Modulo, Rol } from '../../models/configuracion.models';
@@ -17,7 +18,7 @@ type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [CommonModule, Boton, MatIconModule, ActionMenuComponent, ConfirmDialogComponent, SuccessModalComponent],
+  imports: [CommonModule, Boton, MatIconModule, ActionMenuComponent, ConfirmDialogComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -30,6 +31,8 @@ export class RolesPage {
 
   // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
+  readonly paginaActual = signal(1);
+  readonly porPagina = 10;
   readonly estadoError = signal<string | null>(null);
   readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
@@ -100,6 +103,21 @@ export class RolesPage {
     });
   });
 
+  readonly totalRegistros = computed(() => this.filteredRoles().length);
+
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.totalRegistros() / this.porPagina)),
+  );
+
+  readonly paginaActualNormalizada = computed(() =>
+    Math.min(this.paginaActual(), this.totalPaginas()),
+  );
+
+  readonly rolesPaginados = computed(() => {
+    const inicio = (this.paginaActualNormalizada() - 1) * this.porPagina;
+    return this.filteredRoles().slice(inicio, inicio + this.porPagina);
+  });
+
   // ── Control del dropdown Estado ────────────────────────────────────────────
 
   toggleEstadoDropdown(event?: Event): void {
@@ -108,12 +126,23 @@ export class RolesPage {
   }
 
   seleccionarEstado(estado: FiltroEstadoRol): void {
+    this.paginaActual.set(1);
     this.filtroEstado.set(estado);
     this.mostrarEstadoDropdown = false;
   }
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
+  }
+
+  setQuery(value: string): void {
+    this.query.set(value);
+    this.paginaActual.set(1);
+  }
+
+  irAPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas()) return;
+    this.paginaActual.set(pagina);
   }
 
   // ── Modales ────────────────────────────────────────────────────────────────
@@ -134,6 +163,7 @@ export class RolesPage {
       {
         data,
         panelClass: 'tmr-dialog-panel',
+        disableClose: true,
       },
     );
 

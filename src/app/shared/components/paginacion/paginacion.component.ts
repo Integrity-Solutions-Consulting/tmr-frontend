@@ -40,7 +40,7 @@ export class PaginacionComponent implements OnChanges {
     this.paginas = res;
   }
 
-  get registroInicio() { return (this.paginaActual - 1) * this.porPagina + 1; }
+  get registroInicio() { return this.total === 0 ? 0 : (this.paginaActual - 1) * this.porPagina + 1; }
   get registroFin() { return Math.min(this.paginaActual * this.porPagina, this.total); }
 
   irA(p: number | '...') { if (p !== '...') this.paginaCambia.emit(p); }
