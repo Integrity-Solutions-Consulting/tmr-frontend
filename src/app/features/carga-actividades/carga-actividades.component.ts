@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -21,21 +21,21 @@ const COLOR_BORDE = 'FFE2E8F0';
   templateUrl: './carga-actividades.component.html',
   styleUrls: ['./carga-actividades.component.scss']
 })
-export class CargaActividadesComponent {
+export class CargaActividadesComponent implements OnInit {
   protected Math = Math;
   private store = inject(Store);
   private actions$ = inject(Actions);
-  
+
   searchControl = new FormControl('', { nonNullable: true });
   clienteControl = new FormControl('', { nonNullable: true });
   fechaDesdeControl = new FormControl('', { nonNullable: true });
   fechaHastaControl = new FormControl('', { nonNullable: true });
-  
+
   errorMessage: string = '';
   successMessage: string = '';
   listaErrores: string[] = [];
   cargando: boolean = false;
-  
+
   paginaActual$ = new BehaviorSubject<number>(1);
   itemsPorPagina = 10;
 
@@ -82,6 +82,10 @@ export class CargaActividadesComponent {
     })
   );
 
+  ngOnInit(): void {
+    this.store.dispatch(ActividadesActions.cargarActividades());
+  }
+
   private cambioFiltro(control: FormControl<string>): Observable<string> {
     return control.valueChanges.pipe(
       startWith(control.value),
@@ -97,8 +101,8 @@ export class CargaActividadesComponent {
     const fechaHasta = this.parseFechaLocal(hasta);
 
     if (busqueda) {
-      filtrados = filtrados.filter(a => 
-        (a.colaborador && a.colaborador.toLowerCase().includes(busqueda)) || 
+      filtrados = filtrados.filter(a =>
+        (a.colaborador && a.colaborador.toLowerCase().includes(busqueda)) ||
         (a.proyecto && a.proyecto.toLowerCase().includes(busqueda))
       );
     }
@@ -110,11 +114,9 @@ export class CargaActividadesComponent {
     if (fechaDesde || fechaHasta) {
       filtrados = filtrados.filter(a => {
         const fecha = this.parseFechaLocal(a.fecha);
-
         if (!fecha) return false;
         if (fechaDesde && fecha < fechaDesde) return false;
         if (fechaHasta && fecha > fechaHasta) return false;
-
         return true;
       });
     }
@@ -140,9 +142,9 @@ export class CargaActividadesComponent {
     this.errorMessage = '';
     this.successMessage = '';
     this.listaErrores = [];
-    
+
     if (!file) return;
-    
+
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['xlsx', 'csv'].includes(ext!)) {
       this.errorMessage = 'Formato no válido. Use .xlsx o .csv';
@@ -152,6 +154,8 @@ export class CargaActividadesComponent {
 
     this.cargando = true;
 
+    // ✅ CORRECCIÓN: escuchar importarExcelSuccess en lugar de cargarActividadesSuccess
+    // Así no dependemos del reload posterior y evitamos capturar eventos anteriores
     this.actions$.pipe(
       ofType(
         ActividadesActions.importarExcelSuccess,
@@ -162,22 +166,16 @@ export class CargaActividadesComponent {
       this.cargando = false;
 
       if (action.type === ActividadesActions.importarExcelSuccess.type) {
-        const total = action.actividades.length;
-        this.successMessage = total > 0
-          ? `Planilla procesada con éxito. ${total} registro(s) cargado(s) en la tabla.`
-          : 'La planilla se procesó, pero el backend no devolvió registros para mostrar.';
+        this.successMessage = 'Archivo cargado exitosamente';
         this.paginaActual$.next(1);
         return;
       }
 
-      this.errorMessage = action.error;
-      this.listaErrores = action.errores || [];
+      this.errorMessage = (action as any).error;
+      this.listaErrores = (action as any).errores || [];
     });
 
-    this.store.dispatch(
-      ActividadesActions.importarExcel({ archivo: file })
-    );
-
+    this.store.dispatch(ActividadesActions.importarExcel({ archivo: file }));
     event.target.value = '';
   }
 
@@ -258,7 +256,6 @@ export class CargaActividadesComponent {
           const estado = cell.value?.toString().toLowerCase() ?? '';
           const cargado = estado === 'cargado';
           const error = estado === 'error';
-
           cell.font = {
             name: 'Segoe UI',
             size: 10,
@@ -279,7 +276,6 @@ export class CargaActividadesComponent {
   private crearDescarga(blob: Blob, nombreArchivo: string): void {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-
     link.href = url;
     link.download = nombreArchivo;
     document.body.appendChild(link);
@@ -290,12 +286,9 @@ export class CargaActividadesComponent {
 
   formatearFecha(fecha?: string | Date | null): string {
     const valor = this.parseFechaLocal(fecha);
-
     if (!valor) return '-';
-
     const dia = String(valor.getDate()).padStart(2, '0');
     const mes = String(valor.getMonth() + 1).padStart(2, '0');
-
     return `${dia}/${mes}/${valor.getFullYear()}`;
   }
 
@@ -310,19 +303,12 @@ export class CargaActividadesComponent {
 
     const texto = String(fecha).trim();
     const iso = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-
-    if (iso) {
-      return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
-    }
+    if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
 
     const dmy = texto.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
-
-    if (dmy) {
-      return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
-    }
+    if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
 
     const valor = new Date(texto);
-
     return Number.isNaN(valor.getTime())
       ? null
       : new Date(valor.getFullYear(), valor.getMonth(), valor.getDate());
