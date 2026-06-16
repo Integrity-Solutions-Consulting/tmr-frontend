@@ -18,14 +18,6 @@ export class UsuarioDetalleModal {
   usuario = this.data.usuario;
   private readonly configuracionService = inject(ConfiguracionService);
 
-  onEditar(): void {
-    this.dialogRef.close({ action: 'editar', usuario: this.usuario });
-  }
-
-  onToggleEstado(): void {
-    this.dialogRef.close({ action: 'toggleEstado', usuario: this.usuario });
-  }
-
   onCerrar(): void {
     this.dialogRef.close();
   }

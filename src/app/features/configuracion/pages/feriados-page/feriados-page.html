@@ -1,31 +1,74 @@
 <section class="page">
-  <div class="hero">
-    <div>
-      <h2>Días Festivos</h2>
-    </div>
-    <app-boton label="Agregar Feriado" icon="event_available" (clicked)="openModal()" />
+  <div class="page-header">
+    <h1 class="page-title">Días Festivos</h1>
+    <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
   </div>
 
-  <div class="stats-grid">
-    <article>
-      <span>Total feriados</span>
-      <strong>{{ feriados().length }}</strong>
+  <div class="cards-row">
+    <article class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--total-feriados">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="17" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <circle cx="12" cy="16" r="2" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <span class="card-number">{{ feriados().length }}</span>
+        </div>
+        <span class="card-label">Total feriados</span>
+      </div>
     </article>
-    <article>
-      <span>Activos</span>
-      <strong>{{ activos() }}</strong>
+
+    <article class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--active">
+            <span class="material-icons">check_circle</span>
+          </div>
+          <span class="card-number">{{ activos() }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
     </article>
-    <article>
-      <span>Nacionales</span>
-      <strong>{{ nacionales() }}</strong>
+
+    <article class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--nacionales">
+            <span class="material-icons">public</span>
+          </div>
+          <span class="card-number">{{ nacionales() }}</span>
+        </div>
+        <span class="card-label">Nacionales</span>
+      </div>
     </article>
-    <article>
-      <span>Locales</span>
-      <strong>{{ locales() }}</strong>
+
+    <article class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--locales">
+            <span class="material-icons">location_on</span>
+          </div>
+          <span class="card-number">{{ locales() }}</span>
+        </div>
+        <span class="card-label">Locales</span>
+      </div>
     </article>
-    <article>
-      <span>Religiosos</span>
-      <strong>{{ religiosos() }}</strong>
+
+    <article class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--religiosos">
+            <span class="material-icons">celebration</span>
+          </div>
+          <span class="card-number">{{ religiosos() }}</span>
+        </div>
+        <span class="card-label">Religiosos</span>
+      </div>
     </article>
   </div>
 
@@ -44,7 +87,6 @@
   />
 </section>
 
-<!-- Confirm dialog — reemplaza window.confirm() -->
 <app-confirm-dialog
   [visible]="confirmVisible()"
   titulo="Eliminar feriado"
@@ -55,7 +97,6 @@
   (cancelar)="onCancelarEliminar()"
 />
 
-<!-- Success modal — feedback visual de éxito -->
 <app-success-modal
   [visible]="exitoVisible()"
   [mensaje]="exitoMensaje()"

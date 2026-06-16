@@ -128,16 +128,12 @@
   </div>
 
   <!-- Footer -->
-  <div class="rol-modal__footer">
-    @if (isView) {
-      <button class="rol-modal__btn rol-modal__btn--cancel" type="button" mat-dialog-close>
-        Cerrar
-      </button>
-    } @else {
+  @if (!isView) {
+    <div class="rol-modal__footer">
       <button class="rol-modal__btn rol-modal__btn--save" type="submit">
         Guardar
       </button>
-    }
-  </div>
+    </div>
+  }
 
 </form>

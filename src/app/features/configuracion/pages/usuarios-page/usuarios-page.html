@@ -12,8 +12,11 @@
     <div class="summary-card">
       <div class="card-left">
         <div class="card-top-row">
-          <div class="card-icon">
-            <img src="assets/iconos/user.svg" class="card-svg" />
+          <div class="card-icon card-icon--total-usuarios">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20a8 8 0 0 1 16 0"/>
+            </svg>
           </div>
           <span class="card-number">{{ totalUsuarios() }}</span>
         </div>
@@ -25,8 +28,12 @@
     <div class="summary-card">
       <div class="card-left">
         <div class="card-top-row">
-          <div class="card-icon">
-            <img src="assets/iconos/circle-check.svg" class="card-svg" />
+          <div class="card-icon card-icon--active">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
+              <polyline points="16 18 18 20 22 16"/>
+            </svg>
           </div>
           <span class="card-number">{{ activos() }}</span>
         </div>
@@ -39,7 +46,12 @@
       <div class="card-left">
         <div class="card-top-row">
           <div class="card-icon card-icon--inactive">
-            <img src="assets/iconos/user-close-svgrepo-com.svg" class="card-svg" />
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
+              <line x1="17" y1="15" x2="23" y2="21"/>
+              <line x1="23" y1="15" x2="17" y2="21"/>
+            </svg>
           </div>
           <span class="card-number">{{ inactivos() }}</span>
         </div>
@@ -48,6 +60,7 @@
     </div>
 
   </div>
+
 
   <!-- Barra de búsqueda -->
   <div class="search-bar">
@@ -58,7 +71,7 @@
         class="search-input"
         placeholder="Buscar por usuario, nombre, correo o rol..."
         [value]="query()"
-        (input)="query.set($any($event.target).value)"
+        (input)="setQuery($any($event.target).value)"
       />
     </div>
 
@@ -98,7 +111,7 @@
         etiquetaBoton="Descargar"
       ></app-descarga-menu>
 
-      <app-boton label="Crear usuario" icon="person_add" (clicked)="openModal()" />
+      <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
     </div>
   </div>
 
@@ -123,7 +136,7 @@
                 <td colspan="6" class="empty-state">No se encontraron usuarios</td>
               </tr>
             }
-            @for (usuario of filteredUsuarios(); track usuario.id) {
+            @for (usuario of usuariosPaginados(); track usuario.id) {
               <tr>
                 <td>{{ usuario.usuario }}</td>
                 <td>{{ displayUsuarioNombre(usuario) }}</td>
@@ -153,6 +166,14 @@
       </div>
     </div>
   </div>
+
+  <app-paginacion
+    [paginaActual]="paginaActualNormalizada()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalRegistros()"
+    [porPagina]="porPagina"
+    (paginaCambia)="irAPagina($event)"
+  />
 
 </section>
 

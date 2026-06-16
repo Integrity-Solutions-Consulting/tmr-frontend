@@ -12,6 +12,7 @@ import {
   DescargaMenuComponent,
   DescargaOpcion,
 } from '../../../../shared/components/descarga-menu/descarga-menu.component';
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { UsuarioDetalleModal } from '../../components/usuario-detalle-modal/usuario-detalle-modal.component';
 import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios-form-modal';
@@ -22,7 +23,7 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [CommonModule, Boton, ActionMenuComponent, DescargaMenuComponent, SuccessModalComponent],
+  imports: [CommonModule, Boton, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
@@ -32,6 +33,8 @@ export class UsuariosPage {
 
   // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
+  readonly paginaActual = signal(1);
+  readonly porPagina = 10;
   readonly usuarios = this.configuracionService.usuarios;
   readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
@@ -102,6 +105,21 @@ export class UsuariosPage {
     );
   });
 
+  readonly totalRegistros = computed(() => this.filteredUsuarios().length);
+
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.totalRegistros() / this.porPagina)),
+  );
+
+  readonly paginaActualNormalizada = computed(() =>
+    Math.min(this.paginaActual(), this.totalPaginas()),
+  );
+
+  readonly usuariosPaginados = computed(() => {
+    const inicio = (this.paginaActualNormalizada() - 1) * this.porPagina;
+    return this.filteredUsuarios().slice(inicio, inicio + this.porPagina);
+  });
+
   // ── Helpers de filtro ──────────────────────────────────────────────────────
 
   /** Convierte el enum interno al valor boolean que espera el backend. */
@@ -132,12 +150,23 @@ export class UsuariosPage {
   }
 
   seleccionarEstado(estado: FiltroEstado): void {
+    this.paginaActual.set(1);
     this.mostrarEstadoDropdown = false;
     this.filtrarPorEstado(estado);
   }
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
+  }
+
+  setQuery(value: string): void {
+    this.query.set(value);
+    this.paginaActual.set(1);
+  }
+
+  irAPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas()) return;
+    this.paginaActual.set(pagina);
   }
 
   // ── Acciones sobre usuarios ────────────────────────────────────────────────
@@ -295,6 +324,7 @@ export class UsuariosPage {
       height: '640px',
       maxWidth: 'calc(100vw - 32px)',
       maxHeight: 'calc(100dvh - 32px)',
+      disableClose: true,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -333,18 +363,10 @@ export class UsuariosPage {
   viewUsuario(usuario: Usuario): void {
     this.configuracionService.getUsuarioDetalle(usuario.id).subscribe({
       next: (detalle) => {
-        const dialogRef = this.dialog.open(UsuarioDetalleModal, {
+        this.dialog.open(UsuarioDetalleModal, {
           panelClass: 'tmr-dialog-panel',
+          disableClose: true,
           data: { usuario: detalle },
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result?.action === 'editar' && result.usuario) {
-            this.editUsuario(result.usuario);
-          }
-          if (result?.action === 'toggleEstado' && result.usuario) {
-            this.toggleEstadoUsuario(result.usuario);
-          }
         });
       },
       error: (err) => console.error('Error al cargar detalle de usuario:', err),

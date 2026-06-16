@@ -12,8 +12,10 @@
     <div class="summary-card">
       <div class="card-left">
         <div class="card-top-row">
-          <div class="card-icon">
-            <img src="assets/iconos/user.svg" class="card-svg" />
+          <div class="card-icon card-icon--total-roles">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
+            </svg>
           </div>
           <span class="card-number">{{ totalRoles() }}</span>
         </div>
@@ -25,8 +27,12 @@
     <div class="summary-card">
       <div class="card-left">
         <div class="card-top-row">
-          <div class="card-icon">
-            <img src="assets/iconos/circle-check.svg" class="card-svg" />
+          <div class="card-icon card-icon--active">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
+              <polyline points="16 18 18 20 22 16"/>
+            </svg>
           </div>
           <span class="card-number">{{ rolesActivos() }}</span>
         </div>
@@ -39,7 +45,12 @@
       <div class="card-left">
         <div class="card-top-row">
           <div class="card-icon card-icon--inactive">
-            <img src="assets/iconos/user-close-svgrepo-com.svg" class="card-svg" />
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
+              <line x1="17" y1="15" x2="23" y2="21"/>
+              <line x1="23" y1="15" x2="17" y2="21"/>
+            </svg>
           </div>
           <span class="card-number">{{ rolesInactivos() }}</span>
         </div>
@@ -58,7 +69,7 @@
         class="search-input"
         placeholder="Buscar por nombre de rol, descripción o módulo..."
         [value]="query()"
-        (input)="query.set($any($event.target).value)"
+        (input)="setQuery($any($event.target).value)"
       />
     </div>
 
@@ -125,7 +136,7 @@
             </tr>
           }
 
-          @for (rol of filteredRoles(); track rol.id) {
+          @for (rol of rolesPaginados(); track rol.id) {
             <tr>
               <td>
                 <strong class="role-name">{{ rol.nombre }}</strong>
@@ -177,6 +188,14 @@
       </table>
     </div>
   </div>
+
+  <app-paginacion
+    [paginaActual]="paginaActualNormalizada()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalRegistros()"
+    [porPagina]="porPagina"
+    (paginaCambia)="irAPagina($event)"
+  />
 
 </section>
 

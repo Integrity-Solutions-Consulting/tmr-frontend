@@ -140,7 +140,5 @@
   }
 }
 
-.modal-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:12px; }
-
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
