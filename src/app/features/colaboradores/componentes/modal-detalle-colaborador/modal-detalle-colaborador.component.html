@@ -252,7 +252,8 @@
 
               <span
                 class="detalle-proyectos__item-estado"
-                [ngClass]="{
+                [ngClass]="getEstadoClass(proy.estado)"
+                data-estado-legacy="{
                   'estado--progreso':      proy.estado === 'En progreso',
                   'estado--completado':    proy.estado === 'Completado',
                   'estado--pausa':         proy.estado === 'En pausa',
@@ -265,7 +266,7 @@
                 }"
               >
                 <span class="detalle-proyectos__item-dot"></span>
-                {{ proy.estado }}
+                {{ proy.estado || 'Sin seguimiento' }}
               </span>
 
             </div>

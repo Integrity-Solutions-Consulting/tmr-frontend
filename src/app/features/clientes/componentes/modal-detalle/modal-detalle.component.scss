@@ -210,14 +210,18 @@
 .proyecto-estado {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0 14px;
+  border: 1px solid;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 13px;
   font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  white-space: nowrap;
+  line-height: 1;
   color: #6b7280;
+  white-space: nowrap;
 
 &.en-progreso   { color: #0078F0; border-color: #bfdbfe; }
 &.completado    { color: #34C759; border-color: #bbf7d0; }
@@ -227,6 +231,9 @@
 &.aprobado      { color: #AF52DE; border-color: #e9d5ff; }
 &.aplazado      { color: #FFD60A; border-color: #fef08a; }
 &.planificacion { color: #00C7BE; border-color: #a5f3fc; }
+&.activo        { color: #22c55e; border-color: #bbf7d0; }
+&.sin-seguimiento { color: #6B7280; border-color: #e5e7eb; }
+
 }
 
 // ── Animaciones ───────────────────────────────────────────
