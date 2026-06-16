@@ -455,7 +455,6 @@ export class UsuariosPage {
       },
       panelClass: ['tmr-dialog-panel', 'usuarios-dialog-panel'],
       width: '560px',
-      height: '640px',
       maxWidth: 'calc(100vw - 32px)',
       maxHeight: 'calc(100dvh - 32px)',
       disableClose: true,

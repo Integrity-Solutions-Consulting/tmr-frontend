@@ -22,6 +22,15 @@ export class UsuarioDetalleModal {
     this.dialogRef.close();
   }
 
+  seccionesExpandido = {
+    vinculo: true,
+    contacto: true
+  };
+
+  toggleSeccion(seccion: 'vinculo' | 'contacto'): void {
+    this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
+  }
+
   resolveRoleNames(): string {
     const roles = this.configuracionService.roles();
     return (this.usuario.rolesids ?? [])
