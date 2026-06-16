@@ -3,57 +3,64 @@
   overflow-x: auto;
   overflow-y: visible;
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  border: 1px solid #e5e5e5;
 }
 
 .tabla {
   width: 100%;
   border-collapse: collapse;
+  border-spacing: 0;
   font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  border-radius: 10px;
+  overflow: hidden;
 
   &__head {
-    background: #f8fafc;
-    border-bottom: 2px solid #e5e7eb;
+    background: #ffffff;
+    border-bottom: 2px solid #e5e5e5;
     position: sticky;
     top: 0;
     z-index: 10;
   }
 
   &__th {
-    padding: 10px 14px;
+    padding: 11px 14px;
     text-align: left;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: #737373;
     white-space: nowrap;
-    letter-spacing: 0.01em;
     user-select: none;
-    background: #f8fafc;
+    background: #ffffff;
+    line-height: 1.2;
 
     &--center  { text-align: center; }
     &--actions { width: 48px; padding: 0; }
   }
 
   &__row {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e5e5;
     transition: background 0.12s;
 
     &:last-child { border-bottom: none; }
-    &:hover { background: #fafafa; }
+    &:hover { background: rgba(22, 53, 114, 0.04); }
     &--skeleton { pointer-events: none; }
   }
 
   &__td {
-    padding: 6px 14px;
-    font-size: 12px;
+    padding: 13px 16px;
+    font-size: 14px;
     color: #737373;
+    font-weight: 400;
     vertical-align: middle;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-    &--id      { font-weight: 500; font-size: 13px; }
-    &--nombre  { font-weight: 500; }
-    &--email   { font-size: 13px; }
+    &--id      { font-weight: 400; }
+    &--nombre  { font-weight: 400; }
+    &--email   { font-size: 14px; }
     &--center  { text-align: center; }
     &--actions {
       padding: 0 8px;

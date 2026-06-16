@@ -19,19 +19,23 @@
 
   <!-- Estado dropdown -->
   <div class="filtros__estado">
-    <button class="filtros__estado-btn" (click)="toggleEstado()" type="button">
+    <button
+      class="filtros__estado-btn"
+      [class.filtros__estado-btn--active]="estadoAbierto || estadoSeleccionado !== 'Todos'"
+      (click)="toggleEstado($event)"
+      type="button">
       <img src="assets/iconos/estado-btn.svg" alt="estado" class="filtros__estado-icon" width="16" height="16" />
       <span>Estado</span>
     </button>
 
     @if (estadoAbierto) {
-      <div class="filtros__dropdown">
+      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
         <div class="filtros__dropdown-list">
           @for (opcion of opcionesEstado; track opcion.valor) {
             @if (opcion.valor !== 'Todos') {
               <button
                 class="filtros__dropdown-item"
-                (click)="seleccionarEstado(opcion.valor)"
+                (click)="seleccionarEstado(opcion.valor, $event)"
                 type="button"
               >
                 <div class="filtros__dropdown-checkbox"
@@ -46,7 +50,7 @@
           }
         </div>
 
-        <button class="filtros__dropdown-clear" (click)="seleccionarEstado('Todos')" type="button">
+        <button class="filtros__dropdown-clear" (click)="limpiarFiltroEstado($event)" type="button">
           Limpiar filtro
         </button>
       </div>
