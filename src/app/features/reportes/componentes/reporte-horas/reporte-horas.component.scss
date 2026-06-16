@@ -310,8 +310,9 @@ input.filter-input {
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s, box-shadow 0.2s;
   
