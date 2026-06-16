@@ -55,6 +55,7 @@ import { ProyectosService } from '../../servicios/proyectos.service';
 })
 export class ProyectoForm implements OnInit, OnChanges {
   @Input() proyecto: Proyecto | null = null;
+  @Input() guardando = false;
   @Output() guardarProyecto = new EventEmitter<Proyecto>();
 
   private fb = inject(FormBuilder);

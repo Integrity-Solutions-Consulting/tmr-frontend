@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs/operators';
+import { finalize, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -65,6 +65,7 @@ export class ProyectosPage implements OnDestroy {
   modalDetalleVisible = false;
   confirmEliminarVisible = false;
   successCrearVisible = false;
+  guardandoProyecto = false;
   proyectoSeleccionado: Proyecto | null = null;
   proyectoDetalle: Proyecto | null = null;
   codigoPendienteEliminar: string | null = null;
@@ -129,14 +130,22 @@ export class ProyectosPage implements OnDestroy {
   }
 
   guardarProyecto(proyecto: Proyecto): void {
+    if (this.guardandoProyecto) return;
+
+    this.guardandoProyecto = true;
+
     if (this.proyectoSeleccionado) {
       const proyectoConId: Proyecto = { ...proyecto, id: this.proyectoSeleccionado.id };
-      this.proyectosService.actualizarProyecto(proyectoConId.id, proyectoConId).subscribe({
+      this.proyectosService.actualizarProyecto(proyectoConId.id, proyectoConId).pipe(
+        finalize(() => this.guardandoProyecto = false)
+      ).subscribe({
         next: () => { this.store.dispatch(cargarProyectos()); this.cerrarModalCrear(); },
         error: (error) => console.error('Error al actualizar proyecto:', error)
       });
     } else {
-      this.proyectosService.crearProyecto(proyecto).subscribe({
+      this.proyectosService.crearProyecto(proyecto).pipe(
+        finalize(() => this.guardandoProyecto = false)
+      ).subscribe({
         next: () => {
           this.store.dispatch(cargarProyectos());
           this.cerrarModalCrear();

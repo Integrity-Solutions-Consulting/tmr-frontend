@@ -48,6 +48,7 @@
   @if (modalCrearVisible) {
     <app-proyecto-form
       [proyecto]="proyectoSeleccionado"
+      [guardando]="guardandoProyecto"
       (guardarProyecto)="guardarProyecto($event)"
     ></app-proyecto-form>
   }
