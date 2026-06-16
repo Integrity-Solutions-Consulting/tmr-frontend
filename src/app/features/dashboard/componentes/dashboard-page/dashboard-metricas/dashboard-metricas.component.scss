@@ -14,7 +14,7 @@
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -48,31 +48,34 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  
-  svg {
+
+  .metrica-icon-svg {
+    display: inline-block;
     width: 24px;
     height: 24px;
-    stroke-width: 2;
+    background-color: currentColor;
+    mask: var(--icon) no-repeat center / contain;
+    -webkit-mask: var(--icon) no-repeat center / contain;
   }
-  
+
   &.proyectos {
     background: rgba(59, 130, 246, 0.1);
     color: #3b82f6;
   }
-  
+
   &.horas {
     background: rgba(34, 197, 94, 0.1);
     color: #22c55e;
   }
-  
+
   &.colaboradores {
     background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+    color: #f97316;
   }
-  
+
   &.clientes {
     background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
+    color: #a855f7;
   }
 }
 
@@ -81,21 +84,21 @@
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
   }
-  
+
   .metrica-card {
     padding: 1rem;
     flex-direction: column;
     text-align: center;
   }
-  
+
   .metrica-valor {
     font-size: 1.5rem;
   }
-  
+
   .metrica-label {
     font-size: 0.75rem;
   }
-  
+
   .metrica-icon {
     width: 40px;
     height: 40px;
