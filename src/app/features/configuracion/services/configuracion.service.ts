@@ -8,6 +8,7 @@ interface RolBackendPayload {
   nombre: string;
   descripcion: string;
   modulosids: number[];
+  activo?: boolean;
 }
 
 interface FeriadoBackendPayload {
@@ -90,11 +91,25 @@ export class ConfiguracionService {
   upsertRol(rol: Rol): void {
     const url = `${environment.apiUrl}/configuracion/roles`;
     const payload = this.toRolBackendPayload(rol);
+    const existing = this.rolesState().find((r) => r.id === rol.id);
 
-    if (this.rolesState().some((r) => r.id === rol.id)) {
-      this.http.put(`${url}/${rol.id}`, payload).subscribe(() => this.loadRoles());
+    if (existing) {
+      this.http.put(`${url}/${rol.id}`, payload).subscribe(() => {
+        if (existing.activo !== rol.activo) {
+          this.setRolEstado(rol.id, rol.activo).subscribe();
+        } else {
+          this.loadRoles();
+        }
+      });
     } else {
-      this.http.post(url, payload).subscribe(() => this.loadRoles());
+      this.http.post<any>(url, payload).subscribe((response) => {
+        const createdId = response?.id || response?.idRol || rol.id;
+        if (rol.activo === false) {
+          this.setRolEstado(createdId, false).subscribe();
+        } else {
+          this.loadRoles();
+        }
+      });
     }
   }
 
@@ -303,6 +318,7 @@ export class ConfiguracionService {
       modulosids: (rol.modulosids ?? rol.modulos.map((m) => m.id))
         .map((id) => Number(id))
         .filter((id): id is number => Number.isFinite(id) && id > 0),
+      activo: rol.activo,
     };
   }
 

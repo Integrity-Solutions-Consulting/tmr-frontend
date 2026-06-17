@@ -454,9 +454,9 @@ export class UsuariosPage {
         nextId: this.configuracionService.nextId(this.usuarios()),
       },
       panelClass: ['tmr-dialog-panel', 'usuarios-dialog-panel'],
-      width: '560px',
-      maxWidth: 'calc(100vw - 32px)',
-      maxHeight: 'calc(100dvh - 32px)',
+      width: '860px',
+      maxWidth: 'calc(100vw - 48px)',
+      maxHeight: '92vh',
       disableClose: true,
     });
 
@@ -497,7 +497,7 @@ export class UsuariosPage {
     this.configuracionService.getUsuarioDetalle(usuario.id).subscribe({
       next: (detalle) => {
         this.dialog.open(UsuarioDetalleModal, {
-          panelClass: 'tmr-dialog-panel',
+          panelClass: ['tmr-dialog-panel', 'usuario-detalle-dialog-panel'],
           disableClose: true,
           data: { usuario: detalle },
         });

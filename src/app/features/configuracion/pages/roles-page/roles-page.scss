@@ -438,6 +438,13 @@ $hover-row:     rgba(#163572, 0.04);
   border-radius: 10px;
   overflow: hidden;
 
+  // Anchos de columna (estilo líderes — table-layout fixed)
+  th:nth-child(1), td:nth-child(1) { width: 140px; }   // Rol
+  th:nth-child(2), td:nth-child(2) { width: auto; }     // Descripción
+  th:nth-child(3), td:nth-child(3) { width: 280px; }    // Módulos
+  th:nth-child(4), td:nth-child(4) { width: 100px; }    // Estado
+  th:nth-child(5), td:nth-child(5) { width: 56px; }     // Acciones
+
   thead {
     background: #f8fafc;
     border-bottom: 2px solid $border;
@@ -482,16 +489,7 @@ $hover-row:     rgba(#163572, 0.04);
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    // Anchos de columna (estilo líderes — table-layout fixed)
-    th:nth-child(1), td:nth-child(1) { width: 140px; }   // Rol
-    th:nth-child(2), td:nth-child(2) { width: auto; }     // Descripción
-    th:nth-child(3), td:nth-child(3) { width: 280px; }    // Módulos
-    th:nth-child(4), td:nth-child(4) { width: 100px; }    // Estado
-    th:nth-child(5), td:nth-child(5) { width: 56px; }     // Acciones
   }
-
-  th:last-child { width: 56px; }
 }
 
 .role-name {

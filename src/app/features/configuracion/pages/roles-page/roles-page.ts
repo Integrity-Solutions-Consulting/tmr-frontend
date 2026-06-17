@@ -180,7 +180,10 @@ export class RolesPage {
       RolesFormModal,
       {
         data,
-        panelClass: 'tmr-dialog-panel',
+        panelClass: ['tmr-dialog-panel', mode === 'view' ? 'roles-detail-dialog-panel' : 'roles-form-dialog-panel'],
+        width: mode === 'view' ? '620px' : '860px',
+        maxWidth: mode === 'view' ? 'calc(100vw - 32px)' : 'calc(100vw - 48px)',
+        maxHeight: mode === 'view' ? '90vh' : '92vh',
         disableClose: true,
       },
     );

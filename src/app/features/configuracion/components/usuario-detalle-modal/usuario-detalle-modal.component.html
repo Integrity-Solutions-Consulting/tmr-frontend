@@ -1,5 +1,3 @@
-<div class="modal-backdrop"></div>
-
 <div class="modal-card">
   <button class="modal-card__close" type="button" (click)="onCerrar()">
     <span class="material-icons">close</span>
@@ -10,7 +8,6 @@
       <h2 class="modal-card__nombre">{{ (usuario.nombres || usuario.apellidos) ? ((usuario.nombres || '') + ' ' + (usuario.apellidos || '')).trim() : usuario.email }}</h2>
       <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
     </div>
-
   </div>
 
   <div class="modal-card__body">
@@ -20,10 +17,14 @@
         type="button"
         (click)="toggleSeccion('vinculo')">
 
-        <span class="material-icons detalle-section__arrow"
-              [style.transform]="seccionesExpandido.vinculo ? 'rotate(90deg)' : 'rotate(0deg)'">
-          chevron_right
-        </span>
+        <img
+          src="assets/iconos/desplegar.svg"
+          alt="toggle"
+          width="12"
+          height="12"
+          class="detalle-section__arrow"
+          [style.transform]="seccionesExpandido.vinculo ? 'rotate(90deg)' : 'rotate(0deg)'"
+        />
 
         <span class="detalle-section__bar"></span>
         <span class="detalle-section__title">Vinculo de persona</span>
@@ -32,7 +33,7 @@
       @if (seccionesExpandido.vinculo) {
         <div class="detalle-grid">
           <div class="detalle-field">
-            <span class="material-icons detalle-field__icon">account_circle</span>
+            <img src="assets/iconos/user.svg" alt="usuario" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Usuario</p>
               <p class="detalle-field__value">{{ usuario.usuario }}</p>
@@ -40,7 +41,7 @@
           </div>
 
           <div class="detalle-field">
-            <span class="material-icons detalle-field__icon">badge</span>
+            <img src="assets/iconos/identificacion.svg" alt="tipo" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Tipo de usuario</p>
               <p class="detalle-field__value">{{ usuario.idPersona ? 'Interno' : 'Externo' }}</p>
@@ -57,10 +58,14 @@
         type="button"
         (click)="toggleSeccion('contacto')">
 
-        <span class="material-icons detalle-section__arrow"
-              [style.transform]="seccionesExpandido.contacto ? 'rotate(90deg)' : 'rotate(0deg)'">
-          chevron_right
-        </span>
+        <img
+          src="assets/iconos/desplegar.svg"
+          alt="toggle"
+          width="12"
+          height="12"
+          class="detalle-section__arrow"
+          [style.transform]="seccionesExpandido.contacto ? 'rotate(90deg)' : 'rotate(0deg)'"
+        />
 
         <span class="detalle-section__bar"></span>
         <span class="detalle-section__title">Contacto &amp; Roles</span>
@@ -69,14 +74,12 @@
       @if (seccionesExpandido.contacto) {
         <div class="detalle-grid">
           <div class="detalle-field">
-            <span class="material-icons detalle-field__icon">email</span>
+            <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Correo</p>
               <p class="detalle-field__value detalle-field__value--break">{{ usuario.email }}</p>
             </div>
           </div>
-
-
 
           <div class="detalle-field">
             <span class="material-icons detalle-field__icon">admin_panel_settings</span>
