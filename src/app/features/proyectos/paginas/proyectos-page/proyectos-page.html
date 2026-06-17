@@ -35,7 +35,7 @@
       [filtros]="filtros"
       (verMas)="abrirModalDetalle($event)"
       (editar)="abrirModalEditar($event)"
-      (eliminar)="solicitarEliminarProyecto($event)"
+      (inactivar)="solicitarCambiarEstadoProyecto($event)"
     ></app-tabla>
   </div>
 </section>
@@ -48,19 +48,20 @@
   @if (modalCrearVisible) {
     <app-proyecto-form
       [proyecto]="proyectoSeleccionado"
+      [guardando]="guardandoProyecto"
       (guardarProyecto)="guardarProyecto($event)"
     ></app-proyecto-form>
   }
 </app-modal-base>
 
 <app-confirm-dialog
-  [visible]="confirmEliminarVisible"
-  titulo="Eliminar proyecto"
-  mensaje="Esta accion eliminara el proyecto seleccionado. Deseas continuar?"
+  [visible]="confirmCambioEstadoVisible"
+  [titulo]="confirmTitulo"
+  [mensaje]="confirmMensaje"
   textoCancelar="Cancelar"
-  textoConfirmar="Eliminar"
-  (cancelar)="cancelarEliminarProyecto()"
-  (confirmar)="confirmarEliminarProyecto()"
+  [textoConfirmar]="confirmTextoConfirmar"
+  (cancelar)="cancelarCambiarEstadoProyecto()"
+  (confirmar)="confirmarCambiarEstadoProyecto()"
 ></app-confirm-dialog>
 
 <app-success-modal

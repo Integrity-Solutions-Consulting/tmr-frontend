@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { PaginacionComponent } from '../../shared/components/paginacion/paginacion.component';
 import { BehaviorSubject, combineLatest, map, Observable, shareReplay, startWith, take, tap } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
@@ -17,7 +18,7 @@ const COLOR_BORDE = 'FFE2E8F0';
 @Component({
   selector: 'app-carga-actividades',
   standalone: true,
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, PaginacionComponent],
   templateUrl: './carga-actividades.component.html',
   styleUrls: ['./carga-actividades.component.scss']
 })
@@ -38,6 +39,13 @@ export class CargaActividadesComponent implements OnInit {
 
   paginaActual$ = new BehaviorSubject<number>(1);
   itemsPorPagina = 10;
+
+  // Método para recibir cambios desde el componente de paginación compartido
+  paginaCambia(nuevaPagina: number) {
+    if (typeof nuevaPagina === 'number' && nuevaPagina >= 1) {
+      this.paginaActual$.next(nuevaPagina);
+    }
+  }
 
   private actividadesRaw$: Observable<Actividad[]> = this.store.select(selectActividadesList) as Observable<Actividad[]>;
 
@@ -84,6 +92,31 @@ export class CargaActividadesComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(ActividadesActions.cargarActividades());
+  }
+
+  mostrarDetalle = false;
+  actividadSeleccionada: Actividad | null = null;
+
+  selectActividad(actividad: Actividad): void {
+    this.actividadSeleccionada = actividad;
+  }
+
+  verActividad(actividad?: Actividad): void {
+    if (actividad) this.actividadSeleccionada = actividad;
+    if (!this.actividadSeleccionada) return;
+    this.mostrarDetalle = true;
+  }
+
+  editarActividad(actividad?: Actividad): void {
+    const a = actividad ?? this.actividadSeleccionada;
+    if (!a) return;
+    console.log('Editar actividad', a);
+  }
+
+  eliminarActividad(actividad?: Actividad): void {
+    const a = actividad ?? this.actividadSeleccionada;
+    if (!a) return;
+    console.log('Eliminar actividad', a);
   }
 
   private cambioFiltro(control: FormControl<string>): Observable<string> {

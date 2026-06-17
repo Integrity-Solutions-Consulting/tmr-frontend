@@ -45,7 +45,7 @@ export class Tabla {
   }
 
   @Output() editar = new EventEmitter<Proyecto>();
-  @Output() eliminar = new EventEmitter<string>();
+  @Output() inactivar = new EventEmitter<Proyecto>();
   @Output() verMas = new EventEmitter<Proyecto>();
 
   private store = inject(Store);
@@ -76,7 +76,7 @@ export class Tabla {
   ];
 
   paginaActual = signal(1);
-  porPagina = 5;
+  porPagina = 10;
   dataSource = new MatTableDataSource<Proyecto>([]);
   menuAbierto: string | null = null;
 
@@ -84,31 +84,38 @@ export class Tabla {
     const proyectos = this.proyectosSignal();
     const filtros = this._filtros();
 
-    return proyectos.filter(proyecto => {
-      const busqueda = filtros.busqueda.toLowerCase();
+    return proyectos
+      .filter(proyecto => {
+        const busqueda = filtros.busqueda.toLowerCase();
 
-      const coincideBusqueda =
-        proyecto.codigo.toLowerCase().includes(busqueda) ||
-        proyecto.nombre.toLowerCase().includes(busqueda) ||
-        (proyecto.cliente ?? '').toLowerCase().includes(busqueda);
+        const coincideBusqueda =
+          proyecto.codigo.toLowerCase().includes(busqueda) ||
+          proyecto.nombre.toLowerCase().includes(busqueda) ||
+          (proyecto.cliente ?? '').toLowerCase().includes(busqueda);
 
-      // Si no hay estados seleccionados → pasa todos
-      const coincideEstado =
-        !filtros.estados.length ||
-        filtros.estados.includes(this.normalizarEstadoProyecto(proyecto));
+        // Si no hay estados seleccionados → pasa todos
+        const coincideEstado =
+          !filtros.estados.length ||
+          filtros.estados.includes(this.normalizarEstadoProyecto(proyecto));
 
-      // Si no hay tipos seleccionados → pasa todos
-      const coincideTipo =
-        !filtros.tipos.length ||
-        filtros.tipos.includes(proyecto.tipo ?? '');
+        // Si no hay tipos seleccionados → pasa todos
+        const coincideTipo =
+          !filtros.tipos.length ||
+          filtros.tipos.includes(proyecto.tipo ?? '');
 
-      // Filtro de seguimiento (ids de estado)
-      const coincideSeguimiento =
-        !(filtros.seguimiento && filtros.seguimiento.length) ||
-        (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
+        // Filtro de seguimiento (ids de estado)
+        const coincideSeguimiento =
+          !(filtros.seguimiento && filtros.seguimiento.length) ||
+          (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
 
-      return coincideBusqueda && coincideEstado && coincideTipo && coincideSeguimiento;
-    });
+        return coincideBusqueda && coincideEstado && coincideTipo && coincideSeguimiento;
+      })
+      .sort((a, b) => {
+        const aActivo = this.normalizarEstadoProyecto(a) === 'Activo';
+        const bActivo = this.normalizarEstadoProyecto(b) === 'Activo';
+        if (aActivo === bActivo) return 0;
+        return aActivo ? -1 : 1;
+      });
   });
 
   filtrosAplicados = signal<string>('');
@@ -173,6 +180,11 @@ export class Tabla {
   }
 
   obtenerSeguimiento(proyecto: Proyecto): string {
+    const estadoProyecto = this.normalizarEstadoProyecto(proyecto);
+    if (estadoProyecto === 'Inactivo') {
+      return 'Inhabilitado';
+    }
+
     if (!proyecto.idEstadoProyecto) {
       return 'Sin seguimiento';
     }
@@ -180,6 +192,10 @@ export class Tabla {
   }
 
   obtenerSeguimientoClase(proyecto: Proyecto): string {
+    if (this.normalizarEstadoProyecto(proyecto) === 'Inactivo') {
+      return 'seguimiento-inactivo';
+    }
+
     const seguimiento = this.obtenerSeguimiento(proyecto).toLowerCase();
     if (seguimiento.includes('complet')) return 'seguimiento-completado';
     if (seguimiento.includes('cancel')) return 'seguimiento-cancelado';
@@ -259,11 +275,27 @@ export class Tabla {
       : [];
   }
 
+  obtenerLideresVisibles(proyecto: Proyecto, maxVisible = 2): { nombre: string; detalle: string }[] {
+    return this.obtenerLideres(proyecto).slice(0, maxVisible);
+  }
+
+  obtenerLideresOcultos(proyecto: Proyecto, maxVisible = 2): number {
+    return Math.max(0, this.obtenerLideres(proyecto).length - maxVisible);
+  }
+
   obtenerAcciones(proyecto: Proyecto): ActionMenuItem[] {
+    const estado = this.normalizarEstadoProyecto(proyecto);
+    const estaActivo = estado === 'Activo';
+
     return [
       { id: 'ver-mas', label: 'Ver más', action: () => this.verMas.emit(proyecto) },
       { id: 'editar', label: 'Editar', action: () => this.editar.emit(proyecto) },
-      { id: 'eliminar', label: 'Eliminar', danger: true, action: () => this.eliminar.emit(proyecto.codigo) }
+      {
+        id: 'inactivar',
+        label: estaActivo ? 'Inactivar' : 'Activar',
+        danger: estaActivo,
+        action: () => this.inactivar.emit(proyecto)
+      }
     ];
   }
 

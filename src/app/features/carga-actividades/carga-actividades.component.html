@@ -15,8 +15,10 @@
       <button class="btn-primary" [disabled]="cargando" (click)="fileInput.click()">
         @if (!cargando) {
           <span class="material-icons">cloud_upload</span>
-        }  
-        <span>{{ cargando ? 'Procesando...' : 'Cargar Excel' }}</span>
+        } @else {
+          <span>Procesando...</span>
+        }
+        
       </button>
     </div>
   </header>
@@ -132,22 +134,27 @@
     </div>
 
     @if ((totalItemsFiltrados$ | async)! > 0) {
-      <footer class="pagination-bar">
-        <div class="pagination-info">
-          <p>Página <strong>{{ (paginaActual$ | async) }}</strong> de <strong>{{ Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina) }}</strong></p>
-        </div>
-        <div class="pagination-controls">
-          <button class="btn-icon" [disabled]="(paginaActual$ | async) === 1" (click)="paginaAnterior()">
-            <span class="material-icons">chevron_left</span>
-          </button>
-          <span class="current-page-indicator">{{ (paginaActual$ | async) }}</span>
-          <button class="btn-icon" 
-                  [disabled]="(paginaActual$ | async)! >= Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina)" 
-                  (click)="paginaSiguiente()">
-            <span class="material-icons">chevron_right</span>
-          </button>
-        </div>
-      </footer>
+      <app-paginacion
+        [paginaActual]="(paginaActual$ | async) ?? 1"
+        [totalPaginas]="Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina)"
+        [total]="(totalItemsFiltrados$ | async) ?? 0"
+        [porPagina]="itemsPorPagina"
+        (paginaCambia)="paginaCambia($event)">
+      </app-paginacion>
     }
+  </div>
+</div>
+ 
+<div *ngIf="mostrarDetalle" class="modal-detalle-backdrop">
+  <div class="modal-detalle">
+    <h3>Detalle de actividad</h3>
+    <p><strong>Colaborador:</strong> {{ actividadSeleccionada?.colaborador }}</p>
+    <p><strong>Proyecto:</strong> {{ actividadSeleccionada?.proyecto }}</p>
+    <p><strong>Cliente:</strong> {{ actividadSeleccionada?.cliente }}</p>
+    <p><strong>Fecha:</strong> {{ formatearFecha(actividadSeleccionada?.fecha) }}</p>
+    <p><strong>Horas:</strong> {{ actividadSeleccionada?.nroHoras }}</p>
+    <div style="text-align:right; margin-top: 12px;">
+      <button class="btn" (click)="mostrarDetalle = false">Cerrar</button>
+    </div>
   </div>
 </div>

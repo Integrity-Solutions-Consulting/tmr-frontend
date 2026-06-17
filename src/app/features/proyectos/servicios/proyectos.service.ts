@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Proyecto, ProyectoLookups, LookupOption } from '../modelos/proyecto.model';
 import { environment } from '../../../../environments/environment';
@@ -11,8 +11,9 @@ export class ProyectosService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/proyectos`;
 
-  private construirPayload(proyecto: Proyecto, esEdicion = false): any {
-    const fmt = (f: any) => esEdicion ? f : this.formatearFechaCreacion(f);
+  private construirPayload(proyecto: Proyecto): any {
+    const fmt = (f: any) => this.formatearFechaCreacion(f);
+    const estado = proyecto.estado ?? (proyecto.activo === false ? 'Inactivo' : 'Activo');
 
     const lideres = proyecto.lideres?.length
       ? proyecto.lideres
@@ -32,7 +33,8 @@ export class ProyectosService {
       Cliente: proyecto.cliente ?? null,
       IdTipoProyecto: proyecto.idTipoProyecto ?? null,
       Tipo: proyecto.tipo ?? null,
-      Estado: proyecto.estado || 'Activo',
+      Estado: estado,
+      Activo: estado === 'Activo',
       FechaInicio: fmt(proyecto.fechaInicio),
       FechaFin: fmt(proyecto.fechaFin),
       Presupuesto: proyecto.presupuesto ?? null,
@@ -55,7 +57,7 @@ export class ProyectosService {
       }))
     };
 
-    if (proyecto.idEstadoProyecto) {
+    if (proyecto.idEstadoProyecto !== undefined && proyecto.idEstadoProyecto !== null) {
       payload.IdEstadoProyecto = proyecto.idEstadoProyecto;
     }
 
@@ -74,12 +76,12 @@ export class ProyectosService {
     return this.obtenerLookups().pipe(map(data => data.clientes));
   }
 
-  crearProyecto(proyecto: Proyecto): Observable<any> {
-    return this.http.post(this.apiUrl, this.construirPayload(proyecto));
+  crearProyecto(proyecto: Proyecto): Observable<HttpResponse<any>> {
+    return this.http.post<any>(this.apiUrl, this.construirPayload(proyecto), { observe: 'response' });
   }
 
-  actualizarProyecto(id: number, proyecto: Proyecto): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, this.construirPayload(proyecto, true));
+  actualizarProyecto(id: number, proyecto: Proyecto): Observable<HttpResponse<any>> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, this.construirPayload(proyecto), { observe: 'response' });
   }
 
   obtenerProyecto(id: number): Observable<Proyecto> {

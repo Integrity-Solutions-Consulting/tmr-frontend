@@ -105,10 +105,11 @@
       @if (proyecto) {
         <mat-form-field>
           <mat-label>Estado</mat-label>
-          <mat-select yPosition="below" formControlName="estado">
-            <mat-option value="ACTIVO">Activo</mat-option>
-            <mat-option value="INACTIVO">Inactivo</mat-option>
+          <mat-select yPosition="below" formControlName="estado" [disabled]="true">
+            <mat-option value="Activo">Activo</mat-option>
+            <mat-option value="Inactivo">Inactivo</mat-option>
           </mat-select>
+          <mat-hint>El estado no se puede editar desde este formulario</mat-hint>
         </mat-form-field>
       }
 
@@ -327,8 +328,8 @@
 
   <!-- ── Acciones ──────────────────────────────────────────────────────── -->
   <div class="proyecto-form__actions">
-    <button mat-flat-button type="submit">
-      Guardar
+    <button mat-flat-button type="submit" [disabled]="guardando">
+      {{ guardando ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>
 

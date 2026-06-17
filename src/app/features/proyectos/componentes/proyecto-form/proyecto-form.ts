@@ -55,6 +55,7 @@ import { ProyectosService } from '../../servicios/proyectos.service';
 })
 export class ProyectoForm implements OnInit, OnChanges {
   @Input() proyecto: Proyecto | null = null;
+  @Input() guardando = false;
   @Output() guardarProyecto = new EventEmitter<Proyecto>();
 
   private fb = inject(FormBuilder);
@@ -116,8 +117,10 @@ export class ProyectoForm implements OnInit, OnChanges {
         if (this.lideresOpciones.length > 0) {
           this.aplicarProyectoAlFormulario(this.proyecto);
         }
+        this.formulario.controls.estado.disable({ emitEvent: false });
       } else {
         this.resetFormulario();
+        this.formulario.controls.estado.enable({ emitEvent: false });
       }
     }
   }
@@ -158,7 +161,7 @@ export class ProyectoForm implements OnInit, OnChanges {
       fechaFin: this.normalizarFecha(proyecto.fechaFin),
       presupuesto: this.valorFormularioNumerico(proyecto.presupuesto),
       horas: this.valorFormularioNumerico(proyecto.horas),
-      estado: proyecto.estado || 'Activo',
+      estado: this.normalizarEstadoProyecto(proyecto),
       idEstadoProyecto: proyecto.idEstadoProyecto ?? null
     });
 
@@ -242,6 +245,7 @@ export class ProyectoForm implements OnInit, OnChanges {
       idCliente: null, fechaInicio: '', fechaFin: '', presupuesto: '', horas: '',
       numeroRecursos: 0, estado: 'Activo', idEstadoProyecto: null
     });
+    this.formulario.controls.estado.enable({ emitEvent: false });
     this.lideres.clear();
     this.lideres.push(this.crearLider());
     this.cargosFiltrados = [[]];
@@ -435,6 +439,10 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.actualizarNumeroRecursos();
     this.intentoGuardar = true;
 
+    if (this.guardando) {
+      return;
+    }
+
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
       return;
@@ -530,10 +538,31 @@ export class ProyectoForm implements OnInit, OnChanges {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = String(control.value ?? '').trim();
       if (!valor) return null;
+
+      const parent = control.parent;
+      if (parent) {
+        const nombreControl = Object.entries(parent.controls)
+          .find(([, child]) => child === control)?.[0];
+
+        if (nombreControl) {
+          const idControl = this.obtenerControlIdRelacionado(parent, nombreControl);
+          if (idControl && idControl.value != null) {
+            return null;
+          }
+        }
+      }
+
       const opciones = obtenerOpciones();
       if (!opciones.length) return null;
       return opciones.some(opcion => opcion.nombre === valor) ? null : { opcionInvalida: true };
     };
+  }
+
+  private obtenerControlIdRelacionado(parent: AbstractControl, controlName: string): AbstractControl | null {
+    if (controlName === 'cliente') return parent.get('idCliente');
+    if (controlName === 'lider') return parent.get('idLider');
+    if (controlName === 'nombre') return parent.get('idEmpleado');
+    return null;
   }
 
   private obtenerIdClientePorNombre(nombre?: string | null): number | null {
@@ -607,6 +636,14 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   private valorFormularioNumerico(valor: number | null | undefined): string {
     return valor === undefined || valor === null ? '' : String(valor);
+  }
+
+  private normalizarEstadoProyecto(proyecto: Proyecto): string {
+    if (typeof proyecto.activo === 'boolean') {
+      return proyecto.activo ? 'Activo' : 'Inactivo';
+    }
+    const estado = (proyecto.estado ?? '').trim().toLowerCase();
+    return estado === 'inactivo' ? 'Inactivo' : 'Activo';
   }
 
   private normalizarFecha(valor: unknown): string | null {
