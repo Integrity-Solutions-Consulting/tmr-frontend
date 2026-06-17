@@ -5,12 +5,23 @@
   min-width: 220px;
   min-height: 100vh;
   background: #ffffff;
-  border-right: 1px solid #e5e7eb;
   padding: 22px 14px 24px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+
+  @media (min-width: 1025px) {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 64px;
+      right: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #e5e7eb;
+    }
+  }
 }
 
 /* ── Logo ── */
@@ -189,6 +200,7 @@
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    border-right: 1px solid #e5e7eb;
   }
 
   :host-context(body.sidebar-open) .sidebar {
