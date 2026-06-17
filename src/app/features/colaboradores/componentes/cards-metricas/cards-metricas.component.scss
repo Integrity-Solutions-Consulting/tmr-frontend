@@ -17,6 +17,12 @@
     min-height: 82px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     cursor: default;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    }
   }
 
   &__card-content {
