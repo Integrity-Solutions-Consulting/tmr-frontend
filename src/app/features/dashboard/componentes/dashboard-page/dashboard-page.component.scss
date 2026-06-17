@@ -1,7 +1,31 @@
 .dashboard-container {
-  padding: 2rem;
-  background: #f5f7fa;
-  min-height: 100vh;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  padding: 28px 28px 22px;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // evita desbordamiento en layouts flex
+
+
+  @media (max-width: 1024px) {
+    padding: 24px 22px 20px;
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 14px;
+    padding: 20px 14px 18px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 10px;
+  }
 }
 
 .dashboard-header {
@@ -16,6 +40,12 @@
     color: #163572;
     letter-spacing: -0.025em;
     margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }
 
@@ -52,6 +82,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  min-width: 0; // evita que desborde el grid principal
   
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -60,6 +91,10 @@
 
 .section-proximamente {
   grid-column: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // evita desbordamiento interno
   
   @media (max-width: 1200px) {
     grid-column: 1;
@@ -68,6 +103,10 @@
 
 .section-grafico {
   grid-column: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // evita desbordamiento interno
   
   @media (max-width: 1200px) {
     grid-column: 1;

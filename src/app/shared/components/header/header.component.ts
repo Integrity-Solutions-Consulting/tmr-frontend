@@ -21,6 +21,12 @@ import { CommonModule } from '@angular/common';
       align-items: flex-start;
       width: 100%;
       padding: 0 0 24px 0;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
     }
     .header-title {
       font-size: 28px;

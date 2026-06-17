@@ -1,19 +1,14 @@
 <div class="report-wrapper">
 
   <app-header title="Reporte Por Fechas" subtitle="Consulta detallada de asignaciones y periodos de ejecución.">
+    <app-descargar-menu 
+      [disabled]="datosFiltrados().length === 0"
+      (descargarPDF)="exportarPDF()" 
+      (descargarExcel)="exportarExcel()">
+    </app-descargar-menu>
   </app-header>
 
-  <div class="report-content">
-
-    <div class="toolbar">
-      <app-descargar-menu 
-        [disabled]="datosFiltrados().length === 0"
-        (descargarPDF)="exportarPDF()" 
-        (descargarExcel)="exportarExcel()">
-      </app-descargar-menu>
-    </div>
-
-    @if (mostrarDatos()) {
+  @if (mostrarDatos() && datosFiltrados().length > 0) {
     <div class="metricas-grid">
       <!-- Asignaciones -->
       <div class="metrica-card">
@@ -25,7 +20,7 @@
           <div class="metrica-label">Asignaciones</div>
         </div>
       </div>
- 
+  
       <!-- Líderes -->
       <div class="metrica-card">
         <div class="metrica-icon lideres">
@@ -36,7 +31,7 @@
           <div class="metrica-label">Líderes</div>
         </div>
       </div>
- 
+  
       <!-- Recursos -->
       <div class="metrica-card">
         <div class="metrica-icon colaboradores">
@@ -47,7 +42,7 @@
           <div class="metrica-label">Recursos</div>
         </div>
       </div>
- 
+  
       <!-- Clientes -->
       <div class="metrica-card">
         <div class="metrica-icon clientes">
@@ -59,59 +54,59 @@
         </div>
       </div>
     </div>
-    }
+  }
 
-    <div class="filters-container">
-      <div class="filter-group">
-        <label class="filter-label">Cliente</label>
-        <div class="filter-input-wrapper">
-          <input type="text" [value]="busquedaCliente()" (input)="onInputSanitized('cliente', $event)"
-            placeholder="Buscar cliente..." class="filter-input">
-          <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Líder</label>
-        <div class="filter-input-wrapper">
-          <input type="text" [value]="busquedaLider()" (input)="onInputSanitized('lider', $event)"
-            placeholder="Buscar líder..." class="filter-input">
-          <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="7" r="4" />
-            <path d="M10 14H6a4 4 0 0 0-4 4v2" />
-            <path d="M12 21h10" />
-            <path d="m18 15 4 4-4 4" />
-          </svg>
-        </div>
-      </div>
-
-      <div class="filter-group date-group">
-        <label class="filter-label">Inicio</label>
-        <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="onFiltroChange('fechaInicio', $event)"
-          class="filter-input">
-      </div>
-
-      <div class="filter-group date-group">
-        <label class="filter-label">Fin</label>
-        <input type="date" [ngModel]="fechaFin()" (ngModelChange)="onFiltroChange('fechaFin', $event)"
-          class="filter-input">
-      </div>
-
-      <button (click)="limpiarFiltros()" class="btn-clear" title="Limpiar filtros">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" />
+  <div class="filters-container">
+    <div class="filter-group">
+      <label class="filter-label">Cliente</label>
+      <div class="filter-input-wrapper">
+        <input type="text" [value]="busquedaCliente()" (input)="onInputSanitized('cliente', $event)"
+          placeholder="Buscar cliente..." class="filter-input">
+        <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
         </svg>
-      </button>
+      </div>
     </div>
 
-    @if (!mostrarDatos()) {
-    <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white mt-4">
+    <div class="filter-group">
+      <label class="filter-label">Líder</label>
+      <div class="filter-input-wrapper">
+        <input type="text" [value]="busquedaLider()" (input)="onInputSanitized('lider', $event)"
+          placeholder="Buscar líder..." class="filter-input">
+        <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="7" r="4" />
+          <path d="M10 14H6a4 4 0 0 0-4 4v2" />
+          <path d="M12 21h10" />
+          <path d="m18 15 4 4-4 4" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Inicio</label>
+      <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="onFiltroChange('fechaInicio', $event)"
+        class="filter-input">
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Fin</label>
+      <input type="date" [ngModel]="fechaFin()" (ngModelChange)="onFiltroChange('fechaFin', $event)"
+        class="filter-input">
+    </div>
+
+    <button (click)="limpiarFiltros()" class="btn-clear" title="Limpiar filtros">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" />
+      </svg>
+    </button>
+  </div>
+
+  @if (!mostrarDatos()) {
+    <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white">
       <div class="empty-content">
         <div class="empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -125,11 +120,11 @@
         <button (click)="verTodo()" class="btn-link">Ver todo el historial</button>
       </div>
     </div>
-    } @else {
+  } @else {
     <app-tabla [datosPaginados]="datosPaginados()" [columnas]="columnasTabla" [paginaActual]="paginaActual"
       [totalPaginas]="totalPaginas" [total]="datosFiltrados().length" [porPagina]="itemsPorPagina()"
       [mostrarDatos]="mostrarDatos()" (paginaCambia)="paginaActual.set($event)">
     </app-tabla>
-    }
-  </div>
+  }
+
 </div>
