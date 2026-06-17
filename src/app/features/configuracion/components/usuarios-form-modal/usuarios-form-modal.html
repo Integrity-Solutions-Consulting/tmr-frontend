@@ -2,7 +2,7 @@
   <div class="modal-form__header">
     <div>
       <h2 class="modal-form__title">{{ isEdit ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
-      <p class="modal-form__subtitle">Configure acceso, roles y vinculo opcional con colaborador</p>
+      <p class="modal-form__subtitle"></p>
     </div>
     <button class="modal-form__close" type="button" (click)="cancel()">
       <span class="material-icons">close</span>
@@ -23,33 +23,29 @@
         </label>
 
         @if (isInternalUser) {
-          <div class="form-field">
-            <div class="float-select mat-select-wrapper">
-              <mat-select
-                class="float-select__mat-input"
-                formControlName="idColaborador"
-                [class.float-select__input--error]="campoInvalido('idColaborador')"
-                panelWidth="null"
-                placeholder="Seleccione un colaborador"
-              >
-                <mat-option value="">Seleccione un colaborador</mat-option>
-                @for (colaborador of colaboradores; track colaborador.id) {
-                  <mat-option [value]="colaborador.id">
-                    {{ colaborador.nombreCompleto }}
-                  </mat-option>
-                }
-              </mat-select>
-              <label class="float-select__label float-select__label--up">
-                Colaborador <span class="req">*</span>
-              </label>
-            </div>
-            @if (cargandoColaboradores()) {
-              <span class="form-field__hint">Cargando colaboradores...</span>
-            }
-            @if (campoInvalido('idColaborador')) {
-              <span class="form-field__error">{{ colaboradorError() }}</span>
-            }
+        <div class="form-field">
+          <div class="float-select mat-select-wrapper">
+            <mat-select class="float-select__mat-input" formControlName="idColaborador"
+              [class.float-select__input--error]="campoInvalido('idColaborador')" panelWidth="null"
+              placeholder="Seleccione un colaborador">
+              <mat-option value="">Seleccione un colaborador</mat-option>
+              @for (colaborador of colaboradores; track colaborador.id) {
+              <mat-option [value]="colaborador.id">
+                {{ colaborador.nombreCompleto }}
+              </mat-option>
+              }
+            </mat-select>
+            <label class="float-select__label float-select__label--up">
+              Colaborador <span class="req">*</span>
+            </label>
           </div>
+          @if (cargandoColaboradores()) {
+          <span class="form-field__hint">Cargando colaboradores...</span>
+          }
+          @if (campoInvalido('idColaborador')) {
+          <span class="form-field__error">{{ colaboradorError() }}</span>
+          }
+        </div>
         }
       </div>
     </div>
@@ -63,46 +59,33 @@
       <div class="form-grid form-grid--2">
         <div class="form-field">
           @if (isInternalUser) {
-            <div class="email-compose" [class.email-compose--error]="campoInvalido('email')">
-              <div class="float-field">
-                <input
-                  class="float-field__input"
-                  type="text"
-                  [value]="form.controls.usuario.value"
-                  placeholder=" "
-                  (input)="syncInternalEmailInput($any($event.target).value)"
-                />
-                <label class="float-field__label">Correo <span class="req">*</span></label>
-              </div>
-              <span class="email-compose__suffix">{{ emailSuffix }}</span>
-            </div>
-          } @else {
+          <div class="email-compose" [class.email-compose--error]="campoInvalido('email')">
             <div class="float-field">
-              <input
-                class="float-field__input"
-                type="email"
-                formControlName="email"
-                placeholder=" "
-                [class.float-field__input--error]="campoInvalido('email')"
-              />
-              <label class="float-field__label">Email <span class="req">*</span></label>
+              <input class="float-field__input" type="text" [value]="form.controls.usuario.value" placeholder=" "
+                (input)="syncInternalEmailInput($any($event.target).value)" />
+              <label class="float-field__label">Correo <span class="req">*</span></label>
             </div>
+            <span class="email-compose__suffix">{{ emailSuffix }}</span>
+          </div>
+          } @else {
+          <div class="float-field">
+            <input class="float-field__input" type="email" formControlName="email" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('email')" />
+            <label class="float-field__label">Email <span class="req">*</span></label>
+          </div>
           }
           @if (campoInvalido('email')) {
-            <span class="form-field__error">{{ emailError() }}</span>
+          <span class="form-field__error">{{ emailError() }}</span>
           }
         </div>
 
         <div class="form-field">
           <div class="float-select">
-            <select
-              class="float-select__input"
-              formControlName="roleid"
-              [class.float-select__input--error]="campoInvalido('roleid')"
-            >
+            <select class="float-select__input" formControlName="roleid"
+              [class.float-select__input--error]="campoInvalido('roleid')">
               <option value="">Seleccione un rol</option>
               @for (r of rolesList; track r.id) {
-                <option [value]="r.id">{{ r.nombre }}</option>
+              <option [value]="r.id">{{ r.nombre }}</option>
               }
             </select>
             <label class="float-select__label float-select__label--up">
@@ -110,7 +93,7 @@
             </label>
           </div>
           @if (campoInvalido('roleid')) {
-            <span class="form-field__error">Seleccione un rol</span>
+          <span class="form-field__error">Seleccione un rol</span>
           }
         </div>
 
@@ -121,76 +104,60 @@
 
         <div class="form-field">
           @if (isEdit) {
-            <!-- Editar usuario: campo opcional para nueva contraseña -->
-            <div class="float-field">
-              <input
-                class="float-field__input float-field__input--password"
-                [type]="showTemporaryPassword ? 'text' : 'password'"
-                formControlName="password"
-                placeholder=" "
-                [class.float-field__input--error]="campoInvalido('password')"
-              />
-              <label class="float-field__label">Nueva contrasena</label>
-              <button
-                type="button"
-                class="password-toggle"
-                (click)="toggleTemporaryPasswordVisibility()"
-                title="Mostrar/ocultar contrasena"
-              >
-                <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
-              </button>
-            </div>
-            @if (campoInvalido('password')) {
-              <span class="form-field__error">{{ passwordError() }}</span>
-            }
+          <!-- Editar usuario: campo opcional para nueva contraseña -->
+          <div class="float-field">
+            <input class="float-field__input float-field__input--password"
+              [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('password')" />
+            <label class="float-field__label">Nueva contrasena</label>
+            <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
+              title="Mostrar/ocultar contrasena">
+              <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          @if (campoInvalido('password')) {
+          <span class="form-field__error">{{ passwordError() }}</span>
+          }
           } @else {
-            <!-- Nuevo usuario: mostrar contraseña temporal para que el admin pueda copiarla -->
-            <div class="float-field">
-              <input
-                class="float-field__input float-field__input--password"
-                [type]="showTemporaryPassword ? 'text' : 'password'"
-                formControlName="password"
-                placeholder=" "
-                [class.float-field__input--error]="campoInvalido('password')"
-                readonly
-              />
-              <label class="float-field__label float-field__label--always">Contrasena temporal <span class="req">*</span></label>
-              <button
-                type="button"
-                class="password-toggle"
-                (click)="toggleTemporaryPasswordVisibility()"
-                title="Mostrar/ocultar contrasena"
-              >
-                <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
-              </button>
-            </div>
-            <p class="form-field__hint">
-              Copie esta contrasena antes de guardar.
-              <button type="button" class="btn-regenerar" (click)="regenerateTemporaryPassword()">↺ Regenerar</button>
-            </p>
-            @if (campoInvalido('password')) {
-              <span class="form-field__error">{{ passwordError() }}</span>
-            }
+          <!-- Nuevo usuario: mostrar contraseña temporal para que el admin pueda copiarla -->
+          <div class="float-field">
+            <input class="float-field__input float-field__input--password"
+              [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('password')" readonly />
+            <label class="float-field__label float-field__label--always">Contrasena temporal <span
+                class="req">*</span></label>
+            <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
+              title="Mostrar/ocultar contrasena">
+              <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <p class="form-field__hint">
+            Copie esta contrasena antes de guardar.
+            <button type="button" class="btn-regenerar" (click)="regenerateTemporaryPassword()">↺ Regenerar</button>
+          </p>
+          @if (campoInvalido('password')) {
+          <span class="form-field__error">{{ passwordError() }}</span>
+          }
           }
         </div>
       </div>
     </div>
 
     @if (errorGuardar()) {
-      <div class="modal-form__error-banner">
-        <span class="material-icons">error_outline</span>
-        {{ errorGuardar() }}
-      </div>
+    <div class="modal-form__error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ errorGuardar() }}
+    </div>
     }
   </div>
 
   <div class="modal-form__footer">
     <button class="modal-form__btn modal-form__btn--save" type="submit" [disabled]="guardando()">
       @if (guardando()) {
-        <span class="modal-form__spinner"></span>
-        Guardando...
+      <span class="modal-form__spinner"></span>
+      Guardando...
       } @else {
-        Guardar
+      Guardar
       }
     </button>
   </div>

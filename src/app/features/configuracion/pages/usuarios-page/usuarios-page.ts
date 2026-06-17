@@ -40,7 +40,7 @@ export class UsuariosPage {
   readonly roles = this.configuracionService.roles;
 
   // ── Filtro activo por estado ──────────────────────────────────────────────
-  readonly filtroActivo = signal<FiltroEstado>('todos');
+  readonly filtroActivo = signal<FiltroEstado>('activos');
 
   // ── Estado del dropdown Estado ────────────────────────────────────────────
   mostrarEstadoDropdown = false;
@@ -83,15 +83,21 @@ export class UsuariosPage {
     return 'Estado';
   });
 
-  // ── Filtrado local por texto (el filtro de estado viaja al backend) ────────
+  // ── Filtrado local por texto y estado ──────────────────────────────────────
   readonly filteredUsuarios = computed(() => {
     const query = this.query().trim().toLowerCase();
-    if (!query) {
-      return this.usuarios();
-    }
+    const filtro = this.filtroActivo();
 
-    return this.usuarios().filter((usuario) =>
-      [
+    return this.usuarios().filter((usuario) => {
+      // Filtro por estado
+      const esActivo = usuario.estado === 'Activo';
+      if (filtro === 'activos' && !esActivo) return false;
+      if (filtro === 'inactivos' && esActivo) return false;
+
+      // Filtro por texto
+      if (!query) return true;
+
+      return [
         usuario.nombres,
         usuario.apellidos,
         usuario.usuario,
@@ -101,8 +107,8 @@ export class UsuariosPage {
       ]
         .join(' ')
         .toLowerCase()
-        .includes(query),
-    );
+        .includes(query);
+    });
   });
 
   readonly totalRegistros = computed(() => this.filteredUsuarios().length);

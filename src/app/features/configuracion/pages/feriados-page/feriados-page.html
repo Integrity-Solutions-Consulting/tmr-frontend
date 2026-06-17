@@ -1,7 +1,6 @@
 <section class="page">
   <div class="page-header">
     <h1 class="page-title">Días Festivos</h1>
-    <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
   </div>
 
   <div class="cards-row">
@@ -70,6 +69,10 @@
         <span class="card-label">Religiosos</span>
       </div>
     </article>
+
+    <div class="add-button-container">
+      <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
+    </div>
   </div>
 
   @if (eliminarError()) {

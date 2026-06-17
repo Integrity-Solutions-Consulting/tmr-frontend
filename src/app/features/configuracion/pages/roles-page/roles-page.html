@@ -222,13 +222,3 @@
   [mensaje]="exitoMensaje()"
   (cerrar)="cerrarExito()"
 />
-
-<app-confirm-dialog
-  [visible]="confirmVisible()"
-  titulo="Eliminar rol"
-  [mensaje]="confirmMensaje()"
-  textoConfirmar="Eliminar"
-  textoCancelar="Cancelar"
-  (confirmar)="confirmarEliminarRol()"
-  (cancelar)="cancelarEliminarRol()"
-/>

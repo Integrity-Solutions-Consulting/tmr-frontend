@@ -495,8 +495,7 @@
 // ── Overrides CDK MatDialog ──────────────────────────────────
 ::ng-deep .roles-form-dialog-panel {
   width: 860px !important;
-  min-width: 860px !important;
-  max-width: calc(100vw - 48px) !important;
+  max-width: calc(100vw - 32px) !important;
 }
 
 ::ng-deep .roles-form-dialog-panel .mat-mdc-dialog-container,
@@ -510,7 +509,6 @@
 
 ::ng-deep .roles-detail-dialog-panel {
   width: 620px !important;
-  min-width: 620px !important;
   max-width: calc(100vw - 32px) !important;
 }
 
