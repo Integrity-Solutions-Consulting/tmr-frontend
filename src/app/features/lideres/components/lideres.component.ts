@@ -91,6 +91,7 @@ export class LideresComponent implements OnInit {
   // ── Eliminar ───────────────────────────────────────────
   mostrarEliminar = false;
   liderAEliminar: Lider | null = null;
+  errorEliminar: string | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) { }
 
@@ -623,22 +624,28 @@ export class LideresComponent implements OnInit {
 
   abrirEliminar(lider: Lider): void {
     this.liderAEliminar = lider;
+    this.errorEliminar = null;
     this.mostrarEliminar = true;
   }
 
   confirmarEliminarLider(): void {
     if (!this.liderAEliminar) return;
     const id = this.liderAEliminar.id ?? this.liderAEliminar.codigo;
+    this.errorEliminar = null;
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
         this.mostrarEliminar = false;
         this.liderAEliminar = null;
+        this.errorEliminar = null;
         this.mensajeConfirmacion = 'El líder ha sido eliminado exitosamente';
         this.mostrarConfirmacion = true;
         this.obtenerLideresDelBackend();
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
       },
-      error: (err) => console.error('Error al eliminar líder:', err)
+      error: (err) => {
+        console.error('Error al eliminar líder:', err);
+        this.errorEliminar = err?.error?.detail || err?.error?.message || 'No se pudo eliminar el líder. Intente de nuevo.';
+      }
     });
   }
 }

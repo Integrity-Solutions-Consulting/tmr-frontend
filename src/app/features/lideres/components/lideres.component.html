@@ -235,6 +235,6 @@
 <app-success-modal [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion"
   (cerrar)="mostrarConfirmacion = false">
 </app-success-modal>
-<app-modal-eliminar-lider [mostrar]="mostrarEliminar" [nombreLider]="liderAEliminar?.nombre || ''"
+<app-modal-eliminar-lider [mostrar]="mostrarEliminar" [nombreLider]="liderAEliminar?.nombre || ''" [error]="errorEliminar"
   (cerrarModal)="mostrarEliminar = false" (confirmarEliminar)="confirmarEliminarLider()">
 </app-modal-eliminar-lider>
