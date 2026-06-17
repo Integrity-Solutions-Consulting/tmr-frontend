@@ -20,6 +20,10 @@ import { ModalDetalleComponent }  from '../modal-detalle/modal-detalle.component
 import { ModalDescargaComponent } from '../modal-descarga/modal-descarga.component';
 import { NotificacionComponent }  from '../notificacion/notificacion.component';
 import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../../shared/components/action-menu/action-menu.component';
 
 @Component({
   selector: 'app-lista-clientes',
@@ -34,6 +38,7 @@ import { PaginacionComponent } from '../../../../shared/components/paginacion/pa
     ModalDescargaComponent,
     NotificacionComponent,
     PaginacionComponent,
+    ActionMenuComponent,
   ],
   templateUrl: './lista-clientes.component.html',
   styleUrls: ['./lista-clientes.component.scss'],
@@ -60,7 +65,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   filtrosForm!: FormGroup;
 
   // ── Menú tres puntos ──────────────────────────────────────
-  menuAbierto: number | null = null;
+  menuAbierto: string | null = null;
 
   // ── Descarga ──────────────────────────────────────────────
   descargaAbierta = false;
@@ -174,9 +179,9 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   // ── Menú tres puntos ──────────────────────────────────────
-  toggleMenu(id: number, e: MouseEvent): void {
-    e.stopPropagation();
-    this.menuAbierto = this.menuAbierto === id ? null : id;
+  toggleMenu(payload: { id: string; event: Event }): void {
+    payload.event.stopPropagation();
+    this.menuAbierto = this.menuAbierto === payload.id ? null : payload.id;
   }
 
   cerrarMenu(): void {
@@ -236,6 +241,61 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     this.cerrarMenu();
     this.store.dispatch(ClientesActions.abrirModalEditar({ cliente }));
     this.store.dispatch(ClientesActions.cargarClientePorId({ id: cliente.id }));
+  }
+
+  accionesCliente(cliente: Cliente): ActionMenuItem[] {
+    const activo = cliente.estado === 'Activo';
+
+    return [
+      { id: 'ver-mas', label: 'Ver más' },
+      { id: 'editar', label: 'Editar' },
+      {
+        id: activo ? 'inactivar' : 'activar',
+        label: activo ? 'Desactivar' : 'Activar',
+        danger: activo,
+      },
+    ];
+  }
+
+  onAccionCliente(accion: ActionMenuItem, cliente: Cliente): void {
+    if (accion.id === 'ver-mas') {
+      this.verDetalle(cliente);
+      return;
+    }
+
+    if (accion.id === 'editar') {
+      this.abrirEditar(cliente);
+      return;
+    }
+
+    if (accion.id === 'activar' || accion.id === 'inactivar') {
+      this.cambiarEstadoCliente(cliente);
+    }
+  }
+
+  private cambiarEstadoCliente(cliente: Cliente): void {
+    this.cerrarMenu();
+    const nuevoEstado = cliente.estado === 'Activo' ? 'Inactivo' : 'Activo';
+
+    this.clientesService.getClientePorId(cliente.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: detalle => {
+        this.store.dispatch(ClientesActions.editarCliente({
+          id: cliente.id,
+          request: {
+            tipoId: detalle.tipoId,
+            identificador: detalle.identificador,
+            nombreComercial: detalle.nombreComercial,
+            nombres: detalle.nombres ?? '',
+            apellidos: detalle.apellidos ?? '',
+            correoElectronico: detalle.correoElectronico,
+            telefono: detalle.telefono,
+            direccion: detalle.direccion ?? '',
+            estado: nuevoEstado,
+          },
+        }));
+      },
+      error: error => console.error('Error al cambiar estado del cliente:', error),
+    });
   }
 
   abrirCrear(): void {

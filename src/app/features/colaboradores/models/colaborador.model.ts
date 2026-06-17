@@ -44,6 +44,8 @@ export interface Colaborador {
   idTipoContrato?: number | null;
   idModoTrabajo?: number | null;
   idCategoriaEmpleado?: number | null;
+  idDepartamento?: number | null;
+  idCargo?: number | null;
 
   // ── Contrato / empresa ─────────────────────────────
   tipoContrato?: string;

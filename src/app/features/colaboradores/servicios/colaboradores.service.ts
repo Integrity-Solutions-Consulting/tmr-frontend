@@ -192,10 +192,13 @@ export class ColaboradoresService {
       idTipoContrato: api.idTipoContrato ?? api.IdTipoContrato ?? null,
       idModoTrabajo: api.idModoTrabajo ?? api.IdModoTrabajo ?? null,
       idCategoriaEmpleado: api.idCategoriaEmpleado ?? api.IdCategoriaEmpleado ?? null,
+      idDepartamento: api.idDepartamento ?? api.IdDepartamento ?? null,
+      idCargo: api.idCargo ?? api.IdCargo ?? null,
 
       // ── Contrato / empresa ─────────────────────────────
       tipoContrato: api.tipoContrato ?? api.TipoContrato ?? '',
       tipoIdentificacion: (api.asociacion ?? api.Asociacion ?? '') as any,
+      asociacion: api.asociacion ?? api.Asociacion ?? null,
 
       // ── Datos personales ───────────────────────────────
       identificacion: api.numeroIdentificacion ?? api.NumeroIdentificacion ?? '',
@@ -222,6 +225,7 @@ export class ColaboradoresService {
 
       // ── Estado / proyectos ─────────────────────────────
       estado: (api.activo ?? api.Activo) ? 'Activo' : 'Inactivo',
+      activo: api.activo ?? api.Activo ?? false,
       proyectosAsignados: (api.proyectos ?? api.Proyectos ?? []).map((p: any) => ({
         id: p.id?.toString() ?? p.Id?.toString() ?? '',
         nombre: p.nombre ?? p.Nombre ?? '',

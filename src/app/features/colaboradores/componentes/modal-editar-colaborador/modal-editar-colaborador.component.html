@@ -77,33 +77,6 @@
             }
           </div>
 
-          <!-- Estado -->
-          <div class="form-field">
-            <div class="float-select">
-              <select
-                class="float-select__input"
-                formControlName="estado"
-                [class.float-select__input--error]="campoInvalido('estado')">
-
-                <option value=""></option>
-
-                @for (e of estados; track e) {
-                  <option [value]="e">{{ e }}</option>
-                }
-              </select>
-
-              <label
-                class="float-select__label"
-                [class.float-select__label--up]="tieneValor('estado')">
-                Estado <span class="req">*</span>
-              </label>
-            </div>
-
-            @if (campoInvalido('estado')) {
-              <span class="form-field__error">Campo requerido</span>
-            }
-          </div>
-
         </div>
       </div>
 

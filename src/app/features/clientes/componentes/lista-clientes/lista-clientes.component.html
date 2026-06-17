@@ -243,26 +243,13 @@
           </td>
 
           <td class="td-acciones">
-            <div class="menu-wrap">
-              <button class="btn-menu" (click)="toggleMenu(cliente.id, $event)">⋮</button>
-
-              <div
-                class="menu-desplegable"
-                *ngIf="menuAbierto === cliente.id"
-                (click)="$event.stopPropagation()">
-
-                <button class="menu-item" (click)="verDetalle(cliente)">
-                  <img src="assets/iconos/ver mas.svg" width="14" height="14" alt="ver"/>
-                  Ver más
-                </button>
-
-                <button class="menu-item" (click)="abrirEditar(cliente)">
-                  <img src="assets/iconos/editar.svg" width="14" height="14" alt="editar"/>
-                  Editar
-                </button>
-
-              </div>
-            </div>
+            <app-action-menu
+              [itemId]="cliente.id.toString()"
+              [menuAbierto]="menuAbierto"
+              [acciones]="accionesCliente(cliente)"
+              (toggleMenu)="toggleMenu($event)"
+              (accionSeleccionada)="onAccionCliente($event, cliente)"
+            ></app-action-menu>
           </td>
         </tr>
 
