@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/servicios/auth.service';
 import { environment } from '../../../../../environments/environment';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 
 @Component({
     selector: 'app-generar-reporte',
@@ -73,9 +73,8 @@ export class GenerarReporte implements OnInit {
         const user = this.authService.getCurrentUser();
         if (!user) return;
 
-        // Cargar todas las actividades desde el backend y filtrarlas
         this.http.get<any[]>(`${environment.apiUrl}/carga-actividades`).subscribe({
-            next: (actividades) => {
+            next: async (actividades) => {
                 const mesFiltrado = mes + 1; // formulario es 0-indexed, la BD es 1-indexed
 
                 const filteredData = (actividades || [])
@@ -92,28 +91,136 @@ export class GenerarReporte implements OnInit {
                         }
 
                         return matchesUser && matchesAnio && matchesMes && matchesCliente;
-                    })
-                    .map(a => {
-                        const proy = this.proyectos.find(p => p.id === a.idproyecto);
-                        return {
-                            'Fecha': a.fechaactividad,
-                            'Colaborador': user.name || 'Usuario',
-                            'Proyecto': proy ? proy.nombre : 'Sin Proyecto',
-                            'Cliente': proy ? proy.cliente : 'Sin Cliente',
-                            'Código Requerimiento': a.codigorequerimiento || '',
-                            'Horas': a.cantidadhoras,
-                            'Descripción': a.descripcionactividad || '',
-                            'Notas': a.notas || '',
-                            'Es Billable': a.esbillable ? 'Sí' : 'No'
-                        };
                     });
 
-                const ws = XLSX.utils.json_to_sheet(filteredData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+                if (filteredData.length === 0) {
+                    console.warn("No hay actividades para el periodo seleccionado.");
+                    this.dialogRef.close();
+                    return;
+                }
 
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Reporte Actividades');
+
+                const headerFill: ExcelJS.Fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF163572' }
+                };
+                const headerFont: Partial<ExcelJS.Font> = {
+                    name: 'Arial',
+                    size: 11,
+                    bold: true,
+                    color: { argb: 'FFFFFFFF' }
+                };
+
+                // Título
+                worksheet.mergeCells('A1:I1');
+                const titleCell = worksheet.getCell('A1');
+                titleCell.value = `Reporte de Actividades - ${user.name || 'Colaborador'}`;
+                titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+                worksheet.getRow(1).height = 30;
+
+                // Subtítulo
+                worksheet.mergeCells('A2:I2');
+                const subtitleCell = worksheet.getCell('A2');
+                subtitleCell.value = `Periodo: ${this.meses[mes]} ${anio}`;
+                subtitleCell.font = { name: 'Arial', size: 10, italic: true };
+                worksheet.getRow(2).height = 20;
+
+                worksheet.addRow([]);
+
+                // Cabeceras
+                const headers = [
+                    'Fecha', 'Colaborador', 'Proyecto', 'Cliente', 'Código Requerimiento', 'Horas', 'Descripción', 'Notas', 'Es Billable'
+                ];
+                const headerRow = worksheet.addRow(headers);
+                headerRow.height = 24;
+                headerRow.eachCell((cell) => {
+                    cell.fill = headerFill;
+                    cell.font = headerFont;
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                let totalHoras = 0;
+                filteredData.forEach(a => {
+                    const proy = this.proyectos.find(p => p.id === a.idproyecto);
+                    const row = worksheet.addRow([
+                        a.fechaactividad,
+                        user.name || 'Usuario',
+                        proy ? proy.nombre : 'Sin Proyecto',
+                        proy ? proy.cliente : 'Sin Cliente',
+                        a.codigorequerimiento || '',
+                        Number(a.cantidadhoras),
+                        a.descripcionactividad || '',
+                        a.notas || '',
+                        a.esbillable ? 'Sí' : 'No'
+                    ]);
+                    row.height = 20;
+                    totalHoras += Number(a.cantidadhoras);
+
+                    row.getCell(1).alignment = { horizontal: 'center' };
+                    row.getCell(5).alignment = { horizontal: 'center' };
+                    row.getCell(6).alignment = { horizontal: 'right' };
+                    row.getCell(9).alignment = { horizontal: 'center' };
+
+                    row.eachCell((cell) => {
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                            left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                            bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                            right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+                        };
+                    });
+                });
+
+                const totalRow = worksheet.addRow([
+                    'TOTAL HORAS', '', '', '', '', totalHoras, '', '', ''
+                ]);
+                worksheet.mergeCells(`A${totalRow.number}:E${totalRow.number}`);
+                totalRow.height = 22;
+                totalRow.getCell(1).font = { bold: true };
+                totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+                totalRow.getCell(6).font = { bold: true };
+                totalRow.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
+
+                totalRow.eachCell((cell, colNum) => {
+                    if (colNum <= 6) {
+                        cell.border = {
+                            top: { style: 'medium' },
+                            bottom: { style: 'double' }
+                        };
+                    }
+                });
+
+                worksheet.columns.forEach((column, i) => {
+                    if (i === 0) column.width = 12;
+                    else if (i === 1) column.width = 25;
+                    else if (i === 2) column.width = 25;
+                    else if (i === 3) column.width = 25;
+                    else if (i === 4) column.width = 18;
+                    else if (i === 5) column.width = 10;
+                    else if (i === 6) column.width = 35;
+                    else if (i === 7) column.width = 25;
+                    else if (i === 8) column.width = 12;
+                });
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
                 const fileName = `Reporte_${this.meses[mes]}_${anio}.xlsx`;
-                XLSX.writeFile(wb, fileName);
+                a.download = fileName;
+                a.click();
+                window.URL.revokeObjectURL(url);
 
                 this.dialogRef.close();
             },
