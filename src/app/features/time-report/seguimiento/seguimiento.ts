@@ -727,8 +727,14 @@ export class SeguimientoComponent implements AfterViewInit {
 
     public onFechaManualChange() {
         if (this.fechaDesde && this.fechaHasta) {
-            const desde = new Date(this.fechaDesde + 'T00:00:00');
-            const hasta = new Date(this.fechaHasta + 'T00:00:00');
+            let desde = new Date(this.fechaDesde + 'T00:00:00');
+            let hasta = new Date(this.fechaHasta + 'T00:00:00');
+
+            if (hasta < desde) {
+                this.fechaHasta = this.fechaDesde;
+                hasta = new Date(this.fechaHasta + 'T00:00:00');
+            }
+
             const anioDesde = desde.getFullYear();
             const mesDesde = desde.getMonth();
 

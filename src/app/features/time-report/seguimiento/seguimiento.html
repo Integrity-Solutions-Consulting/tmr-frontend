@@ -119,7 +119,7 @@
         <!-- Fecha Hasta -->
         <div class="filter-group date-group">
             <label class="filter-label">Fecha hasta</label>
-            <input class="filter-input" type="date" [(ngModel)]="fechaHasta" (ngModelChange)="onFechaManualChange()">
+            <input class="filter-input" type="date" [(ngModel)]="fechaHasta" [min]="fechaDesde" (ngModelChange)="onFechaManualChange()">
         </div>
 
         <!-- Descargar -->
@@ -156,7 +156,7 @@
                         <th class="col-estado">Seguimiento</th>
                         <th class="col-dias-reporte">Días con Reporte</th>
                         <th class="col-dias-completar">Días a Completar</th>
-                        <th class="col-acciones">Acciones</th>
+                        <th class="col-acciones"></th>
                     </tr>
                 </thead>
                 <tbody>
