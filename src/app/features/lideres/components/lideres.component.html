@@ -230,14 +230,14 @@
   </div>
 </div>
 <app-modal-lider [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion" [lider]="liderParaEditar"
-  [guardando]="guardandoLider" (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider($event)"> </app-modal-lider>
+  [guardando]="guardandoLider" [error]="errorFormulario" (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider($event)"> </app-modal-lider>
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
 </app-modal-detalle-lider>
 
-<app-modal-confirmacion [mostrar]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion"
-  (cerrarModal)="mostrarConfirmacion = false">
-</app-modal-confirmacion>
+<app-success-modal [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion"
+  (cerrar)="mostrarConfirmacion = false">
+</app-success-modal>
 <app-modal-eliminar-lider [mostrar]="mostrarEliminar" [nombreLider]="liderAEliminar?.nombre || ''"
   (cerrarModal)="mostrarEliminar = false" (confirmarEliminar)="confirmarEliminarLider()">
 </app-modal-eliminar-lider>
