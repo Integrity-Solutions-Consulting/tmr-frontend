@@ -143,6 +143,12 @@ $text-light: #7C7C7C;
   color: #737373;
   &.placeholder { color: #737373; }
 }
+.custom-select.disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  color: #a0a0a0;
+  pointer-events: none;
+}
 
 .custom-select-arrow {
   font-size: 18px;

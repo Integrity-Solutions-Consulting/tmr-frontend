@@ -75,7 +75,7 @@ export class ModalLider implements OnInit, OnChanges {
       this.form = {
         tipoId: this.tiposLideres.find(t => t.valor === this.lider.tipo)?.id?.toString() || '',
         tipoNombre: this.lider.tipo || '',
-        personaId: '',
+        personaId: this.lider.idPersona?.toString() || '',
         identificacion: this.lider.numeroIdentificacion || '',
         nombres: this.lider.nombres || '',
         apellidos: this.lider.apellidos || '',
@@ -173,7 +173,10 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   getPersonaNombre(): string {
-    const persona = this.personasDisponibles.find(p => p.id.toString() === this.form.personaId);
+    const persona = this.personasDisponibles.find(
+      p => p.id.toString() === this.form.personaId ||
+           p.idPersona?.toString() === this.form.personaId
+    );
     return persona ? persona.nombreCompleto : '';
   }
 
@@ -187,16 +190,16 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   isEmailValid(email: string): boolean {
-    if (!email) return true;
+    if (!email || email.trim().length === 0) return false;
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(email.trim());
   }
 
   isTelefonoValid(telefono: string): boolean {
-  if (!telefono || telefono.trim().length === 0) return false;
-  const regex = /^(09\d{8}|0[2-7]\d{7})$/;
-  return regex.test(telefono.trim());
-}
+    if (!telefono || telefono.trim().length === 0) return false;
+    const regex = /^(09\d{8}|0[2-7]\d{7})$/;
+    return regex.test(telefono.trim());
+  }
 
   isNombresValid(nombres: string): boolean {
     return !!nombres && nombres.trim().length > 0 && nombres.trim().length <= 100;
@@ -214,7 +217,7 @@ export class ModalLider implements OnInit, OnChanges {
                       this.isTelefonoValid(this.form.telefono);
 
     if (this.modoEdicion) {
-      return baseValid && !!this.form.estado;
+      return baseValid;
     }
 
     if (this.form.tipoNombre === 'Interno') {
@@ -233,14 +236,14 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   soloNumerosYSignos(event: KeyboardEvent): boolean {
-  const regex = /^[0-9]$/;
-  if (event.key.length > 1) return true;
-  if (!regex.test(event.key)) {
-    event.preventDefault();
-    return false;
+    const regex = /^[0-9]$/;
+    if (event.key.length > 1) return true;
+    if (!regex.test(event.key)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
-  return true;
-}
 
   onInputNombres(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -264,9 +267,9 @@ export class ModalLider implements OnInit, OnChanges {
     }
   }
 
- onInputTelefono(event: Event) {
-  const input = event.target as HTMLInputElement;
-  input.value = input.value.replace(/[^0-9]/g, '');
-  this.form.telefono = input.value;
-}
+  onInputTelefono(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, '');
+    this.form.telefono = input.value;
+  }
 }
