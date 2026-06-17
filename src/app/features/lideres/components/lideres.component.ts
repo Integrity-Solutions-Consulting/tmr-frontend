@@ -15,6 +15,7 @@ import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
+import { ModalEliminarLiderComponent } from './modal-eliminar-lider/modal-eliminar-lider.component';
 
 export interface ProyectoAsignado {
   id?: number;
@@ -49,32 +50,29 @@ export interface Lider {
     ModalLider,
     ModalDetalleLider,
     ModalDescargaComponent,
-    ModalConfirmacion
+    ModalConfirmacion,
+    ModalEliminarLiderComponent
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
 })
 export class LideresComponent implements OnInit {
 
-  // ── Data Real ───────────────────────────────────────────
   lideres: Lider[] = []; 
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
 
   private apiUrl = `${environment.apiUrl}/lideres`;
 
-  // ── Filtros ────────────────────────────────────────────
   busqueda = '';
   tipoFiltro = '';
   estadoFiltro: 'Activo' | 'Inactivo' | '' = 'Activo';
 
-  // ── Paginación ─────────────────────────────────────────
   paginaActual = 1;
   porPagina = 10;
   totalPaginas = 1;
   paginas: number[] = [];
 
-  // ── Modales ────────────────────────────────────────────
   mostrarFormulario = false;
   mostrarDetalle = false;
   mostrarDescarga = false;
@@ -86,9 +84,11 @@ export class LideresComponent implements OnInit {
   liderEditando: Lider | null = null;
   liderForm!: FormGroup;
   guardandoLider = false;
-
-  // ── Estado Dropdown ────────────────────────────────────
   mostrarEstadoDropdown = false;
+
+  // ── Eliminar ───────────────────────────────────────────
+  mostrarEliminar = false;
+  liderAEliminar: Lider | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) { }
 
@@ -106,7 +106,6 @@ export class LideresComponent implements OnInit {
     this.obtenerLideresDelBackend();
   }
 
-  // ── Consumir API Real ──────────────────────────────────
   obtenerLideresDelBackend(): void {
     this.http.get<any[]>(this.apiUrl).subscribe({
       next: (lideres) => {
@@ -152,6 +151,10 @@ export class LideresComponent implements OnInit {
       return {
         ...l,
         id: l.id,
+        idPersona: l.idPersona ?? l.idpersona ?? l.Idpersona ?? null,
+        nombres: l.nombres,
+        apellidos: l.apellidos,
+        email: l.email,
         codigo: String(i + 1),
         nombre: `${l.nombres} ${l.apellidos}`,
         tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
@@ -166,7 +169,6 @@ export class LideresComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  // ── Contadores cards dinámicos ──────────────────────────
   get totalInternos(): number {
     return this.lideres.filter(l => l.tipo === 'Interno').length;
   }
@@ -183,7 +185,6 @@ export class LideresComponent implements OnInit {
     return this.lideres.filter(l => l.estado === 'Activo').length;
   }
 
-  // ── Paginación helpers ─────────────────────────────────
   get rangoInicio(): number {
     return this.lideresFiltrados.length === 0 ? 0 : (this.paginaActual - 1) * this.porPagina + 1;
   }
@@ -192,7 +193,6 @@ export class LideresComponent implements OnInit {
     return Math.min(this.paginaActual * this.porPagina, this.lideresFiltrados.length);
   }
 
-  // ── Filtros ────────────────────────────────────────────
   filtrarPor(tipo: string): void {
     if (tipo === 'Inactivo') {
       this.estadoFiltro = this.estadoFiltro === 'Inactivo' ? 'Activo' : 'Inactivo';
@@ -271,7 +271,6 @@ export class LideresComponent implements OnInit {
     if (this.paginaActual < this.totalPaginas) this.irPagina(this.paginaActual + 1);
   }
 
-  // ── Modal Formulario ───────────────────────────────────
   abrirFormulario(): void {
     this.mostrarDescarga = false;
     this.modoEdicion = false;
@@ -308,7 +307,7 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
     this.modoEdicion = true;
     this.liderEditando = lider;
-    this.liderParaEditar = lider;
+    this.liderParaEditar = { ...lider };
     this.guardandoLider = false;
     this.mostrarFormulario = true;
   }
@@ -316,7 +315,6 @@ export class LideresComponent implements OnInit {
   guardarLider(payload: any): void {
     if (this.guardandoLider) return;
 
-    // Solo validamos duplicados en registros nuevos para no truncar las ediciones
     if (!this.modoEdicion && this.liderYaExiste(payload)) {
       this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto o colaborador asignado.';
       this.mostrarConfirmacion = true;
@@ -479,13 +477,24 @@ export class LideresComponent implements OnInit {
     });
   }
 
-  eliminarLider(lider: Lider): void {
-    if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
-      const id = lider.id ?? lider.codigo;
-      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
-        next: () => this.obtenerLideresDelBackend(),
-        error: (err) => console.error('Error al eliminar líder:', err)
-      });
-    }
+  abrirEliminar(lider: Lider): void {
+    this.liderAEliminar = lider;
+    this.mostrarEliminar = true;
+  }
+
+  confirmarEliminarLider(): void {
+    if (!this.liderAEliminar) return;
+    const id = this.liderAEliminar.id ?? this.liderAEliminar.codigo;
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.mostrarEliminar = false;
+        this.liderAEliminar = null;
+        this.mensajeConfirmacion = 'El líder ha sido eliminado exitosamente';
+        this.mostrarConfirmacion = true;
+        this.obtenerLideresDelBackend();
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      },
+      error: (err) => console.error('Error al eliminar líder:', err)
+    });
   }
 }

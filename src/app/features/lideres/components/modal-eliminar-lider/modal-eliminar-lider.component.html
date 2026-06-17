@@ -1,0 +1,20 @@
+<div class="modal-overlay" *ngIf="mostrar">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-icon">
+      <span class="material-symbols-outlined">delete</span>
+    </div>
+
+    <h2 class="modal-title">¿Eliminar líder?</h2>
+
+    <p class="modal-mensaje">
+      Esta acción eliminará a <strong>{{ nombreLider }}</strong> permanentemente.
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="cerrarModal.emit()">Cancelar</button>
+      <button class="btn-eliminar" (click)="confirmarEliminar.emit()">Eliminar</button>
+    </div>
+
+  </div>
+</div>

@@ -1,37 +1,45 @@
-<form class="rol-modal" [formGroup]="form" (ngSubmit)="save()">
+<form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
 
   <!-- Header -->
-  <div class="rol-modal__header">
-    <div class="rol-modal__header-text">
+  <div class="modal-form__header">
+    <div>
       @if (isView) {
-        <span class="rol-modal__badge rol-modal__badge--view"></span>
+        <div class="modal-card__title-row">
+          <h2 class="modal-card__nombre">{{ data.rol!.nombre }}</h2>
+          <span class="status-pill" [class.status-pill--inactive]="!data.rol!.activo">
+            {{ data.rol!.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      } @else {
+        <h2 class="modal-form__title">
+          {{ isEdit ? 'Editar Rol' : 'Crear Nuevo Rol' }}
+        </h2>
+        <p class="modal-form__subtitle">
+          Define el alcance funcional y los módulos accesibles del perfil.
+        </p>
       }
-      <h2 class="rol-modal__title">
-        {{ isView ? data.rol!.nombre : isEdit ? 'Editar Rol' : 'Crear Nuevo Rol' }}
-      </h2>
-      <p class="rol-modal__subtitle">
-        {{ isView
-          ? 'Detalle del rol y módulos habilitados.'
-          : 'Define el alcance funcional y los módulos accesibles del perfil.' }}
-      </p>
     </div>
-    <button class="rol-modal__close" type="button" mat-dialog-close aria-label="Cerrar">
-      <mat-icon>close</mat-icon>
+    <button class="modal-form__close" type="button" mat-dialog-close aria-label="Cerrar">
+      <span class="material-icons">close</span>
     </button>
   </div>
 
   <!-- Body -->
-  <div class="rol-modal__body">
+  <div class="modal-form__body">
 
     @if (isView) {
       <div class="detalle-section">
         <button class="detalle-section__header detalle-section__header--toggle"
           type="button"
           (click)="toggleSeccion('info')">
-          <span class="material-icons detalle-section__arrow"
-                [style.transform]="seccionesExpandido.info ? 'rotate(90deg)' : 'rotate(0deg)'">
-            chevron_right
-          </span>
+          <img
+            src="assets/iconos/desplegar.svg"
+            alt="toggle"
+            width="12"
+            height="12"
+            class="detalle-section__arrow"
+            [style.transform]="seccionesExpandido.info ? 'rotate(90deg)' : 'rotate(0deg)'"
+          />
           <span class="detalle-section__bar"></span>
           <span class="detalle-section__title">Información del rol</span>
         </button>
@@ -71,10 +79,14 @@
         <button class="detalle-section__header detalle-section__header--toggle"
           type="button"
           (click)="toggleSeccion('modulos')">
-          <span class="material-icons detalle-section__arrow"
-                [style.transform]="seccionesExpandido.modulos ? 'rotate(90deg)' : 'rotate(0deg)'">
-            chevron_right
-          </span>
+          <img
+            src="assets/iconos/desplegar.svg"
+            alt="toggle"
+            width="12"
+            height="12"
+            class="detalle-section__arrow"
+            [style.transform]="seccionesExpandido.modulos ? 'rotate(90deg)' : 'rotate(0deg)'"
+          />
           <span class="detalle-section__bar"></span>
           <span class="detalle-section__title">Módulos habilitados</span>
         </button>
@@ -100,59 +112,61 @@
 
     } @else {
 
-      <!-- Nombre -->
-      <div class="rol-modal__field">
-        <label class="rol-modal__label">Nombre del rol <span class="req">*</span></label>
-        <div class="rol-modal__input-wrap"
-             [class.rol-modal__input-wrap--error]="form.controls.nombre.invalid && form.controls.nombre.touched">
-          <mat-icon class="rol-modal__input-icon">admin_panel_settings</mat-icon>
-          <input
-            class="rol-modal__input"
-            formControlName="nombre"
-            placeholder="Ej. Pasante"
-            autocomplete="off"
-          />
+      <!-- Fila 1: Nombre del rol | Estado -->
+      <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
+        <!-- Nombre -->
+        <div class="form-field">
+          <div class="float-field">
+            <input
+              class="float-field__input"
+              type="text"
+              formControlName="nombre"
+              placeholder=" "
+              [class.float-field__input--error]="campoInvalido('nombre')"
+            />
+            <label class="float-field__label">Nombre del rol <span class="req">*</span></label>
+          </div>
+          @if (campoInvalido('nombre')) {
+            <span class="form-field__error">
+              @if (form.controls.nombre.errors?.['required']) { Campo requerido }
+              @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
+              @else if (form.controls.nombre.errors?.['pattern']) { Solo letras, espacios y tildes }
+              @else if (form.controls.nombre.errors?.['duplicateRoleName']) { Ya existe un rol con este nombre }
+            </span>
+          }
         </div>
-        @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
-          <span class="rol-modal__error">
-            @if (form.controls.nombre.errors?.['required']) { Campo requerido }
-            @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
-            @else if (form.controls.nombre.errors?.['pattern']) { Solo letras, espacios y tildes }
-            @else if (form.controls.nombre.errors?.['duplicateRoleName']) { Ya existe un rol con este nombre }
-          </span>
-        }
+
+        <!-- Estado -->
+        <div class="form-field">
+          <div class="float-select">
+            <select class="float-select__input" formControlName="activo">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+            <label class="float-select__label float-select__label--up">Estado <span class="req">*</span></label>
+          </div>
+        </div>
       </div>
 
       <!-- Descripción -->
-      <div class="rol-modal__field">
-        <label class="rol-modal__label">Descripción <span class="req">*</span></label>
-        <div class="rol-modal__input-wrap rol-modal__input-wrap--textarea"
-             [class.rol-modal__input-wrap--error]="form.controls.descripcion.invalid && form.controls.descripcion.touched">
-          <mat-icon class="rol-modal__input-icon">notes</mat-icon>
+      <div class="form-field" style="margin-bottom: 24px;">
+        <div class="float-field">
           <textarea
-            class="rol-modal__input rol-modal__textarea"
+            class="float-field__input float-field__input--textarea"
             formControlName="descripcion"
+            placeholder=" "
             rows="2"
-            placeholder="Describe el alcance del rol"
+            [class.float-field__input--error]="campoInvalido('descripcion')"
+            style="height: 80px; padding: 10px 12px; resize: none;"
           ></textarea>
+          <label class="float-field__label">Descripción <span class="req">*</span></label>
         </div>
-        @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
-          <span class="rol-modal__error">
+        @if (campoInvalido('descripcion')) {
+          <span class="form-field__error">
             @if (form.controls.descripcion.errors?.['required']) { Campo requerido }
             @else if (form.controls.descripcion.errors?.['minlength']) { Mínimo 5 caracteres }
           </span>
         }
-      </div>
-
-      <!-- Estado -->
-      <div class="rol-modal__field">
-        <label class="rol-modal__label">Estado <span class="req">*</span></label>
-        <div class="rol-modal__select-wrap">
-          <select class="rol-modal__select" formControlName="activo">
-            <option [ngValue]="true">Activo</option>
-            <option [ngValue]="false">Inactivo</option>
-          </select>
-        </div>
       </div>
 
       <!-- Módulos accesibles -->
@@ -186,7 +200,7 @@
         </div>
 
         @if (form.controls.modulosIds.errors?.['requiredModules'] && form.controls.modulosIds.touched) {
-          <p class="rol-modal__error">Selecciona al menos un módulo</p>
+          <p class="form-field__error">Selecciona al menos un módulo</p>
         }
       </div>
 
@@ -196,8 +210,8 @@
 
   <!-- Footer -->
   @if (!isView) {
-    <div class="rol-modal__footer">
-      <button class="rol-modal__btn rol-modal__btn--save" type="submit">
+    <div class="modal-form__footer">
+      <button class="modal-form__btn modal-form__btn--save" type="submit">
         Guardar
       </button>
     </div>

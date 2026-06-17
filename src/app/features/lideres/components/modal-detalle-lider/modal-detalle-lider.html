@@ -1,6 +1,5 @@
 <div class="detalle-overlay" (click)="cerrar()">
   <div class="detalle-card" (click)="$event.stopPropagation()">
-
     <!-- Header -->
     <div class="detalle-header">
       <div class="detalle-codigo">{{ lider?.codigo }}</div>
@@ -89,7 +88,9 @@
               'estado--aprobado':      proyecto.estado === 'Aprobado',
               'estado--aplazado':      proyecto.estado === 'Aplazado',
               'estado--planificacion': proyecto.estado === 'Planificación',
-              'estado--espera':        proyecto.estado === 'En espera'
+              'estado--espera':        proyecto.estado === 'En espera',
+              'estado--activo':        proyecto.estado === 'Activo'
+
             }">
             <span class="detalle-proyectos__item-dot"></span>
             {{ proyecto.estado || 'Sin estado' }}

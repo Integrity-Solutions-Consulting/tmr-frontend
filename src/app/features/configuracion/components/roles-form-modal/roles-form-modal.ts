@@ -80,6 +80,16 @@ export class RolesFormModal {
     return this.data.mode === 'view';
   }
 
+  tieneValor(campo: keyof typeof this.form.controls): boolean {
+    const value = this.form.controls[campo].value;
+    return value !== null && value !== undefined && value !== '';
+  }
+
+  campoInvalido(campo: keyof typeof this.form.controls): boolean {
+    const control = this.form.controls[campo];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
   /**
    * Devuelve el ícono de Material para un módulo dado su nombre.
    * El nombre se normaliza (sin tildes, minúsculas) antes de buscar en el mapa.

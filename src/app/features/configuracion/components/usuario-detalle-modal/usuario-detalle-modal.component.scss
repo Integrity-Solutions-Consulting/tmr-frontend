@@ -1,26 +1,20 @@
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 900;
-  animation: fadeIn 0.2s ease;
+:host {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .modal-card {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 901;
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
   background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-  width: 520px;
-  max-width: calc(100vw - 32px);
-  max-height: 90vh;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.22s ease;
 
   &__close {
     position: absolute;
@@ -163,5 +157,16 @@
   }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
+::ng-deep .usuario-detalle-dialog-panel {
+  width: 620px !important;
+  min-width: 620px !important;
+  max-width: calc(100vw - 32px) !important;
+}
+
+::ng-deep .usuario-detalle-dialog-panel .mat-mdc-dialog-container,
+::ng-deep .usuario-detalle-dialog-panel .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+}

@@ -17,13 +17,13 @@
       </div>
 
       <div class="form-grid form-grid--2">
-        <label class="check-field form-field--full">
+        <label class="check-field">
           <input type="checkbox" formControlName="usuarioInterno" />
           <span>Usuario Interno</span>
         </label>
 
         @if (isInternalUser) {
-          <div class="form-field form-field--full">
+          <div class="form-field">
             <div class="float-select mat-select-wrapper">
               <mat-select
                 class="float-select__mat-input"
@@ -61,7 +61,7 @@
       </div>
 
       <div class="form-grid form-grid--2">
-        <div class="form-field form-field--full">
+        <div class="form-field">
           @if (isInternalUser) {
             <div class="email-compose" [class.email-compose--error]="campoInvalido('email')">
               <div class="float-field">
@@ -93,7 +93,7 @@
           }
         </div>
 
-        <div class="form-field form-field--full">
+        <div class="form-field">
           <div class="float-select">
             <select
               class="float-select__input"
@@ -114,12 +114,12 @@
           }
         </div>
 
-        <label class="check-field form-field--full">
+        <label class="check-field">
           <input type="checkbox" formControlName="debeCambiarPassword" />
           <span>Debe cambiar contrasena en el proximo acceso</span>
         </label>
 
-        <div class="form-field form-field--full">
+        <div class="form-field">
           @if (isEdit) {
             <!-- Editar usuario: campo opcional para nueva contraseña -->
             <div class="float-field">
