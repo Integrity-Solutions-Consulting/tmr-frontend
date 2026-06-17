@@ -25,8 +25,8 @@ export class ActividadesEffects {
     return {
       id: String(this.getValue(item, ['id', 'Id'], crypto.randomUUID())),
       colaborador: this.getValue(item, ['colaborador', 'Colaborador'], 'Sin colaborador'),
-      proyecto: this.getValue(item, ['proyecto', 'Proyecto', 'descripcionActividad', 'DescripcionActividad'], 'Sin proyecto'),
-      cliente: this.getValue(item, ['cliente', 'Cliente'], 'Sin cliente'),
+      proyecto: this.getValue(item, ['proyecto', 'Proyecto', 'proyectoNombre', 'ProyectoNombre', 'descripcionActividad', 'DescripcionActividad'], 'Sin proyecto'),
+      cliente: this.getValue(item, ['cliente', 'Cliente', 'clienteNombre', 'ClienteNombre'], 'Sin cliente'),
       liderTecnico: this.getValue(item, ['liderTecnico', 'LiderTecnico'], ''),
       fecha: this.getValue(item, ['fecha', 'Fecha', 'fechaActividad', 'FechaActividad'], undefined),
       nroHoras: Number(this.getValue(item, ['nroHoras', 'NroHoras', 'cantidadHoras', 'CantidadHoras'], 0)),

@@ -1,4 +1,5 @@
 @use "sass:color";
+$white: #ffffff;
 $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted: #64748b;
 
 .dashboard-container { padding: 2rem; background-color: $bg-color; min-height: 100vh; font-family: sans-serif; }
@@ -40,19 +41,149 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
   }
 }
 
-.table-card { background: white; border: 1px solid $border-color; border-top: none; border-radius: 0 0 12px 12px;
-  .data-table { width: 100%; border-collapse: collapse;
-    th { background: #f8fafc; padding: 1.2rem 1rem; text-align: left; font-size: 0.75rem; color: $text-muted; border-bottom: 2px solid $border-color; text-transform: uppercase; letter-spacing: 0.5px; }
-    td { padding: 1.2rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
-    .font-bold { font-weight: 600; color: $primary-color; }
-    .client-tag { background: #eff6ff; color: #1e40af; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-    .empty-row { padding: 3rem; text-align: center; color: $text-muted; }
+.table-card {
+  background: white;
+  border: 1px solid $border-color;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.table-scroll-container {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+  overflow: hidden;
+  max-height: calc(100vh - 420px);
+}
+
+.table-wrapper {
+  background: $white;
+  border-radius: 10px;
+  border: 1px solid #E5E5E5;
+  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+}
+
+.data-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+
+  thead {
+    background: $white;
+    border-bottom: 2px solid $border-color;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    th {
+      padding: 13px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #737373;
+      font-size: 14px;
+      white-space: nowrap;
+      background: $white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:first-child th:first-child { border-top-left-radius: 10px; }
+    tr:first-child th:last-child { border-top-right-radius: 10px; }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border-color;
+      transition: background 0.12s ease;
+
+      &:last-child { border-bottom: none; }
+      &:last-child td:first-child { border-bottom-left-radius: 10px; }
+      &:last-child td:last-child { border-bottom-right-radius: 10px; }
+      &:hover { background: rgba(59, 130, 246, 0.04); }
+    }
+
+    td {
+      padding: 13px 16px;
+      color: #4b5563;
+      font-weight: 400;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 64px; }
+    th:nth-child(2), td:nth-child(2) { width: 180px; }
+    th:nth-child(3), td:nth-child(3) { width: auto; }
+    th:nth-child(4), td:nth-child(4) { width: 160px; }
+    th:nth-child(5), td:nth-child(5) { width: 140px; }
+    th:nth-child(6), td:nth-child(6) { width: 120px; }
+    th:nth-child(7), td:nth-child(7) { width: 120px; }
+  }
+
+  .font-bold {
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .table-number {
+    font-weight: 600;
+    color: #c2410c;
+  }
+
+  .client-tag {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .empty-row {
+    padding: 3rem;
+    text-align: center;
+    color: $text-muted;
   }
 }
 
-.status-badge.pendiente { 
-  display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #dcfce7; color: #166534;
-  .dot { height: 7px; width: 7px; border-radius: 50%; background: #22c55e; margin-right: 8px; }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #60a5fa;
+  }
+}
+
+.status-badge.pendiente {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+
+  .dot {
+    background: #1d4ed8;
+  }
 }
 
 .btn-primary { background: $primary-color; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s;
