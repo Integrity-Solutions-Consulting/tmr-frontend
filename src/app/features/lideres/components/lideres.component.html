@@ -165,10 +165,7 @@
             <td>{{ lider.correo }}</td>
             <td>{{ lider.telefono }}</td>
             <td>
-              <span class="badge" [class.badge--activo]="lider.estado === 'Activo'"
-                [class.badge--inactivo]="lider.estado !== 'Activo'">
-                {{ lider.estado }}
-              </span>
+              <app-badge-estado [estado]="lider.estado"></app-badge-estado>
             </td>
             <td>
               <button class="action-btn" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">

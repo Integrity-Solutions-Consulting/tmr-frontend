@@ -15,6 +15,7 @@ import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
 import { ModalEliminarLiderComponent } from './modal-eliminar-lider/modal-eliminar-lider.component';
+import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
 
 export interface ProyectoAsignado {
   id?: number;
@@ -50,7 +51,8 @@ export interface Lider {
     ModalDetalleLider,
     ModalDescargaComponent,
     SuccessModalComponent,
-    ModalEliminarLiderComponent
+    ModalEliminarLiderComponent,
+    BadgeEstadoComponent
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],

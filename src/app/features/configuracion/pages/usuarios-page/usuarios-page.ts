@@ -8,6 +8,7 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
+import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
 import {
   DescargaMenuComponent,
   DescargaOpcion,
@@ -23,7 +24,7 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [CommonModule, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent],
+  imports: [CommonModule, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent, BadgeEstadoComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })

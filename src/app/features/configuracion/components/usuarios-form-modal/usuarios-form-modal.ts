@@ -1,8 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
 import { catchError, forkJoin, map, of } from 'rxjs';
 import { ColaboradorUsuarioOption, Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
@@ -16,7 +14,7 @@ const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
 @Component({
   selector: 'app-usuarios-form-modal',
-  imports: [ReactiveFormsModule, MatSelectModule, MatOptionModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './usuarios-form-modal.html',
   styleUrl: './usuarios-form-modal.scss',
 })
@@ -103,15 +101,15 @@ export class UsuariosFormModal {
     const errors = this.form.controls.usuario.errors;
 
     if (errors?.['required']) return 'Campo requerido';
-    if (errors?.['pattern']) return 'Use letras, numeros, punto, guion o guion bajo';
-    return 'Usuario invalido';
+    if (errors?.['pattern']) return 'Use letras, números, punto, guion o guion bajo';
+    return 'Usuario inválido';
   }
 
   emailError(): string {
     const errors = this.form.controls.email.errors;
 
     if (errors?.['required']) return 'Campo requerido';
-    return this.isInternalUser ? 'Completa el usuario interno' : 'Formato de correo invalido';
+    return this.isInternalUser ? 'Completa el usuario interno' : 'Formato de correo inválido';
   }
 
   passwordError(): string {
@@ -119,16 +117,16 @@ export class UsuariosFormModal {
 
     if (errors?.['required']) return 'Campo requerido';
     if (errors?.['temporaryPassword']) {
-      return 'Debe incluir mayuscula, minuscula, numero y caracter especial';
+      return 'Debe incluir mayúscula, minúscula, número y carácter especial';
     }
-    return 'Password invalido';
+    return 'Contraseña inválida';
   }
 
   colaboradorError(): string {
     if (!this.form.controls.idColaborador.value) {
       return 'Seleccione un colaborador';
     }
-    return 'Colaborador invalido';
+    return 'Colaborador inválido';
   }
 
   regenerateTemporaryPassword(): void {
