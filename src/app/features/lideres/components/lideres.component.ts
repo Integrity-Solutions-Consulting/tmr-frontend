@@ -360,8 +360,8 @@ export class LideresComponent implements OnInit {
         this.guardandoLider = false;
         this.errorFormulario = null;
         this.mensajeConfirmacion = this.modoEdicion
-          ? 'Los cambios han sido<br>guardados exitosamente'
-          : 'El nuevo líder ha sido<br>agregado exitosamente';
+          ? 'Los cambios han sido guardados exitosamente'
+          : 'El nuevo líder ha sido agregado exitosamente';
         this.mostrarConfirmacion = true;
         this.mostrarFormulario = false;
         this.liderEditando = null;

@@ -27,6 +27,7 @@
           <div class="float-select mat-select-wrapper">
             <mat-select class="float-select__mat-input" formControlName="idColaborador"
               [class.float-select__input--error]="campoInvalido('idColaborador')" panelWidth="null"
+              panelClass="colaborador-select-panel"
               placeholder="Seleccione un colaborador">
               <mat-option value="">Seleccione un colaborador</mat-option>
               @for (colaborador of colaboradores; track colaborador.id) {

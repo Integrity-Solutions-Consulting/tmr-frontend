@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ModalConfirmacion {
   @Input() mostrar = false;
-  @Input() mensaje = 'El nuevo líder ha sido<br>agregado exitosamente';
+  @Input() mensaje = 'El nuevo líder ha sido agregado exitosamente';
   @Output() cerrarModal = new EventEmitter<void>();
 
   cerrar() {
