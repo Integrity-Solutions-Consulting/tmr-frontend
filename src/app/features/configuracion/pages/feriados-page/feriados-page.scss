@@ -26,10 +26,6 @@ $border: #E5E5E5;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-
-  app-boton {
-    margin-top: 6px;
-  }
 }
 
 .page-title {
@@ -67,6 +63,11 @@ $border: #E5E5E5;
   &:hover {
     box-shadow: 0 4px 14px rgba($primary, 0.12);
   }
+}
+
+.add-button-container {
+  margin-left: auto;
+  align-self: center;
 }
 
 .card-left {
@@ -185,7 +186,16 @@ $border: #E5E5E5;
     flex-direction: column;
   }
 
-  .page-header app-boton {
+  .add-button-container {
+    width: 100%;
+  }
+
+  ::ng-deep .add-button-container app-boton {
+    width: 100%;
+    display: block;
+  }
+
+  ::ng-deep .add-button-container app-boton button {
     width: 100%;
   }
 

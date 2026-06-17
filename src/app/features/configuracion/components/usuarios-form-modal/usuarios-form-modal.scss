@@ -656,8 +656,7 @@
 
 ::ng-deep .usuarios-dialog-panel {
   width: 860px !important;
-  min-width: 860px !important;
-  max-width: calc(100vw - 48px) !important;
+  max-width: calc(100vw - 32px) !important;
 }
 
 ::ng-deep .usuarios-dialog-panel .mat-mdc-dialog-container,

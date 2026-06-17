@@ -65,7 +65,7 @@ export class ConfiguracionService {
   }
 
   loadRoles(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/configuracion/roles`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/configuracion/roles?pageSize=1000`).subscribe({
       next: (data) => this.rolesState.set((data ?? []).map((d) => ({
         id: d.idRol || d.id,
         nombre: d.nombreRol || d.nombre || '',
@@ -270,7 +270,7 @@ export class ConfiguracionService {
   }
 
   loadFeriados(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/configuracion/dias-festivos`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/configuracion/dias-festivos?pageSize=1000`).subscribe({
       next: (data) => this.feriadosState.set((data ?? []).map((d) => ({
         id: d.idDiaFestivo || d.id,
         nombre: d.nombreFeriado || d.motivo || d.nombre || '',

@@ -430,6 +430,7 @@ $hover-row:     rgba(#163572, 0.04);
 
 .roles-table {
   width: 100%;
+  min-width: 900px;
   table-layout: fixed;
   border-collapse: collapse;
   border-spacing: 0;
@@ -656,7 +657,6 @@ $hover-row:     rgba(#163572, 0.04);
   .usuarios-actions { width: 100%; flex-direction: column; align-items: stretch; }
   .usuarios-actions app-descarga-menu,
   .page-create { width: 100%; }
-  .roles-table { min-width: 720px; }
 }
 
 @media (max-width: 480px) {

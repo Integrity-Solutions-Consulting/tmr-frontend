@@ -42,16 +42,12 @@ export class RolesPage {
   readonly modulos = this.configuracionService.modulos;
 
   // ── Filtro por estado ─────────────────────────────────────────────────────
-  readonly filtroEstado = signal<FiltroEstadoRol>('');
+  readonly filtroEstado = signal<FiltroEstadoRol>('Activo');
 
   // ── Estado dropdown ───────────────────────────────────────────────────────
   mostrarEstadoDropdown = false;
 
   // ── Confirmación y éxito ──────────────────────────────────────────────────
-  readonly confirmVisible = signal(false);
-  readonly confirmMensaje = signal('');
-  private rolPendienteEliminar: Rol | null = null;
-
   readonly exitoVisible = signal(false);
   readonly exitoMensaje = signal('Operación realizada exitosamente');
 
@@ -226,11 +222,11 @@ export class RolesPage {
         action: () => this.editRol(rol),
       },
       {
-        id: 'eliminar',
-        label: 'Eliminar',
-        danger: true,
+        id: rol.activo ? 'inactivar' : 'activar',
+        label: rol.activo ? 'Inactivar' : 'Activar',
+        danger: rol.activo,
         disabled: this.rolEliminandoId() === rol.id,
-        action: () => this.solicitarEliminarRol(rol),
+        action: () => this.toggleRolEstado(rol),
       },
     ];
   }
@@ -262,43 +258,27 @@ export class RolesPage {
     this.rolExpandidoId.set(null);
   }
 
-  // ── Eliminar rol ──────────────────────────────────────────────────────────
+  // ── Inactivar/Activar rol ─────────────────────────────────────────────────
 
-  solicitarEliminarRol(rol: Rol): void {
+  toggleRolEstado(rol: Rol): void {
     this.closeActionsMenu();
-    this.estadoError.set(null);
-    this.rolPendienteEliminar = rol;
-    this.confirmMensaje.set(`Se va a eliminar el rol "${rol.nombre}". Esta accion no se puede deshacer.`);
-    this.confirmVisible.set(true);
-  }
-
-  confirmarEliminarRol(): void {
-    this.closeActionsMenu();
-    this.confirmVisible.set(false);
-    const rol = this.rolPendienteEliminar;
-    this.rolPendienteEliminar = null;
-    if (!rol) return;
-
     this.estadoError.set(null);
     this.rolEliminandoId.set(rol.id);
 
-    this.configuracionService.deleteRol(rol.id).subscribe({
+    const request$ = rol.activo
+      ? this.configuracionService.deleteRol(rol.id)
+      : this.configuracionService.setRolEstado(rol.id, true);
+
+    request$.subscribe({
       next: () => {
         this.rolEliminandoId.set(null);
-        this.closeActionsMenu();
-        this.mostrarExito('Rol eliminado correctamente');
+        this.mostrarExito(`Rol ${rol.activo ? 'inactivado' : 'activado'} correctamente`);
       },
       error: (err) => {
         this.rolEliminandoId.set(null);
         this.estadoError.set(this.extractDeleteError(err));
       },
     });
-  }
-
-  cancelarEliminarRol(): void {
-    this.closeActionsMenu();
-    this.confirmVisible.set(false);
-    this.rolPendienteEliminar = null;
   }
 
   // ── Utilidades ────────────────────────────────────────────────────────────
