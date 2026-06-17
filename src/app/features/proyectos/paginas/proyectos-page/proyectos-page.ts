@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngrx/store';
-import { finalize, take } from 'rxjs/operators';
+import { finalize, map, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -25,8 +25,7 @@ import { Proyecto } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
 
 import {
-  cargarProyectos,
-  eliminarProyecto
+  cargarProyectos
 } from '../../store/proyectos.actions';
 
 // Colores corporativos
@@ -63,12 +62,15 @@ export class ProyectosPage implements OnDestroy {
 
   modalCrearVisible = false;
   modalDetalleVisible = false;
-  confirmEliminarVisible = false;
+  confirmCambioEstadoVisible = false;
+  confirmTitulo = '';
+  confirmMensaje = '';
+  confirmTextoConfirmar = 'Confirmar';
   successCrearVisible = false;
   guardandoProyecto = false;
   proyectoSeleccionado: Proyecto | null = null;
   proyectoDetalle: Proyecto | null = null;
-  codigoPendienteEliminar: string | null = null;
+  proyectoPendienteCambioEstado: Proyecto | null = null;
 
   private successModalTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -134,24 +136,43 @@ export class ProyectosPage implements OnDestroy {
 
     this.guardandoProyecto = true;
 
+    const finalizeAction = (): void => {
+      this.guardandoProyecto = false;
+    };
+
+    const handleError = (error: any): void => {
+      console.error('Error al guardar proyecto:', error);
+    };
+
     if (this.proyectoSeleccionado) {
       const proyectoConId: Proyecto = { ...proyecto, id: this.proyectoSeleccionado.id };
       this.proyectosService.actualizarProyecto(proyectoConId.id, proyectoConId).pipe(
-        finalize(() => this.guardandoProyecto = false)
+        finalize(() => finalizeAction())
       ).subscribe({
-        next: () => { this.store.dispatch(cargarProyectos()); this.cerrarModalCrear(); },
-        error: (error) => console.error('Error al actualizar proyecto:', error)
+        next: (response) => {
+          if (response.status === 200 || response.status === 204) {
+            this.store.dispatch(cargarProyectos());
+            this.cerrarModalCrear();
+          } else {
+            console.error('Respuesta inesperada al actualizar proyecto:', response);
+          }
+        },
+        error: handleError
       });
     } else {
       this.proyectosService.crearProyecto(proyecto).pipe(
-        finalize(() => this.guardandoProyecto = false)
+        finalize(() => finalizeAction())
       ).subscribe({
-        next: () => {
-          this.store.dispatch(cargarProyectos());
-          this.cerrarModalCrear();
-          this.mostrarSuccessCrear();
+        next: (response) => {
+          if (response.status === 201 || response.status === 200) {
+            this.store.dispatch(cargarProyectos());
+            this.cerrarModalCrear();
+            this.mostrarSuccessCrear();
+          } else {
+            console.error('Respuesta inesperada al crear proyecto:', response);
+          }
         },
-        error: (error) => console.error('Error al crear proyecto:', error)
+        error: handleError
       });
     }
   }
@@ -174,6 +195,17 @@ export class ProyectosPage implements OnDestroy {
     });
   }
 
+  solicitarCambiarEstadoProyecto(proyecto: Proyecto): void {
+    this.proyectoPendienteCambioEstado = proyecto;
+    const estadoActual = proyecto.activo === false || proyecto.estado?.toLowerCase() === 'inactivo' ? 'Inactivo' : 'Activo';
+    const nuevoEstado = estadoActual === 'Activo' ? 'Inactivo' : 'Activo';
+
+    this.confirmTitulo = `${nuevoEstado} proyecto`;
+    this.confirmMensaje = `Esta acción marcará el proyecto como ${nuevoEstado.toLowerCase()}. ¿Deseas continuar?`;
+    this.confirmTextoConfirmar = nuevoEstado;
+    this.confirmCambioEstadoVisible = true;
+  }
+
   abrirModalDetalle(proyecto: Proyecto): void {
     this.proyectosService.obtenerProyecto(proyecto.id).subscribe({
       next: (proyectoCompleto) => { this.proyectoDetalle = proyectoCompleto; this.modalDetalleVisible = true; },
@@ -186,20 +218,38 @@ export class ProyectosPage implements OnDestroy {
     this.proyectoDetalle = null;
   }
 
-  solicitarEliminarProyecto(codigo: string): void {
-    this.codigoPendienteEliminar = codigo;
-    this.confirmEliminarVisible = true;
+  cancelarCambiarEstadoProyecto(): void {
+    this.proyectoPendienteCambioEstado = null;
+    this.confirmCambioEstadoVisible = false;
   }
 
-  cancelarEliminarProyecto(): void {
-    this.codigoPendienteEliminar = null;
-    this.confirmEliminarVisible = false;
-  }
+  confirmarCambiarEstadoProyecto(): void {
+    if (!this.proyectoPendienteCambioEstado) return;
 
-  confirmarEliminarProyecto(): void {
-    if (!this.codigoPendienteEliminar) return;
-    this.store.dispatch(eliminarProyecto({ codigo: this.codigoPendienteEliminar }));
-    this.cancelarEliminarProyecto();
+    const proyecto = this.proyectoPendienteCambioEstado;
+    const estadoActual = proyecto.activo === false || proyecto.estado?.toLowerCase() === 'inactivo' ? 'Inactivo' : 'Activo';
+    const nuevoEstado = estadoActual === 'Activo' ? 'Inactivo' : 'Activo';
+
+    const proyectoActualizado: Proyecto = {
+      ...proyecto,
+      activo: nuevoEstado === 'Activo',
+      estado: nuevoEstado
+    };
+
+    this.proyectosService.actualizarProyecto(proyectoActualizado.id, proyectoActualizado).pipe(
+      take(1)
+    ).subscribe({
+      next: (response) => {
+        if (response.status === 200 || response.status === 204) {
+          this.store.dispatch(cargarProyectos());
+        } else {
+          console.error('Respuesta inesperada al cambiar estado del proyecto:', response);
+        }
+      },
+      error: (error) => console.error('Error al cambiar estado del proyecto:', error)
+    });
+
+    this.cancelarCambiarEstadoProyecto();
   }
 
   aplicarFiltros(filtros: FiltrosProyecto): void {
@@ -207,21 +257,64 @@ export class ProyectosPage implements OnDestroy {
   }
 
   descargarProyectosExcel(): void {
-    this.obtenerProyectosActivos().subscribe({
+    this.obtenerProyectosFiltrados().subscribe({
       next: (proyectos) => void this.descargarXlsx(proyectos, 'Proyectos'),
       error: (error) => console.error('Error al descargar proyectos:', error)
     });
   }
 
   descargarProyectosPdf(): void {
-    this.obtenerProyectosActivos().subscribe({
+    this.obtenerProyectosFiltrados().subscribe({
       next: (proyectos) => this.descargarPDF(proyectos, 'Proyectos'),
       error: (error) => console.error('Error al descargar proyectos:', error)
     });
   }
 
-  private obtenerProyectosActivos() {
-    return this.store.select(selectProyectos).pipe(take(1));
+  private obtenerProyectosFiltrados() {
+    return this.store.select(selectProyectos).pipe(
+      take(1),
+      map((proyectos) => proyectos
+        .filter((proyecto) => this.proyectoCoincideConFiltros(proyecto, this.filtros))
+        .sort((a, b) => {
+          const aActivo = this.normalizarEstadoProyecto(a) === 'Activo';
+          const bActivo = this.normalizarEstadoProyecto(b) === 'Activo';
+          if (aActivo === bActivo) return 0;
+          return aActivo ? -1 : 1;
+        })
+      )
+    );
+  }
+
+  private proyectoCoincideConFiltros(proyecto: Proyecto, filtros: FiltrosProyecto): boolean {
+    const busqueda = filtros.busqueda.toLowerCase();
+    const estado = this.normalizarEstadoProyecto(proyecto);
+
+    const coincideBusqueda =
+      proyecto.codigo.toLowerCase().includes(busqueda) ||
+      proyecto.nombre.toLowerCase().includes(busqueda) ||
+      (proyecto.cliente ?? '').toLowerCase().includes(busqueda);
+
+    const coincideEstado =
+      !filtros.estados.length ||
+      filtros.estados.includes(estado);
+
+    const coincideTipo =
+      !filtros.tipos.length ||
+      filtros.tipos.includes(proyecto.tipo ?? '');
+
+    const coincideSeguimiento =
+      !(filtros.seguimiento && filtros.seguimiento.length) ||
+      (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
+
+    return coincideBusqueda && coincideEstado && coincideTipo && coincideSeguimiento;
+  }
+
+  private normalizarEstadoProyecto(proyecto: Proyecto): string {
+    if (typeof proyecto.activo === 'boolean') {
+      return proyecto.activo ? 'Activo' : 'Inactivo';
+    }
+    const estado = (proyecto.estado ?? '').trim().toLowerCase();
+    return estado === 'inactivo' ? 'Inactivo' : 'Activo';
   }
 
   // ─── EXCEL ────────────────────────────────────────────────────────────────
@@ -629,16 +722,16 @@ export class ProyectosPage implements OnDestroy {
 
       // Calcular altura aproximada del bloque completo del proyecto
       const alturaEstimadaProyecto =
-        18 +               // encabezado proyecto
-        (body.length * 8) + // filas
-        12;                // margen seguridad
+        24 +                // encabezado proyecto + separación
+        (body.length * 10) + // filas con margen de seguridad
+        18;                 // margen seguridad
 
       // Si no cabe completo, empezar en una página nueva
       if (currentY + alturaEstimadaProyecto > footerY - 10) {
         doc.addPage();
         dibujarCabecera();
         currentY = 30;
-     }
+      }
 
       // ── Encabezado del proyecto ──
       doc.setFillColor(232, 238, 249);
@@ -655,9 +748,10 @@ export class ProyectosPage implements OnDestroy {
         body,
         styles: {
           fontSize: 7.5,
-          cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 },
+          cellPadding: { top: 3, bottom: 3, left: 5, right: 5 },
           valign: 'middle',
           overflow: 'linebreak',
+          cellWidth: 'wrap',
           lineColor: [226, 232, 240],
           lineWidth: 0.2,
         },
@@ -667,24 +761,29 @@ export class ProyectosPage implements OnDestroy {
           fontStyle:   'bold',
           fontSize:    7.5,
           halign:      'center',
-          cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+          cellPadding: { top: 4, bottom: 4, left: 6, right: 6 },
         },
-        bodyStyles: { textColor: [55, 65, 81] },
+        bodyStyles: {
+          textColor: [55, 65, 81],
+          minCellHeight: 10
+        },
         columnStyles: {
-          0: { cellWidth: 14, halign: 'center' },
-          1: { cellWidth: 65 },
-          2: { cellWidth: 18, halign: 'right'  },
-          3: { cellWidth: 12, halign: 'center' },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 55 },
-          6: { cellWidth: 18, halign: 'center' },
-          7: { cellWidth: 18, halign: 'center' },
-          8: { cellWidth: 18, halign: 'center' },
+          0: { cellWidth: 16, halign: 'center' },
+          1: { cellWidth: 90 },
+          2: { cellWidth: 22, halign: 'right' },
+          3: { cellWidth: 16, halign: 'center' },
+          4: { cellWidth: 28 },
+          5: { cellWidth: 80 },
+          6: { cellWidth: 24, halign: 'center' },
+          7: { cellWidth: 24, halign: 'center' },
+          8: { cellWidth: 22, halign: 'center' },
         },
+        pageBreak: 'auto',
+        rowPageBreak: 'avoid',
+        tableWidth: 'auto',
         margin: { left: marginX, right: marginX, bottom: 18 },
         didDrawPage: (data) => {
           dibujarCabecera();
-          // Re-dibujar encabezado del proyecto si la tabla continúa en página nueva
           if (data.pageNumber > 1) {
             const yHead = 28;
             doc.setFillColor(232, 238, 249);

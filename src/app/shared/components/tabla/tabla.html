@@ -44,11 +44,16 @@
       <th mat-header-cell *matHeaderCellDef>Líderes</th>
       <td mat-cell *matCellDef="let proyecto">
         <div class="tabla__lista">
-          @if (obtenerLideres(proyecto).length) {
-            @for (lider of obtenerLideres(proyecto); track lider.nombre) {
+          @if (obtenerLideresVisibles(proyecto).length) {
+            @for (lider of obtenerLideresVisibles(proyecto); track lider.nombre) {
               <span class="tabla__lista-item">
                 <span>{{ lider.nombre }}</span>
                 <small>{{ lider.detalle }}</small>
+              </span>
+            }
+            @if (obtenerLideresOcultos(proyecto) > 0) {
+              <span class="tabla_ _lista-ver-mas" (click)="verMas.emit(proyecto)">
+                +{{ obtenerLideresOcultos(proyecto) }} más
               </span>
             }
           } @else {

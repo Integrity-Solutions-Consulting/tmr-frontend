@@ -105,10 +105,11 @@
       @if (proyecto) {
         <mat-form-field>
           <mat-label>Estado</mat-label>
-          <mat-select yPosition="below" formControlName="estado">
+          <mat-select yPosition="below" formControlName="estado" [disabled]="true">
             <mat-option value="Activo">Activo</mat-option>
             <mat-option value="Inactivo">Inactivo</mat-option>
           </mat-select>
+          <mat-hint>El estado no se puede editar desde este formulario</mat-hint>
         </mat-form-field>
       }
 
