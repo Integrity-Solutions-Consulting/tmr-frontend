@@ -434,24 +434,23 @@ td {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 28px;
-  padding: 0 12px;
-  border: 1px solid #EAEAEA;
+  padding: 6px 14px;
+  border: 1px solid #D1D5DB;
   border-radius: 999px;
   background: #FFFFFF;
-
+  color: #6B7280;
   font-size: 13px;
   font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 
   &.activo {
-    color: #26BF4D;
     .estado-dot {
-      background: #26BF4D;
+      background: #22c55e;
     }
   }
 
   &.inactivo {
-    color: #8E8E93;
     .estado-dot {
       background: #8E8E93;
     }
@@ -459,8 +458,8 @@ td {
 }
 
 .estado-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;

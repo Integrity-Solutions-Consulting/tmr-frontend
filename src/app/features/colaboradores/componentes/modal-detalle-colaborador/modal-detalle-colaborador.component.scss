@@ -468,3 +468,39 @@
     transform: translate(-50%, -50%);
   }
 }
+
+:host ::ng-deep app-badge-estado .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: auto;
+  height: auto;
+  padding: 6px 14px;
+  border: 1px solid #D1D5DB;
+  border-radius: 999px;
+  background: #FFFFFF;
+  box-shadow: none;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:host ::ng-deep app-badge-estado .badge-text {
+  color: #6B7280;
+}
+
+:host ::ng-deep app-badge-estado .badge-dot {
+  width: 10px;
+  height: 10px;
+}
+
+:host ::ng-deep app-badge-estado .dot-activo {
+  background-color: #22c55e;
+}
+
+:host ::ng-deep app-badge-estado .dot-inactivo {
+  background-color: #8E8E93;
+}

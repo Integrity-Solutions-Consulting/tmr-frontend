@@ -1,77 +1,64 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Colaborador } from '../../models/colaborador.model';
 import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
 import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../../shared/components/action-menu/action-menu.component';
 
 @Component({
   selector: 'app-tabla-colaboradores',
   standalone: true,
-  imports: [CommonModule, BadgeEstadoComponent, TruncatePipe],
+  imports: [CommonModule, BadgeEstadoComponent, TruncatePipe, ActionMenuComponent],
   templateUrl: './tabla-colaboradores.component.html',
   styleUrl: './tabla-colaboradores.component.scss',
 })
 export class TablaColaboradoresComponent {
   @Input() colaboradores: Colaborador[] = [];
-  @Input() cargando: boolean = false;
+  @Input() cargando = false;
 
   @Output() verDetalle = new EventEmitter<Colaborador>();
-  @Output() editar     = new EventEmitter<Colaborador>();
-  @Output() eliminar   = new EventEmitter<Colaborador>();
+  @Output() editar = new EventEmitter<Colaborador>();
+  @Output() cambiarEstado = new EventEmitter<Colaborador>();
 
   menuAbierto: string | null = null;
-  dropdownTop  = 0;
-  dropdownLeft = 0;
 
-  toggleMenu(id: string, event: MouseEvent): void {
-    event.stopPropagation();
+  toggleMenu(payload: { id: string; event: Event }): void {
+    payload.event.stopPropagation();
+    this.menuAbierto = this.menuAbierto === payload.id ? null : payload.id;
+  }
 
-    if (this.menuAbierto === id) {
-      this.menuAbierto = null;
+  accionesColaborador(colaborador: Colaborador): ActionMenuItem[] {
+    const activo = colaborador.estado === 'Activo';
+
+    return [
+      { id: 'ver-mas', label: 'Ver más' },
+      { id: 'editar', label: 'Editar' },
+      {
+        id: activo ? 'inactivar' : 'activar',
+        label: activo ? 'Desactivar' : 'Activar',
+        danger: activo,
+      },
+    ];
+  }
+
+  onAccionSeleccionada(accion: ActionMenuItem, colaborador: Colaborador): void {
+    this.menuAbierto = null;
+
+    if (accion.id === 'ver-mas') {
+      this.verDetalle.emit(colaborador);
       return;
     }
 
-    const btn  = event.currentTarget as HTMLElement;
-    const rect = btn.getBoundingClientRect();
-    const dropdownWidth  = 160;
-    const dropdownHeight = 108;
-
-    // Siempre a la izquierda del botón
-    const left = rect.right - dropdownWidth - 20;
-    let top = rect.top + rect.height / 2 - dropdownHeight / 2;
-
-    // Ajuste vertical si se sale por abajo
-    if (top + dropdownHeight > window.innerHeight - 8) {
-      top = window.innerHeight - dropdownHeight - 8;
+    if (accion.id === 'editar') {
+      this.editar.emit(colaborador);
+      return;
     }
-    // Ajuste vertical si se sale por arriba
-    if (top < 8) top = 8;
 
-    this.dropdownTop  = top;
-    this.dropdownLeft = left;
-    this.menuAbierto  = id;
-  }
-
-  @HostListener('document:click')
-  cerrarMenu(): void {
-    this.menuAbierto = null;
-  }
-
-  onVerDetalle(col: Colaborador, event: Event): void {
-    event.stopPropagation();
-    this.menuAbierto = null;
-    this.verDetalle.emit(col);
-  }
-
-  onEditar(col: Colaborador, event: Event): void {
-    event.stopPropagation();
-    this.menuAbierto = null;
-    this.editar.emit(col);
-  }
-
-  onEliminar(col: Colaborador, event: Event): void {
-    event.stopPropagation();
-    this.menuAbierto = null;
-    this.eliminar.emit(col);
+    if (accion.id === 'activar' || accion.id === 'inactivar') {
+      this.cambiarEstado.emit(colaborador);
+    }
   }
 }

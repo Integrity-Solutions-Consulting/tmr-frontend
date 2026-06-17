@@ -50,8 +50,6 @@ export class ModalEditarColaboradorComponent implements OnInit {
   departamentos: CatalogoItem[] = [];         // DEP
   cargosDisponibles: CargoItem[] = [];
 
-  readonly estados = ['Activo', 'Inactivo'];
-
   ngOnInit(): void {
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────

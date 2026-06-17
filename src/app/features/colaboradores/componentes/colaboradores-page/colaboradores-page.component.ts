@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ExportarService }                  from '../../servicios/exportar.service';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
+import { CatalogosService, CargoItem, CatalogoItem } from '../../servicios/catalogos.service';
 import {
   Colaborador,
   FiltrosColaborador,
@@ -79,6 +80,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   constructor(
     private svc:         ColaboradoresService,
     private exportarSvc: ExportarService,
+    private catalogosSvc: CatalogosService,
   ) {}
 
   ngOnInit(): void {
@@ -194,32 +196,228 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   cerrarNotificacion(): void { this.notificacion = null; }
 
-  colaboradorAEliminar: Colaborador | null = null;
+  onCambiarEstado(col: Colaborador): void {
+    const nuevoActivo = col.estado !== 'Activo';
 
-onEliminar(col: Colaborador): void {
-  this.colaboradorAEliminar = col;
-}
+    if (!nuevoActivo) {
+      this.svc.eliminarColaborador(col.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.cargarDatos();
+            this.cargarMetricas();
+            this.notificacion = {
+              tipo: 'exito',
+              mensaje: 'El colaborador ha sido desactivado exitosamente',
+            };
+          },
+          error: (err) => {
+            const mensaje = err?.error?.detail || 'Error al actualizar el estado del colaborador';
+            this.notificacion = { tipo: 'error', mensaje };
+          },
+        });
+      return;
+    }
 
-confirmarEliminar(): void {
-  if (!this.colaboradorAEliminar) return;
-  this.svc.eliminarColaborador(this.colaboradorAEliminar.id)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
+    forkJoin({
+      detalle: this.svc.getColaboradorById(col.id),
+      empresas: this.catalogosSvc.getCatalogo('EMP'),
+      tiposContrato: this.catalogosSvc.getCatalogo('TCT'),
+      departamentos: this.catalogosSvc.getCatalogo('DEP'),
+      modalidades: this.catalogosSvc.getCatalogo('MDT'),
+      categorias: this.catalogosSvc.getCatalogo('CAT'),
+    }).pipe(
+      switchMap(({ detalle, empresas, tiposContrato, departamentos, modalidades, categorias }) => {
+        const idDepartamento = this.resolverIdCatalogo(
+          departamentos,
+          (detalle as any).idDepartamento,
+          detalle.departamento
+        );
+
+        const cargos$ = idDepartamento
+          ? this.catalogosSvc.getCargosPorDepartamento(idDepartamento)
+          : of([] as CargoItem[]);
+
+        return cargos$.pipe(
+          switchMap(cargos => {
+            const request = this.crearRequestCambioEstadoColaborador(
+              detalle,
+              nuevoActivo,
+              empresas,
+              tiposContrato,
+              departamentos,
+              modalidades,
+              categorias,
+              cargos
+            );
+
+            return this.svc.editarColaborador(detalle.id, request);
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
-        this.colaboradorAEliminar = null;
         this.cargarDatos();
         this.cargarMetricas();
-        console.log('Colaborador eliminado correctamente');
+        this.notificacion = {
+          tipo: 'exito',
+          mensaje: `El colaborador ha sido ${nuevoActivo ? 'activado' : 'desactivado'} exitosamente`,
+        };
       },
-      error: () => console.error('Error al eliminar el colaborador'),
+      error: (err) => {
+        const mensaje = err?.error?.detail || err?.message || 'Error al actualizar el estado del colaborador';
+        this.notificacion = { tipo: 'error', mensaje };
+      },
     });
-}
+  }
 
-cancelarEliminar(): void {
-  this.colaboradorAEliminar = null;
-}
+  private crearRequestCambioEstadoColaborador(
+    colaborador: Colaborador,
+    activo: boolean,
+    empresas: CatalogoItem[],
+    tiposContrato: CatalogoItem[],
+    departamentos: CatalogoItem[],
+    modalidades: CatalogoItem[],
+    categorias: CatalogoItem[],
+    cargos: CargoItem[]
+  ): any {
+    const anyColaborador = colaborador as any;
+    const idDepartamento = this.resolverIdCatalogo(
+      departamentos,
+      anyColaborador.idDepartamento,
+      colaborador.departamento
+    );
+
+    const idCargo = anyColaborador.idCargo
+      ? Number(anyColaborador.idCargo)
+      : this.buscarIdCargo(cargos, colaborador.cargo);
+
+    const idTipoContrato = this.resolverIdCatalogo(
+      tiposContrato,
+      colaborador.idTipoContrato,
+      colaborador.tipoContrato
+    );
+
+    const idModoTrabajo = this.resolverIdCatalogo(
+      modalidades,
+      colaborador.idModoTrabajo,
+      colaborador.modalidad
+    );
+
+    const idCategoriaEmpleado = this.resolverIdCatalogo(
+      categorias,
+      colaborador.idCategoriaEmpleado,
+      colaborador.categoria
+    );
+
+    this.validarIdRequerido(idTipoContrato, 'tipo de contrato');
+    this.validarIdRequerido(idDepartamento, 'departamento');
+    this.validarIdRequerido(idCargo, 'cargo');
+    this.validarIdRequerido(idModoTrabajo, 'modalidad');
+    this.validarIdRequerido(idCategoriaEmpleado, 'categoría');
+
+    return {
+      tipoPersona: colaborador.tipoPersona ?? 'NATURAL',
+      idTipoIdentificacion: colaborador.tipoPersona === 'JURIDICA'
+        ? null
+        : (colaborador.idTipoIdentificacion ? Number(colaborador.idTipoIdentificacion) : null),
+      numeroIdentificacion: colaborador.numeroIdentificacion ?? colaborador.identificacion,
+      nombres: colaborador.nombres ?? null,
+      apellidos: colaborador.apellidos ?? null,
+      fechaNacimiento: this.normalizarFechaInput(colaborador.fechaNacimiento) || null,
+      idGenero: colaborador.idGenero ? Number(colaborador.idGenero) : null,
+      idNacionalidad: colaborador.idNacionalidad ? Number(colaborador.idNacionalidad) : null,
+      email: colaborador.correoElectronico ? String(colaborador.correoElectronico).trim() : null,
+      telefono: colaborador.telefono ? String(colaborador.telefono).trim() : null,
+      direccion: colaborador.direccion ? String(colaborador.direccion).trim() : null,
+      idEmpresaCatalogo: this.resolverIdCatalogo(
+        empresas,
+        colaborador.idEmpresaCatalogo,
+        colaborador.asociacion ?? colaborador.tipoIdentificacion
+      ),
+      idTipoContrato,
+      activo,
+      idDepartamento,
+      fechaIngreso: this.normalizarFechaInput(colaborador.fechaContratacion) || null,
+      idCargo,
+      aniosExperiencia: this.normalizarNumeroOpcional(colaborador.aniosExperiencia),
+      idModoTrabajo,
+      idCategoriaEmpleado,
+    };
+  }
+
+  private resolverIdCatalogo(lista: CatalogoItem[], id?: number | null, valor?: string | null): number | null {
+    if (id) return Number(id);
+    if (!valor) return null;
+
+    return lista.find(item =>
+      this.normalizarTexto(item.valor) === this.normalizarTexto(valor)
+    )?.id ?? null;
+  }
+
+  private buscarIdCargo(cargos: CargoItem[], nombre?: string | null): number | null {
+    if (!nombre) return null;
+
+    return cargos.find(cargo => {
+      const cargoAny = cargo as any;
+      const nombreCargo = cargo.nombreCargo ?? cargoAny.nombre ?? cargoAny.valor;
+      return this.normalizarTexto(nombreCargo) === this.normalizarTexto(nombre);
+    }
+    )?.id ?? null;
+  }
+
+  private validarIdRequerido(id: number | null, campo: string): void {
+    if (!id || id <= 0) {
+      throw new Error(`No se pudo activar el colaborador porque falta resolver el ${campo}.`);
+    }
+  }
+
+  private normalizarNumeroOpcional(valor: number | string | null | undefined): number | null {
+    if (valor === null || valor === undefined || valor === '') return null;
+
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : null;
+  }
+
+  private normalizarTexto(valor?: string | null): string {
+    return (valor ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
 
   // ── Descargar ────────────────────────────────────────────
+  private normalizarFechaInput(fecha?: string | Date | null): string {
+    if (!fecha) return '';
+
+    if (fecha instanceof Date && !Number.isNaN(fecha.getTime())) {
+      const y = fecha.getFullYear();
+      const m = String(fecha.getMonth() + 1).padStart(2, '0');
+      const d = String(fecha.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    const valor = String(fecha).trim();
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+      return valor.substring(0, 10);
+    }
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) {
+      const [d, m, y] = valor.split('/');
+      return `${y}-${m}-${d}`;
+    }
+
+    if (/^\d{2}-\d{2}-\d{4}$/.test(valor)) {
+      const [d, m, y] = valor.split('-');
+      return `${y}-${m}-${d}`;
+    }
+
+    return '';
+  }
+
   onDescargarPDF(): void {
   this.obtenerColaboradoresParaExportar()
     .pipe(takeUntil(this.destroy$))

@@ -1,63 +1,56 @@
 <div class="colabs-page">
-   <div class="colabs-page__wrapper">
+  <div class="colabs-page__wrapper">
 
-  <!-- Título -->
-  <h1 class="colabs-page__title">Colaboradores</h1>
+    <h1 class="colabs-page__title">Colaboradores</h1>
 
-  <!-- Cards métricas -->
-  <div class="colabs-page__metricas">
-    <app-cards-metricas
-      [totalColaboradores]="totalColaboradores"
-      [noAsignados]="noAsignados"
-      [asignados]="asignados"
-      [inactivos]="inactivos"
-      [activos]="activos"
-    />
-  </div>
-
-  <!-- Toolbar -->
-  <div class="colabs-page__toolbar">
-    <div class="colabs-page__toolbar-left">
-      <app-filtros-colaboradores
-        (filtrosCambian)="onFiltrosCambian($event)"
+    <div class="colabs-page__metricas">
+      <app-cards-metricas
+        [totalColaboradores]="totalColaboradores"
+        [noAsignados]="noAsignados"
+        [asignados]="asignados"
+        [inactivos]="inactivos"
+        [activos]="activos"
       />
     </div>
-    <div class="colabs-page__toolbar-right">
-      <app-descargar-menu
-        (descargarPDF)="onDescargarPDF()"
-        (descargarExcel)="onDescargarExcel()"
-      />
-     <button class="colabs-page__btn-agregar" (click)="abrirCrear()" type="button">
-       Agregar
-      <img src="assets/iconos/btn-agregar.svg" alt="agregar" width="16" height="16" />
-     </button>
-    </div>
-  </div>
 
-  <!-- Tabla -->
-  <div class="colabs-page__table-container">
-    <app-tabla-colaboradores
-      [colaboradores]="colaboradores"
-      [cargando]="cargando"
-      (verDetalle)="abrirDetalle($event)"
-      (editar)="abrirEditar($event)"
-      (eliminar)="onEliminar($event)" 
+    <div class="colabs-page__toolbar">
+      <div class="colabs-page__toolbar-left">
+        <app-filtros-colaboradores
+          (filtrosCambian)="onFiltrosCambian($event)"
+        />
+      </div>
+      <div class="colabs-page__toolbar-right">
+        <app-descargar-menu
+          (descargarPDF)="onDescargarPDF()"
+          (descargarExcel)="onDescargarExcel()"
+        />
+        <button class="colabs-page__btn-agregar" (click)="abrirCrear()" type="button">
+          Agregar
+          <img src="assets/iconos/btn-agregar.svg" alt="agregar" width="16" height="16" />
+        </button>
+      </div>
+    </div>
+
+    <div class="colabs-page__table-container">
+      <app-tabla-colaboradores
+        [colaboradores]="colaboradores"
+        [cargando]="cargando"
+        (verDetalle)="abrirDetalle($event)"
+        (editar)="abrirEditar($event)"
+        (cambiarEstado)="onCambiarEstado($event)"
+      />
+    </div>
+
+    <app-paginacion
+      [paginaActual]="paginaActual"
+      [totalPaginas]="totalPaginas"
+      [total]="total"
+      [porPagina]="porPagina"
+      (paginaCambia)="onPaginaCambia($event)"
     />
   </div>
-
-  <!-- Paginación independiente -->
-  <app-paginacion
-    [paginaActual]="paginaActual"
-    [totalPaginas]="totalPaginas"
-    [total]="total"
-    [porPagina]="porPagina"
-    (paginaCambia)="onPaginaCambia($event)"
-  />
-  </div>
-
 </div>
 
-<!-- Modales -->
 @if (modalDetalle) {
   <app-modal-detalle-colaborador
     [colaborador]="modalDetalle"
@@ -81,34 +74,6 @@
   />
 }
 
-<!-- Modal confirmar eliminar -->
-@if (colaboradorAEliminar) {
-  <div class="confirm-overlay">
-    <div class="confirm-card">
-
-      <div class="confirm-card__icon-wrapper">
-  <img src="assets/iconos/btn-eliminar.svg" alt="eliminar" width="28" height="28" />
-</div>
-
-      <h3 class="confirm-card__title">¿Eliminar colaborador?</h3>
-      <p class="confirm-card__mensaje">
-        Esta acción eliminará a <strong>{{ colaboradorAEliminar.nombreCompleto }}</strong> permanentemente.
-      </p>
-
-      <div class="confirm-card__actions">
-        <button class="confirm-card__btn confirm-card__btn--cancel" (click)="cancelarEliminar()" type="button">
-          Cancelar
-        </button>
-        <button class="confirm-card__btn confirm-card__btn--confirm" (click)="confirmarEliminar()" type="button">
-          Eliminar
-        </button>
-      </div>
-
-    </div>
-  </div>
-}
-
-<!-- Notificación -->
 @if (notificacion) {
   <app-notificacion-colaborador
     [notificacion]="notificacion"
