@@ -23,21 +23,21 @@
 
     <!-- Tipo -->
     <div class="feriado-modal__field">
-      <label class="feriado-modal__label">Tipo de feriado <span class="req">*</span></label>
       @if (isView) {
+        <label class="feriado-modal__label">Tipo de feriado <span class="req">*</span></label>
         <div class="feriado-modal__view-value">
           <span class="tipo-badge tipo-badge--{{ form.controls.tipo.value.toLowerCase() }}">
             {{ form.controls.tipo.value }}
           </span>
         </div>
       } @else {
-        <div class="feriado-modal__select-wrap">
-          <mat-icon class="feriado-modal__select-icon">category</mat-icon>
-          <select class="feriado-modal__select" formControlName="tipo">
+        <div class="float-select">
+          <select class="float-select__input" formControlName="tipo">
             @for (tipo of tipos; track tipo) {
               <option [value]="tipo">{{ tipo }}</option>
             }
           </select>
+          <label class="float-select__label float-select__label--up">Tipo de feriado <span class="req">*</span></label>
         </div>
         @if (form.controls.tipo.invalid && form.controls.tipo.touched) {
           <span class="feriado-modal__error">Campo requerido</span>
@@ -50,44 +50,50 @@
 
       <!-- Nombre -->
       <div class="feriado-modal__field">
-        <label class="feriado-modal__label">Nombre del feriado <span class="req">*</span></label>
-        <div class="feriado-modal__input-wrap"
-             [class.feriado-modal__input-wrap--error]="form.controls.nombre.invalid && form.controls.nombre.touched">
-          <mat-icon class="feriado-modal__input-icon">event</mat-icon>
-          <input
-            class="feriado-modal__input"
-            formControlName="nombre"
-            placeholder="Ej. Independencia de Guayaquil"
-            [readonly]="isView"
-            autocomplete="off"
-          />
-        </div>
-        @if (!isView && form.controls.nombre.invalid && form.controls.nombre.touched) {
-          <span class="feriado-modal__error">
-            @if (form.controls.nombre.errors?.['required']) { Campo requerido }
-            @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
-          </span>
+        @if (isView) {
+          <label class="feriado-modal__label">Nombre del feriado <span class="req">*</span></label>
+          <div class="feriado-modal__view-value">
+            <span class="feriado-modal__view-text">{{ form.controls.nombre.value }}</span>
+          </div>
+        } @else {
+          <div class="float-field">
+            <input
+              class="float-field__input"
+              formControlName="nombre"
+              placeholder=" "
+              [class.float-field__input--error]="form.controls.nombre.invalid && form.controls.nombre.touched"
+              autocomplete="off"
+            />
+            <label class="float-field__label">Nombre del feriado <span class="req">*</span></label>
+          </div>
+          @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+            <span class="feriado-modal__error">
+              @if (form.controls.nombre.errors?.['required']) { Campo requerido }
+              @else if (form.controls.nombre.errors?.['minlength']) { Mínimo 3 caracteres }
+            </span>
+          }
         }
       </div>
 
       <!-- Fecha -->
       <div class="feriado-modal__field">
-        <label class="feriado-modal__label">Fecha <span class="req">*</span></label>
         @if (isView) {
+          <label class="feriado-modal__label">Fecha <span class="req">*</span></label>
           <div class="feriado-modal__view-value">
             <span class="feriado-modal__view-text">
               {{ formatFecha(form.controls.fecha.value) }}
             </span>
           </div>
         } @else {
-          <div class="feriado-modal__input-wrap"
-               [class.feriado-modal__input-wrap--error]="form.controls.fecha.invalid && form.controls.fecha.touched">
-            <mat-icon class="feriado-modal__input-icon">calendar_today</mat-icon>
+          <div class="float-field">
             <input
-              class="feriado-modal__input feriado-modal__input--date"
+              class="float-field__input float-field__input--date"
               type="date"
               formControlName="fecha"
+              placeholder=" "
+              [class.float-field__input--error]="form.controls.fecha.invalid && form.controls.fecha.touched"
             />
+            <label class="float-field__label float-field__label--always">Fecha <span class="req">*</span></label>
           </div>
           @if (form.controls.fecha.invalid && form.controls.fecha.touched) {
             <span class="feriado-modal__error">Campo requerido</span>
@@ -105,20 +111,21 @@
 
     <!-- Descripción -->
     <div class="feriado-modal__field">
-      <label class="feriado-modal__label">Descripción <span class="feriado-modal__optional">(opcional)</span></label>
       @if (isView) {
+        <label class="feriado-modal__label">Descripción <span class="feriado-modal__optional">(opcional)</span></label>
         <div class="feriado-modal__view-value">
           <span class="feriado-modal__view-text">{{ form.controls.descripcion.value || '—' }}</span>
         </div>
       } @else {
-        <div class="feriado-modal__input-wrap feriado-modal__input-wrap--textarea">
-          <mat-icon class="feriado-modal__input-icon">notes</mat-icon>
+        <div class="float-field">
           <textarea
-            class="feriado-modal__input feriado-modal__textarea"
+            class="float-field__input float-field__input--textarea"
             formControlName="descripcion"
+            placeholder=" "
             rows="2"
-            placeholder="Describe este feriado (opcional)"
+            style="height: 80px; padding: 10px 12px; resize: none;"
           ></textarea>
+          <label class="float-field__label">Descripción <span class="feriado-modal__optional">(opcional)</span></label>
         </div>
       }
     </div>
@@ -146,19 +153,20 @@
 
       <!-- Estado -->
       <div class="feriado-modal__field">
-        <label class="feriado-modal__label">Estado <span class="req">*</span></label>
         @if (isView) {
+          <label class="feriado-modal__label">Estado <span class="req">*</span></label>
           <div class="feriado-modal__view-value">
             <span class="status-pill" [class.status-pill--inactive]="!form.controls.activo.value">
               {{ form.controls.activo.value ? 'Activo' : 'Inactivo' }}
             </span>
           </div>
         } @else {
-          <div class="feriado-modal__select-wrap feriado-modal__select-wrap--sm">
-            <select class="feriado-modal__select" formControlName="activo">
+          <div class="float-select">
+            <select class="float-select__input" formControlName="activo">
               <option [ngValue]="true">Activo</option>
               <option [ngValue]="false">Inactivo</option>
             </select>
+            <label class="float-select__label float-select__label--up">Estado <span class="req">*</span></label>
           </div>
         }
       </div>

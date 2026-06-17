@@ -24,18 +24,16 @@
 
         @if (isInternalUser) {
         <div class="form-field">
-          <div class="float-select mat-select-wrapper">
-            <mat-select class="float-select__mat-input" formControlName="idColaborador"
-              [class.float-select__input--error]="campoInvalido('idColaborador')" panelWidth="null"
-              panelClass="colaborador-select-panel"
-              placeholder="Seleccione un colaborador">
-              <mat-option value="">Seleccione un colaborador</mat-option>
+          <div class="float-select">
+            <select class="float-select__input" formControlName="idColaborador"
+              [class.float-select__input--error]="campoInvalido('idColaborador')">
+              <option value="">Seleccione un colaborador</option>
               @for (colaborador of colaboradores; track colaborador.id) {
-              <mat-option [value]="colaborador.id">
+              <option [value]="colaborador.id">
                 {{ colaborador.nombreCompleto }}
-              </mat-option>
+              </option>
               }
-            </mat-select>
+            </select>
             <label class="float-select__label float-select__label--up">
               Colaborador <span class="req">*</span>
             </label>
@@ -64,7 +62,7 @@
             <div class="float-field">
               <input class="float-field__input" type="text" [value]="form.controls.usuario.value" placeholder=" "
                 (input)="syncInternalEmailInput($any($event.target).value)" />
-              <label class="float-field__label">Correo <span class="req">*</span></label>
+              <label class="float-field__label">Correo electrónico <span class="req">*</span></label>
             </div>
             <span class="email-compose__suffix">{{ emailSuffix }}</span>
           </div>
@@ -72,7 +70,7 @@
           <div class="float-field">
             <input class="float-field__input" type="email" formControlName="email" placeholder=" "
               [class.float-field__input--error]="campoInvalido('email')" />
-            <label class="float-field__label">Email <span class="req">*</span></label>
+            <label class="float-field__label">Correo electrónico <span class="req">*</span></label>
           </div>
           }
           @if (campoInvalido('email')) {
@@ -100,7 +98,7 @@
 
         <label class="check-field">
           <input type="checkbox" formControlName="debeCambiarPassword" />
-          <span>Debe cambiar contrasena en el proximo acceso</span>
+          <span>Debe cambiar contraseña en el próximo acceso</span>
         </label>
 
         <div class="form-field">
@@ -110,9 +108,9 @@
             <input class="float-field__input float-field__input--password"
               [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
               [class.float-field__input--error]="campoInvalido('password')" />
-            <label class="float-field__label">Nueva contrasena</label>
+            <label class="float-field__label">Nueva contraseña</label>
             <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
-              title="Mostrar/ocultar contrasena">
+              title="Mostrar/ocultar contraseña">
               <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
@@ -125,15 +123,15 @@
             <input class="float-field__input float-field__input--password"
               [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
               [class.float-field__input--error]="campoInvalido('password')" readonly />
-            <label class="float-field__label float-field__label--always">Contrasena temporal <span
+            <label class="float-field__label float-field__label--always">Contraseña temporal <span
                 class="req">*</span></label>
             <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
-              title="Mostrar/ocultar contrasena">
+              title="Mostrar/ocultar contraseña">
               <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
           <p class="form-field__hint">
-            Copie esta contrasena antes de guardar.
+            Copie esta contraseña antes de guardar.
             <button type="button" class="btn-regenerar" (click)="regenerateTemporaryPassword()">↺ Regenerar</button>
           </p>
           @if (campoInvalido('password')) {

@@ -125,67 +125,119 @@
   font-size: 11px;
 }
 
-/* ── Input wrap ───────────────────────────────────────────────── */
-.feriado-modal__input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* ── Floating Fields & Selects ─────────────────────────────────── */
+.float-field,
+.float-select {
+  position: relative;
+  width: 100%;
+}
+
+.float-field__input,
+.float-select__input {
+  width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 12px;
-  padding: 0 14px;
-  background: #ffffff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+  color: #374151;
+  background-color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 
-  &:focus-within {
-    border-color: #0c3b73;
-    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+  &:focus {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
   }
 
   &--error {
     border-color: #dc2626;
-    &:focus-within { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08); }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    }
+  }
+}
+
+.float-field__input {
+  height: 48px;
+  padding: 0 12px;
+
+  &:focus ~ .float-field__label,
+  &:not(:placeholder-shown) ~ .float-field__label {
+    top: 0;
+    color: #737373;
+    background: #ffffff;
+    font-size: 11px;
+    transform: translateY(-50%);
+  }
+
+  &--date ~ .float-field__label {
+    top: 0;
+    color: #737373;
+    background: #ffffff;
+    font-size: 11px;
+    transform: translateY(-50%);
   }
 
   &--textarea {
-    align-items: flex-start;
-    padding: 10px 14px;
+    height: 80px;
+    padding: 10px 12px;
+    resize: none;
+
+    &:focus ~ .float-field__label,
+    &:not(:placeholder-shown) ~ .float-field__label {
+      top: 0;
+      color: #737373;
+      background: #ffffff;
+      font-size: 11px;
+      transform: translateY(-50%);
+    }
   }
 }
 
-.feriado-modal__input-icon {
-  font-size: 17px;
-  width: 17px;
-  height: 17px;
-  color: #94a3b8;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.feriado-modal__input {
-  flex: 1;
-  min-height: 44px;
-  border: none;
-  outline: none;
-  background: transparent;
+.float-field__label,
+.float-select__label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  padding: 0 4px;
+  color: #9ca3af;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
   font-size: 13.5px;
-  color: #1e293b;
-  font-family: inherit;
-  width: 100%;
-
-  &::placeholder { color: #b0bec5; }
-  &[readonly] { cursor: default; color: #475569; }
-
-  &--date {
-    color-scheme: light;
-    &::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
-  }
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: all 0.18s ease;
 }
 
-.feriado-modal__textarea {
-  min-height: 56px;
-  resize: vertical;
-  padding: 4px 0;
-  line-height: 1.5;
+.float-field__label--always {
+  top: 0;
+  color: #737373;
+  font-size: 11px;
+  transform: translateY(-50%);
+}
+
+.float-select__input {
+  height: 48px;
+  padding: 0 36px 0 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.float-select__input:focus ~ .float-select__label,
+.float-select__label--up {
+  top: 0;
+  color: #737373;
+  background: #ffffff;
+  font-size: 11px;
+  transform: translateY(-50%);
 }
 
 .feriado-modal__error {
@@ -200,49 +252,6 @@
     border: 1px solid #fecaca;
     border-radius: 8px;
   }
-}
-
-/* ── Select ───────────────────────────────────────────────────── */
-.feriado-modal__select-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.feriado-modal__select-icon {
-  position: absolute;
-  left: 12px;
-  font-size: 17px;
-  width: 17px;
-  height: 17px;
-  color: #94a3b8;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.feriado-modal__select {
-  width: 100%;
-  min-height: 46px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 0 14px 0 38px;
-  color: #1e293b;
-  background: #ffffff;
-  font-size: 13.5px;
-  font-family: inherit;
-  outline: none;
-  appearance: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-
-  &:focus {
-    border-color: #0c3b73;
-    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
-  }
-}
-
-.feriado-modal__select-wrap--sm .feriado-modal__select {
-  padding-left: 14px;
 }
 
 /* ── View values ──────────────────────────────────────────────── */

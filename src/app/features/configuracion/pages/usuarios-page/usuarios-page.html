@@ -164,9 +164,7 @@
                   </div>
                 </td>
                 <td>
-                  <span class="badge" [class.badge--activo]="usuario.estado === 'Activo'" [class.badge--inactivo]="usuario.estado !== 'Activo'">
-                    {{ usuario.estado }}
-                  </span>
+                  <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
                 </td>
                 <td class="actions-cell">
                   <app-action-menu
