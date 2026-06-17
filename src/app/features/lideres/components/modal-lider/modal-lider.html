@@ -1,5 +1,5 @@
 <div class="modal-overlay" *ngIf="mostrarFormulario">
-<div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
 
     <!-- HEADER -->
     <div class="modal-header">
@@ -22,43 +22,12 @@
       <!-- MODO EDICIÓN -->
       <ng-container *ngIf="modoEdicion">
         <div class="form-row">
-          <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
-            <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
-              [class.open]="dropdownAbierto === 'tipo'">
-              <span class="custom-select-value" [class.placeholder]="!form.tipoNombre">{{ form.tipoNombre || 'Tipo de líder' }}</span>
-              <span class="material-icons custom-select-arrow">expand_more</span>
+          <div class="custom-select-wrapper select-wrapper--half">
+            <div class="custom-select disabled">
+              <span class="custom-select-value">
+                {{ form.tipoNombre || 'Tipo de líder' }}
+              </span>
             </div>
-            <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
-              <li *ngFor="let opcion of tiposLideres" (click)="seleccionar('tipo', opcion, $event)">
-                {{ opcion.valor }}
-              </li>
-            </ul>
-            <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
-          </div>
-          <div class="custom-select-wrapper select-wrapper--half"
-            *ngIf="form.tipoNombre === 'Interno'"
-            [class.input-error]="enviado && !form.personaId">
-            <div class="custom-select" (click)="toggleDropdown('persona', $event)"
-              [class.open]="dropdownAbierto === 'persona'">
-              <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
-              <span class="material-icons custom-select-arrow">expand_more</span>
-            </div>
-            <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
-              <div class="dropdown-search-box" (click)="$event.stopPropagation()">
-                <span class="material-icons dropdown-search-icon">search</span>
-                <input type="text" class="dropdown-search-input" placeholder="Buscar colaborador..."
-                  [(ngModel)]="busquedaPersona" (input)="filtrarPersonas()" />
-              </div>
-              <ul class="dropdown-list">
-                <li *ngFor="let persona of personasFiltradas" (click)="seleccionar('persona', persona, $event)">
-                  {{ persona.nombreCompleto }}
-                </li>
-                <li *ngIf="personasFiltradas.length === 0" class="dropdown-empty">
-                  No se encontraron resultados
-                </li>
-              </ul>
-            </div>
-            <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
           </div>
         </div>
       </ng-container>
@@ -66,6 +35,7 @@
       <!-- MODO CREAR -->
       <ng-container *ngIf="!modoEdicion">
         <div class="form-row">
+          <!-- Tipo de líder -->
           <div class="custom-select-wrapper select-wrapper--half" [class.input-error]="enviado && !form.tipoId">
             <div class="custom-select" (click)="toggleDropdown('tipo', $event)"
               [class.open]="dropdownAbierto === 'tipo'">
@@ -80,8 +50,10 @@
             <span class="error-msg" *ngIf="enviado && !form.tipoId">Campo requerido</span>
           </div>
 
-          <div class="custom-select-wrapper select-wrapper--half" *ngIf="form.tipoNombre === 'Interno'"
-            [class.input-error]="enviado && !form.personaId">
+          <!-- Colaborador - solo si es Interno -->
+          <div class="custom-select-wrapper select-wrapper--half"
+            *ngIf="form.tipoNombre === 'Interno'"
+            [class.input-error]="enviado && form.tipoNombre === 'Interno' && !form.personaId">
             <div class="custom-select" (click)="toggleDropdown('persona', $event)"
               [class.open]="dropdownAbierto === 'persona'">
               <span class="custom-select-value" [class.placeholder]="!form.personaId">{{ getPersonaNombre() || 'Colaborador' }}</span>
@@ -104,6 +76,7 @@
             </div>
             <span class="error-msg" *ngIf="enviado && !form.personaId">Campo requerido</span>
           </div>
+
         </div>
       </ng-container>
 
@@ -146,6 +119,7 @@
           {{ modoEdicion ? 'Guardar' : 'Guardar' }}
         </button>
       </div>
+
     </div>
   </div>
 </div>
