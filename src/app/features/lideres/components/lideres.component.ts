@@ -13,7 +13,7 @@ import { ModalLider } from './modal-lider/modal-lider';
 import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
-import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
+import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
 import { ModalEliminarLiderComponent } from './modal-eliminar-lider/modal-eliminar-lider.component';
 
 export interface ProyectoAsignado {
@@ -49,7 +49,7 @@ export interface Lider {
     ModalLider,
     ModalDetalleLider,
     ModalDescargaComponent,
-    ModalConfirmacion,
+    SuccessModalComponent,
     ModalEliminarLiderComponent
   ],
   templateUrl: './lideres.component.html',
@@ -84,6 +84,7 @@ export class LideresComponent implements OnInit {
   liderForm!: FormGroup;
   guardandoLider = false;
   mostrarEstadoDropdown = false;
+  errorFormulario: string | null = null;
 
   // ── Eliminar ───────────────────────────────────────────
   mostrarEliminar = false;
@@ -276,6 +277,7 @@ export class LideresComponent implements OnInit {
     this.liderEditando = null;
     this.liderParaEditar = null;
     this.guardandoLider = false;
+    this.errorFormulario = null;
     this.liderForm.reset({ estado: 'Activo' });
     this.mostrarFormulario = true;
   }
@@ -285,6 +287,7 @@ export class LideresComponent implements OnInit {
     this.liderEditando = null;
     this.liderParaEditar = null;
     this.guardandoLider = false;
+    this.errorFormulario = null;
     this.liderForm.reset();
   }
 
@@ -308,6 +311,7 @@ export class LideresComponent implements OnInit {
     this.liderEditando = lider;
     this.liderParaEditar = { ...lider };
     this.guardandoLider = false;
+    this.errorFormulario = null;
     this.mostrarFormulario = true;
   }
 
@@ -315,9 +319,7 @@ export class LideresComponent implements OnInit {
     if (this.guardandoLider) return;
 
     if (!this.modoEdicion && this.liderYaExiste(payload)) {
-      this.mensajeConfirmacion = 'Ya existe un líder con los mismos datos de contacto o colaborador asignado.';
-      this.mostrarConfirmacion = true;
-      setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      this.errorFormulario = 'Ya existe un líder con los mismos datos de contacto o colaborador asignado.';
       return;
     }
 
@@ -356,6 +358,7 @@ export class LideresComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.guardandoLider = false;
+        this.errorFormulario = null;
         this.mensajeConfirmacion = this.modoEdicion
           ? 'Los cambios han sido<br>guardados exitosamente'
           : 'El nuevo líder ha sido<br>agregado exitosamente';
@@ -365,12 +368,10 @@ export class LideresComponent implements OnInit {
         this.obtenerLideresDelBackend(); 
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.guardandoLider = false;
         console.error('❌ Error al guardar líder en el servidor:', err);
-        this.mensajeConfirmacion = 'No se pudo guardar el líder. Intente de nuevo.';
-        this.mostrarConfirmacion = true;
-        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+        this.errorFormulario = err?.error?.detail || err?.error?.message || 'No se pudo guardar el líder. Intente de nuevo.';
       }
     });
   }

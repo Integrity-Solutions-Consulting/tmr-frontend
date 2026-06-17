@@ -114,6 +114,12 @@
         </div>
       </div>
 
+      <!-- Error Banner -->
+      <div class="modal-form__error-banner" *ngIf="error">
+        <span class="material-icons">error_outline</span>
+        {{ error }}
+      </div>
+
       <div class="button-container">
         <button class="btn-guardar" type="button" (click)="onGuardar()" [disabled]="guardando">
           {{ modoEdicion ? 'Guardar' : 'Guardar' }}

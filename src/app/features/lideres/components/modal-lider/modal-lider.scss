@@ -280,3 +280,24 @@ $text-light: #7C7C7C;
   cursor: not-allowed;
   border-color: #e5e5e5;
 }
+
+.modal-form__error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 12px 0 0;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+
+  .material-icons {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}

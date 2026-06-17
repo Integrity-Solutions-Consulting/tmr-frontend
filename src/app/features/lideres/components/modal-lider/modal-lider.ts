@@ -31,6 +31,7 @@ export class ModalLider implements OnInit, OnChanges {
   @Input() modoEdicion = false;
   @Input() lider: any | null = null;
   @Input() guardando = false;
+  @Input() error: string | null = null;
   @Output() cerrarModal = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<any>();
 
@@ -232,7 +233,6 @@ export class ModalLider implements OnInit, OnChanges {
     this.enviado = true;
     if (!this.formularioValido()) return;
     this.guardar.emit(this.form);
-    this.cerrar();
   }
 
   soloNumerosYSignos(event: KeyboardEvent): boolean {
