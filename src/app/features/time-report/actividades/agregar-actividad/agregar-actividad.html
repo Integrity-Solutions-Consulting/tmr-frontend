@@ -102,7 +102,7 @@
       </div>
       <div class="actividad-modal__input-wrap actividad-modal__input-wrap--textarea"
         [class.actividad-modal__input-wrap--error]="form.get('descripcion')?.invalid && form.get('descripcion')?.touched">
-        <img class="actividad-modal__input-icon" src="assets/iconos/cargo.svg" alt="descripcion" />
+
         <textarea class="actividad-modal__input actividad-modal__textarea" formControlName="descripcion" rows="3"
           maxlength="255" placeholder="Descripción de la actividad"></textarea>
         <span class="actividad-modal__input-hint">{{ form.get('descripcion')?.value?.length || 0 }}/255</span>

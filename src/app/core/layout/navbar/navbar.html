@@ -6,22 +6,13 @@
   <div class="navbar__spacer"></div>
 
   <div class="navbar__user">
-    <button type="button" class="navbar__profile-trigger" (click)="togglePerfil()">
-      <span class="navbar__profile-text">Hola, {{ user.name.split(' ')[0] }}</span>
-      <span class="material-symbols-outlined navbar__profile-icon">account_circle</span>
+    <span class="navbar__profile-text">Hola, {{ user.name.split(' ')[0] }}</span>
+
+    <button type="button" class="navbar__profile-btn" (click)="togglePerfil()" aria-label="Menú de usuario">
+      <span class="material-symbols-outlined navbar__profile-btn-icon">account_circle</span>
     </button>
 
-    <button type="button" class="navbar__notification" aria-label="Notificaciones">
-      <span class="navbar__notification-dot"></span>
-    </button>
-
-    <app-profile-popover
-      [abierto]="perfilAbierto"
-      [nombre]="user.name"
-      [correo]="user.email"
-      (cerrar)="cerrarPerfil()"
-      (cerrarSesion)="cerrarSesion()"
-      (cambiarPassword)="abrirCambiarPassword()"
-    ></app-profile-popover>
+    <app-profile-popover [abierto]="perfilAbierto" [nombre]="user.name" [correo]="user.email" (cerrar)="cerrarPerfil()"
+      (cerrarSesion)="cerrarSesion()" (cambiarPassword)="abrirCambiarPassword()"></app-profile-popover>
   </div>
 </header>

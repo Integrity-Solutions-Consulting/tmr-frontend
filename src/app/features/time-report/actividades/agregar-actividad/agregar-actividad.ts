@@ -301,7 +301,7 @@ export class AgregarActividad implements OnInit {
                         // Refrescar el valor para forzar el repintado del displayWith
                         const currentVal = this.form?.get('tipoActividad')?.value;
                         if (currentVal) {
-                            this.form.get('tipoActividad')?.setValue(currentVal, { emitEvent: false });
+                            this.form.get('tipoActividad')?.setValue(currentVal);
                         }
                     } else {
                         this.tiposActividad.set([]);
@@ -328,12 +328,26 @@ export class AgregarActividad implements OnInit {
                                 unique.push(item);
                             }
                         }
+
+                        // Asegurar que el proyecto actual de la actividad esté en la lista
+                        const act = this.data?.actividad;
+                        if (act && act.idproyecto) {
+                            const exists = unique.some(p => String(p.id) === String(act.idproyecto));
+                            if (!exists) {
+                                unique.push({
+                                    id: String(act.idproyecto),
+                                    nombre: act.proyectoNombre || 'Sin Proyecto',
+                                    codigo: act.codigorequerimiento
+                                });
+                            }
+                        }
+
                         this.proyectos.set(unique);
                         
                         // Refrescar el valor para forzar el repintado del displayWith
                         const currentVal = this.form?.get('proyectoId')?.value;
                         if (currentVal) {
-                            this.form.get('proyectoId')?.setValue(currentVal, { emitEvent: false });
+                            this.form.get('proyectoId')?.setValue(currentVal);
                         }
                     } else {
                         this.proyectos.set([]);

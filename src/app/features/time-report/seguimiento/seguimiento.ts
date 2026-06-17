@@ -25,7 +25,8 @@ import { Colaborador } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-seguimiento',
@@ -256,29 +257,205 @@ export class SeguimientoComponent implements AfterViewInit {
             : this.dataSource.data.forEach(row => this.selection.select(row));
     }
 
-    public descargarSeleccionados() {
+    public async descargarSeleccionados() {
         if (!this.selection.hasValue()) return;
-        this.selection.selected.forEach(col => {
-            this.descargarDetalle(col);
-        });
+        const seleccionados = [...this.selection.selected];
+        for (const col of seleccionados) {
+            await this.descargarSeguimientoColaborador(col);
+        }
         this.selection.clear();
     }
 
-    public exportarExcel() {
-        const rows = this.dataSource.filteredData.map(c => ({
-            Colaborador: c.nombre,
-            Proyecto: c.proyecto,
-            Cliente: c.cliente,
-            Líder: c.liderTecnico,
-            Horas: c.nroHoras,
-            Estado: c.estado,
-            'Días Reporte': c.diasConReporte,
-            'Días Completar': c.diasACompletar
-        }));
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Seguimiento');
-        XLSX.writeFile(wb, 'Seguimiento.xlsx');
+    public async descargarSeguimientoColaborador(col: Colaborador) {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Seguimiento');
+
+        const headerFill: ExcelJS.Fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF163572' }
+        };
+        const headerFont: Partial<ExcelJS.Font> = {
+            name: 'Arial',
+            size: 11,
+            bold: true,
+            color: { argb: 'FFFFFFFF' }
+        };
+
+        worksheet.mergeCells('A1:H1');
+        const titleCell = worksheet.getCell('A1');
+        titleCell.value = `Seguimiento de Colaborador - ${col.nombre}`;
+        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+        worksheet.getRow(1).height = 30;
+
+        worksheet.mergeCells('A2:H2');
+        const subtitleCell = worksheet.getCell('A2');
+        subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
+        subtitleCell.font = { name: 'Arial', size: 10, italic: true };
+        worksheet.getRow(2).height = 20;
+
+        worksheet.addRow([]);
+
+        const headers = [
+            'Colaborador', 'Proyecto', 'Cliente', 'Líder Técnico', 'Horas Registradas', 'Seguimiento', 'Días con Reporte', 'Días a Completar'
+        ];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.height = 24;
+        headerRow.eachCell((cell) => {
+            cell.fill = headerFill;
+            cell.font = headerFont;
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'medium' },
+                right: { style: 'thin' }
+            };
+        });
+
+        const row = worksheet.addRow([
+            col.nombre,
+            col.proyecto,
+            col.cliente,
+            col.liderTecnico,
+            Number(col.nroHoras),
+            col.estado,
+            Number(col.diasConReporte),
+            Number(col.diasACompletar)
+        ]);
+        row.height = 22;
+        
+        row.getCell(5).alignment = { horizontal: 'right' };
+        row.getCell(6).alignment = { horizontal: 'center' };
+        row.getCell(7).alignment = { horizontal: 'center' };
+        row.getCell(8).alignment = { horizontal: 'center' };
+
+        row.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+            };
+        });
+
+        worksheet.columns.forEach((column, i) => {
+            if (i === 0) column.width = 30;
+            else if (i === 1) column.width = 25;
+            else if (i === 2) column.width = 25;
+            else if (i === 3) column.width = 25;
+            else if (i === 4) column.width = 18;
+            else if (i === 5) column.width = 15;
+            else if (i === 6) column.width = 18;
+            else if (i === 7) column.width = 18;
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Seguimiento_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    public async exportarExcel() {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Seguimiento');
+
+        const headerFill: ExcelJS.Fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF163572' }
+        };
+        const headerFont: Partial<ExcelJS.Font> = {
+            name: 'Arial',
+            size: 11,
+            bold: true,
+            color: { argb: 'FFFFFFFF' }
+        };
+
+        worksheet.mergeCells('A1:H1');
+        const titleCell = worksheet.getCell('A1');
+        titleCell.value = 'Consolidado de Seguimiento';
+        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+        worksheet.getRow(1).height = 30;
+
+        worksheet.mergeCells('A2:H2');
+        const subtitleCell = worksheet.getCell('A2');
+        subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
+        subtitleCell.font = { name: 'Arial', size: 10, italic: true };
+        worksheet.getRow(2).height = 20;
+
+        worksheet.addRow([]);
+
+        const headers = [
+            'Colaborador', 'Proyecto', 'Cliente', 'Líder Técnico', 'Horas Registradas', 'Seguimiento', 'Días con Reporte', 'Días a Completar'
+        ];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.height = 24;
+        headerRow.eachCell((cell) => {
+            cell.fill = headerFill;
+            cell.font = headerFont;
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'medium' },
+                right: { style: 'thin' }
+            };
+        });
+
+        this.dataSource.filteredData.forEach(c => {
+            const row = worksheet.addRow([
+                c.nombre,
+                c.proyecto,
+                c.cliente,
+                c.liderTecnico,
+                Number(c.nroHoras),
+                c.estado,
+                Number(c.diasConReporte),
+                Number(c.diasACompletar)
+            ]);
+            row.height = 20;
+            
+            row.getCell(5).alignment = { horizontal: 'right' };
+            row.getCell(6).alignment = { horizontal: 'center' };
+            row.getCell(7).alignment = { horizontal: 'center' };
+            row.getCell(8).alignment = { horizontal: 'center' };
+
+            row.eachCell((cell) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                    left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                    bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                    right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+                };
+            });
+        });
+
+        worksheet.columns.forEach((column, i) => {
+            if (i === 0) column.width = 30;
+            else if (i === 1) column.width = 25;
+            else if (i === 2) column.width = 25;
+            else if (i === 3) column.width = 25;
+            else if (i === 4) column.width = 18;
+            else if (i === 5) column.width = 15;
+            else if (i === 6) column.width = 18;
+            else if (i === 7) column.width = 18;
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Consolidado_Seguimiento_${this.fechaDesde}_a_${this.fechaHasta}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
 
     public exportarPDF() {
@@ -375,12 +552,138 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    public descargarDetalle(col: Colaborador) {
-        const data = [{ Colaborador: col.nombre, Horas: col.nroHoras, Estado: col.estado }];
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Detalle');
-        XLSX.writeFile(wb, `Detalle_${col.nombre.split(' ')[0]}.xlsx`);
+    public async descargarDetalle(col: Colaborador) {
+        try {
+            const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
+            const actividades = await lastValueFrom(
+                this.http.get<any[]>(urlDetalle, {
+                    params: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta }
+                })
+            );
+
+            if (!actividades || actividades.length === 0) {
+                console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                return;
+            }
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Reporte Actividades');
+
+            const headerFill: ExcelJS.Fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF163572' }
+            };
+            const headerFont: Partial<ExcelJS.Font> = {
+                name: 'Arial',
+                size: 11,
+                bold: true,
+                color: { argb: 'FFFFFFFF' }
+            };
+
+            worksheet.mergeCells('A1:H1');
+            const titleCell = worksheet.getCell('A1');
+            titleCell.value = `Detalle de Actividades - Colaborador: ${col.nombre}`;
+            titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
+            titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+            worksheet.getRow(1).height = 30;
+
+            worksheet.mergeCells('A2:H2');
+            const subtitleCell = worksheet.getCell('A2');
+            subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
+            subtitleCell.font = { name: 'Arial', size: 10, italic: true };
+            worksheet.getRow(2).height = 20;
+
+            worksheet.addRow([]);
+
+            const headers = [
+                'Fecha', 'Proyecto', 'Tipo Actividad', 'Req / Ticket', 'Horas', 'Descripción', 'Notas', 'Es Billable'
+            ];
+            const headerRow = worksheet.addRow(headers);
+            headerRow.height = 24;
+            headerRow.eachCell((cell) => {
+                cell.fill = headerFill;
+                cell.font = headerFont;
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'thin' }
+                };
+            });
+
+            let totalHoras = 0;
+            actividades.forEach(act => {
+                const row = worksheet.addRow([
+                    act.fecha,
+                    act.proyecto,
+                    act.tipoActividad,
+                    act.codigoRequerimiento,
+                    Number(act.horas),
+                    act.descripcion,
+                    act.notas,
+                    act.esBillable
+                ]);
+                row.height = 20;
+                totalHoras += Number(act.horas);
+
+                row.getCell(1).alignment = { horizontal: 'center' };
+                row.getCell(4).alignment = { horizontal: 'center' };
+                row.getCell(5).alignment = { horizontal: 'right' };
+                row.getCell(8).alignment = { horizontal: 'center' };
+
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                        left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                        bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                        right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+                    };
+                });
+            });
+
+            const totalRow = worksheet.addRow([
+                'TOTAL HORAS', '', '', '', totalHoras, '', '', ''
+            ]);
+            worksheet.mergeCells(`A${totalRow.number}:D${totalRow.number}`);
+            totalRow.height = 22;
+            totalRow.getCell(1).font = { bold: true };
+            totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+            totalRow.getCell(5).font = { bold: true };
+            totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
+
+            totalRow.eachCell((cell, colNum) => {
+                if (colNum <= 5) {
+                    cell.border = {
+                        top: { style: 'medium' },
+                        bottom: { style: 'double' }
+                    };
+                }
+            });
+
+            worksheet.columns.forEach((column, i) => {
+                if (i === 0) column.width = 12;
+                else if (i === 1) column.width = 25;
+                else if (i === 2) column.width = 20;
+                else if (i === 3) column.width = 15;
+                else if (i === 4) column.width = 10;
+                else if (i === 5) column.width = 35;
+                else if (i === 6) column.width = 25;
+                else if (i === 7) column.width = 12;
+            });
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Reporte_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(`Error descargando el detalle de ${col.nombre}:`, error);
+        }
     }
 
     private formatDate(date: Date): string {
