@@ -92,45 +92,45 @@
   </section>
 
   <div class="table-card">
-    <div class="table-responsive">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th><input type="checkbox"></th>
-            <th>COLABORADOR</th>
-            <th>PROYECTO</th>
-            <th>CLIENTE</th>
-            <th>FECHA</th>
-            <th class="text-center">CANT. HORAS</th>
-            <th>ESTADO</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of (actividadesFiltradas$ | async); track item.id || $index) {
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td><input type="checkbox"></td>
-              <td class="font-bold">{{ item.colaborador }}</td>
-              <td>{{ item.proyecto }}</td>
-              <td><span class="client-tag">{{ item.cliente }}</span></td>
-              <td>{{ formatearFecha(item.fecha) }}</td>
-              <td class="text-center" style="font-weight: 600; color: #ffaa00;">
-                {{ item.nroHoras }} h
-              </td>
-              <td>
-                <span class="status-badge pendiente">
-                  <span class="dot"></span>{{ item.estado || 'Pendiente' }}
-                </span>
-              </td>
+              <th><input type="checkbox"></th>
+              <th>COLABORADOR</th>
+              <th>PROYECTO</th>
+              <th>CLIENTE</th>
+              <th>FECHA</th>
+              <th class="text-center">CANT. HORAS</th>
+              <th>ESTADO</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="empty-row">
-                No hay registros disponibles para los filtros seleccionados.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (item of (actividadesFiltradas$ | async); track item.id || $index) {
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="font-bold">{{ item.colaborador }}</td>
+                <td>{{ item.proyecto }}</td>
+                <td><span class="client-tag">{{ item.cliente }}</span></td>
+                <td>{{ formatearFecha(item.fecha) }}</td>
+                <td class="text-center table-number">{{ item.nroHoras }} h</td>
+                <td>
+                  <span class="status-badge pendiente">
+                    <span class="dot"></span>{{ item.estado || 'Pendiente' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-row">
+                  No hay registros disponibles para los filtros seleccionados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
 
     @if ((totalItemsFiltrados$ | async)! > 0) {
