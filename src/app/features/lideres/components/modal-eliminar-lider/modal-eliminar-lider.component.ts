@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 export class ModalEliminarLiderComponent {
   @Input() mostrar = false;
   @Input() nombreLider = '';
+  @Input() error: string | null = null;
   @Output() cerrarModal = new EventEmitter<void>();
   @Output() confirmarEliminar = new EventEmitter<void>();
 }

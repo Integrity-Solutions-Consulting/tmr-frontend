@@ -11,6 +11,11 @@
       Esta acción eliminará a <strong>{{ nombreLider }}</strong> permanentemente.
     </p>
 
+    <div class="modal-form__error-banner" *ngIf="error">
+      <span class="material-icons">error_outline</span>
+      <span>{{ error }}</span>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-cancelar" (click)="cerrarModal.emit()">Cancelar</button>
       <button class="btn-eliminar" (click)="confirmarEliminar.emit()">Eliminar</button>
