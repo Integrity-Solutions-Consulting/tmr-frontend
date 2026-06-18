@@ -205,120 +205,132 @@
           </div>
 
           <div class="proyecto-form__resources" formArrayName="recursos">
-            <ng-container *ngFor="let recurso of getRecursosDelLider(li).controls; let ri = index">
-              <div class="proyecto-form__resource">
-                <div class="proyecto-form__resource-row" [formGroupName]="ri">
+            <mat-accordion>
+              <ng-container *ngFor="let recurso of getRecursosDelLider(li).controls; let ri = index">
+                <mat-expansion-panel
+                  class="proyecto-form__resource"
+                  [expanded]="isRecursoPanelExpanded(li, ri)"
+                  (opened)="setRecursoPanelExpanded(li, ri, true)"
+                  (closed)="setRecursoPanelExpanded(li, ri, false)">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ getRecursoPanelTitle(li, ri) }}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
 
-                  <div class="proyecto-form__resource-top">
+                  <div [formGroupName]="ri">
+                    <div class="proyecto-form__resource-row">
+                      <div class="proyecto-form__resource-top">
 
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-                      class="proyecto-form__resource-nombre">
-                      <mat-label>Seleccionar recurso</mat-label>
-                      <mat-icon matPrefix>search</mat-icon>
-                      <input
-                        matInput
-                        formControlName="nombre"
-                        [matAutocomplete]="recursoAuto"
-                        matAutocompletePosition="below"
-                        autocomplete="off"
-                        (input)="onRecursoInput(li, ri)"
-                        (focus)="onRecursoFocus(li, ri, $event)"
-                      >
-                      <mat-autocomplete #recursoAuto="matAutocomplete" (optionSelected)="onEmpleadoChange(li, ri, $event.option.value)">
-                        <mat-option *ngFor="let emp of getRecursosFiltrados(li, ri)" [value]="emp.nombre">
-                          {{ emp.nombre }}
-                        </mat-option>
-                      </mat-autocomplete>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'nombre')">Obligatorio</mat-error>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-nombre">
+                          <mat-label>Seleccionar recurso</mat-label>
+                          <mat-icon matPrefix>search</mat-icon>
+                          <input
+                            matInput
+                            formControlName="nombre"
+                            [matAutocomplete]="recursoAuto"
+                            matAutocompletePosition="below"
+                            autocomplete="off"
+                            (input)="onRecursoInput(li, ri)"
+                            (focus)="onRecursoFocus(li, ri, $event)"
+                          >
+                          <mat-autocomplete #recursoAuto="matAutocomplete" (optionSelected)="onEmpleadoChange(li, ri, $event.option.value)">
+                            <mat-option *ngFor="let emp of getRecursosFiltrados(li, ri)" [value]="emp.nombre">
+                              {{ emp.nombre }}
+                            </mat-option>
+                          </mat-autocomplete>
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'nombre')">Obligatorio</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-                      class="proyecto-form__resource-departamento">
-                      <mat-label>Departamento</mat-label>
-                      <mat-select yPosition="below" formControlName="departamento"
-                        (selectionChange)="onDepartamentoChange(li, ri, $event.value)">
-                        <mat-option [value]="null">— Todos —</mat-option>
-                        <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
-                          {{ dep.nombre }}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-departamento">
+                          <mat-label>Departamento</mat-label>
+                          <mat-select yPosition="below" formControlName="departamento"
+                            (selectionChange)="onDepartamentoChange(li, ri, $event.value)">
+                            <mat-option [value]="null">— Todos —</mat-option>
+                            <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
+                              {{ dep.nombre }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
 
-                    <button mat-icon-button type="button" class="proyecto-form__remove"
-                      aria-label="Eliminar recurso" (click)="eliminarRecursoDelLider(li, ri)">
-                      &times;
-                    </button>
-                  </div>
+                        <button mat-icon-button type="button" class="proyecto-form__remove"
+                          aria-label="Eliminar recurso" (click)="eliminarRecursoDelLider(li, ri)">
+                          &times;
+                        </button>
+                      </div>
 
-                  <div class="proyecto-form__resource-middle">
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-                      class="proyecto-form__resource-rol">
-                      <mat-label>Seleccionar cargo</mat-label>
-                      <mat-select yPosition="below" formControlName="rol">
-                        <mat-option *ngFor="let cargo of getCargosParaRecurso(li, ri)" [value]="cargo.nombre">
-                          {{ cargo.nombre }}
-                        </mat-option>
-                      </mat-select>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'rol')">Obligatorio</mat-error>
-                    </mat-form-field>
-                  </div>
+                      <div class="proyecto-form__resource-middle">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-rol">
+                          <mat-label>Seleccionar cargo</mat-label>
+                          <mat-select yPosition="below" formControlName="rol">
+                            <mat-option *ngFor="let cargo of getCargosParaRecurso(li, ri)" [value]="cargo.nombre">
+                              {{ cargo.nombre }}
+                            </mat-option>
+                          </mat-select>
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'rol')">Obligatorio</mat-error>
+                        </mat-form-field>
+                      </div>
 
-                  <div class="proyecto-form__resource-bottom">
-                    <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                      <input #entradaInput class="proyecto-form__date-control" type="date"
-                        autocomplete="off" formControlName="entrada">
-                      <label class="proyecto-form__date-label">Entrada</label>
-                      <div class="proyecto-form__date-error"
-                        *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
-                        Fecha inválida
+                      <div class="proyecto-form__resource-bottom">
+                        <div class="proyecto-form__resource-fecha proyecto-form__date-field">
+                          <input #entradaInput class="proyecto-form__date-control" type="date"
+                            autocomplete="off" formControlName="entrada">
+                          <label class="proyecto-form__date-label">Entrada</label>
+                          <div class="proyecto-form__date-error"
+                            *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
+                            Fecha inválida
+                          </div>
+                        </div>
+
+                        <div class="proyecto-form__resource-fecha proyecto-form__date-field">
+                          <input #salidaInput class="proyecto-form__date-control" type="date"
+                            autocomplete="off" formControlName="salida">
+                          <label class="proyecto-form__date-label">Salida</label>
+                          <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
+                            La salida no puede ser menor que la entrada
+                          </div>
+                          <div class="proyecto-form__date-error"
+                            *ngIf="!recursoFechaSalidaInvalida(li, ri) && (getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('salida')?.touched || intentoGuardar)">
+                            Fecha inválida
+                          </div>
+                        </div>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-costo">
+                          <mat-label>Costo</mat-label>
+                          <input matInput type="text" inputmode="decimal" formControlName="costoHora"
+                            (keydown)="bloquearCaracteresNumericos($event, true)"
+                            (paste)="bloquearPegadoNoNumerico($event, true)">
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
+                            Solo se permiten números
+                          </mat-error>
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('min')">
+                            El valor no puede ser negativo
+                          </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-horas">
+                          <mat-label>Horas</mat-label>
+                          <input matInput type="text" inputmode="numeric" formControlName="horas"
+                            (keydown)="bloquearCaracteresNumericos($event, false)"
+                            (paste)="bloquearPegadoNoNumerico($event, false)">
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros')">
+                            Solo se permiten números
+                          </mat-error>
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('min')">
+                            El valor no puede ser negativo
+                          </mat-error>
+                        </mat-form-field>
                       </div>
                     </div>
-
-                    <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                      <input #salidaInput class="proyecto-form__date-control" type="date"
-                        autocomplete="off" formControlName="salida">
-                      <label class="proyecto-form__date-label">Salida</label>
-                      <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
-                        La salida no puede ser menor que la entrada
-                      </div>
-                      <div class="proyecto-form__date-error"
-                        *ngIf="!recursoFechaSalidaInvalida(li, ri) && (getRecursosDelLider(li).at(ri).get('salida')?.hasError('fechaInvalida') || salidaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('salida')?.touched || intentoGuardar)">
-                        Fecha inválida
-                      </div>
-                    </div>
-
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-                      class="proyecto-form__resource-costo">
-                      <mat-label>Costo</mat-label>
-                      <input matInput type="text" inputmode="decimal" formControlName="costoHora"
-                        (keydown)="bloquearCaracteresNumericos($event, true)"
-                        (paste)="bloquearPegadoNoNumerico($event, true)">
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('soloNumeros')">
-                        Solo se permiten números
-                      </mat-error>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'costoHora') && getRecursosDelLider(li).at(ri).get('costoHora')?.hasError('min')">
-                        El valor no puede ser negativo
-                      </mat-error>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-                      class="proyecto-form__resource-horas">
-                      <mat-label>Horas</mat-label>
-                      <input matInput type="text" inputmode="numeric" formControlName="horas"
-                        (keydown)="bloquearCaracteresNumericos($event, false)"
-                        (paste)="bloquearPegadoNoNumerico($event, false)">
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('soloNumeros')">
-                        Solo se permiten números
-                      </mat-error>
-                      <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'horas') && getRecursosDelLider(li).at(ri).get('horas')?.hasError('min')">
-                        El valor no puede ser negativo
-                      </mat-error>
-                    </mat-form-field>
                   </div>
-
-                </div>
-              </div>
-            </ng-container>
+                </mat-expansion-panel>
+              </ng-container>
+            </mat-accordion>
           </div>
 
         </div>

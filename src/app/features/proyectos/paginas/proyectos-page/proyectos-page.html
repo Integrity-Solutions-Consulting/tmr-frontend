@@ -141,37 +141,46 @@
           </div>
 
           <div class="proyecto-detalle__resources">
-            <h5>Recursos asignados</h5>
+            <mat-accordion>
+              <mat-expansion-panel class="proyecto-detalle__resources-panel">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Recursos asignados</mat-panel-title>
+                  <mat-panel-description>
+                    {{ (lider.recursos || []).length }} recurso{{ (lider.recursos || []).length === 1 ? '' : 's' }}
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
 
-            <div class="proyecto-detalle__table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Nombre</th>
-                    <th>Rol asignado</th>
-                    <th>Entrada</th>
-                    <th>Salida</th>
-                    <th>Costo/hora</th>
-                    <th>Horas</th>
-                  </tr>
-                </thead>
+                <div class="proyecto-detalle__table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Rol asignado</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Costo/hora</th>
+                        <th>Horas</th>
+                      </tr>
+                    </thead>
 
-                <tbody>
-                  @for (recurso of lider.recursos || []; track recurso.nombre) {
-                    <tr>
-                      <td>{{ recurso.tipo }}</td>
-                      <td>{{ recurso.nombre }}</td>
-                      <td>{{ recurso.rol }}</td>
-                      <td>{{ formatearFecha(recurso.entrada) }}</td>
-                      <td>{{ formatearFecha(recurso.salida) }}</td>
-                      <td>${{ recurso.costoHora }}/hora</td>
-                      <td>{{ recurso.horas }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                    <tbody>
+                      @for (recurso of lider.recursos || []; track recurso.nombre) {
+                        <tr>
+                          <td>{{ recurso.tipo }}</td>
+                          <td>{{ recurso.nombre }}</td>
+                          <td>{{ recurso.rol }}</td>
+                          <td>{{ formatearFecha(recurso.entrada) }}</td>
+                          <td>{{ formatearFecha(recurso.salida) }}</td>
+                          <td>${{ recurso.costoHora }}/hora</td>
+                          <td>{{ recurso.horas }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
           </div>
         </div>
         }

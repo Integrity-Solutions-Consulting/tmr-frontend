@@ -196,11 +196,31 @@
   grid-template-columns: 1fr 140px 120px;
 }
 
-.proyecto-detalle__resources h5 {
-  margin: 0 0 10px;
-  color: #163572;
-  font-size: 13px;
-  font-weight: 600;
+.proyecto-detalle__resources {
+  display: flex;
+  flex-direction: column;
+}
+
+.proyecto-detalle__resources-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: none;
+
+  .mat-expansion-panel-header {
+    padding: 0 14px;
+  }
+
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description {
+    color: #163572;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0 14px 14px;
+  }
 }
 
 .proyecto-detalle span {
