@@ -12,7 +12,7 @@ export class ModalDetalleLider {
   @Input() lider: any;
   @Output() cerrarModal = new EventEmitter<void>();
 
-  proyectosExpandido = true;
+  proyectosExpandido = false;
 
   cerrar() {
     this.cerrarModal.emit();

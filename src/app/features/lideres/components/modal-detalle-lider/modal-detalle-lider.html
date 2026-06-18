@@ -1,5 +1,6 @@
 <div class="detalle-overlay" (click)="cerrar()">
   <div class="detalle-card" (click)="$event.stopPropagation()">
+
     <!-- Header -->
     <div class="detalle-header">
       <div class="detalle-codigo">{{ lider?.codigo }}</div>
@@ -18,7 +19,7 @@
       </span>
     </div>
 
-    <!-- Línea separadora debajo del nombre -->
+    <!-- Línea separadora -->
     <div class="detalle-separador"></div>
 
     <!-- Tipo y cliente -->
@@ -33,7 +34,9 @@
         <span>{{ lider?.tipo }}</span>
       </div>
       <div class="detalle-info-item">
-        <img src="assets/iconos/building-07-svgrepo-com.svg" class="detalle-icon" />
+        <div class="detalle-icon-wrapper">
+          <img src="assets/iconos/building-07-svgrepo-com.svg" class="detalle-icon" />
+        </div>
         <span>{{ lider?.cliente }}</span>
       </div>
     </div>
@@ -63,16 +66,16 @@
 
     <!-- Proyectos vinculados -->
     <div class="detalle-seccion-titulo detalle-seccion-titulo--toggle" (click)="toggleProyectos()">
-      <span class="detalle-linea-azul"></span>
       <span class="material-icons detalle-toggle-arrow" [class.rotated]="!proyectosExpandido">expand_more</span>
-      Proyectos vinculados
+      <span>Proyectos vinculados</span>
       <span class="detalle-proyectos__count">{{ lider?.proyectos?.length || 0 }}</span>
     </div>
 
     <div class="detalle-proyectos" *ngIf="proyectosExpandido">
       <div class="detalle-proyectos__lista">
-        <p class="detalle-proyectos__empty" *ngIf="!(lider?.proyectos?.length > 0)">No hay proyectos asignados a este líder.</p>
-
+        <p class="detalle-proyectos__empty" *ngIf="!(lider?.proyectos?.length > 0)">
+          No hay proyectos asignados a este líder.
+        </p>
         <div class="detalle-proyectos__item" *ngFor="let proyecto of lider?.proyectos || []">
           <div class="detalle-proyectos__item-info">
             <p class="detalle-proyectos__item-nombre">{{ proyecto.nombre }}</p>
@@ -81,7 +84,6 @@
               {{ proyecto.cliente || 'Sin cliente' }}
             </div>
           </div>
-
           <span class="detalle-proyectos__item-estado"
             [ngClass]="{
               'estado--progreso':      proyecto.estado === 'En progreso',
@@ -94,7 +96,6 @@
               'estado--planificacion': proyecto.estado === 'Planificación',
               'estado--espera':        proyecto.estado === 'En espera',
               'estado--activo':        proyecto.estado === 'Activo'
-
             }">
             <span class="detalle-proyectos__item-dot"></span>
             {{ proyecto.estado || 'Sin estado' }}

@@ -494,11 +494,17 @@ $hover-row: rgba(#163572, 0.04);
   top: 12px;
   right: 4px;
 }
-.card-left {
-  flex: 1;
+.card-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .card-top-row {
