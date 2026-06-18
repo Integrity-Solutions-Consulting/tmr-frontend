@@ -59,36 +59,27 @@
     }
   </div>
 
-  <section class="toolbar-section">
+  <section class="toolbar-section toolbar-section--row">
     <div class="search-input-wrapper">
       <span class="material-icons">search</span>
-      <input type="text" [formControl]="searchControl" placeholder="Buscar por colaborador o proyecto...">
+      <input type="text" [formControl]="searchControl" placeholder="Buscar proyecto, cliente, codigo...">
     </div>
 
-    <div class="filters-group">
-      <select class="custom-select" [formControl]="clienteControl">
-        <option value="">TODOS LOS CLIENTES</option>
-        @for (cliente of (clientes$ | async); track $index) {
-          <option [value]="cliente">{{ cliente }}</option>
-        }
-      </select>
-
-      <div class="date-controls">
-        <div class="date-field">
-          <label>DESDE</label>
-          <input type="date" [formControl]="fechaDesdeControl">
-        </div>
-        <div class="date-field">
-          <label>HASTA</label>
-          <input type="date" [formControl]="fechaHastaControl">
-        </div>
+    <div class="date-controls">
+      <div class="date-field">
+        <label>DESDE</label>
+        <input type="date" [formControl]="fechaDesdeControl">
       </div>
-
-      <button class="btn-secondary" (click)="descargarExcel()">
-        <span class="material-icons">file_download</span> 
-        <span>Descargar</span>
-      </button>
+      <div class="date-field">
+        <label>HASTA</label>
+        <input type="date" [formControl]="fechaHastaControl">
+      </div>
     </div>
+
+    <button class="btn-secondary" (click)="descargarExcel()">
+      <span class="material-icons">file_download</span> 
+      <span>Descargar</span>
+    </button>
   </section>
 
   <div class="table-card">
