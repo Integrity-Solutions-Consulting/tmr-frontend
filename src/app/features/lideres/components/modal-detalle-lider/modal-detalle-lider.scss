@@ -71,6 +71,13 @@ $inactivo: #ef4444;
   margin: 0;
 }
 
+// ── Línea separadora debajo del nombre ──────────────────────
+.detalle-separador {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0 0 16px;
+}
+
 // ── Badge estado ───────────────────────────────────────────
 .badge-estado {
   display: inline-flex;
@@ -158,6 +165,22 @@ $inactivo: #ef4444;
   border-top: none;
 }
 
+.detalle-seccion-titulo--toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.detalle-toggle-arrow {
+  font-size: 20px;
+  color: $primary;
+  transition: transform 0.2s ease;
+  margin-left: -4px;
+
+  &.rotated {
+    transform: rotate(-90deg);
+  }
+}
+
 .detalle-linea-azul {
   width: 3px;
   height: 16px;
@@ -200,8 +223,7 @@ $inactivo: #ef4444;
 
 // ── Proyectos asignados ────────────────────────────────
 .detalle-proyectos {
-  border-top: 1px solid #f3f4f6;
-  padding-top: 16px;
+  padding-top: 4px;
 
   &__count {
     display: inline-flex;
@@ -362,4 +384,3 @@ $inactivo: #ef4444;
     .detalle-proyectos__item-dot { background: #26BF4D; }
   }
 }
-

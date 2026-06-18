@@ -379,9 +379,9 @@ export class LideresComponent implements OnInit {
     });
   }
 
-  private liderYaExiste(payload: any): boolean {
+private liderYaExiste(payload: any): boolean {
     if (payload.personaId) {
-      return this.lideres.some(lider => lider.id === Number(payload.personaId));
+      return this.lideres.some(lider => (lider as any).idPersona === Number(payload.personaId));
     }
 
     const correo = this.normalizarTexto(payload.correo);

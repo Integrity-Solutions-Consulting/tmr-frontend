@@ -18,6 +18,9 @@
       </span>
     </div>
 
+    <!-- Línea separadora debajo del nombre -->
+    <div class="detalle-separador"></div>
+
     <!-- Tipo y cliente -->
     <div class="detalle-info-row">
       <div class="detalle-info-item">
@@ -59,13 +62,14 @@
     </div>
 
     <!-- Proyectos vinculados -->
-    <div class="detalle-seccion-titulo">
+    <div class="detalle-seccion-titulo detalle-seccion-titulo--toggle" (click)="toggleProyectos()">
       <span class="detalle-linea-azul"></span>
+      <span class="material-icons detalle-toggle-arrow" [class.rotated]="!proyectosExpandido">expand_more</span>
       Proyectos vinculados
       <span class="detalle-proyectos__count">{{ lider?.proyectos?.length || 0 }}</span>
     </div>
 
-    <div class="detalle-proyectos">
+    <div class="detalle-proyectos" *ngIf="proyectosExpandido">
       <div class="detalle-proyectos__lista">
         <p class="detalle-proyectos__empty" *ngIf="!(lider?.proyectos?.length > 0)">No hay proyectos asignados a este líder.</p>
 

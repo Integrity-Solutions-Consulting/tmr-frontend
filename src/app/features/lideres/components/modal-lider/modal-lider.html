@@ -88,13 +88,15 @@
       <div class="form-row">
         <div class="input-wrapper" [class.input-error]="(enviado && !isNombresValid(form.nombres)) || nombresInvalido">
           <input type="text" class="form-input" placeholder="Nombres" [(ngModel)]="form.nombres"
-            (input)="onInputNombres($event)" maxlength="100">
+            (input)="onInputNombres($event)" maxlength="100"
+            [readonly]="nombreApellidoBloqueado" [class.input-readonly]="nombreApellidoBloqueado">
           <span class="error-msg" *ngIf="nombresInvalido">Solo se permiten letras, sin números ni emojis</span>
           <span class="error-msg" *ngIf="enviado && !nombresInvalido && (!form.nombres || form.nombres.trim().length === 0)">Campo requerido</span>
         </div>
         <div class="input-wrapper" [class.input-error]="(enviado && !isApellidosValid(form.apellidos)) || apellidosInvalido">
           <input type="text" class="form-input" placeholder="Apellidos" [(ngModel)]="form.apellidos"
-            (input)="onInputApellidos($event)" maxlength="100">
+            (input)="onInputApellidos($event)" maxlength="100"
+            [readonly]="nombreApellidoBloqueado" [class.input-readonly]="nombreApellidoBloqueado">
           <span class="error-msg" *ngIf="apellidosInvalido">Solo se permiten letras, sin números ni emojis</span>
           <span class="error-msg" *ngIf="enviado && !apellidosInvalido && (!form.apellidos || form.apellidos.trim().length === 0)">Campo requerido</span>
         </div>

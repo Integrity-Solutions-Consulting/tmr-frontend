@@ -118,8 +118,8 @@ $hover-row: rgba(#163572, 0.04);
 
 .card-icon {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -486,13 +486,13 @@ $hover-row: rgba(#163572, 0.04);
   height: 22px;
 }
 
-.card-svg-arrow {
-  width: 12px;
-  height: 12px;
-  position: absolute;
-  top: 7px;
-  right: -2px;
 
+.card-svg-arrow {
+  width: 11px;
+  height: 11px;
+  position: absolute;
+  top: 12px;
+  right: 4px;
 }
 .card-left {
   flex: 1;
