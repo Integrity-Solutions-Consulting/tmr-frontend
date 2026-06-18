@@ -325,6 +325,15 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     padding: 0 0.75rem;
   }
   .toolbar-section .date-field { width: 48%; }
+  /* En móviles, poner label encima del input para evitar desbordes */
+  .toolbar-section .date-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    label { white-space: normal; font-size: 0.72rem; }
+    input { width: 100%; max-width: 100%; }
+  }
   .toolbar-section .btn-secondary {
     order: 3;
     width: 100%;
@@ -332,13 +341,65 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     margin-left: 0;
     padding: 0.75rem;
   }
+  /* table -> card view on mobile */
   .data-table thead { display: none; }
   .data-table tbody tr { display: block; border-bottom: 1px solid $border-color; margin-bottom: 8px; }
   .data-table tbody td {
     display: flex;
     justify-content: space-between;
     padding: 10px 12px;
+    white-space: normal;
   }
   .data-table tbody td:first-child { display: none; }
   .table-wrapper { overflow-x: auto; }
+
+  /* ICONS & BUTTONS FIXES */
+  .toolbar-section .material-icons,
+  .toolbar-section .btn-secondary .material-icons,
+  .btn-icon .material-icons {
+    font-size: 18px;
+    line-height: 1;
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+
+  .search-input-wrapper {
+    .material-icons { margin-right: 8px; }
+    input { font-size: 0.95rem; }
+  }
+
+  .btn-secondary {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-icon { min-width: 36px; min-height: 36px; }
+
+  .client-tag { max-width: 60%; display: inline-block; overflow: hidden; text-overflow: ellipsis; }
+  .status-badge { max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* Ultra-small devices tweaks */
+@media (max-width: 360px) {
+  .toolbar-section { padding: 0.6rem; }
+  .toolbar-section .search-input-wrapper { padding: 0 0.5rem; }
+  .toolbar-section .material-icons, .btn-icon .material-icons { font-size: 16px; }
+  .btn-secondary { font-size: 0.92rem; padding: 0.6rem; }
+  .client-tag, .status-badge { max-width: 55%; font-size: 0.85rem; }
+  .data-table tbody td { padding: 8px 10px; font-size: 0.92rem; }
+  .data-table tbody td:nth-child(2) { font-weight: 700; }
+  /* hide checkboxes to save space on very small screens */
+  .data-table tbody td:first-child, .data-table thead th:first-child { display: none; }
+
+  /* Asegurar que las fechas no se salgan en ultra-small */
+  .toolbar-section .date-controls { width: 100%; padding: 0 0.5rem; }
+  .toolbar-section .date-field { width: 48%; flex-direction: column; }
+}
+
+@media (max-width: 320px) {
+  .toolbar-section .search-input-wrapper { .material-icons { display: none; } }
+  .btn-secondary { padding: 0.5rem; font-size: 0.88rem; }
+  .search-input-wrapper input { font-size: 0.9rem; }
+  .client-tag, .status-badge { max-width: 50%; }
 }
