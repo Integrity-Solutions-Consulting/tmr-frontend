@@ -125,9 +125,8 @@
     </div>
 
     <div class="search-spacer"></div>
-
-    <div class="descarga-wrapper">
-      <button class="btn btn-outline" (click)="abrirDescarga()">
+<div class="descarga-wrapper" (click)="$event.stopPropagation()">
+  <button class="btn btn-outline" (click)="abrirDescarga()">
         Descargar
         <span class="material-symbols-outlined">file_download</span>
       </button>
