@@ -67,8 +67,7 @@ export class LideresComponent implements OnInit {
 
   busqueda = '';
   tipoFiltro = '';
-  estadoFiltro: 'Activo' | 'Inactivo' | '' = 'Activo';
-
+  estadoFiltro: 'Activo' | 'Inactivo' | '' = '';
   paginaActual = 1;
   porPagina = 10;
   totalPaginas = 1;
