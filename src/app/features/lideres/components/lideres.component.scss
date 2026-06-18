@@ -57,35 +57,37 @@ $hover-row: rgba(#163572, 0.04);
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
+  height: 32px;
+  padding: 0 14px;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
   cursor: pointer;
   border: none;
-  transition: all 0.18s ease;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 
-  .material-icons { font-size: 18px; }
-  .material-symbols-outlined { font-size: 18px; }
+  .material-icons { font-size: 16px; }
+  .material-symbols-outlined { font-size: 16px; }
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 
   &.btn-primary {
+    gap: 6px;
     background: #163572;
     color: $white;
-    border-radius: 6px;
+    font-weight: 600;
     &:hover:not(:disabled) {
       background: $primary-dark;
-      box-shadow: 0 4px 12px rgba($primary, 0.3);
     }
   }
 
   &.btn-outline {
+    gap: 8px;
     background: $white;
-    color: #737373;
-    border: 1px solid #E5E5E5;
-    border-radius: 6px;
+    color: #374151;
+    font-weight: 500;
+    border: 1px solid #d1d5db;
     &:hover:not(:disabled) { background: rgba($primary, 0.06); }
   }
 }
@@ -532,33 +534,44 @@ $hover-row: rgba(#163572, 0.04);
   font-size: 15px !important;
   font-weight: 500 !important;
   color: #6b7280 !important;
-  padding: 10px 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
   height: auto !important;
-  line-height: normal !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
 
   .mdc-list-item__primary-text {
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 0 !important;
     color: #6b7280 !important;
+    width: 100% !important;
+    line-height: 1 !important;
   }
 
   .material-icons,
   .material-symbols-outlined {
     font-size: 20px !important;
     color: #6b7280 !important;
-    margin-right: 0 !important;
+    margin: 0 10px 0 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    vertical-align: middle !important;
+  }
+
+  span:not(.material-icons):not(.material-symbols-outlined) {
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
     vertical-align: middle !important;
   }
 
   &:first-child { background-color: #f3f4f6 !important; }
   &:hover { background-color: #f3f4f6 !important; }
 }
-
 .estado-texto {
   font-size: 14px;
   color: #737373;
