@@ -55,11 +55,27 @@ export class UsuariosFormModal {
   constructor() {
     this.cargarColaboradores();
 
-    this.form.controls.usuario.valueChanges.subscribe(() => this.syncInternalEmail());
-    this.form.controls.email.valueChanges.subscribe(() => this.syncUserFromEmail());
+    this.form.controls.usuario.valueChanges.subscribe((val) => {
+      this.syncInternalEmail();
+      this.validarUsuario(val);
+      if (this.isInternalUser) {
+        this.validarEmail(this.form.controls.email.value);
+      }
+    });
+
+    this.form.controls.email.valueChanges.subscribe((val) => {
+      this.syncUserFromEmail();
+      this.validarEmail(val);
+      if (!this.isInternalUser) {
+        this.validarUsuario(this.form.controls.usuario.value);
+      }
+    });
+
     this.form.controls.usuarioInterno.valueChanges.subscribe((isInternal) => {
       this.configureUserMode(Boolean(isInternal));
+      this.ejecutarValidacionesLocales();
     });
+
     this.form.controls.idColaborador.valueChanges.subscribe((idColaborador) => {
       this.resolverPersonaDesdeColaborador(idColaborador);
     });
@@ -102,6 +118,7 @@ export class UsuariosFormModal {
 
     if (errors?.['required']) return 'Campo requerido';
     if (errors?.['pattern']) return 'Use letras, números, punto, guion o guion bajo';
+    if (errors?.['usuarioRepetido']) return 'Este nombre de usuario ya está en uso';
     return 'Usuario inválido';
   }
 
@@ -109,7 +126,8 @@ export class UsuariosFormModal {
     const errors = this.form.controls.email.errors;
 
     if (errors?.['required']) return 'Campo requerido';
-    return this.isInternalUser ? 'Completa el usuario interno' : 'Formato de correo inválido';
+    if (errors?.['emailRepetido']) return 'Este correo ya está registrado por otro usuario';
+    return this.isInternalUser ? 'Completa el usuario interno o el correo ya existe' : 'Formato de correo inválido';
   }
 
   passwordError(): string {
@@ -123,8 +141,12 @@ export class UsuariosFormModal {
   }
 
   colaboradorError(): string {
-    if (!this.form.controls.idColaborador.value) {
+    const errors = this.form.controls.idColaborador.errors;
+    if (errors?.['required'] || !this.form.controls.idColaborador.value) {
       return 'Seleccione un colaborador';
+    }
+    if (errors?.['yaTieneUsuario']) {
+      return 'Este colaborador ya tiene un usuario asignado';
     }
     return 'Colaborador inválido';
   }
@@ -144,6 +166,8 @@ export class UsuariosFormModal {
   }
 
   save(): void {
+    this.ejecutarValidacionesLocales();
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -279,12 +303,20 @@ export class UsuariosFormModal {
   private resolverPersonaDesdeColaborador(idColaborador: string): void {
     if (!idColaborador) {
       this.form.controls.idPersona.setValue(null);
+      // Limpiar errores anteriores
+      const control = this.form.controls.idColaborador;
+      const currentErrors = control.errors;
+      if (currentErrors) {
+        delete currentErrors['yaTieneUsuario'];
+        control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+      }
       return;
     }
 
     const colaborador = this.colaboradores.find((item) => item.id === Number(idColaborador));
     if (colaborador?.idPersona) {
       this.form.controls.idPersona.setValue(colaborador.idPersona);
+      this.validarColaborador(colaborador.idPersona);
       return;
     }
 
@@ -292,6 +324,9 @@ export class UsuariosFormModal {
       next: (detalle) => {
         const idPersona = detalle.idPersona ?? (detalle as ColaboradorUsuarioOption & { idpersona?: number }).idpersona ?? null;
         this.form.controls.idPersona.setValue(idPersona ?? null);
+        if (idPersona) {
+          this.validarColaborador(idPersona);
+        }
       },
       error: () => this.form.controls.idPersona.setValue(null),
     });
@@ -305,6 +340,13 @@ export class UsuariosFormModal {
       this.form.controls.idColaborador.clearValidators();
       this.form.controls.idColaborador.setValue('', { emitEvent: false });
       this.form.controls.idPersona.setValue(null, { emitEvent: false });
+      // Limpiar error de colaborador asignado
+      const control = this.form.controls.idColaborador;
+      const currentErrors = control.errors;
+      if (currentErrors) {
+        delete currentErrors['yaTieneUsuario'];
+        control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+      }
       this.releaseExternalEmail();
     }
 
@@ -382,6 +424,84 @@ export class UsuariosFormModal {
     const rest = Array.from({ length: 6 }, () => this.randomChar(all));
 
     return [...required, ...rest].sort(() => Math.random() - 0.5).join('');
+  }
+
+  private validarColaborador(idPersona: number): void {
+    const yaAsignado = this.configuracionService.usuariosTotales().some((u) => 
+      u.idPersona === idPersona && (!this.isEdit || u.idUsuario !== this.data.usuario?.idUsuario)
+    );
+    const control = this.form.controls.idColaborador;
+    const currentErrors = control.errors || {};
+
+    if (yaAsignado) {
+      control.setErrors({ ...currentErrors, yaTieneUsuario: true });
+    } else {
+      delete currentErrors['yaTieneUsuario'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+    }
+  }
+
+  private validarEmail(email: string): void {
+    const emailTrim = email.trim().toLowerCase();
+    const control = this.form.controls.email;
+    const currentErrors = control.errors || {};
+
+    if (!emailTrim) {
+      delete currentErrors['emailRepetido'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+      return;
+    }
+
+    const yaExiste = this.configuracionService.usuariosTotales().some((u) => 
+      u.email.toLowerCase() === emailTrim && (!this.isEdit || u.idUsuario !== this.data.usuario?.idUsuario)
+    );
+
+    if (yaExiste) {
+      control.setErrors({ ...currentErrors, emailRepetido: true });
+    } else {
+      delete currentErrors['emailRepetido'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+    }
+  }
+
+  private validarUsuario(usuario: string): void {
+    const usuarioTrim = usuario.trim().toLowerCase();
+    const control = this.form.controls.usuario;
+    const currentErrors = control.errors || {};
+
+    if (!usuarioTrim) {
+      delete currentErrors['usuarioRepetido'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+      return;
+    }
+
+    const yaExiste = this.configuracionService.usuariosTotales().some((u) => 
+      u.usuario.toLowerCase() === usuarioTrim && (!this.isEdit || u.idUsuario !== this.data.usuario?.idUsuario)
+    );
+
+    if (yaExiste) {
+      control.setErrors({ ...currentErrors, usuarioRepetido: true });
+    } else {
+      delete currentErrors['usuarioRepetido'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+    }
+  }
+
+  private ejecutarValidacionesLocales(): void {
+    // Validar Colaborador
+    const idColaborador = this.form.controls.idColaborador.value;
+    if (idColaborador && this.isInternalUser) {
+      const colaborador = this.colaboradores.find((item) => item.id === Number(idColaborador));
+      if (colaborador?.idPersona) {
+        this.validarColaborador(colaborador.idPersona);
+      }
+    }
+
+    // Validar Email
+    this.validarEmail(this.form.controls.email.value);
+
+    // Validar Usuario
+    this.validarUsuario(this.form.controls.usuario.value);
   }
 
   private randomChar(characters: string): string {

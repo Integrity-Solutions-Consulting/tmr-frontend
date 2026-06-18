@@ -266,7 +266,7 @@ export class RolesPage {
     this.rolEliminandoId.set(rol.id);
 
     const request$ = rol.activo
-      ? this.configuracionService.deleteRol(rol.id)
+      ? this.configuracionService.setRolEstado(rol.id, false)
       : this.configuracionService.setRolEstado(rol.id, true);
 
     request$.subscribe({
