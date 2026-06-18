@@ -93,7 +93,7 @@ export class RolesPage {
     const query = this.query().trim().toLowerCase();
     const estado = this.filtroEstado();
 
-    return this.roles().filter((rol) => {
+    const filtered = this.roles().filter((rol) => {
       // Filtro por estado
       const matchEstado =
         estado === '' ||
@@ -115,6 +115,8 @@ export class RolesPage {
         .toLowerCase()
         .includes(query);
     });
+
+    return filtered.sort((a, b) => b.id - a.id);
   });
 
   readonly totalRegistros = computed(() => this.filteredRoles().length);

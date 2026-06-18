@@ -89,7 +89,7 @@ export class UsuariosPage {
     const query = this.query().trim().toLowerCase();
     const filtro = this.filtroActivo();
 
-    return this.usuarios().filter((usuario) => {
+    const filtered = this.usuarios().filter((usuario) => {
       // Filtro por estado
       const esActivo = usuario.estado === 'Activo';
       if (filtro === 'activos' && !esActivo) return false;
@@ -110,6 +110,8 @@ export class UsuariosPage {
         .toLowerCase()
         .includes(query);
     });
+
+    return filtered.sort((a, b) => b.id - a.id);
   });
 
   readonly totalRegistros = computed(() => this.filteredUsuarios().length);
