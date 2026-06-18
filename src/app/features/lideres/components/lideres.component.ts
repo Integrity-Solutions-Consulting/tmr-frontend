@@ -227,10 +227,10 @@ export class LideresComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  cerrarDropdowns(): void {
-    this.mostrarEstadoDropdown = false;
-  }
-
+cerrarDropdowns(): void {
+  this.mostrarEstadoDropdown = false;
+  this.mostrarDescarga = false;
+}
   aplicarFiltros(): void {
     const texto = this.busqueda.toLowerCase();
     this.lideresFiltrados = this.lideres.filter(l => {
