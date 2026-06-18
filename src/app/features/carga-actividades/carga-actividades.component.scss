@@ -3,7 +3,7 @@ $white: #ffffff;
 $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted: #64748b;
 
 .dashboard-container { padding: 2rem; background-color: $bg-color; min-height: 100vh; font-family: sans-serif; }
-.header-main-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; 
+.header-main-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; 
   .page-title { color: $primary-color; font-size: 1.8rem; font-weight: 800; margin: 0; }
 }
 
@@ -23,8 +23,16 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
   .stats-value { font-size: 1rem; font-weight: 700; color: $primary-color; margin: 0; }
 }
 
+.content-card {
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 1.2rem;
+  overflow: hidden;
+}
+
 .toolbar-section { 
-  background: white; padding: 1.2rem; border-radius: 12px 12px 0 0; border: 1px solid $border-color; 
+  background: transparent; padding: 0 0 1.2rem; border: none; 
   display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap;
   .search-input-wrapper { flex: 1; min-width: 300px; display: flex; align-items: center; background: #f1f5f9; border-radius: 8px; padding: 0 1rem;
     input { width: 100%; border: none; background: transparent; padding: 0.7rem; outline: none; }
@@ -60,11 +68,14 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 }
 
 .table-card {
+  padding: 28px 28px;
   background: white;
-  border: 1px solid $border-color;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: visible;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
 }
 
 .table-scroll-container {
@@ -138,12 +149,12 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     }
 
     th:nth-child(1), td:nth-child(1) { width: 64px; }
-    th:nth-child(2), td:nth-child(2) { width: 180px; }
-    th:nth-child(3), td:nth-child(3) { width: auto; }
-    th:nth-child(4), td:nth-child(4) { width: 160px; }
-    th:nth-child(5), td:nth-child(5) { width: 140px; }
-    th:nth-child(6), td:nth-child(6) { width: 120px; }
-    th:nth-child(7), td:nth-child(7) { width: 120px; }
+    th:nth-child(2), td:nth-child(2) { width: 240px; }
+    th:nth-child(3), td:nth-child(3) { width: 140px; }
+    th:nth-child(4), td:nth-child(4) { width: 180px; }
+    th:nth-child(5), td:nth-child(5) { width: 120px; }
+    th:nth-child(6), td:nth-child(6) { width: 110px; }
+    th:nth-child(7), td:nth-child(7) { width: 110px; }
   }
 
   .font-bold {
@@ -171,6 +182,15 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     padding: 3rem;
     text-align: center;
     color: $text-muted;
+  }
+}
+
+.pagination-wrapper {
+  padding-top: 0.25rem;
+
+  app-paginacion {
+    display: block;
+    width: 100%;
   }
 }
 
@@ -281,7 +301,10 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 .hidden-input { display: none; }
 
-/* Responsive tweaks for carga-actividades */
+/* ============================================================
+   RESPONSIVE - SOLO AJUSTES, NO SE TOCA LÓGICA DE NEGOCIO
+   ============================================================ */
+
 @media (max-width: 992px) {
   .toolbar-section {
     padding: 1rem;
@@ -307,33 +330,74 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 }
 
 @media (max-width: 640px) {
-  .toolbar-section {
+  /* Dashboard padding reducido */
+  .dashboard-container { padding: 1rem; }
+
+  /* Header: título + stats card apilados */
+  .header-main-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    .page-title { font-size: 1.4rem; }
+  }
+
+  /* Stats card full width */
+  .header-actions { width: 100%; }
+  .stats-card {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Toolbar en columna */
+  .toolbar-section,
+  .toolbar-section--row {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.6rem;
+    padding: 0.75rem;
+    flex-wrap: wrap;
   }
-  .toolbar-section--row { flex-direction: column; }
+
   .toolbar-section .search-input-wrapper {
     order: 1;
     min-width: 0;
     width: 100%;
     padding: 0 0.75rem;
   }
+
+  /* Fechas en fila, cada una ocupa mitad */
   .toolbar-section .date-controls {
     order: 2;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
     justify-content: space-between;
-    padding: 0 0.75rem;
+    padding: 8px 10px;
+    gap: 0.5rem;
   }
-  .toolbar-section .date-field { width: 48%; }
-  /* En móviles, poner label encima del input para evitar desbordes */
+
   .toolbar-section .date-field {
+    width: 48%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
-    label { white-space: normal; font-size: 0.72rem; }
-    input { width: 100%; max-width: 100%; }
+
+    label {
+      white-space: nowrap;
+      font-size: 0.72rem;
+    }
+
+    input {
+      width: 100%;
+      max-width: 100%;
+      font-size: 0.82rem;
+    }
   }
+
+  /* Botón descargar full width */
   .toolbar-section .btn-secondary {
     order: 3;
     width: 100%;
@@ -341,19 +405,95 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     margin-left: 0;
     padding: 0.75rem;
   }
-  /* table -> card view on mobile */
-  .data-table thead { display: none; }
-  .data-table tbody tr { display: block; border-bottom: 1px solid $border-color; margin-bottom: 8px; }
-  .data-table tbody td {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 12px;
-    white-space: normal;
-  }
-  .data-table tbody td:first-child { display: none; }
-  .table-wrapper { overflow-x: auto; }
 
-  /* ICONS & BUTTONS FIXES */
+  /* Tabla → vista de tarjetas */
+  .table-scroll-container {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .table-wrapper {
+    overflow-x: visible;
+    border-radius: 0;
+    border: none;
+  }
+
+  .data-table {
+    display: block;
+
+    thead { display: none; }
+
+    tbody {
+      display: block;
+
+      tr {
+        display: block;
+        background: white;
+        border: 1px solid $border-color;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 0.5rem 0;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      }
+
+      td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 8px 14px;
+        font-size: 0.88rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        gap: 0.5rem;
+
+        /* Etiqueta a la izquierda generada por data-label en el HTML */
+        &::before {
+          content: attr(data-label);
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: $text-muted;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          white-space: nowrap;
+          min-width: 80px;
+          padding-top: 2px;
+          flex-shrink: 0;
+        }
+      }
+
+      /* Ocultar celda del checkbox */
+      td:first-child { display: none; }
+    }
+  }
+
+  /* Tags y badges: no truncar en mobile */
+  .client-tag {
+    max-width: 100%;
+    white-space: normal;
+    text-align: right;
+    display: inline-block;
+    word-break: break-word;
+  }
+
+  .status-badge {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Paginación: info arriba, controles abajo */
+  .pagination-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .pagination-info { font-size: 0.85rem; text-align: center; }
+
+  /* Iconos y botones */
   .toolbar-section .material-icons,
   .toolbar-section .btn-secondary .material-icons,
   .btn-icon .material-icons {
@@ -363,43 +503,28 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     flex-shrink: 0;
   }
 
+  .btn-icon { min-width: 36px; min-height: 36px; }
+
   .search-input-wrapper {
     .material-icons { margin-right: 8px; }
     input { font-size: 0.95rem; }
   }
-
-  .btn-secondary {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .btn-icon { min-width: 36px; min-height: 36px; }
-
-  .client-tag { max-width: 60%; display: inline-block; overflow: hidden; text-overflow: ellipsis; }
-  .status-badge { max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
 }
 
-/* Ultra-small devices tweaks */
+/* Ultra-small devices */
 @media (max-width: 360px) {
   .toolbar-section { padding: 0.6rem; }
   .toolbar-section .search-input-wrapper { padding: 0 0.5rem; }
   .toolbar-section .material-icons, .btn-icon .material-icons { font-size: 16px; }
   .btn-secondary { font-size: 0.92rem; padding: 0.6rem; }
-  .client-tag, .status-badge { max-width: 55%; font-size: 0.85rem; }
-  .data-table tbody td { padding: 8px 10px; font-size: 0.92rem; }
-  .data-table tbody td:nth-child(2) { font-weight: 700; }
-  /* hide checkboxes to save space on very small screens */
-  .data-table tbody td:first-child, .data-table thead th:first-child { display: none; }
-
-  /* Asegurar que las fechas no se salgan en ultra-small */
-  .toolbar-section .date-controls { width: 100%; padding: 0 0.5rem; }
-  .toolbar-section .date-field { width: 48%; flex-direction: column; }
+  .data-table tbody td { padding: 7px 10px; font-size: 0.85rem; }
+  .data-table tbody td::before { min-width: 70px; font-size: 0.68rem; }
+  .toolbar-section .date-controls { padding: 6px 8px; }
 }
 
 @media (max-width: 320px) {
   .toolbar-section .search-input-wrapper { .material-icons { display: none; } }
   .btn-secondary { padding: 0.5rem; font-size: 0.88rem; }
   .search-input-wrapper input { font-size: 0.9rem; }
-  .client-tag, .status-badge { max-width: 50%; }
+  .data-table tbody td::before { min-width: 60px; }
 }
