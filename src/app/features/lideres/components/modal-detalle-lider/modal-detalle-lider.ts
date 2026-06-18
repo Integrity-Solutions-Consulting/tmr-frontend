@@ -12,7 +12,13 @@ export class ModalDetalleLider {
   @Input() lider: any;
   @Output() cerrarModal = new EventEmitter<void>();
 
+  proyectosExpandido = true;
+
   cerrar() {
     this.cerrarModal.emit();
+  }
+
+  toggleProyectos() {
+    this.proyectosExpandido = !this.proyectosExpandido;
   }
 }

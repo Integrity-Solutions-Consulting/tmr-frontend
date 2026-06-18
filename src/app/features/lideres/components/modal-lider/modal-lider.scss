@@ -280,7 +280,11 @@ $text-light: #7C7C7C;
   cursor: not-allowed;
   border-color: #e5e5e5;
 }
-
+.input-readonly {
+  background: #F5F5F5;
+  color: #6b7280;
+  cursor: not-allowed;
+}
 .modal-form__error-banner {
   display: flex;
   align-items: center;

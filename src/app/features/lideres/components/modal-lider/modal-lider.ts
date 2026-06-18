@@ -180,7 +180,12 @@ export class ModalLider implements OnInit, OnChanges {
     );
     return persona ? persona.nombreCompleto : '';
   }
-
+get nombreApellidoBloqueado(): boolean {
+  if (this.modoEdicion) {
+    return this.form.tipoNombre === 'Interno';
+  }
+  return this.form.tipoNombre === 'Interno' && !!this.form.personaId;
+}
   cerrar() {
     this.enviado = false;
     this.dropdownAbierto = null;
