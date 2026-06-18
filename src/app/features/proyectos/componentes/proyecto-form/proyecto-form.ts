@@ -27,6 +27,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import {
   Proyecto,
@@ -49,6 +50,7 @@ import { ProyectosService } from '../../servicios/proyectos.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatExpansionModule,
   ],
   templateUrl: './proyecto-form.html',
   styleUrl: './proyecto-form.scss'
@@ -78,6 +80,7 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   // cargosFiltrados[liderIndex][recursoIndex]
   cargosFiltrados: CargoLookup[][][] = [];
+  recursosExpandidos: boolean[][] = [];
 
   formulario = this.fb.group({
     codigo: ['', Validators.required],
@@ -103,6 +106,37 @@ export class ProyectoForm implements OnInit, OnChanges {
 
   getRecursosDelLider(li: number): FormArray<FormGroup> {
     return this.lideres.at(li).get('recursos') as FormArray<FormGroup>;
+  }
+
+  getRecursoPanelTitle(li: number, ri: number): string {
+    const grupo = this.getRecursosDelLider(li).at(ri);
+    const nombre = String(grupo.get('nombre')?.value ?? '').trim();
+    return nombre || `Recurso ${ri + 1}`;
+  }
+
+  isRecursoPanelExpanded(li: number, ri: number): boolean {
+    return this.recursosExpandidos[li]?.[ri] ?? ri === 0;
+  }
+
+  setRecursoPanelExpanded(li: number, ri: number, expanded: boolean): void {
+    if (!this.recursosExpandidos[li]) {
+      this.recursosExpandidos[li] = [];
+    }
+    this.recursosExpandidos[li][ri] = expanded;
+  }
+
+  private sincronizarEstadoRecursos(li: number): void {
+    const recursos = this.getRecursosDelLider(li);
+    const estado = this.recursosExpandidos[li] ?? [];
+    estado.length = recursos.length;
+
+    for (let i = 0; i < recursos.length; i++) {
+      if (estado[i] === undefined) {
+        estado[i] = i === 0;
+      }
+    }
+
+    this.recursosExpandidos[li] = estado;
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -179,12 +213,14 @@ export class ProyectoForm implements OnInit, OnChanges {
 
     this.lideres.clear();
     this.cargosFiltrados = [];
+    this.recursosExpandidos = [];
 
     if (!lideresData.length) {
       this.lideres.push(this.crearLider());
       this.cargosFiltrados.push([]);
+      this.sincronizarEstadoRecursos(0);
     } else {
-      lideresData.forEach((l) => {
+      lideresData.forEach((l, index) => {
         const liderGroup = this.crearLider();
         const idLider = l.idLider ?? this.obtenerIdLiderPorNombre(l.lider);
         liderGroup.patchValue({
@@ -228,6 +264,7 @@ export class ProyectoForm implements OnInit, OnChanges {
 
         this.lideres.push(liderGroup);
         this.cargosFiltrados.push(cargosLider);
+        this.sincronizarEstadoRecursos(index);
       });
     }
 
@@ -249,6 +286,7 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.lideres.clear();
     this.lideres.push(this.crearLider());
     this.cargosFiltrados = [[]];
+    this.recursosExpandidos = [[]];
     this.intentoGuardar = false;
     this.formulario.markAsPristine();
     this.formulario.markAsUntouched();
@@ -285,12 +323,14 @@ export class ProyectoForm implements OnInit, OnChanges {
   agregarLider(): void {
     this.lideres.push(this.crearLider());
     this.cargosFiltrados.push([]);
+    this.recursosExpandidos.push([true]);
   }
 
   eliminarLider(li: number): void {
     if (this.lideres.length === 1) return;
     this.lideres.removeAt(li);
     this.cargosFiltrados.splice(li, 1);
+    this.recursosExpandidos.splice(li, 1);
   }
 
   // ── Recursos: agregar / eliminar ──────────────────────────────────────────
@@ -299,6 +339,7 @@ export class ProyectoForm implements OnInit, OnChanges {
     this.getRecursosDelLider(li).push(this.crearRecurso());
     if (!this.cargosFiltrados[li]) this.cargosFiltrados[li] = [];
     this.cargosFiltrados[li].push([]);
+    this.sincronizarEstadoRecursos(li);
     this.actualizarNumeroRecursos();
   }
 
@@ -309,9 +350,11 @@ export class ProyectoForm implements OnInit, OnChanges {
         idEmpleado: null, tipo: 'Interno', nombre: '',
         departamento: null, rol: '', entrada: '', salida: '', costoHora: '', horas: ''
       });
+      this.sincronizarEstadoRecursos(li);
     } else {
       arr.removeAt(ri);
       this.cargosFiltrados[li]?.splice(ri, 1);
+      this.sincronizarEstadoRecursos(li);
     }
     this.actualizarNumeroRecursos();
   }

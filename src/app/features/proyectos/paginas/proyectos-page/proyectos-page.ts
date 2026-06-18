@@ -1,5 +1,6 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { Store } from '@ngrx/store';
 import { finalize, map, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
@@ -42,6 +43,7 @@ const COLOR_SEPARADOR   = 'FFE2E8F0';
   standalone: true,
   imports: [
     MatButtonModule,
+    MatExpansionModule,
     Tabla,
     ModalBase,
     BadgeEstado,
