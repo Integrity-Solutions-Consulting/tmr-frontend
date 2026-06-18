@@ -3,11 +3,14 @@ import { Store } from '@ngrx/store';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { PaginacionComponent } from '../../shared/components/paginacion/paginacion.component';
-import { BehaviorSubject, combineLatest, map, Observable, shareReplay, startWith, take, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, shareReplay, startWith, take, tap } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
 import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
 import { selectActividadesList } from '../../core/state/actividades/actividades.selectors';
+import { ClientesService } from '../clientes/servicios/clientes.service';
+import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
+import { ProyectosService } from '../proyectos/servicios/proyectos.service';
 
 const COLOR_PRIMARIO = 'FF163572';
 const COLOR_RECURSO = 'FFFFFFFF';
@@ -26,9 +29,12 @@ export class CargaActividadesComponent implements OnInit {
   protected Math = Math;
   private store = inject(Store);
   private actions$ = inject(Actions);
+  private proyectosService = inject(ProyectosService);
+  private clientesService = inject(ClientesService);
+  private colaboradoresService = inject(ColaboradoresService);
 
   searchControl = new FormControl('', { nonNullable: true });
-  clienteControl = new FormControl('', { nonNullable: true });
+  proyectoControl = new FormControl('', { nonNullable: true });
   fechaDesdeControl = new FormControl('', { nonNullable: true });
   fechaHastaControl = new FormControl('', { nonNullable: true });
 
@@ -39,6 +45,10 @@ export class CargaActividadesComponent implements OnInit {
 
   paginaActual$ = new BehaviorSubject<number>(1);
   itemsPorPagina = 10;
+
+  private proyectosValidos: string[] = [];
+  private clientesValidos: string[] = [];
+  private colaboradoresValidos: string[] = [];
 
   // Método para recibir cambios desde el componente de paginación compartido
   paginaCambia(nuevaPagina: number) {
@@ -56,9 +66,9 @@ export class CargaActividadesComponent implements OnInit {
     })
   );
 
-  clientes$ = this.actividadesRaw$.pipe(
+  proyectos$ = this.actividadesRaw$.pipe(
     map((actividades: Actividad[]) => {
-      const lista = actividades.map(a => a.cliente?.trim() || 'SIN CLIENTE');
+      const lista = actividades.map(a => a.proyecto?.trim() || 'SIN PROYECTO');
       return [...new Set(lista)].sort((a, b) => a.localeCompare(b, 'es'));
     })
   );
@@ -66,12 +76,12 @@ export class CargaActividadesComponent implements OnInit {
   private actividadesFiltradasTodas$ = combineLatest([
     this.actividadesRaw$,
     this.cambioFiltro(this.searchControl),
-    this.cambioFiltro(this.clienteControl),
+    this.cambioFiltro(this.proyectoControl),
     this.cambioFiltro(this.fechaDesdeControl),
     this.cambioFiltro(this.fechaHastaControl)
   ]).pipe(
-    map(([actividades, searchTerm, clienteSelected, desde, hasta]) => {
-      return this.aplicarFiltros(actividades, searchTerm, clienteSelected, desde, hasta);
+    map(([actividades, searchTerm, proyectoSelected, desde, hasta]) => {
+      return this.aplicarFiltros(actividades, searchTerm, proyectoSelected, desde, hasta);
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -126,22 +136,25 @@ export class CargaActividadesComponent implements OnInit {
     );
   }
 
-  private aplicarFiltros(actividades: Actividad[], term: string, clienteSelected: string, desde: string, hasta: string): Actividad[] {
+  private aplicarFiltros(actividades: Actividad[], term: string, proyectoSelected: string, desde: string, hasta: string): Actividad[] {
     let filtrados = actividades;
     const busqueda = term.trim().toLowerCase();
-    const cliente = clienteSelected.trim();
+    const proyecto = proyectoSelected.trim();
     const fechaDesde = this.parseFechaLocal(desde);
     const fechaHasta = this.parseFechaLocal(hasta);
 
+    // Buscar en: código (liderTecnico), colaborador, cliente, proyecto
     if (busqueda) {
       filtrados = filtrados.filter(a =>
+        (a.liderTecnico && a.liderTecnico.toLowerCase().includes(busqueda)) ||
         (a.colaborador && a.colaborador.toLowerCase().includes(busqueda)) ||
+        (a.cliente && a.cliente.toLowerCase().includes(busqueda)) ||
         (a.proyecto && a.proyecto.toLowerCase().includes(busqueda))
       );
     }
 
-    if (cliente) {
-      filtrados = filtrados.filter(a => (a.cliente?.trim() || 'SIN CLIENTE') === cliente);
+    if (proyecto) {
+      filtrados = filtrados.filter(a => (a.proyecto?.trim() || 'SIN PROYECTO') === proyecto);
     }
 
     if (fechaDesde || fechaHasta) {
@@ -170,7 +183,7 @@ export class CargaActividadesComponent implements OnInit {
     if (this.paginaActual$.value > 1) this.paginaActual$.next(this.paginaActual$.value - 1);
   }
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file = event.target.files[0];
     this.errorMessage = '';
     this.successMessage = '';
@@ -186,6 +199,15 @@ export class CargaActividadesComponent implements OnInit {
     }
 
     this.cargando = true;
+
+    const erroresValidacion = await this.validarArchivoExcel(file);
+    if (erroresValidacion.length > 0) {
+      this.cargando = false;
+      this.errorMessage = 'No se puede subir el archivo. Corrija los datos inválidos en el Excel.';
+      this.listaErrores = erroresValidacion;
+      event.target.value = '';
+      return;
+    }
 
     // ✅ CORRECCIÓN: escuchar importarExcelSuccess en lugar de cargarActividadesSuccess
     // Así no dependemos del reload posterior y evitamos capturar eventos anteriores
@@ -210,6 +232,123 @@ export class CargaActividadesComponent implements OnInit {
 
     this.store.dispatch(ActividadesActions.importarExcel({ archivo: file }));
     event.target.value = '';
+  }
+
+  private async validarArchivoExcel(archivo: File): Promise<string[]> {
+    await this.cargarListasDeValidos();
+
+    const ext = archivo.name.split('.').pop()?.toLowerCase();
+    const errores: string[] = [];
+
+    try {
+      const { Workbook } = await import('exceljs');
+      const workbook = new Workbook();
+      const valoresDeFilas: string[][] = [];
+
+      if (ext === 'csv') {
+        const texto = await archivo.text();
+        texto.split(/\r?\n/).forEach(line => {
+          if (!line.trim()) return;
+          valoresDeFilas.push(line.split(',').map(cell => cell.trim()));
+        });
+      } else {
+        const buffer = await archivo.arrayBuffer();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.worksheets[0];
+        worksheet.eachRow({ includeEmpty: false }, (row) => {
+          const rowValues = Array.isArray(row.values) ? row.values as any[] : [];
+          valoresDeFilas.push(rowValues.slice(1).map((value: any) => this.extraerTextoDeCelda(value)));
+        });
+      }
+
+      if (valoresDeFilas.length === 0) {
+        return ['El archivo está vacío o no tiene datos válidos.'];
+      }
+
+      const encabezados = valoresDeFilas[0].map(enc => this.normalizarTexto(enc));
+      const filas = valoresDeFilas.slice(1);
+      const campoProyecto = this.buscarCampo(encabezados, ['proyecto', 'proyectonombre', 'nombreproyecto', 'descripcionactividad']);
+      const campoColaborador = this.buscarCampo(encabezados, ['colaborador', 'nombrecolaborador']);
+      const campoCliente = this.buscarCampo(encabezados, ['cliente', 'clientenombre', 'nombrecliente']);
+
+      if (campoProyecto < 0) errores.push('No se encontró la columna de proyecto en el archivo.');
+      if (campoColaborador < 0) errores.push('No se encontró la columna de colaborador en el archivo.');
+      if (campoCliente < 0) errores.push('No se encontró la columna de cliente en el archivo.');
+
+      if (errores.length > 0) return errores;
+
+      filas.forEach((fila, index) => {
+        const rowIndex = index + 2;
+        const proyecto = this.normalizarTexto(fila[campoProyecto]);
+        const colaborador = this.normalizarTexto(fila[campoColaborador]);
+        const cliente = this.normalizarTexto(fila[campoCliente]);
+
+        if (!proyecto) {
+          errores.push(`Fila ${rowIndex}: proyecto vacío.`);
+        } else if (!this.proyectosValidos.includes(proyecto)) {
+          errores.push(`Fila ${rowIndex}: proyecto '${fila[campoProyecto] || ''}' no existe en el sistema.`);
+        }
+
+        if (!colaborador) {
+          errores.push(`Fila ${rowIndex}: colaborador vacío.`);
+        } else if (!this.colaboradoresValidos.includes(colaborador)) {
+          errores.push(`Fila ${rowIndex}: colaborador '${fila[campoColaborador] || ''}' no existe en el sistema.`);
+        }
+
+        if (!cliente) {
+          errores.push(`Fila ${rowIndex}: cliente vacío.`);
+        } else if (!this.clientesValidos.includes(cliente)) {
+          errores.push(`Fila ${rowIndex}: cliente '${fila[campoCliente] || ''}' no existe en el sistema.`);
+        }
+      });
+    } catch (error) {
+      console.error('Error al validar el archivo de Excel', error);
+      return ['No se pudo validar el archivo. Intente nuevamente con un archivo válido.'];
+    }
+
+    return errores;
+  }
+
+  private async cargarListasDeValidos(): Promise<void> {
+    if (this.proyectosValidos.length && this.clientesValidos.length && this.colaboradoresValidos.length) {
+      return;
+    }
+
+    try {
+      const [proyectos, clientes, colaboradores] = await Promise.all([
+        firstValueFrom(this.proyectosService.obtenerProyectos()),
+        firstValueFrom(this.proyectosService.obtenerClientes()),
+        firstValueFrom(this.colaboradoresService.getColaboradores({ busqueda: '', estado: 'Todos' }, 1, 9999))
+      ]);
+
+      this.proyectosValidos = [...new Set(proyectos.map(p => this.normalizarTexto(p.nombre)))].filter(Boolean);
+      this.clientesValidos = [...new Set(clientes.map(c => this.normalizarTexto(c.nombre)))].filter(Boolean);
+      this.colaboradoresValidos = [...new Set(colaboradores.data.map(c => this.normalizarTexto(c.nombreCompleto)))].filter(Boolean);
+    } catch (error) {
+      console.error('No se pudo cargar la lista de validaciones para Excel', error);
+      this.proyectosValidos = this.proyectosValidos || [];
+      this.clientesValidos = this.clientesValidos || [];
+      this.colaboradoresValidos = this.colaboradoresValidos || [];
+    }
+  }
+
+  private buscarCampo(encabezados: string[], candidatos: string[]): number {
+    return encabezados.findIndex(enc => candidatos.includes(enc));
+  }
+
+  private normalizarTexto(valor: any): string {
+    const texto = this.extraerTextoDeCelda(valor).toLowerCase();
+    return texto.replace(/\s+/g, ' ').trim();
+  }
+
+  private extraerTextoDeCelda(valor: any): string {
+    if (valor == null) return '';
+    if (typeof valor === 'string') return valor.trim();
+    if (typeof valor === 'number' || typeof valor === 'boolean') return String(valor).trim();
+    if (typeof valor === 'object' && 'text' in valor) {
+      return String((valor as any).text).trim();
+    }
+    return String(valor).trim();
   }
 
   descargarExcel(): void {

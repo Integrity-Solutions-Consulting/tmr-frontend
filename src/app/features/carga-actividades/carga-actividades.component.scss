@@ -31,6 +31,24 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
   }
 }
 
+.toolbar-section--row {
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  .search-input-wrapper { 
+    flex: 0 1 350px; 
+    min-width: 250px;
+  }
+  .date-controls {
+    flex-shrink: 0;
+  }
+  .btn-secondary {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
+
 .filters-group { display: flex; gap: 1rem; align-items: center; flex-wrap: nowrap; }
 .custom-select { padding: 0.7rem; border-radius: 8px; border: 1px solid $border-color; font-weight: 600; color: $primary-color; background: white; }
 .date-controls { 
