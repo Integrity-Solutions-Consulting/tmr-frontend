@@ -13,28 +13,34 @@
         <app-badge-estado [estado]="proyecto.estado"></app-badge-estado>
       </div>
 
-      <div class="project-details">
-        <div class="detail-item">
-          <span class="detail-label">Cliente</span>
-          <span class="detail-value" [title]="proyecto.cliente">{{ proyecto.cliente }}</span>
+      <div class="project-body">
+        <div class="project-details-list">
+          <div class="project-detail-row">
+            <mat-icon class="detail-icon">business</mat-icon>
+            <span class="detail-text" [title]="proyecto.cliente">{{ proyecto.cliente }}</span>
+          </div>
+          <div class="project-detail-row">
+            <mat-icon class="detail-icon">payments</mat-icon>
+            <span class="detail-text">${{ proyecto.presupuesto | number }}</span>
+          </div>
+          <div class="project-detail-row">
+            <mat-icon class="detail-icon">calendar_today</mat-icon>
+            <span class="detail-text">
+              @if (parseFecha(proyecto.fechaFinPlaneada); as fecha) {
+                → {{ fecha | date: 'dd/MM/yyyy' }}
+              } @else {
+                → No definida
+              }
+            </span>
+          </div>
         </div>
-        <div class="detail-item">
-          <span class="detail-label">Horas</span>
-          <span class="detail-value">{{ proyecto.horas | number: '1.0-0' }} h</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Presupuesto</span>
-          <span class="detail-value">${{ proyecto.presupuesto | number }}</span>
-        </div>
-        <div class="detail-item align-right">
-          <span class="detail-label">Finalización</span>
-          <span class="detail-value">
-            @if (parseFecha(proyecto.fechaFinPlaneada); as fecha) {
-              {{ fecha | date: 'dd/MM/yyyy' }}
-            } @else {
-              No definida
-            }
-          </span>
+
+        <div class="project-hours-badge">
+          <mat-icon class="hours-icon">alarm</mat-icon>
+          <div class="hours-number-container">
+            <span class="hours-count">{{ proyecto.horas | number: '1.0-0' }}</span>
+            <span class="hours-label">Horas</span>
+          </div>
         </div>
       </div>
     </div>
