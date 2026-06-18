@@ -148,7 +148,7 @@ export class LideresComponent implements OnInit {
       infoPorLider.set(liderId, entrada);
     });
 
-    this.lideres = lideres.map((l, i) => {
+   this.lideres = lideres.map((l, i) => {
       const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
       return {
         ...l,
@@ -166,6 +166,10 @@ export class LideresComponent implements OnInit {
         proyectos: Array.from(datos.proyectos.values()),
         estado: l.activo ? 'Activo' : 'Inactivo'
       };
+    }).sort((a, b) => {
+      if (a.estado === 'Activo' && b.estado !== 'Activo') return -1;
+      if (a.estado !== 'Activo' && b.estado === 'Activo') return 1;
+      return 0;
     });
 
     this.aplicarFiltros();
