@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HorasPorProyecto } from '../../../modelos/dashboard.model';
+import { MatIconModule } from '@angular/material/icon';
+import { HorasPorProyecto, ProyectosPorCliente } from '../../../modelos/dashboard.model';
 import { ReducePipe } from './reduce.pipe';
 
 @Component({
   selector: 'app-grafico-horas',
   standalone: true,
-  imports: [CommonModule, ReducePipe],
+  imports: [CommonModule, ReducePipe, MatIconModule],
   templateUrl: './grafico-horas.component.html',
   styleUrls: ['./grafico-horas.component.scss']
 })
@@ -21,8 +22,18 @@ export class GraficoHorasComponent {
     return this._horasData;
   }
 
+  @Input() proyectosPorCliente: ProyectosPorCliente[] = [];
+  @Input() totalProyectos: number = 0;
+
   private _horasData: HorasPorProyecto[] = [];
   maximo: number = 0;
+  
+  // Carousel State
+  currentSlide: number = 0;
+  totalSlides: number = 2; // 0: Horas reportadas, 1: Proyectos activos
+
+  // Colors for Donut Chart
+  colors: string[] = ['#0ea5e9', '#3b82f6', '#6366f1', '#ec4899', '#f59e0b', '#f97316', '#a855f7', '#10b981'];
 
   private calcularMaximo(): void {
     if (this.horasData.length > 0) {
@@ -51,5 +62,44 @@ export class GraficoHorasComponent {
   getPorcentajeProyecto(item: HorasPorProyecto): number {
     if (!item.horasAsignadas || item.horasAsignadas === 0) return 0;
     return (item.horas / item.horasAsignadas) * 100;
+  }
+
+  // Carousel Navigation
+  prevSlide(): void {
+    this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+  }
+
+  nextSlide(): void {
+    this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+  }
+
+  setSlide(index: number): void {
+    this.currentSlide = index;
+  }
+
+  // Get dynamic slice details for SVG Donut Chart
+  get donutSlices() {
+    let accumulatedPercentage = 0;
+    // Calculate total projects across top clients to calculate accurate segment values
+    const total = this.proyectosPorCliente.reduce((sum, p) => sum + p.proyectosAsignados, 0);
+
+    return this.proyectosPorCliente.map((item, index) => {
+      const percentage = total > 0 ? (item.proyectosAsignados / total) * 100 : 0;
+      const circumference = 2 * Math.PI * 50; // ~314.159
+      const strokeLength = (percentage / 100) * circumference;
+      const strokeSpace = circumference - strokeLength;
+      const offset = (accumulatedPercentage / 100) * circumference;
+      
+      accumulatedPercentage += percentage;
+
+      return {
+        cliente: item.cliente,
+        proyectos: item.proyectosAsignados,
+        porcentaje: item.porcentaje,
+        color: this.colors[index % this.colors.length],
+        dashArray: `${strokeLength} ${strokeSpace}`,
+        dashOffset: `-${offset}`
+      };
+    });
   }
 }

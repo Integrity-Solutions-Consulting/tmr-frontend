@@ -26,8 +26,15 @@ export interface HorasPorProyecto {
   horasAsignadas: number;
 }
 
+export interface ProyectosPorCliente {
+  cliente: string;
+  proyectosAsignados: number;
+  porcentaje: number;
+}
+
 export interface DashboardData {
   metricas: DashboardMetricas;
   proximosACerrar: ProyectoResumen[];
   horasPorProyecto: HorasPorProyecto[];
+  proyectosPorCliente: ProyectosPorCliente[];
 }

@@ -26,7 +26,11 @@
 
     <!-- Gráfico de Horas -->
     <div class="section-grafico" *ngIf="horasPorProyecto$ | async as horasData">
-      <app-grafico-horas [horasData]="horasData"></app-grafico-horas>
+      <app-grafico-horas 
+        [horasData]="horasData"
+        [proyectosPorCliente]="(proyectosPorCliente$ | async) || []"
+        [totalProyectos]="(metricas$ | async)?.totalProyectos || 0">
+      </app-grafico-horas>
     </div>
   </div>
 </div>

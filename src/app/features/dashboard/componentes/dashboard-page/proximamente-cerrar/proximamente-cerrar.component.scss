@@ -65,11 +65,11 @@
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.4rem;
 }
 
 .project-nombre {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #1e3a5f;
 }
@@ -84,7 +84,7 @@
 .project-details-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.35rem;
   flex: 1;
   min-width: 0;
 }

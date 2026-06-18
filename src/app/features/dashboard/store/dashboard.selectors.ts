@@ -32,3 +32,8 @@ export const selectHorasPorProyecto = createSelector(
   selectDashboardData,
   (data) => data?.horasPorProyecto || []
 );
+
+export const selectProyectosPorCliente = createSelector(
+  selectDashboardData,
+  (data) => data?.proyectosPorCliente || []
+);

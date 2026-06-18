@@ -7,53 +7,93 @@
 
 .grafico-card {
   background: white;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   height: 100%;
   display: flex;
   flex-direction: column;
+  border: 1px solid #f1f5f9;
 }
 
-.card-header {
-  padding: 1.5rem;
+.card-header-carousel {
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  h2 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1a202c;
-  }
+  gap: 1rem;
 }
 
-.header-controls {
+.carousel-nav {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.rango-select {
-  padding: 0.375rem 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  background: white;
-  color: #475569;
+.nav-btn {
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: border-color 0.2s;
+  color: #64748b;
+  border-radius: 50%;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
 
   &:hover {
-    border-color: #cbd5e1;
+    background: #e2e8f0;
+    color: #1e3a5f;
   }
 
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
+}
+
+.carousel-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.active {
+    background: #1e3a5f;
+    transform: scale(1.25);
+  }
+}
+
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .grafico-container {
@@ -113,7 +153,7 @@
   width: 100%;
   height: 100%;
   background: #f0f4f8;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -128,7 +168,7 @@
 .bar-value {
   width: 100%;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -187,7 +227,153 @@
 .stat-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1a202c;
+  color: #1e3a5f;
+}
+
+/* Slide 1: Donut Container Styles */
+.donut-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  min-height: 250px;
+  overflow-y: auto;
+}
+
+.donut-chart-wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 190px;
+  height: 190px;
+}
+
+.donut-chart-relative {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-segment {
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.donut-center-info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-center-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+  text-transform: uppercase;
+  max-width: 100px;
+}
+
+.donut-center-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  line-height: 1.1;
+  margin-top: 0.2rem;
+}
+
+.donut-table-wrapper {
+  width: 100%;
+  overflow-y: auto;
+  max-height: 360px;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+}
+
+.donut-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th {
+    text-align: left;
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+    vertical-align: middle;
+  }
+
+  .font-bold {
+    font-weight: 700;
+    color: #1e3a5f;
+  }
+
+  .text-muted {
+    color: #64748b;
+  }
+
+  .align-center {
+    text-align: center;
+  }
+
+  .align-right {
+    text-align: right;
+  }
+
+  .client-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .client-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .client-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
 }
 
 .no-data {
@@ -204,25 +390,24 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .grafico-bars {
-    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .bar-label {
-    font-size: 0.625rem;
-  }
-}
-
 @media (max-width: 768px) {
-  .card-header {
+  .donut-container {
     flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .donut-table-wrapper {
+    width: 100%;
   }
 
   .grafico-stats {
     grid-template-columns: 1fr;
   }
+
+  .carousel-title {
+    font-size: 0.95rem;
+  }
 }
+
