@@ -335,6 +335,11 @@ export class UsuariosFormModal {
   private configureUserMode(isInternal: boolean): void {
     if (isInternal) {
       this.form.controls.idColaborador.setValidators([Validators.required]);
+      this.form.controls.usuario.setValidators([
+        Validators.required,
+        Validators.minLength(3),
+        Validators.pattern(INTERNAL_USERNAME_REGEX),
+      ]);
       this.syncInternalEmail();
     } else {
       this.form.controls.idColaborador.clearValidators();
@@ -347,10 +352,12 @@ export class UsuariosFormModal {
         delete currentErrors['yaTieneUsuario'];
         control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
       }
+      this.form.controls.usuario.setValidators([Validators.required]);
       this.releaseExternalEmail();
     }
 
     this.form.controls.idColaborador.updateValueAndValidity({ emitEvent: false });
+    this.form.controls.usuario.updateValueAndValidity({ emitEvent: false });
     this.form.controls.email.setValidators([Validators.required, Validators.email]);
     this.form.controls.email.updateValueAndValidity({ emitEvent: false });
   }
@@ -470,6 +477,13 @@ export class UsuariosFormModal {
     const currentErrors = control.errors || {};
 
     if (!usuarioTrim) {
+      delete currentErrors['usuarioRepetido'];
+      control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
+      return;
+    }
+
+    // Si no es usuario interno, no validamos duplicidad del nombre de usuario en el frontend
+    if (!this.isInternalUser) {
       delete currentErrors['usuarioRepetido'];
       control.setErrors(Object.keys(currentErrors).length > 0 ? currentErrors : null);
       return;

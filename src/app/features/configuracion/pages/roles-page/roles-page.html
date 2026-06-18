@@ -78,7 +78,7 @@
     <div class="estado-filter">
       <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
         <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
-        <span>Estado</span>
+        <span>{{ labelEstado() }}</span>
       </button>
 
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
