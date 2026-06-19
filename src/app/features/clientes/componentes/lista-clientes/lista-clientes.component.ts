@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, forkJoin, of, switchMap } from 'rxjs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 import { Cliente, CrearClienteRequest, EditarClienteRequest } from '../../modelos/cliente.model';
 import { ClientesService } from '../../servicios/clientes.service';
 import { ClientesActions } from '../../store/clientes.actions';
@@ -346,6 +347,39 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   private descargarPDF(clientes: Cliente[]): void {
+    void exportarReportePdf({
+      titulo: 'Reporte de Clientes',
+      nombreArchivo: 'Clientes',
+      nombreHoja: 'Clientes',
+      columnas: [
+        { encabezado: 'Tipo ID', anchoPdf: 16, alineacion: 'center' },
+        { encabezado: 'Identificador', anchoPdf: 23, alineacion: 'center' },
+        { encabezado: 'Nombre comercial', anchoPdf: 32 },
+        { encabezado: 'Nombres', anchoPdf: 25 },
+        { encabezado: 'Apellidos', anchoPdf: 25 },
+        { encabezado: 'Correo electrónico', anchoPdf: 36 },
+        { encabezado: 'Teléfono', anchoPdf: 20, alineacion: 'center' },
+        { encabezado: 'Dirección', anchoPdf: 28 },
+        { encabezado: 'Estado', anchoPdf: 18, alineacion: 'center' },
+        { encabezado: 'Proyectos asignados', anchoPdf: 24 },
+      ],
+      filas: clientes.map((cliente) => [
+        cliente.tipoId ?? '-',
+        cliente.identificador ?? '-',
+        cliente.nombreComercial ?? '-',
+        cliente.nombres ?? '-',
+        cliente.apellidos ?? '-',
+        cliente.correoElectronico ?? '-',
+        cliente.telefono ?? '-',
+        cliente.direccion ?? '-',
+        cliente.estado ?? '-',
+        this.formatearProyectosCliente(cliente),
+      ]),
+      columnaEstado: 8,
+      orientacionPdf: 'landscape',
+    });
+    return;
+
     const doc = new jsPDF({ orientation: 'landscape' });
     const fecha = this.formatearFecha(new Date());
     const pageW = 297;
@@ -477,6 +511,39 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   private async descargarExcel(clientes: Cliente[]): Promise<void> {
+    await exportarReporteExcel({
+      titulo: 'Reporte de Clientes',
+      nombreArchivo: 'Clientes',
+      nombreHoja: 'Clientes',
+      columnas: [
+        { encabezado: 'Tipo de identificación', anchoExcel: 22 },
+        { encabezado: 'Identificador', anchoExcel: 18 },
+        { encabezado: 'Nombre comercial', anchoExcel: 34 },
+        { encabezado: 'Nombres', anchoExcel: 24 },
+        { encabezado: 'Apellidos', anchoExcel: 24 },
+        { encabezado: 'Correo electrónico', anchoExcel: 34 },
+        { encabezado: 'Teléfono', anchoExcel: 16, alineacion: 'center' },
+        { encabezado: 'Estado', anchoExcel: 14, alineacion: 'center' },
+        { encabezado: 'Dirección', anchoExcel: 36 },
+        { encabezado: 'Proyectos asignados', anchoExcel: 48 },
+      ],
+      filas: clientes.map((cliente) => [
+        cliente.tipoId ?? '-',
+        cliente.identificador ?? '-',
+        cliente.nombreComercial ?? '-',
+        cliente.nombres ?? '-',
+        cliente.apellidos ?? '-',
+        cliente.correoElectronico ?? '-',
+        cliente.telefono ?? '-',
+        cliente.estado ?? '-',
+        cliente.direccion ?? '-',
+        this.formatearProyectosCliente(cliente),
+      ]),
+      columnaEstado: 7,
+      orientacionPdf: 'landscape',
+    });
+    return;
+
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
     const ws = workbook.addWorksheet('Clientes');

@@ -9,6 +9,7 @@ import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla
 import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 @Component({
   selector: 'app-reporte-fechas',
@@ -150,6 +151,30 @@ export class ReporteFechasComponent {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
 
+    await exportarReporteExcel({
+      titulo: 'Reporte por Fechas de Asignación',
+      nombreArchivo: 'Fechas',
+      nombreHoja: 'Reporte de Fechas',
+      columnas: [
+        { encabezado: 'Cliente', anchoExcel: 25, anchoPdf: 45 },
+        { encabezado: 'Líder', anchoExcel: 25, anchoPdf: 42 },
+        { encabezado: 'Recurso', anchoExcel: 25, anchoPdf: 45 },
+        { encabezado: 'Cargo', anchoExcel: 25, anchoPdf: 38 },
+        { encabezado: 'Inicio', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Fin', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+      ],
+      filas: data.map((item) => [
+        item.cliente,
+        item.lider,
+        item.recurso,
+        item.cargo,
+        item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+        item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+      ]),
+      orientacionPdf: 'landscape',
+    });
+    return;
+
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Reporte de Fechas');
@@ -253,6 +278,30 @@ export class ReporteFechasComponent {
   async exportarPDF() {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
+
+    await exportarReportePdf({
+      titulo: 'Reporte por Fechas de Asignación',
+      nombreArchivo: 'Fechas',
+      nombreHoja: 'Reporte de Fechas',
+      columnas: [
+        { encabezado: 'Cliente', anchoPdf: 45 },
+        { encabezado: 'Líder', anchoPdf: 42 },
+        { encabezado: 'Recurso', anchoPdf: 45 },
+        { encabezado: 'Cargo', anchoPdf: 38 },
+        { encabezado: 'Inicio', anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Fin', anchoPdf: 25, alineacion: 'center' },
+      ],
+      filas: data.map((item) => [
+        item.cliente,
+        item.lider,
+        item.recurso,
+        item.cargo,
+        item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+        item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+      ]),
+      orientacionPdf: 'landscape',
+    });
+    return;
 
     // Carga dinámica de jsPDF y jspdf-autotable
     const jsPDF = (await import('jspdf')).default;

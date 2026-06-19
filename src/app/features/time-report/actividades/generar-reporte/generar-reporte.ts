@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/servicios/auth.service';
 import { environment } from '../../../../../environments/environment';
 import * as ExcelJS from 'exceljs';
+import { estandarizarCabeceraExcelExistente } from '../../../../shared/utils/reporte-export.utils';
 
 @Component({
     selector: 'app-generar-reporte',
@@ -212,6 +213,13 @@ export class GenerarReporte implements OnInit {
                     else if (i === 8) column.width = 12;
                 });
 
+                await estandarizarCabeceraExcelExistente(
+                    workbook,
+                    worksheet,
+                    `Reporte de Actividades - ${user.name || 'Colaborador'}`,
+                    9,
+                    `Periodo: ${this.meses[mes]} ${anio}`,
+                );
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const url = window.URL.createObjectURL(blob);

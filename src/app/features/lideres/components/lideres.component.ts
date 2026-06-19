@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -411,6 +412,29 @@ private liderYaExiste(payload: any): boolean {
   }
 
   descargarPDF(): void {
+    void exportarReportePdf({
+      titulo: 'Reporte de Líderes',
+      nombreArchivo: 'Lideres',
+      nombreHoja: 'Líderes',
+      columnas: [
+        { encabezado: 'Nombre', anchoPdf: 55 },
+        { encabezado: 'Correo', anchoPdf: 55 },
+        { encabezado: 'Teléfono', anchoPdf: 30 },
+        { encabezado: 'Tipo', anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Estado', anchoPdf: 25, alineacion: 'center' },
+      ],
+      filas: this.lideresFiltrados.map((lider) => [
+        lider.nombre || '-',
+        lider.correo || '-',
+        lider.telefono || '-',
+        lider.tipo || '-',
+        lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
+      ]),
+      columnaEstado: 4,
+    });
+    this.mostrarDescarga = false;
+    return;
+
     const doc      = new jsPDF({ orientation: 'landscape' });
     const fecha    = new Date().toLocaleDateString('es-EC');
     const pageW    = 297;
@@ -511,6 +535,29 @@ private liderYaExiste(payload: any): boolean {
   }
 
   async descargarExcel(): Promise<void> {
+    await exportarReporteExcel({
+      titulo: 'Reporte de Líderes',
+      nombreArchivo: 'Lideres',
+      nombreHoja: 'Líderes',
+      columnas: [
+        { encabezado: 'Nombre', anchoExcel: 40 },
+        { encabezado: 'Correo', anchoExcel: 40 },
+        { encabezado: 'Teléfono', anchoExcel: 20 },
+        { encabezado: 'Tipo', anchoExcel: 15, alineacion: 'center' },
+        { encabezado: 'Estado', anchoExcel: 15, alineacion: 'center' },
+      ],
+      filas: this.lideresFiltrados.map((lider) => [
+        lider.nombre || '-',
+        lider.correo || '-',
+        lider.telefono || '-',
+        lider.tipo || '-',
+        lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
+      ]),
+      columnaEstado: 4,
+    });
+    this.mostrarDescarga = false;
+    return;
+
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
 
