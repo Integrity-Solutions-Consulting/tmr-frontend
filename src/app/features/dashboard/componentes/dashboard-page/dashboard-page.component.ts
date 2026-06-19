@@ -28,12 +28,14 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   metricas$!: Observable<any>;
   proximosACerrar$!: Observable<any>;
   horasPorProyecto$!: Observable<any>;
+  proyectosPorCliente$!: Observable<any>;
   loading$!: Observable<any>;
 
   constructor(private store: Store) {
     this.metricas$ = this.store.select(DashboardSelectors.selectMetricas);
     this.proximosACerrar$ = this.store.select(DashboardSelectors.selectProximosACerrar);
     this.horasPorProyecto$ = this.store.select(DashboardSelectors.selectHorasPorProyecto);
+    this.proyectosPorCliente$ = this.store.select(DashboardSelectors.selectProyectosPorCliente);
     this.loading$ = this.store.select(DashboardSelectors.selectDashboardLoading);
   }
 
