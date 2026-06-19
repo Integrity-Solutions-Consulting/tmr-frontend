@@ -1,10 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, of, Subject, switchMap, takeUntil } from 'rxjs';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
-import { ExportarService }                  from '../../servicios/exportar.service';
+import { exportarReporteExcelMultihoja, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
 import { CatalogosService, CargoItem, CatalogoItem } from '../../servicios/catalogos.service';
 import {
@@ -80,7 +77,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private svc:         ColaboradoresService,
-    private exportarSvc: ExportarService,
     private catalogosSvc: CatalogosService,
   ) {}
 
@@ -420,28 +416,179 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   onDescargarPDF(): void {
-  this.obtenerColaboradoresParaExportar()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: colaboradores => {
-        this.exportarPDF(colaboradores);
-        console.log('PDF generado correctamente');
-      },
-      error: () => console.error('Error al generar el PDF'),
-    });
-}
+    this.obtenerColaboradoresParaExportar()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: colaboradores => {
+          void exportarReportePdf({
+            titulo: 'Reporte de Colaboradores',
+            nombreArchivo: 'Colaboradores',
+            nombreHoja: 'Colaboradores',
+            columnas: [
+              { encabezado: 'Código', anchoPdf: 16 },
+              { encabezado: 'Empresa / Asociación', anchoPdf: 22 },
+              { encabezado: 'Contrato', anchoPdf: 18 },
+              { encabezado: 'Estado', anchoPdf: 16, alineacion: 'center' },
+              { encabezado: 'Tipo persona', anchoPdf: 18 },
+              { encabezado: 'Tipo ID', anchoPdf: 15 },
+              { encabezado: 'Núm. ID', anchoPdf: 20 },
+              { encabezado: 'Nombres', anchoPdf: 22 },
+              { encabezado: 'Apellidos', anchoPdf: 22 },
+              { encabezado: 'Nacimiento', anchoPdf: 17 },
+              { encabezado: 'Género', anchoPdf: 14 },
+              { encabezado: 'Nacionalidad', anchoPdf: 18 },
+              { encabezado: 'Departamento', anchoPdf: 20 },
+              { encabezado: 'Ingreso', anchoPdf: 17 },
+              { encabezado: 'Cargo', anchoPdf: 22 },
+              { encabezado: 'Años', anchoPdf: 12 },
+              { encabezado: 'Modalidad', anchoPdf: 16 },
+              { encabezado: 'Categoría', anchoPdf: 17 },
+              { encabezado: 'Correo', anchoPdf: 28 },
+              { encabezado: 'Teléfono', anchoPdf: 17 },
+              { encabezado: 'Dirección', anchoPdf: 28 },
+              { encabezado: 'Proyectos asignados', anchoPdf: 36 },
+            ],
+            filas: colaboradores.map((colaborador) => [
+              colaborador.codigoEmpleado ?? '-',
+              colaborador.tipoIdentificacion ?? '-',
+              colaborador.tipoContrato ?? '-',
+              colaborador.estado ?? '-',
+              colaborador.tipoPersona ?? '-',
+              colaborador.idTipoIdentificacion?.toString() ?? '-',
+              colaborador.numeroIdentificacion ?? colaborador.identificacion ?? '-',
+              colaborador.nombres ?? '-',
+              colaborador.apellidos ?? '-',
+              this.formatearFechaValor(colaborador.fechaNacimiento),
+              colaborador.genero ?? '-',
+              colaborador.nacionalidad ?? '-',
+              colaborador.departamento ?? '-',
+              this.formatearFechaValor(colaborador.fechaContratacion),
+              colaborador.cargo ?? '-',
+              String(colaborador.aniosExperiencia ?? '-'),
+              colaborador.modalidad ?? '-',
+              colaborador.categoria ?? '-',
+              colaborador.correoElectronico ?? '-',
+              colaborador.telefono ?? '-',
+              colaborador.direccion ?? '-',
+              this.formatearProyectosColaborador(colaborador),
+            ]),
+            columnaEstado: 3,
+            orientacionPdf: 'landscape',
+            formatoPdf: 'a3',
+          });
+          console.log('PDF generado correctamente');
+        },
+        error: () => console.error('Error al generar el PDF'),
+      });
+  }
 
-onDescargarExcel(): void {
-  this.obtenerColaboradoresParaExportar()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: colaboradores => {
-        void this.exportarExcel(colaboradores);
-        console.log('Excel generado correctamente');
-      },
-      error: () => console.error('Error al generar el Excel'),
-    });
-}
+  onDescargarExcel(): void {
+    this.obtenerColaboradoresParaExportar()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: colaboradores => {
+          const activosCount = colaboradores.filter(c => c.estado === 'Activo').length;
+          const inactivosCount = colaboradores.filter(c => c.estado === 'Inactivo').length;
+          const noAsignadosCount = colaboradores.filter(c => (!c.proyectosAsignados || c.proyectosAsignados.length === 0) && c.estado === 'Activo').length;
+          const asignadosCount = colaboradores.filter(c => c.proyectosAsignados && c.proyectosAsignados.length > 0 && c.estado === 'Activo').length;
+
+          void exportarReporteExcelMultihoja(
+            [
+              {
+                titulo: 'Reporte de Colaboradores',
+                nombreArchivo: 'Colaboradores',
+                nombreHoja: 'Colaboradores',
+                columnas: [
+                  { encabezado: 'Código empleado', anchoExcel: 18 },
+                  { encabezado: 'Empresa / Asociación', anchoExcel: 24 },
+                  { encabezado: 'Tipo de contrato', anchoExcel: 20 },
+                  { encabezado: 'Estado', anchoExcel: 14, alineacion: 'center' },
+                  { encabezado: 'Tipo de persona', anchoExcel: 18 },
+                  { encabezado: 'Tipo de identificación', anchoExcel: 22 },
+                  { encabezado: 'Número de identificación', anchoExcel: 24 },
+                  { encabezado: 'Nombres', anchoExcel: 24 },
+                  { encabezado: 'Apellidos', anchoExcel: 24 },
+                  { encabezado: 'Fecha de nacimiento', anchoExcel: 18 },
+                  { encabezado: 'Género', anchoExcel: 16 },
+                  { encabezado: 'Nacionalidad', anchoExcel: 18 },
+                  { encabezado: 'Departamento', anchoExcel: 22 },
+                  { encabezado: 'Fecha de ingreso', anchoExcel: 18 },
+                  { encabezado: 'Cargo', anchoExcel: 26 },
+                  { encabezado: 'Años de experiencia', anchoExcel: 18 },
+                  { encabezado: 'Modalidad', anchoExcel: 16 },
+                  { encabezado: 'Categoría', anchoExcel: 18 },
+                  { encabezado: 'Correo electrónico', anchoExcel: 34 },
+                  { encabezado: 'Teléfono', anchoExcel: 16 },
+                  { encabezado: 'Dirección', anchoExcel: 36 },
+                  { encabezado: 'Proyectos asignados', anchoExcel: 54 },
+                ],
+                filas: colaboradores.map(c => [
+                  c.codigoEmpleado ?? '-',
+                  c.tipoIdentificacion ?? '-',
+                  c.tipoContrato ?? '-',
+                  c.estado ?? '-',
+                  c.tipoPersona ?? '-',
+                  c.idTipoIdentificacion?.toString() ?? '-',
+                  c.numeroIdentificacion ?? c.identificacion ?? '-',
+                  c.nombres ?? '-',
+                  c.apellidos ?? '-',
+                  this.formatearFechaValor(c.fechaNacimiento),
+                  c.genero ?? '-',
+                  c.nacionalidad ?? '-',
+                  c.departamento ?? '-',
+                  this.formatearFechaValor(c.fechaContratacion),
+                  c.cargo ?? '-',
+                  c.aniosExperiencia ?? '-',
+                  c.modalidad ?? '-',
+                  c.categoria ?? '-',
+                  c.correoElectronico ?? '-',
+                  c.telefono ?? '-',
+                  c.direccion ?? '-',
+                  this.formatearProyectosColaborador(c),
+                ]),
+                columnaEstado: 3,
+              },
+              {
+                titulo: 'Resumen de Colaboradores',
+                nombreArchivo: 'Resumen',
+                nombreHoja: 'Resumen',
+                columnas: [
+                  { encabezado: 'Métrica', anchoExcel: 30 },
+                  { encabezado: 'Total', anchoExcel: 12, alineacion: 'center' },
+                ],
+                filas: [
+                  ['Total colaboradores', colaboradores.length],
+                  ['Activos', activosCount],
+                  ['Inactivos', inactivosCount],
+                  ['No asignados (0 proyectos)', noAsignadosCount],
+                  ['Asignados (1+ proyectos)', asignadosCount],
+                ],
+                columnaEstado: 2,
+              }
+            ],
+            'Colaboradores'
+          );
+          console.log('Excel generado correctamente');
+        },
+        error: () => console.error('Error al generar el Excel'),
+      });
+  }
+
+  private formatearFechaValor(fecha?: string | null): string {
+    if (!fecha) return '-';
+    const valor = String(fecha).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+      const [y, m, d] = valor.substring(0, 10).split('-');
+      return `${d}/${m}/${y}`;
+    }
+    return valor;
+  }
+
+  private formatearProyectosColaborador(colaborador: Colaborador): string {
+    const proyectos = colaborador.proyectosAsignados ?? [];
+    if (!proyectos.length) return '-';
+    return proyectos.map(p => `${p.nombre} - ${p.cliente} - ${p.estado}`).join('; ');
+  }
   // ── Toast ────────────────────────────────────────────────
 private obtenerColaboradoresParaExportar() {
   return this.svc.getColaboradores(this.filtros, 1, 9999).pipe(
@@ -451,358 +598,6 @@ private obtenerColaboradoresParaExportar() {
       return forkJoin(colaboradores.map(col => this.svc.getColaboradorById(col.id)));
     })
   );
-}
-
-private exportarPDF(colaboradores: Colaborador[]): void {
-  void exportarReportePdf({
-    titulo: 'Reporte de Colaboradores',
-    nombreArchivo: 'Colaboradores',
-    nombreHoja: 'Colaboradores',
-    columnas: [
-      { encabezado: 'Código', anchoPdf: 16 },
-      { encabezado: 'Empresa / Asociación', anchoPdf: 22 },
-      { encabezado: 'Contrato', anchoPdf: 18 },
-      { encabezado: 'Estado', anchoPdf: 16, alineacion: 'center' },
-      { encabezado: 'Tipo persona', anchoPdf: 18 },
-      { encabezado: 'Tipo ID', anchoPdf: 15 },
-      { encabezado: 'Núm. ID', anchoPdf: 20 },
-      { encabezado: 'Nombres', anchoPdf: 22 },
-      { encabezado: 'Apellidos', anchoPdf: 22 },
-      { encabezado: 'Nacimiento', anchoPdf: 17 },
-      { encabezado: 'Género', anchoPdf: 14 },
-      { encabezado: 'Nacionalidad', anchoPdf: 18 },
-      { encabezado: 'Departamento', anchoPdf: 20 },
-      { encabezado: 'Ingreso', anchoPdf: 17 },
-      { encabezado: 'Cargo', anchoPdf: 22 },
-      { encabezado: 'Años', anchoPdf: 12 },
-      { encabezado: 'Modalidad', anchoPdf: 16 },
-      { encabezado: 'Categoría', anchoPdf: 17 },
-      { encabezado: 'Correo', anchoPdf: 28 },
-      { encabezado: 'Teléfono', anchoPdf: 17 },
-      { encabezado: 'Dirección', anchoPdf: 28 },
-      { encabezado: 'Proyectos asignados', anchoPdf: 36 },
-    ],
-    filas: colaboradores.map((colaborador) => [
-      colaborador.codigoEmpleado ?? '-',
-      colaborador.tipoIdentificacion ?? '-',
-      colaborador.tipoContrato ?? '-',
-      colaborador.estado ?? '-',
-      colaborador.tipoPersona ?? '-',
-      colaborador.idTipoIdentificacion?.toString() ?? '-',
-      colaborador.numeroIdentificacion ?? colaborador.identificacion ?? '-',
-      colaborador.nombres ?? '-',
-      colaborador.apellidos ?? '-',
-      this.formatearFechaValor(colaborador.fechaNacimiento),
-      colaborador.genero ?? '-',
-      colaborador.nacionalidad ?? '-',
-      colaborador.departamento ?? '-',
-      this.formatearFechaValor(colaborador.fechaContratacion),
-      colaborador.cargo ?? '-',
-      String(colaborador.aniosExperiencia ?? '-'),
-      colaborador.modalidad ?? '-',
-      colaborador.categoria ?? '-',
-      colaborador.correoElectronico ?? '-',
-      colaborador.telefono ?? '-',
-      colaborador.direccion ?? '-',
-      this.formatearProyectosColaborador(colaborador),
-    ]),
-    columnaEstado: 3,
-    orientacionPdf: 'landscape',
-    formatoPdf: 'a3',
-  });
-  return;
-
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
-  const fecha = this.formatearFecha(new Date());
-  const pageW = 420;
-  const pageH = 297;
-  const marginX = 12;
-  const footerY = pageH - 8;
-
-  const dibujarCabecera = () => {
-    doc.setFillColor(22, 53, 114);
-    doc.rect(0, 0, pageW, 22, 'F');
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('Reporte de Colaboradores', marginX, 14);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
-    doc.setDrawColor(99, 135, 190);
-    doc.setLineWidth(0.5);
-    doc.line(0, 22, pageW, 22);
-  };
-
-  dibujarCabecera();
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(22, 53, 114);
-  doc.text('Resumen de Colaboradores', marginX, 32);
-  doc.setDrawColor(22, 53, 114);
-  doc.setLineWidth(0.3);
-  doc.line(marginX, 34, marginX + 70, 34);
-
-  autoTable(doc, {
-    startY: 37,
-    head: [[
-      'Codigo', 'Empresa / Asociacion', 'Contrato', 'Estado', 'Tipo persona',
-      'Tipo ID', 'Num. ID', 'Nombres', 'Apellidos', 'Nacimiento',
-      'Genero', 'Nacionalidad', 'Departamento', 'Ingreso', 'Cargo',
-      'Anios', 'Modalidad', 'Categoria', 'Correo', 'Telefono', 'Direccion',
-      'Proyectos asignados'
-    ]],
-    body: colaboradores.map(c => [
-      c.codigoEmpleado ?? '-',
-      c.tipoIdentificacion ?? '-',
-      c.tipoContrato ?? '-',
-      c.estado ?? '-',
-      c.tipoPersona ?? '-',
-      c.idTipoIdentificacion?.toString() ?? '-',
-      c.numeroIdentificacion ?? c.identificacion ?? '-',
-      c.nombres ?? '-',
-      c.apellidos ?? '-',
-      this.formatearFechaValor(c.fechaNacimiento),
-      c.genero ?? '-',
-      c.nacionalidad ?? '-',
-      c.departamento ?? '-',
-      this.formatearFechaValor(c.fechaContratacion),
-      c.cargo ?? '-',
-      String(c.aniosExperiencia ?? '-'),
-      c.modalidad ?? '-',
-      c.categoria ?? '-',
-      c.correoElectronico ?? '-',
-      c.telefono ?? '-',
-      c.direccion ?? '-',
-      this.formatearProyectosColaborador(c),
-    ]),
-    styles: {
-      fontSize: 6.3,
-      cellPadding: { top: 2.5, bottom: 2.5, left: 2, right: 2 },
-      valign: 'middle',
-      overflow: 'linebreak',
-      font: 'helvetica',
-      lineColor: [226, 232, 240],
-      lineWidth: 0.2,
-    },
-    headStyles: {
-      fillColor: [22, 53, 114],
-      textColor: 255,
-      fontStyle: 'bold',
-      fontSize: 6.2,
-      halign: 'center',
-      cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
-    },
-    bodyStyles: { textColor: [51, 65, 85] },
-    alternateRowStyles: { fillColor: [245, 248, 255] },
-    didParseCell: data => {
-      if (data.section === 'body' && data.column.index === 3) {
-        const val = String(data.cell.raw ?? '').toLowerCase();
-        data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
-        data.cell.styles.fontStyle = 'bold';
-      }
-    },
-    margin: { left: marginX, right: marginX, bottom: 18 },
-    didDrawPage: () => dibujarCabecera(),
-  });
-
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.3);
-    doc.line(marginX, footerY, pageW - marginX, footerY);
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(156, 163, 175);
-    doc.text(`Pagina ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-    doc.text('TMR - Reporte de Colaboradores', marginX, footerY + 4);
-    doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
-  }
-
-  doc.save('colaboradores.pdf');
-}
-
-private async exportarExcel(colaboradores: Colaborador[]): Promise<void> {
-  await exportarReporteExcel({
-    titulo: 'Reporte de Colaboradores',
-    nombreArchivo: 'Colaboradores',
-    nombreHoja: 'Colaboradores',
-    columnas: [
-      { encabezado: 'Código empleado', anchoExcel: 18 },
-      { encabezado: 'Empresa / Asociación', anchoExcel: 24 },
-      { encabezado: 'Tipo de contrato', anchoExcel: 20 },
-      { encabezado: 'Estado', anchoExcel: 14, alineacion: 'center' },
-      { encabezado: 'Tipo de persona', anchoExcel: 18 },
-      { encabezado: 'Tipo de identificación', anchoExcel: 22 },
-      { encabezado: 'Número de identificación', anchoExcel: 24 },
-      { encabezado: 'Nombres', anchoExcel: 24 },
-      { encabezado: 'Apellidos', anchoExcel: 24 },
-      { encabezado: 'Fecha de nacimiento', anchoExcel: 18 },
-      { encabezado: 'Género', anchoExcel: 16 },
-      { encabezado: 'Nacionalidad', anchoExcel: 18 },
-      { encabezado: 'Departamento', anchoExcel: 22 },
-      { encabezado: 'Fecha de ingreso', anchoExcel: 18 },
-      { encabezado: 'Cargo', anchoExcel: 26 },
-      { encabezado: 'Años de experiencia', anchoExcel: 18 },
-      { encabezado: 'Modalidad', anchoExcel: 16 },
-      { encabezado: 'Categoría', anchoExcel: 18 },
-      { encabezado: 'Correo electrónico', anchoExcel: 34 },
-      { encabezado: 'Teléfono', anchoExcel: 16 },
-      { encabezado: 'Dirección', anchoExcel: 36 },
-      { encabezado: 'Proyectos asignados', anchoExcel: 50 },
-    ],
-    filas: colaboradores.map((colaborador) => [
-      colaborador.codigoEmpleado ?? '-',
-      colaborador.tipoIdentificacion ?? '-',
-      colaborador.tipoContrato ?? '-',
-      colaborador.estado ?? '-',
-      colaborador.tipoPersona ?? '-',
-      colaborador.idTipoIdentificacion?.toString() ?? '-',
-      colaborador.numeroIdentificacion ?? colaborador.identificacion ?? '-',
-      colaborador.nombres ?? '-',
-      colaborador.apellidos ?? '-',
-      this.formatearFechaValor(colaborador.fechaNacimiento),
-      colaborador.genero ?? '-',
-      colaborador.nacionalidad ?? '-',
-      colaborador.departamento ?? '-',
-      this.formatearFechaValor(colaborador.fechaContratacion),
-      colaborador.cargo ?? '-',
-      colaborador.aniosExperiencia ?? '-',
-      colaborador.modalidad ?? '-',
-      colaborador.categoria ?? '-',
-      colaborador.correoElectronico ?? '-',
-      colaborador.telefono ?? '-',
-      colaborador.direccion ?? '-',
-      this.formatearProyectosColaborador(colaborador),
-    ]),
-    columnaEstado: 3,
-    orientacionPdf: 'landscape',
-  });
-  return;
-
-  const { Workbook } = await import('exceljs');
-  const workbook = new Workbook();
-  const ws = workbook.addWorksheet('Colaboradores');
-
-  ws.columns = [
-    { header: 'Codigo empleado', key: 'codigoEmpleado', width: 18 },
-    { header: 'Empresa / Asociacion', key: 'empresa', width: 24 },
-    { header: 'Tipo de contrato', key: 'tipoContrato', width: 20 },
-    { header: 'Estado', key: 'estado', width: 14 },
-    { header: 'Tipo de persona', key: 'tipoPersona', width: 18 },
-    { header: 'Tipo de identificacion', key: 'tipoIdentificacion', width: 22 },
-    { header: 'Numero de identificacion', key: 'numeroIdentificacion', width: 24 },
-    { header: 'Nombres', key: 'nombres', width: 24 },
-    { header: 'Apellidos', key: 'apellidos', width: 24 },
-    { header: 'Fecha de nacimiento', key: 'fechaNacimiento', width: 18 },
-    { header: 'Genero', key: 'genero', width: 16 },
-    { header: 'Nacionalidad', key: 'nacionalidad', width: 18 },
-    { header: 'Departamento', key: 'departamento', width: 22 },
-    { header: 'Fecha de ingreso', key: 'fechaContratacion', width: 18 },
-    { header: 'Cargo', key: 'cargo', width: 26 },
-    { header: 'Anios de experiencia', key: 'aniosExperiencia', width: 18 },
-    { header: 'Modalidad', key: 'modalidad', width: 16 },
-    { header: 'Categoria', key: 'categoria', width: 18 },
-    { header: 'Correo electronico', key: 'correoElectronico', width: 34 },
-    { header: 'Telefono', key: 'telefono', width: 16 },
-    { header: 'Direccion', key: 'direccion', width: 36 },
-    { header: 'Proyectos asignados', key: 'proyectos', width: 54 },
-  ];
-
-  colaboradores.forEach(c => ws.addRow({
-    codigoEmpleado: c.codigoEmpleado ?? '-',
-    empresa: c.tipoIdentificacion ?? '-',
-    tipoContrato: c.tipoContrato ?? '-',
-    estado: c.estado ?? '-',
-    tipoPersona: c.tipoPersona ?? '-',
-    tipoIdentificacion: c.idTipoIdentificacion?.toString() ?? '-',
-    numeroIdentificacion: c.numeroIdentificacion ?? c.identificacion ?? '-',
-    nombres: c.nombres ?? '-',
-    apellidos: c.apellidos ?? '-',
-    fechaNacimiento: this.formatearFechaValor(c.fechaNacimiento),
-    genero: c.genero ?? '-',
-    nacionalidad: c.nacionalidad ?? '-',
-    departamento: c.departamento ?? '-',
-    fechaContratacion: this.formatearFechaValor(c.fechaContratacion),
-    cargo: c.cargo ?? '-',
-    aniosExperiencia: c.aniosExperiencia ?? '-',
-    modalidad: c.modalidad ?? '-',
-    categoria: c.categoria ?? '-',
-    correoElectronico: c.correoElectronico ?? '-',
-    telefono: c.telefono ?? '-',
-    direccion: c.direccion ?? '-',
-    proyectos: this.formatearProyectosColaborador(c),
-  }));
-
-  this.aplicarEstiloExcel(ws, 4);
-  const buffer = await workbook.xlsx.writeBuffer();
-  this.crearDescargaExcel(buffer, 'colaboradores.xlsx');
-}
-
-private aplicarEstiloExcel(ws: any, colEstado: number): void {
-  const header = ws.getRow(1);
-  header.height = 24;
-  header.eachCell((cell: any) => {
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF163572' } };
-    cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    cell.border = this.bordeDelgado();
-  });
-
-  ws.eachRow((row: any, rowNumber: number) => {
-    if (rowNumber === 1) return;
-    const fill = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-    row.height = 24;
-    row.eachCell((cell: any, colNumber: number) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-      cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF334155' } };
-      cell.border = this.bordeDelgado('FFE2E8F0');
-      cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-      if (colNumber === colEstado) {
-        const esActivo = String(cell.value ?? '').toLowerCase() === 'activo';
-        cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' } };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      }
-    });
-  });
-}
-
-private bordeDelgado(color = 'FF163572'): any {
-  const b = { style: 'thin', color: { argb: color } };
-  return { top: b, left: b, bottom: b, right: b };
-}
-
-private formatearFecha(fecha: Date): string {
-  return fecha.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
-private formatearFechaValor(fecha?: string | null): string {
-  if (!fecha) return '-';
-  const valor = String(fecha).trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
-    const [y, m, d] = valor.substring(0, 10).split('-');
-    return `${d}/${m}/${y}`;
-  }
-  return valor;
-}
-
-private formatearProyectosColaborador(colaborador: Colaborador): string {
-  const proyectos = colaborador.proyectosAsignados ?? [];
-  if (!proyectos.length) return '-';
-  return proyectos.map(p => `${p.nombre} - ${p.cliente} - ${p.estado}`).join('; ');
-}
-
-private crearDescargaExcel(buffer: any, nombreArchivo: string): void {
-  const blob = new Blob([buffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.href = url;
-  link.download = nombreArchivo;
-  link.click();
-  URL.revokeObjectURL(url);
 }
 
   onToastCerrado(id: number): void { }
