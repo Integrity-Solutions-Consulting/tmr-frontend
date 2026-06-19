@@ -17,6 +17,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -351,6 +352,13 @@ export class SeguimientoComponent implements AfterViewInit {
             else if (i === 7) column.width = 18;
         });
 
+        await estandarizarCabeceraExcelExistente(
+            workbook,
+            worksheet,
+            `Seguimiento de Colaborador - ${col.nombre}`,
+            8,
+            `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`,
+        );
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -362,6 +370,34 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     public async exportarExcel() {
+        await exportarReporteExcel({
+            titulo: 'Reporte de Seguimiento',
+            nombreArchivo: 'Seguimiento',
+            nombreHoja: 'Seguimiento',
+            columnas: [
+                { encabezado: 'Colaborador', anchoExcel: 30 },
+                { encabezado: 'Proyecto', anchoExcel: 25 },
+                { encabezado: 'Cliente', anchoExcel: 25 },
+                { encabezado: 'Líder técnico', anchoExcel: 25 },
+                { encabezado: 'Horas registradas', anchoExcel: 18, alineacion: 'center' },
+                { encabezado: 'Seguimiento', anchoExcel: 18, alineacion: 'center' },
+                { encabezado: 'Días con reporte', anchoExcel: 18, alineacion: 'center' },
+                { encabezado: 'Días a completar', anchoExcel: 18, alineacion: 'center' },
+            ],
+            filas: this.dataSource.filteredData.map((colaborador) => [
+                colaborador.nombre,
+                colaborador.proyecto,
+                colaborador.cliente,
+                colaborador.liderTecnico,
+                Number(colaborador.nroHoras),
+                colaborador.estado,
+                Number(colaborador.diasConReporte),
+                Number(colaborador.diasACompletar),
+            ]),
+            orientacionPdf: 'landscape',
+        });
+        return;
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Seguimiento');
 
@@ -459,6 +495,34 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     public exportarPDF() {
+        void exportarReportePdf({
+            titulo: 'Reporte de Seguimiento',
+            nombreArchivo: 'Seguimiento',
+            nombreHoja: 'Seguimiento',
+            columnas: [
+                { encabezado: 'Colaborador', anchoPdf: 48 },
+                { encabezado: 'Proyecto', anchoPdf: 45 },
+                { encabezado: 'Cliente', anchoPdf: 42 },
+                { encabezado: 'Líder técnico', anchoPdf: 42 },
+                { encabezado: 'Horas', anchoPdf: 22, alineacion: 'center' },
+                { encabezado: 'Seguimiento', anchoPdf: 28, alineacion: 'center' },
+                { encabezado: 'Días con reporte', anchoPdf: 24, alineacion: 'center' },
+                { encabezado: 'Días a completar', anchoPdf: 24, alineacion: 'center' },
+            ],
+            filas: this.dataSource.filteredData.map((colaborador) => [
+                colaborador.nombre,
+                colaborador.proyecto,
+                colaborador.cliente,
+                colaborador.liderTecnico,
+                Number(colaborador.nroHoras),
+                colaborador.estado,
+                Number(colaborador.diasConReporte),
+                Number(colaborador.diasACompletar),
+            ]),
+            orientacionPdf: 'landscape',
+        });
+        return;
+
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
         doc.setFillColor(22, 53, 114);
@@ -673,6 +737,13 @@ export class SeguimientoComponent implements AfterViewInit {
                 else if (i === 7) column.width = 12;
             });
 
+            await estandarizarCabeceraExcelExistente(
+                workbook,
+                worksheet,
+                `Detalle de Actividades - ${col.nombre}`,
+                8,
+                `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`,
+            );
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);

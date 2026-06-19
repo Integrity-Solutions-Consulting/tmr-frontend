@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { finalize, map, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { agregarCabeceraExcel, obtenerLogoReporte } from '../../../../shared/utils/reporte-export.utils';
 
 import { Tabla } from '../../../../shared/components/tabla/tabla';
 import { selectProyectos } from '../../store/proyectos.selectors';
@@ -267,7 +268,7 @@ export class ProyectosPage implements OnDestroy {
 
   descargarProyectosPdf(): void {
     this.obtenerProyectosFiltrados().subscribe({
-      next: (proyectos) => this.descargarPDF(proyectos, 'Proyectos'),
+      next: (proyectos) => void this.descargarPDF(proyectos, 'Proyectos'),
       error: (error) => console.error('Error al descargar proyectos:', error)
     });
   }
@@ -485,11 +486,13 @@ export class ProyectosPage implements OnDestroy {
       }
     });
 
+    await agregarCabeceraExcel(workbook, wsResumen, 'Reporte de Proyectos', 10);
+    await agregarCabeceraExcel(workbook, wsDetalle, 'Reporte de Líderes y Recursos', 13);
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
-    this.crearDescarga(blob, `${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    this.crearDescarga(blob, `Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   private aplicarEstiloHoja(ws: any, colEstado: number): void {
@@ -531,22 +534,26 @@ export class ProyectosPage implements OnDestroy {
   }
 
   // ─── PDF ─────────────────────────────────────────────────────────────────
-  private descargarPDF(proyectos: Proyecto[], nombreBase: string): void {
+  private async descargarPDF(proyectos: Proyecto[], nombreBase: string): Promise<void> {
     const doc      = new jsPDF({ orientation: 'landscape' });
     const fecha    = new Date().toLocaleDateString('es-EC');
     const pageW    = 297;
     const pageH    = 210;  // alto landscape en mm
     const marginX  = 12;
     const footerY  = pageH - 8; // coordenada fija para el pie
+    const logo = await obtenerLogoReporte();
 
     // ── Helper: cabecera reutilizable ──
     const dibujarCabecera = () => {
       doc.setFillColor(22, 53, 114);
       doc.rect(0, 0, pageW, 22, 'F');
+      if (logo) {
+        doc.addImage(logo, 'PNG', marginX, 4, 38, 11);
+      }
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Proyectos', marginX, 14);
+      doc.text('Reporte de Proyectos', pageW * 0.7, 14, { align: 'center' });
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
@@ -770,15 +777,15 @@ export class ProyectosPage implements OnDestroy {
           minCellHeight: 10
         },
         columnStyles: {
-          0: { cellWidth: 16, halign: 'center' },
-          1: { cellWidth: 90 },
-          2: { cellWidth: 22, halign: 'right' },
-          3: { cellWidth: 16, halign: 'center' },
-          4: { cellWidth: 28 },
-          5: { cellWidth: 80 },
-          6: { cellWidth: 24, halign: 'center' },
-          7: { cellWidth: 24, halign: 'center' },
-          8: { cellWidth: 22, halign: 'center' },
+          0: { cellWidth: 14, halign: 'center' },
+          1: { cellWidth: 76 },
+          2: { cellWidth: 19, halign: 'right' },
+          3: { cellWidth: 14, halign: 'center' },
+          4: { cellWidth: 24 },
+          5: { cellWidth: 68 },
+          6: { cellWidth: 20, halign: 'center' },
+          7: { cellWidth: 20, halign: 'center' },
+          8: { cellWidth: 18, halign: 'center' },
         },
         pageBreak: 'auto',
         rowPageBreak: 'avoid',
@@ -816,7 +823,7 @@ export class ProyectosPage implements OnDestroy {
       doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
     }
 
-    doc.save(`${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    doc.save(`Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 
   private crearDescarga(blob: Blob, nombreArchivo: string): void {

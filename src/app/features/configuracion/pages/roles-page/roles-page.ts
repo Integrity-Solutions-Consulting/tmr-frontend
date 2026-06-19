@@ -14,8 +14,7 @@ import { SuccessModalComponent } from '../../../../shared/components/success-mod
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
@@ -327,11 +326,35 @@ export class RolesPage {
 
   // ── Exportación ──────────────────────────────────────────────────────────
   descargarRolesExcel(): void {
-    this.descargarXlsx(this.filteredRoles(), 'Roles');
+    void exportarReporteExcel({
+      titulo: 'Reporte de Roles',
+      nombreArchivo: 'Roles',
+      nombreHoja: 'Roles',
+      columnas: [
+        { encabezado: 'Nombre del Rol', anchoExcel: 30, anchoPdf: 42 },
+        { encabezado: 'Descripción', anchoExcel: 45, anchoPdf: 62 },
+        { encabezado: 'Módulos', anchoExcel: 50, anchoPdf: 78 },
+        { encabezado: 'Estado', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+      ],
+      filas: this.obtenerFilasExportacion(this.filteredRoles()),
+      columnaEstado: 3,
+    });
   }
 
   descargarRolesPdf(): void {
-    this.descargarPDF(this.filteredRoles(), 'Roles');
+    void exportarReportePdf({
+      titulo: 'Reporte de Roles',
+      nombreArchivo: 'Roles',
+      nombreHoja: 'Roles',
+      columnas: [
+        { encabezado: 'Nombre del Rol', anchoPdf: 42 },
+        { encabezado: 'Descripción', anchoPdf: 62 },
+        { encabezado: 'Módulos', anchoPdf: 78 },
+        { encabezado: 'Estado', anchoPdf: 24, alineacion: 'center' },
+      ],
+      filas: this.obtenerFilasExportacion(this.filteredRoles()),
+      columnaEstado: 3,
+    });
   }
 
   private displayModulosRol(rol: Rol): string {
@@ -347,167 +370,4 @@ export class RolesPage {
     ]);
   }
 
-  private async descargarXlsx(roles: Rol[], nombreBase: string): Promise<void> {
-    const { Workbook } = await import('exceljs');
-    const workbook = new Workbook();
-
-    const COLOR_PRIMARIO    = 'FF163572';
-    const COLOR_RECURSO     = 'FFFFFFFF';
-    const COLOR_RECURSO_ALT = 'FFF8FAFC';
-    const COLOR_TEXTO       = 'FF334155';
-    const COLOR_BORDE       = 'FFE2E8F0';
-
-    const ws = workbook.addWorksheet('Roles');
-    ws.columns = [
-      { header: 'Nombre del Rol', key: 'nombre', width: 30 },
-      { header: 'Descripción',    key: 'desc',   width: 45 },
-      { header: 'Módulos',        key: 'modulos',width: 50 },
-      { header: 'Estado',         key: 'estado', width: 18 },
-    ];
-
-    roles.forEach(r => {
-      ws.addRow({
-        nombre: r.nombre || '-',
-        desc: r.descripcion || '-',
-        modulos: this.displayModulosRol(r),
-        estado: r.activo ? 'Activo' : 'Inactivo',
-      });
-    });
-
-    const header = ws.getRow(1);
-    header.height = 22;
-    header.eachCell((cell: any) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font      = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      const b = { style: 'thin', color: { argb: COLOR_PRIMARIO } };
-      cell.border    = { top: b, left: b, bottom: b, right: b };
-    });
-
-    ws.eachRow((row: any, rowNumber: number) => {
-      if (rowNumber === 1) return;
-      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
-      row.height = 20;
-      row.eachCell((cell: any, colNumber: number) => {
-        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-        const b = { style: 'thin', color: { argb: COLOR_BORDE } };
-        cell.border    = { top: b, left: b, bottom: b, right: b };
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-
-        if (colNumber === 4) {
-          const val = cell.value?.toString() ?? '';
-          const esActivo = val.toLowerCase() === 'activo';
-          cell.font = {
-            name: 'Segoe UI', size: 10, bold: true,
-            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
-          };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        }
-      });
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  private descargarPDF(roles: Rol[], nombreBase: string): void {
-    const doc      = new jsPDF({ orientation: 'landscape' });
-    const fecha    = new Date().toLocaleDateString('es-EC');
-    const pageW    = 297;
-    const pageH    = 210;
-    const marginX  = 12;
-    const footerY  = pageH - 8;
-
-    const dibujarCabecera = () => {
-      doc.setFillColor(22, 53, 114);
-      doc.rect(0, 0, pageW, 22, 'F');
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Roles', marginX, 14);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
-      doc.setDrawColor(99, 135, 190);
-      doc.setLineWidth(0.5);
-      doc.line(0, 22, pageW, 22);
-    };
-
-    dibujarCabecera();
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(22, 53, 114);
-    doc.text('Listado de Roles', marginX, 32);
-    doc.setDrawColor(22, 53, 114);
-    doc.setLineWidth(0.3);
-    doc.line(marginX, 34, marginX + 60, 34);
-
-    autoTable(doc, {
-      startY: 37,
-      head: [['Nombre del Rol', 'Descripción', 'Módulos', 'Estado']],
-      body: this.obtenerFilasExportacion(roles),
-      styles: {
-        fontSize: 8,
-        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
-        valign: 'middle',
-        overflow: 'linebreak',
-        font: 'helvetica',
-        lineColor: [226, 232, 240],
-        lineWidth: 0.2,
-      },
-      headStyles: {
-        fillColor: [22, 53, 114],
-        textColor: 255,
-        fontStyle: 'bold',
-        fontSize: 8,
-        halign: 'center',
-        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
-      },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
-      columnStyles: {
-        0: { cellWidth: 50 },
-        1: { cellWidth: 80 },
-        2: { cellWidth: 110 },
-        3: { cellWidth: 33,  halign: 'center' },
-      },
-      didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 3) {
-          const val = String(data.cell.raw ?? '').toLowerCase();
-          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      },
-      margin: { left: marginX, right: marginX, bottom: 18 },
-      didDrawPage: () => dibujarCabecera(),
-    });
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(marginX, footerY, pageW - marginX, footerY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(156, 163, 175);
-      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-      doc.text('TMR — Reporte de Roles', marginX, footerY + 4);
-      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
-    }
-
-    doc.save(`${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
-  }
 }

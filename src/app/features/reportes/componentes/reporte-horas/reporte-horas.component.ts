@@ -9,6 +9,7 @@ import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla
 import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 @Component({
   selector: 'app-reporte-horas',
@@ -162,6 +163,31 @@ export class ReporteHorasComponent {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
 
+    await exportarReporteExcel({
+      titulo: 'Reporte de Horas por Cliente',
+      nombreArchivo: 'Horas',
+      nombreHoja: 'Reporte de Horas',
+      columnas: [
+        { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
+        { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
+        { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
+        { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
+        { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+      ],
+      filas: data.map((item) => [
+        item.cliente,
+        item.estadoCliente,
+        item.mes,
+        item.anio,
+        item.recursos,
+        Number(item.horas).toFixed(1),
+      ]),
+      columnaEstado: 1,
+      orientacionPdf: 'landscape',
+    });
+    return;
+
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Reporte de Horas');
@@ -265,6 +291,31 @@ export class ReporteHorasComponent {
   async exportarPDF() {
     const data = this.datosFiltrados();
     if (data.length === 0) return;
+
+    await exportarReportePdf({
+      titulo: 'Reporte de Horas por Cliente',
+      nombreArchivo: 'Horas',
+      nombreHoja: 'Reporte de Horas',
+      columnas: [
+        { encabezado: 'Cliente', anchoPdf: 75 },
+        { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
+        { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
+        { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
+        { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
+      ],
+      filas: data.map((item) => [
+        item.cliente,
+        item.estadoCliente,
+        item.mes,
+        item.anio,
+        item.recursos,
+        Number(item.horas).toFixed(1),
+      ]),
+      columnaEstado: 1,
+      orientacionPdf: 'landscape',
+    });
+    return;
 
     // Carga dinámica de jsPDF y jspdf-autotable
     const jsPDF = (await import('jspdf')).default;
