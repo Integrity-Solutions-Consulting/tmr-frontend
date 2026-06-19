@@ -1,122 +1,68 @@
 import { Injectable } from '@angular/core';
 import { Colaborador } from '../models/colaborador.model';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { exportarReportePdf, obtenerLogoReporte, fechaArchivo } from '../../../shared/utils/reporte-export.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ExportarService {
 
   // ── EXPORTAR PDF ──────────────────────────────────────
   exportarPDF(colaboradores: Colaborador[]): void {
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
-    const fecha = this.formatearFecha(new Date());
-    const pageW = 420;
-    const pageH = 297;
-    const marginX = 12;
-    const footerY = pageH - 8;
-
-    const dibujarCabecera = () => {
-      doc.setFillColor(22, 53, 114);
-      doc.rect(0, 0, pageW, 22, 'F');
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Colaboradores', marginX, 14);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
-      doc.setDrawColor(99, 135, 190);
-      doc.setLineWidth(0.5);
-      doc.line(0, 22, pageW, 22);
-    };
-
-    dibujarCabecera();
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(22, 53, 114);
-    doc.text('Resumen de Colaboradores', marginX, 32);
-    doc.setDrawColor(22, 53, 114);
-    doc.setLineWidth(0.3);
-    doc.line(marginX, 34, marginX + 70, 34);
-
-    autoTable(doc, {
-      startY: 37,
-      head: [[
-        'Codigo', 'Empresa / Asociacion', 'Contrato', 'Estado', 'Tipo persona',
-        'Tipo ID', 'Num. ID', 'Nombres', 'Apellidos', 'Nacimiento',
-        'Genero', 'Nacionalidad', 'Departamento', 'Ingreso', 'Cargo',
-        'Anios', 'Modalidad', 'Categoria', 'Correo', 'Telefono', 'Direccion',
-        'Proyectos asignados'
-      ]],
-      body: colaboradores.map(c => [
-        c.codigoEmpleado ?? '-',
-        c.tipoIdentificacion ?? '-',
-        c.tipoContrato ?? '-',
-        c.estado ?? '-',
-        c.tipoPersona ?? '-',
-        c.idTipoIdentificacion?.toString() ?? '-',
-        c.numeroIdentificacion ?? c.identificacion ?? '-',
-        c.nombres ?? '-',
-        c.apellidos ?? '-',
-        this.formatearFechaValor(c.fechaNacimiento),
-        c.genero ?? '-',
-        c.nacionalidad ?? '-',
-        c.departamento ?? '-',
-        this.formatearFechaValor(c.fechaContratacion),
-        c.cargo ?? '-',
-        String(c.aniosExperiencia ?? '-'),
-        c.modalidad ?? '-',
-        c.categoria ?? '-',
-        c.correoElectronico ?? '-',
-        c.telefono ?? '-',
-        c.direccion ?? '-',
-        this.formatearProyectosColaborador(c),
+    void exportarReportePdf({
+      titulo: 'Reporte de Colaboradores',
+      nombreArchivo: 'Colaboradores',
+      nombreHoja: 'Colaboradores',
+      columnas: [
+        { encabezado: 'Código', anchoPdf: 16 },
+        { encabezado: 'Empresa / Asociación', anchoPdf: 22 },
+        { encabezado: 'Contrato', anchoPdf: 18 },
+        { encabezado: 'Estado', anchoPdf: 16, alineacion: 'center' },
+        { encabezado: 'Tipo persona', anchoPdf: 18 },
+        { encabezado: 'Tipo ID', anchoPdf: 15 },
+        { encabezado: 'Núm. ID', anchoPdf: 20 },
+        { encabezado: 'Nombres', anchoPdf: 22 },
+        { encabezado: 'Apellidos', anchoPdf: 22 },
+        { encabezado: 'Nacimiento', anchoPdf: 17 },
+        { encabezado: 'Género', anchoPdf: 14 },
+        { encabezado: 'Nacionalidad', anchoPdf: 18 },
+        { encabezado: 'Departamento', anchoPdf: 20 },
+        { encabezado: 'Ingreso', anchoPdf: 17 },
+        { encabezado: 'Cargo', anchoPdf: 22 },
+        { encabezado: 'Años', anchoPdf: 12 },
+        { encabezado: 'Modalidad', anchoPdf: 16 },
+        { encabezado: 'Categoría', anchoPdf: 17 },
+        { encabezado: 'Correo', anchoPdf: 28 },
+        { encabezado: 'Teléfono', anchoPdf: 17 },
+        { encabezado: 'Dirección', anchoPdf: 28 },
+        { encabezado: 'Proyectos asignados', anchoPdf: 36 },
+      ],
+      filas: colaboradores.map((colaborador) => [
+        colaborador.codigoEmpleado ?? '-',
+        colaborador.tipoIdentificacion ?? '-',
+        colaborador.tipoContrato ?? '-',
+        colaborador.estado ?? '-',
+        colaborador.tipoPersona ?? '-',
+        colaborador.idTipoIdentificacion?.toString() ?? '-',
+        colaborador.numeroIdentificacion ?? colaborador.identificacion ?? '-',
+        colaborador.nombres ?? '-',
+        colaborador.apellidos ?? '-',
+        this.formatearFechaValor(colaborador.fechaNacimiento),
+        colaborador.genero ?? '-',
+        colaborador.nacionalidad ?? '-',
+        colaborador.departamento ?? '-',
+        this.formatearFechaValor(colaborador.fechaContratacion),
+        colaborador.cargo ?? '-',
+        String(colaborador.aniosExperiencia ?? '-'),
+        colaborador.modalidad ?? '-',
+        colaborador.categoria ?? '-',
+        colaborador.correoElectronico ?? '-',
+        colaborador.telefono ?? '-',
+        colaborador.direccion ?? '-',
+        this.formatearProyectosColaborador(colaborador),
       ]),
-      styles: {
-        fontSize: 6.3,
-        cellPadding: { top: 2.5, bottom: 2.5, left: 2, right: 2 },
-        valign: 'middle',
-        overflow: 'linebreak',
-        font: 'helvetica',
-        lineColor: [226, 232, 240],
-        lineWidth: 0.2,
-      },
-      headStyles: {
-        fillColor: [22, 53, 114],
-        textColor: 255,
-        fontStyle: 'bold',
-        fontSize: 6.2,
-        halign: 'center',
-        cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
-      },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
-      didParseCell: data => {
-        if (data.section === 'body' && data.column.index === 3) {
-          const val = String(data.cell.raw ?? '').toLowerCase();
-          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      },
-      margin: { left: marginX, right: marginX, bottom: 18 },
-      didDrawPage: () => dibujarCabecera(),
+      columnaEstado: 3,
+      orientacionPdf: 'landscape',
+      formatoPdf: 'a3',
     });
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(marginX, footerY, pageW - marginX, footerY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(156, 163, 175);
-      doc.text(`Pagina ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-      doc.text('TMR - Reporte de Colaboradores', marginX, footerY + 4);
-      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
-    }
-
-    doc.save('colaboradores.pdf');
   }
 
   // ── EXPORTAR EXCEL ────────────────────────────────────
@@ -127,29 +73,38 @@ export class ExportarService {
     // ── Hoja 1: Colaboradores ───────────────────────────
     const ws = workbook.addWorksheet('Colaboradores');
     ws.columns = [
-      { header: 'Codigo empleado', key: 'codigoEmpleado', width: 18 },
-      { header: 'Empresa / Asociacion', key: 'empresa', width: 24 },
-      { header: 'Tipo de contrato', key: 'tipoContrato', width: 20 },
-      { header: 'Estado', key: 'estado', width: 14 },
-      { header: 'Tipo de persona', key: 'tipoPersona', width: 18 },
-      { header: 'Tipo de identificacion', key: 'tipoIdentificacion', width: 22 },
-      { header: 'Numero de identificacion', key: 'numeroIdentificacion', width: 24 },
-      { header: 'Nombres', key: 'nombres', width: 24 },
-      { header: 'Apellidos', key: 'apellidos', width: 24 },
-      { header: 'Fecha de nacimiento', key: 'fechaNacimiento', width: 18 },
-      { header: 'Genero', key: 'genero', width: 16 },
-      { header: 'Nacionalidad', key: 'nacionalidad', width: 18 },
-      { header: 'Departamento', key: 'departamento', width: 22 },
-      { header: 'Fecha de ingreso', key: 'fechaContratacion', width: 18 },
-      { header: 'Cargo', key: 'cargo', width: 26 },
-      { header: 'Anios de experiencia', key: 'aniosExperiencia', width: 18 },
-      { header: 'Modalidad', key: 'modalidad', width: 16 },
-      { header: 'Categoria', key: 'categoria', width: 18 },
-      { header: 'Correo electronico', key: 'correoElectronico', width: 34 },
-      { header: 'Telefono', key: 'telefono', width: 16 },
-      { header: 'Direccion', key: 'direccion', width: 36 },
-      { header: 'Proyectos asignados', key: 'proyectos', width: 54 },
+      { key: 'codigoEmpleado', width: 18 },
+      { key: 'empresa', width: 24 },
+      { key: 'tipoContrato', width: 20 },
+      { key: 'estado', width: 14 },
+      { key: 'tipoPersona', width: 18 },
+      { key: 'tipoIdentificacion', width: 22 },
+      { key: 'numeroIdentificacion', width: 24 },
+      { key: 'nombres', width: 24 },
+      { key: 'apellidos', width: 24 },
+      { key: 'fechaNacimiento', width: 18 },
+      { key: 'genero', width: 16 },
+      { key: 'nacionalidad', width: 18 },
+      { key: 'departamento', width: 22 },
+      { key: 'fechaContratacion', width: 18 },
+      { key: 'cargo', width: 26 },
+      { key: 'aniosExperiencia', width: 18 },
+      { key: 'modalidad', width: 16 },
+      { key: 'categoria', width: 18 },
+      { key: 'correoElectronico', width: 34 },
+      { key: 'telefono', width: 16 },
+      { key: 'direccion', width: 36 },
+      { key: 'proyectos', width: 54 },
     ];
+
+    ws.addRow([]);
+    ws.addRow([]);
+    ws.addRow([
+      'Código empleado', 'Empresa / Asociación', 'Tipo de contrato', 'Estado', 'Tipo de persona',
+      'Tipo de identificación', 'Número de identificación', 'Nombres', 'Apellidos', 'Fecha de nacimiento',
+      'Género', 'Nacionalidad', 'Departamento', 'Fecha de ingreso', 'Cargo', 'Años de experiencia',
+      'Modalidad', 'Categoría', 'Correo electrónico', 'Teléfono', 'Dirección', 'Proyectos asignados'
+    ]);
 
     colaboradores.forEach(c => ws.addRow({
       codigoEmpleado: c.codigoEmpleado ?? '-',
@@ -176,14 +131,18 @@ export class ExportarService {
       proyectos: this.formatearProyectosColaborador(c),
     }));
 
-    this.aplicarEstiloExcel(ws, 4);
+    await this.aplicarEstiloEstandar(workbook, ws, 'Reporte de Colaboradores', 4);
 
     // ── Hoja 2: Resumen ─────────────────────────────────
     const wsResumen = workbook.addWorksheet('Resumen');
     wsResumen.columns = [
-      { header: 'Métrica', key: 'metrica', width: 30 },
-      { header: 'Total', key: 'total', width: 12 },
+      { key: 'metrica', width: 30 },
+      { key: 'total', width: 12 },
     ];
+
+    wsResumen.addRow([]);
+    wsResumen.addRow([]);
+    wsResumen.addRow(['Métrica', 'Total']);
 
     const activosCount = colaboradores.filter(c => c.estado === 'Activo').length;
     const inactivosCount = colaboradores.filter(c => c.estado === 'Inactivo').length;
@@ -196,32 +155,80 @@ export class ExportarService {
     wsResumen.addRow({ metrica: 'No asignados (0 proyectos)', total: noAsignadosCount });
     wsResumen.addRow({ metrica: 'Asignados (1+ proyectos)', total: asignadosCount });
 
-    this.aplicarEstiloExcel(wsResumen, 2);
+    await this.aplicarEstiloEstandar(workbook, wsResumen, 'Resumen de Colaboradores', 2);
 
     const buffer = await workbook.xlsx.writeBuffer();
-    this.crearDescargaExcel(buffer, `colaboradores_${this.getFechaArchivo()}.xlsx`);
+    this.crearDescargaExcel(buffer, `Reporte_Colaboradores_${fechaArchivo()}.xlsx`);
   }
 
   // ── HELPERS ───────────────────────────────────────────
-  private aplicarEstiloExcel(ws: any, colEstado: number): void {
-    const header = ws.getRow(1);
-    header.height = 24;
-    header.eachCell((cell: any) => {
+  private async aplicarEstiloEstandar(
+    workbook: any,
+    ws: any,
+    tituloReporte: string,
+    colEstado: number,
+  ): Promise<void> {
+    const cantidadColumnas = ws.columns.length;
+
+    ws.mergeCells(1, 3, 1, cantidadColumnas);
+    ws.mergeCells(2, 3, 2, cantidadColumnas);
+
+    // Cabecera azul corporativo oscuro (FF1F497D)
+    for (let rowNumber = 1; rowNumber <= 2; rowNumber++) {
+      const row = ws.getRow(rowNumber);
+      row.height = rowNumber === 1 ? 79.25 : 28.25;
+      for (let colNumber = 1; colNumber <= cantidadColumnas; colNumber++) {
+        const cell = row.getCell(colNumber);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F497D' } };
+        if (rowNumber === 2) {
+          cell.border = { bottom: { style: 'thin', color: { argb: 'FF163572' } } };
+        }
+      }
+    }
+
+    const cellTitulo = ws.getCell(1, 3);
+    cellTitulo.value = tituloReporte;
+    cellTitulo.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    cellTitulo.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    const cellGenerado = ws.getCell(2, 3);
+    cellGenerado.value = `Generado: ${this.formatearFecha(new Date())}`;
+    cellGenerado.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
+    cellGenerado.alignment = { vertical: 'middle', horizontal: 'right' };
+
+    const logo = await obtenerLogoReporte();
+    if (logo) {
+      const logoId = workbook.addImage({ base64: logo, extension: 'png' });
+      ws.addImage(logoId, {
+        tl: { col: 0.15, row: 0.12 },
+        ext: { width: 172, height: 55 },
+      });
+    }
+
+    const headerRow = ws.getRow(3);
+    headerRow.height = 18;
+    headerRow.eachCell((cell: any) => {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF163572' } };
-      cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      cell.border = this.bordeDelgado();
+      const border = { style: 'thin' as const, color: { argb: 'FF163572' } };
+      cell.border = { top: border, left: border, bottom: border, right: border };
     });
 
     ws.eachRow((row: any, rowNumber: number) => {
-      if (rowNumber === 1) return;
-      const fill = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-      row.height = 24;
+      if (rowNumber <= 3) return;
+      row.height = 18;
       row.eachCell((cell: any, colNumber: number) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF' },
+        };
         cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF334155' } };
-        cell.border = this.bordeDelgado('FFE2E8F0');
+        const border = { style: 'thin' as const, color: { argb: 'FFE2E8F0' } };
+        cell.border = { top: border, left: border, bottom: border, right: border };
         cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
         if (colNumber === colEstado) {
           const esActivo = String(cell.value ?? '').toLowerCase() === 'activo';
           cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' } };
@@ -229,11 +236,20 @@ export class ExportarService {
         }
       });
     });
-  }
 
-  private bordeDelgado(color = 'FF163572'): any {
-    const b = { style: 'thin', color: { argb: color } };
-    return { top: b, left: b, bottom: b, right: b };
+    ws.views = [{ state: 'frozen', ySplit: 3 }];
+    ws.autoFilter = {
+      from: { row: 3, column: 1 },
+      to: { row: 3, column: cantidadColumnas },
+    };
+    ws.pageSetup = {
+      orientation: cantidadColumnas > 6 ? 'landscape' : 'portrait',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      printTitlesRow: '1:3',
+      margins: { left: 0.35, right: 0.35, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
+    };
   }
 
   private formatearFecha(fecha: Date): string {
@@ -266,13 +282,5 @@ export class ExportarService {
     link.download = nombreArchivo;
     link.click();
     URL.revokeObjectURL(url);
-  }
-
-  private getFechaArchivo(): string {
-    const now = new Date();
-    const d = now.getDate().toString().padStart(2, '0');
-    const m = (now.getMonth() + 1).toString().padStart(2, '0');
-    const y = now.getFullYear();
-    return `${d}-${m}-${y}`;
   }
 }
