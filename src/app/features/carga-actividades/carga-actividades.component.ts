@@ -11,6 +11,7 @@ import { selectActividadesList } from '../../core/state/actividades/actividades.
 import { ClientesService } from '../clientes/servicios/clientes.service';
 import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
+import { exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
 
 const COLOR_PRIMARIO = 'FF163572';
 const COLOR_RECURSO = 'FFFFFFFF';
@@ -363,6 +364,32 @@ export class CargaActividadesComponent implements OnInit {
 
   private async descargarActividadesExcel(actividades: Actividad[]): Promise<void> {
     try {
+      await exportarReporteExcel({
+        titulo: 'Reporte de Actividades',
+        nombreArchivo: 'Actividades',
+        nombreHoja: 'Actividades',
+        columnas: [
+          { encabezado: 'Fecha', anchoExcel: 15, alineacion: 'center' },
+          { encabezado: 'Colaborador', anchoExcel: 36 },
+          { encabezado: 'Proyecto', anchoExcel: 42 },
+          { encabezado: 'Cliente', anchoExcel: 36 },
+          { encabezado: 'Líder técnico', anchoExcel: 30 },
+          { encabezado: 'Horas', anchoExcel: 12, alineacion: 'center' },
+          { encabezado: 'Estado', anchoExcel: 18, alineacion: 'center' },
+        ],
+        filas: actividades.map((actividad) => [
+          this.formatearFecha(actividad.fecha),
+          actividad.colaborador || 'Sin colaborador',
+          actividad.proyecto || 'Sin proyecto',
+          actividad.cliente || 'Sin cliente',
+          actividad.liderTecnico || '-',
+          Number(actividad.nroHoras) || 0,
+          actividad.estado || 'Pendiente',
+        ]),
+        orientacionPdf: 'landscape',
+      });
+      return;
+
       const { Workbook } = await import('exceljs');
       const workbook = new Workbook();
       const worksheet = workbook.addWorksheet('Actividades');
