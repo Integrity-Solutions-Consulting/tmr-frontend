@@ -54,11 +54,11 @@ export async function agregarCabeceraExcel(
 
   const titulo = worksheet.getCell(1, 3);
   titulo.value = tituloReporte;
-  titulo.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-  titulo.alignment = { vertical: 'middle', horizontal: 'center' };
+  titulo.font = { name: 'Calibri', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+  titulo.alignment = { vertical: 'bottom', horizontal: 'center' };
 
   const generado = worksheet.getCell(2, 3);
-  generado.value = `Generado: ${formatearFecha(new Date())}`;
+  generado.value = '';
   generado.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
   generado.alignment = { vertical: 'middle', horizontal: 'right' };
 
@@ -93,8 +93,8 @@ export async function estandarizarCabeceraExcelExistente(
   detalle?: string,
   filaEncabezados = 4,
 ): Promise<void> {
-  try { worksheet.unMergeCells(1, 1, 1, cantidadColumnas); } catch {}
-  try { worksheet.unMergeCells(2, 1, 2, cantidadColumnas); } catch {}
+  try { worksheet.unMergeCells(1, 1, 1, cantidadColumnas); } catch { }
+  try { worksheet.unMergeCells(2, 1, 2, cantidadColumnas); } catch { }
   worksheet.mergeCells(1, 3, 1, cantidadColumnas);
   worksheet.mergeCells(2, 3, 2, cantidadColumnas);
 
@@ -112,8 +112,8 @@ export async function estandarizarCabeceraExcelExistente(
 
   const titulo = worksheet.getCell(1, 3);
   titulo.value = tituloReporte;
-  titulo.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-  titulo.alignment = { vertical: 'middle', horizontal: 'center' };
+  titulo.font = { name: 'Calibri', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+  titulo.alignment = { vertical: 'bottom', horizontal: 'center' };
 
   const generado = worksheet.getCell(2, 3);
   generado.value = detalle ? `${detalle} | Generado: ${formatearFecha(new Date())}` : `Generado: ${formatearFecha(new Date())}`;
@@ -174,15 +174,15 @@ export async function exportarReporteExcel(config: ReporteTabularConfig): Promis
     }
   }
 
-  const titulo = worksheet.getCell(1, 3);
-  titulo.value = config.titulo;
-  titulo.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-  titulo.alignment = { vertical: 'middle', horizontal: 'center' };
+  const tituloCell = worksheet.getCell(1, 3);
+  tituloCell.value = config.titulo;
+  tituloCell.font = { name: 'Calibri', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+  tituloCell.alignment = { vertical: 'bottom', horizontal: 'left' };
 
-  const generado = worksheet.getCell(2, 3);
-  generado.value = `Generado: ${formatearFecha(new Date())}`;
-  generado.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
-  generado.alignment = { vertical: 'middle', horizontal: 'right' };
+  const generadoCell = worksheet.getCell(2, 3);
+  generadoCell.value = '';
+  generadoCell.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
+  generadoCell.alignment = { vertical: 'middle', horizontal: 'right' };
 
   const logo = await obtenerLogo();
   if (logo) {
@@ -196,10 +196,10 @@ export async function exportarReporteExcel(config: ReporteTabularConfig): Promis
   const header = worksheet.getRow(3);
   header.height = 18;
   header.eachCell((cell) => {
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_TABLA } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_CABECERA } };
     cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    const border = { style: 'thin' as const, color: { argb: COLOR_TABLA } };
+    const border = { style: 'thin' as const, color: { argb: COLOR_CABECERA } };
     cell.border = { top: border, left: border, bottom: border, right: border };
   });
 
@@ -228,7 +228,7 @@ export async function exportarReporteExcel(config: ReporteTabularConfig): Promis
           bold: true,
           color: { argb: activo ? 'FF16A34A' : 'FF6B7280' },
         };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.alignment = { vertical: 'middle', horizontal: 'left' };
       }
     });
   });
@@ -270,7 +270,6 @@ export async function exportarReporteExcelMultihoja(
 ): Promise<void> {
   const { Workbook } = await import('exceljs');
   const workbook = new Workbook();
-
   const logo = await obtenerLogo();
 
   for (const config of configs) {
@@ -301,15 +300,15 @@ export async function exportarReporteExcelMultihoja(
       }
     }
 
-    const titulo = worksheet.getCell(1, 3);
-    titulo.value = config.titulo;
-    titulo.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-    titulo.alignment = { vertical: 'middle', horizontal: 'center' };
+    const tituloCell = worksheet.getCell(1, 3);
+    tituloCell.value = config.titulo;
+    tituloCell.font = { name: 'Calibri', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+    tituloCell.alignment = { vertical: 'bottom', horizontal: 'left' };
 
-    const generado = worksheet.getCell(2, 3);
-    generado.value = `Generado: ${formatearFecha(new Date())}`;
-    generado.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
-    generado.alignment = { vertical: 'middle', horizontal: 'right' };
+    const generadoCell = worksheet.getCell(2, 3);
+    generadoCell.value = '';
+    generadoCell.font = { name: 'Calibri', size: 10, color: { argb: 'FFFFFFFF' } };
+    generadoCell.alignment = { vertical: 'middle', horizontal: 'right' };
 
     if (logo) {
       const logoId = workbook.addImage({ base64: logo, extension: 'png' });
@@ -322,10 +321,10 @@ export async function exportarReporteExcelMultihoja(
     const header = worksheet.getRow(3);
     header.height = 18;
     header.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_TABLA } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_CABECERA } };
       cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      const border = { style: 'thin' as const, color: { argb: COLOR_TABLA } };
+      const border = { style: 'thin' as const, color: { argb: COLOR_CABECERA } };
       cell.border = { top: border, left: border, bottom: border, right: border };
     });
 
@@ -354,7 +353,7 @@ export async function exportarReporteExcelMultihoja(
             bold: true,
             color: { argb: activo ? 'FF16A34A' : 'FF6B7280' },
           };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.alignment = { vertical: 'middle', horizontal: 'left' };
         }
       });
     });
@@ -404,34 +403,33 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
   const logo = await obtenerLogo();
   const fecha = formatearFecha(new Date());
 
-const dibujarCabecera = () => {
+  const dibujarCabecera = () => {
     doc.setFillColor(31, 73, 125);
-    doc.rect(0, 0, pageWidth, 36, 'F');
+    doc.rect(0, 0, pageWidth, 30, 'F');
     if (logo) doc.addImage(logo, 'PNG', margin, 6, 50, 15);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    const titleSize = config.titulo.length > 32 ? 12 : config.titulo.length > 24 ? 13.5 : 15;
+    const titleSize = config.titulo.length > 32 ? 13 : config.titulo.length > 24 ? 14 : 15;
     doc.setFontSize(titleSize);
     const titleLines = doc.splitTextToSize(config.titulo, pageWidth - (margin + 60) * 2);
-    doc.text(titleLines, pageWidth * 0.65, titleLines.length > 1 ? 13.5 : 17, { align: 'center' });
+    doc.text(titleLines, pageWidth * 0.73, titleLines.length > 1 ? 16 : 17, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
-    // sin generado..doc.text(`Generado: ${fecha}`, pageWidth - margin, 29, { align: 'right' });
-};
-const anchoUtil = pageWidth - margin * 2;
-const totalSolicitado = config.columnas.reduce((t, c) => t + (c.anchoPdf ?? 0), 0);
-const escala = totalSolicitado > 0 ? anchoUtil / totalSolicitado : 1;
-const columnStyles: Record<number, Partial<Styles>> = {};
-config.columnas.forEach((columna, index) => {
-  columnStyles[index] = {
-    cellWidth: columna.anchoPdf ? Math.floor(columna.anchoPdf * escala * 100) / 100 : 'auto',
-    halign: columna.alineacion ?? 'left',
   };
-});
+  const anchoUtil = pageWidth - margin * 2;
+  const totalSolicitado = config.columnas.reduce((t, c) => t + (c.anchoPdf ?? 0), 0);
+  const escala = totalSolicitado > 0 ? anchoUtil / totalSolicitado : 1;
+  const columnStyles: Record<number, Partial<Styles>> = {};
+  config.columnas.forEach((columna, index) => {
+    columnStyles[index] = {
+      cellWidth: columna.anchoPdf ? Math.floor(columna.anchoPdf * escala * 100) / 100 : 'auto',
+      halign: columna.alineacion ?? 'left',
+    };
+  });
 
   dibujarCabecera();
- autoTable(doc, {
-    startY: 36,
+  autoTable(doc, {
+    startY: 30,
     head: [config.columnas.map((columna) => columna.encabezado)],
     body: config.filas,
     styles: {
@@ -447,6 +445,8 @@ config.columnas.forEach((columna, index) => {
       textColor: 255,
       fontStyle: 'bold',
       halign: 'center',
+      valign: 'middle',
+      cellPadding: { top: 1.5, bottom: 1.5, left: 2, right: 2 },
     },
     bodyStyles: { textColor: [51, 65, 85], halign: 'left' },
     alternateRowStyles: { fillColor: [248, 250, 252] },
@@ -455,7 +455,7 @@ config.columnas.forEach((columna, index) => {
       if (data.section === 'body' && data.column.index === config.columnaEstado) {
         const activo = String(data.cell.raw ?? '').toLowerCase() === 'activo';
         data.cell.styles.textColor = activo ? [22, 163, 74] : [107, 114, 128];
-data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fontStyle = 'bold';
       }
     },
     margin: { left: 0, right: 0, bottom: 18, top: 0 },
