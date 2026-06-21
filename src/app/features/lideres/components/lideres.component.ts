@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClient } from '@angular/common/http'; 
+import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
 import { environment } from '../../../../environments/environment';
@@ -60,7 +60,7 @@ export interface Lider {
 })
 export class LideresComponent implements OnInit {
 
-  lideres: Lider[] = []; 
+  lideres: Lider[] = [];
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
 
@@ -105,7 +105,7 @@ export class LideresComponent implements OnInit {
       telefono: [''],
       estado: ['Activo', Validators.required],
     });
-    
+
     this.obtenerLideresDelBackend();
   }
 
@@ -149,7 +149,7 @@ export class LideresComponent implements OnInit {
       infoPorLider.set(liderId, entrada);
     });
 
-   this.lideres = lideres.map((l, i) => {
+    this.lideres = lideres.map((l, i) => {
       const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
       return {
         ...l,
@@ -231,10 +231,10 @@ export class LideresComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-cerrarDropdowns(): void {
-  this.mostrarEstadoDropdown = false;
-  this.mostrarDescarga = false;
-}
+  cerrarDropdowns(): void {
+    this.mostrarEstadoDropdown = false;
+    this.mostrarDescarga = false;
+  }
   aplicarFiltros(): void {
     const texto = this.busqueda.toLowerCase();
     this.lideresFiltrados = this.lideres.filter(l => {
@@ -334,29 +334,29 @@ cerrarDropdowns(): void {
 
     const solicitud = this.modoEdicion && this.liderParaEditar?.id
       ? {
-          Idlider: Number(this.liderParaEditar.id),
-          Idpersona: payload.personaId ? Number(payload.personaId) : null,
-          Nombres: payload.nombres.trim(),
-          Apellidos: payload.apellidos.trim(),
-          Email: payload.correo ? payload.correo.trim() : null,
-          Telefono: payload.telefono ? payload.telefono.trim() : null,
-          Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
-          Activo: payload.estado === 'Activo',
-          NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
-          Usuariomodificacion: 'frontend',
-          Ipmodificacion: '127.0.0.1'
-        }
+        Idlider: Number(this.liderParaEditar.id),
+        Idpersona: payload.personaId ? Number(payload.personaId) : null,
+        Nombres: payload.nombres.trim(),
+        Apellidos: payload.apellidos.trim(),
+        Email: payload.correo ? payload.correo.trim() : null,
+        Telefono: payload.telefono ? payload.telefono.trim() : null,
+        Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
+        Activo: payload.estado === 'Activo',
+        NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
+        Usuariomodificacion: 'frontend',
+        Ipmodificacion: '127.0.0.1'
+      }
       : {
-          Idpersona: payload.personaId ? Number(payload.personaId) : null,
-          Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
-          Nombres: payload.nombres.trim(),    
-          Apellidos: payload.apellidos.trim(), 
-          Email: payload.correo ? payload.correo.trim() : null,        
-          Telefono: payload.telefono ? payload.telefono.trim() : null,
-          NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
-          Usuariocreacion: 'frontend',
-          Ipcreacion: '127.0.0.1'
-        };
+        Idpersona: payload.personaId ? Number(payload.personaId) : null,
+        Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
+        Nombres: payload.nombres.trim(),
+        Apellidos: payload.apellidos.trim(),
+        Email: payload.correo ? payload.correo.trim() : null,
+        Telefono: payload.telefono ? payload.telefono.trim() : null,
+        NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
+        Usuariocreacion: 'frontend',
+        Ipcreacion: '127.0.0.1'
+      };
 
     const request$ = this.modoEdicion && this.liderParaEditar?.id
       ? this.http.put(`${this.apiUrl}/${this.liderParaEditar.id}`, solicitud)
@@ -372,7 +372,7 @@ cerrarDropdowns(): void {
         this.mostrarConfirmacion = true;
         this.mostrarFormulario = false;
         this.liderEditando = null;
-        this.obtenerLideresDelBackend(); 
+        this.obtenerLideresDelBackend();
         setTimeout(() => this.mostrarConfirmacion = false, 3000);
       },
       error: (err: any) => {
@@ -383,7 +383,7 @@ cerrarDropdowns(): void {
     });
   }
 
-private liderYaExiste(payload: any): boolean {
+  private liderYaExiste(payload: any): boolean {
     if (payload.personaId) {
       return this.lideres.some(lider => (lider as any).idPersona === Number(payload.personaId));
     }
@@ -417,11 +417,11 @@ private liderYaExiste(payload: any): boolean {
       nombreArchivo: 'Lideres',
       nombreHoja: 'Líderes',
       columnas: [
-        { encabezado: 'Nombre', anchoPdf: 55 },
-        { encabezado: 'Correo', anchoPdf: 55 },
-        { encabezado: 'Teléfono', anchoPdf: 30 },
-        { encabezado: 'Tipo', anchoPdf: 25, alineacion: 'center' },
-        { encabezado: 'Estado', anchoPdf: 25, alineacion: 'center' },
+        { encabezado: 'Nombre', anchoPdf: 60 },
+        { encabezado: 'Correo', anchoPdf: 70 },
+        { encabezado: 'Teléfono', anchoPdf: 35 },
+        { encabezado: 'Tipo', anchoPdf: 25, alineacion: 'left' },
+        { encabezado: 'Estado', anchoPdf: 20, alineacion: 'left' },
       ],
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
@@ -435,12 +435,12 @@ private liderYaExiste(payload: any): boolean {
     this.mostrarDescarga = false;
     return;
 
-    const doc      = new jsPDF({ orientation: 'landscape' });
-    const fecha    = new Date().toLocaleDateString('es-EC');
-    const pageW    = 297;
-    const pageH    = 210;
-    const marginX  = 12;
-    const footerY  = pageH - 8;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const fecha = new Date().toLocaleDateString('es-EC');
+    const pageW = 297;
+    const pageH = 210;
+    const marginX = 12;
+    const footerY = pageH - 8;
 
     const dibujarCabecera = () => {
       doc.setFillColor(22, 53, 114);
@@ -543,8 +543,8 @@ private liderYaExiste(payload: any): boolean {
         { encabezado: 'Nombre', anchoExcel: 40 },
         { encabezado: 'Correo', anchoExcel: 40 },
         { encabezado: 'Teléfono', anchoExcel: 20 },
-        { encabezado: 'Tipo', anchoExcel: 15, alineacion: 'center' },
-        { encabezado: 'Estado', anchoExcel: 15, alineacion: 'center' },
+        { encabezado: 'Tipo', anchoExcel: 15, alineacion: 'left' },
+        { encabezado: 'Estado', anchoExcel: 15, alineacion: 'left' },
       ],
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
@@ -561,39 +561,39 @@ private liderYaExiste(payload: any): boolean {
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
 
-    const COLOR_PRIMARIO    = 'FF163572';
-    const COLOR_RECURSO     = 'FFFFFFFF';
+    const COLOR_PRIMARIO = 'FF163572';
+    const COLOR_RECURSO = 'FFFFFFFF';
     const COLOR_RECURSO_ALT = 'FFF8FAFC';
-    const COLOR_TEXTO       = 'FF334155';
-    const COLOR_BORDE       = 'FFE2E8F0';
+    const COLOR_TEXTO = 'FF334155';
+    const COLOR_BORDE = 'FFE2E8F0';
 
     const ws = workbook.addWorksheet('Líderes');
     ws.columns = [
-      { header: 'Nombre',   key: 'nombre',   width: 40 },
-      { header: 'Correo',   key: 'correo',   width: 40 },
+      { header: 'Nombre', key: 'nombre', width: 40 },
+      { header: 'Correo', key: 'correo', width: 40 },
       { header: 'Teléfono', key: 'telefono', width: 20 },
-      { header: 'Tipo',     key: 'tipo',     width: 15 },
-      { header: 'Estado',   key: 'estado',   width: 15 },
+      { header: 'Tipo', key: 'tipo', width: 15 },
+      { header: 'Estado', key: 'estado', width: 15 },
     ];
 
     this.lideresFiltrados.forEach(l => {
       ws.addRow({
-        nombre:   l.nombre || '-',
-        correo:   l.correo || '-',
+        nombre: l.nombre || '-',
+        correo: l.correo || '-',
         telefono: l.telefono || '-',
-        tipo:     l.tipo || '-',
-        estado:   l.estado === 'Activo' ? 'Activo' : 'Inactivo',
+        tipo: l.tipo || '-',
+        estado: l.estado === 'Activo' ? 'Activo' : 'Inactivo',
       });
     });
 
     const header = ws.getRow(1);
     header.height = 22;
     header.eachCell((cell: any) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font      = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       const b = { style: 'thin', color: { argb: COLOR_PRIMARIO } };
-      cell.border    = { top: b, left: b, bottom: b, right: b };
+      cell.border = { top: b, left: b, bottom: b, right: b };
     });
 
     ws.eachRow((row: any, rowNumber: number) => {
@@ -601,10 +601,10 @@ private liderYaExiste(payload: any): boolean {
       const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
       row.height = 20;
       row.eachCell((cell: any, colNumber: number) => {
-        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
         const b = { style: 'thin', color: { argb: COLOR_BORDE } };
-        cell.border    = { top: b, left: b, bottom: b, right: b };
+        cell.border = { top: b, left: b, bottom: b, right: b };
         cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
 
         if (colNumber === 5) {
