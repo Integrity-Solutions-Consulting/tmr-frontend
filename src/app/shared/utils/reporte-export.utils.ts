@@ -396,15 +396,15 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
   const doc = new jsPDF({
     orientation,
     unit: 'mm',
-    format: config.formatoPdf ?? (config.columnas.length > 12 ? 'a3' : 'letter'),
+    format: config.formatoPdf ?? (config.columnas.length > 12 ? 'a3' : 'a4'),
   });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 10;
+  const margin = 0;
   const logo = await obtenerLogo();
   const fecha = formatearFecha(new Date());
 
-  const dibujarCabecera = () => {
+const dibujarCabecera = () => {
     doc.setFillColor(31, 73, 125);
     doc.rect(0, 0, pageWidth, 36, 'F');
     if (logo) doc.addImage(logo, 'PNG', margin, 6, 50, 15);
@@ -412,35 +412,32 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
     doc.setFont('helvetica', 'bold');
     const titleSize = config.titulo.length > 32 ? 12 : config.titulo.length > 24 ? 13.5 : 15;
     doc.setFontSize(titleSize);
-    const titleLines = doc.splitTextToSize(config.titulo, pageWidth * 0.48);
-    doc.text(titleLines, pageWidth * 0.7, titleLines.length > 1 ? 13.5 : 17, { align: 'center' });
+    const titleLines = doc.splitTextToSize(config.titulo, pageWidth - (margin + 60) * 2);
+    doc.text(titleLines, pageWidth * 0.65, titleLines.length > 1 ? 13.5 : 17, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
-    doc.text(`Generado: ${fecha}`, pageWidth - margin, 29, { align: 'right' });
+    // sin generado..doc.text(`Generado: ${fecha}`, pageWidth - margin, 29, { align: 'right' });
+};
+const anchoUtil = pageWidth - margin * 2;
+const totalSolicitado = config.columnas.reduce((t, c) => t + (c.anchoPdf ?? 0), 0);
+const escala = totalSolicitado > 0 ? anchoUtil / totalSolicitado : 1;
+const columnStyles: Record<number, Partial<Styles>> = {};
+config.columnas.forEach((columna, index) => {
+  columnStyles[index] = {
+    cellWidth: columna.anchoPdf ? Math.floor(columna.anchoPdf * escala * 100) / 100 : 'auto',
+    halign: columna.alineacion ?? 'left',
   };
-
-  const anchoUtil = pageWidth - margin * 2;
-  const anchosSolicitados = config.columnas.map((columna) => columna.anchoPdf ?? 0);
-  const anchoTotalSolicitado = anchosSolicitados.reduce((total, ancho) => total + ancho, 0);
-  const escala = anchoTotalSolicitado > anchoUtil ? anchoUtil / anchoTotalSolicitado : 1;
-  const columnStyles: Record<number, Partial<Styles>> = {};
-  config.columnas.forEach((columna, index) => {
-    columnStyles[index] = {
-      cellWidth: columna.anchoPdf ? columna.anchoPdf * escala : undefined,
-      halign: columna.alineacion,
-    };
-  });
+});
 
   dibujarCabecera();
-  autoTable(doc, {
+ autoTable(doc, {
     startY: 36,
     head: [config.columnas.map((columna) => columna.encabezado)],
     body: config.filas,
     styles: {
       font: 'helvetica',
       fontSize: config.columnas.length > 16 ? 5.4 : config.columnas.length > 12 ? 6 : 7.5,
-      cellPadding: config.columnas.length > 16 ? 1 : config.columnas.length > 12 ? 1.4 : 2.2,
-      valign: 'middle',
+      cellPadding: config.columnas.length > 16 ? 1 : config.columnas.length > 12 ? 1.4 : 2,
       overflow: 'linebreak',
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
@@ -451,18 +448,17 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
       fontStyle: 'bold',
       halign: 'center',
     },
-    bodyStyles: { textColor: [51, 65, 85] },
+    bodyStyles: { textColor: [51, 65, 85], halign: 'left' },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     columnStyles,
     didParseCell: (data) => {
       if (data.section === 'body' && data.column.index === config.columnaEstado) {
         const activo = String(data.cell.raw ?? '').toLowerCase() === 'activo';
         data.cell.styles.textColor = activo ? [22, 163, 74] : [107, 114, 128];
-        data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.halign = 'center';
+data.cell.styles.fontStyle = 'bold';
       }
     },
-    margin: { left: margin, right: margin, bottom: 18 },
+    margin: { left: 0, right: 0, bottom: 18, top: 0 },
     didDrawPage: dibujarCabecera,
   });
 
