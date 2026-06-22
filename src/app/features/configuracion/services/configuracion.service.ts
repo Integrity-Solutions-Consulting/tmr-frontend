@@ -30,7 +30,7 @@ export interface UpdateUsuarioPayload {
   rolesids: number[];
   email?: string;
   nombreusuario?: string;
-  password?: string | null;
+  password?: string;
   debeCambiarPassword?: boolean;
 }
 
@@ -259,14 +259,22 @@ export class ConfiguracionService {
   }
 
   toUpdateUsuarioPayload(usuario: Usuario, passwordNueva?: string | null): UpdateUsuarioPayload {
-    return {
-      idPersona: usuario.usuarioInterno ? usuario.idPersona : null,
-      rolesids: usuario.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId)),
+    const numericRoles = usuario.rolesids.map((roleId) => Number(roleId)).filter((roleId) => Number.isFinite(roleId));
+    const personaId = usuario.usuarioInterno ? usuario.idPersona : null;
+
+    const payload: UpdateUsuarioPayload = {
+      idPersona: personaId,
+      rolesids: numericRoles,
       email: usuario.email || undefined,
       nombreusuario: usuario.usuario || undefined,
-      password: passwordNueva || null,
       debeCambiarPassword: usuario.debeCambiarPassword,
     };
+
+    if (passwordNueva && passwordNueva.trim()) {
+      payload.password = passwordNueva.trim();
+    }
+
+    return payload;
   }
 
   loadFeriados(): void {

@@ -85,21 +85,21 @@
   <!-- ══ Configuración ══ -->
   <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
     <a class="sidebar__link sidebar__link--parent" (click)="cfgOpen = !cfgOpen">
-      <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Confirguracion/configuracion.svg')"></span>
+      <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/configuracion.svg')"></span>
       <span>Configuración</span>
       <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
     </a>
     <div class="sidebar__submenu" [class.sidebar__submenu--visible]="cfgOpen">
       <a routerLink="/configuracion/usuarios" routerLinkActive="active" class="sidebar__sublink">
-        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Confirguracion/usuarios.svg')"></span>
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/usuarios.svg')"></span>
         <span>Usuarios</span>
       </a>
       <a routerLink="/configuracion/roles" routerLinkActive="active" class="sidebar__sublink">
-        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Confirguracion/roles.svg')"></span>
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/roles.svg')"></span>
         <span>Roles</span>
       </a>
       <a routerLink="/configuracion/feriados" routerLinkActive="active" class="sidebar__sublink">
-        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Confirguracion/feriados.svg')"></span>
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/feriados.svg')"></span>
         <span>Feriados</span>
       </a>
     </div>
