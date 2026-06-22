@@ -174,8 +174,9 @@
                         <td class="col-horas">{{ el.nroHoras | horasFormat }}</td>
                         <td class="col-estado">
                             <span class="badge" [ngClass]="{
-                                'badge--activo': el.estado === 'Completo',
-                                'badge--inactivo': el.estado !== 'Completo'
+                                'badge--completado': el.estado === 'Completo',
+                                'badge--en-progreso': el.estado === 'En progreso',
+                                'badge--pendiente': el.estado === 'Pendiente'
                             }">
                                 {{ el.estado }}
                             </span>

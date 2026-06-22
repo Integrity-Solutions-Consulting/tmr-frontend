@@ -12,7 +12,12 @@ export class FeriadosService {
   constructor() {
     this.http.get<any[]>(`${environment.apiUrl}/configuracion/dias-festivos`).subscribe({
       next: (data) => {
-        this.feriados = data.map(d => new Date(d.fecha));
+        this.feriados = (data ?? [])
+          .map(d => {
+            const fechaStr = d.fechaFeriado || d.fecha;
+            return fechaStr ? new Date(fechaStr + 'T00:00:00') : null;
+          })
+          .filter((date): date is Date => date !== null && !isNaN(date.getTime()));
       },
       error: (err) => console.error('Error loading feriados', err)
     });
