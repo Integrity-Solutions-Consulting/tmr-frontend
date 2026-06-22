@@ -122,10 +122,7 @@
             </div>
           </div>
 
-          <span class="detalle-proyectos__item-estado" [ngClass]="getEstadoClass(proy.estado)">
-            <span class="detalle-proyectos__item-dot"></span>
-            {{ proy.estado || 'Sin seguimiento' }}
-          </span>
+          <app-badge-estado [estado]="proy.estado || 'Sin seguimiento'"></app-badge-estado>
         </div>
       </div>
     </div>

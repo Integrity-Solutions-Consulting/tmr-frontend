@@ -1,72 +1,105 @@
 .status-badge {
-  min-width: 102px;
-  height: 26px;
-
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-
-  padding: 0 10px;
-
-  background: #ffffff;
-
+  gap: 8px;
+  min-height: 26px;
+  padding: 4px 14px;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
-
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
-  font-size: 11px;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
   font-weight: 500;
-
+  line-height: 1;
+  white-space: nowrap;
   color: #6b7280;
 
-  &.active {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #166534;
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #8e8e93;
+    flex-shrink: 0;
   }
-}
 
-.status-dot {
-  width: 7px;
-  height: 7px;
+  .status-text {
+    color: inherit;
+  }
 
-  border-radius: 50%;
+  &.active {
+    background-color: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+    .status-dot { background-color: #22c55e; }
+  }
 
   &.progress {
-    background: #1677ff;
-  }
-
-  &.active {
-    background: #22c55e;
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+    .status-dot { background-color: #3b82f6; }
   }
 
   &.completed {
-    background: #22c55e;
+    background-color: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #15803d;
+    .status-dot { background-color: #22c55e; }
   }
 
   &.cancelled {
-    background: #ef4444;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+    .status-dot { background-color: #ef4444; }
   }
 
   &.waiting {
-    background: #f97316;
+    background-color: #fff7ed;
+    border-color: #fed7aa;
+    color: #c2410c;
+    .status-dot { background-color: #ff8d28; }
   }
 
   &.inactive {
-    background: #9ca3af;
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #8e8e93;
+    .status-dot { background-color: #8e8e93; }
   }
 
   &.approved {
-    background: #af52de;
+    background-color: #f5f3ff;
+    border-color: #e9d5ff;
+    color: #7131ca;
+    .status-dot { background-color: #af52de; }
   }
 
   &.planning {
-    background: #00c7be;
+    background-color: #ecfeff;
+    border-color: #a5f3fc;
+    color: #0f766e;
+    .status-dot { background-color: #00a6a0; }
   }
 
   &.delayed {
-    background: #ffd60a;
+    background-color: #fff7cd;
+    border-color: #fef08a;
+    color: #78350f;
+    .status-dot { background-color: #d6a800; }
+  }
+
+  &.development {
+    background-color: #f0f9ff;
+    border-color: #dbeafe;
+    color: #134e4a;
+    .status-dot { background-color: #0284c7; }
+  }
+
+  &.sin-seguimiento {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    color: #6b7280;
+    .status-dot { background-color: #9ca3af; }
   }
 }
