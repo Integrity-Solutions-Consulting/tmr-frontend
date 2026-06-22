@@ -1,101 +1,184 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { interval, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TOKEN_CONFIG } from '../../config/token.config';
 
 /**
  * SessionExpirationModalComponent
- * Modal que se muestra 1 minuto antes de expirar el token
- * Permite al usuario extender la sesión o cerrarla
+ * Modal mejorado que se muestra 1 minuto antes de expirar el token
+ * Incluye countdown visual y auto-logout si no hay respuesta
  */
 @Component({
   selector: 'app-session-expiration-modal',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <div class="session-modal">
-      <div class="session-modal__header">
-        <h2 mat-dialog-title>⏰ Sesión por Expirar</h2>
+    <div class="session-expiration-modal">
+      <div class="icon-container">
+        <mat-icon>schedule</mat-icon>
       </div>
-
-      <mat-dialog-content class="session-modal__content">
-        <p>Su sesión expirará en <strong>1 minuto</strong></p>
-        <p>¿Desea extender su sesión?</p>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end" class="session-modal__actions">
-        <button mat-button (click)="onNo()" class="session-modal__btn-no">
-          No, Cerrar Sesión
+      
+      <h2>Sesión próxima a expirar</h2>
+      
+      <p class="message">
+        No se ha detectado actividad, la sesión se cerrará en 1 minuto. <b> ¿Deseas extender la sesión? </b>
+      </p>
+      
+      <div class="actions">
+        <button mat-raised-button (click)="onExtend()" class="btn-extend">
+          Extender Sesión
         </button>
-        <button mat-raised-button color="primary" (click)="onYes()" class="session-modal__btn-yes">
-          Sí, Extender Sesión
+        <button mat-button (click)="onLogout()" class="btn-logout">
+          Cerrar Sesión
         </button>
-      </mat-dialog-actions>
+      </div>
+      
+      <p class="hint">
+        Usa la aplicación para mantener tu sesión activa
+      </p>
     </div>
   `,
   styles: [`
-    .session-modal {
-      min-width: 350px;
-      padding: 0;
+    .session-expiration-modal {
+      text-align: center;
+      padding: 24px;
+      min-width: 360px;
+      background: #ffffff;
     }
 
-    .session-modal__header {
-      padding: 24px 24px 16px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    .icon-container {
+      margin-bottom: 16px;
+      font-size: 48px;
+      color: #ff9800;
+      display: flex;
+      justify-content: center;
     }
 
-    .session-modal__header h2 {
-      margin: 0;
+    ::ng-deep .icon-container mat-icon {
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
+    }
+
+    h2 {
+      margin: 16px 0 8px;
+      color: #333;
       font-size: 20px;
       font-weight: 500;
     }
 
-    .session-modal__content {
-      padding: 24px;
-      text-align: center;
-    }
-
-    .session-modal__content p {
-      margin: 12px 0;
-      font-size: 16px;
+    .message {
+      color: #666;
+      margin-bottom: 24px;
       line-height: 1.5;
+      font-size: 14px;
     }
 
-    .session-modal__content strong {
-      color: #d32f2f;
-      font-weight: 600;
+    .countdown-container {
+      margin: 32px 0;
     }
 
-    .session-modal__actions {
-      padding: 16px 24px;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-      margin: 0;
-      gap: 8px;
+    .time {
+      font-size: 56px;
+      font-weight: bold;
+      color: #ff9800;
+      line-height: 1;
     }
 
-    .session-modal__btn-no {
+    .label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 24px 0 16px;
+    }
+
+    :host ::ng-deep .btn-extend {
+      background-color: #0a2463 !important;
+      color: #ffffff !important;
+      width: 100%;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    :host ::ng-deep .btn-logout {
+      width: 100%;
+      height: 40px;
+      font-size: 14px;
       color: #666;
     }
 
-    .session-modal__btn-yes {
-      min-width: 120px;
+    :host ::ng-deep .hint {
+      font-size: 12px;
+      color: #999;
+      margin: 16px 0 0;
+      font-style: italic;
     }
   `]
 })
-export class SessionExpirationModalComponent {
+export class SessionExpirationModalComponent implements OnInit, OnDestroy {
+  secondsRemaining = TOKEN_CONFIG.MODAL_RESPONSE_TIMEOUT;
+  totalSeconds = TOKEN_CONFIG.MODAL_RESPONSE_TIMEOUT;
+  
+  private destroy$ = new Subject<void>();
   private dialogRef = inject(MatDialogRef<SessionExpirationModalComponent>);
+
+  ngOnInit(): void {
+    console.log('🔔 Modal de sesión abierto - Countdown iniciado');
+    
+    // Iniciar countdown de 1 segundo
+    interval(1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.secondsRemaining--;
+        
+        if (this.secondsRemaining <= 0) {
+          console.log('⏰ Timeout del modal - Auto logout');
+          this.onTimeout();
+        }
+      });
+  }
 
   /**
    * Usuario aceptó extender sesión
    */
-  onYes(): void {
-    this.dialogRef.close(true);
+  onExtend(): void {
+    console.log('✅ Usuario aceptó extender sesión');
+    this.dialogRef.close({ action: 'extend' });
   }
 
   /**
-   * Usuario rechazó y quiere cerrar sesión
+   * Usuario rechazó extender sesión
    */
-  onNo(): void {
-    this.dialogRef.close(false);
+  onLogout(): void {
+    console.log('❌ Usuario rechazó extender sesión');
+    this.dialogRef.close({ action: 'logout' });
+  }
+
+  /**
+   * Timeout del modal - logout automático
+   */
+  private onTimeout(): void {
+    console.log('❌ Timeout - sesión expirada sin respuesta');
+    this.dialogRef.close({ action: 'timeout' });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
