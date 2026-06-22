@@ -1,20 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <path
-    d="M5 19v-1.5A4.5 4.5 0 0 1 9.5 13h1A4.5 4.5 0 0 1 15 17.5V19"
+  <!-- Usuario principal -->
+  <circle
+    cx="8.2"
+    cy="8.4"
+    r="2.8"
     stroke="#34C759"
-    stroke-width="1.8"
+    stroke-width="1.9"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
+
   <path
-    d="M6.5 8.5a3.5 3.5 0 1 0 7 0 3.5 3.5 0 0 0-7 0Z"
+    d="M3.8 19v-.7a4.4 4.4 0 0 1 4.4-4.4h.1a4.4 4.4 0 0 1 4.4 4.4v.7"
     stroke="#34C759"
-    stroke-width="1.8"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
   />
-  <path
-    d="m16.5 10 1.8 1.8L22 8.2"
+
+  <!-- Usuario secundario -->
+  <circle
+    cx="15.8"
+    cy="11.4"
+    r="2.2"
     stroke="#34C759"
-    stroke-width="1.8"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <path
+    d="M13.4 19v-.3a3.3 3.3 0 0 1 3.3-3.3h.1a3.3 3.3 0 0 1 3.3 3.3"
+    stroke="#34C759"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Visto simple -->
+  <path
+    d="M16.2 6.3l1.6 1.6 3.4-3.4"
+    stroke="#34C759"
+    stroke-width="1.9"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
