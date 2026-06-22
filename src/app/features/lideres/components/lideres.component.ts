@@ -682,7 +682,7 @@ export class LideresComponent implements OnInit {
     if (!this.liderAEliminar) return;
     const id = this.liderAEliminar.id ?? this.liderAEliminar.codigo;
     this.errorEliminar = null;
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+    this.http.delete(`${this.apiUrl}/${id}/fisico`).subscribe({
       next: () => {
         this.mostrarEliminar = false;
         this.liderAEliminar = null;
