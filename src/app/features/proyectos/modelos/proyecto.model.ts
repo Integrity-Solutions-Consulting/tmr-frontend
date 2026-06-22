@@ -1,6 +1,7 @@
 export interface RecursoProyecto {
   id?: number;
   idEmpleado?: number | null;
+  idDepartamento?: number | null;
   tipo: string;
   nombre: string;
   departamento?: number | null;

@@ -242,7 +242,7 @@ export class ProyectoForm implements OnInit, OnChanges {
           recursosData.forEach(r => {
             const rg = this.crearRecurso();
             const cargoEncontrado = this.todosLosCargos.find(c => c.nombre === r.rol);
-            const idDep = cargoEncontrado?.idDepartamento ?? null;
+            const idDep = r.departamento ?? r.idDepartamento ?? cargoEncontrado?.idDepartamento ?? null;
             rg.patchValue({
               idEmpleado: r.idEmpleado ?? null,
               tipo: r.tipo,
@@ -503,8 +503,10 @@ export class ProyectoForm implements OnInit, OnChanges {
         horasLider: this.normalizarNumero(l.horasLider),
         recursos: (l.recursos ?? []).map((r: any) => ({
           idEmpleado: r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre),
+          idDepartamento: r.departamento ?? null,
           tipo: r.tipo,
           nombre: r.nombre,
+          departamento: r.departamento ?? null,
           rol: r.rol,
           entrada: this.normalizarFecha(r.entrada),
           salida: this.normalizarFecha(r.salida),

@@ -23,7 +23,7 @@ import {
   ProyectosFiltros
 } from '../../componentes/proyectos-filtros/proyectos-filtros';
 
-import { Proyecto } from '../../modelos/proyecto.model';
+import { CargoLookup, Proyecto, RecursoProyecto } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
 
 import {
@@ -63,6 +63,7 @@ export class ProyectosPage implements OnDestroy {
 
   seguimientoMap: Record<number, string> = {};
   departamentoMap: Record<number, string> = {};
+  cargosCatalogo: CargoLookup[] = [];
 
   modalCrearVisible = false;
   modalDetalleVisible = false;
@@ -116,6 +117,7 @@ export class ProyectosPage implements OnDestroy {
           map[dep.id] = dep.nombre;
           return map;
         },   {} as Record<number, string>);
+        this.cargosCatalogo = lookups.cargos ?? [];
       },
       error: (error) => console.error('Error al cargar lookups:', error)
     });
@@ -481,7 +483,7 @@ export class ProyectosPage implements OnDestroy {
               nombre: recurso.nombre ?? '-',
               costo: recurso.costoHora ? `$${recurso.costoHora}` : '-',
               horas: recurso.horas ?? 0,
-              departamento: this.obtenerNombreDepartamento(recurso.departamento),
+              departamento: this.obtenerDepartamentosRecurso(recurso),
               rol: recurso.rol ?? '-',
               entrada: this.formatearFecha(recurso.entrada ?? null),
               salida: this.formatearFecha(recurso.salida ?? null)
@@ -544,9 +546,39 @@ export class ProyectosPage implements OnDestroy {
     }
   }
 
+  private obtenerIdDepartamentoRecurso(recurso: RecursoProyecto): number | null {
+    return recurso.departamento ?? recurso.idDepartamento ?? null;
+  }
+
+  private obtenerDepartamentosRecurso(recurso: RecursoProyecto): string {
+    const rol = this.normalizarTextoCatalogo(recurso.rol);
+
+    if (rol) {
+      const departamentos = this.cargosCatalogo
+        .filter(cargo => this.normalizarTextoCatalogo(cargo.nombre) === rol)
+        .map(cargo => this.obtenerNombreDepartamento(cargo.idDepartamento))
+        .filter(nombre => nombre !== '-');
+      const departamentosUnicos = Array.from(new Set(departamentos));
+
+      if (departamentosUnicos.length) {
+        return departamentosUnicos.join(', ');
+      }
+    }
+
+    return this.obtenerNombreDepartamento(this.obtenerIdDepartamentoRecurso(recurso));
+  }
+
+  private normalizarTextoCatalogo(valor?: string | null): string {
+    return (valor ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
   private obtenerNombreDepartamento(idDepartamento?: number | null): string {
-  if (!idDepartamento) return '-';
-  return this.departamentoMap[idDepartamento] ?? '-';
+    if (!idDepartamento) return '-';
+    return this.departamentoMap[idDepartamento] ?? '-';
   }
 
   private aplicarEstiloHoja(ws: any, colEstado: number): void {
@@ -834,7 +866,7 @@ export class ProyectosPage implements OnDestroy {
               { content: recurso.nombre ?? '-', styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
               { content: recurso.costoHora ? `$${recurso.costoHora}/h` : '-', styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'right', minCellHeight: 10 } },
               { content: recurso.horas ? `${recurso.horas}h` : '-', styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'center', minCellHeight: 10 } },
-              { content: this.obtenerNombreDepartamento(recurso.departamento), styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
+              { content: this.obtenerDepartamentosRecurso(recurso), styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
               { content: recurso.rol ?? '-', styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
               { content: this.formatearFecha(recurso.entrada ?? null), styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center', minCellHeight: 10 } },
               { content: this.formatearFecha(recurso.salida ?? null), styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center', minCellHeight: 10 } },
@@ -885,7 +917,7 @@ export class ProyectosPage implements OnDestroy {
       // ── Tabla del proyecto ──
       autoTable(doc, {
         startY: currentY,
-        head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Tipo Rec.', 'Rol', 'Entrada', 'Salida']],
+        head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Departamento', 'Rol', 'Entrada', 'Salida']],
         body: body,
         styles: {
           fontSize: 7.5,
