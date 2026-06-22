@@ -98,7 +98,7 @@
     <!-- Fila 1: Nombre del rol | Estado -->
     <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
       <!-- Nombre -->
-      <div class="form-field">
+      <div class="form-field" [class.form-field--full]="!isEdit">
         <div class="float-field">
           <input class="float-field__input" type="text" formControlName="nombre" placeholder=" "
             [class.float-field__input--error]="campoInvalido('nombre')" />
@@ -115,6 +115,7 @@
       </div>
 
       <!-- Estado -->
+      @if (isEdit) {
       <div class="form-field">
         <div class="float-select">
           <select class="float-select__input" formControlName="activo">
@@ -124,6 +125,7 @@
           <label class="float-select__label float-select__label--up">Estado <span class="req">*</span></label>
         </div>
       </div>
+      }
     </div>
 
     <!-- Descripción -->

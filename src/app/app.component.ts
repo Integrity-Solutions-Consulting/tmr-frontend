@@ -20,7 +20,7 @@ import { NavigationEnd } from '@angular/router';
   styleUrl: './app.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  invalidCharacterMessageVisible = false;
+  private activeErrors = new Map<HTMLElement, { errorEl: HTMLElement; timeoutId: number }>();
 
   private destroy$ = new Subject<void>();
   private tokenMonitor = inject(TokenMonitorService);
@@ -30,7 +30,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private currentDialogRef: any; // Referencia al modal abierto
   private passwordDialogRef: any;
-  private invalidCharacterTimeoutId: number | null = null;
 
   @HostListener('document:beforeinput', ['$event'])
   onBeforeInput(event: InputEvent): void {
@@ -39,7 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     event.preventDefault();
-    this.showInvalidCharacterMessage();
+    this.showInvalidCharacterMessage(event.target as HTMLElement);
   }
 
   @HostListener('document:input', ['$event'])
@@ -58,7 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.setEditableValue(target, this.removeEmojis(currentValue));
     target.dispatchEvent(new Event('input', { bubbles: true }));
-    this.showInvalidCharacterMessage();
+    this.showInvalidCharacterMessage(target as HTMLElement);
   }
 
   ngOnInit(): void {
@@ -190,9 +189,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.tokenMonitor.stopMonitoring();
-    if (this.invalidCharacterTimeoutId) {
-      window.clearTimeout(this.invalidCharacterTimeoutId);
-    }
+    this.activeErrors.forEach((val) => {
+      window.clearTimeout(val.timeoutId);
+      val.errorEl.remove();
+    });
+    this.activeErrors.clear();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -236,17 +237,41 @@ export class AppComponent implements OnInit, OnDestroy {
     target.textContent = value;
   }
 
-  private showInvalidCharacterMessage(): void {
-    this.invalidCharacterMessageVisible = true;
-
-    if (this.invalidCharacterTimeoutId) {
-      window.clearTimeout(this.invalidCharacterTimeoutId);
+  private showInvalidCharacterMessage(target: HTMLElement): void {
+    let container: HTMLElement | null = target.closest('.form-field, .float-field, .float-select, .email-compose');
+    if (!container) {
+      container = target.parentElement;
+    }
+    if (!container) {
+      return;
     }
 
-    this.invalidCharacterTimeoutId = window.setTimeout(() => {
-      this.invalidCharacterMessageVisible = false;
-      this.invalidCharacterTimeoutId = null;
-    }, 2500);
+    const existing = this.activeErrors.get(container);
+    if (existing) {
+      window.clearTimeout(existing.timeoutId);
+      const timeoutId = window.setTimeout(() => {
+        existing.errorEl.remove();
+        this.activeErrors.delete(container!);
+      }, 2500);
+      existing.timeoutId = timeoutId;
+    } else {
+      const errorEl = document.createElement('span');
+      errorEl.className = 'form-field__error app-dynamic-character-error';
+      errorEl.textContent = 'Ingrese un caracter valido';
+      errorEl.style.color = '#ef4444';
+      errorEl.style.fontSize = '11px';
+      errorEl.style.marginTop = '4px';
+      errorEl.style.display = 'block';
+
+      container.appendChild(errorEl);
+
+      const timeoutId = window.setTimeout(() => {
+        errorEl.remove();
+        this.activeErrors.delete(container!);
+      }, 2500);
+
+      this.activeErrors.set(container, { errorEl, timeoutId });
+    }
   }
 
   private readonly ignoredInputTypes = new Set([
