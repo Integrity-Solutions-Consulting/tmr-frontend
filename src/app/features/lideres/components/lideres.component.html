@@ -125,8 +125,8 @@
     </div>
 
     <div class="search-spacer"></div>
-<div class="descarga-wrapper" (click)="$event.stopPropagation()">
-  <button class="btn btn-outline" (click)="abrirDescarga()">
+    <div class="descarga-wrapper" (click)="$event.stopPropagation()">
+      <button class="btn btn-outline" (click)="abrirDescarga()">
         Descargar
         <span class="material-symbols-outlined">file_download</span>
       </button>
@@ -182,7 +182,7 @@
                   <span>Editar</span>
                 </button>
                 <button mat-menu-item (click)="toggleEstadoLider(lider)">
-                  <span class="material-symbols-outlined">{{ lider.estado === 'Activo' ? 'person_off' : 'person'
+                  <span class="material-symbols-outlined">{{ lider.estado === 'Activo' ? 'block' : 'check_circle'
                     }}</span>
                   <span>{{ lider.estado === 'Activo' ? 'Desactivar' : 'Activar' }}</span>
                 </button>

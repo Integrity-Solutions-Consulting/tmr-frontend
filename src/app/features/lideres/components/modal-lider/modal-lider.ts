@@ -208,13 +208,33 @@ get nombreApellidoBloqueado(): boolean {
   }
 
   isNombresValid(nombres: string): boolean {
-    return !!nombres && nombres.trim().length > 0 && nombres.trim().length <= 100;
+    return !!nombres && nombres.trim().length >= 3 && nombres.trim().length <= 100;
   }
 
   isApellidosValid(apellidos: string): boolean {
-    return !!apellidos && apellidos.trim().length > 0 && apellidos.trim().length <= 100;
+    return !!apellidos && apellidos.trim().length >= 3 && apellidos.trim().length <= 100;
   }
 
+  telefonoTocado = false;
+  nombresTocado = false;
+  apellidosTocado = false;
+  correoTocado = false;
+
+  onBlurTelefono(): void {
+    this.telefonoTocado = true;
+  }
+
+  onBlurNombres(): void {
+    this.nombresTocado = true;
+  }
+
+  onBlurApellidos(): void {
+    this.apellidosTocado = true;
+  }
+
+  onBlurCorreo(): void {
+    this.correoTocado = true;
+  }
   formularioValido(): boolean {
     const baseValid = !!this.form.tipoId &&
                       this.isNombresValid(this.form.nombres) &&
