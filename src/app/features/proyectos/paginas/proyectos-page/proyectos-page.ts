@@ -62,6 +62,7 @@ export class ProyectosPage implements OnDestroy {
   private proyectosService = inject(ProyectosService);
 
   seguimientoMap: Record<number, string> = {};
+  departamentoMap: Record<number, string> = {};
 
   modalCrearVisible = false;
   modalDetalleVisible = false;
@@ -111,11 +112,14 @@ export class ProyectosPage implements OnDestroy {
           map[estado.id] = estado.nombre;
           return map;
         }, {} as Record<number, string>);
+        this.departamentoMap = lookups.departamentos.reduce((map, dep) => {
+          map[dep.id] = dep.nombre;
+          return map;
+        },   {} as Record<number, string>);
       },
-      error: (error) => console.error('Error al cargar estados de seguimiento:', error)
+      error: (error) => console.error('Error al cargar lookups:', error)
     });
-  }
-
+}
   private obtenerSeguimientoNombre(idEstadoProyecto?: number | null): string {
     if (!idEstadoProyecto) return 'Sin seguimiento';
     return this.seguimientoMap[idEstadoProyecto] ?? 'Sin seguimiento';
@@ -357,27 +361,23 @@ export class ProyectosPage implements OnDestroy {
 
     this.aplicarEstiloHoja(wsResumen, 6);
 
-    // ── Hoja 2: Líderes y Recursos (estructura plana, sin filas vacías intermedias) ──
+    // ── Hoja 2: Líderes y Recursos ──
     const wsDetalle = workbook.addWorksheet('Líderes y Recursos');
     wsDetalle.columns = [
-      { header: 'Código Proyecto', key: 'codigoProyecto', width: 20 },
-      { header: 'Nombre Proyecto', key: 'nombreProyecto', width: 40 },
-      { header: 'Tipo Fila',       key: 'tipoFila',       width: 15 },
-      { header: 'Líder',           key: 'lider',          width: 40 },
-      { header: 'Costo/h Líder',   key: 'costoLider',     width: 18 },
-      { header: 'Horas Líder',     key: 'horasLider',     width: 15 },
-      { header: 'Recurso',         key: 'recurso',        width: 40 },
-      { header: 'Tipo Recurso',    key: 'tipoRecurso',    width: 20 },
-      { header: 'Rol',             key: 'rol',            width: 40 },
-      { header: 'Entrada',         key: 'entrada',        width: 15 },
-      { header: 'Salida',          key: 'salida',         width: 15 },
-      { header: 'Costo/h Recurso', key: 'costoRecurso',   width: 18 },
-      { header: 'Horas Recurso',   key: 'horasRecurso',   width: 15 },
+      { header: 'Proyecto',        key: 'proyecto',        width: 30 },
+      { header: 'Tipo',            key: 'tipo',            width: 14 },
+      { header: 'Nombre',          key: 'nombre',          width: 35 },
+      { header: 'Costo/h',         key: 'costo',           width: 14 },
+      { header: 'Horas',           key: 'horas',           width: 12 },
+      { header: 'Departamento',    key: 'departamento',    width: 25 },
+      { header: 'Rol',             key: 'rol',             width: 30 },
+      { header: 'Entrada',         key: 'entrada',         width: 14 },
+      { header: 'Salida',          key: 'salida',          width: 14 },
     ];
 
     // Estilo header hoja detalle
     const headerDetalle = wsDetalle.getRow(1);
-    headerDetalle.height = 22;
+    headerDetalle.height = 26;
     headerDetalle.eachCell((cell: any) => {
       cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
       cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -385,114 +385,168 @@ export class ProyectosPage implements OnDestroy {
       cell.border    = this.bordeDelgado();
     });
 
-    proyectos.forEach(proyecto => {
+    let rowIndex = 2;
+
+    proyectos.forEach((proyecto, proyectoIdx) => {
       const lideres = proyecto.lideres?.length
         ? proyecto.lideres
         : proyecto.lider
           ? [{ lider: proyecto.lider, costoHoraLider: proyecto.costoHoraLider, horasLider: proyecto.horasLider, recursos: proyecto.recursos ?? [] }]
           : [];
 
-      // Deduplicar líderes por nombre para evitar repeticiones
+      // Deduplicar líderes por nombre
       const lideresUnicos = lideres.filter((l, i, arr) =>
         arr.findIndex(x => x.lider === l.lider) === i
       );
 
-      lideresUnicos.forEach((lider, liderIdx) => {
-        // ── Fila LÍDER ──
-        const filaLider = wsDetalle.addRow({
-          codigoProyecto: liderIdx === 0 ? proyecto.codigo : '',
-          nombreProyecto: liderIdx === 0 ? proyecto.nombre : '',
-          tipoFila:       'LÍDER',
-          lider:          lider.lider ?? '-',
-          costoLider:     lider.costoHoraLider ?? '',
-          horasLider:     lider.horasLider ?? '',
-          recurso:        '',
-          tipoRecurso:    '',
-          rol:            '',
-          entrada:        '',
-          salida:         '',
-          costoRecurso:   '',
-          horasRecurso:   '',
+      if (!lideresUnicos.length) {
+        // Proyecto sin líderes
+        const fila = wsDetalle.addRow({
+          proyecto: proyecto.nombre,
+          tipo: 'Proyecto',
+          nombre: 'Sin líderes asignados',
+          costo: '',
+          horas: '',
+          departamento: '',
+          rol: '',
+          entrada: '',
+          salida: ''
         });
-        filaLider.height = 22;
+        fila.height = 20;
+        fila.eachCell((cell: any) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_RECURSO_ALT } };
+          cell.font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
+          cell.border = this.bordeDelgado(COLOR_BORDE);
+          cell.alignment = { vertical: 'middle', horizontal: 'left' };
+        });
+        rowIndex++;
+
+        // Separador entre proyectos
+        this.agregarFilaSeparadora(wsDetalle);
+        rowIndex++;
+        return;
+      }
+
+      lideresUnicos.forEach((lider, liderIdx) => {
+        // ── FILA: LÍDER ──
+        const filaLider = wsDetalle.addRow({
+          proyecto: liderIdx === 0 ? proyecto.nombre : '',
+          tipo: 'Líder',
+          nombre: lider.lider ?? '-',
+          costo: lider.costoHoraLider ? `$${lider.costoHoraLider}` : '-',
+          horas: lider.horasLider ?? 0,
+          departamento: '-',
+          rol: 'Líder de proyecto',
+          entrada: '',
+          salida: ''
+        });
+        filaLider.height = 24;
         filaLider.eachCell((cell: any) => {
           cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_LIDER } };
           cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: COLOR_PRIMARIO } };
           cell.border    = this.bordeDelgado(COLOR_BORDE);
           cell.alignment = { vertical: 'middle', horizontal: 'left' };
         });
+        rowIndex++;
 
         const recursos = lider.recursos ?? [];
 
         if (!recursos.length) {
-          // Fila "sin recursos" directamente sin filas vacías previas
-          const filaVacia = wsDetalle.addRow({
-            codigoProyecto: '',
-            nombreProyecto: '',
-            tipoFila:       '',
-            lider:          '',
-            costoLider:     '',
-            horasLider:     '',
-            recurso:        'Sin recursos asignados',
-            tipoRecurso:    '',
-            rol:            '',
-            entrada:        '',
-            salida:         '',
-            costoRecurso:   '',
-            horasRecurso:   '',
+          // Sin recursos
+          const filaSinRecursos = wsDetalle.addRow({
+            proyecto: '',
+            tipo: 'Recurso',
+            nombre: 'Sin recursos asignados',
+            costo: '',
+            horas: '',
+            departamento: '',
+            rol: '',
+            entrada: '',
+            salida: ''
           });
-          filaVacia.height = 18;
-          filaVacia.eachCell((cell: any) => {
+          filaSinRecursos.height = 18;
+          filaSinRecursos.eachCell((cell: any) => {
             cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_RECURSO } };
             cell.font      = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
             cell.border    = this.bordeDelgado(COLOR_BORDE);
             cell.alignment = { vertical: 'middle', horizontal: 'left' };
           });
+          rowIndex++;
         } else {
           recursos.forEach((recurso, idx) => {
             const alterno = idx % 2 === 0;
             const fila = wsDetalle.addRow({
-              codigoProyecto: '',
-              nombreProyecto: '',
-              tipoFila:       'Recurso',
-              lider:          '',
-              costoLider:     '',
-              horasLider:     '',
-              recurso:        recurso.nombre ?? '-',
-              tipoRecurso:    recurso.tipo ?? '-',
-              rol:            recurso.rol ?? '-',
-              entrada:        this.formatearFecha(recurso.entrada ?? null),
-              salida:         this.formatearFecha(recurso.salida ?? null),
-              costoRecurso:   recurso.costoHora ?? '',
-              horasRecurso:   recurso.horas ?? '',
+              proyecto: '',
+              tipo: 'Recurso',
+              nombre: recurso.nombre ?? '-',
+              costo: recurso.costoHora ? `$${recurso.costoHora}` : '-',
+              horas: recurso.horas ?? 0,
+              departamento: this.obtenerNombreDepartamento(recurso.departamento),
+              rol: recurso.rol ?? '-',
+              entrada: this.formatearFecha(recurso.entrada ?? null),
+              salida: this.formatearFecha(recurso.salida ?? null)
             });
-            fila.height = 19;
+            fila.height = 20;
             fila.eachCell((cell: any) => {
               cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: alterno ? COLOR_RECURSO : COLOR_RECURSO_ALT } };
               cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
               cell.border    = this.bordeDelgado(COLOR_BORDE);
               cell.alignment = { vertical: 'middle', horizontal: 'left' };
             });
+            rowIndex++;
           });
+        }
+
+        // ── ESPACIO EXTRA entre líderes del mismo proyecto ──
+        if (liderIdx < lideresUnicos.length - 1) {
+          this.agregarFilaEspacio(wsDetalle);
+          rowIndex++;
         }
       });
 
-      // ── Fila separadora entre proyectos (UNA sola, al final de cada proyecto) ──
-      const filaSep = wsDetalle.addRow({});
-      filaSep.height = 5;
-      for (let c = 1; c <= 13; c++) {
-        const cell = filaSep.getCell(c);
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
-      }
+      // ── SEPARADOR ENTRE PROYECTOS ──
+      this.agregarFilaSeparadorProyecto(wsDetalle);
+      rowIndex++;
     });
 
+    // Aplicar cabecera con logo a ambas hojas
     await agregarCabeceraExcel(workbook, wsResumen, 'Reporte de Proyectos', 10);
-    await agregarCabeceraExcel(workbook, wsDetalle, 'Reporte de Líderes y Recursos', 13);
+    await agregarCabeceraExcel(workbook, wsDetalle, 'Reporte de Líderes y Recursos', 9);
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
     this.crearDescarga(blob, `Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }
+
+  // ── Helpers para filas de separación ──
+  private agregarFilaSeparadora(ws: any): void {
+    const fila = ws.addRow([]);
+    fila.height = 3;
+  }
+
+  private agregarFilaEspacio(ws: any): void {
+    const fila = ws.addRow([]);
+    fila.height = 2;
+  }
+
+  private agregarFilaSeparadorProyecto(ws: any): void {
+    const fila = ws.addRow([]);
+    fila.height = 8;
+    for (let c = 1; c <= 9; c++) {
+      const cell = fila.getCell(c);
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
+      cell.border = {
+        top: { style: 'thin', color: { argb: COLOR_BORDE } },
+        bottom: { style: 'thin', color: { argb: COLOR_BORDE } }
+      };
+    }
+  }
+
+  private obtenerNombreDepartamento(idDepartamento?: number | null): string {
+  if (!idDepartamento) return '-';
+  return this.departamentoMap[idDepartamento] ?? '-';
   }
 
   private aplicarEstiloHoja(ws: any, colEstado: number): void {
@@ -533,65 +587,85 @@ export class ProyectosPage implements OnDestroy {
     return { top: b, left: b, bottom: b, right: b };
   }
 
-  // ─── PDF ─────────────────────────────────────────────────────────────────
+  // ─── PDF ──────────────────────────────────────────────────────────────────
   private async descargarPDF(proyectos: Proyecto[], nombreBase: string): Promise<void> {
-    const doc      = new jsPDF({ orientation: 'landscape' });
-    const fecha    = new Date().toLocaleDateString('es-EC');
-    const pageW    = 297;
-    const pageH    = 210;  // alto landscape en mm
-    const marginX  = 12;
-    const footerY  = pageH - 8; // coordenada fija para el pie
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const fecha = new Date().toLocaleDateString('es-EC');
+    const pageW = 297;
+    const pageH = 210;
+    const marginX = 14;
+    const footerY = pageH - 10;
     const logo = await obtenerLogoReporte();
 
-    // ── Helper: cabecera reutilizable ──
-    const dibujarCabecera = () => {
+    // ── Cabecera de página ──
+    const dibujarCabecera = (pagina: number, totalPaginas: number) => {
       doc.setFillColor(22, 53, 114);
-      doc.rect(0, 0, pageW, 22, 'F');
+      doc.rect(0, 0, pageW, 24, 'F');
+
       if (logo) {
-        doc.addImage(logo, 'PNG', marginX, 4, 38, 11);
+        doc.addImage(logo, 'PNG', marginX, 4, 38, 14);
       }
+
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Proyectos', pageW * 0.7, 14, { align: 'center' });
+      doc.text('Reporte de Proyectos', pageW / 2, 15, { align: 'center' });
+
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
+      doc.text(`Generado: ${fecha}`, pageW - marginX, 15, { align: 'right' });
+
       doc.setDrawColor(99, 135, 190);
       doc.setLineWidth(0.5);
-      doc.line(0, 22, pageW, 22);
+      doc.line(0, 24, pageW, 24);
     };
 
-    dibujarCabecera();
+    // ── Pie de página ──
+    const dibujarPie = (pagina: number, totalPaginas: number) => {
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(marginX, footerY, pageW - marginX, footerY);
 
-    // ── Subtítulo sección resumen ──
-    doc.setFontSize(10);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(156, 163, 175);
+      doc.text(`Página ${pagina} de ${totalPaginas}`, pageW / 2, footerY + 5, { align: 'center' });
+      doc.text('TMR — Reporte de Proyectos', marginX, footerY + 5);
+      doc.text(fecha, pageW - marginX, footerY + 5, { align: 'right' });
+    };
+
+    // ── PÁGINA 1: Tabla Resumen ──
+    // jsPDF inicia con la página 1 creada; NO llamar addPage() aquí
+    dibujarCabecera(1, 1);
+
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(22, 53, 114);
-    doc.text('Resumen de Proyectos', marginX, 32);
+    doc.text('Resumen de Proyectos', marginX, 34);
     doc.setDrawColor(22, 53, 114);
     doc.setLineWidth(0.3);
-    doc.line(marginX, 34, marginX + 60, 34);
+    doc.line(marginX, 36, marginX + 70, 36);
 
-    // ── Tabla resumen ──
+    const tableData = proyectos.map(p => [
+      p.codigo,
+      p.nombre,
+      p.cliente ?? '-',
+      p.tipo ?? '-',
+      this.obtenerSeguimientoNombre(p.idEstadoProyecto),
+      this.normalizarEstadoProyecto(p),
+      this.formatearFecha(p.fechaInicio),
+      this.formatearFecha(p.fechaFin),
+      String(p.horas ?? 0),
+      p.presupuesto ? `$${p.presupuesto}` : '-'
+    ]);
+
     autoTable(doc, {
-      startY: 37,
+      startY: 40,
       head: [['Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado', 'Inicio', 'Fin', 'Horas', 'Presupuesto']],
-      body: proyectos.map(p => [
-        p.codigo,
-        p.nombre,
-        p.cliente ?? '-',
-        p.tipo ?? '-',
-        this.obtenerSeguimientoNombre(p.idEstadoProyecto),
-        p.estado ?? '-',
-        this.formatearFecha(p.fechaInicio),
-        this.formatearFecha(p.fechaFin),
-        String(p.horas ?? '-'),
-        p.presupuesto ? `$${p.presupuesto}` : '-',
-      ]),
+      body: tableData,
       styles: {
-        fontSize: 8,
-        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        fontSize: 7.5,
+        cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
         valign: 'middle',
         overflow: 'linebreak',
         font: 'helvetica',
@@ -604,21 +678,25 @@ export class ProyectosPage implements OnDestroy {
         fontStyle: 'bold',
         fontSize: 8,
         halign: 'center',
-        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+        cellPadding: { top: 5, bottom: 5, left: 6, right: 6 }
       },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
+      bodyStyles: {
+        textColor: [55, 65, 81]
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252]
+      },
       columnStyles: {
-        0: { cellWidth: 18,  halign: 'center' },
-        1: { cellWidth: 44 },
-        2: { cellWidth: 34 },
-        3: { cellWidth: 26 },
-        4: { cellWidth: 24,  halign: 'center' },
-        5: { cellWidth: 20,  halign: 'center' },
-        6: { cellWidth: 18,  halign: 'center' },
-        7: { cellWidth: 18,  halign: 'center' },
-        8: { cellWidth: 14,  halign: 'center' },
-        9: { cellWidth: 22,  halign: 'right'  },
+        0: { cellWidth: 22, halign: 'center' },
+        1: { cellWidth: 48 },
+        2: { cellWidth: 38 },
+        3: { cellWidth: 24, halign: 'center' },
+        4: { cellWidth: 26, halign: 'center' },
+        5: { cellWidth: 22, halign: 'center' },
+        6: { cellWidth: 20, halign: 'center' },
+        7: { cellWidth: 20, halign: 'center' },
+        8: { cellWidth: 16, halign: 'center' },
+        9: { cellWidth: 24, halign: 'right' }
       },
       didParseCell: (data) => {
         if (data.section === 'body' && data.column.index === 5) {
@@ -627,86 +705,124 @@ export class ProyectosPage implements OnDestroy {
           data.cell.styles.fontStyle = 'bold';
         }
       },
-      margin: { left: marginX, right: marginX, bottom: 18 },
-      didDrawPage: () => dibujarCabecera(),
+      margin: { left: marginX, right: marginX, bottom: 22, top: 30 },
+      didDrawPage: (data) => {
+        // Usar getCurrentPageInfo para el número real de página en el doc
+        const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
+        const total   = (doc as any).internal.getNumberOfPages();
+        dibujarCabecera(pageNum, total);
+        dibujarPie(pageNum, total);
+      },
     });
 
-    // ── Sección detalle: siempre empieza en página nueva ──
-    doc.addPage();
-    dibujarCabecera();
+    // ── SECCIÓN: Detalle de Líderes y Recursos ──
+    const finalYResumen = (doc as any).lastAutoTable.finalY + 14;
+    const espacioRestante = footerY - finalYResumen - 22;
 
-    let currentY = 30;
+    // Si queda menos de 50 pts, empezar en nueva página
+    if (espacioRestante < 50) {
+      doc.addPage();
+    }
 
-    // Subtítulo detalle
-    doc.setFontSize(10);
+    let currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
+    let currentY = espacioRestante < 50 ? 30 : finalYResumen;
+
+    // Dibujar cabecera si se saltó a nueva página
+    if (espacioRestante < 50) {
+      dibujarCabecera(currentPageNum, currentPageNum);
+    }
+
+    // Título de la sección de detalle
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(22, 53, 114);
     doc.text('Detalle de Líderes y Recursos', marginX, currentY);
     doc.setDrawColor(22, 53, 114);
     doc.setLineWidth(0.3);
-    doc.line(marginX, currentY + 2, marginX + 70, currentY + 2);
-    currentY += 10;
+    doc.line(marginX, currentY + 2, marginX + 85, currentY + 2);
+    currentY += 12;
 
-    proyectos.forEach(proyecto => {
+    // ── Loop por proyectos ──
+    proyectos.forEach((proyecto, proyectoIdx) => {
       const lideres = proyecto.lideres?.length
         ? proyecto.lideres
         : proyecto.lider
           ? [{ lider: proyecto.lider, costoHoraLider: proyecto.costoHoraLider, horasLider: proyecto.horasLider, recursos: proyecto.recursos ?? [] }]
           : [];
 
-      if (!lideres.length) return;
-
-      // Deduplicar líderes por nombre
       const lideresUnicos = lideres.filter((l, i, arr) =>
         arr.findIndex(x => x.lider === l.lider) === i
       );
 
-      // Construir body de la tabla del proyecto
+      // ── Proyecto sin líderes ──
+      if (!lideresUnicos.length) {
+        const alturaEstimada = 30;
+        if (currentY + alturaEstimada > footerY - 22) {
+          doc.addPage();
+          currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
+          dibujarCabecera(currentPageNum, currentPageNum);
+          currentY = 32;
+        }
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(156, 163, 175);
+        doc.text(`Proyecto "${proyecto.nombre}" sin líderes asignados`, marginX, currentY);
+        currentY += 12;
+
+        if (proyectoIdx < proyectos.length - 1) {
+          currentY += 4;
+        }
+        return;
+      }
+
+      // ── Construir body de la tabla del proyecto ──
       const body: any[] = [];
 
       lideresUnicos.forEach((lider, liderIdx) => {
         const recursos = lider.recursos ?? [];
 
-        // Separador visual entre líderes del mismo proyecto
+        // Separador visual entre líderes dentro del mismo proyecto
         if (liderIdx > 0) {
           body.push([{
             content: '',
-            colSpan: 9,
-            styles: { fillColor: [226, 232, 240], cellPadding: 1 }
+            colSpan: 8,
+            styles: { fillColor: [226, 232, 240], cellPadding: 1, minCellHeight: 3 }
           }]);
         }
 
-        // ── Fila LÍDER ──
+        // Fila LÍDER
         const estiloLider: any = {
-          fontStyle:  'bold',
-          fillColor:  [210, 222, 245],
-          textColor:  [22, 53, 114],
-          fontSize:   8,
+          fontStyle: 'bold',
+          fillColor: [210, 222, 245],
+          textColor: [22, 53, 114],
+          fontSize: 8,
+          minCellHeight: 12,
         };
         body.push([
-          { content: 'LÍDER',                                                    styles: { ...estiloLider, halign: 'center' } },
-          { content: lider.lider ?? '-',                                         styles: estiloLider },
+          { content: 'LÍDER', styles: { ...estiloLider, halign: 'center' } },
+          { content: lider.lider ?? '-', styles: estiloLider },
           { content: lider.costoHoraLider ? `$${lider.costoHoraLider}/h` : '-', styles: { ...estiloLider, halign: 'right' } },
-          { content: lider.horasLider ? `${lider.horasLider}h` : '-',           styles: { ...estiloLider, halign: 'center' } },
-          { content: '', styles: { fillColor: [210, 222, 245] } },
-          { content: '', styles: { fillColor: [210, 222, 245] } },
-          { content: '', styles: { fillColor: [210, 222, 245] } },
-          { content: '', styles: { fillColor: [210, 222, 245] } },
-          { content: '', styles: { fillColor: [210, 222, 245] } },
+          { content: lider.horasLider ? `${lider.horasLider}h` : '-', styles: { ...estiloLider, halign: 'center' } },
+          { content: '', styles: { fillColor: [210, 222, 245], minCellHeight: 12 } },
+          { content: '', styles: { fillColor: [210, 222, 245], minCellHeight: 12 } },
+          { content: '', styles: { fillColor: [210, 222, 245], minCellHeight: 12 } },
+          { content: '', styles: { fillColor: [210, 222, 245], minCellHeight: 12 } },
         ]);
 
-        // ── Filas RECURSOS ──
+        // Filas RECURSOS
         if (!recursos.length) {
           body.push([
-            { content: '', styles: { fillColor: [255, 255, 255] } },
+            { content: '', styles: { fillColor: [255, 255, 255], minCellHeight: 10 } },
             {
               content: 'Sin recursos asignados',
-              colSpan: 8,
+              colSpan: 7,
               styles: {
-                fontStyle:  'italic',
-                textColor:  [156, 163, 175],
-                fillColor:  [255, 255, 255],
-                fontSize:   7.5,
+                fontStyle: 'italic',
+                textColor: [156, 163, 175],
+                fillColor: [255, 255, 255],
+                fontSize: 7.5,
+                minCellHeight: 10,
               }
             }
           ]);
@@ -714,113 +830,133 @@ export class ProyectosPage implements OnDestroy {
           recursos.forEach((recurso, idx) => {
             const bg: [number, number, number] = idx % 2 === 0 ? [255, 255, 255] : [248, 250, 252];
             body.push([
-              { content: 'Recurso',                                              styles: { fontSize: 7, textColor: [148, 163, 184], fillColor: bg, halign: 'center' } },
-              { content: recurso.nombre ?? '-',                                  styles: { fillColor: bg, textColor: [51, 65, 85] } },
-              { content: recurso.costoHora ? `$${recurso.costoHora}/h` : '-',   styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'right' } },
-              { content: recurso.horas ? `${recurso.horas}h` : '-',             styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'center' } },
-              { content: recurso.tipo ?? '-',                                    styles: { fillColor: bg, textColor: [51, 65, 85] } },
-              { content: recurso.rol ?? '-',                                     styles: { fillColor: bg, textColor: [51, 65, 85] } },
-              { content: this.formatearFecha(recurso.entrada ?? null),           styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center' } },
-              { content: this.formatearFecha(recurso.salida ?? null),            styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center' } },
-              { content: '-',                                                    styles: { fillColor: bg, textColor: [156, 163, 175], halign: 'center' } },
+              { content: 'Recurso', styles: { fontSize: 7, textColor: [148, 163, 184], fillColor: bg, halign: 'center', minCellHeight: 10 } },
+              { content: recurso.nombre ?? '-', styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
+              { content: recurso.costoHora ? `$${recurso.costoHora}/h` : '-', styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'right', minCellHeight: 10 } },
+              { content: recurso.horas ? `${recurso.horas}h` : '-', styles: { fillColor: bg, textColor: [107, 114, 128], halign: 'center', minCellHeight: 10 } },
+              { content: this.obtenerNombreDepartamento(recurso.departamento), styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
+              { content: recurso.rol ?? '-', styles: { fillColor: bg, textColor: [51, 65, 85], minCellHeight: 10 } },
+              { content: this.formatearFecha(recurso.entrada ?? null), styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center', minCellHeight: 10 } },
+              { content: this.formatearFecha(recurso.salida ?? null), styles: { fillColor: bg, textColor: [51, 65, 85], halign: 'center', minCellHeight: 10 } },
             ]);
           });
         }
       });
 
+      // ── Estimación de altura para decidir salto de página ──
+      // Calculamos cuántas filas reales hay (líderes + recursos + separadores)
+      const filasLider    = lideresUnicos.length;
+      const filasRecurso  = lideresUnicos.reduce((sum, l) => sum + Math.max((l.recursos ?? []).length, 1), 0);
+      const filaSeparador = Math.max(lideresUnicos.length - 1, 0);
 
-      // Calcular altura aproximada del bloque completo del proyecto
-      const alturaEstimadaProyecto =
-        24 +                // encabezado proyecto + separación
-        (body.length * 10) + // filas con margen de seguridad
-        18;                 // margen seguridad
+      const alturaEncabezado = 12;   // banda azul del proyecto
+      const alturaHeader     = 11;   // cabecera de columnas
+      const alturaFilaLider  = 14;   // cada fila de líder
+      const alturaFilaRec    = 11;   // cada fila de recurso
+      const alturaFilaSep    = 4;    // separador entre líderes
+      const alturaMargen     = 12;   // espacio inferior entre proyectos
 
-      // Si no cabe completo, empezar en una página nueva
-      if (currentY + alturaEstimadaProyecto > footerY - 10) {
+      const alturaEstimada =
+        alturaEncabezado +
+        alturaHeader +
+        (filasLider   * alturaFilaLider) +
+        (filasRecurso * alturaFilaRec)   +
+        (filaSeparador * alturaFilaSep)  +
+        alturaMargen;
+
+      // Si no entra completo en el espacio restante, saltar a nueva página
+      if (currentY + alturaEstimada > footerY - 22) {
         doc.addPage();
-        dibujarCabecera();
-        currentY = 30;
+        currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
+        dibujarCabecera(currentPageNum, currentPageNum);
+        dibujarPie(currentPageNum, currentPageNum);
+        currentY = 32;
       }
 
-      // ── Encabezado del proyecto ──
+      // ── Encabezado del proyecto (banda azul claro) ──
       doc.setFillColor(232, 238, 249);
-      doc.roundedRect(marginX, currentY, pageW - marginX * 2, 8, 1, 1, 'F');
+      doc.roundedRect(marginX, currentY, pageW - marginX * 2, 9, 1, 1, 'F');
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(22, 53, 114);
-      doc.text(`${proyecto.codigo}  —  ${proyecto.nombre}`, marginX + 3, currentY + 5.5);
-      doc.setFont('helvetica', 'normal');
+      doc.text(`${proyecto.codigo} — ${proyecto.nombre}`, marginX + 4, currentY + 6.5);
+      currentY += 11;
 
+      // ── Tabla del proyecto ──
       autoTable(doc, {
-        startY: currentY + 10,
-        head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Tipo Rec.', 'Rol', 'Entrada', 'Salida', 'Costo Rec.']],
-        body,
+        startY: currentY,
+        head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Tipo Rec.', 'Rol', 'Entrada', 'Salida']],
+        body: body,
         styles: {
           fontSize: 7.5,
-          cellPadding: { top: 3, bottom: 3, left: 5, right: 5 },
+          cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
           valign: 'middle',
           overflow: 'linebreak',
-          cellWidth: 'wrap',
           lineColor: [226, 232, 240],
           lineWidth: 0.2,
         },
         headStyles: {
-          fillColor:   [51, 65, 85],
-          textColor:   255,
-          fontStyle:   'bold',
-          fontSize:    7.5,
-          halign:      'center',
-          cellPadding: { top: 4, bottom: 4, left: 6, right: 6 },
+          fillColor: [51, 65, 85],
+          textColor: 255,
+          fontStyle: 'bold',
+          fontSize: 7.5,
+          halign: 'center',
+          cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+          minCellHeight: 10,
         },
         bodyStyles: {
           textColor: [55, 65, 81],
           minCellHeight: 10
         },
         columnStyles: {
-          0: { cellWidth: 14, halign: 'center' },
-          1: { cellWidth: 76 },
-          2: { cellWidth: 19, halign: 'right' },
-          3: { cellWidth: 14, halign: 'center' },
-          4: { cellWidth: 24 },
-          5: { cellWidth: 68 },
-          6: { cellWidth: 20, halign: 'center' },
-          7: { cellWidth: 20, halign: 'center' },
-          8: { cellWidth: 18, halign: 'center' },
+          0: { cellWidth: 20, halign: 'center' },
+          1: { cellWidth: 62 },
+          2: { cellWidth: 24, halign: 'right' },
+          3: { cellWidth: 18, halign: 'center' },
+          4: { cellWidth: 22, halign: 'center' },
+          5: { cellWidth: 62 },
+          6: { cellWidth: 24, halign: 'center' },
+          7: { cellWidth: 24, halign: 'center' },
         },
-        pageBreak: 'auto',
+        // pageBreak: 'avoid' intenta mantener la tabla completa en una sola página.
+        // Si la tabla es demasiado grande para una sola página usa 'auto'.
+        pageBreak: 'avoid',
         rowPageBreak: 'avoid',
         tableWidth: 'auto',
-        margin: { left: marginX, right: marginX, bottom: 18 },
+        margin: { left: marginX, right: marginX, bottom: 30 },
         didDrawPage: (data) => {
-          dibujarCabecera();
-          if (data.pageNumber > 1) {
-            const yHead = 28;
+          const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
+          const total   = (doc as any).internal.getNumberOfPages();
+          dibujarCabecera(pageNum, total);
+          dibujarPie(pageNum, total);
+
+          // Si autoTable abrió una página nueva de forma automática, dibujar
+          // el banner de continuación del proyecto
+          if (data.pageNumber > 1 && data.cursor) {
+            const yBanner = 32;
             doc.setFillColor(232, 238, 249);
-            doc.roundedRect(marginX, yHead, pageW - marginX * 2, 7, 1, 1, 'F');
+            doc.roundedRect(marginX, yBanner, pageW - marginX * 2, 8, 1, 1, 'F');
             doc.setFontSize(8);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(22, 53, 114);
-            doc.text(`${proyecto.codigo}  —  ${proyecto.nombre} (cont.)`, marginX + 3, yHead + 5);
+            doc.text(`${proyecto.codigo} — ${proyecto.nombre} (cont.)`, marginX + 4, yBanner + 5.5);
           }
         },
       });
 
       currentY = (doc as any).lastAutoTable.finalY + 10;
+
+      if (proyectoIdx < proyectos.length - 1) {
+        currentY += 4;
+      }
     });
 
-    // ── Pie de página en TODAS las páginas ──
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
+    // ── Asegurar cabecera y pie correctos en todas las páginas ──
+    const totalPages = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(marginX, footerY, pageW - marginX, footerY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(156, 163, 175);
-      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-      doc.text('TMR — Reporte de Proyectos', marginX, footerY + 4);
-      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
+      dibujarCabecera(i, totalPages);
+      dibujarPie(i, totalPages);
     }
 
     doc.save(`Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
