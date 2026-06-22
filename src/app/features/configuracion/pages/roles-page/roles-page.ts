@@ -7,20 +7,17 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
-import { DescargaMenuComponent, DescargaOpcion } from '../../../../shared/components/descarga-menu/descarga-menu.component';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
-import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [CommonModule, MatIconModule, ActionMenuComponent, DescargaMenuComponent, ConfirmDialogComponent, PaginacionComponent, SuccessModalComponent],
+  imports: [CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
@@ -59,21 +56,6 @@ export class RolesPage {
   readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
 
   readonly rolesInactivos = computed(() => this.roles().filter((rol) => !rol.activo).length);
-
-  readonly opcionesDescarga: DescargaOpcion[] = [
-    {
-      id: 'excel',
-      label: 'Exportar Excel',
-      icon: 'assets/iconos/download.svg',
-      action: () => this.descargarRolesExcel()
-    },
-    {
-      id: 'pdf',
-      label: 'Exportar PDF',
-      icon: 'assets/iconos/download.svg',
-      action: () => this.descargarRolesPdf()
-    }
-  ];
 
   readonly modulosCubiertos = computed(() =>
     new Set(this.roles().flatMap((rol) => rol.modulos.map((m) => m.id))).size,
@@ -178,7 +160,7 @@ export class RolesPage {
       {
         data,
         panelClass: ['tmr-dialog-panel', mode === 'view' ? 'roles-detail-dialog-panel' : 'roles-form-dialog-panel'],
-        width: mode === 'view' ? '620px' : '860px',
+        width: mode === 'view' ? '620px' : '560px',
         maxWidth: mode === 'view' ? 'calc(100vw - 32px)' : 'calc(100vw - 48px)',
         maxHeight: mode === 'view' ? '90vh' : '92vh',
         disableClose: true,
@@ -322,52 +304,6 @@ export class RolesPage {
       ?? body?.error
       ?? body?.title
       ?? 'No se pudo eliminar el rol. Verifica si es un rol de sistema o si tiene usuarios asignados.';
-  }
-
-  // ── Exportación ──────────────────────────────────────────────────────────
-  descargarRolesExcel(): void {
-    void exportarReporteExcel({
-      titulo: 'Reporte de Roles',
-      nombreArchivo: 'Roles',
-      nombreHoja: 'Roles',
-      columnas: [
-        { encabezado: 'Nombre del Rol', anchoExcel: 30, anchoPdf: 42 },
-        { encabezado: 'Descripción', anchoExcel: 45, anchoPdf: 62 },
-        { encabezado: 'Módulos', anchoExcel: 50, anchoPdf: 78 },
-        { encabezado: 'Estado', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
-      ],
-      filas: this.obtenerFilasExportacion(this.filteredRoles()),
-      columnaEstado: 3,
-    });
-  }
-
-  descargarRolesPdf(): void {
-    void exportarReportePdf({
-      titulo: 'Reporte de Roles',
-      nombreArchivo: 'Roles',
-      nombreHoja: 'Roles',
-      columnas: [
-        { encabezado: 'Nombre del Rol', anchoPdf: 42 },
-        { encabezado: 'Descripción', anchoPdf: 62 },
-        { encabezado: 'Módulos', anchoPdf: 78 },
-        { encabezado: 'Estado', anchoPdf: 24, alineacion: 'center' },
-      ],
-      filas: this.obtenerFilasExportacion(this.filteredRoles()),
-      columnaEstado: 3,
-    });
-  }
-
-  private displayModulosRol(rol: Rol): string {
-    return rol.modulos.map(m => m.nombre).join(', ') || '-';
-  }
-
-  private obtenerFilasExportacion(roles: Rol[]): string[][] {
-    return roles.map(rol => [
-      rol.nombre || '-',
-      rol.descripcion || '-',
-      this.displayModulosRol(rol),
-      rol.activo ? 'Activo' : 'Inactivo',
-    ]);
   }
 
 }
