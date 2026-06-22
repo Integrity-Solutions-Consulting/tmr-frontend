@@ -370,7 +370,7 @@ $hover-row: rgba(#163572, 0.04);
 
     th:nth-child(1), td:nth-child(1) { width: 80px; }
     th:nth-child(2), td:nth-child(2) { width: 90px; }
-    th:nth-child(3), td:nth-child(3) { width: auto; }
+    th:nth-child(3), td:nth-child(3) { width: 100%; }// CAMBIO
     th:nth-child(4), td:nth-child(4) { width: 140px; }
     th:nth-child(5), td:nth-child(5) { width: 220px; }
     th:nth-child(6), td:nth-child(6) { width: 140px; }
@@ -533,7 +533,7 @@ $hover-row: rgba(#163572, 0.04);
   border-radius: 8px !important;
   font-size: 15px !important;
   font-weight: 500 !important;
-  color: #6b7280 !important;
+  color: #1a1b1f !important; 
   height: auto !important;
   min-height: 40px !important;
   padding: 0 14px !important;
@@ -542,7 +542,7 @@ $hover-row: rgba(#163572, 0.04);
     display: flex !important;
     align-items: center !important;
     gap: 0 !important;
-    color: #6b7280 !important;
+    color:  #1a1b1f !important;
     width: 100% !important;
     line-height: 1 !important;
   }
@@ -550,7 +550,7 @@ $hover-row: rgba(#163572, 0.04);
   .material-icons,
   .material-symbols-outlined {
     font-size: 20px !important;
-    color: #6b7280 !important;
+    color: #1a1b1f !important;  
     margin: 0 10px 0 0 !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -561,16 +561,6 @@ $hover-row: rgba(#163572, 0.04);
     height: 20px !important;
     vertical-align: middle !important;
   }
-
-  span:not(.material-icons):not(.material-symbols-outlined) {
-    display: inline-flex !important;
-    align-items: center !important;
-    line-height: 1 !important;
-    vertical-align: middle !important;
-  }
-
-  &:first-child { background-color: #f3f4f6 !important; }
-  &:hover { background-color: #f3f4f6 !important; }
 }
 .estado-texto {
   font-size: 14px;
