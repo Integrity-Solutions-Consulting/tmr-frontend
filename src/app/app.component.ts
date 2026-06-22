@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterOutlet } from '@angular/router';
 import { TokenMonitorService } from './core/services/token-monitor.service';
+import { UserActivityService } from './core/services/user-activity.service';
 import { AuthService } from './features/auth/servicios/auth.service';
 import { TokenService } from './features/auth/servicios/token.service';
 import { AuthResponse } from './features/auth/modelos/auth.models';
@@ -11,6 +12,10 @@ import { CambiarPasswordModalComponent } from './features/auth/componentes/cambi
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap } from 'rxjs/operators';
 import { NavigationEnd } from '@angular/router';
+
+interface SessionExpirationResult {
+  action: 'extend' | 'logout' | 'timeout';
+}
 
 @Component({
   selector: 'app-root',
@@ -24,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private tokenMonitor = inject(TokenMonitorService);
+  private userActivity = inject(UserActivityService);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
   private dialog = inject(MatDialog);
@@ -60,9 +66,44 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showInvalidCharacterMessage(target as HTMLElement);
   }
 
+  // ===== ACTIVITY TRACKING LISTENERS =====
+  // Estos @HostListener capturan la actividad del usuario para el sistema de token refresh
+
+  @HostListener('document:mousedown')
+  onMouseDown(): void {
+    this.userActivity.recordActivity('mousedown');
+  }
+
+  @HostListener('document:keydown')
+  onKeyDown(): void {
+    this.userActivity.recordActivity('keydown');
+  }
+
+  @HostListener('document:touchstart')
+  onTouchStart(): void {
+    this.userActivity.recordActivity('touchstart');
+  }
+
+  @HostListener('document:click')
+  onClick(): void {
+    this.userActivity.recordActivity('click');
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.userActivity.recordActivity('scroll');
+  }
+
+  @HostListener('window:focus')
+  onFocus(): void {
+    this.userActivity.recordActivity('focus');
+  }
+  // ========================================
+
   ngOnInit(): void {
     // Iniciar monitoreo si hay token válido
     if (this.tokenService.isTokenValid()) {
+      this.userActivity.startTracking();
       this.tokenMonitor.startMonitoring();
       this.enforcePasswordChange();
     }
@@ -74,11 +115,21 @@ export class AppComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => this.enforcePasswordChange());
 
-    // Escuchar advertencia de expiración (1 minuto antes)
+    // ← NUEVO: Escuchar refresh silencioso (con actividad)
+    this.tokenMonitor
+      .onSilentRefreshNeeded()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('🔄 Actividad detectada - Refresh automático...');
+        this.performSilentRefresh();
+      });
+
+    // Escuchar advertencia de expiración (sin actividad)
     this.tokenMonitor
       .onExpirationWarning()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
+        console.log('⚠️ Sin actividad - Mostrando modal...');
         this.showExpirationModal();
       });
 
@@ -110,16 +161,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.currentDialogRef
       .afterClosed()
       .pipe(
-        switchMap(result => {
+        switchMap((result: SessionExpirationResult) => {
           console.log('🔄 Resultado del modal:', result);
-          if (result === true) {
+          
+          if (result?.action === 'extend') {
             // Usuario aceptó extender sesión - realizar refresh
             console.log('✅ Usuario aceptó extender sesión, refrescando token...');
             return this.authService.refreshTokenRequest();
           } else {
-            // Usuario rechazó - logout
-            console.log('❌ Usuario rechazó extender sesión, cerrando...');
-            throw new Error('User rejected session extension');
+            // Usuario rechazó, timeout, o cerró el modal - logout
+            console.log('❌ Usuario rechazó o timeout, cerrando sesión...');
+            throw new Error('User rejected session extension or modal timeout');
           }
         }),
         takeUntil(this.destroy$)
@@ -144,6 +196,28 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Realiza refresh silencioso cuando hay actividad
+   */
+  private performSilentRefresh(): void {
+    console.log('🔄 Iniciando refresh automático por actividad...');
+    this.authService.refreshTokenRequest().subscribe({
+      next: (response: AuthResponse) => {
+        console.log('✅ Token refrescado automáticamente');
+        this.authService.updateTokens(response);
+        
+        // Reiniciar monitoreo para siguiente ciclo
+        this.tokenMonitor.stopMonitoring();
+        this.tokenMonitor.startMonitoring();
+        console.log('✅ Sesión extendida automáticamente');
+      },
+      error: (err) => {
+        console.error('❌ Error en refresh automático:', err);
+        this.handleTokenExpired();
+      }
+    });
+  }
+
+  /**
    * Redirige a login cuando token expira
    */
   private handleTokenExpired(): void {
@@ -154,6 +228,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.currentDialogRef = null;
     }
 
+    this.userActivity.stopTracking();
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {
@@ -188,6 +263,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.userActivity.stopTracking();
     this.tokenMonitor.stopMonitoring();
     this.activeErrors.forEach((val) => {
       window.clearTimeout(val.timeoutId);

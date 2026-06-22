@@ -1,11 +1,14 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { TokenService } from '../../features/auth/servicios/token.service';
+import { UserActivityService } from './user-activity.service';
+import { TOKEN_CONFIG } from '../config/token.config';
 
 /**
  * TokenMonitorService
  * Monitorea la expiración del Access Token y emite eventos:
- * - onExpirationWarning: 1 minuto antes de expiración
+ * - onSilentRefreshNeeded: cuando hay actividad y faltan 60s
+ * - onExpirationWarning: 1 minuto antes de expiración (sin actividad)
  * - onTokenExpired: cuando el token expira
  */
 @Injectable({
@@ -14,13 +17,15 @@ import { TokenService } from '../../features/auth/servicios/token.service';
 export class TokenMonitorService {
   private expirationWarning$ = new Subject<void>();
   private tokenExpired$ = new Subject<void>();
+  private silentRefreshNeeded$ = new Subject<void>();
   private checkInterval: any;
   private warningEmitted = false;
   private readonly DEBUG = true; // Habilitar logs de debug
 
   constructor(
     private tokenService: TokenService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private userActivity: UserActivityService
   ) {}
 
   /**
@@ -38,8 +43,16 @@ export class TokenMonitorService {
   }
 
   /**
+   * Observable que emite cuando se debe hacer refresh silencioso (hay actividad)
+   */
+  onSilentRefreshNeeded() {
+    return this.silentRefreshNeeded$.asObservable();
+  }
+
+  /**
    * Inicia el monitoreo del token
    * Revisa cada 10 segundos si el token está próximo a expirar
+   * Detecta actividad del usuario para decidir entre refresh silencioso o mostrar modal
    */
   startMonitoring(): void {
     if (this.checkInterval) {
@@ -88,17 +101,35 @@ export class TokenMonitorService {
             this.tokenExpired$.next();
           });
           this.stopMonitoring();
-        } else if (timeUntilExpiration <= 60 && !this.warningEmitted) {
+        } else if (timeUntilExpiration <= TOKEN_CONFIG.EXPIRATION_WARNING_SECONDS && !this.warningEmitted) {
           // Faltan 60 segundos o menos (emitir solo una vez)
+          // Verificar actividad del usuario
           if (this.DEBUG) {
-            console.warn(`⚠️  TokenMonitor: ADVERTENCIA DE EXPIRACIÓN (${timeUntilExpiration}s restantes)`);
+            console.log(`⏰ TokenMonitor: Verificando actividad del usuario...`);
           }
-          this.warningEmitted = true;
-          this.ngZone.run(() => {
-            this.expirationWarning$.next();
-          });
+          const hasActivity = this.userActivity.isUserActive(TOKEN_CONFIG.ACTIVITY_CHECK_WINDOW);
+
+          if (hasActivity) {
+            // Hay actividad - refresh silencioso
+            if (this.DEBUG) {
+              console.log(`✅ TokenMonitor: Actividad detectada - Refresh silencioso`);
+            }
+            this.warningEmitted = true;
+            this.ngZone.run(() => {
+              this.silentRefreshNeeded$.next();
+            });
+          } else {
+            // Sin actividad - mostrar modal
+            if (this.DEBUG) {
+              console.warn(`⚠️  TokenMonitor: ADVERTENCIA DE EXPIRACIÓN (${timeUntilExpiration}s restantes)`);
+            }
+            this.warningEmitted = true;
+            this.ngZone.run(() => {
+              this.expirationWarning$.next();
+            });
+          }
         }
-      }, 10000); // Revisar cada 10 segundos
+      }, TOKEN_CONFIG.CHECK_INTERVAL_MS); // Revisar cada 10 segundos
     });
   }
 
