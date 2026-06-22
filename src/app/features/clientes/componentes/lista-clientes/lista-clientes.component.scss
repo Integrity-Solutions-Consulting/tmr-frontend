@@ -100,6 +100,7 @@ $blanco:      #ffffff;
     width: 22px;
     height: 22px;
     display: block;
+    object-fit: contain;
   }
 
   &--total {
@@ -108,10 +109,20 @@ $blanco:      #ffffff;
 
   &--activos {
     background: #e6fdee;
+
+    img {
+      width: 28px;
+      height: 28px;
+    }
   }
 
   &--inactivos {
     background: #F3F4F6;
+
+    img {
+      width: 28px;
+      height: 28px;
+    }
   }
 }
 
