@@ -431,14 +431,19 @@
         flex-shrink: 0;
     }
 
-    &--activo {
+    &--completado {
         &::before {
             background: #22c55e;
         }
     }
-    &--inactivo {
+    &--en-progreso {
         &::before {
-            background: #9ca3af;
+            background: #3b82f6;
+        }
+    }
+    &--pendiente {
+        &::before {
+            background: #f97316;
         }
     }
 }

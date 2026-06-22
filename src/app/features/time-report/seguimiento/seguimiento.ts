@@ -262,7 +262,7 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!this.selection.hasValue()) return;
         const seleccionados = [...this.selection.selected];
         for (const col of seleccionados) {
-            await this.descargarSeguimientoColaborador(col);
+            await this.descargarDetalle(col);
         }
         this.selection.clear();
     }
@@ -619,131 +619,334 @@ export class SeguimientoComponent implements AfterViewInit {
     public async descargarDetalle(col: Colaborador) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
-            const actividades = await lastValueFrom(
-                this.http.get<any[]>(urlDetalle, {
+            const res = await lastValueFrom(
+                this.http.get<{ actividades: any[], feriados: string[] }>(urlDetalle, {
                     params: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta }
                 })
             );
 
-            if (!actividades || actividades.length === 0) {
+            const rawActividades = res.actividades || [];
+            const feriados = res.feriados || [];
+
+            if (!rawActividades || rawActividades.length === 0) {
                 console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
                 return;
             }
 
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Reporte Actividades');
-
-            const headerFill: ExcelJS.Fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FF163572' }
-            };
-            const headerFont: Partial<ExcelJS.Font> = {
-                name: 'Arial',
-                size: 11,
-                bold: true,
-                color: { argb: 'FFFFFFFF' }
-            };
-
-            worksheet.mergeCells('A1:H1');
-            const titleCell = worksheet.getCell('A1');
-            titleCell.value = `Detalle de Actividades - Colaborador: ${col.nombre}`;
-            titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
-            titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
-            worksheet.getRow(1).height = 30;
-
-            worksheet.mergeCells('A2:H2');
-            const subtitleCell = worksheet.getCell('A2');
-            subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
-            subtitleCell.font = { name: 'Arial', size: 10, italic: true };
-            worksheet.getRow(2).height = 20;
-
-            worksheet.addRow([]);
-
-            const headers = [
-                'Fecha', 'Proyecto', 'Tipo Actividad', 'Req / Ticket', 'Horas', 'Descripción', 'Notas', 'Es Billable'
-            ];
-            const headerRow = worksheet.addRow(headers);
-            headerRow.height = 24;
-            headerRow.eachCell((cell) => {
-                cell.fill = headerFill;
-                cell.font = headerFont;
-                cell.alignment = { vertical: 'middle', horizontal: 'center' };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'medium' },
-                    right: { style: 'thin' }
-                };
+            // Agrupación de actividades por Cliente
+            const groupsByClient: { [clientName: string]: any[] } = {};
+            rawActividades.forEach(act => {
+                const client = act.clienteProyecto || 'Sin Cliente';
+                if (!groupsByClient[client]) {
+                    groupsByClient[client] = [];
+                }
+                groupsByClient[client].push(act);
             });
 
-            let totalHoras = 0;
-            actividades.forEach(act => {
-                const row = worksheet.addRow([
-                    act.fecha,
-                    act.proyecto,
-                    act.tipoActividad,
-                    act.codigoRequerimiento,
-                    Number(act.horas),
-                    act.descripcion,
-                    act.notas,
-                    act.esBillable
-                ]);
-                row.height = 20;
-                totalHoras += Number(act.horas);
+            const startDate = new Date(this.fechaDesde + 'T00:00:00');
+            const endDate = new Date(this.fechaHasta + 'T00:00:00');
+            const listDates: Date[] = [];
+            let cur = new Date(startDate);
+            while (cur <= endDate) {
+                listDates.push(new Date(cur));
+                cur.setDate(cur.getDate() + 1);
+            }
+            const totalDays = listDates.length;
+            const totalCols = 6 + totalDays + 1; // N° + Tipo + Líder + Req + Desc + TotalAct + Días + TotalActFinal
 
-                row.getCell(1).alignment = { horizontal: 'center' };
-                row.getCell(4).alignment = { horizontal: 'center' };
-                row.getCell(5).alignment = { horizontal: 'right' };
-                row.getCell(8).alignment = { horizontal: 'center' };
+            const workbook = new ExcelJS.Workbook();
 
-                row.eachCell((cell) => {
+            Object.keys(groupsByClient).forEach((clientName, clientIdx) => {
+                const clientActividades = groupsByClient[clientName];
+
+                // Limpiar nombre de hoja para que sea válido en Excel
+                let sheetName = `Reporte_${clientName}`.replace(/[*?:\\/\[\]]/g, '').substring(0, 31);
+                if (sheetName.length === 0) sheetName = `Reporte_${clientIdx + 1}`;
+                const worksheet = workbook.addWorksheet(sheetName);
+
+                // Configurar anchos de columna
+                const colWidths = [5, 20, 25, 25, 60, 15]; // N°, Tipo, Líder, Req, Desc, Total
+                for (let i = 0; i < totalDays; i++) {
+                    colWidths.push(4.5); // Días
+                }
+                colWidths.push(15); // Total Final
+                worksheet.columns = colWidths.map((w, idx) => ({
+                    key: `col_${idx + 1}`,
+                    width: w
+                }));
+
+                // Fila 4: Cliente
+                worksheet.getCell(4, 1).value = 'Cliente:';
+                worksheet.getCell(4, 1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF163572' } };
+                worksheet.getCell(4, 3).value = clientName;
+                worksheet.getCell(4, 3).font = { name: 'Arial', size: 11, bold: true };
+
+                // Fila 5: Nombre del consultor
+                worksheet.getCell(5, 1).value = 'Nombre del consultor:';
+                worksheet.getCell(5, 1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF163572' } };
+                worksheet.getCell(5, 3).value = col.nombre;
+                worksheet.getCell(5, 3).font = { name: 'Arial', size: 11, bold: true };
+
+                // Fila 6: Encabezados de tabla
+                worksheet.getCell(6, 1).value = 'N°';
+                worksheet.getCell(6, 2).value = 'TIPO DE ACTIVIDAD';
+                worksheet.getCell(6, 3).value = 'LIDER DE PROYECTO';
+                worksheet.getCell(6, 4).value = 'CODIGO REQUERIMIENTO / INCIDENTE';
+                worksheet.getCell(6, 5).value = 'DESCRIPCION DE TRABAJOS REALIZADOS';
+                worksheet.getCell(6, 6).value = 'TOTAL HORAS POR ACTIVIDAD';
+                worksheet.getCell(6, 7).value = 'DISTRIBUCION DE TIEMPO DEL DIA';
+                worksheet.getCell(6, totalCols).value = 'TOTAL HORAS POR ACT.';
+
+                // Combinaciones de encabezado
+                worksheet.mergeCells(6, 1, 8, 1); // N°
+                worksheet.mergeCells(6, 2, 8, 2); // Tipo
+                worksheet.mergeCells(6, 3, 8, 3); // Líder
+                worksheet.mergeCells(6, 4, 8, 4); // Req
+                worksheet.mergeCells(6, 5, 8, 5); // Desc
+                worksheet.mergeCells(6, 6, 8, 6); // Total
+                worksheet.mergeCells(6, 7, 6, 6 + totalDays); // Distribución del tiempo
+                worksheet.mergeCells(6, totalCols, 8, totalCols); // Total Final
+
+                // Fila 7: Números de día (01..31)
+                listDates.forEach((date, dateIdx) => {
+                    const dayNum = String(date.getDate()).padStart(2, '0');
+                    worksheet.getCell(7, 7 + dateIdx).value = dayNum;
+                });
+
+                // Fila 8: Iniciales de día de la semana (L, M, M, J, V, S, D)
+                const weekdays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+                listDates.forEach((date, dateIdx) => {
+                    const dayName = weekdays[date.getDay()];
+                    worksheet.getCell(8, 7 + dateIdx).value = dayName;
+                });
+
+                // Estilo del encabezado
+                const tableHeaderFill: ExcelJS.Fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF163572' }
+                };
+
+                for (let r = 6; r <= 8; r++) {
+                    for (let c = 1; c <= totalCols; c++) {
+                        const cell = worksheet.getCell(r, c);
+                        cell.fill = tableHeaderFill;
+                        cell.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+                        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                            left: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                            bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                            right: { style: 'thin', color: { argb: 'FFFFFFFF' } }
+                        };
+                    }
+                }
+
+                // Agrupar actividades por combinación única
+                const groupedRows: { [key: string]: {
+                    tipo: string,
+                    lider: string,
+                    req: string,
+                    desc: string,
+                    hoursByDay: { [dateStr: string]: number }
+                } } = {};
+
+                clientActividades.forEach(act => {
+                    const key = `${act.tipoActividad}|${act.liderProyecto}|${act.codigoRequerimiento}|${act.descripcion}`;
+                    if (!groupedRows[key]) {
+                        groupedRows[key] = {
+                            tipo: act.tipoActividad,
+                            lider: act.liderProyecto,
+                            req: act.codigoRequerimiento,
+                            desc: act.descripcion,
+                            hoursByDay: {}
+                        };
+                    }
+                    const dateStr = act.fecha;
+                    groupedRows[key].hoursByDay[dateStr] = (groupedRows[key].hoursByDay[dateStr] || 0) + Number(act.horas);
+                });
+
+                // Escribir datos
+                let currentRow = 9;
+                let seqNum = 1;
+
+                const alternatingFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+                const whiteFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+                const weekendFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+                const feriadoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFFFF0' } }; // Soft yellow
+                const vacacionesFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } }; // Amber pastel
+                const permisoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1E7DD' } }; // Green pastel
+
+                Object.keys(groupedRows).forEach(key => {
+                    const group = groupedRows[key];
+                    const isAlternating = (seqNum % 2 === 0);
+                    const baseFill = isAlternating ? alternatingFill : whiteFill;
+
+                    worksheet.getCell(currentRow, 1).value = seqNum++;
+                    worksheet.getCell(currentRow, 2).value = group.tipo;
+                    worksheet.getCell(currentRow, 3).value = group.lider;
+                    worksheet.getCell(currentRow, 4).value = group.req;
+                    worksheet.getCell(currentRow, 5).value = group.desc;
+
+                    // Días
+                    listDates.forEach((date, dateIdx) => {
+                        const dateStr = this.formatDate(date);
+                        const hrs = group.hoursByDay[dateStr];
+                        if (hrs > 0) {
+                            worksheet.getCell(currentRow, 7 + dateIdx).value = hrs;
+                        }
+                    });
+
+                    // Fórmulas
+                    const startAddr = worksheet.getCell(currentRow, 7).address.replace(/[0-9]/g, '');
+                    const endAddr = worksheet.getCell(currentRow, 6 + totalDays).address.replace(/[0-9]/g, '');
+                    worksheet.getCell(currentRow, 6).value = { formula: `SUM(${startAddr}${currentRow}:${endAddr}${currentRow})` } as any;
+                    worksheet.getCell(currentRow, totalCols).value = { formula: `SUM(${startAddr}${currentRow}:${endAddr}${currentRow})` } as any;
+
+                    // Estilo de fila de datos
+                    for (let c = 1; c <= totalCols; c++) {
+                        const cell = worksheet.getCell(currentRow, c);
+                        cell.fill = baseFill;
+                        cell.font = { name: 'Arial', size: 10, color: { argb: 'FF334155' } };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                            left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                            bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                            right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+                        };
+
+                        if (c === 1 || c === 6 || c === totalCols) {
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF334155' } };
+                        } else if (c >= 7 && c <= 6 + totalDays) {
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            
+                            // Aplicar rellenos por nomenclatura
+                            const dateIdx = c - 7;
+                            const date = listDates[dateIdx];
+                            const dateStr = this.formatDate(date);
+                            const isWeekend = (date.getDay() === 0 || date.getDay() === 6);
+                            const isFeriado = feriados.includes(dateStr);
+                            const hasVal = (cell.value !== null && cell.value !== undefined && cell.value !== '');
+
+                            if (hasVal && group.tipo === 'Vacaciones') {
+                                cell.fill = vacacionesFill;
+                            } else if (hasVal && group.tipo === 'Permiso') {
+                                cell.fill = permisoFill;
+                            } else if (isFeriado) {
+                                cell.fill = feriadoFill;
+                            } else if (isWeekend) {
+                                cell.fill = weekendFill;
+                            }
+                        } else {
+                            cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+                        }
+                    }
+
+                    currentRow++;
+                });
+
+                // Fila de Totales
+                const totalRow = currentRow;
+                worksheet.getCell(totalRow, 1).value = 'TOTAL';
+                worksheet.getCell(totalRow, 6).value = { formula: `SUM(F9:F${totalRow - 1})` } as any;
+                worksheet.getCell(totalRow, totalCols).value = { formula: `SUM(${worksheet.getCell(totalRow, totalCols).address.replace(/[0-9]/g, '')}9:${worksheet.getCell(totalRow, totalCols).address.replace(/[0-9]/g, '')}${totalRow - 1})` } as any;
+
+                listDates.forEach((date, dateIdx) => {
+                    const colNum = 7 + dateIdx;
+                    const colLetter = worksheet.getCell(totalRow, colNum).address.replace(/[0-9]/g, '');
+                    worksheet.getCell(totalRow, colNum).value = { formula: `SUM(${colLetter}9:${colLetter}${totalRow - 1})` } as any;
+                });
+
+                // Estilo de la fila de totales
+                for (let c = 1; c <= totalCols; c++) {
+                    const cell = worksheet.getCell(totalRow, c);
+                    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF163572' } };
+                    cell.alignment = { horizontal: c === 1 ? 'left' : 'center', vertical: 'middle' };
                     cell.border = {
-                        top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                        left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                        bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                        right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+                        top: { style: 'medium', color: { argb: 'FF163572' } },
+                        bottom: { style: 'double', color: { argb: 'FF163572' } }
+                    };
+
+                    const dateIdx = c - 7;
+                    if (dateIdx >= 0 && dateIdx < totalDays) {
+                        const date = listDates[dateIdx];
+                        const dateStr = this.formatDate(date);
+                        const isWeekend = (date.getDay() === 0 || date.getDay() === 6);
+                        const isFeriado = feriados.includes(dateStr);
+
+                        if (isFeriado) {
+                            cell.fill = feriadoFill;
+                        } else if (isWeekend) {
+                            cell.fill = weekendFill;
+                        } else {
+                            cell.fill = whiteFill;
+                        }
+                    } else {
+                        cell.fill = whiteFill;
+                    }
+                }
+
+                // Firmas
+                const sigRow1 = totalRow + 5;
+                const sigRow2 = totalRow + 6;
+
+                worksheet.getCell(sigRow1, 2).value = `Elaborado por: ${col.nombre}`;
+                worksheet.getCell(sigRow1, 2).font = { name: 'Arial', size: 10, italic: true };
+                worksheet.getCell(sigRow2, 2).value = `ISC INTEGRITY SOLUTIONS & CONSULTING CIA. LTDA.`;
+                worksheet.getCell(sigRow2, 2).font = { name: 'Arial', size: 10, bold: true };
+
+                const distinctLeaders = Array.from(new Set(clientActividades.map(act => act.liderProyecto).filter(Boolean)));
+                const leaderName = distinctLeaders.length > 0 ? distinctLeaders.join(', ') : 'Sin Líder';
+                worksheet.getCell(sigRow1, 8).value = `Revisado y Aprobado por: ${leaderName}`;
+                worksheet.getCell(sigRow1, 8).font = { name: 'Arial', size: 10, italic: true };
+                worksheet.getCell(sigRow2, 8).value = `Empresa: ${clientName}`;
+                worksheet.getCell(sigRow2, 8).font = { name: 'Arial', size: 10, bold: true };
+
+                // Nomenclatura (Leyenda)
+                const nomTitleRow = totalRow + 9;
+                const nomVacRow = totalRow + 10;
+                const nomFerRow = totalRow + 11;
+                const nomPermRow = totalRow + 12;
+                const nomWkRow = totalRow + 13;
+
+                worksheet.getCell(nomTitleRow, 2).value = 'Nomenclatura';
+                worksheet.getCell(nomTitleRow, 2).font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF163572' } };
+
+                const legendCells = [
+                    { row: nomVacRow, label: 'Vacaciones', fill: vacacionesFill },
+                    { row: nomFerRow, label: 'Feriado', fill: feriadoFill },
+                    { row: nomPermRow, label: 'Permiso', fill: permisoFill },
+                    { row: nomWkRow, label: 'Fines de Semana', fill: weekendFill }
+                ];
+
+                legendCells.forEach(item => {
+                    const cLabel = worksheet.getCell(item.row, 3);
+                    cLabel.value = item.label;
+                    cLabel.fill = item.fill;
+                    cLabel.font = { name: 'Arial', size: 9 };
+                    cLabel.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cLabel.border = {
+                        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+                        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
                     };
                 });
+
+                // Llamar a la estandarización de cabeceras corporativas
+                const currentMonthName = startDate.toLocaleString('es-EC', { month: 'long' }).toUpperCase();
+                void estandarizarCabeceraExcelExistente(
+                    workbook,
+                    worksheet,
+                    `TIME REPORT - ${clientName.toUpperCase()}`,
+                    totalCols,
+                    `${currentMonthName} ${startDate.getFullYear()}`,
+                    6
+                );
             });
 
-            const totalRow = worksheet.addRow([
-                'TOTAL HORAS', '', '', '', totalHoras, '', '', ''
-            ]);
-            worksheet.mergeCells(`A${totalRow.number}:D${totalRow.number}`);
-            totalRow.height = 22;
-            totalRow.getCell(1).font = { bold: true };
-            totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
-            totalRow.getCell(5).font = { bold: true };
-            totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-
-            totalRow.eachCell((cell, colNum) => {
-                if (colNum <= 5) {
-                    cell.border = {
-                        top: { style: 'medium' },
-                        bottom: { style: 'double' }
-                    };
-                }
-            });
-
-            worksheet.columns.forEach((column, i) => {
-                if (i === 0) column.width = 12;
-                else if (i === 1) column.width = 25;
-                else if (i === 2) column.width = 20;
-                else if (i === 3) column.width = 15;
-                else if (i === 4) column.width = 10;
-                else if (i === 5) column.width = 35;
-                else if (i === 6) column.width = 25;
-                else if (i === 7) column.width = 12;
-            });
-
-            await estandarizarCabeceraExcelExistente(
-                workbook,
-                worksheet,
-                `Detalle de Actividades - ${col.nombre}`,
-                8,
-                `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`,
-            );
+            // Guardar archivo y disparar descarga
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);
@@ -752,6 +955,7 @@ export class SeguimientoComponent implements AfterViewInit {
             a.download = `Reporte_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
             a.click();
             window.URL.revokeObjectURL(url);
+
         } catch (error) {
             console.error(`Error descargando el detalle de ${col.nombre}:`, error);
         }
