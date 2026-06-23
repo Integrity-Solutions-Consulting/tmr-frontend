@@ -332,6 +332,7 @@ export class LideresComponent implements OnInit {
         label: activo ? 'Desactivar' : 'Activar',
         danger: activo,
       },
+      { id: 'eliminar', label: 'Eliminar', danger: true }
     ];
   }
 
@@ -350,6 +351,12 @@ export class LideresComponent implements OnInit {
 
     if (accion.id === 'activar' || accion.id === 'inactivar') {
       this.toggleEstadoLider(lider);
+      return;
+    }
+
+    if (accion.id === 'eliminar') {
+      this.abrirEliminar(lider);
+      return;
     }
   }
   abrirFormulario(): void {
