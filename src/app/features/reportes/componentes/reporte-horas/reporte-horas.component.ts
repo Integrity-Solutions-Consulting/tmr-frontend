@@ -160,259 +160,88 @@ export class ReporteHorasComponent {
   }
 
   async exportarExcel() {
-    const data = this.datosFiltrados();
-    if (data.length === 0) return;
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      mes: this.mesSeleccionado() || undefined,
+      anio: this.anioSeleccionado() || undefined
+    };
 
-    await exportarReporteExcel({
-      titulo: 'Reporte de Horas por Cliente',
-      nombreArchivo: 'Horas',
-      nombreHoja: 'Reporte de Horas',
-      columnas: [
-        { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
-        { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
-        { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
-        { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
-        { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-        { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-      ],
-      filas: data.map((item) => [
-        item.cliente,
-        item.estadoCliente,
-        item.mes,
-        item.anio,
-        item.recursos,
-        Number(item.horas).toFixed(1),
-      ]),
-      columnaEstado: 1,
-      orientacionPdf: 'landscape',
+    const total = this.totalItems();
+    if (total === 0) return;
+
+    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
+
+        await exportarReporteExcel({
+          titulo: 'Reporte de Horas por Cliente',
+          nombreArchivo: 'Horas',
+          nombreHoja: 'Reporte de Horas',
+          columnas: [
+            { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
+            { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
+            { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
+            { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+            { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+          ],
+          filas: data.map((item) => [
+            item.cliente,
+            item.estadoCliente,
+            item.mes,
+            item.anio,
+            item.recursos,
+            Number(item.horas).toFixed(1),
+          ]),
+          columnaEstado: 1,
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar Excel:', err)
     });
-    return;
-
-    const { Workbook } = await import('exceljs');
-    const workbook = new Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Horas');
-
-    // 1. Columnas y anchos recomendados
-    worksheet.columns = [
-      { header: 'Cliente', key: 'cliente', width: 30 },
-      { header: 'Estado Cliente', key: 'estadoCliente', width: 18 },
-      { header: 'Mes', key: 'mes', width: 15 },
-      { header: 'Año', key: 'anio', width: 15 },
-      { header: 'Recursos', key: 'recursos', width: 15 },
-      { header: 'Horas', key: 'horas', width: 15 }
-    ];
-
-    // 2. Agregar datos
-    data.forEach(item => {
-      worksheet.addRow({
-        cliente: item.cliente,
-        estadoCliente: item.estadoCliente,
-        mes: item.mes,
-        anio: item.anio,
-        recursos: item.recursos,
-        horas: Number(item.horas)
-      });
-    });
-
-    // 3. Aplicar estilos a la cabecera
-    const headerRow = worksheet.getRow(1);
-    headerRow.height = 25;
-    headerRow.eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF163572' } // Color de marca principal #163572
-      };
-      cell.font = {
-        name: 'Segoe UI',
-        size: 11,
-        bold: true,
-        color: { argb: 'FFFFFFFF' }
-      };
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center'
-      };
-    });
-
-    // 4. Aplicar estilos a las celdas de datos
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // Omitir cabecera
-
-      row.height = 20;
-
-      // Cebra (alternar fondo gris y blanco)
-      const fillType = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-
-      row.eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: fillType }
-        };
-        cell.font = {
-          name: 'Segoe UI',
-          size: 10,
-          color: { argb: 'FF334155' } // Gris oscuro #334155
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
-        };
-        
-        // Centrar las columnas numéricas, de fechas y estados; el cliente (Columna A) alineado a la izquierda
-        if (!cell.address.startsWith('A')) {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'center'
-          };
-        } else {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'left'
-          };
-        }
-      });
-    });
-
-    // 5. Descargar archivo
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Reporte_Horas_${new Date().toISOString().slice(0, 10)}.xlsx`;
-    link.click();
-    URL.revokeObjectURL(url);
   }
 
   async exportarPDF() {
-    const data = this.datosFiltrados();
-    if (data.length === 0) return;
-
-    await exportarReportePdf({
-      titulo: 'Reporte de Horas por Cliente',
-      nombreArchivo: 'Horas',
-      nombreHoja: 'Reporte de Horas',
-      columnas: [
-        { encabezado: 'Cliente', anchoPdf: 75 },
-        { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
-        { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
-        { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
-        { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
-        { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
-      ],
-      filas: data.map((item) => [
-        item.cliente,
-        item.estadoCliente,
-        item.mes,
-        item.anio,
-        item.recursos,
-        Number(item.horas).toFixed(1),
-      ]),
-      columnaEstado: 1,
-      orientacionPdf: 'landscape',
-    });
-    return;
-
-    // Carga dinámica de jsPDF y jspdf-autotable
-    const jsPDF = (await import('jspdf')).default;
-    const autoTable = (await import('jspdf-autotable')).default;
-
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-    // Encabezado
-    doc.setFillColor(22, 53, 114);
-    doc.rect(0, 0, 297, 20, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REPORTE DE HORAS POR CLIENTE', 148, 13, { align: 'center' });
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    const fecha = new Date().toLocaleDateString('es-EC', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-    doc.text(`Generado el: ${fecha}`, 285, 13, { align: 'right' });
-
-    // AutoTable
-    autoTable(doc, {
-      startY: 26,
-      head: [[
-        'Cliente', 'Estado Cliente', 'Mes', 'Año', 'Recursos', 'Horas'
-      ]],
-      body: data.map(item => [
-        item.cliente,
-        item.estadoCliente,
-        item.mes,
-        item.anio,
-        item.recursos.toString(),
-        Number(item.horas).toFixed(1)
-      ]),
-      styles: {
-        font: 'helvetica',
-        fontSize: 8,
-        cellPadding: 4,
-        valign: 'middle',
-      },
-      headStyles: {
-        fillColor: [22, 53, 114],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-        fontSize: 8.5,
-        halign: 'center',
-      },
-      bodyStyles: {
-        textColor: [55, 65, 81],
-      },
-      alternateRowStyles: {
-        fillColor: [245, 247, 255],
-      },
-      columnStyles: {
-        0: { cellWidth: 80 },
-        1: { halign: 'center', cellWidth: 37 },
-        2: { halign: 'center', cellWidth: 40 },
-        3: { halign: 'center', cellWidth: 30 },
-        4: { halign: 'center', cellWidth: 45 },
-        5: { halign: 'center', cellWidth: 45 },
-      },
-      willDrawCell: (data) => {
-        if (data.section === 'body' && data.column.index === 1) {
-          const estado = data.cell.raw as string;
-          data.cell.styles.textColor = estado === 'Activo'
-            ? [22, 163, 74]
-            : [107, 114, 128];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      },
-      margin: { left: 10, right: 10 },
-      tableLineColor: [229, 231, 235],
-      tableLineWidth: 0.1,
-    });
-
-    // Pie de página
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(7);
-      doc.setTextColor(156, 163, 175);
-      doc.text(
-        `Página ${i} de ${pageCount} — Integrity Solutions`,
-        148, 205, { align: 'center' }
-      );
-    }
-
-    // Guardar archivo
-    const formatFecha = () => {
-      const now = new Date();
-      const d = now.getDate().toString().padStart(2, '0');
-      const m = (now.getMonth() + 1).toString().padStart(2, '0');
-      const y = now.getFullYear();
-      return `${d}-${m}-${y}`;
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      mes: this.mesSeleccionado() || undefined,
+      anio: this.anioSeleccionado() || undefined
     };
-    doc.save(`reporte_horas_${formatFecha()}.pdf`);
+
+    const total = this.totalItems();
+    if (total === 0) return;
+
+    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
+
+        await exportarReportePdf({
+          titulo: 'Reporte de Horas por Cliente',
+          nombreArchivo: 'Horas',
+          nombreHoja: 'Reporte de Horas',
+          columnas: [
+            { encabezado: 'Cliente', anchoPdf: 75 },
+            { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
+            { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
+            { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
+            { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
+          ],
+          filas: data.map((item) => [
+            item.cliente,
+            item.estadoCliente,
+            item.mes,
+            item.anio,
+            item.recursos,
+            Number(item.horas).toFixed(1),
+          ]),
+          columnaEstado: 1,
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar PDF:', err)
+    });
   }
 }

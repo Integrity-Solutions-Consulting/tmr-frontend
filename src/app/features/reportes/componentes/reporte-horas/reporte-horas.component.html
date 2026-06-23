@@ -119,7 +119,7 @@
     </div>
   } @else {
     <app-tabla [datosPaginados]="datosPaginados()" [columnas]="columnasTabla" [paginaActual]="paginaActual"
-      [totalPaginas]="totalPaginas" [total]="datosFiltrados().length" [porPagina]="itemsPorPagina()"
+      [totalPaginas]="totalPaginas" [total]="totalItems()" [porPagina]="itemsPorPagina()"
       [mostrarDatos]="mostrarDatos()" (paginaCambia)="paginaActual.set($event)">
     </app-tabla>
   }

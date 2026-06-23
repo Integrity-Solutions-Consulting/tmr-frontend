@@ -250,24 +250,7 @@
                 </div>
               </div>
 
-              <span
-                class="detalle-proyectos__item-estado"
-                [ngClass]="getEstadoClass(proy.estado)"
-                data-estado-legacy="{
-                  'estado--progreso':      proy.estado === 'En progreso',
-                  'estado--completado':    proy.estado === 'Completado',
-                  'estado--pausa':         proy.estado === 'En pausa',
-                  'estado--cancelado':     proy.estado === 'Cancelado',
-                  'estado--inactivo':      proy.estado === 'Inactivo',
-                  'estado--aprobado':      proy.estado === 'Aprobado',
-                  'estado--aplazado':      proy.estado === 'Aplazado',
-                  'estado--planificacion': proy.estado === 'Planificación',
-                  'estado--espera':        proy.estado === 'En espera'
-                }"
-              >
-                <span class="detalle-proyectos__item-dot"></span>
-                {{ proy.estado || 'Sin seguimiento' }}
-              </span>
+              <app-badge-estado [estado]="proy.estado || 'Sin seguimiento'"></app-badge-estado>
 
             </div>
           }
