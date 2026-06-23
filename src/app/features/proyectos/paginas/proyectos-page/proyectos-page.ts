@@ -64,6 +64,7 @@ export class ProyectosPage implements OnDestroy {
   seguimientoMap: Record<number, string> = {};
   departamentoMap: Record<number, string> = {};
   cargosCatalogo: CargoLookup[] = [];
+  idEstadoEnEspera: number | null = null;
 
   modalCrearVisible = false;
   modalDetalleVisible = false;
@@ -116,12 +117,15 @@ export class ProyectosPage implements OnDestroy {
         this.departamentoMap = lookups.departamentos.reduce((map, dep) => {
           map[dep.id] = dep.nombre;
           return map;
-        },   {} as Record<number, string>);
+        }, {} as Record<number, string>);
         this.cargosCatalogo = lookups.cargos ?? [];
+        const enEspera = lookups.estados.find(e => e.nombre === 'En espera');
+        this.idEstadoEnEspera = enEspera ? enEspera.id : null;
       },
       error: (error) => console.error('Error al cargar lookups:', error)
     });
-}
+  }
+
   private obtenerSeguimientoNombre(idEstadoProyecto?: number | null): string {
     if (!idEstadoProyecto) return 'Sin seguimiento';
     return this.seguimientoMap[idEstadoProyecto] ?? 'Sin seguimiento';
@@ -331,189 +335,236 @@ export class ProyectosPage implements OnDestroy {
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
 
-    // ── Hoja 1: Resumen de proyectos ──
-    const wsResumen = workbook.addWorksheet('Proyectos');
-    wsResumen.columns = [
-      { header: 'Código',      key: 'codigo',      width: 16 },
-      { header: 'Nombre',      key: 'nombre',      width: 40 },
-      { header: 'Cliente',     key: 'cliente',     width: 40 },
-      { header: 'Tipo',        key: 'tipo',        width: 25 },
-      { header: 'Seguimiento', key: 'seguimiento', width: 25 },
-      { header: 'Estado',      key: 'estado',      width: 18 },
-      { header: 'Inicio',      key: 'inicio',      width: 15 },
-      { header: 'Fin',         key: 'fin',         width: 15 },
-      { header: 'Horas',       key: 'horas',       width: 12 },
-      { header: 'Presupuesto', key: 'presupuesto', width: 20 },
+    const COLS = 9;
+    const ws = workbook.addWorksheet('Proyectos');
+
+    ws.columns = [
+      { key: 'c1', width: 22 },
+      { key: 'c2', width: 38 },
+      { key: 'c3', width: 38 },
+      { key: 'c4', width: 22 },
+      { key: 'c5', width: 22 },
+      { key: 'c6', width: 18 },
+      { key: 'c7', width: 15 },
+      { key: 'c8', width: 15 },
+      { key: 'c9', width: 20 },
     ];
 
-    proyectos.forEach(p => {
-      wsResumen.addRow({
-        codigo:      p.codigo,
-        nombre:      p.nombre,
-        cliente:     p.cliente ?? '-',
-        tipo:        p.tipo ?? '-',
-        seguimiento: this.obtenerSeguimientoNombre(p.idEstadoProyecto),
-        estado:      p.estado ?? '-',
-        inicio:      this.formatearFecha(p.fechaInicio),
-        fin:         this.formatearFecha(p.fechaFin),
-        horas:       p.horas ?? '',
-        presupuesto: p.presupuesto ?? '',
+    // ── Helper: aplicar estilo a una fila ──
+    const estilizarFila = (
+      fila: any,
+      opciones: {
+        bg?: string;
+        fontColor?: string;
+        bold?: boolean;
+        italic?: boolean;
+        size?: number;
+        height?: number;
+        border?: boolean;
+      }
+    ) => {
+      if (opciones.height) fila.height = opciones.height;
+      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+        if (col > COLS) return;
+        if (opciones.bg) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opciones.bg } };
+        }
+        cell.font = {
+          name: 'Segoe UI',
+          size: opciones.size ?? 10,
+          bold: opciones.bold ?? false,
+          italic: opciones.italic ?? false,
+          color: { argb: opciones.fontColor ?? COLOR_TEXTO }
+        };
+        if (opciones.border) {
+          cell.border = this.bordeDelgado(COLOR_BORDE);
+        }
+        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
       });
-    });
+    };
 
-    this.aplicarEstiloHoja(wsResumen, 6);
+    // ── Helper: título de sección (banda azul que abarca todas las columnas) ──
+    const agregarTituloSeccion = (titulo: string) => {
+      const fila = ws.addRow([titulo, '', '', '', '', '', '', '', '']);
+      fila.height = 24;
+      ws.mergeCells(fila.number, 1, fila.number, COLS);
+      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+        if (col > COLS) return;
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+        cell.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.alignment = { vertical: 'middle', horizontal: 'left' };
+      });
+    };
 
-    // ── Hoja 2: Líderes y Recursos ──
-    const wsDetalle = workbook.addWorksheet('Líderes y Recursos');
-    wsDetalle.columns = [
-      { header: 'Proyecto',        key: 'proyecto',        width: 30 },
-      { header: 'Tipo',            key: 'tipo',            width: 14 },
-      { header: 'Nombre',          key: 'nombre',          width: 35 },
-      { header: 'Costo/h',         key: 'costo',           width: 14 },
-      { header: 'Horas',           key: 'horas',           width: 12 },
-      { header: 'Departamento',    key: 'departamento',    width: 25 },
-      { header: 'Rol',             key: 'rol',             width: 30 },
-      { header: 'Entrada',         key: 'entrada',         width: 14 },
-      { header: 'Salida',          key: 'salida',          width: 14 },
-    ];
+    // ── Helper: fila separadora entre bloques ──
+    const agregarSeparadorBloque = () => {
+      const fila = ws.addRow(['', '', '', '', '', '', '', '', '']);
+      fila.height = 10;
+      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+        if (col > COLS) return;
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
+      });
+    };
 
-    // Estilo header hoja detalle
-    const headerDetalle = wsDetalle.getRow(1);
-    headerDetalle.height = 26;
-    headerDetalle.eachCell((cell: any) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+    // ══════════════════════════════════════════════
+    // BLOQUE 1 — RESUMEN DE PROYECTOS
+    // ══════════════════════════════════════════════
+    agregarTituloSeccion('Resumen de Proyectos');
+
+    const cabResumen = ws.addRow([
+      'Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado', 'Inicio', 'Fin', 'Horas / Presupuesto'
+    ]);
+    cabResumen.height = 26;
+    cabResumen.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+      if (col > COLS) return;
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
       cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { vertical: 'middle', horizontal: 'center' };
       cell.border    = this.bordeDelgado();
     });
 
-    let rowIndex = 2;
+    proyectos.forEach((p, i) => {
+      const fila = ws.addRow([
+        p.codigo,
+        p.nombre,
+        p.cliente ?? '-',
+        p.tipo ?? '-',
+        this.obtenerSeguimientoNombre(p.idEstadoProyecto),
+        this.normalizarEstadoProyecto(p),
+        this.formatearFecha(p.fechaInicio),
+        this.formatearFecha(p.fechaFin),
+        p.horas
+          ? `${p.horas}h / ${p.presupuesto ? '$' + p.presupuesto : '-'}`
+          : (p.presupuesto ? '$' + p.presupuesto : '-'),
+      ]);
+      fila.height = 20;
+      const bg = i % 2 === 0 ? COLOR_RECURSO : COLOR_RECURSO_ALT;
 
-    proyectos.forEach((proyecto, proyectoIdx) => {
+      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+        if (col > COLS) return;
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        cell.border    = this.bordeDelgado(COLOR_BORDE);
+        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+        // Estado con color semántico
+        if (col === 6) {
+          const esActivo = (cell.value?.toString() ?? '').toLowerCase() === 'activo';
+          cell.font = {
+            name: 'Segoe UI', size: 10, bold: true,
+            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+    });
+
+    // ══════════════════════════════════════════════
+    // SEPARADOR ENTRE BLOQUES
+    // ══════════════════════════════════════════════
+    agregarSeparadorBloque();
+    agregarSeparadorBloque();
+
+    // ══════════════════════════════════════════════
+    // BLOQUE 2 — LÍDERES Y RECURSOS
+    // ══════════════════════════════════════════════
+    agregarTituloSeccion('Líderes y Recursos por Proyecto');
+
+    const cabDetalle = ws.addRow([
+      'Proyecto', 'Tipo', 'Nombre', 'Costo/h', 'Horas', 'Departamento', 'Rol', 'Entrada', 'Salida'
+    ]);
+    cabDetalle.height = 26;
+    cabDetalle.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+      if (col > COLS) return;
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
+      cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border    = this.bordeDelgado();
+    });
+
+    proyectos.forEach((proyecto) => {
       const lideres = proyecto.lideres?.length
         ? proyecto.lideres
         : proyecto.lider
-          ? [{ lider: proyecto.lider, costoHoraLider: proyecto.costoHoraLider, horasLider: proyecto.horasLider, recursos: proyecto.recursos ?? [] }]
+          ? [{
+              lider: proyecto.lider,
+              costoHoraLider: proyecto.costoHoraLider,
+              horasLider: proyecto.horasLider,
+              recursos: proyecto.recursos ?? []
+            }]
           : [];
 
-      // Deduplicar líderes por nombre
       const lideresUnicos = lideres.filter((l, i, arr) =>
         arr.findIndex(x => x.lider === l.lider) === i
       );
 
       if (!lideresUnicos.length) {
-        // Proyecto sin líderes
-        const fila = wsDetalle.addRow({
-          proyecto: proyecto.nombre,
-          tipo: 'Proyecto',
-          nombre: 'Sin líderes asignados',
-          costo: '',
-          horas: '',
-          departamento: '',
-          rol: '',
-          entrada: '',
-          salida: ''
-        });
-        fila.height = 20;
-        fila.eachCell((cell: any) => {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_RECURSO_ALT } };
-          cell.font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
-          cell.border = this.bordeDelgado(COLOR_BORDE);
-          cell.alignment = { vertical: 'middle', horizontal: 'left' };
-        });
-        rowIndex++;
-
-        // Separador entre proyectos
-        this.agregarFilaSeparadora(wsDetalle);
-        rowIndex++;
+        const f = ws.addRow([proyecto.nombre, '', 'Sin líderes asignados', '', '', '', '', '', '']);
+        f.height = 20;
+        estilizarFila(f, { bg: COLOR_RECURSO_ALT, fontColor: 'FF9CA3AF', italic: true, border: true });
+        this.agregarFilaSeparadora(ws);
         return;
       }
 
       lideresUnicos.forEach((lider, liderIdx) => {
-        // ── FILA: LÍDER ──
-        const filaLider = wsDetalle.addRow({
-          proyecto: liderIdx === 0 ? proyecto.nombre : '',
-          tipo: 'Líder',
-          nombre: lider.lider ?? '-',
-          costo: lider.costoHoraLider ? `$${lider.costoHoraLider}` : '-',
-          horas: lider.horasLider ?? 0,
-          departamento: '-',
-          rol: 'Líder de proyecto',
-          entrada: '',
-          salida: ''
-        });
+        // ── Fila LÍDER ──
+        const filaLider = ws.addRow([
+          liderIdx === 0 ? proyecto.nombre : '',
+          'Líder',
+          lider.lider ?? '-',
+          lider.costoHoraLider ? `$${lider.costoHoraLider}` : '-',
+          lider.horasLider ?? 0,
+          '-',
+          'Líder de proyecto',
+          '',
+          ''
+        ]);
         filaLider.height = 24;
-        filaLider.eachCell((cell: any) => {
+        filaLider.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+          if (col > COLS) return;
           cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_LIDER } };
           cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: COLOR_PRIMARIO } };
           cell.border    = this.bordeDelgado(COLOR_BORDE);
           cell.alignment = { vertical: 'middle', horizontal: 'left' };
         });
-        rowIndex++;
 
         const recursos = lider.recursos ?? [];
 
         if (!recursos.length) {
-          // Sin recursos
-          const filaSinRecursos = wsDetalle.addRow({
-            proyecto: '',
-            tipo: 'Recurso',
-            nombre: 'Sin recursos asignados',
-            costo: '',
-            horas: '',
-            departamento: '',
-            rol: '',
-            entrada: '',
-            salida: ''
-          });
-          filaSinRecursos.height = 18;
-          filaSinRecursos.eachCell((cell: any) => {
-            cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_RECURSO } };
-            cell.font      = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
-            cell.border    = this.bordeDelgado(COLOR_BORDE);
-            cell.alignment = { vertical: 'middle', horizontal: 'left' };
-          });
-          rowIndex++;
+          const f = ws.addRow(['', 'Recurso', 'Sin recursos asignados', '', '', '', '', '', '']);
+          f.height = 18;
+          estilizarFila(f, { bg: COLOR_RECURSO, fontColor: 'FF9CA3AF', italic: true, size: 9, border: true });
         } else {
           recursos.forEach((recurso, idx) => {
-            const alterno = idx % 2 === 0;
-            const fila = wsDetalle.addRow({
-              proyecto: '',
-              tipo: 'Recurso',
-              nombre: recurso.nombre ?? '-',
-              costo: recurso.costoHora ? `$${recurso.costoHora}` : '-',
-              horas: recurso.horas ?? 0,
-              departamento: this.obtenerDepartamentosRecurso(recurso),
-              rol: recurso.rol ?? '-',
-              entrada: this.formatearFecha(recurso.entrada ?? null),
-              salida: this.formatearFecha(recurso.salida ?? null)
-            });
-            fila.height = 20;
-            fila.eachCell((cell: any) => {
-              cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: alterno ? COLOR_RECURSO : COLOR_RECURSO_ALT } };
-              cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-              cell.border    = this.bordeDelgado(COLOR_BORDE);
-              cell.alignment = { vertical: 'middle', horizontal: 'left' };
-            });
-            rowIndex++;
+            const bg = idx % 2 === 0 ? COLOR_RECURSO : COLOR_RECURSO_ALT;
+            const f = ws.addRow([
+              '',
+              'Recurso',
+              recurso.nombre ?? '-',
+              recurso.costoHora ? `$${recurso.costoHora}` : '-',
+              recurso.horas ?? 0,
+              this.obtenerDepartamentosRecurso(recurso),
+              recurso.rol ?? '-',
+              this.formatearFecha(recurso.entrada ?? null),
+              this.formatearFecha(recurso.salida ?? null)
+            ]);
+            f.height = 20;
+            estilizarFila(f, { bg, border: true });
           });
         }
 
-        // ── ESPACIO EXTRA entre líderes del mismo proyecto ──
+        // Espacio entre líderes del mismo proyecto
         if (liderIdx < lideresUnicos.length - 1) {
-          this.agregarFilaEspacio(wsDetalle);
-          rowIndex++;
+          this.agregarFilaEspacio(ws);
         }
       });
 
-      // ── SEPARADOR ENTRE PROYECTOS ──
-      this.agregarFilaSeparadorProyecto(wsDetalle);
-      rowIndex++;
+      // Separador entre proyectos
+      this.agregarFilaSeparadorProyecto(ws);
     });
 
-    // Aplicar cabecera con logo a ambas hojas
-    await agregarCabeceraExcel(workbook, wsResumen, 'Reporte de Proyectos', 10);
-    await agregarCabeceraExcel(workbook, wsDetalle, 'Reporte de Líderes y Recursos', 9);
+    // Cabecera con logo
+    await agregarCabeceraExcel(workbook, ws, 'Reporte de Proyectos', 10);
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
@@ -667,7 +718,6 @@ export class ProyectosPage implements OnDestroy {
     };
 
     // ── PÁGINA 1: Tabla Resumen ──
-    // jsPDF inicia con la página 1 creada; NO llamar addPage() aquí
     dibujarCabecera(1, 1);
 
     doc.setFontSize(11);
@@ -739,7 +789,6 @@ export class ProyectosPage implements OnDestroy {
       },
       margin: { left: marginX, right: marginX, bottom: 22, top: 30 },
       didDrawPage: (data) => {
-        // Usar getCurrentPageInfo para el número real de página en el doc
         const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
         const total   = (doc as any).internal.getNumberOfPages();
         dibujarCabecera(pageNum, total);
@@ -751,7 +800,6 @@ export class ProyectosPage implements OnDestroy {
     const finalYResumen = (doc as any).lastAutoTable.finalY + 14;
     const espacioRestante = footerY - finalYResumen - 22;
 
-    // Si queda menos de 50 pts, empezar en nueva página
     if (espacioRestante < 50) {
       doc.addPage();
     }
@@ -759,12 +807,10 @@ export class ProyectosPage implements OnDestroy {
     let currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
     let currentY = espacioRestante < 50 ? 30 : finalYResumen;
 
-    // Dibujar cabecera si se saltó a nueva página
     if (espacioRestante < 50) {
       dibujarCabecera(currentPageNum, currentPageNum);
     }
 
-    // Título de la sección de detalle
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(22, 53, 114);
@@ -786,7 +832,6 @@ export class ProyectosPage implements OnDestroy {
         arr.findIndex(x => x.lider === l.lider) === i
       );
 
-      // ── Proyecto sin líderes ──
       if (!lideresUnicos.length) {
         const alturaEstimada = 30;
         if (currentY + alturaEstimada > footerY - 22) {
@@ -808,13 +853,11 @@ export class ProyectosPage implements OnDestroy {
         return;
       }
 
-      // ── Construir body de la tabla del proyecto ──
       const body: any[] = [];
 
       lideresUnicos.forEach((lider, liderIdx) => {
         const recursos = lider.recursos ?? [];
 
-        // Separador visual entre líderes dentro del mismo proyecto
         if (liderIdx > 0) {
           body.push([{
             content: '',
@@ -823,7 +866,6 @@ export class ProyectosPage implements OnDestroy {
           }]);
         }
 
-        // Fila LÍDER
         const estiloLider: any = {
           fontStyle: 'bold',
           fillColor: [210, 222, 245],
@@ -842,7 +884,6 @@ export class ProyectosPage implements OnDestroy {
           { content: '', styles: { fillColor: [210, 222, 245], minCellHeight: 12 } },
         ]);
 
-        // Filas RECURSOS
         if (!recursos.length) {
           body.push([
             { content: '', styles: { fillColor: [255, 255, 255], minCellHeight: 10 } },
@@ -875,18 +916,16 @@ export class ProyectosPage implements OnDestroy {
         }
       });
 
-      // ── Estimación de altura para decidir salto de página ──
-      // Calculamos cuántas filas reales hay (líderes + recursos + separadores)
       const filasLider    = lideresUnicos.length;
       const filasRecurso  = lideresUnicos.reduce((sum, l) => sum + Math.max((l.recursos ?? []).length, 1), 0);
       const filaSeparador = Math.max(lideresUnicos.length - 1, 0);
 
-      const alturaEncabezado = 12;   // banda azul del proyecto
-      const alturaHeader     = 11;   // cabecera de columnas
-      const alturaFilaLider  = 14;   // cada fila de líder
-      const alturaFilaRec    = 11;   // cada fila de recurso
-      const alturaFilaSep    = 4;    // separador entre líderes
-      const alturaMargen     = 12;   // espacio inferior entre proyectos
+      const alturaEncabezado = 12;
+      const alturaHeader     = 11;
+      const alturaFilaLider  = 14;
+      const alturaFilaRec    = 11;
+      const alturaFilaSep    = 4;
+      const alturaMargen     = 12;
 
       const alturaEstimada =
         alturaEncabezado +
@@ -896,7 +935,6 @@ export class ProyectosPage implements OnDestroy {
         (filaSeparador * alturaFilaSep)  +
         alturaMargen;
 
-      // Si no entra completo en el espacio restante, saltar a nueva página
       if (currentY + alturaEstimada > footerY - 22) {
         doc.addPage();
         currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
@@ -905,7 +943,6 @@ export class ProyectosPage implements OnDestroy {
         currentY = 32;
       }
 
-      // ── Encabezado del proyecto (banda azul claro) ──
       doc.setFillColor(232, 238, 249);
       doc.roundedRect(marginX, currentY, pageW - marginX * 2, 9, 1, 1, 'F');
       doc.setFontSize(9);
@@ -914,7 +951,6 @@ export class ProyectosPage implements OnDestroy {
       doc.text(`${proyecto.codigo} — ${proyecto.nombre}`, marginX + 4, currentY + 6.5);
       currentY += 11;
 
-      // ── Tabla del proyecto ──
       autoTable(doc, {
         startY: currentY,
         head: [['Tipo', 'Nombre', 'Costo/h', 'Horas', 'Departamento', 'Rol', 'Entrada', 'Salida']],
@@ -950,8 +986,6 @@ export class ProyectosPage implements OnDestroy {
           6: { cellWidth: 24, halign: 'center' },
           7: { cellWidth: 24, halign: 'center' },
         },
-        // pageBreak: 'avoid' intenta mantener la tabla completa en una sola página.
-        // Si la tabla es demasiado grande para una sola página usa 'auto'.
         pageBreak: 'avoid',
         rowPageBreak: 'avoid',
         tableWidth: 'auto',
@@ -962,8 +996,6 @@ export class ProyectosPage implements OnDestroy {
           dibujarCabecera(pageNum, total);
           dibujarPie(pageNum, total);
 
-          // Si autoTable abrió una página nueva de forma automática, dibujar
-          // el banner de continuación del proyecto
           if (data.pageNumber > 1 && data.cursor) {
             const yBanner = 32;
             doc.setFillColor(232, 238, 249);

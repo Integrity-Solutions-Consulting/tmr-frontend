@@ -70,6 +70,13 @@
       </td>
     </ng-container>
 
+    <ng-container matColumnDef="observacion">
+      <th mat-header-cell *matHeaderCellDef>Observación</th>
+      <td mat-cell *matCellDef="let proyecto">
+        <span class="tabla__observacion">{{ proyecto.observacion || '-' }}</span>
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="acciones">
       <th mat-header-cell *matHeaderCellDef aria-label="Acciones"></th>
       <td mat-cell *matCellDef="let proyecto">

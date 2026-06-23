@@ -116,6 +116,27 @@
           <span>Rango de fechas</span>
           <strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong>
         </div>
+
+        <div>
+          <span>Observación</span>
+          <strong>{{ proyectoDetalle.observacion || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Fecha fin real</span>
+          <strong>{{ formatearFecha(proyectoDetalle.fechaFinReal) }}</strong>
+        </div>
+
+        @if (proyectoDetalle.idEstadoProyecto === idEstadoEnEspera) {
+          <div>
+            <span>Fecha inicio espera</span>
+            <strong>{{ formatearFecha(proyectoDetalle.fechaInicioEspera) }}</strong>
+          </div>
+          <div>
+            <span>Fecha fin espera</span>
+            <strong>{{ formatearFecha(proyectoDetalle.fechaFinEspera) }}</strong>
+          </div>
+        }
       </section>
 
       <section class="proyecto-detalle__leaders">
