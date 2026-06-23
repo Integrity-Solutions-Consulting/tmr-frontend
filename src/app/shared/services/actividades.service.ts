@@ -196,7 +196,7 @@ export class ActividadesService {
     });
   }
 
-  eliminarActividad(id: number | string, callback?: () => void): void {
+  eliminarActividad(id: number | string, callback?: () => void, errorCallback?: (err: any) => void): void {
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
         this.cargarResumen(this.currentAnio(), this.currentMes());
@@ -206,7 +206,10 @@ export class ActividadesService {
 
         if (callback) callback();
       },
-      error: (err) => console.error('Error al eliminar actividad', err)
+      error: (err) => {
+        console.error('Error al eliminar actividad', err);
+        if (errorCallback) errorCallback(err);
+      }
     });
   }
 

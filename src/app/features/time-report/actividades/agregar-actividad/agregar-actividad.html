@@ -297,3 +297,11 @@
   </div>
 
 </form>
+
+<app-modal-eliminar-actividad
+  [mostrar]="mostrarEliminar"
+  [descripcionActividad]="data?.actividad?.descripcionactividad || ''"
+  [error]="errorEliminar"
+  (cerrarModal)="mostrarEliminar = false"
+  (confirmarEliminar)="confirmarEliminarActividad()"
+></app-modal-eliminar-actividad>
