@@ -193,29 +193,14 @@
             <td>
               <app-badge-estado [estado]="lider.estado"></app-badge-estado>
             </td>
-            <td class="td-actions">
-              <button class="action-btn" title="Acciones" aria-label="Acciones del líder" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">
-                <span class="material-icons">more_vert</span>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="verLider(lider, rangoInicio + i)">
-                  <span class="material-symbols-outlined">visibility</span>
-                  <span>Ver más</span>
-                </button>
-                <button mat-menu-item (click)="editarLider(lider)">
-                  <span class="material-symbols-outlined">edit_square</span>
-                  <span>Editar</span>
-                </button>
-                <button mat-menu-item (click)="toggleEstadoLider(lider)">
-                  <span class="material-symbols-outlined">{{ lider.estado === 'Activo' ? 'block' : 'check_circle'
-                    }}</span>
-                  <span>{{ lider.estado === 'Activo' ? 'Desactivar' : 'Activar' }}</span>
-                </button>
-                <button mat-menu-item (click)="abrirEliminar(lider)">
-                  <span class="material-symbols-outlined">delete</span>
-                  <span>Eliminar</span>
-                </button>
-              </mat-menu>
+            <td class="td-actions" (click)="$event.stopPropagation()">
+              <app-action-menu
+                [itemId]="(lider.id ?? lider.codigo).toString()"
+                [menuAbierto]="menuAbierto"
+                [acciones]="accionesLider(lider)"
+                (toggleMenu)="toggleMenu($event)"
+                (accionSeleccionada)="onAccionSeleccionada($event, lider, rangoInicio + i)"
+              ></app-action-menu>
             </td>
           </tr>
           <tr *ngIf="lideresFiltrados.length === 0">

@@ -24,7 +24,11 @@ const COLOR_TABLA = 'FF163572';
 const COLOR_TEXTO = 'FF334155';
 const COLOR_BORDE = 'FFE2E8F0';
 const COLOR_ALTERNO = 'FFF8FAFC';
-const LOGO_URL = 'assets/img/logo-reporte-integrity.png';
+const LOGO_URLS = [
+  '/assets/img/logo-reporte-integrity.png',
+  'assets/img/logo-reporte-integrity.png',
+  '/assets/img/logo-integrity.png',
+];
 
 export function fechaArchivo(fecha = new Date()): string {
   const year = fecha.getFullYear();
@@ -479,19 +483,27 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
 }
 
 export async function obtenerLogoReporte(): Promise<string | null> {
-  try {
-    const response = await fetch(LOGO_URL);
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    return await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
+  for (const ruta of LOGO_URLS) {
+    try {
+      const url = new URL(ruta, document.baseURI).toString();
+      const response = await fetch(url, { cache: 'no-cache' });
+      if (!response.ok) continue;
+
+      const blob = await response.blob();
+      if (!blob.type.startsWith('image/')) continue;
+
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      // Intenta la siguiente ruta disponible.
+    }
   }
+
+  return null;
 }
 
 const obtenerLogo = obtenerLogoReporte;
