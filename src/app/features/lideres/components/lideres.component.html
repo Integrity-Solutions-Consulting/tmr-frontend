@@ -130,6 +130,16 @@
   <div class="table-scroll-container">
     <div class="table-wrapper" #tableWrapper>
       <table class="lideres-table">
+        <colgroup>
+          <col class="col-codigo">
+          <col class="col-tipo">
+          <col class="col-nombre">
+          <col class="col-cliente">
+          <col class="col-correo">
+          <col class="col-telefono">
+          <col class="col-estado">
+          <col class="col-acciones">
+        </colgroup>
         <thead>
           <tr>
             <th>Código</th>
@@ -139,33 +149,28 @@
             <th>Correo electrónico</th>
             <th>Teléfono</th>
             <th>Estado</th>
-            <th></th>
+            <th class="th-actions">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let lider of lideresPaginados; let i = index">
-            <td>{{ lider.codigo }}</td>
-            <td>{{ lider.tipo }}</td>
-            <td>{{ lider.nombre }}</td>
+            <td [title]="lider.codigo">{{ lider.codigo }}</td>
+            <td [title]="lider.tipo">{{ lider.tipo }}</td>
+            <td class="td-truncate" [title]="lider.nombre">
+              <span class="cell-ellipsis">{{ lider.nombre }}</span>
+            </td>
             <td class="td-cliente">
-              <!-- Un solo cliente -->
-              <div *ngIf="obtenerClientesList(lider.cliente).length === 1" class="single-client"
-                [title]="obtenerClientesList(lider.cliente)[0]">
-                {{ obtenerClientesList(lider.cliente)[0] }}
-              </div>
-
-              <!-- Varios clientes -->
-              <div *ngIf="obtenerClientesList(lider.cliente).length > 1" class="client-list-wrap"
-                (mouseleave)="cerrarLiderExpandido()">
+              <div *ngIf="obtenerClientesList(lider.cliente).length > 0" class="client-list-wrap">
                 <div class="client-list">
-                  <!-- Primer cliente como texto normal -->
-                  <div class="client-name-text" [title]="visibleClientes(lider)[0]">
-                    {{ visibleClientes(lider)[0] }}
-                  </div>
+                  <span class="client-chip" *ngFor="let cli of visibleClientes(lider)" [title]="cli">
+                    {{ cli }}
+                  </span>
                   <button *ngIf="clientesOcultosCount(lider) > 0" type="button" class="client-chip client-chip--more"
                     [class.client-chip--more-active]="estaLiderExpandido(lider)"
-                    (click)="toggleClientesExpandidos($event, lider)" (mouseenter)="onMouseEnterLider(lider)">
-                    +{{ clientesOcultosCount(lider) }} más
+                    (click)="toggleClientesExpandidos($event, lider)"
+                    [attr.aria-expanded]="estaLiderExpandido(lider)"
+                    [attr.aria-label]="'Ver ' + clientesOcultosCount(lider) + ' clientes más de ' + lider.nombre">
+                    {{ estaLiderExpandido(lider) ? 'Cerrar' : '+' + clientesOcultosCount(lider) + ' más' }}
                   </button>
                 </div>
 
@@ -177,16 +182,19 @@
                 </div>
               </div>
 
-              <!-- Sin clientes -->
               <span *ngIf="obtenerClientesList(lider.cliente).length === 0">-</span>
             </td>
-            <td>{{ lider.correo }}</td>
-            <td>{{ lider.telefono }}</td>
+            <td class="td-truncate" [title]="lider.correo">
+              <span class="cell-ellipsis">{{ lider.correo }}</span>
+            </td>
+            <td class="td-truncate" [title]="lider.telefono">
+              <span class="cell-ellipsis">{{ lider.telefono }}</span>
+            </td>
             <td>
               <app-badge-estado [estado]="lider.estado"></app-badge-estado>
             </td>
-            <td>
-              <button class="action-btn" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">
+            <td class="td-actions">
+              <button class="action-btn" title="Acciones" aria-label="Acciones del líder" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">
                 <span class="material-icons">more_vert</span>
               </button>
               <mat-menu #menu="matMenu">
