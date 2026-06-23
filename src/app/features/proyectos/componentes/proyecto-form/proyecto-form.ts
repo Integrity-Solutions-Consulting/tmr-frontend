@@ -152,7 +152,6 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.cargarLookups();
 
-    // Escucha cambios en el seguimiento
     this.formulario.get('idEstadoProyecto')
       ?.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -241,12 +240,12 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       ? proyecto.lideres
       : proyecto.lider
         ? [{
-            idLider: proyecto.idLider ?? null,
-            lider: proyecto.lider,
-            costoHoraLider: proyecto.costoHoraLider,
-            horasLider: proyecto.horasLider,
-            recursos: proyecto.recursos ?? []
-          }]
+          idLider: proyecto.idLider ?? null,
+          lider: proyecto.lider,
+          costoHoraLider: proyecto.costoHoraLider,
+          horasLider: proyecto.horasLider,
+          recursos: proyecto.recursos ?? []
+        }]
         : [];
 
     this.lideres.clear();
@@ -311,7 +310,6 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     this.formulario.markAsPristine();
     this.formulario.markAsUntouched();
 
-    // Actualiza campos de espera con el estado cargado
     this.actualizarCamposEspera(proyecto.idEstadoProyecto ?? null);
   }
 
@@ -405,42 +403,61 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   // ── Eventos de autocomplete ───────────────────────────────────────────────
 
   onClienteInput(): void {
-    this.formulario.controls.idCliente.setValue(null);
+    this.formulario.controls.idCliente.setValue(null, { emitEvent: false });
+    this.formulario.controls.cliente.updateValueAndValidity();
   }
 
   onClienteFocus(event: FocusEvent): void {
-    (event.target as HTMLInputElement | null)?.select();
+    const input = event.target as HTMLInputElement | null;
+    if (input) {
+      input.select();
+      // Forzar que el panel se abra mostrando todas las opciones
+      setTimeout(() => input.dispatchEvent(new Event('input')), 0);
+    }
   }
 
   onClienteChange(nombreCliente: string): void {
     const encontrado = this.clientesOpciones.find(c => c.nombre === nombreCliente);
-    this.formulario.controls.idCliente.setValue(encontrado?.id ?? null);
+    this.formulario.controls.idCliente.setValue(encontrado?.id ?? null, { emitEvent: false });
+    this.formulario.controls.cliente.updateValueAndValidity();
   }
 
   onLiderInput(li: number): void {
-    this.lideres.at(li).get('idLider')?.setValue(null);
+    this.lideres.at(li).get('idLider')?.setValue(null, { emitEvent: false });
+    this.lideres.at(li).get('lider')?.updateValueAndValidity();
   }
 
-  onLiderFocus(_li: number, event: FocusEvent): void {
-    (event.target as HTMLInputElement | null)?.select();
+  onLiderFocus(li: number, event: FocusEvent): void {
+    const input = event.target as HTMLInputElement | null;
+    if (input) {
+      input.select();
+      setTimeout(() => input.dispatchEvent(new Event('input')), 0);
+    }
   }
 
   onLiderChange(li: number, nombreLider: string): void {
     const found = this.lideresOpciones.find(l => l.nombre === nombreLider);
-    this.lideres.at(li).get('idLider')?.setValue(found?.id ?? null);
+    this.lideres.at(li).get('idLider')?.setValue(found?.id ?? null, { emitEvent: false });
+    this.lideres.at(li).get('lider')?.updateValueAndValidity();
   }
 
   onRecursoInput(li: number, ri: number): void {
-    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null);
+    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null, { emitEvent: false });
+    this.getRecursosDelLider(li).at(ri).get('nombre')?.updateValueAndValidity();
   }
 
   onRecursoFocus(li: number, ri: number, event: FocusEvent): void {
-    (event.target as HTMLInputElement | null)?.select();
+    const input = event.target as HTMLInputElement | null;
+    if (input) {
+      input.select();
+      setTimeout(() => input.dispatchEvent(new Event('input')), 0);
+    }
   }
 
   onEmpleadoChange(li: number, ri: number, nombreEmpleado: string): void {
     const emp = this.empleadosDisponibles.find(e => e.nombre === nombreEmpleado);
-    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(emp?.id ?? null);
+    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(emp?.id ?? null, { emitEvent: false });
+    this.getRecursosDelLider(li).at(ri).get('nombre')?.updateValueAndValidity();
   }
 
   onDepartamentoChange(li: number, ri: number, idDep: number): void {
@@ -454,21 +471,37 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   // ── Filtros de autocomplete ───────────────────────────────────────────────
 
   getClientesFiltrados(): LookupOption[] {
-    const filtro = String(this.formulario.controls.cliente.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.clientesOpciones;
-    return this.clientesOpciones.filter(c => c.nombre.toLowerCase().includes(filtro));
+    const valor = String(this.formulario.controls.cliente.value ?? '').trim();
+    const idActual = this.formulario.controls.idCliente.value;
+    // Si ya hay un id seleccionado o el valor coincide exactamente con una opción → mostrar todas
+    const yaSeleccionado = idActual != null ||
+      this.clientesOpciones.some(c => c.nombre === valor);
+    if (!valor || yaSeleccionado) return this.clientesOpciones;
+    return this.clientesOpciones.filter(c =>
+      c.nombre.toLowerCase().includes(valor.toLowerCase())
+    );
   }
 
   getLideresFiltrados(li: number): LookupOption[] {
-    const filtro = String(this.lideres.at(li).get('lider')?.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.lideresOpciones;
-    return this.lideresOpciones.filter(l => l.nombre.toLowerCase().includes(filtro));
+    const valor = String(this.lideres.at(li).get('lider')?.value ?? '').trim();
+    const idActual = this.lideres.at(li).get('idLider')?.value;
+    const yaSeleccionado = idActual != null ||
+      this.lideresOpciones.some(l => l.nombre === valor);
+    if (!valor || yaSeleccionado) return this.lideresOpciones;
+    return this.lideresOpciones.filter(l =>
+      l.nombre.toLowerCase().includes(valor.toLowerCase())
+    );
   }
 
   getRecursosFiltrados(li: number, ri: number): LookupOption[] {
-    const filtro = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim().toLowerCase();
-    if (!filtro) return this.empleadosDisponibles;
-    return this.empleadosDisponibles.filter(e => e.nombre.toLowerCase().includes(filtro));
+    const valor = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim();
+    const idActual = this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.value;
+    const yaSeleccionado = idActual != null ||
+      this.empleadosDisponibles.some(e => e.nombre === valor);
+    if (!valor || yaSeleccionado) return this.empleadosDisponibles;
+    return this.empleadosDisponibles.filter(e =>
+      e.nombre.toLowerCase().includes(valor.toLowerCase())
+    );
   }
 
   // ── Cargos ────────────────────────────────────────────────────────────────
@@ -594,7 +627,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   // ── Helpers de teclado ────────────────────────────────────────────────────
 
   bloquearCaracteresNumericos(event: KeyboardEvent, permiteDecimal: boolean): void {
-    const permitidas = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','Home','End'];
+    const permitidas = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
     if (permitidas.includes(event.key) || event.ctrlKey || event.metaKey) return;
     const esNum = /^[0-9]$/.test(event.key);
     const esDec = permiteDecimal && event.key === '.' && !(event.target as HTMLInputElement).value.includes('.');
@@ -631,22 +664,24 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       const valor = String(control.value ?? '').trim();
       if (!valor) return null;
 
+      const opciones = obtenerOpciones();
+      if (!opciones.length) return null;
+
+      // Si el valor coincide directamente con una opción → válido
+      if (opciones.some(opcion => opcion.nombre === valor)) return null;
+
+      // Si el id relacionado ya está seteado → válido
       const parent = control.parent;
       if (parent) {
         const nombreControl = Object.entries(parent.controls)
           .find(([, child]) => child === control)?.[0];
-
         if (nombreControl) {
           const idControl = this.obtenerControlIdRelacionado(parent, nombreControl);
-          if (idControl && idControl.value != null) {
-            return null;
-          }
+          if (idControl && idControl.value != null) return null;
         }
       }
 
-      const opciones = obtenerOpciones();
-      if (!opciones.length) return null;
-      return opciones.some(opcion => opcion.nombre === valor) ? null : { opcionInvalida: true };
+      return { opcionInvalida: true };
     };
   }
 
@@ -754,7 +789,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     }
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
       const [d, m, a] = s.split('/').map(Number);
-      return `${a}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      return `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     }
     if (s.includes('T')) return s.split('T')[0];
     const f = this.parseFechaString(s);
