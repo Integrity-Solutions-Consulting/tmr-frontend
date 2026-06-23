@@ -25,8 +25,9 @@ import { TOKEN_CONFIG } from '../../config/token.config';
       <h2>Sesión próxima a expirar</h2>
       
       <p class="message">
-        No se ha detectado actividad, la sesión se cerrará en 1 minuto. <b> ¿Deseas extender la sesión? </b>
+        No se ha detectado actividad. <b>¿Deseas extender la sesión?</b>
       </p>
+      
       
       <div class="actions">
         <button mat-raised-button (click)="onExtend()" class="btn-extend">
@@ -38,7 +39,7 @@ import { TOKEN_CONFIG } from '../../config/token.config';
       </div>
       
       <p class="hint">
-        Usa la aplicación para mantener tu sesión activa
+        Si no respondes en {{ totalSeconds }}s, se cerrará la sesión automáticamente
       </p>
     </div>
   `,
@@ -78,9 +79,6 @@ import { TOKEN_CONFIG } from '../../config/token.config';
       font-size: 14px;
     }
 
-    .countdown-container {
-      margin: 32px 0;
-    }
 
     .time {
       font-size: 56px;

@@ -168,27 +168,40 @@ export class AppComponent implements OnInit, OnDestroy {
             // Usuario aceptó extender sesión - realizar refresh
             console.log('✅ Usuario aceptó extender sesión, refrescando token...');
             return this.authService.refreshTokenRequest();
+          } else if (result?.action === 'logout' || result?.action === 'timeout') {
+            // Usuario rechazó o timeout - hacer logout explícito en el backend
+            const actionLabel = result?.action === 'timeout' ? '⏰ Timeout' : '❌ Usuario rechazó';
+            console.log(`${actionLabel} extender sesión, haciendo logout en BD...`);
+            return this.authService.logout();
           } else {
-            // Usuario rechazó, timeout, o cerró el modal - logout
-            console.log('❌ Usuario rechazó o timeout, cerrando sesión...');
-            throw new Error('User rejected session extension or modal timeout');
+            // Modal cerrado sin acción
+            console.log('❌ Modal cerrado sin acción, cerrando sesión...');
+            throw new Error('Modal closed without action');
           }
         }),
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response: AuthResponse) => {
-          // Actualizar tokens y reiniciar monitoreo
-          console.log('✅ Token refrescado, reiniciando monitoreo...');
-          this.authService.updateTokens(response);
-          this.tokenMonitor.stopMonitoring();
-          this.tokenMonitor.startMonitoring();
-          console.log('✅ Sesión extendida exitosamente');
-          this.currentDialogRef = null;
+        next: (response: any) => {
+          // Verificar si fue refresh o logout
+          if ('accessToken' in response) {
+            // Es un refresh token response
+            console.log('✅ Token refrescado, reiniciando monitoreo...');
+            this.authService.updateTokens(response);
+            this.tokenMonitor.stopMonitoring();
+            this.tokenMonitor.startMonitoring();
+            console.log('✅ Sesión extendida exitosamente');
+            this.currentDialogRef = null;
+          } else {
+            // Es un logout response (message)
+            console.log('✅ Logout exitoso en BD, redirigiendo a login...');
+            this.currentDialogRef = null;
+            this.handleTokenExpired();
+          }
         },
         error: (err: any) => {
-          // Si hay error o usuario rechaza, logout
-          console.warn('❌ No se pudo extender la sesión:', err.message);
+          // Si hay error en logout o refresh, hacer logout local y redirigir
+          console.warn('❌ Error en operación:', err.message);
           this.currentDialogRef = null;
           this.handleTokenExpired();
         }
