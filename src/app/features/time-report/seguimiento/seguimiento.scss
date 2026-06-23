@@ -298,12 +298,13 @@
 }
 
 .table-wrapper {
-    overflow-x: hidden; // evita scroll horizontal
+    overflow-x: auto; // permite scroll horizontal
     width: 100%;
 }
 
 .seguimiento-table {
     width: 100%;
+    min-width: 1100px;
     table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
@@ -328,8 +329,10 @@
             user-select: none;
             box-sizing: border-box;
 
-            &.col-nombre, &.col-horas {
+            &.col-nombre,
+            &.col-horas {
                 cursor: pointer;
+
                 &:hover {
                     color: #111827;
                 }
@@ -345,9 +348,11 @@
             &:last-child {
                 border-bottom: none;
             }
+
             &:hover {
                 background: #f9fafb;
             }
+
             &.selected-row {
                 background: #f3f4f6;
             }
@@ -373,16 +378,16 @@
         padding: 14px 0 !important;
         vertical-align: middle !important;
         text-align: center !important;
-        
+
         mat-checkbox {
             display: inline-flex !important;
             vertical-align: middle !important;
             justify-content: center !important;
             align-items: center !important;
             margin: 0 !important;
-            transform: translateY(-2px) !important;
+            transform: translateY(-10px) !important;
         }
-        
+
         ::ng-deep {
             .mat-mdc-checkbox {
                 display: inline-flex !important;
@@ -390,48 +395,55 @@
                 justify-content: center !important;
                 align-items: center !important;
                 margin: 0 !important;
-                transform: translateY(-2px) !important;
+                transform: translateY(-10px) !important;
             }
+
             .mdc-checkbox {
                 padding: 0 !important;
                 margin: 0 auto !important;
             }
+
             .mat-mdc-checkbox-ripple,
             .mdc-checkbox__ripple {
                 display: none !important;
             }
         }
     }
+
     .col-nombre {
-        width: 150px;
+        /* Distribuido equitativamente */
     }
+
     .col-proyecto {
-        width: 130px;
+        /* Distribuido equitativamente */
     }
+
     .col-cliente {
-        width: 130px;
+        /* Distribuido equitativamente */
     }
+
     .col-lider {
-        width: 130px;
+        /* Distribuido equitativamente */
     }
+
     .col-horas {
-        width: 90px;
         text-align: center;
     }
+
     .col-estado {
-        width: 110px;
         text-align: center;
     }
+
     .col-dias-reporte {
-        width: 115px;
         text-align: center;
     }
+
     .col-dias-completar {
-        width: 115px;
         text-align: center;
     }
+
     .col-acciones {
-        width: 80px;
+        width: 60px;
         text-align: center;
         padding: 14px 4px;
     }
@@ -467,11 +479,13 @@
             background: #22c55e;
         }
     }
+
     &--en-progreso {
         &::before {
             background: #3b82f6;
         }
     }
+
     &--pendiente {
         &::before {
             background: #f97316;
@@ -705,7 +719,7 @@
     vertical-align: middle;
     opacity: 0.6;
     transition: opacity 0.15s;
-    
+
     &:hover {
         opacity: 1;
     }
