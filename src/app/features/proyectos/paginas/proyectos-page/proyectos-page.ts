@@ -23,7 +23,7 @@ import {
   ProyectosFiltros
 } from '../../componentes/proyectos-filtros/proyectos-filtros';
 
-import { CargoLookup, Proyecto, RecursoProyecto } from '../../modelos/proyecto.model';
+import { CargoLookup, LiderProyecto, Proyecto, RecursoProyecto } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
 
 import {
@@ -31,13 +31,13 @@ import {
 } from '../../store/proyectos.actions';
 
 // Colores corporativos
-const COLOR_PRIMARIO    = 'FF163572';
-const COLOR_LIDER       = 'FFE8EEF9';
-const COLOR_RECURSO     = 'FFFFFFFF';
+const COLOR_PRIMARIO = 'FF163572';
+const COLOR_LIDER = 'FFE8EEF9';
+const COLOR_RECURSO = 'FFFFFFFF';
 const COLOR_RECURSO_ALT = 'FFF8FAFC';
-const COLOR_TEXTO       = 'FF334155';
-const COLOR_BORDE       = 'FFE2E8F0';
-const COLOR_SEPARADOR   = 'FFE2E8F0';
+const COLOR_TEXTO = 'FF334155';
+const COLOR_BORDE = 'FFE2E8F0';
+const COLOR_SEPARADOR = 'FFE2E8F0';
 
 @Component({
   selector: 'app-proyectos-page',
@@ -335,334 +335,158 @@ export class ProyectosPage implements OnDestroy {
     const { Workbook } = await import('exceljs');
     const workbook = new Workbook();
 
-    const COLS = 9;
+    const COLS = 17;
     const ws = workbook.addWorksheet('Proyectos');
 
     ws.columns = [
-      { key: 'c1', width: 22 },
-      { key: 'c2', width: 38 },
-      { key: 'c3', width: 38 },
-      { key: 'c4', width: 22 },
-      { key: 'c5', width: 22 },
-      { key: 'c6', width: 18 },
-      { key: 'c7', width: 15 },
-      { key: 'c8', width: 15 },
-      { key: 'c9', width: 20 },
+      { key: 'c1', width: 18 },  // Código
+      { key: 'c2', width: 35 },  // Nombre
+      { key: 'c3', width: 28 },  // Cliente
+      { key: 'c4', width: 20 },  // Tipo
+      { key: 'c5', width: 20 },  // Seguimiento
+      { key: 'c6', width: 14 },  // Estado
+      { key: 'c7', width: 14 },  // Inicio
+      { key: 'c8', width: 14 },  // Fin
+      { key: 'c9', width: 16 },  // Fecha Fin Real
+      { key: 'c10', width: 10 },  // Horas
+      { key: 'c11', width: 16 },  // Presupuesto
+      { key: 'c12', width: 30 },  // Líder
+      { key: 'c13', width: 14 },  // Costo/h Líder
+      { key: 'c14', width: 30 },  // Recurso
+      { key: 'c15', width: 24 },  // Rol Recurso
+      { key: 'c16', width: 16 },  // Inicio Espera
+      { key: 'c17', width: 16 },  // Fin Espera
     ];
 
-    // ── Helper: aplicar estilo a una fila ──
-    const estilizarFila = (
-      fila: any,
-      opciones: {
-        bg?: string;
-        fontColor?: string;
-        bold?: boolean;
-        italic?: boolean;
-        size?: number;
-        height?: number;
-        border?: boolean;
-      }
-    ) => {
-      if (opciones.height) fila.height = opciones.height;
-      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
-        if (col > COLS) return;
-        if (opciones.bg) {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opciones.bg } };
-        }
-        cell.font = {
-          name: 'Segoe UI',
-          size: opciones.size ?? 10,
-          bold: opciones.bold ?? false,
-          italic: opciones.italic ?? false,
-          color: { argb: opciones.fontColor ?? COLOR_TEXTO }
-        };
-        if (opciones.border) {
-          cell.border = this.bordeDelgado(COLOR_BORDE);
-        }
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-      });
-    };
+    // ── Cabecera corporativa con logo PRIMERO ──
+    await agregarCabeceraExcel(workbook, ws, 'Reporte de Proyectos', COLS);
 
-    // ── Helper: título de sección (banda azul que abarca todas las columnas) ──
-    const agregarTituloSeccion = (titulo: string) => {
-      const fila = ws.addRow([titulo, '', '', '', '', '', '', '', '']);
-      fila.height = 24;
-      ws.mergeCells(fila.number, 1, fila.number, COLS);
-      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
-        if (col > COLS) return;
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-        cell.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
-        cell.alignment = { vertical: 'middle', horizontal: 'left' };
-      });
-    };
-
-    // ── Helper: fila separadora entre bloques ──
-    const agregarSeparadorBloque = () => {
-      const fila = ws.addRow(['', '', '', '', '', '', '', '', '']);
-      fila.height = 10;
-      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
-        if (col > COLS) return;
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
-      });
-    };
-
-    // ══════════════════════════════════════════════
-    // BLOQUE 1 — RESUMEN DE PROYECTOS
-    // ══════════════════════════════════════════════
-    agregarTituloSeccion('Resumen de Proyectos');
-
-    const cabResumen = ws.addRow([
-      'Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado', 'Inicio', 'Fin', 'Horas / Presupuesto'
+    // ── Cabecera de columnas ──
+    const cabecera = ws.addRow([
+      'Código', 'Nombre', 'Cliente', 'Tipo', 'Seguimiento', 'Estado',
+      'Inicio', 'Fin', 'Fecha Fin Real', 'Horas', 'Presupuesto',
+      'Líder', 'Costo/h Líder',
+      'Recurso', 'Rol',
+      'Inicio Espera', 'Fin Espera'
     ]);
-    cabResumen.height = 26;
-    cabResumen.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+    cabecera.height = 28;
+    cabecera.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
       if (col > COLS) return;
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
-      cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border    = this.bordeDelgado();
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
+      cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.border = this.bordeDelgado();
     });
 
-    proyectos.forEach((p, i) => {
-      const fila = ws.addRow([
-        p.codigo,
-        p.nombre,
-        p.cliente ?? '-',
-        p.tipo ?? '-',
-        this.obtenerSeguimientoNombre(p.idEstadoProyecto),
-        this.normalizarEstadoProyecto(p),
-        this.formatearFecha(p.fechaInicio),
-        this.formatearFecha(p.fechaFin),
-        p.horas
-          ? `${p.horas}h / ${p.presupuesto ? '$' + p.presupuesto : '-'}`
-          : (p.presupuesto ? '$' + p.presupuesto : '-'),
-      ]);
-      fila.height = 20;
-      const bg = i % 2 === 0 ? COLOR_RECURSO : COLOR_RECURSO_ALT;
-
-      fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
-        if (col > COLS) return;
-        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
-        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-        cell.border    = this.bordeDelgado(COLOR_BORDE);
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-
-        // Estado con color semántico
-        if (col === 6) {
-          const esActivo = (cell.value?.toString() ?? '').toLowerCase() === 'activo';
-          cell.font = {
-            name: 'Segoe UI', size: 10, bold: true,
-            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
-          };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        }
-      });
-    });
-
-    // ══════════════════════════════════════════════
-    // SEPARADOR ENTRE BLOQUES
-    // ══════════════════════════════════════════════
-    agregarSeparadorBloque();
-    agregarSeparadorBloque();
-
-    // ══════════════════════════════════════════════
-    // BLOQUE 2 — LÍDERES Y RECURSOS
-    // ══════════════════════════════════════════════
-    agregarTituloSeccion('Líderes y Recursos por Proyecto');
-
-    const cabDetalle = ws.addRow([
-      'Proyecto', 'Tipo', 'Nombre', 'Costo/h', 'Horas', 'Departamento', 'Rol', 'Entrada', 'Salida'
-    ]);
-    cabDetalle.height = 26;
-    cabDetalle.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
-      if (col > COLS) return;
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
-      cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border    = this.bordeDelgado();
-    });
+    let filaGlobal = 0;
 
     proyectos.forEach((proyecto) => {
-      const lideres = proyecto.lideres?.length
+      const seguimientoNombre = this.obtenerSeguimientoNombre(proyecto.idEstadoProyecto);
+      const esEnEspera =
+        seguimientoNombre.toLowerCase() === 'en espera' ||
+        proyecto.fechaInicioEspera != null ||
+        proyecto.fechaFinEspera != null;
+
+      // Normalizar líderes
+      const lideres: LiderProyecto[] = proyecto.lideres?.length
         ? proyecto.lideres
         : proyecto.lider
           ? [{
-              lider: proyecto.lider,
-              costoHoraLider: proyecto.costoHoraLider,
-              horasLider: proyecto.horasLider,
-              recursos: proyecto.recursos ?? []
-            }]
+            lider: proyecto.lider,
+            costoHoraLider: proyecto.costoHoraLider,
+            horasLider: proyecto.horasLider,
+            recursos: proyecto.recursos ?? []
+          }]
           : [];
 
       const lideresUnicos = lideres.filter((l, i, arr) =>
         arr.findIndex(x => x.lider === l.lider) === i
       );
 
+      // Construir filas: una por recurso; si no hay recursos, una por líder; si no hay líderes, una fila vacía
+      const filas: { lider: LiderProyecto | null; recurso: RecursoProyecto | null }[] = [];
+
       if (!lideresUnicos.length) {
-        const f = ws.addRow([proyecto.nombre, '', 'Sin líderes asignados', '', '', '', '', '', '']);
-        f.height = 20;
-        estilizarFila(f, { bg: COLOR_RECURSO_ALT, fontColor: 'FF9CA3AF', italic: true, border: true });
-        this.agregarFilaSeparadora(ws);
-        return;
+        filas.push({ lider: null, recurso: null });
+      } else {
+        lideresUnicos.forEach((lider) => {
+          const recursos = lider.recursos ?? [];
+          if (!recursos.length) {
+            filas.push({ lider, recurso: null });
+          } else {
+            recursos.forEach((recurso) => {
+              filas.push({ lider, recurso });
+            });
+          }
+        });
       }
 
-      lideresUnicos.forEach((lider, liderIdx) => {
-        // ── Fila LÍDER ──
-        const filaLider = ws.addRow([
-          liderIdx === 0 ? proyecto.nombre : '',
-          'Líder',
-          lider.lider ?? '-',
-          lider.costoHoraLider ? `$${lider.costoHoraLider}` : '-',
-          lider.horasLider ?? 0,
-          '-',
-          'Líder de proyecto',
-          '',
-          ''
+      filas.forEach(({ lider, recurso }) => {
+        const bg = filaGlobal % 2 === 0 ? COLOR_RECURSO : COLOR_RECURSO_ALT;
+
+        const fila = ws.addRow([
+          proyecto.codigo,
+          proyecto.nombre,
+          proyecto.cliente ?? '-',
+          proyecto.tipo ?? '-',
+          seguimientoNombre,
+          this.normalizarEstadoProyecto(proyecto),
+          this.formatearFecha(proyecto.fechaInicio),
+          this.formatearFecha(proyecto.fechaFin),
+          this.formatearFecha(proyecto.fechaFinReal) || '-',
+          proyecto.horas ?? 0,
+          proyecto.presupuesto ? `$${proyecto.presupuesto}` : '-',
+          lider?.lider ?? '-',
+          lider?.costoHoraLider ? `$${lider.costoHoraLider}/h` : '-',
+          recurso?.nombre ?? '-',
+          recurso?.rol ?? '-',
+          esEnEspera ? (this.formatearFecha(proyecto.fechaInicioEspera) || '-') : '',
+          esEnEspera ? (this.formatearFecha(proyecto.fechaFinEspera) || '-') : '',
         ]);
-        filaLider.height = 24;
-        filaLider.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
+
+        fila.height = 20;
+
+        fila.eachCell({ includeEmpty: true }, (cell: any, col: number) => {
           if (col > COLS) return;
-          cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_LIDER } };
-          cell.font      = { name: 'Segoe UI', size: 10, bold: true, color: { argb: COLOR_PRIMARIO } };
-          cell.border    = this.bordeDelgado(COLOR_BORDE);
-          cell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+          cell.font = { name: 'Segoe UI', size: 9, color: { argb: COLOR_TEXTO } };
+          cell.border = this.bordeDelgado(COLOR_BORDE);
+          cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+          // Col 6 — Estado: color semántico
+          if (col === 6) {
+            const esActivo = (cell.value?.toString() ?? '').toLowerCase() === 'activo';
+            cell.font = {
+              name: 'Segoe UI', size: 9, bold: true,
+              color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          }
+
+          // Col 9 — Fecha Fin Real: color gris si es '-'
+          if (col === 9 && cell.value === '-') {
+            cell.font = { name: 'Segoe UI', size: 9, color: { argb: 'FFADB5BD' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          }
+
+          // Col 16-17 — Fechas espera: fondo amarillo si tiene valor
+          if ((col === 16 || col === 17) && esEnEspera && cell.value && cell.value !== '-') {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+            cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF856404' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          }
         });
 
-        const recursos = lider.recursos ?? [];
-
-        if (!recursos.length) {
-          const f = ws.addRow(['', 'Recurso', 'Sin recursos asignados', '', '', '', '', '', '']);
-          f.height = 18;
-          estilizarFila(f, { bg: COLOR_RECURSO, fontColor: 'FF9CA3AF', italic: true, size: 9, border: true });
-        } else {
-          recursos.forEach((recurso, idx) => {
-            const bg = idx % 2 === 0 ? COLOR_RECURSO : COLOR_RECURSO_ALT;
-            const f = ws.addRow([
-              '',
-              'Recurso',
-              recurso.nombre ?? '-',
-              recurso.costoHora ? `$${recurso.costoHora}` : '-',
-              recurso.horas ?? 0,
-              this.obtenerDepartamentosRecurso(recurso),
-              recurso.rol ?? '-',
-              this.formatearFecha(recurso.entrada ?? null),
-              this.formatearFecha(recurso.salida ?? null)
-            ]);
-            f.height = 20;
-            estilizarFila(f, { bg, border: true });
-          });
-        }
-
-        // Espacio entre líderes del mismo proyecto
-        if (liderIdx < lideresUnicos.length - 1) {
-          this.agregarFilaEspacio(ws);
-        }
+        filaGlobal++;
       });
-
-      // Separador entre proyectos
-      this.agregarFilaSeparadorProyecto(ws);
     });
-
-    // Cabecera con logo
-    await agregarCabeceraExcel(workbook, ws, 'Reporte de Proyectos', 10);
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
     this.crearDescarga(blob, `Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.xlsx`);
-  }
-
-  // ── Helpers para filas de separación ──
-  private agregarFilaSeparadora(ws: any): void {
-    const fila = ws.addRow([]);
-    fila.height = 3;
-  }
-
-  private agregarFilaEspacio(ws: any): void {
-    const fila = ws.addRow([]);
-    fila.height = 2;
-  }
-
-  private agregarFilaSeparadorProyecto(ws: any): void {
-    const fila = ws.addRow([]);
-    fila.height = 8;
-    for (let c = 1; c <= 9; c++) {
-      const cell = fila.getCell(c);
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SEPARADOR } };
-      cell.border = {
-        top: { style: 'thin', color: { argb: COLOR_BORDE } },
-        bottom: { style: 'thin', color: { argb: COLOR_BORDE } }
-      };
-    }
-  }
-
-  private obtenerIdDepartamentoRecurso(recurso: RecursoProyecto): number | null {
-    return recurso.departamento ?? recurso.idDepartamento ?? null;
-  }
-
-  private obtenerDepartamentosRecurso(recurso: RecursoProyecto): string {
-    const rol = this.normalizarTextoCatalogo(recurso.rol);
-
-    if (rol) {
-      const departamentos = this.cargosCatalogo
-        .filter(cargo => this.normalizarTextoCatalogo(cargo.nombre) === rol)
-        .map(cargo => this.obtenerNombreDepartamento(cargo.idDepartamento))
-        .filter(nombre => nombre !== '-');
-      const departamentosUnicos = Array.from(new Set(departamentos));
-
-      if (departamentosUnicos.length) {
-        return departamentosUnicos.join(', ');
-      }
-    }
-
-    return this.obtenerNombreDepartamento(this.obtenerIdDepartamentoRecurso(recurso));
-  }
-
-  private normalizarTextoCatalogo(valor?: string | null): string {
-    return (valor ?? '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim()
-      .toLowerCase();
-  }
-
-  private obtenerNombreDepartamento(idDepartamento?: number | null): string {
-    if (!idDepartamento) return '-';
-    return this.departamentoMap[idDepartamento] ?? '-';
-  }
-
-  private aplicarEstiloHoja(ws: any, colEstado: number): void {
-    const header = ws.getRow(1);
-    header.height = 22;
-    header.eachCell((cell: any) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font      = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border    = this.bordeDelgado();
-    });
-
-    ws.eachRow((row: any, rowNumber: number) => {
-      if (rowNumber === 1) return;
-      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
-      row.height = 20;
-      row.eachCell((cell: any, colNumber: number) => {
-        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font      = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-        cell.border    = this.bordeDelgado(COLOR_BORDE);
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-
-        if (colNumber === colEstado) {
-          const val = cell.value?.toString() ?? '';
-          const esActivo = val.toLowerCase() === 'activo';
-          cell.font = {
-            name: 'Segoe UI', size: 10, bold: true,
-            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
-          };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        }
-      });
-    });
   }
 
   private bordeDelgado(color = COLOR_PRIMARIO): any {
@@ -790,7 +614,7 @@ export class ProyectosPage implements OnDestroy {
       margin: { left: marginX, right: marginX, bottom: 22, top: 30 },
       didDrawPage: (data) => {
         const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
-        const total   = (doc as any).internal.getNumberOfPages();
+        const total = (doc as any).internal.getNumberOfPages();
         dibujarCabecera(pageNum, total);
         dibujarPie(pageNum, total);
       },
@@ -916,23 +740,23 @@ export class ProyectosPage implements OnDestroy {
         }
       });
 
-      const filasLider    = lideresUnicos.length;
-      const filasRecurso  = lideresUnicos.reduce((sum, l) => sum + Math.max((l.recursos ?? []).length, 1), 0);
+      const filasLider = lideresUnicos.length;
+      const filasRecurso = lideresUnicos.reduce((sum, l) => sum + Math.max((l.recursos ?? []).length, 1), 0);
       const filaSeparador = Math.max(lideresUnicos.length - 1, 0);
 
       const alturaEncabezado = 12;
-      const alturaHeader     = 11;
-      const alturaFilaLider  = 14;
-      const alturaFilaRec    = 11;
-      const alturaFilaSep    = 4;
-      const alturaMargen     = 12;
+      const alturaHeader = 11;
+      const alturaFilaLider = 14;
+      const alturaFilaRec = 11;
+      const alturaFilaSep = 4;
+      const alturaMargen = 12;
 
       const alturaEstimada =
         alturaEncabezado +
         alturaHeader +
-        (filasLider   * alturaFilaLider) +
-        (filasRecurso * alturaFilaRec)   +
-        (filaSeparador * alturaFilaSep)  +
+        (filasLider * alturaFilaLider) +
+        (filasRecurso * alturaFilaRec) +
+        (filaSeparador * alturaFilaSep) +
         alturaMargen;
 
       if (currentY + alturaEstimada > footerY - 22) {
@@ -992,7 +816,7 @@ export class ProyectosPage implements OnDestroy {
         margin: { left: marginX, right: marginX, bottom: 30 },
         didDrawPage: (data) => {
           const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
-          const total   = (doc as any).internal.getNumberOfPages();
+          const total = (doc as any).internal.getNumberOfPages();
           dibujarCabecera(pageNum, total);
           dibujarPie(pageNum, total);
 
@@ -1028,8 +852,8 @@ export class ProyectosPage implements OnDestroy {
 
   private crearDescarga(blob: Blob, nombreArchivo: string): void {
     const link = document.createElement('a');
-    const url  = URL.createObjectURL(blob);
-    link.href     = url;
+    const url = URL.createObjectURL(blob);
+    link.href = url;
     link.download = nombreArchivo;
     document.body.appendChild(link);
     link.click();
@@ -1051,6 +875,41 @@ export class ProyectosPage implements OnDestroy {
       return `${String(parsed.getDate()).padStart(2, '0')}/${String(parsed.getMonth() + 1).padStart(2, '0')}/${parsed.getFullYear()}`;
     }
     return fecha;
+  }
+
+  private obtenerIdDepartamentoRecurso(recurso: RecursoProyecto): number | null {
+    return recurso.departamento ?? recurso.idDepartamento ?? null;
+  }
+
+  private obtenerDepartamentosRecurso(recurso: RecursoProyecto): string {
+    const rol = this.normalizarTextoCatalogo(recurso.rol);
+
+    if (rol) {
+      const departamentos = this.cargosCatalogo
+        .filter(cargo => this.normalizarTextoCatalogo(cargo.nombre) === rol)
+        .map(cargo => this.obtenerNombreDepartamento(cargo.idDepartamento))
+        .filter(nombre => nombre !== '-');
+      const departamentosUnicos = Array.from(new Set(departamentos));
+
+      if (departamentosUnicos.length) {
+        return departamentosUnicos.join(', ');
+      }
+    }
+
+    return this.obtenerNombreDepartamento(this.obtenerIdDepartamentoRecurso(recurso));
+  }
+
+  private normalizarTextoCatalogo(valor?: string | null): string {
+    return (valor ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  private obtenerNombreDepartamento(idDepartamento?: number | null): string {
+    if (!idDepartamento) return '-';
+    return this.departamentoMap[idDepartamento] ?? '-';
   }
 
   private formatearColaboradores(proyecto: Proyecto): string {
