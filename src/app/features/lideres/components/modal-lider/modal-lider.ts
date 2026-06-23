@@ -196,13 +196,13 @@ get nombreApellidoBloqueado(): boolean {
   }
 
   isEmailValid(email: string): boolean {
-    if (!email || email.trim().length === 0) return false;
+    if (!email || email.trim().length === 0) return true;
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(email.trim());
   }
 
   isTelefonoValid(telefono: string): boolean {
-    if (!telefono || telefono.trim().length === 0) return false;
+    if (!telefono || telefono.trim().length === 0) return true;
     const regex = /^(09\d{8}|0[2-7]\d{7})$/;
     return regex.test(telefono.trim());
   }

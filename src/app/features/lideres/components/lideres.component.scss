@@ -726,6 +726,11 @@ $hover-row: rgba(#163572, 0.04);
   svg {
     stroke: #34c759;;
   }
+
+  .card-svg {
+    width: 27px;
+    height: 27px;
+  }
 }
 
 .card-icon--inactive {
@@ -736,7 +741,14 @@ $hover-row: rgba(#163572, 0.04);
   svg {
     stroke: #6B7280;
   }
+
+  .card-svg {
+    width: 27px;
+    height: 27px;
+  }
 }
+
+
 
 // ── Chips y Despliegue de Clientes ─────────────────────────
 .lideres-table td.td-cliente {
@@ -877,4 +889,4 @@ $hover-row: rgba(#163572, 0.04);
 @keyframes expandIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
-}
+}
