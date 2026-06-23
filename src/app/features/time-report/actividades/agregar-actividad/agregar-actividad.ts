@@ -18,6 +18,7 @@ import { environment } from '../../../../../environments/environment';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
+import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/modal-eliminar-actividad.component';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -35,7 +36,8 @@ import { FeriadosService } from '../../../../shared/services/feriados.service';
         MatTooltipModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatAutocompleteModule
+        MatAutocompleteModule,
+        ModalEliminarActividadComponent
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -49,6 +51,8 @@ export class AgregarActividad implements OnInit {
 
     public form!: FormGroup;
     public esEdicion = false;
+    public mostrarEliminar = false;
+    public errorEliminar: string | null = null;
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
@@ -410,10 +414,24 @@ export class AgregarActividad implements OnInit {
     cancelar() { this.dialogRef.close(); }
 
     eliminar() {
-        if (this.esEdicion && confirm('¿Está seguro de que desea eliminar esta actividad?')) {
-            this.actividadesService.eliminarActividad(this.data.actividad.id);
-            this.dialogRef.close();
+        if (this.esEdicion) {
+            this.mostrarEliminar = true;
+            this.errorEliminar = null;
         }
+    }
+
+    confirmarEliminarActividad() {
+        this.errorEliminar = null;
+        this.actividadesService.eliminarActividad(
+            this.data.actividad.id,
+            () => {
+                this.mostrarEliminar = false;
+                this.dialogRef.close();
+            },
+            (err) => {
+                this.errorEliminar = err?.error?.detail || err?.error?.message || 'No se pudo eliminar la actividad. Intente de nuevo.';
+            }
+        );
     }
 
     guardar() {
