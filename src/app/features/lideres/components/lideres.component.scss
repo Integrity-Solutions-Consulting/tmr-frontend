@@ -371,7 +371,7 @@ $hover-row: rgba(#163572, 0.04);
     th:nth-child(1), td:nth-child(1) { width: 80px; }
     th:nth-child(2), td:nth-child(2) { width: 90px; }
     th:nth-child(3), td:nth-child(3) { width: 100%; }// CAMBIO
-    th:nth-child(4), td:nth-child(4) { width: 140px; }
+    th:nth-child(4), td:nth-child(4) { width: 175px; }
     th:nth-child(5), td:nth-child(5) { width: 220px; }
     th:nth-child(6), td:nth-child(6) { width: 140px; }
     th:nth-child(7), td:nth-child(7) { width: 120px; }
@@ -737,3 +737,144 @@ $hover-row: rgba(#163572, 0.04);
     stroke: #6B7280;
   }
 }
+
+// ── Chips y Despliegue de Clientes ─────────────────────────
+.lideres-table td.td-cliente {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.single-client {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 143px;
+}
+
+.client-name-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 143px;
+  color: #737373;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.client-list-wrap {
+  position: relative;
+  display: inline-block;
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.client-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.client-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  font-family: 'Inter', sans-serif;
+  padding: 3px 10px;
+  color: #163572;
+  background: #EEF3FB;
+  border: 1px solid #d8e8fb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 135px; // Aumentado para aprovechar la disposición vertical
+}
+
+.client-chip--more {
+  cursor: pointer;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  font-family: inherit;
+  letter-spacing: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #cbd5e1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+.client-chip--more-active {
+  color: #0c3b73;
+  background: #dbeafe;
+  border-color: #93c5fd;
+
+  &:hover { background: #bfdbfe; }
+}
+
+.client-expand-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; // Alineado a la izquierda del botón/lista
+  display: flex;
+  flex-direction: column; // Lista vertical para mejor legibilidad
+  gap: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  width: max-content;
+  min-width: 160px;
+  max-width: 260px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 99;
+  animation: expandIn 0.15s ease;
+
+  // Flecha decorativa superior apuntando al botón "+N más"
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 20px; // Alineada con el trigger a la izquierda
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+    transform: rotate(45deg);
+  }
+}
+
+.client-chip--expand {
+  color: #334155;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  max-width: 220px;
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

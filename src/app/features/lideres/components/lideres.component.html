@@ -162,7 +162,41 @@
             <td>{{ lider.codigo }}</td>
             <td>{{ lider.tipo }}</td>
             <td>{{ lider.nombre }}</td>
-            <td>{{ lider.cliente }}</td>
+            <td class="td-cliente">
+              <!-- Un solo cliente -->
+              <div *ngIf="obtenerClientesList(lider.cliente).length === 1" class="single-client" [title]="obtenerClientesList(lider.cliente)[0]">
+                {{ obtenerClientesList(lider.cliente)[0] }}
+              </div>
+
+              <!-- Varios clientes -->
+              <div *ngIf="obtenerClientesList(lider.cliente).length > 1" class="client-list-wrap" (mouseleave)="cerrarLiderExpandido()">
+                <div class="client-list">
+                  <!-- Primer cliente como texto normal -->
+                  <div class="client-name-text" [title]="visibleClientes(lider)[0]">
+                    {{ visibleClientes(lider)[0] }}
+                  </div>
+                  <button
+                    *ngIf="clientesOcultosCount(lider) > 0"
+                    type="button"
+                    class="client-chip client-chip--more"
+                    [class.client-chip--more-active]="estaLiderExpandido(lider)"
+                    (click)="toggleClientesExpandidos($event, lider)"
+                    (mouseenter)="onMouseEnterLider(lider)"
+                  >
+                    +{{ clientesOcultosCount(lider) }} más
+                  </button>
+                </div>
+
+                <div *ngIf="estaLiderExpandido(lider)" class="client-expand-list" (click)="$event.stopPropagation()">
+                  <span class="client-chip client-chip--expand" *ngFor="let cli of clientesOcultosList(lider)" [title]="cli">
+                    {{ cli }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Sin clientes -->
+              <span *ngIf="obtenerClientesList(lider.cliente).length === 0">-</span>
+            </td>
             <td>{{ lider.correo }}</td>
             <td>{{ lider.telefono }}</td>
             <td>

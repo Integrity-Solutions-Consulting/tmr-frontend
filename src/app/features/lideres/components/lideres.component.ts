@@ -88,6 +88,48 @@ export class LideresComponent implements OnInit {
   mostrarEstadoDropdown = false;
   errorFormulario: string | null = null;
 
+  // ── Control de expansión de clientes ──────────────────────
+  liderExpandidoId: string | number | null = null;
+
+  obtenerClientesList(cliente: string | string[] | null | undefined): string[] {
+    if (!cliente) return [];
+    if (Array.isArray(cliente)) return cliente;
+    return cliente.split(',').map(c => c.trim()).filter(c => c !== '');
+  }
+
+  visibleClientes(lider: Lider): string[] {
+    return this.obtenerClientesList(lider.cliente).slice(0, 1);
+  }
+
+  clientesOcultosCount(lider: Lider): number {
+    const list = this.obtenerClientesList(lider.cliente);
+    return Math.max(list.length - 1, 0);
+  }
+
+  clientesOcultosList(lider: Lider): string[] {
+    return this.obtenerClientesList(lider.cliente).slice(1);
+  }
+
+  estaLiderExpandido(lider: Lider): boolean {
+    const id = lider.id ?? lider.codigo;
+    return this.liderExpandidoId === id;
+  }
+
+  toggleClientesExpandidos(event: Event, lider: Lider): void {
+    event.stopPropagation();
+    const id = lider.id ?? lider.codigo;
+    this.liderExpandidoId = this.liderExpandidoId === id ? null : id;
+  }
+
+  onMouseEnterLider(lider: Lider): void {
+    const id = lider.id ?? lider.codigo;
+    this.liderExpandidoId = id;
+  }
+
+  cerrarLiderExpandido(): void {
+    this.liderExpandidoId = null;
+  }
+
   // ── Eliminar ───────────────────────────────────────────
   mostrarEliminar = false;
   liderAEliminar: Lider | null = null;
@@ -234,6 +276,7 @@ export class LideresComponent implements OnInit {
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
     this.mostrarDescarga = false;
+    this.cerrarLiderExpandido();
   }
   aplicarFiltros(): void {
     const texto = this.busqueda.toLowerCase();
@@ -411,6 +454,11 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
   }
 
+  obtenerClientesExport(lider: Lider): string {
+    const list = this.obtenerClientesList(lider.cliente);
+    return list.length > 0 ? list.join(', ') : 'Sin clientes';
+  }
+
   descargarPDF(): void {
     void exportarReportePdf({
       titulo: 'Reporte de Líderes',
@@ -418,6 +466,7 @@ export class LideresComponent implements OnInit {
       nombreHoja: 'Líderes',
       columnas: [
         { encabezado: 'Nombre', anchoPdf: 60 },
+        { encabezado: 'Clientes vinculados', anchoPdf: 55 },
         { encabezado: 'Correo', anchoPdf: 70 },
         { encabezado: 'Teléfono', anchoPdf: 35 },
         { encabezado: 'Tipo', anchoPdf: 25, alineacion: 'left' },
@@ -425,12 +474,13 @@ export class LideresComponent implements OnInit {
       ],
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
+        this.obtenerClientesExport(lider),
         lider.correo || '-',
         lider.telefono || '-',
         lider.tipo || '-',
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
       ]),
-      columnaEstado: 4,
+      columnaEstado: 5,
     });
     this.mostrarDescarga = false;
     return;
@@ -541,6 +591,7 @@ export class LideresComponent implements OnInit {
       nombreHoja: 'Líderes',
       columnas: [
         { encabezado: 'Nombre', anchoExcel: 40 },
+        { encabezado: 'Clientes vinculados', anchoExcel: 30 },
         { encabezado: 'Correo', anchoExcel: 40 },
         { encabezado: 'Teléfono', anchoExcel: 20 },
         { encabezado: 'Tipo', anchoExcel: 15, alineacion: 'left' },
@@ -548,12 +599,13 @@ export class LideresComponent implements OnInit {
       ],
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
+        this.obtenerClientesExport(lider),
         lider.correo || '-',
         lider.telefono || '-',
         lider.tipo || '-',
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
       ]),
-      columnaEstado: 4,
+      columnaEstado: 5,
     });
     this.mostrarDescarga = false;
     return;
