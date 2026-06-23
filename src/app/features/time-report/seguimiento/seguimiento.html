@@ -144,14 +144,12 @@
                         </th>
                         <th class="col-nombre" (click)="ordenar('nombre')">
                             Colaborador
-                            <span class="sort-icon" *ngIf="sortField === 'nombre'">{{ sortAsc ? '↑' : '↓' }}</span>
                         </th>
                         <th class="col-proyecto">Proyecto</th>
                         <th class="col-cliente">Cliente</th>
                         <th class="col-lider">Líder Técnico</th>
                         <th class="col-horas" (click)="ordenar('nroHoras')">
                             Nro de Horas
-                            <span class="sort-icon" *ngIf="sortField === 'nroHoras'">{{ sortAsc ? '↑' : '↓' }}</span>
                         </th>
                         <th class="col-estado">Seguimiento</th>
                         <th class="col-dias-reporte">Días con Reporte</th>
