@@ -121,11 +121,6 @@ export class LideresComponent implements OnInit {
     this.liderExpandidoId = this.liderExpandidoId === id ? null : id;
   }
 
-  onMouseEnterLider(lider: Lider): void {
-    const id = lider.id ?? lider.codigo;
-    this.liderExpandidoId = id;
-  }
-
   cerrarLiderExpandido(): void {
     this.liderExpandidoId = null;
   }

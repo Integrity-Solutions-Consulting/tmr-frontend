@@ -99,13 +99,13 @@ $hover-row:     rgba(#163572, 0.04);
   align-self: center;
 
   &--total-usuarios {
-    background: #BFDBFE;
-    color: #0078F0;
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
   }
 
   &--active {
     background: #e6fdee;
-    color: #34c759;
+    color: #34C759;
   }
 
   &--inactive {
@@ -128,10 +128,11 @@ $hover-row:     rgba(#163572, 0.04);
 }
 
 .card-svg {
-  width: 20px;
-  height: 20px;
-  color: inherit;
-  stroke: currentColor;
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────
