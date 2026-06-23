@@ -476,8 +476,7 @@
             <div class="float-select">
               <select
                 class="float-select__input"
-                formControlName="idModoTrabajo"
-                [class.float-select__input--error]="campoInvalido('idModoTrabajo')">
+                formControlName="idModoTrabajo">
 
                 <option [ngValue]="null"></option>
 
@@ -489,13 +488,9 @@
               <label
                 class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idModoTrabajo')">
-                Modalidad <span class="req">*</span>
+                Modalidad
               </label>
             </div>
-
-            @if (campoInvalido('idModoTrabajo')) {
-              <span class="form-field__error">Campo requerido</span>
-            }
           </div>
 
           <!-- Categoría -->
@@ -503,8 +498,7 @@
             <div class="float-select">
               <select
                 class="float-select__input"
-                formControlName="idCategoriaEmpleado"
-                [class.float-select__input--error]="campoInvalido('idCategoriaEmpleado')">
+                formControlName="idCategoriaEmpleado">
 
                 <option [ngValue]="null"></option>
 
@@ -516,14 +510,11 @@
               <label
                 class="float-select__label"
                 [class.float-select__label--up]="tieneValor('idCategoriaEmpleado')">
-                Categoría <span class="req">*</span>
+                Categoría
               </label>
             </div>
-
-            @if (campoInvalido('idCategoriaEmpleado')) {
-              <span class="form-field__error">Campo requerido</span>
-            }
           </div>
+
 
         </div>
       </div>

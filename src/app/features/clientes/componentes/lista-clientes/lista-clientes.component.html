@@ -111,7 +111,7 @@
 
     <!-- Búsqueda -->
     <div class="input-busqueda-wrap">
-      <img class="icono-busqueda" src="assets/iconos/busqueda.svg" width="15" height="15" alt="buscar"/>
+      <img class="icono-busqueda" src="assets/iconos/buscar.svg" width="16" height="16" alt="buscar"/>
       <input
         formControlName="busqueda"
         class="input-busqueda"
@@ -124,7 +124,7 @@
       [class.activo]="dropdownEstadoAbierto || estadosSeleccionados.length > 0"
       (click)="toggleDropdownEstado($event)">
 
-      <img src="assets/iconos/estado.svg" width="13" height="13" alt="estado"/>
+      <img src="assets/iconos/estado-btn.svg" width="16" height="16" alt="estado"/>
       <span class="select-estado-texto">Estado</span>
 
       <div class="dropdown-estado" *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
@@ -175,7 +175,7 @@
       <div class="btn-descarga-wrap">
         <button class="btn-descargar" (click)="toggleDescarga($event)">
           Descargar
-          <img src="assets/iconos/descargar.svg" width="15" height="15" alt="descargar"/>
+          <img src="assets/iconos/download.svg" width="16" height="16" alt="descargar"/>
         </button>
 
         <app-modal-descarga
@@ -188,7 +188,7 @@
       <!-- Botón Agregar -->
       <button class="btn-agregar" (click)="abrirCrear()">
         Agregar
-        <img src="assets/iconos/agregar.svg" width="16" height="16" alt="agregar"/>
+        <img src="assets/iconos/btn-agregar.svg" width="16" height="16" alt="agregar"/>
       </button>
 
     </div>
