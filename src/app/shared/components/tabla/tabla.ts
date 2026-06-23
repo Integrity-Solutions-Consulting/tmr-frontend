@@ -93,17 +93,14 @@ export class Tabla {
           proyecto.nombre.toLowerCase().includes(busqueda) ||
           (proyecto.cliente ?? '').toLowerCase().includes(busqueda);
 
-        // Si no hay estados seleccionados → pasa todos
         const coincideEstado =
           !filtros.estados.length ||
           filtros.estados.includes(this.normalizarEstadoProyecto(proyecto));
 
-        // Si no hay tipos seleccionados → pasa todos
         const coincideTipo =
           !filtros.tipos.length ||
           filtros.tipos.includes(proyecto.tipo ?? '');
 
-        // Filtro de seguimiento (ids de estado)
         const coincideSeguimiento =
           !(filtros.seguimiento && filtros.seguimiento.length) ||
           (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
@@ -134,7 +131,6 @@ export class Tabla {
   constructor() {
     this.cargarSeguimientoOpciones();
 
-    // Effect para resetear página cuando cambian los FILTROS (no cuando cambia paginaActual)
     effect(() => {
       const filtros = this._filtros();
       const filtroKey = JSON.stringify(filtros);
@@ -146,7 +142,6 @@ export class Tabla {
       this.filtrosAplicados.set(filtroKey);
     });
 
-    // Effect para actualizar el datasource cuando cambia la página o los datos
     effect(() => {
       this.dataSource.data = this.proyectosEnPagina();
     });

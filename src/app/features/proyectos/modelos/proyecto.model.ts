@@ -30,13 +30,11 @@ export interface Proyecto {
   cliente?: string;
   idTipoProyecto?: number | null;
   tipo?: string;
-  // Primer líder (compatibilidad con vista detalle)
   idLider?: number | null;
   lider?: string;
   cargoLider?: string;
   costoHoraLider?: number;
   horasLider?: number;
-  // Lista completa de líderes
   lideres?: LiderProyecto[];
   idEstadoProyecto?: number;
   estado: string;
@@ -48,6 +46,11 @@ export interface Proyecto {
   activo?: boolean;
   fechaCreacion?: string;
   recursos?: RecursoProyecto[];
+  // Nuevos campos
+  observacion?: string;
+  fechaFinReal?: string | null;
+  fechaInicioEspera?: string | null;
+  fechaFinEspera?: string | null;
 }
 
 export interface LookupOption {

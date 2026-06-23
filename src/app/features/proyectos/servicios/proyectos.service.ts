@@ -39,6 +39,10 @@ export class ProyectosService {
       FechaFin: fmt(proyecto.fechaFin),
       Presupuesto: proyecto.presupuesto ?? null,
       Horas: proyecto.horas ?? null,
+      Observacion: proyecto.observacion ?? null,
+      FechaFinReal: fmt(proyecto.fechaFinReal),
+      FechaInicioEspera: fmt(proyecto.fechaInicioEspera),
+      FechaFinEspera: fmt(proyecto.fechaFinEspera),
       Lideres: lideres.map(l => ({
         IdLider: l.idLider ?? null,
         Lider: l.lider ?? null,

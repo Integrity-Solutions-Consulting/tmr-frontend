@@ -122,6 +122,48 @@
         <mat-hint>Opcional</mat-hint>
       </mat-form-field>
     </div>
+
+    <!-- ── Observación ───────────────────────────────────────────────── -->
+    <mat-form-field appearance="outline" class="proyecto-form__field" style="margin-top: 16px;">
+      <mat-label>Observación</mat-label>
+      <textarea matInput formControlName="observacion" rows="2"></textarea>
+      <mat-hint>Opcional</mat-hint>
+    </mat-form-field>
+
+    <!-- ── Fecha Fin Real (solo edición y si NO está en espera) ────── -->
+    @if (proyecto && !mostrarCamposEspera) {
+      <div class="proyecto-form__field proyecto-form__date-field" style="margin-top: 8px;">
+        <input class="proyecto-form__date-control" type="date"
+               formControlName="fechaFinReal">
+        <label class="proyecto-form__date-label">Fecha fin real</label>
+        <div class="proyecto-form__date-error"
+             *ngIf="campoInvalido('fechaFinReal') && formulario.controls.fechaFinReal.hasError('fechaInvalida')">
+          Fecha inválida
+        </div>
+      </div>
+    }
+
+    <!-- ── Campos de Espera (solo edición y cuando estado = En espera) ── -->
+    <div *ngIf="mostrarCamposEspera" class="proyecto-form__grid" style="margin-top: 16px;">
+      <div class="proyecto-form__field proyecto-form__date-field">
+        <input class="proyecto-form__date-control" type="date"
+               formControlName="fechaInicioEspera">
+        <label class="proyecto-form__date-label">Fecha inicio espera</label>
+        <div class="proyecto-form__date-error"
+             *ngIf="campoInvalido('fechaInicioEspera') && formulario.controls.fechaInicioEspera.hasError('fechaInvalida')">
+          Fecha inválida
+        </div>
+      </div>
+      <div class="proyecto-form__field proyecto-form__date-field">
+        <input class="proyecto-form__date-control" type="date"
+               formControlName="fechaFinEspera">
+        <label class="proyecto-form__date-label">Fecha fin espera</label>
+        <div class="proyecto-form__date-error"
+             *ngIf="campoInvalido('fechaFinEspera') && formulario.controls.fechaFinEspera.hasError('fechaInvalida')">
+          Fecha inválida
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ── Asignación: líderes + recursos ───────────────────────────────── -->
@@ -346,5 +388,3 @@
   </div>
 
 </form>
-
-
