@@ -54,11 +54,11 @@
           autocomplete="off" formControlName="fechaInicio">
         <label class="proyecto-form__date-label">Fecha de inicio <span>*</span></label>
         <div class="proyecto-form__date-error"
-          *ngIf="(formulario.controls.fechaInicio.hasError('fechaInvalida') || fechaInicioInput.validity.badInput) && (formulario.controls.fechaInicio.touched || intentoGuardar)">
+          *ngIf="(formulario.controls['fechaInicio'].hasError('fechaInvalida') || fechaInicioInput.validity.badInput) && (formulario.controls['fechaInicio'].touched || intentoGuardar)">
           Fecha inválida
         </div>
         <div class="proyecto-form__date-error"
-          *ngIf="!fechaInicioInput.validity.badInput && !formulario.controls.fechaInicio.hasError('fechaInvalida') && campoInvalido('fechaInicio')">
+          *ngIf="!fechaInicioInput.validity.badInput && !formulario.controls['fechaInicio'].hasError('fechaInvalida') && campoInvalido('fechaInicio')">
           Este campo es obligatorio
         </div>
       </div>
@@ -71,11 +71,11 @@
           La fecha fin no puede ser menor que la fecha de inicio
         </div>
         <div class="proyecto-form__date-error"
-          *ngIf="!fechaFinInvalida() && (formulario.controls.fechaFin.hasError('fechaInvalida') || fechaFinInput.validity.badInput) && (formulario.controls.fechaFin.touched || intentoGuardar)">
+          *ngIf="!fechaFinInvalida() && (formulario.controls['fechaFin'].hasError('fechaInvalida') || fechaFinInput.validity.badInput) && (formulario.controls['fechaFin'].touched || intentoGuardar)">
           Fecha inválida
         </div>
         <div class="proyecto-form__date-error"
-          *ngIf="!fechaFinInvalida() && !fechaFinInput.validity.badInput && !formulario.controls.fechaFin.hasError('fechaInvalida') && campoInvalido('fechaFin')">
+          *ngIf="!fechaFinInvalida() && !fechaFinInput.validity.badInput && !formulario.controls['fechaFin'].hasError('fechaInvalida') && campoInvalido('fechaFin')">
           Este campo es obligatorio
         </div>
       </div>
@@ -86,7 +86,7 @@
           (keydown)="bloquearCaracteresNumericos($event, true)"
           (paste)="bloquearPegadoNoNumerico($event, true)">
         <mat-hint>Opcional</mat-hint>
-        <mat-error *ngIf="campoInvalido('presupuesto') && formulario.controls.presupuesto.hasError('soloNumeros')">
+        <mat-error *ngIf="campoInvalido('presupuesto') && formulario.controls['presupuesto'].hasError('soloNumeros')">
           Solo se permiten números
         </mat-error>
       </mat-form-field>
@@ -97,7 +97,7 @@
           (keydown)="bloquearCaracteresNumericos($event, false)"
           (paste)="bloquearPegadoNoNumerico($event, false)">
         <mat-hint>Opcional</mat-hint>
-        <mat-error *ngIf="campoInvalido('horas') && (formulario.controls.horas.hasError('soloNumeros') || formulario.controls.horas.hasError('min'))">
+        <mat-error *ngIf="campoInvalido('horas') && (formulario.controls['horas'].hasError('soloNumeros') || formulario.controls['horas'].hasError('min'))">
           Solo se permiten números
         </mat-error>
       </mat-form-field>
@@ -130,14 +130,14 @@
       <mat-hint>Opcional</mat-hint>
     </mat-form-field>
 
-    <!-- ── Fecha Fin Real (solo edición y si NO está en espera) ────── -->
-    @if (proyecto && !mostrarCamposEspera) {
+    <!-- ── Fecha Fin Real (solo edición) ────── -->
+    @if (proyecto) {
       <div class="proyecto-form__field proyecto-form__date-field" style="margin-top: 8px;">
         <input class="proyecto-form__date-control" type="date"
                formControlName="fechaFinReal">
         <label class="proyecto-form__date-label">Fecha fin real</label>
         <div class="proyecto-form__date-error"
-             *ngIf="campoInvalido('fechaFinReal') && formulario.controls.fechaFinReal.hasError('fechaInvalida')">
+             *ngIf="campoInvalido('fechaFinReal') && formulario.controls['fechaFinReal'].hasError('fechaInvalida')">
           Fecha inválida
         </div>
       </div>
@@ -150,7 +150,7 @@
                formControlName="fechaInicioEspera">
         <label class="proyecto-form__date-label">Fecha inicio espera</label>
         <div class="proyecto-form__date-error"
-             *ngIf="campoInvalido('fechaInicioEspera') && formulario.controls.fechaInicioEspera.hasError('fechaInvalida')">
+             *ngIf="campoInvalido('fechaInicioEspera') && formulario.controls['fechaInicioEspera'].hasError('fechaInvalida')">
           Fecha inválida
         </div>
       </div>
@@ -159,7 +159,7 @@
                formControlName="fechaFinEspera">
         <label class="proyecto-form__date-label">Fecha fin espera</label>
         <div class="proyecto-form__date-error"
-             *ngIf="campoInvalido('fechaFinEspera') && formulario.controls.fechaFinEspera.hasError('fechaInvalida')">
+             *ngIf="campoInvalido('fechaFinEspera') && formulario.controls['fechaFinEspera'].hasError('fechaInvalida')">
           Fecha inválida
         </div>
       </div>
