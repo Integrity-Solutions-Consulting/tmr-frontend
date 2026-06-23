@@ -1,21 +1,37 @@
-FROM node:20-alpine
+# --- ETAPA 1: Compilación ---
+FROM node:20-alpine AS builder
 
-# 1. Definimos los ARG (reciben valores de --build-arg)
+# 1. Definimos los ARG para que Dokploy pueda pasarlos si lo necesita
 ARG BUILD_CONFIG=production
 ARG NODE_ENV_ARG=production
 
-# 2. Convertimos el ARG en ENV para que esté disponible en el CMD
+# Convertir ARG en ENV
 ENV BUILD_CONFIG=$BUILD_CONFIG
 ENV NODE_ENV=$NODE_ENV_ARG
 
 WORKDIR /app
 
+# Copiar dependencias e instalar
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 
+# Copiar todo el código y construir
 COPY . .
+RUN npm run build -- --configuration=$BUILD_CONFIG
+
+# --- ETAPA 2: Servidor de producción (Nginx) ---
+FROM nginx:alpine
+
+# Limpiar archivos predeterminados de Nginx
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copiar compilación del frontend desde la etapa 1
+# Nota: La carpeta de salida de la compilación es dist/gestion-actividades/browser
+COPY --from=builder /app/dist/gestion-actividades/browser /usr/share/nginx/html
+
+# Copiar configuración personalizada de Nginx
+COPY .docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 3000
 
-# Cambia esto en tu última línea:
-CMD npm run start -- --configuration $BUILD_CONFIG  
+CMD ["nginx", "-g", "daemon off;"]
