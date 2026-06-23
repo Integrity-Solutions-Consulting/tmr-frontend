@@ -95,8 +95,8 @@ export class ModalCrearColaboradorComponent implements OnInit {
         Validators.min(0),
         Validators.max(50)
       ]],
-      idModoTrabajo: [null, Validators.required],
-      idCategoriaEmpleado: [null, Validators.required],
+      idModoTrabajo: [null],
+      idCategoriaEmpleado: [null],
     });
 
     this.configurarValidacionesDinamicas();
@@ -412,8 +412,8 @@ export class ModalCrearColaboradorComponent implements OnInit {
       fechaIngreso: v.fechaContratacion || null,
       idCargo: Number(v.idCargo),
       aniosExperiencia: Number(v.aniosExperiencia),
-      idModoTrabajo: Number(v.idModoTrabajo),
-      idCategoriaEmpleado: Number(v.idCategoriaEmpleado),
+      idModoTrabajo: v.idModoTrabajo ? Number(v.idModoTrabajo) : null,
+      idCategoriaEmpleado: v.idCategoriaEmpleado ? Number(v.idCategoriaEmpleado) : null,
     };
 
     this.guardar.emit(request);

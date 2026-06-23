@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -49,6 +49,11 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
   toggleEstado(event?: MouseEvent): void {
     event?.stopPropagation();
     this.estadoAbierto = !this.estadoAbierto;
+  }
+
+  @HostListener('document:click')
+  cerrarDropdowns(): void {
+    this.estadoAbierto = false;
   }
 
   seleccionarEstado(valor: EstadoColaborador | 'Todos', event?: MouseEvent): void {
