@@ -5,9 +5,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
@@ -17,6 +14,10 @@ import { ModalDescargaComponent } from './modal-descarga/modal-descarga.componen
 import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
 import { ModalEliminarLiderComponent } from './modal-eliminar-lider/modal-eliminar-lider.component';
 import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../shared/components/action-menu/action-menu.component';
 
 export interface ProyectoAsignado {
   id?: number;
@@ -45,15 +46,13 @@ export interface Lider {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatIconModule,
     ModalLider,
     ModalDetalleLider,
     ModalDescargaComponent,
     SuccessModalComponent,
     ModalEliminarLiderComponent,
-    BadgeEstadoComponent
+    BadgeEstadoComponent,
+    ActionMenuComponent
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
@@ -63,6 +62,7 @@ export class LideresComponent implements OnInit {
   lideres: Lider[] = [];
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
+  menuAbierto: string | null = null;
 
   private apiUrl = `${environment.apiUrl}/lideres`;
 
@@ -316,6 +316,42 @@ export class LideresComponent implements OnInit {
     if (this.paginaActual < this.totalPaginas) this.irPagina(this.paginaActual + 1);
   }
 
+  toggleMenu(payload: { id: string; event: Event }): void {
+    payload.event.stopPropagation();
+    this.menuAbierto = this.menuAbierto === payload.id ? null : payload.id;
+  }
+
+  accionesLider(lider: Lider): ActionMenuItem[] {
+    const activo = lider.estado === 'Activo';
+
+    return [
+      { id: 'ver-mas', label: 'Ver más' },
+      { id: 'editar', label: 'Editar' },
+      {
+        id: activo ? 'inactivar' : 'activar',
+        label: activo ? 'Desactivar' : 'Activar',
+        danger: activo,
+      },
+    ];
+  }
+
+  onAccionSeleccionada(accion: ActionMenuItem, lider: Lider, numero: number): void {
+    this.menuAbierto = null;
+
+    if (accion.id === 'ver-mas') {
+      this.verLider(lider, numero);
+      return;
+    }
+
+    if (accion.id === 'editar') {
+      this.editarLider(lider);
+      return;
+    }
+
+    if (accion.id === 'activar' || accion.id === 'inactivar') {
+      this.toggleEstadoLider(lider);
+    }
+  }
   abrirFormulario(): void {
     this.mostrarDescarga = false;
     this.modoEdicion = false;
