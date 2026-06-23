@@ -36,7 +36,7 @@
   line-height: normal !important;
   padding: 10px 14px !important;
   border-radius: 8px !important;
-  color: #6b7280 !important;
+  color: #424242 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
@@ -51,15 +51,20 @@
   width: 20px;
   height: 20px;
   margin-right: 0;
-  color: #6b7280;
+  color: #424242;
   font-size: 20px;
   line-height: 20px;
   vertical-align: middle;
 }
 
+::ng-deep .action-menu__item mat-icon,
+::ng-deep .action-menu__item .mat-icon {
+  color: #424242 !important;
+}
+
 .action-menu__item:hover {
   background: #f3f4f6 !important;
-  color: #6b7280 !important;
+  color: #424242 !important;
 }
 
 .action-menu__item:disabled {
@@ -76,12 +81,12 @@
 }
 
 .action-menu__item--danger {
-  color: #6b7280 !important;
+  color: #424242 !important;
 }
 
 .action-menu__item--danger:hover {
   background: #f3f4f6 !important;
-  color: #6b7280 !important;
+  color: #424242 !important;
 }
 
 :host ::ng-deep .action-menu__panel.mat-mdc-menu-panel {
