@@ -6,6 +6,16 @@ export interface ReporteFechas {
   cargo: string;
   fechaInicio: Date;
   fechaFin: Date;
+  codigoProyecto?: string;
+  proyecto?: string;
+  estadoProyecto?: string;
+  tipoProyecto?: string;
+  fechaFinReal?: Date;
+  presupuesto?: number;
+  horas?: number;
+  fechaInicioEspera?: Date;
+  fechaFinEspera?: Date;
+  observaciones?: string;
 }
 
 export interface FiltrosReporteFechas {
