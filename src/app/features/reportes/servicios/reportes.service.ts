@@ -37,7 +37,10 @@ export class ReportesService {
         const items = (res.data || []).map((item: any) => ({
           ...item,
           fechaInicio: item.fechaInicio ? new Date(item.fechaInicio) : new Date(),
-          fechaFin: item.fechaFin ? new Date(item.fechaFin) : new Date()
+          fechaFin: item.fechaFin ? new Date(item.fechaFin) : new Date(),
+          fechaFinReal: item.fechaFinReal ? new Date(item.fechaFinReal) : undefined,
+          fechaInicioEspera: item.fechaInicioEspera ? new Date(item.fechaInicioEspera) : undefined,
+          fechaFinEspera: item.fechaFinEspera ? new Date(item.fechaFinEspera) : undefined
         }));
         return { data: items, total: res.total || 0 };
       })
