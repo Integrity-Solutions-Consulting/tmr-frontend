@@ -125,8 +125,8 @@
         <!-- Descargar -->
         <button class="btn-descargar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
             (click)="descargarSeleccionados()">
-            <img class="download-icon" src="assets/iconos/descargar.svg" alt="descargar" />
             Descargar
+            <span class="material-symbols-outlined download-icon">file_download</span>
         </button>
     </div>
 

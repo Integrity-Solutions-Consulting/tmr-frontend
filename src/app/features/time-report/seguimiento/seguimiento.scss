@@ -244,33 +244,45 @@
 
 /* Descargar button */
 .btn-descargar {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: none;
-    background: #E5E7EB;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    background: #ffffff;
     color: #9CA3AF;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: not-allowed;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
 
-    mat-icon {
+    .download-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     &.enabled {
-        background: #163572;
-        color: white;
+        background: #ffffff;
+        color: #163572;
+        border: 1px solid #cbd5e1;
         cursor: pointer;
 
+        .download-icon {
+            color: #163572;
+        }
+
         &:hover {
-            background: #0c3b73;
+            background: rgba(#163572, 0.06);
+            border-color: #163572;
         }
     }
 }
