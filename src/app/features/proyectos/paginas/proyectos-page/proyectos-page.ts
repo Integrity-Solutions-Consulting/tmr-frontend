@@ -17,7 +17,7 @@ import {
   DescargaMenuComponent,
   DescargaOpcion
 } from '../../../../shared/components/descarga-menu/descarga-menu.component';
-import { ProyectoForm } from '../../componentes/proyecto-form/proyecto-form';
+import { ProyectoFormComponent } from '../../componentes/proyecto-form/proyecto-form';
 import {
   FiltrosProyecto,
   ProyectosFiltros
@@ -51,7 +51,7 @@ const COLOR_SEPARADOR   = 'FFE2E8F0';
     ConfirmDialogComponent,
     SuccessModalComponent,
     DescargaMenuComponent,
-    ProyectoForm,
+    ProyectoFormComponent,
     ProyectosFiltros
   ],
   templateUrl: './proyectos-page.html',
