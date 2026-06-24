@@ -1,4 +1,4 @@
-.modal-backdrop {
+﻿.modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
@@ -98,7 +98,7 @@
   }
 }
 
-// ── Sección ────────────────────────────────────────────
+// â”€â”€ SecciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .detalle-section {
   margin-bottom: 20px;
 
@@ -149,7 +149,7 @@
   }
 }
 
-// ── Layouts ────────────────────────────────────────────
+// â”€â”€ Layouts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .detalle-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -169,7 +169,7 @@
   margin-bottom: 20px;
 }
 
-// ── Campo individual ───────────────────────────────────
+// â”€â”€ Campo individual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .detalle-field {
   display: flex;
   align-items: flex-start;
@@ -205,7 +205,7 @@
   }
 }
 
-// ── Proyectos asignados ────────────────────────────────
+// â”€â”€ Proyectos asignados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .detalle-proyectos {
   border-top: 1px solid #f3f4f6;
   padding-top: 16px;
@@ -340,5 +340,83 @@
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
+  }
+}
+
+
+// Datos de salida
+.detalle-salida {
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #163572;
+    transition: opacity 0.15s;
+
+    img {
+      flex-shrink: 0;
+      filter: brightness(0) saturate(100%) invert(18%) sepia(46%) saturate(1746%) hue-rotate(199deg) brightness(91%) contrast(96%);
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      border-radius: 6px;
+      box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    }
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #163572;
+  }
+
+  &__contenido {
+    padding-top: 16px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 28px;
+  }
+
+  &__campo {
+    min-width: 0;
+  }
+
+  &__vacio {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #9ca3af;
+    font-style: italic;
+    margin: 0;
+    padding: 2px 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .detalle-salida__grid {
+    grid-template-columns: 1fr;
   }
 }

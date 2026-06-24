@@ -82,6 +82,14 @@ export interface Colaborador {
   activo?: boolean;
   proyectosAsignados: ProyectoAsignado[];
   numProyectos: number;
+
+  // ── salida de colaboradores ─────────────────────────────
+  fechaSalida?: string | null;
+  tipoSalida?: string | null;
+  causaSalida?: string | null;
+  comentarioSalida?: string | null;
+  reemplazoNombre?: string | null;
+  tieneDatosSalida?: boolean;
 }
 
 // DTO para CREAR colaborador.
@@ -224,4 +232,21 @@ export interface ColaboradorDetalleApi {
 
   // Proyectos.
   proyectos: ProyectoAsignado[];
+
+
+  // ── salida de colaboradores ─────────────────────────────
+  fechaSalida: string | null;
+  tipoSalida: string | null;
+  causaSalida: string | null;
+  comentarioSalida: string | null;
+  reemplazoNombre: string | null;
+}
+
+// ── Request para registrar salida ─────────────────────────────
+export interface RegistrarSalidaRequest {
+  fechaSalida: string;
+  idTipoSalida: number;
+  idCausaSalida: number;
+  comentario: string | null;
+  idEmpleadoReemplazo: number | null;
 }
