@@ -32,6 +32,16 @@ export class AuthService {
   }
 
   /**
+   * Cierra la sesión usando solo el Refresh Token, sin necesitar AT válido.
+   * Usar cuando el AT ya expiró (modal de expiración, timeout automático).
+   * Endpoint público — nunca lanza 401 aunque el RT esté expirado.
+   */
+  logoutWithRefreshToken(): Observable<void> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    return this.http.post<void>(`${this.API_URL}/logout-rt`, { refreshToken });
+  }
+
+  /**
    * Realiza una solicitud de refresh token al backend
    * Retorna los nuevos AT, RT y expiración
    */

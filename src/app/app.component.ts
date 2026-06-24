@@ -169,10 +169,10 @@ export class AppComponent implements OnInit, OnDestroy {
             console.log('✅ Usuario aceptó extender sesión, refrescando token...');
             return this.authService.refreshTokenRequest();
           } else if (result?.action === 'logout' || result?.action === 'timeout') {
-            // Usuario rechazó o timeout - hacer logout explícito en el backend
+            // Usuario rechazó o timeout — cerrar sesión con el RT (sin necesitar AT válido)
             const actionLabel = result?.action === 'timeout' ? '⏰ Timeout' : '❌ Usuario rechazó';
-            console.log(`${actionLabel} extender sesión, haciendo logout en BD...`);
-            return this.authService.logout();
+            console.log(`${actionLabel} extender sesión — cerrando sesión con RT en BD...`);
+            return this.authService.logoutWithRefreshToken();
           } else {
             // Modal cerrado sin acción
             console.log('❌ Modal cerrado sin acción, cerrando sesión...');
@@ -184,7 +184,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: any) => {
           // Verificar si fue refresh o logout
-          if ('accessToken' in response) {
+          if (response && 'accessToken' in response) {
             // Es un refresh token response
             console.log('✅ Token refrescado, reiniciando monitoreo...');
             this.authService.updateTokens(response);
@@ -193,15 +193,15 @@ export class AppComponent implements OnInit, OnDestroy {
             console.log('✅ Sesión extendida exitosamente');
             this.currentDialogRef = null;
           } else {
-            // Es un logout response (message)
-            console.log('✅ Logout exitoso en BD, redirigiendo a login...');
+            // Es un logout-rt response (void / null) — limpiar y redirigir
+            console.log('✅ Sesión desactivada en BD (RT logout), redirigiendo a login...');
             this.currentDialogRef = null;
             this.handleTokenExpired();
           }
         },
         error: (err: any) => {
           // Si hay error en logout o refresh, hacer logout local y redirigir
-          console.warn('❌ Error en operación:', err.message);
+          console.warn('❌ Error en operación (se procede con logout local):', err?.message);
           this.currentDialogRef = null;
           this.handleTokenExpired();
         }
@@ -239,6 +239,17 @@ export class AppComponent implements OnInit, OnDestroy {
       console.log('🔐 Cerrando modal de sesión expirada...');
       this.currentDialogRef.close();
       this.currentDialogRef = null;
+    }
+
+    // Intentar desactivar la sesión en BD usando el RT antes de limpiar el storage
+    // Best-effort: si falla (p. ej. no hay RT o red caída) se ignora y se procede
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      console.log('🔒 handleTokenExpired — cerrando sesión con RT en BD (best-effort)...');
+      this.authService.logoutWithRefreshToken().subscribe({
+        next: () => console.log('✅ Sesión desactivada en BD al expirar token'),
+        error: (err: any) => console.warn('⚠️ No se pudo notificar al BD (se procede igual):', err?.message)
+      });
     }
 
     this.userActivity.stopTracking();
