@@ -544,7 +544,8 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     });
     return;
 
-    const { Workbook } = await import('exceljs');
+    const ExcelJS = await import('exceljs');
+    const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
     const workbook = new Workbook();
     const ws = workbook.addWorksheet('Clientes');
 

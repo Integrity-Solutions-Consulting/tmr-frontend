@@ -332,7 +332,8 @@ export class ProyectosPage implements OnDestroy {
 
   // ─── EXCEL ────────────────────────────────────────────────────────────────
   private async descargarXlsx(proyectos: Proyecto[], nombreBase: string): Promise<void> {
-    const { Workbook } = await import('exceljs');
+    const ExcelJS = await import('exceljs');
+    const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
     const workbook = new Workbook();
 
     const COLS = 17;
