@@ -242,7 +242,8 @@ export class CargaActividadesComponent implements OnInit {
     const errores: string[] = [];
 
     try {
-      const { Workbook } = await import('exceljs');
+      const ExcelJS = await import('exceljs');
+      const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
       const workbook = new Workbook();
       const valoresDeFilas: string[][] = [];
 
@@ -390,7 +391,8 @@ export class CargaActividadesComponent implements OnInit {
       });
       return;
 
-      const { Workbook } = await import('exceljs');
+      const ExcelJS = await import('exceljs');
+      const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
       const workbook = new Workbook();
       const worksheet = workbook.addWorksheet('Actividades');
 

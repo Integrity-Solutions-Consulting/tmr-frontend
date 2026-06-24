@@ -149,7 +149,8 @@ export async function estandarizarCabeceraExcelExistente(
 }
 
 export async function exportarReporteExcel(config: ReporteTabularConfig): Promise<void> {
-  const { Workbook } = await import('exceljs');
+  const ExcelJS = await import('exceljs');
+  const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet(config.nombreHoja);
 
@@ -272,7 +273,8 @@ export async function exportarReporteExcelMultihoja(
   configs: ReporteTabularConfig[],
   nombreArchivo: string,
 ): Promise<void> {
-  const { Workbook } = await import('exceljs');
+  const ExcelJS = await import('exceljs');
+  const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
   const workbook = new Workbook();
   const logo = await obtenerLogo();
 

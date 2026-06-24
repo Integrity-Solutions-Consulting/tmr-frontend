@@ -648,7 +648,8 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
     return;
 
-    const { Workbook } = await import('exceljs');
+    const ExcelJS = await import('exceljs');
+    const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
     const workbook = new Workbook();
 
     const COLOR_PRIMARIO = 'FF163572';
