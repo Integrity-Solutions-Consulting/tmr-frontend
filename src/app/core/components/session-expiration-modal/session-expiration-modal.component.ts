@@ -46,6 +46,7 @@ import { TOKEN_CONFIG } from '../../config/token.config';
   styles: [`
     .session-expiration-modal {
       text-align: center;
+      border-radius: 30px !important;
       padding: 24px;
       min-width: 360px;
       background: #ffffff;

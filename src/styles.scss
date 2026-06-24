@@ -375,3 +375,21 @@ body {
 .table-scroll-container table {
   min-width: 100%;
 }
+
+/* ── Session Expiration Dialog ─────────────────────────────────── */
+.session-expiration-dialog.cdk-overlay-pane {
+  border-radius: 30px !important;
+  overflow: hidden !important;
+}
+
+.session-expiration-dialog {
+  .mat-mdc-dialog-container {
+    border-radius: 30px !important;
+    overflow: hidden !important;
+  }
+
+  .mdc-dialog__surface {
+    border-radius: 30px !important;
+    overflow: hidden !important;
+  }
+}
