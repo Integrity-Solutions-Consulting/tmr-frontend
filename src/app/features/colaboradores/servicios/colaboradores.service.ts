@@ -6,6 +6,7 @@ import {
   ColaboradoresPaginados,
   ColaboradorListaApi,
   FiltrosColaborador,
+  RegistrarSalidaRequest,
 } from '../models/colaborador.model';
 import { environment } from '../../../../environments/environment';
 
@@ -233,6 +234,16 @@ export class ColaboradoresService {
         estado: (p.estado ?? p.Estado ?? '') as any,
       })),
       numProyectos: (api.proyectos ?? api.Proyectos ?? []).length,
+
+      // ================================================================
+      // NUEVOS CAMPOS PARA SALIDA DE COLABORADORES
+      // ================================================================
+      fechaSalida: api.fechaSalida ?? null,
+      tipoSalida: api.tipoSalida ?? null,
+      causaSalida: api.causaSalida ?? null,
+      comentarioSalida: api.comentarioSalida ?? null,
+      reemplazoNombre: api.reemplazoNombre ?? null,
+      tieneDatosSalida: !!(api.fechaSalida || api.tipoSalida || api.causaSalida),
     };
   }
 
@@ -309,6 +320,23 @@ export class ColaboradoresService {
   eliminarColaborador(id: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
+      this.httpOptions
+    );
+  }
+
+  // ================================================================
+  // REGISTRAR SALIDA
+  // ================================================================
+  /**
+   * Registra la salida de un colaborador (desactivación con datos de salida)
+   * @param id ID del colaborador que se va
+   * @param request Datos de la salida (fecha, tipo, causa, comentario, reemplazo)
+   * @returns Observable<void>
+   */
+  registrarSalida(id: string, request: RegistrarSalidaRequest): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/${id}/salida`,
+      request,
       this.httpOptions
     );
   }

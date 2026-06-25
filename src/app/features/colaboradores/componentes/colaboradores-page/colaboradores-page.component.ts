@@ -20,6 +20,7 @@ import { PaginacionComponent }             from '../../../../shared/components/p
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
+import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';  // ← NUEVO
 import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
 
 @Component({
@@ -35,6 +36,7 @@ import { NotificacionColaboradorComponent } from '../notificacion/notificacion.c
     ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
+    ModalRegistrarSalidaComponent,  // ← NUEVO
     NotificacionColaboradorComponent,
   ],
   templateUrl: './colaboradores-page.component.html',
@@ -66,6 +68,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   modalDetalle: Colaborador | null = null;
   modalCrear   = false;
   modalEditar: Colaborador | null = null;
+  modalRegistrarSalida: Colaborador | null = null;  
 
   // ── Notificación ─────────────────────────────────────────────────────
   notificacion: Notificacion | null = null;
@@ -147,10 +150,25 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         });
     }
 
+  // ================================================================
+  // NUEVO: Registrar salida
+  // ================================================================
+  abrirRegistrarSalida(col: Colaborador): void {
+    this.svc.getColaboradorById(col.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: detalle => {
+          this.modalRegistrarSalida = detalle;
+        },
+        error: () => console.error('Error al cargar el colaborador para registrar salida'),
+      });
+  }
+
   // ── Modales cerrar ───────────────────────────────────────
   cerrarDetalle(): void { this.modalDetalle = null;  }
   cerrarCrear():   void { this.modalCrear   = false; }
   cerrarEditar():  void { this.modalEditar  = null;  }
+  cerrarRegistrarSalida(): void { this.modalRegistrarSalida = null; }  // ← NUEVO
 
   // ── CRUD ─────────────────────────────────────────────────
   onCrear(request: any): void {
@@ -166,7 +184,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error al crear el colaborador', err);
-          // Mostramos el mensaje de error del backend si existe
           const mensaje = err?.error?.detail || 'Error al crear el colaborador';
           this.notificacion = { tipo: 'error', mensaje };
         },
@@ -190,6 +207,17 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           },
         });
     }
+
+  // ================================================================
+  // NUEVO: Callback cuando se registra la salida
+  // ================================================================
+  onSalidaRegistrada(): void {
+    this.cerrarRegistrarSalida();
+    this.paginaActual = 1;
+    this.cargarDatos();
+    this.cargarMetricas();
+    this.notificacion = { tipo: 'exito', mensaje: 'La salida del colaborador ha sido registrada exitosamente' };
+  }
 
   cerrarNotificacion(): void { this.notificacion = null; }
 
@@ -311,8 +339,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
     this.validarIdRequerido(idTipoContrato, 'tipo de contrato');
     this.validarIdRequerido(idDepartamento, 'departamento');
     this.validarIdRequerido(idCargo, 'cargo');
-    this.validarIdRequerido(idModoTrabajo, 'modalidad');
-    this.validarIdRequerido(idCategoriaEmpleado, 'categoría');
+
 
     return {
       tipoPersona: colaborador.tipoPersona ?? 'NATURAL',

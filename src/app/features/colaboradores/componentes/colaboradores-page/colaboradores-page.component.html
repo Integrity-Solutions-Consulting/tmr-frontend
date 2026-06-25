@@ -38,6 +38,7 @@
         (verDetalle)="abrirDetalle($event)"
         (editar)="abrirEditar($event)"
         (cambiarEstado)="onCambiarEstado($event)"
+        (registrarSalida)="abrirRegistrarSalida($event)"
       />
     </div>
 
@@ -80,3 +81,13 @@
     (cerrar)="cerrarNotificacion()"
   />
 }
+
+@if (modalRegistrarSalida) {
+    <app-modal-registrar-salida
+        [colaborador]="modalRegistrarSalida"
+        (cerrar)="cerrarRegistrarSalida()"
+        (salidaRegistrada)="onSalidaRegistrada()"
+    />
+}
+
+

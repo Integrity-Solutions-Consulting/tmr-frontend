@@ -22,6 +22,7 @@ export class TablaColaboradoresComponent {
   @Output() verDetalle = new EventEmitter<Colaborador>();
   @Output() editar = new EventEmitter<Colaborador>();
   @Output() cambiarEstado = new EventEmitter<Colaborador>();
+  @Output() registrarSalida = new EventEmitter<Colaborador>();
 
   menuAbierto: string | null = null;
 
@@ -30,19 +31,32 @@ export class TablaColaboradoresComponent {
     this.menuAbierto = this.menuAbierto === payload.id ? null : payload.id;
   }
 
+
   accionesColaborador(colaborador: Colaborador): ActionMenuItem[] {
     const activo = colaborador.estado === 'Activo';
 
-    return [
-      { id: 'ver-mas', label: 'Ver más' },
-      { id: 'editar', label: 'Editar' },
-      {
-        id: activo ? 'inactivar' : 'activar',
-        label: activo ? 'Desactivar' : 'Activar',
-        danger: activo,
-      },
-    ];
+    if (activo) {
+      return [
+        { id: 'ver-mas', label: 'Ver más' },
+        { id: 'editar', label: 'Editar' },
+        {
+          id: 'registrar-salida',
+          label: 'Registrar salida',
+          danger: true,
+        },
+      ];
+    } else {
+      return [
+        { id: 'ver-mas', label: 'Ver más' },
+        { id: 'editar', label: 'Editar' },
+        {
+          id: 'activar',
+          label: 'Activar',
+        },
+      ];
+    }
   }
+
 
   onAccionSeleccionada(accion: ActionMenuItem, colaborador: Colaborador): void {
     this.menuAbierto = null;
@@ -57,8 +71,14 @@ export class TablaColaboradoresComponent {
       return;
     }
 
-    if (accion.id === 'activar' || accion.id === 'inactivar') {
+    if (accion.id === 'registrar-salida') {
+      this.registrarSalida.emit(colaborador);
+      return;
+    }
+
+    if (accion.id === 'activar') {
       this.cambiarEstado.emit(colaborador);
+      return;
     }
   }
 }
