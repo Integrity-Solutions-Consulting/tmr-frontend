@@ -12,6 +12,8 @@ import {
 import {
   CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
+import { ColaboradoresService } from '../../servicios/colaboradores.service';
+import { Colaborador } from '../../models/colaborador.model';
 
 @Component({
   selector: 'app-modal-crear-colaborador',
@@ -22,11 +24,11 @@ import {
 })
 export class ModalCrearColaboradorComponent implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
-  // Emitimos el objeto que espera el backend para crear Persona + Empleado.
   @Output() guardar = new EventEmitter<any>();
 
   private fb = inject(FormBuilder);
   private catalogosService = inject(CatalogosService);
+  private colaboradoresService = inject(ColaboradoresService);
 
   form!: FormGroup;
   enviado = false;
@@ -38,18 +40,27 @@ export class ModalCrearColaboradorComponent implements OnInit {
   ];
 
   // ── Listas cargadas desde el backend (con id + valor) ──
-  empresas: CatalogoItem[] = [];              // EMP
-  tiposContrato: CatalogoItem[] = [];         // TCT
-  tiposIdentificacion: CatalogoItem[] = [];   // TID
-  generos: CatalogoItem[] = [];               // GEN
-  nacionalidades: CatalogoItem[] = [];        // NAC
-  departamentos: CatalogoItem[] = [];         // DEP
-  modalidades: CatalogoItem[] = [];           // MDT
-  categorias: CatalogoItem[] = [];            // CAT
-  cargosDisponibles: CargoItem[] = [];        // cargos del departamento elegido
+  empresas: CatalogoItem[] = [];
+  tiposContrato: CatalogoItem[] = [];
+  tiposIdentificacion: CatalogoItem[] = [];
+  generos: CatalogoItem[] = [];
+  nacionalidades: CatalogoItem[] = [];
+  departamentos: CatalogoItem[] = [];
+  modalidades: CatalogoItem[] = [];
+  categorias: CatalogoItem[] = [];
+  cargosDisponibles: CargoItem[] = [];
+
+  // ================================================================
+  // SECCIÓN REEMPLAZO (SOLO COLABORADORES INACTIVOS)
+  // ================================================================
+  seccionReemplazoAbierta = false;
+  colaboradoresInactivos: Colaborador[] = [];
+  colaboradoresFiltrados: Colaborador[] = [];
+  mostrarLista = false;
+  reemplazoSeleccionado: Colaborador | null = null;
+  busquedaActual = '';
 
   ngOnInit(): void {
-    // Construimos el formulario.
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: [null, Validators.required],
@@ -97,10 +108,16 @@ export class ModalCrearColaboradorComponent implements OnInit {
       ]],
       idModoTrabajo: [null],
       idCategoriaEmpleado: [null],
+
+      // ================================================================
+      // CAMPO REEMPLAZO
+      // ================================================================
+      idEmpleadoReemplazo: [null],
     });
 
     this.configurarValidacionesDinamicas();
     this.cargarCatalogos();
+    this.cargarColaboradoresInactivos();
 
     // Al cambiar departamento → cargar sus cargos y limpiar el cargo elegido.
     this.form.get('idDepartamento')?.valueChanges.subscribe(idDep => {
@@ -125,6 +142,83 @@ export class ModalCrearColaboradorComponent implements OnInit {
     this.catalogosService.getCatalogo('DEP').subscribe(d => this.departamentos = d);
     this.catalogosService.getCatalogo('MDT').subscribe(d => this.modalidades = d);
     this.catalogosService.getCatalogo('CAT').subscribe(d => this.categorias = d);
+  }
+
+  // ================================================================
+  // MÉTODOS PARA REEMPLAZO (SOLO COLABORADORES INACTIVOS)
+  // ================================================================
+
+  toggleReemplazo(): void {
+    this.seccionReemplazoAbierta = !this.seccionReemplazoAbierta;
+    // Si se abre la sección, mostrar la lista automáticamente
+    if (this.seccionReemplazoAbierta) {
+      this.mostrarLista = true;
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    } else {
+      this.mostrarLista = false;
+    }
+  }
+
+  private cargarColaboradoresInactivos(): void {
+    this.colaboradoresService.getColaboradores({ estado: 'Inactivo', busqueda: '' }, 1, 1000)
+      .subscribe((response: any) => {
+        this.colaboradoresInactivos = response.data;
+        this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+        // Si la sección está abierta, mostrar la lista
+        if (this.seccionReemplazoAbierta) {
+          this.mostrarLista = true;
+        }
+      });
+  }
+
+  filtrarColaboradores(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.busquedaActual = input.value.toLowerCase().trim();
+
+    if (this.busquedaActual === '') {
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    } else {
+      this.colaboradoresFiltrados = this.colaboradoresInactivos.filter(c =>
+        c.nombreCompleto.toLowerCase().includes(this.busquedaActual) ||
+        c.identificacion.includes(this.busquedaActual)
+      );
+    }
+
+    this.mostrarLista = this.colaboradoresFiltrados.length > 0 && !this.reemplazoSeleccionado;
+  }
+
+  seleccionarReemplazo(colaborador: Colaborador): void {
+    this.reemplazoSeleccionado = colaborador;
+    this.form.patchValue({ idEmpleadoReemplazo: Number(colaborador.id) });
+    this.mostrarLista = false;
+  }
+
+  limpiarReemplazo(): void {
+    this.reemplazoSeleccionado = null;
+    this.form.patchValue({ idEmpleadoReemplazo: null });
+    this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    this.busquedaActual = '';
+    this.mostrarLista = true;
+  }
+
+  // ================================================================
+  // NUEVO MÉTODO: ABRIR LISTA AL HACER CLIC
+  // ================================================================
+  abrirLista(): void {
+    // Si no hay búsqueda activa, mostrar los inactivos
+    if (!this.busquedaActual || this.busquedaActual === '') {
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    }
+    this.mostrarLista = true;
+  }
+
+  // ================================================================
+  // MÉTODO PARA CERRAR LA LISTA CON RETRASO
+  // ================================================================
+  cerrarLista(): void {
+    setTimeout(() => {
+      this.mostrarLista = false;
+    }, 200);
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -172,22 +266,18 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
       const tipo = this.obtenerTipoIdentificacionActual();
 
-      // Cédula: exactamente 10 números.
       if (tipo.includes('cedula')) {
         return /^\d{10}$/.test(valor) ? null : { cedulaInvalida: true };
       }
 
-      // RUC: exactamente 13 números.
       if (tipo.includes('ruc')) {
         return /^\d{13}$/.test(valor) ? null : { rucInvalido: true };
       }
 
-      // Pasaporte: alfanumérico entre 5 y 20.
       if (tipo.includes('pasaporte')) {
         return /^[A-Za-z0-9]{5,20}$/.test(valor) ? null : { pasaporteInvalido: true };
       }
 
-      // Otro documento: letras y números, sin símbolos ni emojis.
       if (tipo.includes('otro')) {
         return /^[A-Za-z0-9]+$/.test(valor) ? null : { alfanumericoInvalido: true };
       }
@@ -202,7 +292,6 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
       if (!valor) return null;
 
-      // Permite + solo al inicio y luego solo números.
       if (!/^\+?\d+$/.test(valor)) {
         return { telefonoInvalido: true };
       }
@@ -241,7 +330,6 @@ export class ModalCrearColaboradorComponent implements OnInit {
         return { emoji: true };
       }
 
-      // Letras, espacios, tildes, ñ, guion y apóstrofe.
       const regex = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
 
       return regex.test(valor) ? null : { soloLetras: true };
@@ -316,12 +404,10 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
     let valor = input.value.replace(/[^\d+]/g, '');
 
-    // Deja el + solo si está al inicio.
     valor = valor.startsWith('+')
       ? '+' + valor.slice(1).replace(/\+/g, '')
       : valor.replace(/\+/g, '');
 
-    // Máximo 15 dígitos reales.
     const tieneMas = valor.startsWith('+');
     const digitos = valor.replace(/\D/g, '').slice(0, 15);
 
@@ -383,8 +469,6 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
     const v = this.form.getRawValue();
 
-    // Objeto que espera el backend.
-    // Ahora contiene datos de Persona + datos de Empleado.
     const request = {
       // ── Datos de persona ──────────────────────────────
       numeroIdentificacion: String(v.identificacion).trim(),
@@ -414,6 +498,11 @@ export class ModalCrearColaboradorComponent implements OnInit {
       aniosExperiencia: Number(v.aniosExperiencia),
       idModoTrabajo: v.idModoTrabajo ? Number(v.idModoTrabajo) : null,
       idCategoriaEmpleado: v.idCategoriaEmpleado ? Number(v.idCategoriaEmpleado) : null,
+
+      // ================================================================
+      // CAMPO REEMPLAZO
+      // ================================================================
+      idEmpleadoReemplazo: this.reemplazoSeleccionado ? Number(this.reemplazoSeleccionado.id) : null,
     };
 
     this.guardar.emit(request);

@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.40);
-  z-index: 1000; /* Elevado por encima del navbar (990) */
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,10 +159,45 @@
     flex-shrink: 0;
   }
 
-  // Separa las filas cuando una sección tiene varios form-grid.
   .form-grid + .form-grid {
     margin-top: 18px;
   }
+}
+
+// ── Toggle para sección reemplazo ─────────────────────
+.form-section__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+
+  &:hover {
+    color: #7c3aed;
+  }
+
+  .material-icons {
+    font-size: 20px;
+    color: #6b7280;
+  }
+}
+
+.opcional {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.form-section__content {
+  padding-top: 12px;
+  padding-left: 32px;
 }
 
 // ── Grid ─────────────────────────────────────────────
@@ -352,6 +387,129 @@
   }
 }
 
+// ================================================================
+// ESTILOS PARA DROPDOWN DE REEMPLAZO
+// ================================================================
+
+.reemplazo-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 4px 0;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+
+  &__item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__identificacion {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 8px;
+  }
+
+  &__empty {
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  &__more {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+    border-top: 1px solid #f3f4f6;
+    background: #fafafa;
+  }
+}
+
+.reemplazo-seleccionado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-top: 4px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__identificacion {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  &__remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+
+    &:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .material-icons {
+      font-size: 18px;
+    }
+  }
+}
+
+// Posición relativa para el dropdown
+.form-field {
+  position: relative;
+}
 // ── Campos deshabilitados ─────────────────────────────
 .float-field__input:disabled {
   background: #f3f4f6;
