@@ -14,6 +14,7 @@ import { Colaborador } from '../../models/colaborador.model';
 import {
   CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
+import { ColaboradoresService } from '../../servicios/colaboradores.service';
 
 @Component({
   selector: 'app-modal-editar-colaborador',
@@ -29,6 +30,7 @@ export class ModalEditarColaboradorComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private catalogosService = inject(CatalogosService);
+  private colaboradoresService = inject(ColaboradoresService);
 
   form!: FormGroup;
   enviado = false;
@@ -40,15 +42,25 @@ export class ModalEditarColaboradorComponent implements OnInit {
   ];
 
   // ── Listas del backend ──────────────────────────────
-  empresas: CatalogoItem[] = [];              // EMP
-  tiposContrato: CatalogoItem[] = [];         // TCT
-  tiposIdentificacion: CatalogoItem[] = [];   // TID
-  generos: CatalogoItem[] = [];               // GEN
-  nacionalidades: CatalogoItem[] = [];        // NAC
-  modalidades: CatalogoItem[] = [];           // MDT
-  categorias: CatalogoItem[] = [];            // CAT
-  departamentos: CatalogoItem[] = [];         // DEP
+  empresas: CatalogoItem[] = [];
+  tiposContrato: CatalogoItem[] = [];
+  tiposIdentificacion: CatalogoItem[] = [];
+  generos: CatalogoItem[] = [];
+  nacionalidades: CatalogoItem[] = [];
+  modalidades: CatalogoItem[] = [];
+  categorias: CatalogoItem[] = [];
+  departamentos: CatalogoItem[] = [];
   cargosDisponibles: CargoItem[] = [];
+
+  // ================================================================
+  // SECCIÓN REEMPLAZO (SOLO COLABORADORES INACTIVOS)
+  // ================================================================
+  seccionReemplazoAbierta = false;
+  colaboradoresInactivos: Colaborador[] = [];
+  colaboradoresFiltrados: Colaborador[] = [];
+  mostrarLista = false;
+  reemplazoSeleccionado: Colaborador | null = null;
+  busquedaActual = '';
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -99,11 +111,16 @@ export class ModalEditarColaboradorComponent implements OnInit {
       ]],
       idModoTrabajo: [null],
       idCategoriaEmpleado: [null],
+
+      // ================================================================
+      // CAMPO REEMPLAZO
+      // ================================================================
+      idEmpleadoReemplazo: [null],
     });
 
     this.configurarValidacionesDinamicas();
-    this.habilitarCamposEditables();
     this.cargarCatalogosYPrecargar();
+    this.cargarColaboradoresInactivos();
 
     // Al cambiar departamento manualmente, cargar sus cargos y limpiar cargo anterior.
     this.form.get('idDepartamento')?.valueChanges.subscribe(idDep => {
@@ -142,25 +159,9 @@ export class ModalEditarColaboradorComponent implements OnInit {
     });
   }
 
-  private habilitarCamposEditables(): void {
-    [
-      'idEmpresaCatalogo',
-      'tipoPersona',
-      'idTipoIdentificacion',
-      'identificacion',
-      'nombres',
-      'apellidos',
-      'fechaNacimiento',
-      'idGenero',
-      'idNacionalidad',
-      'correoElectronico',
-      'telefono',
-      'direccion',
-    ].forEach(campo => {
-      this.form.get(campo)?.enable();
-    });
-  }
-
+  // ================================================================
+  // PRECARGAR VALORES DEL COLABORADOR EN EL FORMULARIO
+  // ================================================================
   private precargarValores(): void {
     const c: any = this.colaborador;
 
@@ -191,6 +192,11 @@ export class ModalEditarColaboradorComponent implements OnInit {
       ? (c.estado ? 'Activo' : 'Inactivo')
       : c.estado ?? (c.activo ? 'Activo' : 'Inactivo');
 
+    // ================================================================
+    // PRECARGAR REEMPLAZO
+    // ================================================================
+    const idReemplazo = c.idEmpleadoReemplazo ?? null;
+
     this.form.patchValue({
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: idEmpresa ?? null,
@@ -218,6 +224,11 @@ export class ModalEditarColaboradorComponent implements OnInit {
       aniosExperiencia: c.aniosExperiencia ?? null,
       idModoTrabajo: idModalidad ?? null,
       idCategoriaEmpleado: idCategoria ?? null,
+
+      // ================================================================
+      // REEMPLAZO
+      // ================================================================
+      idEmpleadoReemplazo: idReemplazo,
     }, { emitEvent: false });
 
     this.aplicarReglasTipoPersona(this.form.get('tipoPersona')?.value);
@@ -260,6 +271,96 @@ export class ModalEditarColaboradorComponent implements OnInit {
 
     const partes = nombreCompleto.trim().split(' ');
     return partes.slice(Math.ceil(partes.length / 2)).join(' ');
+  }
+
+  // ================================================================
+  // HABILITAR CAMPOS EDITABLES
+  // ================================================================
+  private habilitarCamposEditables(): void {
+    [
+      'idEmpresaCatalogo',
+      'tipoPersona',
+      'idTipoIdentificacion',
+      'identificacion',
+      'nombres',
+      'apellidos',
+      'fechaNacimiento',
+      'idGenero',
+      'idNacionalidad',
+      'correoElectronico',
+      'telefono',
+      'direccion',
+    ].forEach(campo => {
+      this.form.get(campo)?.enable();
+    });
+  }
+
+  // ================================================================
+  // MÉTODOS PARA REEMPLAZO (SOLO COLABORADORES INACTIVOS)
+  // ================================================================
+
+  toggleReemplazo(): void {
+    this.seccionReemplazoAbierta = !this.seccionReemplazoAbierta;
+    if (this.seccionReemplazoAbierta) {
+      this.mostrarLista = true;
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    } else {
+      this.mostrarLista = false;
+    }
+  }
+
+  private cargarColaboradoresInactivos(): void {
+    this.colaboradoresService.getColaboradores({ estado: 'Inactivo', busqueda: '' }, 1, 1000)
+      .subscribe((response: any) => {
+        this.colaboradoresInactivos = response.data;
+        this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+        if (this.seccionReemplazoAbierta) {
+          this.mostrarLista = true;
+        }
+      });
+  }
+
+  filtrarColaboradores(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.busquedaActual = input.value.toLowerCase().trim();
+
+    if (this.busquedaActual === '') {
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    } else {
+      this.colaboradoresFiltrados = this.colaboradoresInactivos.filter(c =>
+        c.nombreCompleto.toLowerCase().includes(this.busquedaActual) ||
+        c.identificacion.includes(this.busquedaActual)
+      );
+    }
+
+    this.mostrarLista = this.colaboradoresFiltrados.length > 0 && !this.reemplazoSeleccionado;
+  }
+
+  seleccionarReemplazo(colaborador: Colaborador): void {
+    this.reemplazoSeleccionado = colaborador;
+    this.form.patchValue({ idEmpleadoReemplazo: Number(colaborador.id) });
+    this.mostrarLista = false;
+  }
+
+  limpiarReemplazo(): void {
+    this.reemplazoSeleccionado = null;
+    this.form.patchValue({ idEmpleadoReemplazo: null });
+    this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    this.busquedaActual = '';
+    this.mostrarLista = true;
+  }
+
+  abrirLista(): void {
+    if (!this.busquedaActual || this.busquedaActual === '') {
+      this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
+    }
+    this.mostrarLista = true;
+  }
+
+  cerrarLista(): void {
+    setTimeout(() => {
+      this.mostrarLista = false;
+    }, 200);
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -419,18 +520,15 @@ export class ModalEditarColaboradorComponent implements OnInit {
 
     const valor = String(fecha).trim();
 
-    // Si viene como 2026-06-14 o 2026-06-14T00:00:00
     if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
       return valor.substring(0, 10);
     }
 
-    // Si viene como 14/06/2026
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) {
       const [d, m, y] = valor.split('/');
       return `${y}-${m}-${d}`;
     }
 
-    // Si viene como 14-06-2026
     if (/^\d{2}-\d{2}-\d{4}$/.test(valor)) {
       const [d, m, y] = valor.split('-');
       return `${y}-${m}-${d}`;
@@ -570,6 +668,11 @@ export class ModalEditarColaboradorComponent implements OnInit {
       aniosExperiencia: Number(v.aniosExperiencia),
       idModoTrabajo: v.idModoTrabajo ? Number(v.idModoTrabajo) : null,
       idCategoriaEmpleado: v.idCategoriaEmpleado ? Number(v.idCategoriaEmpleado) : null,
+
+      // ================================================================
+      // CAMPO REEMPLAZO
+      // ================================================================
+      idEmpleadoReemplazo: this.reemplazoSeleccionado ? Number(this.reemplazoSeleccionado.id) : null,
     };
 
     this.guardar.emit(request);

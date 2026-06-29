@@ -515,8 +515,79 @@
             </div>
           </div>
 
-
         </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- SECCIÓN REEMPLAZO (DESPLEGABLE) - CON BÚSQUEDA Y FILTRO -->
+      <!-- ================================================================ -->
+      <div class="form-section">
+        <button class="form-section__toggle" type="button" (click)="toggleReemplazo()">
+          <span class="material-icons">{{ seccionReemplazoAbierta ? 'expand_less' : 'expand_more' }}</span>
+          <span class="form-section__bar"></span>
+          <span class="form-section__title">Reemplazo <span class="opcional">(opcional)</span></span>
+        </button>
+
+        @if (seccionReemplazoAbierta) {
+          <div class="form-section__content">
+            <div class="form-grid form-grid--2">
+              <div class="form-field">
+                <div class="float-field">
+                  <input
+                    class="float-field__input"
+                    type="text"
+                    placeholder=" "
+                    (input)="filtrarColaboradores($event)"
+                    (click)="abrirLista()"
+                    (focus)="abrirLista()"
+                    (blur)="cerrarLista()"
+                    [value]="reemplazoSeleccionado?.nombreCompleto || ''"
+                    [disabled]="!!reemplazoSeleccionado"
+                  />
+                  <label class="float-field__label">
+                    Buscar colaborador
+                  </label>
+                </div>
+
+                <!-- Lista de resultados (dropdown estilizado) -->
+                @if (!reemplazoSeleccionado && mostrarLista) {
+                  <div class="reemplazo-dropdown">
+                    @if (colaboradoresFiltrados.length === 0) {
+                      <div class="reemplazo-dropdown__empty">
+                        No se encontraron colaboradores
+                      </div>
+                    } @else {
+                      @for (col of colaboradoresFiltrados | slice:0:5; track col.id) {
+                        <div class="reemplazo-dropdown__item" (click)="seleccionarReemplazo(col)">
+                          <span class="reemplazo-dropdown__nombre">{{ col.nombreCompleto }}</span>
+                          <span class="reemplazo-dropdown__identificacion">{{ col.identificacion }}</span>
+                        </div>
+                      }
+                      @if (colaboradoresFiltrados.length > 5) {
+                        <div class="reemplazo-dropdown__more">
+                          {{ colaboradoresFiltrados.length - 5 }} más disponibles.
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+
+                <!-- Reemplazo seleccionado -->
+                @if (reemplazoSeleccionado) {
+                  <div class="reemplazo-seleccionado">
+                    <div class="reemplazo-seleccionado__info">
+                      <span class="reemplazo-seleccionado__nombre">{{ reemplazoSeleccionado.nombreCompleto }}</span>
+                      <span class="reemplazo-seleccionado__identificacion">{{ reemplazoSeleccionado.identificacion }}</span>
+                    </div>
+                    <button class="reemplazo-seleccionado__remove" (click)="limpiarReemplazo()" type="button">
+                      <span class="material-icons">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
     </div>

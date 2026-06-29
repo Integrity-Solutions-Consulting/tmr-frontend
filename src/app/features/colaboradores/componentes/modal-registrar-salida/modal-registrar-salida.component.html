@@ -1,4 +1,5 @@
-﻿<div class="modal-backdrop">
+﻿
+<div class="modal-backdrop">
   <div class="modal-form" (click)="$event.stopPropagation()">
 
     <!-- HEADER -->
@@ -110,57 +111,6 @@
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section__title">
-          <span class="form-section__bar"></span>
-          Reemplazo
-        </div>
-
-        <!-- Buscador de reemplazo -->
-        <div class="form-field">
-          <div class="float-field">
-            <input
-              class="float-field__input"
-              type="text"
-              placeholder=" "
-              (input)="filtrarColaboradores($event)"
-              [value]="reemplazoSeleccionado?.nombreCompleto || ''"
-              [disabled]="!!reemplazoSeleccionado"
-            />
-            <label class="float-field__label">
-              Buscar colaborador de reemplazo
-            </label>
-          </div>
-        </div>
-
-        <!-- Lista de resultados -->
-        @if (!reemplazoSeleccionado && colaboradoresFiltrados.length > 0) {
-          <div class="reemplazo-lista">
-            @for (col of colaboradoresFiltrados; track col.id) {
-              <div class="reemplazo-item" (click)="seleccionarReemplazo(col)">
-                <span class="reemplazo-item__nombre">{{ col.nombreCompleto }}</span>
-                <span class="reemplazo-item__identificacion">{{ col.identificacion }}</span>
-                <span class="reemplazo-item__cargo">{{ col.cargo }}</span>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Reemplazo seleccionado -->
-        @if (reemplazoSeleccionado) {
-          <div class="reemplazo-seleccionado">
-            <div class="reemplazo-seleccionado__info">
-              <span class="reemplazo-seleccionado__nombre">{{ reemplazoSeleccionado.nombreCompleto }}</span>
-              <span class="reemplazo-seleccionado__identificacion">{{ reemplazoSeleccionado.identificacion }}</span>
-              <span class="reemplazo-seleccionado__cargo">{{ reemplazoSeleccionado.cargo }}</span>
-            </div>
-            <button class="reemplazo-seleccionado__remove" (click)="limpiarReemplazo()" type="button">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-        }
-      </div>
-
     </div>
 
     <!-- FOOTER -->
@@ -181,4 +131,3 @@
 
   </div>
 </div>
-

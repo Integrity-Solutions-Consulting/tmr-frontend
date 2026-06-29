@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogosService, CatalogoItem } from '../../servicios/catalogos.service';
 import { ColaboradoresService } from '../../servicios/colaboradores.service';
-import { Colaborador, RegistrarSalidaRequest } from '../../models/colaborador.model';
+import { RegistrarSalidaRequest } from '../../models/colaborador.model';
 
 @Component({
   selector: 'app-modal-registrar-salida',
@@ -13,7 +13,7 @@ import { Colaborador, RegistrarSalidaRequest } from '../../models/colaborador.mo
   styleUrl: './modal-registrar-salida.component.scss',
 })
 export class ModalRegistrarSalidaComponent implements OnInit {
-  @Input() colaborador!: Colaborador;
+  @Input() colaborador!: any;
   @Output() cerrar = new EventEmitter<void>();
   @Output() salidaRegistrada = new EventEmitter<void>();
 
@@ -27,8 +27,6 @@ export class ModalRegistrarSalidaComponent implements OnInit {
 
   tiposSalida: CatalogoItem[] = [];
   causasSalida: CatalogoItem[] = [];
-  colaboradoresActivos: Colaborador[] = [];
-  colaboradoresFiltrados: Colaborador[] = [];
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -36,11 +34,9 @@ export class ModalRegistrarSalidaComponent implements OnInit {
       idTipoSalida: [null, Validators.required],
       idCausaSalida: [null, Validators.required],
       comentario: [''],
-      idEmpleadoReemplazo: [null],
     });
 
     this.cargarCatalogos();
-    this.cargarColaboradoresActivos();
   }
 
   private obtenerFechaActual(): string {
@@ -59,46 +55,6 @@ export class ModalRegistrarSalidaComponent implements OnInit {
     this.catalogosService.getCatalogo('CAS').subscribe((data: CatalogoItem[]) => {
       this.causasSalida = data;
     });
-  }
-
-  private cargarColaboradoresActivos(): void {
-    this.colaboradoresService.getColaboradores({ estado: 'Activo', busqueda: '' }, 1, 1000)
-      .subscribe((response: any) => {
-        this.colaboradoresActivos = response.data.filter(
-          (c: Colaborador) => c.id !== this.colaborador.id
-        );
-        this.colaboradoresFiltrados = [...this.colaboradoresActivos];
-      });
-  }
-
-  filtrarColaboradores(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const busqueda = input.value.toLowerCase().trim();
-
-    if (!busqueda) {
-      this.colaboradoresFiltrados = [...this.colaboradoresActivos];
-      return;
-    }
-
-    this.colaboradoresFiltrados = this.colaboradoresActivos.filter(c =>
-      c.nombreCompleto.toLowerCase().includes(busqueda) ||
-      c.identificacion.includes(busqueda)
-    );
-  }
-
-  seleccionarReemplazo(colaborador: Colaborador): void {
-    this.form.patchValue({ idEmpleadoReemplazo: colaborador.id });
-    this.colaboradoresFiltrados = [...this.colaboradoresActivos];
-  }
-
-  limpiarReemplazo(): void {
-    this.form.patchValue({ idEmpleadoReemplazo: null });
-  }
-
-  get reemplazoSeleccionado(): Colaborador | null {
-    const id = this.form.get('idEmpleadoReemplazo')?.value;
-    if (!id) return null;
-    return this.colaboradoresActivos.find(c => c.id === id) || null;
   }
 
   campoInvalido(campo: string): boolean {
@@ -126,7 +82,7 @@ export class ModalRegistrarSalidaComponent implements OnInit {
       idTipoSalida: Number(v.idTipoSalida),
       idCausaSalida: Number(v.idCausaSalida),
       comentario: v.comentario?.trim() || null,
-      idEmpleadoReemplazo: v.idEmpleadoReemplazo ? Number(v.idEmpleadoReemplazo) : null,
+      idEmpleadoReemplazo: null,
     };
 
     this.colaboradoresService.registrarSalida(this.colaborador.id, request)
