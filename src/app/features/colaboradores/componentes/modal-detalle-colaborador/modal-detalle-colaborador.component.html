@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <div class="modal-card__header">
-    <p class="modal-card__codigo">{{ codigoColaborador }} Â· {{ contratoTipo }}</p>
+    <p class="modal-card__codigo">{{ codigoColaborador }} · {{ contratoTipo }}</p>
 
     <div class="modal-card__title-row">
       <h2 class="modal-card__nombre">{{ colaborador.nombreCompleto }}</h2>
@@ -46,14 +46,14 @@
             <img src="assets/iconos/departamento.svg" alt="departamento" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Departamento</p>
-              <p class="detalle-field__value">{{ colaborador.departamento || 'â€”' }}</p>
+              <p class="detalle-field__value">{{ colaborador.departamento || '—' }}</p>
             </div>
           </div>
 
           <div class="detalle-field">
             <img src="assets/iconos/contratacion.svg" alt="contratacion" class="detalle-field__icon" width="15" height="15" />
             <div>
-              <p class="detalle-field__label">Fecha de contrataciÃ³n</p>
+              <p class="detalle-field__label">Fecha de contratación</p>
               <p class="detalle-field__value">{{ formatFecha(colaborador.fechaContratacion) }}</p>
             </div>
           </div>
@@ -62,15 +62,15 @@
             <img src="assets/iconos/cargo.svg" alt="cargo" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Cargo</p>
-              <p class="detalle-field__value">{{ colaborador.cargo || 'â€”' }}</p>
+              <p class="detalle-field__value">{{ colaborador.cargo || '—' }}</p>
             </div>
           </div>
 
           <div class="detalle-field">
             <img src="assets/iconos/experiencia.svg" alt="experiencia" class="detalle-field__icon" width="15" height="15" />
             <div>
-              <p class="detalle-field__label">AÃ±os de experiencia</p>
-              <p class="detalle-field__value">{{ colaborador.aniosExperiencia }} aÃ±os</p>
+              <p class="detalle-field__label">Años de experiencia</p>
+              <p class="detalle-field__value">{{ colaborador.aniosExperiencia }} años</p>
             </div>
           </div>
 
@@ -78,15 +78,15 @@
             <img src="assets/iconos/modalidad.svg" alt="modalidad" class="detalle-field__icon" width="15" height="15" />
             <div>
               <p class="detalle-field__label">Modalidad</p>
-              <p class="detalle-field__value">{{ colaborador.modalidad || 'â€”' }}</p>
+              <p class="detalle-field__value">{{ colaborador.modalidad || '—' }}</p>
             </div>
           </div>
 
           <div class="detalle-field">
             <img src="assets/iconos/categoria.svg" alt="categoria" class="detalle-field__icon" width="15" height="15" />
             <div>
-              <p class="detalle-field__label">CategorÃ­a</p>
-              <p class="detalle-field__value">{{ colaborador.categoria || 'â€”' }}</p>
+              <p class="detalle-field__label">Categoría</p>
+              <p class="detalle-field__value">{{ colaborador.categoria || '—' }}</p>
             </div>
           </div>
 
@@ -123,8 +123,8 @@
             <div class="detalle-field">
               <img src="assets/iconos/cedula.svg" alt="identificacion" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">IdentificaciÃ³n</p>
-                <p class="detalle-field__value">{{ colaborador.identificacion || 'â€”' }}</p>
+                <p class="detalle-field__label">Identificación</p>
+                <p class="detalle-field__value">{{ colaborador.identificacion || '—' }}</p>
               </div>
             </div>
 
@@ -139,8 +139,8 @@
             <div class="detalle-field">
               <img src="assets/iconos/genero.svg" alt="genero" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">GÃ©nero</p>
-                <p class="detalle-field__value">{{ colaborador.genero || 'â€”' }}</p>
+                <p class="detalle-field__label">Género</p>
+                <p class="detalle-field__value">{{ colaborador.genero || '—' }}</p>
               </div>
             </div>
 
@@ -148,7 +148,7 @@
               <span class="material-icons detalle-field__icon">public</span>
               <div>
                 <p class="detalle-field__label">Nacionalidad</p>
-                <p class="detalle-field__value">{{ colaborador.nacionalidad || 'â€”' }}</p>
+                <p class="detalle-field__value">{{ colaborador.nacionalidad || '—' }}</p>
               </div>
             </div>
 
@@ -182,9 +182,9 @@
             <div class="detalle-field">
               <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">Correo electrÃ³nico</p>
+                <p class="detalle-field__label">Correo electrónico</p>
                 <p class="detalle-field__value detalle-field__value--break">
-                  {{ colaborador.correoElectronico || 'â€”' }}
+                  {{ colaborador.correoElectronico || '—' }}
                 </p>
               </div>
             </div>
@@ -192,16 +192,16 @@
             <div class="detalle-field">
               <img src="assets/iconos/telefono.svg" alt="telefono" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">TelÃ©fono</p>
-                <p class="detalle-field__value">{{ colaborador.telefono || 'â€”' }}</p>
+                <p class="detalle-field__label">Teléfono</p>
+                <p class="detalle-field__value">{{ colaborador.telefono || '—' }}</p>
               </div>
             </div>
 
             <div class="detalle-field">
               <img src="assets/iconos/direccion.svg" alt="direccion" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">DirecciÃ³n</p>
-                <p class="detalle-field__value">{{ colaborador.direccion || 'â€”' }}</p>
+                <p class="detalle-field__label">Dirección</p>
+                <p class="detalle-field__value">{{ colaborador.direccion || '—' }}</p>
               </div>
             </div>
 
@@ -259,8 +259,50 @@
       }
     </div>
 
+    <!-- ================================================================ -->
+    <!-- SECCIÓN REEMPLAZO (DESPLEGABLE) -->
+    <!-- ================================================================ -->
+    @if (colaborador.reemplazoNombre || colaborador.reemplazaANombre) {
+      <div class="detalle-reemplazo">
+        <button class="detalle-reemplazo__toggle" (click)="toggleSeccion('reemplazo')" type="button">
+          <img
+            src="assets/iconos/desplegar.svg"
+            alt="toggle"
+            width="12"
+            height="12"
+            [style.transform]="seccionesExpandido.reemplazo ? 'rotate(90deg)' : 'rotate(0deg)'"
+            style="transition: transform 0.2s ease;"
+          />
+          <span class="detalle-reemplazo__label">Reemplazo</span>
+        </button>
 
-    <!-- DATOS DE SALIDA (solo si estÃ¡ inactivo) -->
+        @if (seccionesExpandido.reemplazo) {
+          <div class="detalle-reemplazo__contenido">
+            @if (colaborador.estado === 'Activo' && colaborador.reemplazaANombre) {
+              <div class="detalle-field">
+                <span class="material-icons detalle-field__icon">swap_horiz</span>
+                <div>
+                  <p class="detalle-field__label">Reemplaza a</p>
+                  <p class="detalle-field__value">{{ colaborador.reemplazaANombre }}</p>
+                </div>
+              </div>
+            }
+
+            @if (colaborador.estado === 'Inactivo' && colaborador.reemplazoNombre) {
+              <div class="detalle-field">
+                <span class="material-icons detalle-field__icon">swap_horiz</span>
+                <div>
+                  <p class="detalle-field__label">Reemplazado por</p>
+                  <p class="detalle-field__value">{{ colaborador.reemplazoNombre }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- DATOS DE SALIDA (solo si está inactivo) -->
     @if (colaborador.estado === 'Inactivo') {
       <div class="detalle-salida">
         <button class="detalle-salida__toggle" (click)="toggleSeccion('salida')" type="button">
@@ -316,17 +358,6 @@
                     </div>
                   </div>
                 }
-
-                <!-- Reemplazo -->
-                @if (colaborador.reemplazoNombre) {
-                  <div class="detalle-field detalle-salida__campo">
-                    <span class="material-icons detalle-field__icon">person</span>
-                    <div>
-                      <p class="detalle-field__label">Reemplazado por</p>
-                      <p class="detalle-field__value">{{ colaborador.reemplazoNombre }}</p>
-                    </div>
-                  </div>
-                }
               </div>
             } @else {
               <p class="detalle-salida__vacio">Este colaborador fue desactivado sin registrar los datos de salida.</p>
@@ -335,6 +366,6 @@
         }
       </div>
     }
+
   </div>
 </div>
-

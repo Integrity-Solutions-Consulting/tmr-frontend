@@ -90,6 +90,9 @@ export interface Colaborador {
   comentarioSalida?: string | null;
   reemplazoNombre?: string | null;
   tieneDatosSalida?: boolean;
+
+  // ── CAMPOS PARA REEMPLAZO ─────────────────────────────
+   reemplazaANombre?: string | null;
 }
 
 // DTO para CREAR colaborador.
@@ -240,6 +243,11 @@ export interface ColaboradorDetalleApi {
   causaSalida: string | null;
   comentarioSalida: string | null;
   reemplazoNombre: string | null;
+
+
+  // ── CAMPOS PARA REEMPLAZO ─────────────────────────────
+   reemplazaANombre?: string | null;
+
 }
 
 // ── Request para registrar salida ─────────────────────────────

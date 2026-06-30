@@ -244,6 +244,12 @@ export class ColaboradoresService {
       comentarioSalida: api.comentarioSalida ?? null,
       reemplazoNombre: api.reemplazoNombre ?? null,
       tieneDatosSalida: !!(api.fechaSalida || api.tipoSalida || api.causaSalida),
+
+      // ================================================================
+      // NUEVO: A QUIÉN REEMPLAZA
+      // ================================================================
+      reemplazaANombre: api.reemplazaANombre ?? null,
+
     };
   }
 

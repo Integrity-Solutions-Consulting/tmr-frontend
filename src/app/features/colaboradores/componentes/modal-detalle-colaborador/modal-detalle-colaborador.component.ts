@@ -21,6 +21,7 @@ export class ModalDetalleColaboradorComponent {
     contacto: true,
     proyectos: false,
     salida: true,
+    reemplazo: true,
   };
 
   get codigoColaborador(): string {
@@ -37,7 +38,7 @@ export class ModalDetalleColaboradorComponent {
     return this.colaborador?.proyectosAsignados?.length ?? this.colaborador?.numProyectos ?? 0;
   }
 
-  toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos' | 'salida'): void {
+  toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos' | 'salida' | 'reemplazo'): void {
     this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
   }
 
