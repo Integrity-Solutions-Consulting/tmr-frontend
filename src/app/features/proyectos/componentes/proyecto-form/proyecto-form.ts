@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnChanges,
@@ -64,6 +65,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private fb = inject(FormBuilder);
   private proyectosService = inject(ProyectosService);
+  private elementRef = inject(ElementRef<HTMLElement>);
 
   intentoGuardar = false;
   mostrarCamposEspera = false;
@@ -361,10 +363,20 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   // ── Líderes: agregar / eliminar ───────────────────────────────────────────
 
+  private desplazarseAlUltimoLider(): void {
+    setTimeout(() => {
+      const hostElement = this.elementRef.nativeElement as HTMLElement;
+      const bloques = hostElement.querySelectorAll<HTMLElement>('.proyecto-form__leader-block');
+      const ultimoBloque = bloques[bloques.length - 1];
+      ultimoBloque?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }
+
   agregarLider(): void {
     this.lideres.push(this.crearLider());
     this.cargosFiltrados.push([]);
     this.recursosExpandidos.push([true]);
+    this.desplazarseAlUltimoLider();
   }
 
   eliminarLider(li: number): void {
