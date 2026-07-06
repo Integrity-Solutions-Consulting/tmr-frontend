@@ -30,8 +30,8 @@
           [matAutocomplete]="clienteAuto"
           matAutocompletePosition="below"
           autocomplete="off"
-          (input)="onClienteInput()"
-          (focus)="onClienteFocus($event)"
+          (input)="!proyecto && onClienteInput()"
+          (focus)="!proyecto && onClienteFocus($event)"
         >
         <mat-autocomplete #clienteAuto="matAutocomplete" (optionSelected)="onClienteChange($event.option.value)">
           <mat-option *ngFor="let c of getClientesFiltrados()" [value]="c.nombre">

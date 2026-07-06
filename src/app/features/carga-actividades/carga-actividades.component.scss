@@ -97,7 +97,7 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 
 .data-table {
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: collapse;
   border-spacing: 0;
   font-size: 14px;
@@ -117,7 +117,7 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
       font-weight: 600;
       color: #737373;
       font-size: 14px;
-      white-space: nowrap;
+      white-space: normal;
       background: $white;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -143,9 +143,10 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
       color: #4b5563;
       font-weight: 400;
       vertical-align: middle;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+      word-break: break-word;
     }
 
     th:nth-child(1), td:nth-child(1) { width: 64px; }
