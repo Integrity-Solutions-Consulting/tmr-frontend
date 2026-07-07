@@ -305,3 +305,13 @@
   (cerrarModal)="mostrarEliminar = false"
   (confirmarEliminar)="confirmarEliminarActividad()"
 ></app-modal-eliminar-actividad>
+
+<app-confirm-dialog
+  [visible]="mostrarConfirmacionHoras"
+  titulo="Confirmar registro de horas"
+  mensaje="¿Está seguro de registrar más de 8 horas para esta actividad?"
+  textoConfirmar="Aceptar"
+  textoCancelar="Cancelar"
+  (confirmar)="confirmarGuardar()"
+  (cancelar)="cancelarGuardar()"
+></app-confirm-dialog>
