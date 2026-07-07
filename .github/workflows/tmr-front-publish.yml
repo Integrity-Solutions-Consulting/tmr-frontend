@@ -39,7 +39,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=sha,prefix=,format=short
             type=ref,event=tag
 
@@ -55,7 +55,6 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILD_CONFIG=production
-            API_URL=${{ secrets.API_URL }}
 
       - name: Disparar redeploy en Dokploy
         if: success()
