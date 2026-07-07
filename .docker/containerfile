@@ -1,13 +1,11 @@
 # --- ETAPA 1: Compilación ---
 FROM node:20-alpine AS builder
 
-# 1. Definimos los ARG para que Dokploy pueda pasarlos si lo necesita
+# 1. Definimos los ARG necesarios para la compilación
 ARG BUILD_CONFIG=production
-ARG NODE_ENV_ARG=production
 
 # Convertir ARG en ENV
 ENV BUILD_CONFIG=$BUILD_CONFIG
-ENV NODE_ENV=$NODE_ENV_ARG
 
 WORKDIR /app
 
@@ -15,8 +13,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps --include=dev
 
-# Copiar todo el código y construir
+# Copiar todo el código
 COPY . .
+
+# Construir la aplicación - usa las definiciones de environments.ts
 RUN npm run build -- --configuration=$BUILD_CONFIG
 
 # --- ETAPA 2: Servidor de producción (Nginx) ---
