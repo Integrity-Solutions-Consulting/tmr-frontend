@@ -41,7 +41,7 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=sha,prefix=,format=short
-            type=semver,pattern={{major}}
+            type=semver,pattern=v{{major}}
 
 
       - name: Build y push de la imagen
