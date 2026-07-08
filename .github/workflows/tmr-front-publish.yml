@@ -41,7 +41,8 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=sha,prefix=,format=short
-            type=ref,event=tag
+            type=semver,pattern={{major}}
+
 
       - name: Build y push de la imagen
         uses: docker/build-push-action@v5
