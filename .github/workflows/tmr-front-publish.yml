@@ -44,6 +44,19 @@ jobs:
             type=semver,pattern=v{{major}}
 
 
+      - name: Build y push de la imagen
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./.docker/containerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_CONFIG=production
+
       - name: Disparar redeploy en Dokploy
         if: success()
         run: |
