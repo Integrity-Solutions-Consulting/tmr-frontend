@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { HorasPorProyecto, ProyectosPorCliente } from '../../../modelos/dashboard.model';
@@ -12,6 +12,12 @@ import { ReducePipe } from './reduce.pipe';
   styleUrls: ['./grafico-horas.component.scss']
 })
 export class GraficoHorasComponent {
+
+  @Output() proyectoSelect = new EventEmitter<HorasPorProyecto>();
+
+  onProyectoClick(item: HorasPorProyecto): void {
+    this.proyectoSelect.emit(item);
+  }
 
   @Input() set horasData(data: HorasPorProyecto[]) {
     this._horasData = data;
@@ -42,8 +48,11 @@ export class GraficoHorasComponent {
   }
 
   getAltura(item: HorasPorProyecto): number {
-    const porcentaje = this.getPorcentajeProyecto(item);
-    return Math.min(porcentaje, 100);
+    if (item.horasAsignadas && item.horasAsignadas > 0) {
+      return Math.min((item.horas / item.horasAsignadas) * 100, 100);
+    }
+    if (this.maximo === 0) return 0;
+    return (item.horas / this.maximo) * 100;
   }
 
   getNombreProyectoCorto(nombre: string): string {
