@@ -77,9 +77,19 @@
                   <span class="missing-badge">Faltan: <strong>{{ colab.horasFaltantes }}h</strong></span>
                 </div>
               </div>
-              <button class="expand-btn">
-                <mat-icon>{{ expandedCollaborators[colab.idEmpleado] ? 'expand_less' : 'expand_more' }}</mat-icon>
-              </button>
+              
+              <div class="action-buttons-group">
+                <!-- Botón de alerta por correo electrónico (Mailto) -->
+                <button class="btn-email-alert" 
+                        (click)="$event.stopPropagation(); enviarAlertaEmail(colab)" 
+                        title="Enviar recordatorio por correo">
+                  <mat-icon>mail</mat-icon>
+                </button>
+                
+                <button class="expand-btn">
+                  <mat-icon>{{ expandedCollaborators[colab.idEmpleado] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              </div>
             </div>
             
             <!-- Desglose de días con registros insuficientes -->

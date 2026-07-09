@@ -97,6 +97,25 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     this.expandedCollaborators[idEmpleado] = !this.expandedCollaborators[idEmpleado];
   }
 
+  enviarAlertaEmail(colab: any): void {
+    const email = colab.email || '';
+    const asunto = encodeURIComponent(`Recordatorio: Horas Pendientes de Registro - TMR`);
+    
+    // Redactamos el cuerpo del correo con un formato profesional y saltos de línea
+    const cuerpo = encodeURIComponent(
+      `Hola ${colab.nombreCompleto},\n\n` +
+      `Te recordamos que tienes horas pendientes de registrar en el sistema TMR para el periodo actual.\n\n` +
+      `• Proyecto: ${this.selectedProyecto.proyecto}\n` +
+      `• Horas faltantes: ${colab.horasFaltantes}h\n\n` +
+      `Por favor, ingresa a la brevedad al sistema para completar tus registros.\n\n` +
+      `Saludos cordiales,\n` +
+      `Gestión de Proyectos`
+    );
+
+    // Ejecuta el protocolo mailto para abrir el gestor del coordinador
+    window.location.href = `mailto:${email}?subject=${asunto}&body=${cuerpo}`;
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
