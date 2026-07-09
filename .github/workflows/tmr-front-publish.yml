@@ -63,23 +63,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DOKPLOY_WEBHOOK_URL }}" ]; then
             echo "Disparando redeploy en Dokploy..."
-
-            # Construir un mensaje descriptivo
-            if [ "${{ github.event_name }}" == "push" ]; then
-              COMMIT_MSG="${{ github.event.head_commit.message }}"
-              COMMIT_SHA="${{ github.sha }}"
-              DESCRIPTION="Commit: ${COMMIT_SHA::7} - ${COMMIT_MSG}"
-            elif [ "${{ github.event_name }}" == "push" ] && [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-              TAG="${{ github.ref_name }}"
-              DESCRIPTION="Tag: ${TAG}"
-            else
-              DESCRIPTION="Deploy manual desde workflow"
-            fi
-
-            # Enviar JSON con el campo 'description' (o 'commit', ajusta según Dokploy)
-            curl -fsS -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
-              -H "Content-Type: application/json" \
-              -d "{\"description\": \"${DESCRIPTION}\", \"commit\": \"${{ github.sha }}\", \"tag\": \"${{ github.ref_name }}\"}"
+            curl -fsS -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
           else
             echo "DOKPLOY_WEBHOOK_URL no está configurado; se omite el redeploy."
           fi
