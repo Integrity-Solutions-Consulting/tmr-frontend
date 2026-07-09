@@ -1,4 +1,4 @@
-import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, isDevMode, APP_INITIALIZER } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, isDevMode, APP_INITIALIZER, ErrorHandler } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideStore } from '@ngrx/store';
@@ -12,6 +12,7 @@ import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
 import { loadUserModulesInitializer } from './core/initializers/load-user-modules.initializer';
+import { ChunkErrorHandler } from './core/handlers/chunk-error.handler';
 
 // Reducers
 import { authReducer } from './features/auth/store/auth.reducer';
@@ -78,6 +79,10 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: () => loadUserModulesInitializer,
       multi: true,
+    },
+    {
+      provide: ErrorHandler,
+      useClass: ChunkErrorHandler,
     },
   ],
 };
