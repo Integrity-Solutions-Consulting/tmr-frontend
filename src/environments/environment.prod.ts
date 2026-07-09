@@ -1,5 +1,4 @@
 export const environment = {
-  production: false,
-  apiUrl: 'https://dev.api.tmr2.dokploy.integritysolutions.com.ec/api'
+  production: true,
+  apiUrl: ''
 };
-//Como digas y mandes Chamo

@@ -57,6 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILD_CONFIG=production
+            API_URL=${{ secrets.API_URL }}
 
       - name: Disparar redeploy en Dokploy
         if: success()

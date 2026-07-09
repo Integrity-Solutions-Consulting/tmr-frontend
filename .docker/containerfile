@@ -3,9 +3,11 @@ FROM node:20-alpine AS builder
 
 # 1. Definimos los ARG necesarios para la compilación
 ARG BUILD_CONFIG=production
+ARG API_URL
 
 # Convertir ARG en ENV
 ENV BUILD_CONFIG=$BUILD_CONFIG
+ENV API_URL=$API_URL
 
 WORKDIR /app
 
@@ -15,6 +17,11 @@ RUN npm ci --legacy-peer-deps --include=dev
 
 # Copiar todo el código
 COPY . .
+
+# Si se pasa un valor de API_URL en el build, lo inyectamos en el environment de producción
+RUN if [ -n "$API_URL" ]; then \
+      printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
+    fi
 
 # Construir la aplicación - usa las definiciones de environments.ts
 RUN npm run build -- --configuration=$BUILD_CONFIG
