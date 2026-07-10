@@ -126,6 +126,13 @@ export const routes: Routes = [
                 m => m.FeriadosPage
               ),
           },
+          {
+            path: 'catalogos',
+            loadComponent: () =>
+              import('./features/configuracion/pages/catalogos-page/catalogos-page').then(
+                m => m.CatalogosPage
+              ),
+          },
         ],
       },
     ],

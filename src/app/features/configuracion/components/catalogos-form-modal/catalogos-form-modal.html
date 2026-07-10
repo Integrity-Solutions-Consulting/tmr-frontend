@@ -1,0 +1,165 @@
+<form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
+
+  <!-- Header -->
+  <div class="modal-form__header">
+    <div>
+      @if (isView) {
+      <div class="modal-card__title-row">
+        <h2 class="modal-card__nombre">{{ data.detalle!.valor }}</h2>
+        <span class="status-pill" [class.status-pill--inactive]="!data.detalle!.activo">
+          {{ data.detalle!.activo ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      } @else {
+      <h2 class="modal-form__title">
+        {{ isEdit ? 'Editar Ítem de Catálogo' : 'Crear Nuevo Ítem' }}
+      </h2>
+      }
+    </div>
+    <button class="modal-form__close" type="button" mat-dialog-close aria-label="Cerrar">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="modal-form__body">
+
+    @if (isView) {
+    <div class="detalle-section">
+      <div class="detalle-grid">
+        <div class="detalle-field">
+          <span class="material-icons detalle-field__icon">tag</span>
+          <div>
+            <p class="detalle-field__label">Código</p>
+            <p class="detalle-field__value">{{ data.detalle!.codigoValor }}</p>
+          </div>
+        </div>
+        <div class="detalle-field">
+          <span class="material-icons detalle-field__icon">label</span>
+          <div>
+            <p class="detalle-field__label">Valor / Nombre</p>
+            <p class="detalle-field__value">{{ data.detalle!.valor }}</p>
+          </div>
+        </div>
+        <div class="detalle-field">
+          <span class="material-icons detalle-field__icon">notes</span>
+          <div>
+            <p class="detalle-field__label">Descripción</p>
+            <p class="detalle-field__value">{{ data.detalle!.descripcion || 'Sin descripción' }}</p>
+          </div>
+        </div>
+        <div class="detalle-field">
+          <span class="material-icons detalle-field__icon">sort</span>
+          <div>
+            <p class="detalle-field__label">Orden</p>
+            <p class="detalle-field__value">{{ data.detalle!.orden !== null && data.detalle!.orden !== undefined ? data.detalle!.orden : 'No definido' }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <span class="material-icons detalle-field__icon">info</span>
+          <div>
+            <p class="detalle-field__label">Estado</p>
+            <p class="detalle-field__value">
+              <span class="status-pill" [class.status-pill--inactive]="!data.detalle!.activo">
+                {{ data.detalle!.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    } @else {
+
+    <!-- Fila 1: Código | Estado -->
+    <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
+      <!-- Código -->
+      <div class="form-field" [class.form-field--full]="!isEdit">
+        <div class="float-field">
+          <input class="float-field__input" type="text" formControlName="codigoValor" placeholder=" "
+            [class.float-field__input--error]="campoInvalido('codigoValor')" style="text-transform: uppercase;" />
+          <label class="float-field__label">Código <span class="req">*</span></label>
+        </div>
+        @if (campoInvalido('codigoValor')) {
+        <span class="form-field__error">
+          @if (form.controls.codigoValor.errors?.['required']) { Campo requerido }
+          @else if (form.controls.codigoValor.errors?.['minlength']) { Mínimo 1 carácter }
+          @else if (form.controls.codigoValor.errors?.['pattern']) { Solo letras, números, - y _ }
+          @else if (form.controls.codigoValor.errors?.['duplicateCodigo']) { Ya existe este código en el catálogo }
+        </span>
+        }
+      </div>
+
+      <!-- Estado -->
+      @if (isEdit) {
+      <div class="form-field">
+        <div class="float-select">
+          <select class="float-select__input" formControlName="activo">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+          <label class="float-select__label float-select__label--up">Estado <span class="req">*</span></label>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Valor / Nombre -->
+    <div class="form-field" style="margin-bottom: 20px;">
+      <div class="float-field">
+        <input class="float-field__input" type="text" formControlName="valor" placeholder=" "
+          [class.float-field__input--error]="campoInvalido('valor')" />
+        <label class="float-field__label">Valor / Nombre <span class="req">*</span></label>
+      </div>
+      @if (campoInvalido('valor')) {
+      <span class="form-field__error">
+        @if (form.controls.valor.errors?.['required']) { Campo requerido }
+        @else if (form.controls.valor.errors?.['minlength']) { Mínimo 2 caracteres }
+        @else if (form.controls.valor.errors?.['duplicateValor']) { Ya existe este valor en el catálogo }
+      </span>
+      }
+    </div>
+
+    <!-- Fila 2: Orden | Valor Extra -->
+    <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
+      <!-- Orden -->
+      <div class="form-field">
+        <div class="float-field">
+          <input class="float-field__input" type="number" formControlName="orden" placeholder=" "
+            [class.float-field__input--error]="campoInvalido('orden')" />
+          <label class="float-field__label">Orden (opcional)</label>
+        </div>
+        @if (campoInvalido('orden')) {
+        <span class="form-field__error">
+          @if (form.controls.orden.errors?.['min']) { Debe ser mayor o igual a 0 }
+        </span>
+        }
+      </div>
+
+
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-field" style="margin-bottom: 24px;">
+      <div class="float-field">
+        <textarea class="float-field__input float-field__input--textarea" formControlName="descripcion" placeholder=" "
+          rows="2" style="height: 80px; padding: 10px 12px; resize: none;"></textarea>
+        <label class="float-field__label">Descripción (opcional)</label>
+      </div>
+    </div>
+
+    }
+
+  </div>
+
+  <!-- Footer -->
+  @if (!isView) {
+  <div class="modal-form__footer">
+    <button class="modal-form__btn modal-form__btn--save" type="submit">
+      Guardar
+    </button>
+  </div>
+  }
+
+</form>
