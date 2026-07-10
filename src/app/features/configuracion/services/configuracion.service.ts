@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { Feriado, Modulo, Rol, Usuario } from '../models/configuracion.models';
+import { Feriado, Modulo, Rol, Usuario, CatalogoMaster, CatalogoDetalle, CreateCatalogoDetalleRequest, UpdateCatalogoDetalleRequest } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
 
 interface RolBackendPayload {
@@ -43,18 +43,21 @@ export class ConfiguracionService {
   private readonly usuariosTotalesState = signal<Usuario[]>([]);
   private readonly feriadosState = signal<Feriado[]>([]);
   private readonly modulosState = signal<Modulo[]>([]);
+  private readonly catalogosMaestrosState = signal<CatalogoMaster[]>([]);
 
   readonly roles = this.rolesState.asReadonly();
   readonly usuarios = this.usuariosState.asReadonly();
   readonly usuariosTotales = this.usuariosTotalesState.asReadonly();
   readonly feriados = this.feriadosState.asReadonly();
   readonly modulos = this.modulosState.asReadonly();
+  readonly catalogosMaestros = this.catalogosMaestrosState.asReadonly();
 
   constructor() {
     this.loadModulos();
     this.loadRoles();
     this.loadUsuarios();
     this.loadFeriados();
+    this.loadCatalogosMaestros();
   }
 
   loadModulos(): void {
@@ -342,5 +345,29 @@ export class ConfiguracionService {
 
   private normalizeFeriadoTipo(tipo: unknown): string {
     return String(tipo) === 'Institucional' ? 'Religioso' : String(tipo);
+  }
+
+  loadCatalogosMaestros(): void {
+    this.http.get<CatalogoMaster[]>(`${environment.apiUrl}/configuracion/catalogos`).subscribe({
+      next: (data) => this.catalogosMaestrosState.set(data ?? []),
+      error: (err) => console.error(err),
+    });
+  }
+
+  getDetallesPorCatalogoId(idCatalogo: number): Observable<CatalogoDetalle[]> {
+    return this.http.get<CatalogoDetalle[]>(`${environment.apiUrl}/configuracion/catalogos/${idCatalogo}/detalles`);
+  }
+
+  crearDetalle(payload: CreateCatalogoDetalleRequest): Observable<CatalogoDetalle> {
+    return this.http.post<CatalogoDetalle>(`${environment.apiUrl}/configuracion/catalogos/detalles`, payload);
+  }
+
+  actualizarDetalle(id: number, payload: UpdateCatalogoDetalleRequest): Observable<CatalogoDetalle> {
+    return this.http.put<CatalogoDetalle>(`${environment.apiUrl}/configuracion/catalogos/detalles/${id}`, payload);
+  }
+
+  eliminarDetalle(id: number, idCatalogo?: number): Observable<unknown> {
+    const query = idCatalogo ? `?idCatalogo=${idCatalogo}` : '';
+    return this.http.delete(`${environment.apiUrl}/configuracion/catalogos/detalles/${id}${query}`);
   }
 }

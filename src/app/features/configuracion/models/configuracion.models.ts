@@ -63,3 +63,41 @@ export interface TableColumn<T> {
   type?: 'text' | 'chips' | 'status' | 'date' | 'boolean' | 'actions';
   width?: string;
 }
+
+export interface CatalogoMaster {
+  id: number;
+  tipoCatalogo: string;
+  codigo: string;
+  descripcion?: string;
+  activo: boolean;
+}
+
+export interface CatalogoDetalle {
+  id: number;
+  idCatalogo: number;
+  codigoValor: string;
+  valor: string;
+  descripcion?: string;
+  orden?: number;
+  valorExtra?: string;
+  activo: boolean;
+}
+
+export interface CreateCatalogoDetalleRequest {
+  idCatalogo: number;
+  codigoValor: string;
+  valor: string;
+  descripcion?: string;
+  orden?: number;
+  valorExtra?: string;
+}
+
+export interface UpdateCatalogoDetalleRequest {
+  valor: string;
+  descripcion?: string;
+  orden?: number;
+  valorExtra?: string;
+  activo?: boolean;
+  idCatalogo?: number;
+}
+
