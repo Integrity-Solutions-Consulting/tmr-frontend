@@ -34,4 +34,14 @@ export class DashboardService {
     }
     return this.http.get<any>(`${this.apiUrl}/mis-horas-incompletas`, { params });
   }
+
+  enviarNotificacionEmail(idEmpleado: number, nombreCompleto: string, proyecto: string, horasFaltantes: number): Observable<any> {
+    const payload = {
+      idEmpleado,
+      nombreCompleto,
+      proyecto,
+      horasFaltantes
+    };
+    return this.http.post<any>(`${this.apiUrl}/notificar-faltantes-email`, payload);
+  }
 }

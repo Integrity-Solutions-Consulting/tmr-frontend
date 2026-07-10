@@ -42,6 +42,9 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   loadingIncompletas = false;
   rangoActual = 'mes';
   expandedCollaborators: { [id: number]: boolean } = {};
+  enviandoAlerta: { [id: number]: boolean } = {};
+  exitoAlerta: { [id: number]: boolean } = {};
+  errorAlerta: { [id: number]: string } = {};
 
   constructor(private store: Store) {
     this.metricas$ = this.store.select(DashboardSelectors.selectMetricas);
@@ -114,6 +117,34 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
 
     // Ejecuta el protocolo mailto para abrir el gestor del coordinador
     window.location.href = `mailto:${email}?subject=${asunto}&body=${cuerpo}`;
+  }
+
+  enviarAlertaEmailServer(colab: any): void {
+    const idEmp = colab.idEmpleado;
+    if (this.enviandoAlerta[idEmp]) return;
+
+    this.enviandoAlerta[idEmp] = true;
+    this.errorAlerta[idEmp] = '';
+    this.exitoAlerta[idEmp] = false;
+
+    this.dashboardService.enviarNotificacionEmail(
+      idEmp,
+      colab.nombreCompleto,
+      this.selectedProyecto.proyecto,
+      colab.horasFaltantes
+    ).subscribe({
+      next: () => {
+        this.enviandoAlerta[idEmp] = false;
+        this.exitoAlerta[idEmp] = true;
+        setTimeout(() => {
+          this.exitoAlerta[idEmp] = false;
+        }, 4000);
+      },
+      error: (err) => {
+        this.enviandoAlerta[idEmp] = false;
+        this.errorAlerta[idEmp] = err.error?.mensaje || 'Error al enviar correo';
+      }
+    });
   }
 
   ngOnDestroy(): void {

@@ -79,17 +79,37 @@
               </div>
               
               <div class="action-buttons-group">
-                <!-- Botón de alerta por correo electrónico (Mailto) -->
+                <!-- Botón de envío de correo SMTP directo (Servidor) -->
+                <button class="btn-email-server-alert" 
+                        [class.sending]="enviandoAlerta[colab.idEmpleado]"
+                        (click)="$event.stopPropagation(); enviarAlertaEmailServer(colab)" 
+                        [disabled]="enviandoAlerta[colab.idEmpleado]"
+                        title="Enviar correo directo desde el servidor (SMTP)">
+                  <mat-icon *ngIf="!enviandoAlerta[colab.idEmpleado]">send</mat-icon>
+                  <mat-icon class="spinning-icon" *ngIf="enviandoAlerta[colab.idEmpleado]">sync</mat-icon>
+                </button>
+
+                <!-- Botón de alerta por correo local (Mailto - Backup) -->
                 <button class="btn-email-alert" 
                         (click)="$event.stopPropagation(); enviarAlertaEmail(colab)" 
-                        title="Enviar recordatorio por correo">
-                  <mat-icon>mail</mat-icon>
+                        title="Abrir en gestor de correos local (Mailto)">
+                  <mat-icon>mail_outline</mat-icon>
                 </button>
                 
                 <button class="expand-btn">
                   <mat-icon>{{ expandedCollaborators[colab.idEmpleado] ? 'expand_less' : 'expand_more' }}</mat-icon>
                 </button>
               </div>
+            </div>
+            
+            <!-- Mensaje de éxito / error en el envío -->
+            <div class="alert-feedback-banner success" *ngIf="exitoAlerta[colab.idEmpleado]">
+              <mat-icon>check_circle</mat-icon>
+              <span>¡Correo enviado con éxito!</span>
+            </div>
+            <div class="alert-feedback-banner error" *ngIf="errorAlerta[colab.idEmpleado]">
+              <mat-icon>error</mat-icon>
+              <span>{{ errorAlerta[colab.idEmpleado] }}</span>
             </div>
             
             <!-- Desglose de días con registros insuficientes -->
