@@ -26,4 +26,12 @@ export class DashboardService {
     }
     return this.http.get<any[]>(`${this.apiUrl}/proyectos/${idProyecto}/horas-incompletas`, { params });
   }
+
+  getMisHorasIncompletas(rango?: string): Observable<any> {
+    let params = {};
+    if (rango) {
+      params = { rango };
+    }
+    return this.http.get<any>(`${this.apiUrl}/mis-horas-incompletas`, { params });
+  }
 }
