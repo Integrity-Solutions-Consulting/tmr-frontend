@@ -3,4 +3,4 @@ export const environment = {
   apiUrl: ''
 };
 
-//TEEEEEEEEESST DE CHUNKS XDDD
+//TEST DOKPLOY MESSAGE EN COMMIT CON DOKER AS PROVIDER

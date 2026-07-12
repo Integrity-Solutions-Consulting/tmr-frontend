@@ -61,10 +61,30 @@ jobs:
 
       - name: Disparar redeploy en Dokploy
         if: success()
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           if [ -n "${{ secrets.DOKPLOY_WEBHOOK_URL }}" ]; then
             echo "Disparando redeploy en Dokploy..."
-            curl -fsS -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"
+            short_sha=${GITHUB_SHA::7}
+
+            payload=$(jq -n \
+              --arg ref "$GITHUB_REF" \
+              --arg id "$short_sha" \
+              --arg msg "$COMMIT_MESSAGE" \
+              '{ref: $ref, head_commit: {id: $id, message: $msg}}')
+
+            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -H 'X-GitHub-Event: push' \
+              -d "$payload")
+
+            if [ "$response" -ne 200 ]; then
+              echo "Deployment failed with HTTP status $response"
+              exit 1
+            fi
+            echo "Dokploy deployment triggered successfully!"
           else
             echo "DOKPLOY_WEBHOOK_URL no está configurado; se omite el redeploy."
           fi
