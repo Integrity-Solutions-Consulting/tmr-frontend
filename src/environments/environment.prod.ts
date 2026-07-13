@@ -3,5 +3,4 @@ export const environment = {
   apiUrl: ''
 };
 
-//TEST DOKPLOY MESSAGE + autor EN COMMIT CON DOKER AS PROVIDER
-//test en PR 
+//test push o pr to dev debe crear imagen
