@@ -3,4 +3,4 @@ export const environment = {
   apiUrl: ''
 };
 
-//test push o pr to dev debe crear imagen
+//segundo test. patch version
