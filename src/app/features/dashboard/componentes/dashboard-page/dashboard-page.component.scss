@@ -511,10 +511,10 @@
 }
 
 .btn-email-server-alert {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   cursor: pointer;
-  color: #059669;
+  color: #3b82f6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -525,9 +525,9 @@
   height: 32px;
 
   &:hover:not(:disabled) {
-    background: #d1fae5;
-    color: #047857;
-    border-color: #6ee7b7;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
   }
 
   &:disabled {
