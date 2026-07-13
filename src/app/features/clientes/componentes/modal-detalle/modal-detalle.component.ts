@@ -1,11 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Cliente, EstadoProyecto } from '../../modelos/cliente.model';
+import { Cliente } from '../../modelos/cliente.model';
+import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
+
+type SeccionDetalleCliente = 'general' | 'contacto' | 'proyectos';
 
 @Component({
   selector: 'app-modal-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BadgeEstadoComponent],
   templateUrl: './modal-detalle.component.html',
   styleUrl: './modal-detalle.component.scss',
 })
@@ -13,29 +16,17 @@ export class ModalDetalleComponent {
   @Input() cliente!: Cliente;
   @Output() cerrar = new EventEmitter<void>();
 
-  // ── Estado expansión proyectos ────────────────────────────
-  expandido = false;
+  seccionesExpandido: Record<SeccionDetalleCliente, boolean> = {
+    general: true,
+    contacto: true,
+    proyectos: false,
+  };
 
-  // ── Toggle proyectos ──────────────────────────────────────
-  toggleProyectos(): void {
-    this.expandido = !this.expandido;
+  get totalProyectos(): number {
+    return this.cliente?.proyectosAsignados?.length ?? 0;
   }
 
-  // ── Clase CSS según estado proyecto ──────────────────────
-  getClase(estado: EstadoProyecto): string {
-    const mapa: Record<EstadoProyecto, string> = {
-      'En progreso': 'proyecto-estado en-progreso',
-      'Completado':  'proyecto-estado completado',
-      'Pausado':     'proyecto-estado pausado',
-      'Cancelado':   'proyecto-estado cancelado',
-    };
-    return mapa[estado] || 'proyecto-estado';
-  }
-
-  // ── Cerrar con overlay ────────────────────────────────────
-  onOverlay(e: MouseEvent): void {
-    if ((e.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.cerrar.emit();
-    }
+  toggleSeccion(seccion: SeccionDetalleCliente): void {
+    this.seccionesExpandido[seccion] = !this.seccionesExpandido[seccion];
   }
 }

@@ -1,115 +1,130 @@
-<div class="modal-overlay" (click)="onOverlay($event)">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+<div class="modal-backdrop"></div>
 
-    <!-- Header -->
-    <div class="card-header">
-      <div class="header-top">
-        <button class="btn-cerrar" (click)="cerrar.emit()">✕</button>
-      </div>
-      <div class="header-main">
-        <h2 class="nombre">{{ cliente.nombreComercial }}</h2>
-        <span class="estado-badge"
-          [class.activo]="cliente.estado === 'Activo'"
-          [class.inactivo]="cliente.estado === 'Inactivo'">
-          <span class="dot"></span>{{ cliente.estado }}
-        </span>
-      </div>
-      <div class="tipo-row">
-        <span class="tipo-item">
-          <img src="assets/iconos/identificacion.svg" width="14" height="14" alt="tipo"/>
-          {{ cliente.tipoId }}
-        </span>
-        <span class="tipo-item">
-          <img src="assets/iconos/cliente.svg" width="14" height="14" alt="id"/>
-          {{ cliente.identificador }}
-        </span>
-      </div>
-    </div>
+<div class="modal-card">
+  <button class="modal-card__close" (click)="cerrar.emit()" type="button" aria-label="Cerrar">
+    <span class="material-icons">close</span>
+  </button>
 
-<!-- Datos de contacto -->
-<div class="seccion">
-  <div class="seccion-titulo">
-    <span class="barra"></span>
-    Datos de contacto
-  </div>
-  <div class="contacto-grid">
+  <div class="modal-card__header">
+    <div class="modal-card__top-row">
+      <div class="modal-card__title-block">
+        <h2 class="modal-card__nombre">{{ cliente.nombreComercial }}</h2>
 
-    <!-- Nombres -->
-    <div class="contacto-item">
-      <div class="contacto-label">
-        <img src="assets/iconos/nombre.svg" width="13" height="13" alt="nombre"/>
-        Nombres
-      </div>
-      <div class="contacto-valor">{{ cliente.nombres || '—' }}</div>
-    </div>
-
-    <!-- Apellidos -->
-    <div class="contacto-item">
-      <div class="contacto-label">
-        <img src="assets/iconos/nombre.svg" width="13" height="13" alt="apellido"/>
-        Apellidos
-      </div>
-      <div class="contacto-valor">{{ cliente.apellidos || '—' }}</div>
-    </div>
-
-    <!-- Correo -->
-    <div class="contacto-item">
-      <div class="contacto-label">
-        <img src="assets/iconos/correo.svg" width="13" height="13" alt="correo"/>
-        Correo electrónico
-      </div>
-      <div class="contacto-valor">{{ cliente.correoElectronico }}</div>
-    </div>
-
-    <!-- Teléfono -->
-    <div class="contacto-item">
-      <div class="contacto-label">
-        <img src="assets/iconos/telefono.svg" width="13" height="13" alt="telefono"/>
-        Teléfono
-      </div>
-      <div class="contacto-valor telefono">{{ cliente.telefono }}</div>
-    </div>
-
-    <!-- Dirección -->
-    <div class="contacto-item campo-full">
-      <div class="contacto-label">
-        <img src="assets/iconos/direccion.svg" width="13" height="13" alt="direccion"/>
-        Dirección
-      </div>
-      <div class="contacto-valor">{{ cliente.direccion || '—' }}</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Proyectos asignados -->
-<div class="seccion">
-  <div class="proyectos-header" (click)="toggleProyectos()">
-    <div class="seccion-titulo clickeable">
-      <span class="barra"></span>
-      <span class="toggle-icon">{{ expandido ? '▼' : '▶' }}</span>
-      Proyectos asignados
-      <span class="badge-count">{{ cliente.proyectosAsignados?.length || 0 }}</span>
-    </div>
-  </div>
-
-  <!-- Solo esta parte tiene scroll -->
-  <div class="seccion-proyectos" *ngIf="expandido">
-    <div *ngIf="!cliente.proyectosAsignados || cliente.proyectosAsignados.length === 0"
-         class="sin-proyectos">
-      Sin proyectos asignados
-    </div>
-    <div *ngFor="let p of cliente.proyectosAsignados" class="proyecto-item">
-      <div class="proyecto-info">
-        <div class="proyecto-nombre">{{ p.nombre }}</div>
-        <div class="proyecto-cliente">
-          <img src="assets/iconos/cliente.svg" width="12" height="12" alt="cliente"/>
-          {{ p.cliente }}
+        <div class="modal-card__meta">
+          <span class="modal-card__meta-item">
+            <img src="assets/iconos/identificacion.svg" alt="tipo" width="15" height="15" />
+            {{ cliente.tipoId || '-' }}
+          </span>
+          <span class="modal-card__meta-item">
+            <img src="assets/iconos/cliente.svg" alt="identificador" width="15" height="15" />
+            {{ cliente.identificador || '-' }}
+          </span>
         </div>
       </div>
-      <span class="proyecto-estado" [class]="getClase(p.estado)">
-        <span class="dot"></span>{{ p.estado }}
+
+      <span
+        class="estado-badge"
+        [class.estado-badge--activo]="cliente.estado === 'Activo'"
+        [class.estado-badge--inactivo]="cliente.estado === 'Inactivo'">
+        <span class="estado-badge__dot"></span>
+        {{ cliente.estado }}
       </span>
+    </div>
+  </div>
+
+  <div class="modal-card__body">
+    <div class="detalle-section">
+      <button
+        class="detalle-section__header detalle-section__header--toggle"
+        type="button"
+        (click)="toggleSeccion('contacto')">
+        <img
+          src="assets/iconos/desplegar.svg"
+          alt="toggle"
+          width="12"
+          height="12"
+          class="detalle-section__arrow"
+          [style.transform]="seccionesExpandido.contacto ? 'rotate(90deg)' : 'rotate(0deg)'" />
+
+        <span class="detalle-section__bar"></span>
+        <span class="detalle-section__title">Datos de contacto</span>
+      </button>
+
+      <div class="detalle-grid" *ngIf="seccionesExpandido.contacto">
+        <div class="detalle-field">
+          <img src="assets/iconos/nombre.svg" alt="nombres" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Nombres</p>
+            <p class="detalle-field__value">{{ cliente.nombres || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/nombre.svg" alt="apellidos" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Apellidos</p>
+            <p class="detalle-field__value">{{ cliente.apellidos || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Correo electr&oacute;nico</p>
+            <p class="detalle-field__value detalle-field__value--break">{{ cliente.correoElectronico || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field">
+          <img src="assets/iconos/telefono.svg" alt="telefono" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Tel&eacute;fono</p>
+            <p class="detalle-field__value">{{ cliente.telefono || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="detalle-field detalle-field--full">
+          <img src="assets/iconos/direccion.svg" alt="direccion" class="detalle-field__icon" width="15" height="15" />
+          <div>
+            <p class="detalle-field__label">Direcci&oacute;n</p>
+            <p class="detalle-field__value">{{ cliente.direccion || '-' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detalle-proyectos">
+      <button class="detalle-proyectos__toggle" (click)="toggleSeccion('proyectos')" type="button">
+        <img
+          src="assets/iconos/desplegar.svg"
+          alt="toggle"
+          width="12"
+          height="12"
+          [style.transform]="seccionesExpandido.proyectos ? 'rotate(90deg)' : 'rotate(0deg)'"
+          class="detalle-proyectos__arrow" />
+
+        <span class="detalle-proyectos__label">Proyectos asignados</span>
+        <span class="detalle-proyectos__count">{{ totalProyectos }}</span>
+      </button>
+
+      <div class="detalle-proyectos__lista" *ngIf="seccionesExpandido.proyectos">
+        <p class="detalle-proyectos__empty" *ngIf="!cliente.proyectosAsignados || cliente.proyectosAsignados.length === 0">
+          Sin proyectos asignados
+        </p>
+
+        <div class="detalle-proyectos__item" *ngFor="let proy of cliente.proyectosAsignados">
+          <div class="detalle-proyectos__item-info">
+            <p class="detalle-proyectos__item-nombre">{{ proy.nombre }}</p>
+
+            <div class="detalle-proyectos__item-cliente">
+              <img src="assets/iconos/proyecto.svg" alt="proyecto" width="13" height="13" />
+              {{ proy.cliente }}
+            </div>
+          </div>
+
+          <app-badge-estado [estado]="proy.estado || 'Sin seguimiento'"></app-badge-estado>
+        </div>
+      </div>
     </div>
   </div>
 </div>

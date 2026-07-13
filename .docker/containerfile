@@ -1,0 +1,44 @@
+# --- ETAPA 1: Compilación ---
+FROM node:20-alpine AS builder
+
+# 1. Definimos los ARG necesarios para la compilación
+ARG BUILD_CONFIG=production
+ARG API_URL
+
+# Convertir ARG en ENV
+ENV BUILD_CONFIG=$BUILD_CONFIG
+ENV API_URL=$API_URL
+
+WORKDIR /app
+
+# Copiar dependencias e instalar
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps --include=dev
+
+# Copiar todo el código
+COPY . .
+
+# Si se pasa un valor de API_URL en el build, lo inyectamos en el environment de producción
+RUN if [ -n "$API_URL" ]; then \
+      printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
+    fi
+
+# Construir la aplicación - usa las definiciones de environments.ts
+RUN npm run build -- --configuration=$BUILD_CONFIG
+
+# --- ETAPA 2: Servidor de producción (Nginx) ---
+FROM nginx:alpine
+
+# Limpiar archivos predeterminados de Nginx
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copiar compilación del frontend desde la etapa 1
+# Nota: La carpeta de salida de la compilación es dist/gestion-actividades/browser
+COPY --from=builder /app/dist/gestion-actividades/browser /usr/share/nginx/html
+
+# Copiar configuración personalizada de Nginx
+COPY .docker/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 3000
+
+CMD ["nginx", "-g", "daemon off;"]

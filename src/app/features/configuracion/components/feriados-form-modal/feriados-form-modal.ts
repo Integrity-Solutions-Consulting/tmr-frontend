@@ -1,26 +1,25 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { Feriado, TipoFeriado } from '../../models/configuracion.models';
-import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
-import { ONLY_LETTERS_REGEX } from '../../../../shared/validators/form-validators';
+
+export type FeriadoModalMode = 'create' | 'edit' | 'view';
+
+export interface FeriadoModalData {
+  feriado?: Feriado;
+  feriados: Feriado[];
+  nextId: number;
+  fecha?: string;
+  mode?: FeriadoModalMode;
+}
 
 @Component({
   selector: 'app-feriados-form-modal',
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
-    MatSelectModule,
-    ModalBase,
   ],
   templateUrl: './feriados-form-modal.html',
   styleUrl: './feriados-form-modal.scss',
@@ -28,24 +27,48 @@ import { ONLY_LETTERS_REGEX } from '../../../../shared/validators/form-validator
 export class FeriadosFormModal {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<FeriadosFormModal>);
-  readonly data = inject<{ feriado?: Feriado; nextId: number; fecha?: string }>(MAT_DIALOG_DATA);
-  readonly tipos: TipoFeriado[] = ['Nacional', 'Local', 'Religioso', 'Institucional'];
+  readonly data = inject<FeriadoModalData>(MAT_DIALOG_DATA);
+
+  readonly tipos = ['Nacional', 'Local', 'Religioso'] as TipoFeriado[];
 
   readonly form = this.fb.nonNullable.group({
-    tipo: [this.data.feriado?.tipo ?? 'Local' as TipoFeriado, Validators.required],
-    nombre: [this.data.feriado?.nombre ?? '', [Validators.required, Validators.minLength(3), Validators.pattern(ONLY_LETTERS_REGEX)]],
+    tipo: [this.data.feriado?.tipo ?? 'Nacional' as TipoFeriado, Validators.required],
+    nombre: [
+      this.data.feriado?.nombre ?? '',
+      [Validators.required, Validators.minLength(3)],
+    ],
     fecha: [this.data.feriado?.fecha ?? this.data.fecha ?? '', Validators.required],
-  });
+    descripcion: [this.data.feriado?.descripcion ?? ''],
+    recurrente: [this.data.feriado?.recurrente ?? false],
+    activo: [this.data.feriado?.activo ?? true, Validators.required],
+  }, { validators: [this.duplicateDateNameValidator()] });
 
-  get isEdit(): boolean {
-    return Boolean(this.data.feriado);
+  constructor() {
+    if (this.isEdit) {
+      this.form.controls.activo.disable({ emitEvent: false });
+    }
   }
 
-  cancel(): void {
-    this.dialogRef.close();
+  get isEdit(): boolean {
+    return this.data.mode === 'edit';
+  }
+
+  get isView(): boolean {
+    return this.data.mode === 'view';
+  }
+
+  formatFecha(fecha: string): string {
+    if (!fecha) return '';
+    return new Intl.DateTimeFormat('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(new Date(`${fecha}T00:00:00`));
   }
 
   save(): void {
+    if (this.isView) {
+      this.dialogRef.close();
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -56,5 +79,23 @@ export class FeriadosFormModal {
       id: this.data.feriado?.id ?? this.data.nextId,
       ...value,
     } satisfies Feriado);
+  }
+
+  private duplicateDateNameValidator() {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const nombre = (group.get('nombre')?.value ?? '').trim().toLowerCase();
+      const fecha = (group.get('fecha')?.value ?? '').trim();
+
+      if (!nombre || !fecha) return null;
+
+      const duplicate = this.data.feriados.some(
+        (f) =>
+          f.id !== this.data.feriado?.id &&
+          f.nombre.trim().toLowerCase() === nombre &&
+          f.fecha === fecha
+      );
+
+      return duplicate ? { duplicateFeriado: true } : null;
+    };
   }
 }

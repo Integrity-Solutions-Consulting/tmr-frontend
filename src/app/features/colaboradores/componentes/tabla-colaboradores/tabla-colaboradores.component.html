@@ -3,11 +3,11 @@
   <table class="tabla">
     <thead class="tabla__head">
       <tr>
-        <th class="tabla__th">Identificación</th>
-        <th class="tabla__th">Tipo</th>
+        <th class="tabla__th">Identificaci&oacute;n</th>
+        <th class="tabla__th">Empresa</th>
         <th class="tabla__th">Nombre</th>
-        <th class="tabla__th tabla__th--center">Núm. Proyectos</th>
-        <th class="tabla__th">Correo electrónico</th>
+        <th class="tabla__th tabla__th--center">N&uacute;m. Proyectos</th>
+        <th class="tabla__th">Correo electr&oacute;nico</th>
         <th class="tabla__th">Cargo</th>
         <th class="tabla__th">Estado</th>
         <th class="tabla__th tabla__th--actions"></th>
@@ -31,7 +31,7 @@
           <td class="tabla__td tabla__td--empty" colspan="8">
             <span class="material-icons tabla__empty-icon">search_off</span>
             <p class="tabla__empty-text">No se encontraron colaboradores</p>
-            <p class="tabla__empty-sub">Intenta ajustar los filtros de búsqueda</p>
+            <p class="tabla__empty-sub">Intenta ajustar los filtros de b&uacute;squeda</p>
           </td>
         </tr>
       }
@@ -63,32 +63,13 @@
             </td>
 
             <td class="tabla__td tabla__td--actions" (click)="$event.stopPropagation()">
-              <div class="tabla__menu-wrapper">
-                <button
-                  class="tabla__menu-btn"
-                  (click)="toggleMenu(col.id, $event)"
-                  title="Acciones"
-                >
-                  <img src="assets/iconos/puntos.svg" alt="acciones" width="20" height="20" />
-                </button>
-
-                @if (menuAbierto === col.id) {
-                  <div class="tabla__dropdown">
-                    <button class="tabla__dropdown-item" (click)="onVerDetalle(col, $event)">
-                      <img src="assets/iconos/eye.svg" alt="ver" width="15" height="15" />
-                      Ver más
-                    </button>
-                    <button class="tabla__dropdown-item" (click)="onEditar(col, $event)">
-                      <img src="assets/iconos/btn-editar.svg" alt="editar" width="15" height="15" />
-                      Editar
-                    </button>
-                    <button class="tabla__dropdown-item tabla__dropdown-item--danger" (click)="onEliminar(col, $event)">
-                      <img src="assets/iconos/btn-eliminar.svg" alt="eliminar" width="15" height="15" />
-                      Eliminar
-                    </button>
-                  </div>
-                }
-              </div>
+              <app-action-menu
+                [itemId]="col.id"
+                [menuAbierto]="menuAbierto"
+                [acciones]="accionesColaborador(col)"
+                (toggleMenu)="toggleMenu($event)"
+                (accionSeleccionada)="onAccionSeleccionada($event, col)"
+              ></app-action-menu>
             </td>
 
           </tr>

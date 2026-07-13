@@ -4,6 +4,26 @@
   background: #f5f7fb;
 }
 
+.layout__overlay {
+  display: none;
+}
+
+:host-context(body.sidebar-open) {
+  @media (max-width: 1024px) {
+    .layout__overlay {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(22, 53, 114, 0.3); /* Premium semi-transparent dark blue overlay */
+      backdrop-filter: blur(2px);
+      z-index: 999;
+    }
+  }
+}
+
 .layout__main {
   flex: 1;
   display: flex;

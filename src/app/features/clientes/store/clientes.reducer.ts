@@ -1,5 +1,5 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
-import { Cliente, FiltrosCliente, Notificacion, PaginacionResponse } from '../modelos/cliente.model';
+import { Cliente, FiltrosCliente, Notificacion, PaginacionResponse, ResumenClientes } from '../modelos/cliente.model';
 import { ClientesActions } from './clientes.actions';
 
 // ── State ────────────────────────────────────────────────────
@@ -10,6 +10,7 @@ export interface ClientesState {
   paginaActual:      number;
   tamanoPagina:      number;
   filtros:           FiltrosCliente;
+  resumen:           ResumenClientes;
   cargando:          boolean;
   error:             string | null;
   notificacion:      Notificacion | null;
@@ -27,6 +28,7 @@ const estadoInicial: ClientesState = {
   paginaActual:        1,
   tamanoPagina:        9,
   filtros:             { busqueda: '', estado: 'todos' },
+  resumen:             { totalInactivos: 0, totalActivos: 0, total: 0 },
   cargando:            false,
   error:               null,
   notificacion:        null,
@@ -57,6 +59,13 @@ export const clientesFeature = createFeature({
     })),
     on(ClientesActions.cargarClientesFallido, (state, { error }) => ({
       ...state, cargando: false, error
+    })),
+
+    on(ClientesActions.cargarResumenClientesExitoso, (state, { resumen }) => ({
+      ...state, resumen
+    })),
+    on(ClientesActions.cargarResumenClientesFallido, (state, { error }) => ({
+      ...state, error
     })),
 
     // Cargar detalle

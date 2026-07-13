@@ -1,75 +1,309 @@
-import { Component, computed, inject, signal, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
-import { Boton } from '../../../../shared/components/boton/boton';
-import { SearchInput } from '../../../../shared/components/search-input/search-input';
-import { Tabla } from '../../../../shared/components/tabla/tabla';
-import { DetailModal, DetailModalData } from '../../../../shared/components/detail-modal/detail-modal';
-import { RolesFormModal } from '../../components/roles-form-modal/roles-form-modal';
-import { Rol, TableColumn } from '../../models/configuracion.models';
+import { MatIconModule } from '@angular/material/icon';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../../shared/components/action-menu/action-menu.component';
+
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
+import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
+import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/roles-form-modal';
+import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
+
+type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [Boton, SearchInput, Tabla],
-  schemas: [NO_ERRORS_SCHEMA],
+  imports: [CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
 export class RolesPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+
+  @ViewChildren(ActionMenuComponent)
+  private readonly actionMenus!: QueryList<ActionMenuComponent>;
+
+  // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
+  readonly paginaActual = signal(1);
+  readonly porPagina = 10;
+  readonly estadoError = signal<string | null>(null);
+  readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
+  readonly modulos = this.configuracionService.modulos;
 
-  readonly columns: TableColumn<Record<string, unknown>>[] = [
-    { key: 'nombre', label: 'Rol', width: '18%' },
-    { key: 'descripcion', label: 'Descripcion', width: '28%' },
-    { key: 'modulos', label: 'Modulos', type: 'chips' },
-    { key: 'acciones', label: 'Acciones', type: 'actions', width: '110px' },
-  ];
+  // ── Filtro por estado ─────────────────────────────────────────────────────
+  readonly filtroEstado = signal<FiltroEstadoRol>('Activo');
 
-  readonly filteredRoles = computed(() => {
-    const query = this.query().trim().toLowerCase();
-    if (!query) {
-      return this.roles();
-    }
+  // ── Estado dropdown ───────────────────────────────────────────────────────
+  mostrarEstadoDropdown = false;
 
-    return this.roles().filter((rol) =>
-      [rol.nombre, rol.descripcion, rol.modulos.join(' ')].join(' ').toLowerCase().includes(query),
-    );
+  // ── Confirmación y éxito ──────────────────────────────────────────────────
+  readonly exitoVisible = signal(false);
+  readonly exitoMensaje = signal('Operación realizada exitosamente');
+
+  /** ID del rol cuya lista de módulos extra está desplegada */
+  readonly rolExpandidoId = signal<number | null>(null);
+
+  // ── Computeds de conteo ───────────────────────────────────────────────────
+  readonly totalRoles = computed(() => this.roles().length);
+
+  readonly rolesActivos = computed(() => this.roles().filter((rol) => rol.activo).length);
+
+  readonly rolesInactivos = computed(() => this.roles().filter((rol) => !rol.activo).length);
+
+  readonly modulosCubiertos = computed(() =>
+    new Set(this.roles().flatMap((rol) => rol.modulos.map((m) => m.id))).size,
+  );
+
+  /** Label del botón de filtro estado */
+  readonly labelEstado = computed(() => {
+    const filtro = this.filtroEstado();
+    if (filtro === 'Activo') return 'Activos';
+    if (filtro === 'Inactivo') return 'Inactivos';
+    return 'Estado';
   });
 
-  openModal(rol?: Rol): void {
-    const dialogRef = this.dialog.open<RolesFormModal, { rol?: Rol; nextId: number }, Rol>(
+  /** Filtrado por texto Y por estado */
+  readonly filteredRoles = computed(() => {
+    const query = this.query().trim().toLowerCase();
+    const estado = this.filtroEstado();
+
+    const filtered = this.roles().filter((rol) => {
+      // Filtro por estado
+      const matchEstado =
+        estado === '' ||
+        (estado === 'Activo' && rol.activo) ||
+        (estado === 'Inactivo' && !rol.activo);
+
+      if (!matchEstado) return false;
+
+      // Filtro por texto
+      if (!query) return true;
+
+      return [
+        rol.nombre,
+        rol.descripcion,
+        rol.modulos.map((m) => m.nombre).join(' '),
+        rol.activo ? 'activo' : 'inactivo',
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
+    });
+
+    return filtered.sort((a, b) => b.id - a.id);
+  });
+
+  readonly totalRegistros = computed(() => this.filteredRoles().length);
+
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.totalRegistros() / this.porPagina)),
+  );
+
+  readonly paginaActualNormalizada = computed(() =>
+    Math.min(this.paginaActual(), this.totalPaginas()),
+  );
+
+  readonly rolesPaginados = computed(() => {
+    const inicio = (this.paginaActualNormalizada() - 1) * this.porPagina;
+    return this.filteredRoles().slice(inicio, inicio + this.porPagina);
+  });
+
+  // ── Control del dropdown Estado ────────────────────────────────────────────
+
+  toggleEstadoDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
+  }
+
+  seleccionarEstado(estado: FiltroEstadoRol): void {
+    this.paginaActual.set(1);
+    this.filtroEstado.set(estado);
+    this.mostrarEstadoDropdown = false;
+  }
+
+  cerrarDropdowns(): void {
+    this.mostrarEstadoDropdown = false;
+  }
+
+  setQuery(value: string): void {
+    this.query.set(value);
+    this.paginaActual.set(1);
+  }
+
+  irAPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas()) return;
+    this.paginaActual.set(pagina);
+  }
+
+  // ── Modales ────────────────────────────────────────────────────────────────
+
+  openModal(rol?: Rol, mode: 'create' | 'edit' | 'view' = 'create'): void {
+    this.closeActionsMenu();
+
+    const data: RolModalData = {
+      rol,
+      roles: this.roles(),
+      nextId: this.configuracionService.nextId(this.roles()),
+      modulos: this.modulos(),
+      mode: rol ? mode : 'create',
+    };
+
+    const dialogRef = this.dialog.open<RolesFormModal, RolModalData, Rol>(
       RolesFormModal,
       {
-        data: { rol, nextId: this.configuracionService.nextId(this.roles()) },
-        panelClass: 'tmr-dialog-panel',
+        data,
+        panelClass: ['tmr-dialog-panel', mode === 'view' ? 'roles-detail-dialog-panel' : 'roles-form-dialog-panel'],
+        width: mode === 'view' ? '620px' : '560px',
+        maxWidth: mode === 'view' ? 'calc(100vw - 32px)' : 'calc(100vw - 48px)',
+        maxHeight: mode === 'view' ? '90vh' : '92vh',
+        disableClose: true,
       },
     );
 
     dialogRef.afterClosed().subscribe((result) => {
+      this.closeActionsMenu();
+
       if (result) {
+        const esNuevo = !this.roles().some((r) => r.id === result.id);
+        this.closeActionsMenu();
         this.configuracionService.upsertRol(result);
+        this.closeActionsMenu();
+        this.mostrarExito(
+          esNuevo ? 'Rol creado correctamente' : 'Rol actualizado correctamente',
+        );
       }
     });
   }
 
   viewRol(rol: Rol): void {
-    this.dialog.open<DetailModal, DetailModalData>(DetailModal, {
-      panelClass: 'tmr-dialog-panel',
-      data: {
-        title: rol.nombre,
-        subtitle: 'Detalle del rol y modulos habilitados.',
-        fields: [
-          { label: 'Descripcion', value: rol.descripcion },
-          { label: 'Modulos', value: rol.modulos.join(', ') },
-        ],
+    this.closeActionsMenu();
+    this.openModal(rol, 'view');
+  }
+
+  editRol(rol: Rol): void {
+    this.closeActionsMenu();
+    this.openModal(rol, 'edit');
+  }
+
+  obtenerAccionesRol(rol: Rol): ActionMenuItem[] {
+    return [
+      {
+        id: 'ver-mas',
+        label: 'Ver más',
+        action: () => this.viewRol(rol),
+      },
+      {
+        id: 'editar',
+        label: 'Editar',
+        action: () => this.editRol(rol),
+      },
+      {
+        id: rol.activo ? 'inactivar' : 'activar',
+        label: rol.activo ? 'Inactivar' : 'Activar',
+        danger: rol.activo,
+        disabled: this.rolEliminandoId() === rol.id,
+        action: () => this.toggleRolEstado(rol),
+      },
+    ];
+  }
+
+  // ── Módulos expandibles ────────────────────────────────────────────────────
+
+  visibleModulos(rol: Rol): Modulo[] {
+    return rol.modulos.slice(0, 3);
+  }
+
+  modulosOcultos(rol: Rol): number {
+    return Math.max(rol.modulos.length - 3, 0);
+  }
+
+  modulosOcultosList(rol: Rol): Modulo[] {
+    return rol.modulos.slice(3);
+  }
+
+  estaExpandido(rolId: number): boolean {
+    return this.rolExpandidoId() === rolId;
+  }
+
+  toggleModulosExpandidos(event: Event, rolId: number): void {
+    event.stopPropagation();
+    this.rolExpandidoId.set(this.rolExpandidoId() === rolId ? null : rolId);
+  }
+
+  cerrarExpandido(): void {
+    this.rolExpandidoId.set(null);
+  }
+
+  // ── Inactivar/Activar rol ─────────────────────────────────────────────────
+
+  toggleRolEstado(rol: Rol): void {
+    this.closeActionsMenu();
+    this.estadoError.set(null);
+    this.rolEliminandoId.set(rol.id);
+
+    const request$ = rol.activo
+      ? this.configuracionService.setRolEstado(rol.id, false)
+      : this.configuracionService.setRolEstado(rol.id, true);
+
+    request$.subscribe({
+      next: () => {
+        this.rolEliminandoId.set(null);
+        this.mostrarExito(`Rol ${rol.activo ? 'inactivado' : 'activado'} correctamente`);
+      },
+      error: (err) => {
+        this.rolEliminandoId.set(null);
+        this.estadoError.set(this.extractDeleteError(err));
       },
     });
   }
 
-  deleteRol(rol: Rol): void {
-    this.configuracionService.deleteRol(rol.id);
+  // ── Utilidades ────────────────────────────────────────────────────────────
+
+  cerrarExito(): void {
+    this.closeActionsMenu();
+    this.exitoVisible.set(false);
   }
+
+  closeActionsMenu(): void {
+    this.actionMenus?.forEach((menu) => menu.closeMenu());
+    this.cerrarExpandido();
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.closeActionsMenu();
+    this.exitoMensaje.set(mensaje);
+    this.exitoVisible.set(true);
+    setTimeout(() => this.exitoVisible.set(false), 3000);
+  }
+
+  private extractDeleteError(err: unknown): string {
+    const error = (err as { error?: unknown })?.error;
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    const body = error as {
+      errors?: { message?: string }[];
+      message?: string;
+      mensaje?: string;
+      error?: string;
+      title?: string;
+    } | undefined;
+
+    return body?.errors?.[0]?.message
+      ?? body?.message
+      ?? body?.mensaje
+      ?? body?.error
+      ?? body?.title
+      ?? 'No se pudo eliminar el rol. Verifica si es un rol de sistema o si tiene usuarios asignados.';
+  }
+
 }

@@ -1,0 +1,9 @@
+node_modules
+.angular
+dist
+.git
+.vs
+.vscode
+README.md
+guiareadme.md
+search-results.txt

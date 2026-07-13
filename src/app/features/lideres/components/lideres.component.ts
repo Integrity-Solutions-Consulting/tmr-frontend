@@ -1,20 +1,34 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import { exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { HttpClient, HttpHeaders } from '@angular/common/http'; 
+import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
+import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
-import { ModalConfirmacion } from './modal-confirmacion/modal-confirmacion';
+import { SuccessModalComponent } from '../../../shared/components/success-modal/success-modal.component';
+import { ModalEliminarLiderComponent } from './modal-eliminar-lider/modal-eliminar-lider.component';
+import { BadgeEstadoComponent } from '../../../shared/components/badge-estado/badge-estado.component';
+import {
+  ActionMenuComponent,
+  ActionMenuItem,
+} from '../../../shared/components/action-menu/action-menu.component';
+
+export interface ProyectoAsignado {
+  id?: number;
+  codigo: string;
+  nombre: string;
+  cliente: string;
+  estado: string;
+}
 
 export interface Lider {
+  id?: number;
   codigo: string;
   tipo: 'Interno' | 'Externo';
   nombre: string;
@@ -22,6 +36,7 @@ export interface Lider {
   correo: string;
   telefono: string;
   estado: 'Activo' | 'Inactivo';
+  proyectos: ProyectoAsignado[];
 }
 
 @Component({
@@ -31,51 +46,89 @@ export interface Lider {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatIconModule,
     ModalLider,
     ModalDetalleLider,
     ModalDescargaComponent,
-    ModalConfirmacion
+    SuccessModalComponent,
+    ModalEliminarLiderComponent,
+    BadgeEstadoComponent,
+    ActionMenuComponent
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
 })
 export class LideresComponent implements OnInit {
 
-  // ── Data Real ───────────────────────────────────────────
-  lideres: Lider[] = []; 
+  lideres: Lider[] = [];
   lideresFiltrados: Lider[] = [];
   lideresPaginados: Lider[] = [];
+  menuAbierto: string | null = null;
 
-  // Url base de tu backend Luis
-  private apiUrl = 'http://localhost:5071/api/lideres'; 
+  private apiUrl = `${environment.apiUrl}/lideres`;
 
-  // ── Filtros ────────────────────────────────────────────
   busqueda = '';
   tipoFiltro = '';
-  estadoFiltro = '';
-
-  // ── Paginación ─────────────────────────────────────────
+  estadoFiltro: 'Activo' | 'Inactivo' | '' = '';
   paginaActual = 1;
   porPagina = 10;
   totalPaginas = 1;
   paginas: number[] = [];
 
-  // ── Modales ────────────────────────────────────────────
   mostrarFormulario = false;
   mostrarDetalle = false;
   mostrarDescarga = false;
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   liderSeleccionado: any = null;
+  liderParaEditar: any = null;
   modoEdicion = false;
   liderEditando: Lider | null = null;
   liderForm!: FormGroup;
-
-  // ── Estado Dropdown ────────────────────────────────────
+  guardandoLider = false;
   mostrarEstadoDropdown = false;
+  errorFormulario: string | null = null;
+
+  // ── Control de expansión de clientes ──────────────────────
+  liderExpandidoId: string | number | null = null;
+
+  obtenerClientesList(cliente: string | string[] | null | undefined): string[] {
+    if (!cliente) return [];
+    if (Array.isArray(cliente)) return cliente;
+    return cliente.split(',').map(c => c.trim()).filter(c => c !== '');
+  }
+
+  visibleClientes(lider: Lider): string[] {
+    return this.obtenerClientesList(lider.cliente).slice(0, 1);
+  }
+
+  clientesOcultosCount(lider: Lider): number {
+    const list = this.obtenerClientesList(lider.cliente);
+    return Math.max(list.length - 1, 0);
+  }
+
+  clientesOcultosList(lider: Lider): string[] {
+    return this.obtenerClientesList(lider.cliente).slice(1);
+  }
+
+  estaLiderExpandido(lider: Lider): boolean {
+    const id = lider.id ?? lider.codigo;
+    return this.liderExpandidoId === id;
+  }
+
+  toggleClientesExpandidos(event: Event, lider: Lider): void {
+    event.stopPropagation();
+    const id = lider.id ?? lider.codigo;
+    this.liderExpandidoId = this.liderExpandidoId === id ? null : id;
+  }
+
+  cerrarLiderExpandido(): void {
+    this.liderExpandidoId = null;
+  }
+
+  // ── Eliminar ───────────────────────────────────────────
+  mostrarEliminar = false;
+  liderAEliminar: Lider | null = null;
+  errorEliminar: string | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) { }
 
@@ -89,32 +142,21 @@ export class LideresComponent implements OnInit {
       telefono: [''],
       estado: ['Activo', Validators.required],
     });
-    
+
     this.obtenerLideresDelBackend();
   }
 
-  // Helper para sacar el token guardado
-  private obtenerHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
-  // ── Consumir API Real ──────────────────────────────────
   obtenerLideresDelBackend(): void {
-    this.http.get<any[]>(this.apiUrl, { headers: this.obtenerHeaders() }).subscribe({
-      next: (data) => {
-        this.lideres = data.map((l, i) => ({
-          ...l,
-          codigo: String(i + 1).padStart(3, '0'),
-          nombre: `${l.nombres} ${l.apellidos}`,
-          tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
-          correo: l.email,
-          cliente: '',
-          estado: l.activo ? 'Activo' : 'Inactivo'
-        }));
-        this.aplicarFiltros();
+    this.http.get<any[]>(this.apiUrl).subscribe({
+      next: (lideres) => {
+        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
+          next: (proyectos) => {
+            this.procesarLideres(lideres, proyectos);
+          },
+          error: () => {
+            this.procesarLideres(lideres, []);
+          }
+        });
       },
       error: (err) => {
         console.error('❌ Error al traer líderes:', err);
@@ -122,7 +164,55 @@ export class LideresComponent implements OnInit {
     });
   }
 
-  // ── Contadores cards dinámicos (Con la data real) ───────
+  private procesarLideres(lideres: any[], proyectos: any[]): void {
+    const infoPorLider = new Map<number, { clientes: Set<string>; proyectos: Map<number, ProyectoAsignado> }>();
+
+    proyectos.forEach((proyecto: any) => {
+      const liderId = proyecto.idLider;
+      if (liderId == null) return;
+
+      const entrada = infoPorLider.get(liderId) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+      if (proyecto.cliente) entrada.clientes.add(proyecto.cliente);
+
+      const proyectoId = proyecto.id ?? Math.random();
+      entrada.proyectos.set(proyectoId, {
+        id: proyecto.id,
+        codigo: proyecto.codigo ?? '',
+        nombre: proyecto.nombre ?? '',
+        cliente: proyecto.cliente ?? '',
+        estado: proyecto.estado ?? ''
+      });
+
+      infoPorLider.set(liderId, entrada);
+    });
+
+    this.lideres = lideres.map((l, i) => {
+      const datos = infoPorLider.get(l.id) ?? { clientes: new Set<string>(), proyectos: new Map<number, ProyectoAsignado>() };
+      return {
+        ...l,
+        id: l.id,
+        idPersona: l.idPersona ?? l.idpersona ?? l.Idpersona ?? null,
+        nombres: l.nombres,
+        apellidos: l.apellidos,
+        email: l.email,
+        codigo: String(i + 1),
+        nombre: `${l.nombres} ${l.apellidos}`,
+        tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
+        correo: l.email,
+        telefono: l.telefono ?? '',
+        cliente: Array.from(datos.clientes).join(', '),
+        proyectos: Array.from(datos.proyectos.values()),
+        estado: l.activo ? 'Activo' : 'Inactivo'
+      };
+    }).sort((a, b) => {
+      if (a.estado === 'Activo' && b.estado !== 'Activo') return -1;
+      if (a.estado !== 'Activo' && b.estado === 'Activo') return 1;
+      return 0;
+    });
+
+    this.aplicarFiltros();
+  }
+
   get totalInternos(): number {
     return this.lideres.filter(l => l.tipo === 'Interno').length;
   }
@@ -139,7 +229,6 @@ export class LideresComponent implements OnInit {
     return this.lideres.filter(l => l.estado === 'Activo').length;
   }
 
-  // ── Paginación helpers ─────────────────────────────────
   get rangoInicio(): number {
     return this.lideresFiltrados.length === 0 ? 0 : (this.paginaActual - 1) * this.porPagina + 1;
   }
@@ -148,39 +237,42 @@ export class LideresComponent implements OnInit {
     return Math.min(this.paginaActual * this.porPagina, this.lideresFiltrados.length);
   }
 
-  // ── Filtros corregidos ──────────────────────────────────
   filtrarPor(tipo: string): void {
     if (tipo === 'Inactivo') {
-      this.estadoFiltro = 'Inactivo';
+      this.estadoFiltro = this.estadoFiltro === 'Inactivo' ? 'Activo' : 'Inactivo';
       this.tipoFiltro = '';
     } else {
-      this.tipoFiltro = tipo;
-      this.estadoFiltro = '';
+      if (this.tipoFiltro === tipo) {
+        this.tipoFiltro = '';
+        this.estadoFiltro = 'Activo';
+      } else {
+        this.tipoFiltro = tipo;
+      }
     }
     this.aplicarFiltros();
   }
 
-  filtrarEstado(estado: string): void {
-    this.estadoFiltro = estado;
+  filtrarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
+    this.estadoFiltro = estado === 'Activo' || estado === 'Inactivo' ? estado : 'Activo';
     this.aplicarFiltros();
   }
 
-  toggleEstadoDropdown(): void {
+  toggleEstadoDropdown(event?: Event): void {
+    event?.stopPropagation();
     this.mostrarEstadoDropdown = !this.mostrarEstadoDropdown;
   }
 
-  seleccionarEstado(estado: string): void {
-    this.estadoFiltro = estado;
-    if (estado === '') {
-      this.mostrarEstadoDropdown = false;
-    }
+  seleccionarEstado(estado: 'Activo' | 'Inactivo' | ''): void {
+    this.estadoFiltro = estado === 'Activo' || estado === 'Inactivo' ? estado : '';
+    this.mostrarEstadoDropdown = false;
     this.aplicarFiltros();
   }
 
   cerrarDropdowns(): void {
     this.mostrarEstadoDropdown = false;
+    this.mostrarDescarga = false;
+    this.cerrarLiderExpandido();
   }
-
   aplicarFiltros(): void {
     const texto = this.busqueda.toLowerCase();
     this.lideresFiltrados = this.lideres.filter(l => {
@@ -224,11 +316,56 @@ export class LideresComponent implements OnInit {
     if (this.paginaActual < this.totalPaginas) this.irPagina(this.paginaActual + 1);
   }
 
-  // ── Modal Formulario ───────────────────────────────────
+  toggleMenu(payload: { id: string; event: Event }): void {
+    payload.event.stopPropagation();
+    this.menuAbierto = this.menuAbierto === payload.id ? null : payload.id;
+  }
+
+  accionesLider(lider: Lider): ActionMenuItem[] {
+    const activo = lider.estado === 'Activo';
+
+    return [
+      { id: 'ver-mas', label: 'Ver más' },
+      { id: 'editar', label: 'Editar' },
+      {
+        id: activo ? 'inactivar' : 'activar',
+        label: activo ? 'Desactivar' : 'Activar',
+        danger: activo,
+      },
+      { id: 'eliminar', label: 'Eliminar', danger: true }
+    ];
+  }
+
+  onAccionSeleccionada(accion: ActionMenuItem, lider: Lider, numero: number): void {
+    this.menuAbierto = null;
+
+    if (accion.id === 'ver-mas') {
+      this.verLider(lider, numero);
+      return;
+    }
+
+    if (accion.id === 'editar') {
+      this.editarLider(lider);
+      return;
+    }
+
+    if (accion.id === 'activar' || accion.id === 'inactivar') {
+      this.toggleEstadoLider(lider);
+      return;
+    }
+
+    if (accion.id === 'eliminar') {
+      this.abrirEliminar(lider);
+      return;
+    }
+  }
   abrirFormulario(): void {
     this.mostrarDescarga = false;
     this.modoEdicion = false;
     this.liderEditando = null;
+    this.liderParaEditar = null;
+    this.guardandoLider = false;
+    this.errorFormulario = null;
     this.liderForm.reset({ estado: 'Activo' });
     this.mostrarFormulario = true;
   }
@@ -236,12 +373,18 @@ export class LideresComponent implements OnInit {
   cerrarFormulario(): void {
     this.mostrarFormulario = false;
     this.liderEditando = null;
+    this.liderParaEditar = null;
+    this.guardandoLider = false;
+    this.errorFormulario = null;
     this.liderForm.reset();
   }
 
   verLider(lider: Lider, numero: number): void {
     this.mostrarDescarga = false;
     this.liderSeleccionado = { ...lider, numero };
+    if (!this.liderSeleccionado.proyectos) {
+      this.liderSeleccionado.proyectos = [];
+    }
     this.mostrarDetalle = true;
   }
 
@@ -254,21 +397,91 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
     this.modoEdicion = true;
     this.liderEditando = lider;
-    this.liderForm.patchValue(lider);
+    this.liderParaEditar = { ...lider };
+    this.guardandoLider = false;
+    this.errorFormulario = null;
     this.mostrarFormulario = true;
   }
 
-  guardarLider(): void {
-    this.mensajeConfirmacion = this.modoEdicion
-      ? 'Los cambios han sido<br>guardados exitosamente'
-      : 'El nuevo líder ha sido<br>agregado exitosamente';
+  guardarLider(payload: any): void {
+    if (this.guardandoLider) return;
 
-    this.mostrarConfirmacion = true;
-    
-    setTimeout(() => {
-      this.mostrarConfirmacion = false;
-      this.obtenerLideresDelBackend();
-    }, 3000);
+    if (!this.modoEdicion && this.liderYaExiste(payload)) {
+      this.errorFormulario = 'Ya existe un líder con los mismos datos de contacto o colaborador asignado.';
+      return;
+    }
+
+    this.guardandoLider = true;
+
+    const solicitud = this.modoEdicion && this.liderParaEditar?.id
+      ? {
+        Idlider: Number(this.liderParaEditar.id),
+        Idpersona: payload.personaId ? Number(payload.personaId) : null,
+        Nombres: payload.nombres.trim(),
+        Apellidos: payload.apellidos.trim(),
+        Email: payload.correo ? payload.correo.trim() : null,
+        Telefono: payload.telefono ? payload.telefono.trim() : null,
+        Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
+        Activo: payload.estado === 'Activo',
+        NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
+        Usuariomodificacion: 'frontend',
+        Ipmodificacion: '127.0.0.1'
+      }
+      : {
+        Idpersona: payload.personaId ? Number(payload.personaId) : null,
+        Idtipo: payload.tipoId ? Number(payload.tipoId) : undefined,
+        Nombres: payload.nombres.trim(),
+        Apellidos: payload.apellidos.trim(),
+        Email: payload.correo ? payload.correo.trim() : null,
+        Telefono: payload.telefono ? payload.telefono.trim() : null,
+        NumeroIdentificacion: payload.identificacion ? payload.identificacion.trim() : null,
+        Usuariocreacion: 'frontend',
+        Ipcreacion: '127.0.0.1'
+      };
+
+    const request$ = this.modoEdicion && this.liderParaEditar?.id
+      ? this.http.put(`${this.apiUrl}/${this.liderParaEditar.id}`, solicitud)
+      : this.http.post(this.apiUrl, solicitud);
+
+    request$.subscribe({
+      next: () => {
+        this.guardandoLider = false;
+        this.errorFormulario = null;
+        this.mensajeConfirmacion = this.modoEdicion
+          ? 'Los cambios han sido guardados exitosamente'
+          : 'El nuevo líder ha sido agregado exitosamente';
+        this.mostrarConfirmacion = true;
+        this.mostrarFormulario = false;
+        this.liderEditando = null;
+        this.obtenerLideresDelBackend();
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      },
+      error: (err: any) => {
+        this.guardandoLider = false;
+        console.error('❌ Error al guardar líder en el servidor:', err);
+        this.errorFormulario = err?.error?.detail || err?.error?.message || 'No se pudo guardar el líder. Intente de nuevo.';
+      }
+    });
+  }
+
+  private liderYaExiste(payload: any): boolean {
+    if (payload.personaId) {
+      return this.lideres.some(lider => (lider as any).idPersona === Number(payload.personaId));
+    }
+
+    const correo = this.normalizarTexto(payload.correo);
+    const telefono = this.normalizarTexto(payload.telefono);
+    const nombreCompleto = this.normalizarTexto(`${payload.nombres ?? ''} ${payload.apellidos ?? ''}`);
+
+    return this.lideres.some(lider =>
+      (lider.correo && this.normalizarTexto(lider.correo) === correo)
+      || (lider.telefono && this.normalizarTexto(lider.telefono) === telefono)
+      || (lider.nombre && this.normalizarTexto(lider.nombre) === nombreCompleto)
+    );
+  }
+
+  private normalizarTexto(valor: unknown): string {
+    return String(valor ?? '').trim().toLowerCase();
   }
 
   abrirDescarga(): void {
@@ -279,55 +492,301 @@ export class LideresComponent implements OnInit {
     this.mostrarDescarga = false;
   }
 
+  obtenerClientesExport(lider: Lider): string {
+    const list = this.obtenerClientesList(lider.cliente);
+    return list.length > 0 ? list.join(', ') : 'Sin clientes';
+  }
+
   descargarPDF(): void {
-    const doc = new jsPDF();
-    doc.setTextColor(115, 115, 115);
-    doc.text('Lista de Líderes', 14, 16);
-    doc.setTextColor(0, 0, 0);
-    autoTable(doc, {
-      head: [['#', 'Tipo', 'Nombre', 'Cliente', 'Correo', 'Teléfono', 'Estado']],
-      body: this.lideres.map((l, i) => [
-        i + 1, l.tipo, l.nombre, l.cliente, l.correo, l.telefono, l.estado
+    void exportarReportePdf({
+      titulo: 'Reporte de Líderes',
+      nombreArchivo: 'Lideres',
+      nombreHoja: 'Líderes',
+      columnas: [
+        { encabezado: 'Nombre', anchoPdf: 60 },
+        { encabezado: 'Clientes vinculados', anchoPdf: 55 },
+        { encabezado: 'Correo', anchoPdf: 70 },
+        { encabezado: 'Teléfono', anchoPdf: 35 },
+        { encabezado: 'Tipo', anchoPdf: 25, alineacion: 'left' },
+        { encabezado: 'Estado', anchoPdf: 20, alineacion: 'left' },
+      ],
+      filas: this.lideresFiltrados.map((lider) => [
+        lider.nombre || '-',
+        this.obtenerClientesExport(lider),
+        lider.correo || '-',
+        lider.telefono || '-',
+        lider.tipo || '-',
+        lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
       ]),
-      startY: 22,
+      columnaEstado: 5,
+    });
+    this.mostrarDescarga = false;
+    return;
+
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const fecha = new Date().toLocaleDateString('es-EC');
+    const pageW = 297;
+    const pageH = 210;
+    const marginX = 12;
+    const footerY = pageH - 8;
+
+    const dibujarCabecera = () => {
+      doc.setFillColor(22, 53, 114);
+      doc.rect(0, 0, pageW, 22, 'F');
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Reporte de Líderes', marginX, 14);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
+      doc.setDrawColor(99, 135, 190);
+      doc.setLineWidth(0.5);
+      doc.line(0, 22, pageW, 22);
+    };
+
+    dibujarCabecera();
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(22, 53, 114);
+    doc.text('Listado de Líderes', marginX, 32);
+    doc.setDrawColor(22, 53, 114);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, 34, marginX + 60, 34);
+
+    const bodyData = this.lideresFiltrados.map(l => [
+      l.nombre || '-',
+      l.correo || '-',
+      l.telefono || '-',
+      l.tipo || '-',
+      l.estado === 'Activo' ? 'Activo' : 'Inactivo',
+    ]);
+
+    autoTable(doc, {
+      startY: 37,
+      head: [['Nombre del Líder', 'Correo Electrónico', 'Teléfono', 'Tipo', 'Estado']],
+      body: bodyData,
+      styles: {
+        fontSize: 8,
+        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+        valign: 'middle',
+        overflow: 'linebreak',
+        font: 'helvetica',
+        lineColor: [226, 232, 240],
+        lineWidth: 0.2,
+      },
       headStyles: {
         fillColor: [22, 53, 114],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold'
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 8,
+        halign: 'center',
+        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
       },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245]
+      bodyStyles: { textColor: [51, 65, 85] },
+      alternateRowStyles: { fillColor: [245, 248, 255] },
+      columnStyles: {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 70 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 30, halign: 'center' },
+        4: { cellWidth: 30, halign: 'center' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4) {
+          const val = String(data.cell.raw ?? '').toLowerCase();
+          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+      margin: { left: marginX, right: marginX, bottom: 18 },
+      didDrawPage: () => dibujarCabecera(),
+    });
+
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(marginX, footerY, pageW - marginX, footerY);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(156, 163, 175);
+      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
+      doc.text('TMR — Reporte de Líderes', marginX, footerY + 4);
+      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
+    }
+
+    doc.save(`Lideres_${new Date().toISOString().slice(0, 10)}.pdf`);
+    this.mostrarDescarga = false;
+  }
+
+  async descargarExcel(): Promise<void> {
+    await exportarReporteExcel({
+      titulo: 'Reporte de Líderes',
+      nombreArchivo: 'Lideres',
+      nombreHoja: 'Líderes',
+      columnas: [
+        { encabezado: 'Nombre', anchoExcel: 40 },
+        { encabezado: 'Clientes vinculados', anchoExcel: 30 },
+        { encabezado: 'Correo', anchoExcel: 40 },
+        { encabezado: 'Teléfono', anchoExcel: 20 },
+        { encabezado: 'Tipo', anchoExcel: 15, alineacion: 'left' },
+        { encabezado: 'Estado', anchoExcel: 15, alineacion: 'left' },
+      ],
+      filas: this.lideresFiltrados.map((lider) => [
+        lider.nombre || '-',
+        this.obtenerClientesExport(lider),
+        lider.correo || '-',
+        lider.telefono || '-',
+        lider.tipo || '-',
+        lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
+      ]),
+      columnaEstado: 5,
+    });
+    this.mostrarDescarga = false;
+    return;
+
+    const ExcelJS = await import('exceljs');
+    const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
+    const workbook = new Workbook();
+
+    const COLOR_PRIMARIO = 'FF163572';
+    const COLOR_RECURSO = 'FFFFFFFF';
+    const COLOR_RECURSO_ALT = 'FFF8FAFC';
+    const COLOR_TEXTO = 'FF334155';
+    const COLOR_BORDE = 'FFE2E8F0';
+
+    const ws = workbook.addWorksheet('Líderes');
+    ws.columns = [
+      { header: 'Nombre', key: 'nombre', width: 40 },
+      { header: 'Correo', key: 'correo', width: 40 },
+      { header: 'Teléfono', key: 'telefono', width: 20 },
+      { header: 'Tipo', key: 'tipo', width: 15 },
+      { header: 'Estado', key: 'estado', width: 15 },
+    ];
+
+    this.lideresFiltrados.forEach(l => {
+      ws.addRow({
+        nombre: l.nombre || '-',
+        correo: l.correo || '-',
+        telefono: l.telefono || '-',
+        tipo: l.tipo || '-',
+        estado: l.estado === 'Activo' ? 'Activo' : 'Inactivo',
+      });
+    });
+
+    const header = ws.getRow(1);
+    header.height = 22;
+    header.eachCell((cell: any) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
+      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      const b = { style: 'thin', color: { argb: COLOR_PRIMARIO } };
+      cell.border = { top: b, left: b, bottom: b, right: b };
+    });
+
+    ws.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber === 1) return;
+      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
+      row.height = 20;
+      row.eachCell((cell: any, colNumber: number) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
+        const b = { style: 'thin', color: { argb: COLOR_BORDE } };
+        cell.border = { top: b, left: b, bottom: b, right: b };
+        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+        if (colNumber === 5) {
+          const val = cell.value?.toString() ?? '';
+          const esActivo = val.toLowerCase() === 'activo';
+          cell.font = {
+            name: 'Segoe UI', size: 10, bold: true,
+            color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    this.crearDescarga(blob, `Lideres_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    this.mostrarDescarga = false;
+  }
+
+  private crearDescarga(blob: Blob, nombreArchivo: string): void {
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  toggleEstadoLider(lider: Lider): void {
+    const nuevoEstado = lider.estado !== 'Activo';
+    const nombres = (lider as any).nombres || '';
+    const apellidos = (lider as any).apellidos || '';
+    const email = (lider as any).email || (lider as any).correo || null;
+    const telefono = (lider as any).telefono || null;
+    const numeroIdentificacion = (lider as any).numeroIdentificacion || null;
+    const idTipo = (lider as any).idtipo || null;
+
+    const solicitud = {
+      Nombres: nombres,
+      Apellidos: apellidos,
+      Email: email,
+      Telefono: telefono,
+      Idtipo: idTipo,
+      Activo: nuevoEstado,
+      NumeroIdentificacion: numeroIdentificacion,
+      Usuariomodificacion: 'frontend',
+      Ipmodificacion: '127.0.0.1'
+    };
+
+    this.http.put(`${this.apiUrl}/${lider.id}`, solicitud).subscribe({
+      next: () => {
+        this.mensajeConfirmacion = nuevoEstado
+          ? 'El líder ha sido activado exitosamente'
+          : 'El líder ha sido desactivado exitosamente';
+        this.mostrarConfirmacion = true;
+        this.obtenerLideresDelBackend();
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      },
+      error: (err) => console.error('Error al cambiar estado del líder:', err)
+    });
+  }
+
+  abrirEliminar(lider: Lider): void {
+    this.liderAEliminar = lider;
+    this.errorEliminar = null;
+    this.mostrarEliminar = true;
+  }
+
+  confirmarEliminarLider(): void {
+    if (!this.liderAEliminar) return;
+    const id = this.liderAEliminar.id ?? this.liderAEliminar.codigo;
+    this.errorEliminar = null;
+    this.http.delete(`${this.apiUrl}/${id}/fisico`).subscribe({
+      next: () => {
+        this.mostrarEliminar = false;
+        this.liderAEliminar = null;
+        this.errorEliminar = null;
+        this.mensajeConfirmacion = 'El líder ha sido eliminado exitosamente';
+        this.mostrarConfirmacion = true;
+        this.obtenerLideresDelBackend();
+        setTimeout(() => this.mostrarConfirmacion = false, 3000);
+      },
+      error: (err) => {
+        console.error('Error al eliminar líder:', err);
+        this.errorEliminar = err?.error?.detail || err?.error?.message || 'No se pudo eliminar el líder. Intente de nuevo.';
       }
     });
-    doc.save('lideres.pdf');
-    this.mostrarDescarga = false;
-  }
-
-  descargarExcel(): void {
-    const datos = this.lideres.map((l, i) => ({
-      '#': i + 1,
-      'Tipo': l.tipo,
-      'Nombre': l.nombre,
-      'Cliente': l.cliente,
-      'Correo': l.correo,
-      'Teléfono': l.telefono,
-      'Estado': l.estado
-    }));
-    const ws = XLSX.utils.json_to_sheet(datos);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Líderes'); // ◄ Corregido: XLSX con una sola equis
-    XLSX.writeFile(wb, 'lideres.xlsx');             // ◄ Corregido: XLSX con una sola equis
-    this.mostrarDescarga = false;
-  }
-
-  eliminarLider(lider: Lider): void {
-    if (confirm(`¿Eliminar a ${lider.nombre}?`)) {
-      this.http.delete(`${this.apiUrl}/${lider.codigo}`, { headers: this.obtenerHeaders() }).subscribe({
-        next: () => {
-          this.obtenerLideresDelBackend();
-        },
-        error: (err) => console.error('Error al eliminar líder:', err)
-      });
-    }
   }
 }

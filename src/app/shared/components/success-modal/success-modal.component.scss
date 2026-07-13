@@ -1,75 +1,75 @@
-.success-modal {
+// ── Backdrop / Overlay ─────────────────────────────────────────
+.success-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 140;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.success-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.35);
-}
-
-.success-modal__card {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 360px);
-  padding: 34px 32px 30px;
-  border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 18px 45px rgba(17, 24, 39, 0.18);
-  text-align: center;
-}
-
-.success-modal__icon {
-  width: 58px;
-  height: 58px;
-  margin: 0 auto 18px;
-  border-radius: 999px;
-  background: #26bf4d;
-  color: #ffffff;
-  display: inline-flex;
+  background: rgba(0, 0, 0, 0.18);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
 }
 
-.success-modal__card p {
-  margin: 0 0 22px;
-  color: #163572;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.35;
-}
+// ── Card ───────────────────────────────────────────────────────
+.success-modal-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 8px 32px rgba(22, 53, 114, 0.15);
+  min-width: 260px;
+  max-width: 90vw;
+  width: auto;
+  animation: slideUp 0.25s ease;
 
-.success-modal__card button {
-  min-width: 112px;
-  height: 40px;
-  border-radius: 8px;
-  background: #163572 !important;
-  color: #ffffff !important;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: none !important;
-}
-
-@media (max-width: 480px) {
-  .success-modal {
-    padding: 14px;
-  }
-
-  .success-modal__card {
-    padding: 28px 20px 24px;
-    border-radius: 14px;
-  }
-
-  .success-modal__card p {
+  p {
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
+    font-weight: 500;
+    color: #34C759;
+    text-align: center;
+    margin: 0;
+    line-height: 1.4;
   }
+}
+
+// ── Icon ───────────────────────────────────────────────────────
+.success-modal-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────
+@media (max-width: 520px) {
+  .success-modal-card {
+    padding: 32px 36px;
+    min-width: 220px;
+  }
+
+  .success-modal-icon {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+// ── Animaciones ───────────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }

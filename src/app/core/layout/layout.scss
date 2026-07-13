@@ -1,6 +1,8 @@
-// Variables locales de Layout
+// Variables de diseño responsive
+$breakpoint-sm: 640px; // móviles
+$breakpoint-md: 960px; // tablets
 $navbar-height: 54px;
-$sidebar-width: 164px; // Ajustado al valor que tenías en tu Navbar anterior
+$sidebar-width-desktop: 164px;
 
 .layout-container {
     display: flex;
@@ -13,22 +15,39 @@ $sidebar-width: 164px; // Ajustado al valor que tenías en tu Navbar anterior
     display: flex;
     flex: 1;
     margin-top: $navbar-height;
-    overflow: hidden; // Evita scroll doble en el body
+    overflow: hidden; // evita scroll doble
+    @media (max-width: $breakpoint-sm) {
+        flex-direction: column;
+    }
 }
 
 .sidebar-wrapper {
-    width: $sidebar-width;
+    width: $sidebar-width-desktop;
     height: 100%;
-    flex-shrink: 0; // Evita que el sidebar se aplaste
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    @media (max-width: $breakpoint-sm) {
+        position: fixed;
+        top: $navbar-height;
+        left: 0;
+        height: calc(100vh - $navbar-height);
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+}
+
+.sidebar-open .sidebar-wrapper {
+    transform: translateX(0);
 }
 
 .content-area {
     flex: 1;
     padding: 24px;
     background-color: #F5F5F5;
-    overflow-y: auto; // El contenido hace scroll independiente
-
-    /* Esto asegura que el contenido siempre ocupe el resto de la pantalla */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
+    @media (max-width: $breakpoint-sm) {
+        padding: 16px;
+    }
 }

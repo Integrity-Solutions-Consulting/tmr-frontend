@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .proyecto-form__section {
@@ -11,20 +12,42 @@
   h3 {
     margin: 0 0 20px;
     padding-left: 0;
-
     color: #163572;
-
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
   }
 }
 
+.proyecto-form__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0;
+  }
+
+  button {
+    width: 140px;
+    height: 36px;
+    border-radius: 10px;
+    background: #163572 !important;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none !important;
+
+    &:hover {
+      background: #162056 !important;
+    }
+  }
+}
+
 .proyecto-form__subtitle {
   margin: 0 0 14px;
-
   color: #163572;
-
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
@@ -36,87 +59,229 @@
   width: 100%;
 }
 
+.proyecto-form__search-wrapper {
+  width: 100%;
+}
+
+.proyecto-form__search-wrapper--compact {
+  margin-bottom: 12px;
+}
+
+.proyecto-form__search {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 38px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+  }
+}
+
+.proyecto-form__date-field {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 22px;
+}
+
+.proyecto-form__date-control {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  line-height: 42px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+  }
+}
+
+.proyecto-form__date-label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  padding: 0 4px;
+  transform: translateY(-50%);
+  background: #ffffff;
+  color: #737373;
+  font-size: 11px;
+  line-height: 1;
+  pointer-events: none;
+
+  span {
+    color: #ef4444;
+  }
+}
+
+.proyecto-form__date-error {
+  margin-top: 4px;
+  color: #dc2626;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 15px;
+}
+
 :host ::ng-deep .proyecto-form {
   .mat-mdc-form-field {
     width: 100%;
-    --mat-form-field-container-height: 40px;
+    --mat-form-field-container-height: 42px;
     --mat-form-field-container-vertical-padding: 8px;
-
-    font-size: 13px;
+    font-size: 13.5px;
   }
 
   .mat-mdc-text-field-wrapper {
-    height: 40px;
-    min-height: 40px;
+    height: 42px;
+    min-height: 42px;
     padding-bottom: 0;
+    border: 1px solid #d1d5db;
     background: #ffffff;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  // ⬇ FIX OBSERVACIÓN: más alto el contenedor del textarea para dar aire al label flotado
+  .mat-mdc-text-field-wrapper.mdc-text-field--textarea {
+    height: auto !important;
+    min-height: 100px !important;
+    align-items: stretch;
+    overflow: visible !important; // evita que el texto se recorte arriba
   }
 
   .mat-mdc-form-field-flex {
-    height: 40px;
+    height: 42px;
     align-items: center;
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mat-mdc-form-field-flex {
+    height: auto !important;
+    align-items: stretch;
   }
 
   .mdc-text-field--outlined .mat-mdc-form-field-infix,
   .mat-mdc-form-field-infix {
     width: 100%;
-    min-height: 40px;
+    min-height: 42px;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
   }
 
+  // ⬇ FIX OBSERVACIÓN: más padding-top en el infix para separar el texto del label
+  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mat-mdc-form-field-infix {
+    min-height: 84px !important;
+    padding-top: 40px !important;
+    padding-bottom: 12px !important;
+    overflow: visible !important;
+  }
+
+  // ⬇ FIX OBSERVACIÓN: line-height controlado para que el primer renglón no quede pegado arriba
+  .mat-mdc-text-field-wrapper.mdc-text-field--textarea textarea.mat-mdc-input-element {
+    line-height: 1.4 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
   .mat-mdc-input-element,
   .mat-mdc-select-value {
-    color: #111827;
-    font-size: 13px;
+    color: #374151;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
     font-weight: 400;
     line-height: 24px;
   }
 
   .mat-mdc-floating-label {
-    color: #737373;
-    font-size: 13px;
+    color: #9ca3af;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
     font-weight: 400;
   }
 
   .mdc-floating-label--float-above {
     font-size: 11px !important;
-    color: #163572 !important;
+    color: #737373 !important;
+    background: #ffffff !important;
+    padding: 0 4px !important;
+    z-index: 2 !important;
+  }
+
+  // ⬇ FIX OBSERVACIÓN: ajustado para que el label quede sobre el borde, no sobre el texto
+  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mdc-floating-label--float-above {
+    transform: translateY(-37px) scale(0.75) !important;
   }
 
   .mat-mdc-form-field-error {
     margin-top: 4px;
-    font-size: 11px;
-    font-weight: 400;
+    color: #dc2626;
+    font-size: 11.5px;
+    font-weight: 500;
   }
 
   .mat-mdc-form-field-subscript-wrapper {
-    min-height: 18px;
+    min-height: 22px;
   }
 
+  .mat-mdc-icon-button.mat-mdc-button-base.mat-datepicker-toggle,
   .mat-datepicker-toggle,
   .mat-mdc-icon-button.mat-mdc-button-base {
     width: 36px;
     height: 36px;
     color: #737373;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
   }
 
+  .mat-datepicker-toggle {
+    align-self: center;
+  }
+
+  .mat-datepicker-toggle-default-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .mdc-notched-outline,
   .mdc-notched-outline__leading,
   .mdc-notched-outline__notch,
   .mdc-notched-outline__trailing {
-    border-color: #a1a1a1 !important;
+    border: 0 !important;
   }
 
-  .mdc-text-field--focused {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: #163572 !important;
-    }
+  .mat-mdc-text-field-wrapper.mdc-text-field--focused {
+    border-color: #163572;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--invalid {
+    border-color: #dc2626;
   }
 }
+
+// ── Grid info general ────────────────────────────────────────────────────────
 
 .proyecto-form__grid {
   display: grid;
@@ -124,43 +289,125 @@
   gap: 16px;
 }
 
+.proyecto-form__status-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+
+  span {
+    color: #737373;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  strong {
+    color: #163572;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  small {
+    color: #6b7280;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+}
+
+// ── Bloque líder ─────────────────────────────────────────────────────────────
+
+.proyecto-form__leader-block {
+  width: min(100%, 827px);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.proyecto-form__leader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+
+  h4 {
+    margin: 0;
+    color: #163572;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    color: #ef4444 !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+
+    &:hover {
+      background: #fee2e2 !important;
+    }
+  }
+}
+
+// ── Campos del líder ─────────────────────────────────────────────────────────
+
 .proyecto-form__leader {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 168px 168px;
   gap: 16px;
   align-items: start;
 
-  width: min(100%, 827px);
-  min-height: 66px;
+  width: 100%;
+  min-height: 72px;
   margin-bottom: 20px;
-  padding: 13px 16px;
+  padding: 16px;
 
-  background: #f5f5f5;
-  border-radius: 15px;
+  background: #f8fafc;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
   box-sizing: border-box;
 }
+
+// ── Cabecera de recursos ──────────────────────────────────────────────────────
 
 .proyecto-form__resources-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  width: min(100%, 827px);
+  width: 100%;
   margin-bottom: 10px;
 }
 
 .proyecto-form__add {
-  width: 173px;
-  height: 40px;
-
-  border-radius: 6px;
-
+  width: 160px;
+  height: 36px;
+  border-radius: 10px;
   background: #163572 !important;
   color: #ffffff !important;
-
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-
   box-shadow: none !important;
 
   &:hover {
@@ -168,21 +415,22 @@
   }
 }
 
+// ── Lista de recursos ─────────────────────────────────────────────────────────
+
 .proyecto-form__resources {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: min(100%, 827px);
+  width: 100%;
 }
 
 .proyecto-form__resource {
-  width: min(100%, 827px);
+  width: 100%;
   min-height: 127px;
   padding: 16px;
-
-  border-radius: 15px;
-
-  background: #f5f5f5;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
+  background: #f8fafc;
   box-sizing: border-box;
 }
 
@@ -193,6 +441,7 @@
 }
 
 .proyecto-form__resource-top,
+.proyecto-form__resource-middle,
 .proyecto-form__resource-bottom {
   display: grid;
   gap: 12px;
@@ -200,7 +449,11 @@
 }
 
 .proyecto-form__resource-top {
-  grid-template-columns: 394px 320px 36px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+}
+
+.proyecto-form__resource-middle {
+  grid-template-columns: 1fr;
 }
 
 .proyecto-form__resource-bottom {
@@ -208,6 +461,7 @@
 }
 
 .proyecto-form__resource-nombre,
+.proyecto-form__resource-departamento,
 .proyecto-form__resource-rol,
 .proyecto-form__resource-fecha,
 .proyecto-form__resource-costo,
@@ -215,30 +469,22 @@
   width: 100%;
 }
 
-.proyecto-form__resource-nombre {
-  width: 394px;
-}
-
-.proyecto-form__resource-rol {
-  width: 320px;
-}
-
 .proyecto-form__resource-costo,
 .proyecto-form__resource-horas {
   width: 150px;
 }
 
+.proyecto-form__field :is(.mat-mdc-icon-button, .mat-datepicker-toggle) {
+  align-self: center;
+}
+
 .proyecto-form__remove {
   width: 36px !important;
   height: 40px !important;
-
   margin-top: 0;
-
   border-radius: 8px !important;
-
   color: #ef4444 !important;
   background: transparent !important;
-
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -248,24 +494,21 @@
   }
 }
 
+// ── Acciones ──────────────────────────────────────────────────────────────────
+
 .proyecto-form__actions {
   display: flex;
   justify-content: flex-end;
-
   margin-top: 24px;
 
   button {
     width: 173px;
     height: 40px;
-
-    border-radius: 6px;
-
+    border-radius: 10px;
     background: #163572 !important;
     color: #ffffff !important;
-
     font-size: 14px;
     font-weight: 600;
-
     box-shadow: none !important;
 
     &:hover {
@@ -274,9 +517,15 @@
   }
 }
 
+// ── Responsive ────────────────────────────────────────────────────────────────
+
 @media (max-width: 1024px) {
   .proyecto-form__grid {
     grid-template-columns: 1fr;
+  }
+
+  .proyecto-form__leader-block {
+    width: 100%;
   }
 
   .proyecto-form__leader {
@@ -299,6 +548,7 @@
   }
 
   .proyecto-form__resource-nombre,
+  .proyecto-form__resource-departamento,
   .proyecto-form__resource-rol,
   .proyecto-form__resource-costo,
   .proyecto-form__resource-horas {
@@ -316,6 +566,16 @@
     grid-template-columns: 1fr;
   }
 
+  .proyecto-form__section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    button {
+      width: 100%;
+    }
+  }
+
   .proyecto-form__resources-header {
     align-items: flex-start;
     flex-direction: column;
@@ -326,9 +586,8 @@
     grid-template-columns: minmax(0, 1fr) 36px;
   }
 
-  .proyecto-form__resource-rol {
+  .proyecto-form__resource-departamento {
     grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   .proyecto-form__remove {
@@ -345,10 +604,8 @@
     min-height: auto;
   }
 
-  .proyecto-form__actions {
-    button {
-      width: 100%;
-    }
+  .proyecto-form__actions button {
+    width: 100%;
   }
 
   .proyecto-form__add {
@@ -367,6 +624,10 @@
 
   .proyecto-form__leader {
     padding: 12px;
+  }
+
+  .proyecto-form__leader-block {
+    padding: 14px;
   }
 
   .proyecto-form__resource-bottom {

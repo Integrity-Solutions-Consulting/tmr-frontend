@@ -4,92 +4,138 @@
   <div class="page-header">
     <h1 class="page-title">Líderes</h1>
   </div>
-
+  <!-- Cards -->
   <!-- Cards -->
   <div class="cards-row">
+    <!-- Internos -->
     <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon">
-            <img src="icons/user.svg" class="card-svg" />
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-icon card-icon--internal">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#163572"
+              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="3.5" />
+              <path d="M5 18a6 6 0 0 1 14 0" />
+              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
+              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
+            </svg>
+            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="#163572" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="17" y1="7" x2="7" y2="17" />
+              <polyline points="17 17 7 17 7 7" />
+            </svg>
           </div>
           <span class="card-number">{{ totalInternos }}</span>
         </div>
         <span class="card-label">Internos</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Interno')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
+    <!-- Externos -->
     <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
+      <div class="card-body">
+        <div class="card-top">
           <div class="card-icon card-icon--external">
-            <img src="icons/user.svg" class="card-svg" />
-            <img src="icons/arrow-up-right.svg" class="card-svg-arrow" />
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#A855F7"
+              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="3.5" />
+              <path d="M5 18a6 6 0 0 1 14 0" />
+              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
+              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
+            </svg>
+            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="#A855F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7" />
+              <polyline points="7 7 17 7 17 17" />
+            </svg>
           </div>
           <span class="card-number">{{ totalExternos }}</span>
         </div>
         <span class="card-label">Externos</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Externo')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
 
+    <!-- Activos -->
+    <!-- Activos -->
     <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-icon card-icon--active">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#34c759"
+              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="3.5" />
+              <path d="M5 18a6 6 0 0 1 14 0" />
+              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
+              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
+            </svg>
+            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="7 12.5 10.5 16 17 8" />
+            </svg>
+          </div>
+          <span class="card-number">{{ totalActivos }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="card-body">
+        <div class="card-top">
           <div class="card-icon card-icon--inactive">
-            <img src="icons/user-close-svgrepo-com.svg" class="card-svg" />
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6B7280"
+              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="3.5" />
+              <path d="M5 18a6 6 0 0 1 14 0" />
+              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
+              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
+            </svg>
+            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="#6B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="7" x2="17" y2="17" />
+              <line x1="17" y1="7" x2="7" y2="17" />
+            </svg>
           </div>
           <span class="card-number">{{ totalInactivos }}</span>
         </div>
         <span class="card-label">Inactivos</span>
       </div>
-      <button class="card-filter-btn" (click)="filtrarPor('Inactivo')">
-        <img src="icons/filter-svgrepo-com.svg" class="filter-svg" />
-      </button>
     </div>
   </div>
-
   <!-- Barra de búsqueda y botones -->
   <div class="search-bar">
     <div class="search-input-wrapper">
       <span class="material-icons search-icon">search</span>
-      <input type="text" class="search-input" placeholder="Buscar por nombres, código..." [(ngModel)]="busqueda"
+      <input type="text" class="search-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
         (input)="aplicarFiltros()" />
     </div>
-    <div class="estado-filter-wrapper">
-      <img src="icons/circle-plus-svgrepo-com.svg" class="estado-icon-img"
-        (click)="$event.stopPropagation(); toggleEstadoDropdown()" />
+    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
+      <img src="assets/iconos/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
       <span class="estado-texto">Estado</span>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-search">
-          <span class="material-icons dropdown-search-icon">search</span>
-          <input type="text" placeholder="Estado" class="dropdown-search-input" />
-        </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('Activo')">
+        <div class="dropdown-option"
+          (click)="seleccionarEstado('Activo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
           </div>
           <span>Activo</span>
           <span class="dropdown-count">{{ totalActivos }}</span>
         </div>
-        <div class="dropdown-option" (click)="seleccionarEstado('Inactivo')">
+        <div class="dropdown-option"
+          (click)="seleccionarEstado('Inactivo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Inactivo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Inactivo'">check</span>
           </div>
           <span>Inactivo</span>
           <span class="dropdown-count">{{ totalInactivos }}</span>
         </div>
-        <div class="dropdown-limpiar" (click)="seleccionarEstado('')">Limpiar filtro</div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>
     </div>
-    <div class="search-spacer"></div>
 
-    <div class="descarga-wrapper">
+    <div class="search-spacer"></div>
+    <div class="descarga-wrapper" (click)="$event.stopPropagation()">
       <button class="btn btn-outline" (click)="abrirDescarga()">
         Descargar
         <span class="material-symbols-outlined">file_download</span>
@@ -109,6 +155,16 @@
   <div class="table-scroll-container">
     <div class="table-wrapper" #tableWrapper>
       <table class="lideres-table">
+        <colgroup>
+          <col class="col-codigo">
+          <col class="col-tipo">
+          <col class="col-nombre">
+          <col class="col-cliente">
+          <col class="col-correo">
+          <col class="col-telefono">
+          <col class="col-estado">
+          <col class="col-acciones">
+        </colgroup>
         <thead>
           <tr>
             <th>Código</th>
@@ -118,37 +174,53 @@
             <th>Correo electrónico</th>
             <th>Teléfono</th>
             <th>Estado</th>
-            <th></th>
+            <th class="th-actions">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let lider of lideresPaginados; let i = index">
-            <td>{{ lider.codigo }}</td>
-            <td>{{ lider.tipo }}</td>
-            <td>{{ lider.nombre }}</td>
-            <td>{{ lider.cliente }}</td>
-            <td>{{ lider.correo }}</td>
-            <td>{{ lider.telefono }}</td>
-            <td>
-              <span class="badge" [class.badge--activo]="lider.estado === 'Activo'"
-                [class.badge--inactivo]="lider.estado !== 'Activo'">
-                {{ lider.estado }}
-              </span>
+            <td [title]="lider.codigo">{{ lider.codigo }}</td>
+            <td [title]="lider.tipo">{{ lider.tipo }}</td>
+            <td class="td-truncate" [title]="lider.nombre">
+              <span class="cell-ellipsis">{{ lider.nombre }}</span>
+            </td>
+            <td class="td-cliente">
+              <div *ngIf="obtenerClientesList(lider.cliente).length > 0" class="client-list-wrap">
+                <div class="client-list">
+                  <span class="client-chip" *ngFor="let cli of visibleClientes(lider)" [title]="cli">
+                    {{ cli }}
+                  </span>
+                  <button *ngIf="clientesOcultosCount(lider) > 0" type="button" class="client-chip client-chip--more"
+                    [class.client-chip--more-active]="estaLiderExpandido(lider)"
+                    (click)="toggleClientesExpandidos($event, lider)" [attr.aria-expanded]="estaLiderExpandido(lider)"
+                    [attr.aria-label]="'Ver ' + clientesOcultosCount(lider) + ' clientes más de ' + lider.nombre">
+                    {{ estaLiderExpandido(lider) ? 'Cerrar' : '+' + clientesOcultosCount(lider) + ' más' }}
+                  </button>
+                </div>
+
+                <div *ngIf="estaLiderExpandido(lider)" class="client-expand-list" (click)="$event.stopPropagation()">
+                  <span class="client-chip client-chip--expand" *ngFor="let cli of clientesOcultosList(lider)"
+                    [title]="cli">
+                    {{ cli }}
+                  </span>
+                </div>
+              </div>
+
+              <span *ngIf="obtenerClientesList(lider.cliente).length === 0">-</span>
+            </td>
+            <td class="td-truncate" [title]="lider.correo">
+              <span class="cell-ellipsis">{{ lider.correo }}</span>
+            </td>
+            <td class="td-truncate" [title]="lider.telefono">
+              <span class="cell-ellipsis">{{ lider.telefono }}</span>
             </td>
             <td>
-              <button class="action-btn" [matMenuTriggerFor]="menu" (click)="cerrarDescarga()">
-                <span class="material-icons">more_vert</span>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="verLider(lider, rangoInicio + i)">
-                  <span class="material-symbols-outlined">visibility</span>
-                  Ver más
-                </button>
-                <button mat-menu-item (click)="editarLider(lider)">
-                  <span class="material-symbols-outlined">edit_square</span>
-                  Editar
-                </button>
-              </mat-menu>
+              <app-badge-estado [estado]="lider.estado"></app-badge-estado>
+            </td>
+            <td class="td-actions" (click)="$event.stopPropagation()">
+              <app-action-menu [itemId]="(lider.id ?? lider.codigo).toString()" [menuAbierto]="menuAbierto"
+                [acciones]="accionesLider(lider)" (toggleMenu)="toggleMenu($event)"
+                (accionSeleccionada)="onAccionSeleccionada($event, lider, rangoInicio + i)"></app-action-menu>
             </td>
           </tr>
           <tr *ngIf="lideresFiltrados.length === 0">
@@ -184,17 +256,17 @@
       </div>
     </div>
   </div>
-
 </div>
-
-<app-modal-lider *ngIf="mostrarFormulario" [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion"
-  (cerrarModal)="cerrarFormulario()" (guardar)="guardarLider()">
-</app-modal-lider>
+<app-modal-lider [mostrarFormulario]="mostrarFormulario" [modoEdicion]="modoEdicion" [lider]="liderParaEditar"
+  [guardando]="guardandoLider" [error]="errorFormulario" (cerrarModal)="cerrarFormulario()"
+  (guardar)="guardarLider($event)"> </app-modal-lider>
 
 <app-modal-detalle-lider *ngIf="mostrarDetalle" [lider]="liderSeleccionado" (cerrarModal)="mostrarDetalle = false">
 </app-modal-detalle-lider>
-<app-modal-confirmacion 
-  [mostrar]="mostrarConfirmacion" 
-  [mensaje]="mensajeConfirmacion"
-  (cerrarModal)="mostrarConfirmacion = false">
-</app-modal-confirmacion>
+
+<app-success-modal [visible]="mostrarConfirmacion" [mensaje]="mensajeConfirmacion"
+  (cerrar)="mostrarConfirmacion = false">
+</app-success-modal>
+<app-modal-eliminar-lider [mostrar]="mostrarEliminar" [nombreLider]="liderAEliminar?.nombre || ''"
+  [error]="errorEliminar" (cerrarModal)="mostrarEliminar = false" (confirmarEliminar)="confirmarEliminarLider()">
+</app-modal-eliminar-lider>

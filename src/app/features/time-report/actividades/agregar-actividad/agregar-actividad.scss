@@ -1,167 +1,570 @@
 @use "sass:color";
 
-// Variables de color del proyecto
+// Variables de diseño estandarizadas
 $primary-blue: #163572;
-$text-dark: #1A1A2E;
-$gray-light: #F3F4F6;
-$border-color: #E5E7EB;
+$focus-blue: #0c3b73;
+$text-dark: #1e293b;
+$text-muted: #64748b;
+$border-color: #d6e0ec;
+$error-color: #dc2626;
 
-.modal-wrap {
-    display: flex;
-    flex-direction: column;
-    max-height: 90vh;
-    font-family: 'Inter', sans-serif;
+/* ── Contenedor principal ──────────────────────────────────────── */
+.actividad-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(95vw, 560px);
+  max-height: 90vh;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background-color: #ffffff;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.modal-title {
-    padding: 24px 24px 0;
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: $text-dark;
-    flex-shrink: 0;
+/* ── Header ───────────────────────────────────────────────────── */
+.actividad-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #e8edf5;
+  flex-shrink: 0;
 }
 
-.modal-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 24px;
+.actividad-modal__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-    /* Custom scrollbar para mejor UX */
-    &::-webkit-scrollbar {
-        width: 6px;
+.actividad-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  width: fit-content;
+}
+
+.actividad-modal__badge--new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.actividad-modal__badge--edit {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.actividad-modal__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: $primary-blue;
+  line-height: 1.2;
+}
+
+.actividad-modal__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.actividad-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid #0f172a;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  mat-icon, img {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: $focus-blue;
+    color: $focus-blue;
+  }
+}
+
+/* ── Body ─────────────────────────────────────────────────────── */
+.actividad-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 28px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.actividad-modal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.actividad-modal__body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #bdc9d9;
+}
+
+/* ── Field ────────────────────────────────────────────────────── */
+.actividad-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actividad-modal__field--width-80 {
+  width: 100% !important;
+}
+
+.actividad-modal__label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actividad-modal__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+
+  .req {
+    color: $error-color;
+    margin-left: 2px;
+  }
+}
+
+.actividad-modal__info-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $focus-blue;
+  }
+}
+
+/* ── Input wrapper ────────────────────────────────────────────── */
+.actividad-modal__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid $border-color;
+  border-radius: 10px;
+  padding: 0 14px;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+
+  &:focus-within {
+    border-color: $focus-blue;
+    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+  }
+
+  &--error {
+    border-color: $error-color;
+
+    &:focus-within {
+      border-color: $error-color;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
     }
+  }
 
-    &::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 10px;
+  &--textarea {
+    align-items: flex-start;
+    padding: 10px 14px;
+  }
+
+  &--date {
+    padding-right: 6px;
+  }
+}
+
+.actividad-modal__input-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.actividad-modal__input {
+  flex: 1;
+  min-height: 44px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #1e293b;
+  font-family: inherit;
+  width: 100%;
+
+  &::placeholder {
+    color: #b0bec5;
+  }
+
+  &[readonly] {
+    cursor: default;
+    color: #475569;
+    background: transparent;
+  }
+}
+
+.actividad-modal__textarea {
+  min-height: 62px;
+  resize: vertical;
+  padding: 4px 0;
+  line-height: 1.5;
+}
+
+.actividad-modal__input-hint {
+  font-size: 11px;
+  color: $text-muted;
+  align-self: flex-end;
+  margin-bottom: 8px;
+  margin-left: auto;
+  user-select: none;
+}
+
+.actividad-modal__error {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: $error-color;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Select wrap ──────────────────────────────────────────────── */
+.actividad-modal__select-wrap {
+  position: relative;
+
+  &::after {
+    content: 'expand_more';
+    font-family: 'Material Icons';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 18px;
+    pointer-events: none;
+  }
+
+  &--error {
+    .actividad-modal__select {
+      border-color: $error-color;
+      
+      &:focus {
+        border-color: $error-color;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+      }
     }
+  }
 }
 
-.modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.actividad-modal__select {
+  width: 100%;
+  min-height: 46px;
+  border: 1.5px solid $border-color;
+  border-radius: 10px;
+  padding: 0 40px 0 14px;
+  color: #1e293b;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: $focus-blue;
+    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+  }
 }
 
-.field-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-
-    .full-field {
-        flex: 1;
-    }
+/* ── Layout auxiliaries ────────────────────────────────────────── */
+.actividad-modal__two-col {
+  display: flex;
+  gap: 14px;
 }
 
-.two-col {
-    display: flex;
-    gap: 12px;
+.fecha-field {
+  flex: 1.2;
+}
+
+.horas-field {
+  flex: 0.9;
 }
 
 .flex-1 {
-    flex: 1;
+  flex: 1;
 }
 
-.required {
-    color: #ef4444;
-}
+/* ── Custom Checkboxes ─────────────────────────────────────────── */
+.actividad-modal__checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  gap: 10px;
 
-/* Botón de ayuda circular */
-.help-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: $primary-blue;
-    color: white;
-    border: none;
+  input {
+    position: absolute;
+    opacity: 0;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s ease-in-out;
+    height: 0;
+    width: 0;
+  }
+
+  &:hover input ~ .actividad-modal__checkmark {
+    border-color: #b9d2f2;
+  }
+}
+
+.actividad-modal__checkmark {
+  height: 18px;
+  width: 18px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 5px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+}
+
+.actividad-modal__checkbox-container input:checked ~ .actividad-modal__checkmark {
+  background-color: $focus-blue;
+  border-color: $focus-blue;
+
+  &::after {
+    display: block;
+  }
+}
+
+.actividad-modal__checkbox-text {
+  line-height: 1;
+}
+
+.actividad-modal__recurrente-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.actividad-modal__checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* ── Panel de Recurrencia ──────────────────────────────────────── */
+.actividad-modal__recurrence-panel {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.actividad-modal__preview-banner {
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #bbf7d0;
+  line-height: 1.4;
+}
+
+.actividad-modal__preview-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.actividad-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 28px 22px;
+  border-top: 1px solid #e8edf5;
+  flex-shrink: 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.actividad-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+
+  mat-icon, img {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+  }
+
+  &--cancel {
+    border: 1.5px solid $border-color;
+    background: #ffffff;
+    color: #475569;
 
     &:hover {
-        background: color.adjust($primary-blue, $lightness: 10%);
+      background: #f8fafc;
+      border-color: #b0bec5;
     }
+  }
 
-    &-top {
-        align-self: flex-start;
-        margin-top: 16px;
+  &--save {
+    background: $focus-blue;
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background: color.adjust($focus-blue, $lightness: -4%);
+      box-shadow: 0 4px 14px rgba(12, 59, 115, 0.22);
     }
-}
-
-/* Panel de Recurrencia */
-.recurrente-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 8px 0;
-}
-
-.recurrence-panel {
-    background: #F9FAFB;
-    border: 1px solid $border-color;
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 0;
-}
-
-.preview-banner {
-    background: #DCFCE7;
-    color: #15803D;
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 4px;
-    border: 1px solid #BBF7D0;
-}
-
-/* Footer del Modal */
-.modal-footer {
-    padding: 16px 24px 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    border-top: 1px solid $gray-light;
-    flex-shrink: 0;
-}
-
-.btn-cancelar {
-    color: #6B7280;
-    font-weight: 500;
-}
-
-.btn-agregar {
-    background-color: $primary-blue;
-    color: white;
-    border-radius: 24px;
-    padding: 0 32px;
-    height: 40px;
-    font-weight: 600;
 
     &:disabled {
-        background: #9CA3AF;
-        cursor: not-allowed;
+      background: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
+  }
+
+  &--delete {
+    background: #fef2f2;
+    color: $error-color;
+    border: 1.5px solid #fee2e2;
+
+    &:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+  }
 }
 
-/* Overrides de Angular Material */
-:host ::v-deep .mat-mdc-form-field-subscript-wrapper {
-    font-size: 11px;
+/* ── Material Datepicker Adjustments inside Wrapper ───────────────── */
+.actividad-modal__input-wrap {
+  ::v-deep {
+    .mat-datepicker-toggle {
+      color: #94a3b8;
+      
+      .mat-mdc-icon-button {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .mat-mdc-button-touch-target {
+          display: none;
+        }
+
+        &:hover {
+          color: #334155;
+          background: #f1f5f9;
+        }
+      }
+    }
+  }
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .actividad-modal__header,
+  .actividad-modal__body,
+  .actividad-modal__footer {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  .actividad-modal__field--width-80 {
+    width: 100% !important;
+  }
+
+  .actividad-modal__two-col {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .actividad-modal__footer {
+    flex-direction: column-reverse;
+  }
+
+  .actividad-modal__btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .spacer {
+    display: none;
+  }
 }

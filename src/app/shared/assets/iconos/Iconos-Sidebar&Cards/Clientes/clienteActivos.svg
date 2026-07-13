@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Edificio -->
+  <rect
+    x="3.8"
+    y="5"
+    width="13"
+    height="16"
+    rx="1.6"
+    stroke="#34C759"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Puerta -->
+  <path
+    d="M8.6 21v-4h4v4"
+    stroke="#34C759"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Ventanas -->
+  <path
+    d="M7.1 8.6h.01M10.3 8.6h.01M13.5 8.6h.01M7.1 12h.01M10.3 12h.01M13.5 12h.01"
+    stroke="#34C759"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Fondo del visto -->
+  <rect
+    x="14.8"
+    y="1.8"
+    width="8"
+    height="8"
+    rx="1.5"
+    fill="#E6FDEE"
+  />
+
+  <!-- Visto -->
+  <path
+    d="M16.4 5.8l1.6 1.6 3.3-3.6"
+    stroke="#34C759"
+    stroke-width="1.9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

@@ -2,9 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-// Asegúrate de que estas rutas apunten a las carpetas que creaste
-import { Navbar } from '../navbar/navbar';
-import { Sidebar } from '../sidebar/sidebar';
+import { Navbar } from './navbar/navbar';
+import { Sidebar } from './sidebar/sidebar';
 
 
 @Component({

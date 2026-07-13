@@ -6,6 +6,7 @@ import {
   ColaboradoresPaginados,
   ColaboradorListaApi,
   FiltrosColaborador,
+  RegistrarSalidaRequest,
 } from '../models/colaborador.model';
 import { environment } from '../../../../environments/environment';
 
@@ -52,6 +53,18 @@ export class ColaboradoresService {
     };
   }
 
+  getMetricasGenerales(): Observable<void> {
+    return this.http.get<ColaboradorListaApi[]>(
+      this.apiUrl,
+      this.httpOptions
+    ).pipe(
+      map(respuesta => {
+        const todos = respuesta.map(api => this.mapApiAColaborador(api));
+        this._colaboradores.set(this.ordenarActivosPrimero(todos));
+      })
+    );
+  }
+
   // =========================================================================
   // LISTAR — llama al backend real
   // =========================================================================
@@ -61,7 +74,6 @@ export class ColaboradoresService {
     porPagina: number
   ): Observable<ColaboradoresPaginados> {
 
-    // Armamos los query params según los filtros.
     const params: string[] = [];
 
     if (filtros.busqueda?.trim()) {
@@ -82,21 +94,17 @@ export class ColaboradoresService {
 
     const queryString = params.length ? `?${params.join('&')}` : '';
 
-    // Llamada GET al backend con cookies.
     return this.http.get<ColaboradorListaApi[]>(
       `${this.apiUrl}${queryString}`,
       this.httpOptions
     ).pipe(
       map(respuesta => {
-        // Convertimos cada item al modelo que usa el frontend.
-        const todos = respuesta.map(api => this.mapApiAColaborador(api));
+        const todos = this.ordenarActivosPrimero(
+          respuesta.map(api => this.mapApiAColaborador(api))
+        );
 
-        // Guardamos para las métricas.
-        this._colaboradores.set(todos);
-
-        // Paginamos en el frontend.
         const total = todos.length;
-        const totalPaginas = Math.ceil(total / porPagina);
+        const totalPaginas = Math.ceil(total / porPagina) || 1;
         const inicio = (pagina - 1) * porPagina;
         const paginaData = todos.slice(inicio, inicio + porPagina);
 
@@ -112,6 +120,13 @@ export class ColaboradoresService {
   }
 
   // ── Convierte el item del backend al modelo del frontend ──
+  private ordenarActivosPrimero(colaboradores: Colaborador[]): Colaborador[] {
+    return [...colaboradores].sort((a, b) => {
+      if (a.estado === b.estado) return 0;
+      return a.estado === 'Activo' ? -1 : 1;
+    });
+  }
+
   private mapApiAColaborador(api: ColaboradorListaApi): Colaborador {
     return {
       id: api.id.toString(),
@@ -149,33 +164,138 @@ export class ColaboradoresService {
 
   // ── Convierte el detalle del backend al modelo del frontend ──
   private mapDetalleAColaborador(api: any): Colaborador {
+    const fechaNacimiento = this.normalizarFechaInput(
+      this.obtenerValor(api, 'fechaNacimiento', 'FechaNacimiento', 'fechanacimiento')
+    );
+
+    const fechaContratacion = this.normalizarFechaInput(
+      this.obtenerValor(
+        api,
+        'fechaIngreso',
+        'FechaIngreso',
+        'fechaingreso',
+        'fechaContratacion',
+        'FechaContratacion',
+        'fechacontratacion'
+      )
+    );
+
     return {
-      id: api.id?.toString() ?? '',
-      codigoEmpleado: api.codigoEmpleado ?? '',
-      tipoContrato: api.tipoContrato ?? '',
-      identificacion: api.numeroIdentificacion ?? '',
-      tipoIdentificacion: api.asociacion as any,
-      nombreCompleto: `${api.nombres ?? ''} ${api.apellidos ?? ''}`.trim(),
-      departamento: api.departamento ?? '',
-      fechaContratacion: api.fechaIngreso ?? '',
-      cargo: api.cargo ?? '',
-      aniosExperiencia: api.aniosExperiencia ?? 0,
-      modalidad: api.modalidad as any,
-      categoria: api.categoria as any,
-      correoElectronico: api.email ?? '',
-      fechaNacimiento: api.fechaNacimiento ?? '',
-      telefono: api.telefono ?? '',
-      genero: api.genero as any,
-      direccion: api.direccion ?? '',
-      estado: api.activo ? 'Activo' : 'Inactivo',
-      proyectosAsignados: (api.proyectos ?? []).map((p: any) => ({
-        id: p.id?.toString() ?? '',
-        nombre: p.nombre ?? '',
-        cliente: p.cliente ?? '',
-        estado: p.estado as any,
+      id: api.id?.toString() ?? api.Id?.toString() ?? '',
+      codigoEmpleado: api.codigoEmpleado ?? api.CodigoEmpleado ?? '',
+
+      // ── IDs necesarios para editar ─────────────────────
+      idEmpresaCatalogo: api.idEmpresaCatalogo ?? api.IdEmpresaCatalogo ?? null,
+      tipoPersona: api.tipoPersona ?? api.TipoPersona ?? 'NATURAL',
+      idTipoIdentificacion: api.idTipoIdentificacion ?? api.IdTipoIdentificacion ?? null,
+      idGenero: api.idGenero ?? api.IdGenero ?? null,
+      idNacionalidad: api.idNacionalidad ?? api.IdNacionalidad ?? null,
+      idTipoContrato: api.idTipoContrato ?? api.IdTipoContrato ?? null,
+      idModoTrabajo: api.idModoTrabajo ?? api.IdModoTrabajo ?? null,
+      idCategoriaEmpleado: api.idCategoriaEmpleado ?? api.IdCategoriaEmpleado ?? null,
+      idDepartamento: api.idDepartamento ?? api.IdDepartamento ?? null,
+      idCargo: api.idCargo ?? api.IdCargo ?? null,
+
+      // ── Contrato / empresa ─────────────────────────────
+      tipoContrato: api.tipoContrato ?? api.TipoContrato ?? '',
+      tipoIdentificacion: (api.asociacion ?? api.Asociacion ?? '') as any,
+      asociacion: api.asociacion ?? api.Asociacion ?? null,
+
+      // ── Datos personales ───────────────────────────────
+      identificacion: api.numeroIdentificacion ?? api.NumeroIdentificacion ?? '',
+      numeroIdentificacion: api.numeroIdentificacion ?? api.NumeroIdentificacion ?? '',
+      nombres: api.nombres ?? api.Nombres ?? '',
+      apellidos: api.apellidos ?? api.Apellidos ?? '',
+      nombreCompleto: `${api.nombres ?? api.Nombres ?? ''} ${api.apellidos ?? api.Apellidos ?? ''}`.trim(),
+      fechaNacimiento,
+      genero: (api.genero ?? api.Genero ?? '') as any,
+      nacionalidad: api.nacionalidad ?? api.Nacionalidad ?? '',
+
+      // ── Datos laborales ────────────────────────────────
+      departamento: api.departamento ?? api.Departamento ?? '',
+      fechaContratacion,
+      cargo: api.cargo ?? api.Cargo ?? '',
+      aniosExperiencia: api.aniosExperiencia ?? api.AniosExperiencia ?? 0,
+      modalidad: (api.modalidad ?? api.Modalidad ?? '') as any,
+      categoria: (api.categoria ?? api.Categoria ?? '') as any,
+
+      // ── Contacto ───────────────────────────────────────
+      correoElectronico: api.email ?? api.Email ?? '',
+      telefono: api.telefono ?? api.Telefono ?? '',
+      direccion: api.direccion ?? api.Direccion ?? '',
+
+      // ── Estado / proyectos ─────────────────────────────
+      estado: (api.activo ?? api.Activo) ? 'Activo' : 'Inactivo',
+      activo: api.activo ?? api.Activo ?? false,
+      proyectosAsignados: (api.proyectos ?? api.Proyectos ?? []).map((p: any) => ({
+        id: p.id?.toString() ?? p.Id?.toString() ?? '',
+        nombre: p.nombre ?? p.Nombre ?? '',
+        cliente: p.cliente ?? p.Cliente ?? '',
+        estado: (p.estado ?? p.Estado ?? '') as any,
       })),
-      numProyectos: (api.proyectos ?? []).length,
+      numProyectos: (api.proyectos ?? api.Proyectos ?? []).length,
+
+      // ================================================================
+      // NUEVOS CAMPOS PARA SALIDA DE COLABORADORES
+      // ================================================================
+      fechaSalida: api.fechaSalida ?? null,
+      tipoSalida: api.tipoSalida ?? null,
+      causaSalida: api.causaSalida ?? null,
+      comentarioSalida: api.comentarioSalida ?? null,
+      reemplazoNombre: api.reemplazoNombre ?? null,
+      tieneDatosSalida: !!(api.fechaSalida || api.tipoSalida || api.causaSalida),
+
+      // ================================================================
+      // NUEVO: A QUIÉN REEMPLAZA
+      // ================================================================
+      reemplazaANombre: api.reemplazaANombre ?? null,
+
     };
+  }
+
+  // =========================================================================
+  // HELPERS
+  // =========================================================================
+  private obtenerValor(obj: any, ...keys: string[]): any {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+        return obj[key];
+      }
+    }
+
+    return '';
+  }
+
+  private normalizarFechaInput(fecha?: string | Date | null): string {
+    if (!fecha) return '';
+
+    if (fecha instanceof Date && !Number.isNaN(fecha.getTime())) {
+      const y = fecha.getFullYear();
+      const m = String(fecha.getMonth() + 1).padStart(2, '0');
+      const d = String(fecha.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    const valor = String(fecha).trim();
+
+    // Si viene como 2026-06-14 o 2026-06-14T00:00:00
+    if (/^\d{4}-\d{2}-\d{2}/.test(valor)) {
+      return valor.substring(0, 10);
+    }
+
+    // Si viene como 14/06/2026
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) {
+      const [d, m, y] = valor.split('/');
+      return `${y}-${m}-${d}`;
+    }
+
+    // Si viene como 14-06-2026
+    if (/^\d{2}-\d{2}-\d{4}$/.test(valor)) {
+      const [d, m, y] = valor.split('-');
+      return `${y}-${m}-${d}`;
+    }
+
+    return '';
   }
 
   // =========================================================================
@@ -206,6 +326,23 @@ export class ColaboradoresService {
   eliminarColaborador(id: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
+      this.httpOptions
+    );
+  }
+
+  // ================================================================
+  // REGISTRAR SALIDA
+  // ================================================================
+  /**
+   * Registra la salida de un colaborador (desactivación con datos de salida)
+   * @param id ID del colaborador que se va
+   * @param request Datos de la salida (fecha, tipo, causa, comentario, reemplazo)
+   * @returns Observable<void>
+   */
+  registrarSalida(id: string, request: RegistrarSalidaRequest): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/${id}/salida`,
+      request,
       this.httpOptions
     );
   }

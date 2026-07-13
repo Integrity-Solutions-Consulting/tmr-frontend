@@ -5,194 +5,108 @@
     <img src="assets/imagenes/logo-isc.png" alt="Integrity Solutions" class="sidebar__logo-img">
   </div>
 
-    <!-- ══ Dashboard ══ -->
-    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link">
-      <!-- Pie chart icon -->
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2v10l8.66 5"/>
-        <path d="M12 12l-8.66 5L12 12"/>
-      </svg>
-      <span>Dashboard</span>
-    </a>
+  <!-- ══ Dashboard ══ -->
+  <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Dashboard')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Dashboard/dashboard.svg')"></span>
+    <span>Dashboard</span>
+  </a>
 
-    <!-- ══ Proyectos ══ -->
-    <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link">
-      <!-- Building / project icon -->
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <path d="M3 9h18M9 21V9"/>
-      </svg>
-      <span>Proyectos</span>
-    </a>
+  <!-- ══ Proyectos ══ -->
+  <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Proyectos')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg')"></span>
+    <span>Proyectos</span>
+  </a>
 
-    <!-- ══ Time Report ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="trOpen">
-      <a class="sidebar__link sidebar__link--parent" (click)="trOpen = !trOpen">
-        <!-- Clock icon -->
-        <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <polyline points="12 7 12 12 15.5 14.5"/>
-        </svg>
-        <span>Time Report</span>
-        <svg class="sidebar__chevron" [class.sidebar__chevron--up]="trOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+  <!-- ══ Time Report ══ -->
+  <div class="sidebar__group" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
+    <a class="sidebar__link sidebar__link--parent" (click)="trOpen = !trOpen">
+      <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
+      <span>Time Report</span>
+      <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
+    </a>
+    <div class="sidebar__submenu" [class.sidebar__submenu--visible]="trOpen">
+      <a routerLink="/time-report/actividades" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Actividades')">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/actividades.svg')"></span>
+        <span>Actividades</span>
       </a>
-      <div class="sidebar__submenu" [class.sidebar__submenu--visible]="trOpen">
-        <!-- Actividades: persona frente a computadora -->
-        <a routerLink="/time-report/actividades" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="13" width="20" height="8" rx="2"/>
-            <path d="M12 13V7"/>
-            <circle cx="12" cy="5" r="2"/>
-            <path d="M8 13v-2a4 4 0 0 1 8 0v2"/>
-          </svg>
-          <span>Actividades</span>
-        </a>
-        <!-- Seguimiento: calendario con señal/pin -->
-        <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="17" rx="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-            <circle cx="16" cy="16" r="2.5" fill="currentColor" stroke="none"/>
-            <path d="M16 11v2.5"/>
-          </svg>
-          <span>Seguimiento</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- ══ Carga Actividades ══ -->
-    <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link">
-      <!-- Upload/Excel icon -->
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="12" y1="18" x2="12" y2="12"/>
-        <polyline points="9 15 12 12 15 15"/>
-      </svg>
-      <span>Carga Actividades</span>
-    </a>
-
-    <!-- ══ Reportes ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="repOpen">
-      <a class="sidebar__link sidebar__link--parent" (click)="repOpen = !repOpen">
-        <!-- Bar chart icon -->
-        <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10"/>
-          <line x1="12" y1="20" x2="12" y2="4"/>
-          <line x1="6"  y1="20" x2="6"  y2="14"/>
-          <line x1="2"  y1="20" x2="22" y2="20"/>
-        </svg>
-        <span>Reportes</span>
-        <svg class="sidebar__chevron" [class.sidebar__chevron--up]="repOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+      <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Seguimiento')">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/seguimiento.svg')"></span>
+        <span>Seguimiento</span>
       </a>
-      <div class="sidebar__submenu" [class.sidebar__submenu--visible]="repOpen">
-        <!-- Por Horas: reloj pequeño -->
-        <a routerLink="/reportes/horas" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <polyline points="12 7 12 12 15 14"/>
-          </svg>
-          <span>Por Horas</span>
-        </a>
-        <!-- Por Fechas: calendario pequeño -->
-        <a routerLink="/reportes/fechas" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="17" rx="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8"  y1="2" x2="8"  y2="6"/>
-            <line x1="3"  y1="10" x2="21" y2="10"/>
-            <line x1="8"  y1="14" x2="16" y2="14"/>
-          </svg>
-          <span>Por Fechas</span>
-        </a>
-      </div>
     </div>
+  </div>
 
-    <!-- ══ Líderes: persona con corbata ══ -->
-    <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link">
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="5" r="3.5"/>
-          <!-- Cuerpo -->
-          <path d="M5 18a6 6 0 0 1 14 0"/>
-          <!-- Nudo de corbata -->
-          <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none"/>
-          <!-- Cuerpo de la corbata -->
-          <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none"/>
-      </svg>
-      <span>Líderes</span>
+  <!-- ══ Carga Actividades ══ -->
+  <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Actividades')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/CargaDeActividades/carga-actividades.svg')"></span>
+    <span>Carga Actividades</span>
+  </a>
+
+  <!-- ══ Reportes ══ -->
+  <div class="sidebar__group" [class.sidebar__group--open]="repOpen" *ngIf="hasModule('Reportes')">
+    <a class="sidebar__link sidebar__link--parent" (click)="repOpen = !repOpen">
+      <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/reportes.svg')"></span>
+      <span>Reportes</span>
+      <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
     </a>
-
-    <!-- ══ Colaboradores: persona casual (sin corbata) ══ -->
-    <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link">
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="9" cy="8" r="3"/>
-        <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
-        <circle cx="18" cy="14" r="2.5"/>
-        <path d="M15 21v-.5A4.5 4.5 0 0 1 21 21"/>
-      </svg>
-      <span>Colaboradores</span>
-    </a>
-
-    <!-- ══ Clientes ══ -->
-    <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link">
-      <!-- Building / company icon -->
-      <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="4" y="2" width="16" height="20" rx="1"/>
-        <path d="M9 22V15h6v6"/>
-        <path d="M8 7h.01M12 7h.01M16 7h.01"/>
-        <path d="M8 11h.01M12 11h.01M16 11h.01"/>
-      </svg>
-      <span>Clientes</span>
-    </a>
-
-    <!-- Divider -->
-    <div class="sidebar__divider"></div>
-
-    <!-- ══ Configuración ══ -->
-    <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen">
-      <a class="sidebar__link sidebar__link--parent" (click)="cfgOpen = !cfgOpen">
-        <!-- Gear icon -->
-        <svg class="sidebar__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span>Configuración</span>
-        <svg class="sidebar__chevron" [class.sidebar__chevron--up]="cfgOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+    <div class="sidebar__submenu" [class.sidebar__submenu--visible]="repOpen">
+      <a routerLink="/reportes/horas" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/horas.svg')"></span>
+        <span>Por Horas</span>
       </a>
-      <div class="sidebar__submenu" [class.sidebar__submenu--visible]="cfgOpen">
-        <a routerLink="/configuracion/usuarios" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20a8 8 0 0 1 16 0"/>
-          </svg>
-          <span>Usuarios</span>
-        </a>
-        <a routerLink="/configuracion/roles" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-          </svg>
-          <span>Roles</span>
-        </a>
-        <a routerLink="/configuracion/feriados" routerLinkActive="active" class="sidebar__sublink">
-          <svg class="sidebar__svg sidebar__svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="17" rx="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8"  y1="2" x2="8"  y2="6"/>
-            <line x1="3"  y1="10" x2="21" y2="10"/>
-            <circle cx="12" cy="16" r="2" fill="currentColor" stroke="none"/>
-          </svg>
-          <span>Feriados</span>
-        </a>
-      </div>
+      <a routerLink="/reportes/fechas" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/fechas.svg')"></span>
+        <span>Por Fechas</span>
+      </a>
     </div>
+  </div>
+
+  <!-- ══ Líderes ══ -->
+  <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Lideres')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Lideres/lideres.svg')"></span>
+    <span>Líderes</span>
+  </a>
+
+  <!-- ══ Colaboradores ══ -->
+  <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Colaboradores')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg')"></span>
+    <span>Colaboradores</span>
+  </a>
+
+  <!-- ══ Clientes ══ -->
+  <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Clientes')">
+    <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg')"></span>
+    <span>Clientes</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="sidebar__divider" *ngIf="hasModule('Configuracion')"></div>
+
+  <!-- ══ Configuración ══ -->
+  <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
+    <a class="sidebar__link sidebar__link--parent" (click)="cfgOpen = !cfgOpen">
+      <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/configuracion.svg')"></span>
+      <span>Configuración</span>
+      <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
+    </a>
+    <div class="sidebar__submenu" [class.sidebar__submenu--visible]="cfgOpen">
+      <a routerLink="/configuracion/usuarios" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/usuarios.svg')"></span>
+        <span>Usuarios</span>
+      </a>
+      <a routerLink="/configuracion/roles" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/roles.svg')"></span>
+        <span>Roles</span>
+      </a>
+      <a routerLink="/configuracion/feriados" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/feriados.svg')"></span>
+        <span>Feriados</span>
+      </a>
+      <a routerLink="/configuracion/catalogos" routerLinkActive="active" class="sidebar__sublink">
+        <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/catalogos.svg')"></span>
+        <span>Catálogos</span>
+      </a>
+    </div>
+  </div>
 
 </aside>

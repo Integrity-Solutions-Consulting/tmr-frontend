@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.40);
-  z-index: 900;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,8 +14,8 @@
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-  width: 680px;
-  max-width: calc(100vw - 32px);
+  width: 860px;
+  max-width: calc(100vw - 48px);
   max-height: 92vh;
   display: flex;
   flex-direction: column;
@@ -112,7 +112,7 @@
 
 // ── Sección ──────────────────────────────────────────
 .form-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 
   &__title {
     display: flex;
@@ -125,6 +125,10 @@
     margin-bottom: 18px;
   }
 
+  .form-grid + .form-grid {
+    margin-top: 18px;
+  }
+
   &__bar {
     width: 3px;
     height: 14px;
@@ -134,11 +138,51 @@
   }
 }
 
+// ── Toggle para sección reemplazo ─────────────────────
+.form-section__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+
+  &:hover {
+    color: #7c3aed;
+  }
+
+  .material-icons {
+    font-size: 20px;
+    color: #6b7280;
+  }
+}
+
+.opcional {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.form-section__content {
+  padding-top: 12px;
+  padding-left: 32px;
+}
+
 // ── Grid ─────────────────────────────────────────────
 .form-grid {
   display: grid;
-  gap: 20px;
-  &--2 { grid-template-columns: 1fr 1fr; }
+  column-gap: 26px;
+  row-gap: 20px;
+
+  &--2 {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 .form-field {
@@ -162,15 +206,13 @@
 }
 
 // ── Floating Input ─────────────────────────────────────
-// El label arranca CENTRADO verticalmente en el input.
-// Al hacer focus o tener valor → sube y se sienta SOBRE el borde.
 .float-field {
   position: relative;
   width: 100%;
 
   &__input {
     width: 100%;
-    height: 42px;
+    height: 48px;
     padding: 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
@@ -192,7 +234,6 @@
       &:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
     }
 
-    // Cuando tiene valor o foco → sube el label al borde
     &:focus ~ .float-field__label,
     &:not(:placeholder-shown) ~ .float-field__label {
       top: 0px;
@@ -202,7 +243,6 @@
       background: #ffffff;
     }
 
-    // Date siempre muestra el label arriba
     &--date ~ .float-field__label {
       top: 0;
       transform: translateY(-50%);
@@ -228,7 +268,6 @@
     white-space: nowrap;
     line-height: 1;
 
-    // Siempre arriba — para dates
     &--always {
       top: 0;
       transform: none;
@@ -239,15 +278,13 @@
 }
 
 // ── Floating Select ───────────────────────────────────
-// El label siempre está sobre el borde porque los selects
-// siempre tienen un valor visible.
 .float-select {
   position: relative;
   width: 100%;
 
   &__input {
     width: 100%;
-    height: 46px;
+    height: 48px;
     padding: 0 36px 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
@@ -272,7 +309,6 @@
     &--error { border-color: #dc2626; }
   }
 
-  // Label empieza centrado, sube cuando tiene valor
   &__label {
     position: absolute;
     left: 10px;
@@ -289,7 +325,6 @@
     white-space: nowrap;
     line-height: 1;
 
-    // Cuando tiene valor → sube sobre el borde
     &--up {
       top: 0px;
       transform: none;
@@ -299,7 +334,6 @@
     }
   }
 
-  // Foco también sube el label
   &__input:focus ~ &__label {
     top: 0px;
     transform: translateY(-50%);
@@ -308,10 +342,151 @@
   }
 }
 
+// ================================================================
+// ESTILOS PARA DROPDOWN DE REEMPLAZO
+// ================================================================
+
+.reemplazo-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 4px 0;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+
+  &__item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__identificacion {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 8px;
+  }
+
+  &__empty {
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  &__more {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+    border-top: 1px solid #f3f4f6;
+    background: #fafafa;
+  }
+}
+
+.reemplazo-seleccionado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-top: 4px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__identificacion {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  &__remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+
+    &:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .material-icons {
+      font-size: 18px;
+    }
+  }
+}
+
+// Posición relativa para el dropdown
+.form-field {
+  position: relative;
+}
+
+// ── Campos deshabilitados ─────────────────────────────
+.float-field__input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.float-select__input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+  opacity: 1;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }

@@ -1,39 +1,84 @@
-<div class="filtros">
+<div class="filtros" (click)="cerrarDropdowns()">
+
   <mat-form-field appearance="outline" class="filtros__search">
     <span class="filtros__search-icon"></span>
-
     <input
       matInput
       [(ngModel)]="busqueda"
       (ngModelChange)="emitirFiltros()"
-      placeholder="Buscar proyecto, cliente, codigo..."
-    >
+      placeholder="Buscar proyecto, cliente, codigo...">
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="filtros__select">
-    <mat-label>Estado</mat-label>
-    <mat-select
-      [(ngModel)]="estado"
-      (selectionChange)="emitirFiltros()"
-    >
-      <mat-option value="">Todos</mat-option>
-      <mat-option value="En progreso">En progreso</mat-option>
-      <mat-option value="En espera">En espera</mat-option>
-      <mat-option value="Completado">Completado</mat-option>
-      <mat-option value="Cancelado">Cancelado</mat-option>
-    </mat-select>
-  </mat-form-field>
+  <!-- Filtro Estado -->
+  <div class="filtros__dropdown-wrapper" [class.active]="estadosSeleccionados.length > 0" (click)="toggleEstadoDropdown($event)">
+    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="filtros__dropdown-label">{{ labelEstado }}</span>
+    @if (mostrarEstadoDropdown) {
+      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
+        @for (estado of estadosFiltro; track estado) {
+          <div class="filtros__dropdown-option" (click)="toggleEstado(estado, $event)">
+            <div class="filtros__checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
+              @if (estaEstadoSeleccionado(estado)) {
+                <span class="material-icons">check</span>
+              }
+            </div>
+            <span>{{ estado }}</span>
+          </div>
+        }
+        <div class="filtros__dropdown-limpiar" (click)="limpiarEstados($event)">Limpiar filtro</div>
+      </div>
+    }
+  </div>
 
-  <mat-form-field appearance="outline" class="filtros__select">
-    <mat-label>Tipo</mat-label>
-    <mat-select
-      [(ngModel)]="tipo"
-      (selectionChange)="emitirFiltros()"
-    >
-      <mat-option value="">Todos</mat-option>
-      <mat-option value="Llave en mano">Llave en mano</mat-option>
-      <mat-option value="Soporte evolutivo">Soporte evolutivo</mat-option>
-      <mat-option value="Consultoria">Consultoria</mat-option>
-    </mat-select>
-  </mat-form-field>
+  <!-- Filtro Seguimiento -->
+  <div class="filtros__dropdown-wrapper" [class.active]="seguimientoSeleccionados.length > 0" (click)="toggleSeguimientoDropdown($event)">
+    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="filtros__dropdown-label">{{ labelSeguimiento }}</span>
+    @if (mostrarSeguimientoDropdown) {
+      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
+        @for (e of seguimientoOpciones; track e.id) {
+          <div class="filtros__dropdown-option" (click)="toggleSeguimiento(e.id, $event)">
+            <div class="filtros__checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
+              @if (estaSeguimientoSeleccionado(e.id)) {
+                <span class="material-icons">check</span>
+              }
+            </div>
+            <span>{{ e.nombre }}</span>
+          </div>
+        }
+        <div class="filtros__dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
+      </div>
+    }
+  </div>
+
+  <!-- Filtro Tipo -->
+  <div class="filtros__dropdown-wrapper" [class.active]="tiposSeleccionados.length > 0" (click)="toggleTipoDropdown($event)">
+    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="filtros__dropdown-label">{{ labelTipo }}</span>
+    @if (mostrarTipoDropdown) {
+      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
+        @for (t of tipos; track t.id) {
+          <div class="filtros__dropdown-option" (click)="toggleTipo(t.nombre, $event)">
+            <div class="filtros__checkbox" [class.checked]="estaTipoSeleccionado(t.nombre)">
+              @if (estaTipoSeleccionado(t.nombre)) {
+                <span class="material-icons">check</span>
+              }
+            </div>
+            <span>{{ t.nombre }}</span>
+          </div>
+        }
+        <div class="filtros__dropdown-limpiar" (click)="limpiarTipos($event)">Limpiar filtro</div>
+      </div>
+    }
+  </div>
+
 </div>

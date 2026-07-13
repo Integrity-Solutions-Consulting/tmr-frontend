@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -46,17 +46,29 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
     return this.form.get('estado')?.value ?? 'Todos';
   }
 
-  toggleEstado(): void {
+  toggleEstado(event?: MouseEvent): void {
+    event?.stopPropagation();
     this.estadoAbierto = !this.estadoAbierto;
   }
 
-  seleccionarEstado(valor: EstadoColaborador | 'Todos'): void {
-    this.form.patchValue({ estado: valor });
+  @HostListener('document:click')
+  cerrarDropdowns(): void {
     this.estadoAbierto = false;
   }
 
-  limpiarBusqueda(valor: EstadoColaborador | 'Todos'): void{
-    this.form.patchValue({ estado: valor});
+  seleccionarEstado(valor: EstadoColaborador | 'Todos', event?: MouseEvent): void {
+    event?.stopPropagation();
+    const nuevoEstado = this.estadoSeleccionado === valor ? 'Todos' : valor;
+    this.form.patchValue({ estado: nuevoEstado });
+  }
+
+  limpiarFiltroEstado(event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.form.patchValue({ estado: 'Todos' });
+  }
+
+  limpiarBusqueda(valor: EstadoColaborador | 'Todos'): void {
+    this.form.patchValue({ estado: valor });
   }
 
   ngOnDestroy(): void {

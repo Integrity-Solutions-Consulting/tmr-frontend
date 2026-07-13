@@ -1,159 +1,224 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Actividad } from '../models/actividad.model';
-
-const HOY = new Date();
-const MES = HOY.getMonth();
-const ANIO = HOY.getFullYear();
+import { AuthService } from '../../features/auth/servicios/auth.service';
+import { environment } from '../../../environments/environment';
+import { FeriadosService } from './feriados.service';
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
-  private _actividades = signal<Actividad[]>([
-    {
-      id: '1',
-      tipoActividad: 'Desarrollo',
-      proyectoId: 'p1',
-      proyectoNombre: 'Proyecto bolsa de empleo',
-      codigoRequerimiento: 'ISC_FS_BOLSA_EMPLEO',
-      descripcion: 'Desarrollo de componentes UI',
-      fechaActividad: new Date(ANIO, MES, 6),
-      numeroHoras: 2.5,
-      esRecurrente: false
-    },
-    {
-      id: '2',
-      tipoActividad: 'Reunión',
-      proyectoId: 'p2',
-      proyectoNombre: 'Middleware Fábrica de software',
-      codigoRequerimiento: 'MID_FAB_001',
-      descripcion: 'Reunión de planning sprint',
-      fechaActividad: new Date(ANIO, MES, 12),
-      numeroHoras: 1.5,
-      esRecurrente: false
-    },
-    {
-      id: '3',
-      tipoActividad: 'Desarrollo',
-      proyectoId: 'p3',
-      proyectoNombre: 'Accesos Fábrica de software',
-      codigoRequerimiento: 'ACC_FAB_002',
-      descripcion: 'Implementación módulo accesos',
-      fechaActividad: new Date(ANIO, MES, 19),
-      numeroHoras: 8,
-      esRecurrente: false
-    },
-    {
-      id: '4',
-      tipoActividad: 'Testing',
-      proyectoId: 'p1',
-      proyectoNombre: 'Proyecto bolsa de empleo',
-      codigoRequerimiento: 'ISC_FS_TEST_01',
-      descripcion: 'Pruebas de integración',
-      fechaActividad: new Date(ANIO, MES, 22),
-      numeroHoras: 4,
-      esRecurrente: false
-    }
-  ]);
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private feriadosService = inject(FeriadosService);
+  private apiUrl = `${environment.apiUrl}/time-report/actividades`;
 
+  private _actividades = signal<Actividad[]>([]);
   public readonly actividades = this._actividades.asReadonly();
 
-  // === Computed signals ===
-  public readonly horasRegistradasHoy = computed(() => {
-    const hoy = new Date();
-    return this._actividades()
-      .filter(a => this.mismaFecha(a.fechaActividad, hoy))
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
-  });
+  // Variables de estado del mes activo en el calendario
+  private currentAnio = signal<number>(new Date().getFullYear());
+  private currentMes = signal<number>(new Date().getMonth() + 1);
 
-  public readonly horasMesActual = computed(() => {
-    const hoy = new Date();
-    return this._actividades()
-      .filter(a =>
-        a.fechaActividad.getMonth() === hoy.getMonth() &&
-        a.fechaActividad.getFullYear() === hoy.getFullYear()
-      )
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
-  });
+  // Signals para métricas
+  private _horasRegistradasHoy = signal<number>(0);
+  public readonly horasRegistradasHoy = this._horasRegistradasHoy.asReadonly();
 
-  public readonly horasSemanaActual = computed(() => {
-    const hoy = new Date();
-    const inicioSemana = new Date(hoy);
-    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-    inicioSemana.setHours(0, 0, 0, 0);
-    const finSemana = new Date(inicioSemana);
-    finSemana.setDate(inicioSemana.getDate() + 6);
-    finSemana.setHours(23, 59, 59, 999);
-    return this._actividades()
-      .filter(a => a.fechaActividad >= inicioSemana && a.fechaActividad <= finSemana)
-      .reduce((acc, curr) => acc + curr.numeroHoras, 0);
-  });
+  private _horasMesActual = signal<number>(0);
+  public readonly horasMesActual = this._horasMesActual.asReadonly();
 
-  public readonly horasPorRegistrar = computed(() => {
-    const objetivo = 8;
-    return Math.max(0, objetivo - this.horasRegistradasHoy());
-  });
+  private _horasSemanaActual = signal<number>(0);
+  public readonly horasSemanaActual = this._horasSemanaActual.asReadonly();
 
-  // === Methods ===
-  getActividadesPorFecha(fecha: Date): Actividad[] {
-    return this._actividades().filter(a => this.mismaFecha(a.fechaActividad, fecha));
+  private _horasPorRegistrar = signal<number>(0);
+  public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
+
+  cargarResumen(anio?: number, mes?: number): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const empId = user.idEmpleado ?? user.id;
+    let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
+    if (anio && mes) {
+      url += `&anio=${anio}&mes=${mes}`;
+    }
+    this.http.get<any>(url).subscribe({
+      next: (res) => {
+        this._horasPorRegistrar.set(res.horasPorRegistrar);
+        this._horasRegistradasHoy.set(res.horasRegistradas);
+        this._horasSemanaActual.set(res.horasSemana);
+        this._horasMesActual.set(res.horasMes);
+      },
+      error: (err) => console.error('Error al cargar resumen', err)
+    });
   }
 
-  agregarActividad(data: any): void {
-    const nuevas: Actividad[] = [];
+  cargarCalendario(anio: number, mes: number): void {
+    this.currentAnio.set(anio);
+    this.currentMes.set(mes);
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const empId = user.idEmpleado ?? user.id;
+    this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${empId}&anio=${anio}&mes=${mes}`).subscribe({
+      next: (data) => {
+        const mapped = (data || []).map(item => ({
+          id: String(item.id),
+          idempleado: item.idEmpleado,
+          idproyecto: item.idProyecto,
+          proyectoNombre: item.proyectoNombre || 'Sin Proyecto',
+          idtipoactividad: item.idTipoActividad,
+          tipoActividadNombre: item.tipoActividadNombre || 'Otro',
+          codigorequerimiento: item.codigoRequerimiento || '',
+          fechaactividad: new Date(item.fechaActividad + 'T00:00:00'),
+          cantidadhoras: item.cantidadHoras,
+          descripcionactividad: item.descripcionActividad || '',
+          notas: item.notas || '',
+          esbillable: item.esBillable ?? true
+        } as Actividad));
+        this._actividades.set(mapped);
+      },
+      error: (err) => console.error('Error al cargar calendario', err)
+    });
+  }
+
+  getActividadesPorFecha(fecha: Date): any[] {
+    return this._actividades().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
+  }
+
+  agregarActividad(data: any, callback?: () => void): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
 
     if (data.esRecurrente && data.fechaInicio && data.fechaFin) {
-      const inicio = new Date(data.fechaInicio);
-      const fin = new Date(data.fechaFin);
+      const parseLocal = (d: any) => {
+        if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const parts = String(d).split('T')[0].split('-');
+        if (parts.length === 3) {
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        }
+        return new Date(d);
+      };
+
+      const inicio = parseLocal(data.fechaInicio);
+      const fin = parseLocal(data.fechaFin);
       const cur = new Date(inicio);
+
+      const requests: any[] = [];
       while (cur <= fin) {
         const esFDS = cur.getDay() === 0 || cur.getDay() === 6;
-        if (!esFDS || data.incluirFinesDeSemana) {
-          nuevas.push({
-            id: Math.random().toString(36).substr(2, 9),
-            tipoActividad: data.tipoActividad,
-            proyectoId: data.proyectoId,
-            proyectoNombre: this.nombreProyecto(data.proyectoId),
+        const esFeriado = data.incluirFeriados ? false : this.feriadosService.esFeriado(cur);
+
+        if ((data.incluirFinesDeSemana || !esFDS) && !esFeriado) {
+          const payload = {
+            idEmpleado: user.idEmpleado ?? Number(user.id),
+            idProyecto: data.proyectoId,
+            idTipoActividad: Number(data.tipoActividad),
             codigoRequerimiento: data.codigoRequerimiento,
-            descripcion: data.descripcion,
-            fechaActividad: new Date(cur),
-            numeroHoras: data.horasPorDia || data.numeroHoras,
-            esRecurrente: true
-          });
+            cantidadHoras: data.horasPorDia,
+            fechaActividad: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`,
+            descripcionActividad: data.descripcion,
+            notas: data.notas || '',
+            esBillable: data.esbillable ?? true
+          };
+          requests.push(this.http.post(this.apiUrl, payload));
         }
         cur.setDate(cur.getDate() + 1);
       }
+
+      if (requests.length > 0) {
+        let completed = 0;
+        requests.forEach(req => {
+          req.subscribe({
+            next: () => {
+              completed++;
+              if (completed === requests.length) {
+                this.cargarResumen(this.currentAnio(), this.currentMes());
+                const actDate = parseLocal(data.fechaInicio);
+                this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+                if (callback) callback();
+              }
+            },
+            error: (err: any) => console.error('Error al crear actividad recurrente', err)
+          });
+        });
+      } else {
+        if (callback) callback();
+      }
     } else {
-      nuevas.push({
-        id: Math.random().toString(36).substr(2, 9),
-        tipoActividad: data.tipoActividad,
-        proyectoId: data.proyectoId,
-        proyectoNombre: this.nombreProyecto(data.proyectoId),
+      const payload = {
+        idEmpleado: user.idEmpleado ?? Number(user.id),
+        idProyecto: data.proyectoId,
+        idTipoActividad: Number(data.tipoActividad),
         codigoRequerimiento: data.codigoRequerimiento,
-        descripcion: data.descripcion,
-        fechaActividad: new Date(data.fechaActividad),
-        numeroHoras: data.numeroHoras,
-        esRecurrente: false
+        cantidadHoras: data.numeroHoras,
+        fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
+        descripcionActividad: data.descripcion,
+        notas: data.notas || '',
+        esBillable: data.esbillable ?? true
+      };
+
+      this.http.post(this.apiUrl, payload).subscribe({
+        next: (res) => {
+          this.cargarResumen(this.currentAnio(), this.currentMes());
+          const actDate = new Date(data.fechaActividad);
+          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          if (callback) callback();
+        },
+        error: (err) => console.error('Error al crear actividad', err)
       });
     }
-
-    this._actividades.update(prev => [...prev, ...nuevas]);
   }
 
-  private nombreProyecto(id: string): string {
-    const map: Record<string, string> = {
-      p1: 'Proyecto bolsa de empleo',
-      p2: 'Middleware Fábrica de software',
-      p3: 'Accesos Fábrica de software',
-      p4: 'Arquitectura Fábrica de software',
-      p5: 'DESARROLLO DE APLICACIONES NAOS'
+  actualizarActividad(id: number | string, data: any, callback?: () => void): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const payload = {
+      idProyecto: data.proyectoId,
+      idTipoActividad: Number(data.tipoActividad),
+      codigoRequerimiento: data.codigoRequerimiento,
+      cantidadHoras: data.numeroHoras,
+      fechaActividad: new Date(data.fechaActividad).toISOString().split('T')[0],
+      descripcionActividad: data.descripcion,
+      notas: data.notas || '',
+      esBillable: data.esbillable ?? true
     };
-    return map[id] || id;
+
+    this.http.put(`${this.apiUrl}/${id}`, payload).subscribe({
+      next: () => {
+        this.cargarResumen(this.currentAnio(), this.currentMes());
+        const actDate = new Date(data.fechaActividad);
+        this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+
+        if (callback) callback();
+      },
+      error: (err) => console.error('Error al actualizar actividad', err)
+    });
   }
 
-  private mismaFecha(a: Date, b: Date): boolean {
+  eliminarActividad(id: number | string, callback?: () => void, errorCallback?: (err: any) => void): void {
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.cargarResumen(this.currentAnio(), this.currentMes());
+        // Recargar el calendario actual
+        const hoy = new Date();
+        this.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
+
+        if (callback) callback();
+      },
+      error: (err) => {
+        console.error('Error al eliminar actividad', err);
+        if (errorCallback) errorCallback(err);
+      }
+    });
+  }
+
+  private mismaFecha(a: Date | string, b: Date): boolean {
+    const dateA = a instanceof Date ? a : new Date(a);
     return (
-      a.getDate() === b.getDate() &&
-      a.getMonth() === b.getMonth() &&
-      a.getFullYear() === b.getFullYear()
+      dateA.getDate() === b.getDate() &&
+      dateA.getMonth() === b.getMonth() &&
+      dateA.getFullYear() === b.getFullYear()
     );
   }
 }

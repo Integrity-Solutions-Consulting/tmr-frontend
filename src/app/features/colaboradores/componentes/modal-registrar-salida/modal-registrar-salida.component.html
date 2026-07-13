@@ -1,0 +1,133 @@
+﻿
+<div class="modal-backdrop">
+  <div class="modal-form" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-form__header">
+      <div>
+        <h2 class="modal-form__title">Registrar Salida</h2>
+        <p class="modal-form__subtitle">{{ colaborador.nombreCompleto }} · {{ colaborador.identificacion }}</p>
+      </div>
+      <button class="modal-form__close" (click)="onCerrar()" type="button">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-form__body" [formGroup]="form">
+
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos de salida
+        </div>
+
+        <div class="form-grid form-grid--2">
+          <!-- Fecha de salida -->
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input float-field__input--date"
+                type="date"
+                formControlName="fechaSalida"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('fechaSalida')"
+              />
+              <label class="float-field__label float-field__label--always">
+                Fecha de salida <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('fechaSalida')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Tipo de salida -->
+          <div class="form-field">
+            <div class="float-select">
+              <select
+                class="float-select__input"
+                formControlName="idTipoSalida"
+                [class.float-select__input--error]="campoInvalido('idTipoSalida')"
+              >
+                <option [ngValue]="null"></option>
+                @for (tipo of tiposSalida; track tipo.id) {
+                  <option [ngValue]="tipo.id">{{ tipo.valor }}</option>
+                }
+              </select>
+              <label
+                class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idTipoSalida')"
+              >
+                Tipo de salida <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idTipoSalida')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Causa de salida -->
+          <div class="form-field form-field--full">
+            <div class="float-select">
+              <select
+                class="float-select__input"
+                formControlName="idCausaSalida"
+                [class.float-select__input--error]="campoInvalido('idCausaSalida')"
+              >
+                <option [ngValue]="null"></option>
+                @for (causa of causasSalida; track causa.id) {
+                  <option [ngValue]="causa.id">{{ causa.valor }}</option>
+                }
+              </select>
+              <label
+                class="float-select__label"
+                [class.float-select__label--up]="tieneValor('idCausaSalida')"
+              >
+                Causa de salida <span class="req">*</span>
+              </label>
+            </div>
+            @if (campoInvalido('idCausaSalida')) {
+              <span class="form-field__error">Campo requerido</span>
+            }
+          </div>
+
+          <!-- Comentario -->
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <textarea
+                class="float-field__input float-field__input--textarea"
+                formControlName="comentario"
+                placeholder=" "
+                rows="3"
+                maxlength="500"
+              ></textarea>
+              <label class="float-field__label">
+                Comentario (opcional)
+              </label>
+            </div>
+            <span class="form-field__hint">Máximo 500 caracteres</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-form__footer">
+      <button
+        class="modal-form__btn modal-form__btn--save"
+        (click)="onGuardar()"
+        type="button"
+        [disabled]="cargando"
+      >
+        @if (cargando) {
+          <span class="spinner"></span>
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+
+  </div>
+</div>

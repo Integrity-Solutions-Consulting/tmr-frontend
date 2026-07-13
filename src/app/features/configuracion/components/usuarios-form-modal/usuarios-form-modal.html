@@ -1,97 +1,164 @@
-<app-modal-base
-  [title]="isEdit ? 'Editar Usuario' : 'Nuevo Usuario'"
-  subtitle="Gestiona identidad, roles multiples y estado operativo del usuario."
->
-  <form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
-    <div class="modal-body">
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Nombres</mat-label>
-        <mat-icon matPrefix>badge</mat-icon>
-        <input matInput formControlName="nombres" placeholder="Ej. Juan Carlos Perez Lopez" />
-        <mat-error>
-          @if (form.controls.nombres.errors?.['required'] && form.controls.nombres.touched) {
-            Campo requerido
-          }
-          @if (form.controls.nombres.errors?.['pattern'] && form.controls.nombres.touched) {
-            Solo letras, espacios y tildes
-          }
-          @if (form.controls.nombres.errors?.['minlength'] && form.controls.nombres.touched) {
-            Mínimo 4 caracteres
-          }
-        </mat-error>
-      </mat-form-field>
+<form class="modal-form" [formGroup]="form" (ngSubmit)="save()">
+  <div class="modal-form__header">
+    <div>
+      <h2 class="modal-form__title">{{ isEdit ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+      <p class="modal-form__subtitle"></p>
+    </div>
+    <button class="modal-form__close" type="button" (click)="cancel()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
 
-      <div class="two-columns">
-        <mat-form-field appearance="outline" hideRequiredMarker="true">
-          <mat-label>Correo Corporativo</mat-label>
-          <mat-icon matPrefix>mail</mat-icon>
-          <input matInput formControlName="email" placeholder="Ej. usuario@empresa.com" />
-          <mat-error>
-            @if (form.controls.email.errors?.['required'] && form.controls.email.touched) {
-              Campo requerido
-            }
-            @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
-              Email inválido
-            }
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" hideRequiredMarker="true">
-          <mat-label>Nombre de Usuario</mat-label>
-          <mat-icon matPrefix>person</mat-icon>
-          <input matInput formControlName="usuario" placeholder="Ej. jperez" />
-          <mat-error>
-            @if (form.controls.usuario.errors?.['required'] && form.controls.usuario.touched) {
-              Campo requerido
-            }
-            @if (form.controls.usuario.errors?.['pattern'] && form.controls.usuario.touched) {
-              Solo letras, números y guion bajo
-            }
-            @if (form.controls.usuario.errors?.['minlength'] && form.controls.usuario.touched) {
-              Mínimo 3 caracteres
-            }
-          </mat-error>
-        </mat-form-field>
+  <div class="modal-form__body">
+    <div class="form-section">
+      <div class="form-section__title">
+        <span class="form-section__bar"></span>
+        Tipo de usuario
       </div>
 
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Área</mat-label>
-        <mat-icon matPrefix>business</mat-icon>
-        <input matInput formControlName="area" placeholder="Selecciona el área" />
-        <mat-error>
-          @if (form.controls.area.errors?.['required'] && form.controls.area.touched) {
-            Campo requerido
-          }
-          @if (form.controls.area.errors?.['pattern'] && form.controls.area.touched) {
-            Solo letras, espacios y tildes
-          }
-          @if (form.controls.area.errors?.['minlength'] && form.controls.area.touched) {
-            Mínimo 2 caracteres
-          }
-        </mat-error>
-      </mat-form-field>
+      <div class="form-grid form-grid--2">
+        <label class="check-field">
+          <input type="checkbox" formControlName="usuarioInterno" />
+          <span>Usuario Interno</span>
+        </label>
 
-      <mat-form-field appearance="outline" hideRequiredMarker="true">
-        <mat-label>Roles</mat-label>
-        <mat-icon matPrefix>verified_user</mat-icon>
-        <mat-select formControlName="roles" multiple>
-          @for (rol of data.roles; track rol.id) {
-            <mat-option [value]="rol.nombre">{{ rol.nombre }}</mat-option>
+        @if (isInternalUser) {
+        <div class="form-field">
+          <div class="float-select">
+            <select class="float-select__input" formControlName="idColaborador"
+              [class.float-select__input--error]="campoInvalido('idColaborador')">
+              <option value="">Seleccione un colaborador</option>
+              @for (colaborador of colaboradores; track colaborador.id) {
+              <option [value]="colaborador.id">
+                {{ colaborador.nombreCompleto }}
+              </option>
+              }
+            </select>
+            <label class="float-select__label float-select__label--up">
+              Colaborador <span class="req">*</span>
+            </label>
+          </div>
+          @if (cargandoColaboradores()) {
+          <span class="form-field__hint">Cargando colaboradores...</span>
           }
-        </mat-select>
-        <mat-error>
-          @if (form.controls.roles.errors?.['required'] && form.controls.roles.touched) {
-            Selecciona al menos un rol
+          @if (campoInvalido('idColaborador')) {
+          <span class="form-field__error">{{ colaboradorError() }}</span>
           }
-        </mat-error>
-      </mat-form-field>
+        </div>
+        }
+      </div>
     </div>
 
-    <div class="modal-actions">
-      <button mat-button type="button" (click)="cancel()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit">
-        {{ isEdit ? 'Guardar cambios' : 'Crear usuario' }}
-      </button>
+    <div class="form-section">
+      <div class="form-section__title">
+        <span class="form-section__bar"></span>
+        Datos de acceso
+      </div>
+
+      <div class="form-grid form-grid--2">
+        <div class="form-field">
+          @if (isInternalUser) {
+          <div class="email-compose" [class.email-compose--error]="campoInvalido('email')">
+            <div class="float-field">
+              <input class="float-field__input" type="text" [value]="form.controls.usuario.value" placeholder=" "
+                (input)="syncInternalEmailInput($any($event.target).value)" />
+              <label class="float-field__label">Correo electrónico <span class="req">*</span></label>
+            </div>
+            <span class="email-compose__suffix">{{ emailSuffix }}</span>
+          </div>
+          } @else {
+          <div class="float-field">
+            <input class="float-field__input" type="email" formControlName="email" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('email')" />
+            <label class="float-field__label">Correo electrónico <span class="req">*</span></label>
+          </div>
+          }
+          @if (campoInvalido('email')) {
+          <span class="form-field__error">{{ emailError() }}</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <div class="float-select">
+            <select class="float-select__input" formControlName="roleid"
+              [class.float-select__input--error]="campoInvalido('roleid')">
+              <option value="">Seleccione un rol</option>
+              @for (r of rolesList; track r.id) {
+              <option [value]="r.id">{{ r.nombre }}</option>
+              }
+            </select>
+            <label class="float-select__label float-select__label--up">
+              Rol <span class="req">*</span>
+            </label>
+          </div>
+          @if (campoInvalido('roleid')) {
+          <span class="form-field__error">Seleccione un rol</span>
+          }
+        </div>
+
+        <label class="check-field">
+          <input type="checkbox" formControlName="debeCambiarPassword" />
+          <span>Debe cambiar contraseña en el próximo acceso</span>
+        </label>
+
+        <div class="form-field">
+          @if (isEdit) {
+          <!-- Editar usuario: campo opcional para nueva contraseña -->
+          <div class="float-field">
+            <input class="float-field__input float-field__input--password"
+              [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('password')" />
+            <label class="float-field__label">Nueva contraseña</label>
+            <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
+              title="Mostrar/ocultar contraseña">
+              <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          @if (campoInvalido('password')) {
+          <span class="form-field__error">{{ passwordError() }}</span>
+          }
+          } @else {
+          <!-- Nuevo usuario: mostrar contraseña temporal para que el admin pueda copiarla -->
+          <div class="float-field">
+            <input class="float-field__input float-field__input--password"
+              [type]="showTemporaryPassword ? 'text' : 'password'" formControlName="password" placeholder=" "
+              [class.float-field__input--error]="campoInvalido('password')" readonly />
+            <label class="float-field__label float-field__label--always">Contraseña temporal <span
+                class="req">*</span></label>
+            <button type="button" class="password-toggle" (click)="toggleTemporaryPasswordVisibility()"
+              title="Mostrar/ocultar contraseña">
+              <span class="material-icons">{{ showTemporaryPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <p class="form-field__hint">
+            Copie esta contraseña antes de guardar.
+            <button type="button" class="btn-regenerar" (click)="regenerateTemporaryPassword()">↺ Regenerar</button>
+          </p>
+          @if (campoInvalido('password')) {
+          <span class="form-field__error">{{ passwordError() }}</span>
+          }
+          }
+        </div>
+      </div>
     </div>
-  </form>
-</app-modal-base>
+
+    @if (errorGuardar()) {
+    <div class="modal-form__error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ errorGuardar() }}
+    </div>
+    }
+  </div>
+
+  <div class="modal-form__footer">
+    <button class="modal-form__btn modal-form__btn--save" type="submit" [disabled]="guardando()">
+      @if (guardando()) {
+      <span class="modal-form__spinner"></span>
+      Guardando...
+      } @else {
+      Guardar
+      }
+    </button>
+  </div>
+
+</form>

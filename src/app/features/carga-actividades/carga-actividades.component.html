@@ -1,5 +1,6 @@
-<div class="dashboard-container">
-  <header class="header-main-row">
+  <div class="table-card">
+
+      <header class="header-main-row">
     <h1 class="page-title">Carga de Actividades</h1>
     <div class="header-actions">
       <div class="stats-card">
@@ -10,13 +11,15 @@
         </div>
       </div>
       
-      <input type="file" #fileInput class="hidden-input" (change)="onFileSelected($event)" accept=".xlsx,.xls,.xlm">
+      <input type="file" #fileInput class="hidden-input" (change)="onFileSelected($event)" accept=".xlsx,.csv">
       
       <button class="btn-primary" [disabled]="cargando" (click)="fileInput.click()">
         @if (!cargando) {
           <span class="material-icons">cloud_upload</span>
-        }  
-        <span>{{ cargando ? 'Procesando...' : 'Cargar Excel' }}</span>
+        } @else {
+          <span>Procesando...</span>
+        }
+        
       </button>
     </div>
   </header>
@@ -57,97 +60,93 @@
     }
   </div>
 
-  <section class="toolbar-section">
+  <section class="toolbar-section toolbar-section--row">
     <div class="search-input-wrapper">
       <span class="material-icons">search</span>
-      <input type="text" [formControl]="searchControl" placeholder="Buscar por colaborador o proyecto...">
+      <input type="text" [formControl]="searchControl" placeholder="Buscar proyecto, cliente, codigo...">
     </div>
 
-    <div class="filters-group">
-      <select class="custom-select" [formControl]="clienteControl">
-        <option value="">TODOS LOS CLIENTES</option>
-        @for (cliente of (clientes$ | async); track $index) {
-          <option [value]="cliente">{{ cliente }}</option>
-        }
-      </select>
-
-      <div class="date-controls">
-        <div class="date-field">
-          <label>DESDE</label>
-          <input type="date" [formControl]="fechaDesdeControl">
-        </div>
-        <div class="date-field">
-          <label>HASTA</label>
-          <input type="date" [formControl]="fechaHastaControl">
-        </div>
+    <div class="date-controls">
+      <div class="date-field">
+        <label>DESDE</label>
+        <input type="date" [formControl]="fechaDesdeControl">
       </div>
-
-      <button class="btn-secondary" (click)="descargarExcel()">
-        <span class="material-icons">file_download</span> 
-        <span>Descargar</span>
-      </button>
+      <div class="date-field">
+        <label>HASTA</label>
+        <input type="date" [formControl]="fechaHastaControl">
+      </div>
     </div>
+
+    <button class="btn-secondary" (click)="descargarExcel()">
+      <span class="material-icons">file_download</span> 
+      <span>Descargar</span>
+    </button>
   </section>
 
-  <div class="table-card">
-    <div class="table-responsive">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th><input type="checkbox"></th>
-            <th>COLABORADOR</th>
-            <th>PROYECTO</th>
-            <th>CLIENTE</th>
-            <th>FECHA</th>
-            <th class="text-center">CANT. HORAS</th>
-            <th>ESTADO</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of (actividadesFiltradas$ | async); track item.id) {
+
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td><input type="checkbox"></td>
-              <td class="font-bold">{{ item.colaborador }}</td>
-              <td>{{ item.proyecto }}</td>
-              <td><span class="client-tag">{{ item.cliente }}</span></td>
-              <td>{{ item.fecha | date:'dd/MM/yyyy' }}</td>
-              <td class="text-center" style="font-weight: 600; color: #ffaa00;">
-                {{ item.nroHoras }} h
-              </td>
-              <td>
-                <span class="status-badge pendiente">
-                  <span class="dot"></span>{{ item.estado || 'Pendiente' }}
-                </span>
-              </td>
+              <th><input type="checkbox"></th>
+              <th>COLABORADOR</th>
+              <th>PROYECTO</th>
+              <th>CLIENTE</th>
+              <th>FECHA</th>
+              <th class="text-center">CANT. HORAS</th>
+              <th>ESTADO</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="empty-row">
-                No hay registros disponibles para el rango de fechas seleccionado (Mayo 2026).
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (item of (actividadesFiltradas$ | async); track item.id || $index) {
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="font-bold">{{ item.colaborador }}</td>
+                <td>{{ item.proyecto }}</td>
+                <td><span class="client-tag">{{ item.cliente }}</span></td>
+                <td>{{ formatearFecha(item.fecha) }}</td>
+                <td class="text-center table-number">{{ item.nroHoras }} h</td>
+                <td>
+                  <span class="status-badge pendiente">
+                    <span class="dot"></span>{{ item.estado || 'Pendiente' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-row">
+                  No hay registros disponibles para los filtros seleccionados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
 
     @if ((totalItemsFiltrados$ | async)! > 0) {
-      <footer class="pagination-bar">
-        <div class="pagination-info">
-          <p>Página <strong>{{ (paginaActual$ | async) }}</strong> de <strong>{{ Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina) }}</strong></p>
-        </div>
-        <div class="pagination-controls">
-          <button class="btn-icon" [disabled]="(paginaActual$ | async) === 1" (click)="paginaAnterior()">
-            <span class="material-icons">chevron_left</span>
-          </button>
-          <span class="current-page-indicator">{{ (paginaActual$ | async) }}</span>
-          <button class="btn-icon" 
-                  [disabled]="(paginaActual$ | async)! >= Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina)" 
-                  (click)="paginaSiguiente()">
-            <span class="material-icons">chevron_right</span>
-          </button>
-        </div>
-      </footer>
+      <app-paginacion
+        [paginaActual]="(paginaActual$ | async) ?? 1"
+        [totalPaginas]="Math.ceil(((totalItemsFiltrados$ | async) || 0) / itemsPorPagina)"
+        [total]="(totalItemsFiltrados$ | async) ?? 0"
+        [porPagina]="itemsPorPagina"
+        (paginaCambia)="paginaCambia($event)">
+      </app-paginacion>
     }
+  </div>
+
+ 
+<div *ngIf="mostrarDetalle" class="modal-detalle-backdrop">
+  <div class="modal-detalle">
+    <h3>Detalle de actividad</h3>
+    <p><strong>Colaborador:</strong> {{ actividadSeleccionada?.colaborador }}</p>
+    <p><strong>Proyecto:</strong> {{ actividadSeleccionada?.proyecto }}</p>
+    <p><strong>Cliente:</strong> {{ actividadSeleccionada?.cliente }}</p>
+    <p><strong>Fecha:</strong> {{ formatearFecha(actividadSeleccionada?.fecha) }}</p>
+    <p><strong>Horas:</strong> {{ actividadSeleccionada?.nroHoras }}</p>
+    <div style="text-align:right; margin-top: 12px;">
+      <button class="btn" (click)="mostrarDetalle = false">Cerrar</button>
+    </div>
   </div>
 </div>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <rect
+    x="4"
+    y="2"
+    width="16"
+    height="20"
+    rx="1"
+    stroke="#a855f7"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M9 22v-6h6v6"
+    stroke="#a855f7"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M8 7h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M12 7h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M16 7h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M8 11h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M12 11h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M16 11h.01"
+    stroke="#a855f7"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+</svg>

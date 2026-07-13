@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "19b0e6c8-eefe-4f36-b62a-37198760c921"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -36,7 +36,15 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "exceljs",
+              "html2canvas",
+              "canvg",
+              "rgbcolor",
+              "raf",
+              "core-js"
+            ]
           },
           "configurations": {
             "production": {
@@ -62,17 +70,34 @@
                   "maximumError": "20kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "host": "0.0.0.0",
+            "port": 3000,
+            "allowedHosts": ["dev.api.tmr2.dokploy.integritysolutions.com.ec","localhost", "dev.tmr2.dokploy.integritysolutions.com.ec"]
+          },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": { "buildTarget": "gestion-actividades:build:production" },
@@ -82,9 +107,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "packageManager": "npm",
-    "analytics": false
   }
 }

@@ -15,6 +15,14 @@ export interface CargoItem {
   nombreCargo: string;
 }
 
+// Lo que devuelve el backend para la tabla de empleados.
+export interface EmpleadoItem {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  cargo?: string;
+}
+
 // Lo que devuelve el backend para las personas del ComboBox.
 export interface PersonaItem {
   id: number;
@@ -35,6 +43,9 @@ export class CatalogosService {
 
   // URL base del módulo colaboradores en el backend.
   private readonly apiUrl = `${environment.apiUrl}/colaboradores`;
+
+  // URL base del módulo administración en el backend.
+  private readonly administracionApiUrl = `${environment.apiUrl}/administracion`;
 
   // Configuración para enviar cookies al backend.
   private readonly httpOptions = {
@@ -58,10 +69,20 @@ export class CatalogosService {
     );
   }
 
-  // ── Personas para el ComboBox ──
-  getPersonas(): Observable<PersonaItem[]> {
-    return this.http.get<PersonaItem[]>(
-      `${this.apiUrl}/personas`,
+
+  // ── Empleados para el ComboBox de recursos del proyecto ──
+  // Debe leer de la tabla administracion.tbl_administracion_empleado.
+  getEmpleados(): Observable<EmpleadoItem[]> {
+    return this.http.get<EmpleadoItem[]>(
+      `${this.administracionApiUrl}/empleados`,
+      this.httpOptions
+    );
+  }
+
+  // ── Cargos desde la tabla administracion.tbl_administracion_cargo.
+  getCargos(): Observable<CargoItem[]> {
+    return this.http.get<CargoItem[]>(
+      `${this.administracionApiUrl}/cargos`,
       this.httpOptions
     );
   }

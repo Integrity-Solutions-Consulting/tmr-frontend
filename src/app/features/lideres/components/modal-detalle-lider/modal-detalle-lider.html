@@ -19,19 +19,24 @@
       </span>
     </div>
 
+    <!-- Línea separadora -->
+    <div class="detalle-separador"></div>
+
     <!-- Tipo y cliente -->
     <div class="detalle-info-row">
       <div class="detalle-info-item">
         <div class="detalle-icon-wrapper">
-          <img src="icons/user.svg" class="detalle-icon" />
+          <img src="assets/iconos/user.svg" class="detalle-icon" />
           <img *ngIf="lider?.tipo === 'Externo'"
-               src="icons/arrow-up-right.svg"
+               src="assets/iconos/arrow-up-right.svg"
                class="detalle-icon-arrow" />
         </div>
         <span>{{ lider?.tipo }}</span>
       </div>
       <div class="detalle-info-item">
-        <img src="icons/building-07-svgrepo-com.svg" class="detalle-icon" />
+        <div class="detalle-icon-wrapper">
+          <img src="assets/iconos/building-07-svgrepo-com.svg" class="detalle-icon" />
+        </div>
         <span>{{ lider?.cliente }}</span>
       </div>
     </div>
@@ -45,17 +50,57 @@
     <div class="detalle-contacto-grid">
       <div class="detalle-contacto-item">
         <span class="detalle-contacto-label">
-          <img src="icons/email-svgrepo-com.svg" class="detalle-icon-sm" />
+          <img src="assets/iconos/email-svgrepo-com.svg" class="detalle-icon-sm" />
           Correo electrónico
         </span>
         <span class="detalle-contacto-valor azul">{{ lider?.correo }}</span>
       </div>
       <div class="detalle-contacto-item">
         <span class="detalle-contacto-label">
-          <img src="icons/phone-svgrepo-com.svg" class="detalle-icon-sm" />
+          <img src="assets/iconos/phone-svgrepo-com.svg" class="detalle-icon-sm" />
           Teléfono
         </span>
         <span class="detalle-contacto-valor azul">{{ lider?.telefono }}</span>
+      </div>
+    </div>
+
+    <!-- Proyectos vinculados -->
+    <div class="detalle-seccion-titulo detalle-seccion-titulo--toggle" (click)="toggleProyectos()">
+      <span class="material-icons detalle-toggle-arrow" [class.rotated]="!proyectosExpandido">expand_more</span>
+      <span>Proyectos vinculados</span>
+      <span class="detalle-proyectos__count">{{ lider?.proyectos?.length || 0 }}</span>
+    </div>
+
+    <div class="detalle-proyectos" *ngIf="proyectosExpandido">
+      <div class="detalle-proyectos__lista">
+        <p class="detalle-proyectos__empty" *ngIf="!(lider?.proyectos?.length > 0)">
+          No hay proyectos asignados a este líder.
+        </p>
+        <div class="detalle-proyectos__item" *ngFor="let proyecto of lider?.proyectos || []">
+          <div class="detalle-proyectos__item-info">
+            <p class="detalle-proyectos__item-nombre">{{ proyecto.nombre }}</p>
+            <div class="detalle-proyectos__item-cliente">
+              <img src="assets/iconos/proyecto.svg" alt="proyecto" width="13" height="13" />
+              {{ proyecto.cliente || 'Sin cliente' }}
+            </div>
+          </div>
+          <span class="detalle-proyectos__item-estado"
+            [ngClass]="{
+              'estado--progreso':      proyecto.estado === 'En progreso',
+              'estado--completado':    proyecto.estado === 'Completado',
+              'estado--pausa':         proyecto.estado === 'En pausa',
+              'estado--cancelado':     proyecto.estado === 'Cancelado',
+              'estado--inactivo':      proyecto.estado === 'Inactivo',
+              'estado--aprobado':      proyecto.estado === 'Aprobado',
+              'estado--aplazado':      proyecto.estado === 'Aplazado',
+              'estado--planificacion': proyecto.estado === 'Planificación',
+              'estado--espera':        proyecto.estado === 'En espera',
+              'estado--activo':        proyecto.estado === 'Activo'
+            }">
+            <span class="detalle-proyectos__item-dot"></span>
+            {{ proyecto.estado || 'Sin estado' }}
+          </span>
+        </div>
       </div>
     </div>
 

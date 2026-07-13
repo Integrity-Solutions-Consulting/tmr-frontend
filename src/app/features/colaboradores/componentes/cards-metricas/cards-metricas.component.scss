@@ -1,18 +1,28 @@
 .metricas {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
 
   &__card {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 14px 16px;
-    min-width: 160px;
-    gap: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    border-radius: 16px;
+    padding: 18px 22px;
+    min-width: 190px;
+    min-height: 82px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    cursor: default;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    }
   }
 
   &__card-content {
@@ -21,51 +31,83 @@
     gap: 8px;
   }
 
-  // Icono + número en la misma fila alineados
+  // Icono + número en la misma fila
   &__top {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+  }
+
+  &__icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    // Total colaboradores
+    &--total {
+      background: rgba(249, 115, 22, 0.1);
+      color: #f97316;
+    }
+
+    // Activos
+    &--activos {
+      background: #e6fdee;
+      color: #34C759;
+    }
+
+    // Inactivos
+    &--inactivos {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+
+    // Asignados
+    &--asignados {
+      background: #EEF3FB;
+      color: #163572;
+    }
+
+    // No asignados
+    &--no-asignados {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
   }
 
   &__icon {
-    color: #163572;
+    width: 22px;
+    height: 22px;
+    display: block;
     flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  // Aumenta solo los íconos de Activos e Inactivos
+  // para que visualmente se vean del mismo porte que el naranja.
+  &__icon-box--activos &__icon,
+  &__icon-box--inactivos &__icon {
+    width: 25px;
+    height: 25px;
   }
 
   &__numero {
     font-family: 'Inter', sans-serif;
     font-size: 22px;
     font-weight: 700;
-    color: #111827;
+    color: #163572;
     line-height: 1;
   }
 
-  // Label alineada a la izquierda debajo del icono
   &__label {
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 400;
-    color: #6b7280;
-    padding-left: 0;
-    line-height: 1;
-  }
-
-  &__filter-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    color: #9ca3af;
-    display: flex;
-    align-items: flex-start;
-    align-self: flex-start;
-    border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
-
-    &:hover {
-      color: #163572;
-      background: #f0f4ff;
-    }
+    color: #6B7280;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 }

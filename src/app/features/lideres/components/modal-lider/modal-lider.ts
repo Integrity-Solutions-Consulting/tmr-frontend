@@ -1,8 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, HostListener, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+
+interface TipoLider {
+  id: number;
+  valor: string;
+}
+
+interface PersonaDisponible {
+  id: number;
+  idPersona: number;
+  nombreCompleto: string;
+  email: string;
+  telefono: string;
+  activo: boolean;
+}
 
 @Component({
   selector: 'app-modal-lider',
@@ -11,26 +26,35 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './modal-lider.html',
   styleUrl: './modal-lider.scss'
 })
-export class ModalLider implements OnInit {
+export class ModalLider implements OnInit, OnChanges {
   @Input() mostrarFormulario = false;
   @Input() modoEdicion = false;
+  @Input() lider: any | null = null;
+  @Input() guardando = false;
+  @Input() error: string | null = null;
   @Output() cerrarModal = new EventEmitter<void>();
-  @Output() guardar = new EventEmitter<void>();
+  @Output() guardar = new EventEmitter<any>();
 
   enviado = false;
   dropdownAbierto: string | null = null;
-  
-  tiposLideres: { id: number, valor: string }[] = [];
-  personasDisponibles: { id: number, nombres: string, apellidos: string, email: string, telefono: string }[] = [];
+  nombresInvalido = false;
+  apellidosInvalido = false;
+
+  tiposLideres: TipoLider[] = [];
+  personasDisponibles: PersonaDisponible[] = [];
+  busquedaPersona = '';
+  personasFiltradas: PersonaDisponible[] = [];
 
   form = {
-    tipo: '' as any,
-    persona: '', // Aquí guardaremos el id de la persona como string
+    tipoId: '' as any,
+    tipoNombre: '',
+    personaId: '',
+    identificacion: '',
     nombres: '',
     apellidos: '',
     correo: '',
     telefono: '',
-    estado: ''
+    estado: 'Activo'
   };
 
   constructor(private http: HttpClient) {}
@@ -38,29 +62,67 @@ export class ModalLider implements OnInit {
   ngOnInit() {
     this.loadTiposLideres();
     this.loadPersonasDisponibles();
+    this.syncFormWithLider();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['lider'] || changes['modoEdicion']) {
+      this.syncFormWithLider();
+    }
+  }
+
+  private syncFormWithLider(): void {
+    if (this.modoEdicion && this.lider) {
+      this.form = {
+        tipoId: this.tiposLideres.find(t => t.valor === this.lider.tipo)?.id?.toString() || '',
+        tipoNombre: this.lider.tipo || '',
+        personaId: this.lider.idPersona?.toString() || '',
+        identificacion: this.lider.numeroIdentificacion || '',
+        nombres: this.lider.nombres || '',
+        apellidos: this.lider.apellidos || '',
+        correo: this.lider.correo || this.lider.email || '',
+        telefono: this.lider.telefono || '',
+        estado: this.lider.estado || 'Activo'
+      };
+    } else {
+      this.form = {
+        tipoId: '' as any,
+        tipoNombre: '',
+        personaId: '',
+        identificacion: '',
+        nombres: '',
+        apellidos: '',
+        correo: '',
+        telefono: '',
+        estado: 'Activo'
+      };
+    }
   }
 
   private loadTiposLideres(): void {
-    console.log('📋 Obteniendo tipos de líderes...');
-    this.http.get<{ id: number, valor: string }[]>('http://localhost:5071/api/lideres/tipos')
+    this.http.get<TipoLider[]>(`${environment.apiUrl}/lideres/tipos`)
       .subscribe({
-        next: (tipos: any) => { // ◄ Corregido: Agregado tipo explicitamente
-          console.log('✅ Tipos de líderes obtenidos:', tipos);
-          this.tiposLideres = tipos;
+        next: (tipos) => {
+          this.tiposLideres = tipos ?? [];
+          if (this.modoEdicion && this.lider) {
+            this.syncFormWithLider();
+          }
         },
-        error: (error: any) => console.error('❌ Error al obtener tipos de líderes:', error) // ◄ Corregido
+        error: (error) => console.error('Error al obtener tipos de líderes:', error)
       });
   }
 
   private loadPersonasDisponibles(): void {
-    console.log('👥 Obteniendo personas disponibles...');
-    this.http.get<{ id: number, nombres: string, apellidos: string, email: string, telefono: string }[]>('http://localhost:5071/api/lideres/personas-disponibles')
+    this.http.get<PersonaDisponible[]>(`${environment.apiUrl}/colaboradores`)
       .subscribe({
-        next: (personas: any) => { // ◄ Corregido: Agregado tipo explicitamente
-          console.log('✅ Personas disponibles obtenidas:', personas);
-          this.personasDisponibles = personas;
+        next: (colaboradores) => {
+          this.personasDisponibles = colaboradores ?? [];
+          this.personasFiltradas = [...this.personasDisponibles];
+          if (this.modoEdicion && this.lider) {
+            this.syncFormWithLider();
+          }
         },
-        error: (error: any) => console.error('❌ Error al obtener personas disponibles:', error) // ◄ Corregido
+        error: (error) => console.error('Error al obtener colaboradores:', error)
       });
   }
 
@@ -72,59 +134,167 @@ export class ModalLider implements OnInit {
   toggleDropdown(nombre: string, event: Event) {
     event.stopPropagation();
     this.dropdownAbierto = this.dropdownAbierto === nombre ? null : nombre;
+    if (nombre === 'persona' && this.dropdownAbierto === 'persona') {
+      this.busquedaPersona = '';
+      this.personasFiltradas = [...this.personasDisponibles];
+    }
+  }
+
+  filtrarPersonas() {
+    const busqueda = this.busquedaPersona.toLowerCase().trim();
+    this.personasFiltradas = this.personasDisponibles.filter(p =>
+      p.nombreCompleto.toLowerCase().includes(busqueda)
+    );
   }
 
   seleccionar(campo: string, valor: any, event: Event) {
     event.stopPropagation();
-    
+
     if (campo === 'tipo' && valor && typeof valor === 'object') {
-      this.form.tipo = valor.valor; 
+      this.form.tipoId = valor.id.toString();
+      this.form.tipoNombre = valor.valor;
+      this.form.personaId = '';
+      this.form.identificacion = '';
+      this.form.nombres = '';
+      this.form.apellidos = '';
+      this.form.correo = '';
+      this.form.telefono = '';
     } else if (campo === 'persona' && valor && typeof valor === 'object') {
-      // Guardamos el id en el formulario
-      this.form.persona = valor.id.toString();
-      
-      // Auto-llenamos los campos de texto con los datos de la persona seleccionada
-      this.form.nombres = valor.nombres;
-      this.form.apellidos = valor.apellidos;
-      this.form.correo = valor.email;
-      this.form.telefono = valor.telefono;
+      this.form.personaId = valor.idPersona.toString();
+      this.form.identificacion = valor.numeroIdentificacion || '';
+      this.form.nombres = valor.nombreCompleto.split(' ')[0];
+      this.form.apellidos = valor.nombreCompleto.split(' ').slice(1).join(' ');
+      this.form.correo = valor.email || '';
+      this.form.telefono = valor.telefono || '';
     } else {
       (this.form as any)[campo] = valor;
     }
-    
+
     this.dropdownAbierto = null;
   }
 
   getPersonaNombre(): string {
-    const persona = this.personasDisponibles.find(p => p.id.toString() === this.form.persona);
-    return persona ? `${persona.nombres} ${persona.apellidos}` : '';
+    const persona = this.personasDisponibles.find(
+      p => p.id.toString() === this.form.personaId ||
+           p.idPersona?.toString() === this.form.personaId
+    );
+    return persona ? persona.nombreCompleto : '';
   }
-
+get nombreApellidoBloqueado(): boolean {
+  if (this.modoEdicion) {
+    return this.form.tipoNombre === 'Interno';
+  }
+  return this.form.tipoNombre === 'Interno' && !!this.form.personaId;
+}
   cerrar() {
     this.enviado = false;
     this.dropdownAbierto = null;
-    this.form = { tipo: '', persona: '', nombres: '', apellidos: '', correo: '', telefono: '', estado: '' };
+    this.nombresInvalido = false;
+    this.apellidosInvalido = false;
+    this.syncFormWithLider();
     this.cerrarModal.emit();
   }
 
+  isEmailValid(email: string): boolean {
+    if (!email || email.trim().length === 0) return true;
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email.trim());
+  }
+
+  isTelefonoValid(telefono: string): boolean {
+    if (!telefono || telefono.trim().length === 0) return true;
+    const regex = /^(09\d{8}|0[2-7]\d{7})$/;
+    return regex.test(telefono.trim());
+  }
+
+  isNombresValid(nombres: string): boolean {
+    return !!nombres && nombres.trim().length >= 3 && nombres.trim().length <= 100;
+  }
+
+  isApellidosValid(apellidos: string): boolean {
+    return !!apellidos && apellidos.trim().length >= 3 && apellidos.trim().length <= 100;
+  }
+
+  telefonoTocado = false;
+  nombresTocado = false;
+  apellidosTocado = false;
+  correoTocado = false;
+
+  onBlurTelefono(): void {
+    this.telefonoTocado = true;
+  }
+
+  onBlurNombres(): void {
+    this.nombresTocado = true;
+  }
+
+  onBlurApellidos(): void {
+    this.apellidosTocado = true;
+  }
+
+  onBlurCorreo(): void {
+    this.correoTocado = true;
+  }
   formularioValido(): boolean {
+    const baseValid = !!this.form.tipoId &&
+                      this.isNombresValid(this.form.nombres) &&
+                      this.isApellidosValid(this.form.apellidos) &&
+                      this.isEmailValid(this.form.correo) &&
+                      this.isTelefonoValid(this.form.telefono);
+
     if (this.modoEdicion) {
-      return !!this.form.tipo && !!this.form.persona &&
-             !!this.form.nombres && !!this.form.apellidos &&
-             !!this.form.correo && !!this.form.telefono &&
-             !!this.form.estado;
+      return baseValid;
     }
-    return !!this.form.tipo && !!this.form.persona &&
-           !!this.form.nombres && !!this.form.apellidos &&
-           !!this.form.correo && !!this.form.telefono;
+
+    if (this.form.tipoNombre === 'Interno') {
+      return baseValid && !!this.form.personaId;
+    }
+
+    return baseValid;
   }
 
   onGuardar() {
+    if (this.guardando) return;
     this.enviado = true;
     if (!this.formularioValido()) return;
-    this.guardar.emit();
-    this.cerrarModal.emit();
-    this.form = { tipo: '', persona: '', nombres: '', apellidos: '', correo: '', telefono: '', estado: '' };
-    this.enviado = false;
+    this.guardar.emit(this.form);
+  }
+
+  soloNumerosYSignos(event: KeyboardEvent): boolean {
+    const regex = /^[0-9]$/;
+    if (event.key.length > 1) return true;
+    if (!regex.test(event.key)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  onInputNombres(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const valorOriginal = input.value;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/gu, '');
+    this.nombresInvalido = valorOriginal !== input.value;
+    this.form.nombres = input.value;
+    if (this.nombresInvalido) {
+      setTimeout(() => this.nombresInvalido = false, 2000);
+    }
+  }
+
+  onInputApellidos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const valorOriginal = input.value;
+    input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/gu, '');
+    this.apellidosInvalido = valorOriginal !== input.value;
+    this.form.apellidos = input.value;
+    if (this.apellidosInvalido) {
+      setTimeout(() => this.apellidosInvalido = false, 2000);
+    }
+  }
+
+  onInputTelefono(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, '');
+    this.form.telefono = input.value;
   }
 }

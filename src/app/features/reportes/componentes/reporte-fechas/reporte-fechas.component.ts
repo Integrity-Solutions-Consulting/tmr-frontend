@@ -2,16 +2,19 @@ import { Component, signal, computed, OnInit, inject, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteFechas } from '../../modelos/reporte-fechas.model';
-import { HeaderComponent } from '../../../../shared/componentes/header/header.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { ReportesService } from '../../servicios/reportes.service';
 
-import { TablaComponent } from '../../../../shared/componentes/tabla-colega/tabla.component';
-import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/tabla.types';
+import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla.component';
+import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
+import { MatIconModule } from '@angular/material/icon';
+import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 @Component({
   selector: 'app-reporte-fechas',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
   templateUrl: './reporte-fechas.component.html',
   styleUrl: './reporte-fechas.component.scss'
 })
@@ -75,10 +78,7 @@ export class ReporteFechasComponent {
     });
   }
 
-  mostrarDatos = computed(() => {
-    const hayFiltros = this.busquedaCliente() !== '' || this.busquedaLider() !== '' || this.fechaInicio() !== '' || this.fechaFin() !== '';
-    return hayFiltros || this.forzarMostrar();
-  });
+  mostrarDatos = computed(() => true);
 
   datosFiltrados = computed(() => this.datos());
 
@@ -148,106 +148,128 @@ export class ReporteFechasComponent {
   }
 
   async exportarExcel() {
-    const data = this.datosFiltrados();
-    if (data.length === 0) return;
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      lider: this.busquedaLider() || undefined,
+      fechaInicio: this.fechaInicio() ? this.fechaInicio() + 'T00:00:00' : undefined,
+      fechaFin: this.fechaFin() ? this.fechaFin() + 'T23:59:59' : undefined
+    };
 
-    const { Workbook } = await import('exceljs');
-    const workbook = new Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Fechas');
+    const total = this.totalItems();
+    if (total === 0) return;
 
-    // 1. Columnas y anchos recomendados
-    worksheet.columns = [
-      { header: 'Cliente', key: 'cliente', width: 25 },
-      { header: 'Líder', key: 'lider', width: 25 },
-      { header: 'Recurso', key: 'recurso', width: 25 },
-      { header: 'Cargo', key: 'cargo', width: 25 },
-      { header: 'Inicio', key: 'fechaInicio', width: 15 },
-      { header: 'Fin', key: 'fechaFin', width: 15 }
-    ];
+    this.reportesService.getReporteFechas(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
 
-    // 2. Agregar datos
-    data.forEach(item => {
-      worksheet.addRow({
-        cliente: item.cliente,
-        lider: item.lider,
-        recurso: item.recurso,
-        cargo: item.cargo,
-        fechaInicio: item.fechaInicio ? item.fechaInicio.toLocaleDateString() : '',
-        fechaFin: item.fechaFin ? item.fechaFin.toLocaleDateString() : ''
-      });
+        await exportarReporteExcel({
+          titulo: 'Reporte por Fechas de Asignación',
+          nombreArchivo: 'Fechas',
+          nombreHoja: 'Reporte de Fechas',
+          columnas: [
+            { encabezado: 'Código del Proyecto', anchoExcel: 20 },
+            { encabezado: 'Proyecto', anchoExcel: 25 },
+            { encabezado: 'Líder', anchoExcel: 25 },
+            { encabezado: 'Cliente', anchoExcel: 25 },
+            { encabezado: 'Estado del Proyecto', anchoExcel: 20 },
+            { encabezado: 'Tipo de Proyecto', anchoExcel: 20 },
+            { encabezado: 'Recurso', anchoExcel: 25 },
+            { encabezado: 'Cargo', anchoExcel: 20 },
+            { encabezado: 'Fecha de Inicio', anchoExcel: 15, alineacion: 'center' },
+            { encabezado: 'Fecha de Fin Estimada', anchoExcel: 18, alineacion: 'center' },
+            { encabezado: 'Fecha Fin Real', anchoExcel: 15, alineacion: 'center' },
+            { encabezado: 'Presupuesto', anchoExcel: 15, alineacion: 'right' },
+            { encabezado: 'Horas', anchoExcel: 12, alineacion: 'center' },
+            { encabezado: 'Fecha Inicio Espera', anchoExcel: 18, alineacion: 'center' },
+            { encabezado: 'Fecha Fin Espera', anchoExcel: 18, alineacion: 'center' },
+            { encabezado: 'Observaciones', anchoExcel: 30 },
+          ],
+          filas: data.map((item) => [
+            item.codigoProyecto || '',
+            item.proyecto || '',
+            item.lider,
+            item.cliente,
+            item.estadoProyecto || '',
+            item.tipoProyecto || '',
+            item.recurso,
+            item.cargo,
+            item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+            item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+            item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
+            item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
+            item.horas !== null && item.horas !== undefined ? item.horas : '',
+            item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
+            item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
+            item.observaciones || '',
+          ]),
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar Excel:', err)
     });
+  }
 
-    // 3. Aplicar estilos a la cabecera
-    const headerRow = worksheet.getRow(1);
-    headerRow.height = 25;
-    headerRow.eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF163572' } // Color de marca principal #163572
-      };
-      cell.font = {
-        name: 'Segoe UI',
-        size: 11,
-        bold: true,
-        color: { argb: 'FFFFFFFF' }
-      };
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center'
-      };
+  async exportarPDF() {
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      lider: this.busquedaLider() || undefined,
+      fechaInicio: this.fechaInicio() ? this.fechaInicio() + 'T00:00:00' : undefined,
+      fechaFin: this.fechaFin() ? this.fechaFin() + 'T23:59:59' : undefined
+    };
+
+    const total = this.totalItems();
+    if (total === 0) return;
+
+    this.reportesService.getReporteFechas(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
+
+        await exportarReportePdf({
+          titulo: 'Reporte por Fechas de Asignación',
+          nombreArchivo: 'Fechas',
+          nombreHoja: 'Reporte de Fechas',
+          columnas: [
+            { encabezado: 'Código del Proyecto', anchoPdf: 25 },
+            { encabezado: 'Proyecto', anchoPdf: 30 },
+            { encabezado: 'Líder', anchoPdf: 30 },
+            { encabezado: 'Cliente', anchoPdf: 30 },
+            { encabezado: 'Estado del Proyecto', anchoPdf: 22 },
+            { encabezado: 'Tipo de Proyecto', anchoPdf: 22 },
+            { encabezado: 'Recurso', anchoPdf: 30 },
+            { encabezado: 'Cargo', anchoPdf: 22 },
+            { encabezado: 'Fecha de Inicio', anchoPdf: 18, alineacion: 'center' },
+            { encabezado: 'Fecha de Fin Estimada', anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Fecha Fin Real', anchoPdf: 18, alineacion: 'center' },
+            { encabezado: 'Presupuesto', anchoPdf: 18, alineacion: 'right' },
+            { encabezado: 'Horas', anchoPdf: 12, alineacion: 'center' },
+            { encabezado: 'Fecha Inicio Espera', anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Fecha Fin Espera', anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Observaciones', anchoPdf: 35 },
+          ],
+          filas: data.map((item) => [
+            item.codigoProyecto || '',
+            item.proyecto || '',
+            item.lider,
+            item.cliente,
+            item.estadoProyecto || '',
+            item.tipoProyecto || '',
+            item.recurso,
+            item.cargo,
+            item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+            item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+            item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
+            item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
+            item.horas !== null && item.horas !== undefined ? item.horas : '',
+            item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
+            item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
+            item.observaciones || '',
+          ]),
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar PDF:', err)
     });
-
-    // 4. Aplicar estilos a las celdas de datos
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // Omitir cabecera
-
-      row.height = 20;
-
-      // Cebra (alternar fondo gris y blanco)
-      const fillType = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-
-      row.eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: fillType }
-        };
-        cell.font = {
-          name: 'Segoe UI',
-          size: 10,
-          color: { argb: 'FF334155' } // Gris oscuro #334155
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
-        };
-        
-        // Centrar las fechas
-        if (cell.address.startsWith('E') || cell.address.startsWith('F')) {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'center'
-          };
-        } else {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'left'
-          };
-        }
-      });
-    });
-
-    // 5. Descargar archivo
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Reporte_Fechas_${new Date().toISOString().slice(0, 10)}.xlsx`;
-    link.click();
-    URL.revokeObjectURL(url);
   }
 }

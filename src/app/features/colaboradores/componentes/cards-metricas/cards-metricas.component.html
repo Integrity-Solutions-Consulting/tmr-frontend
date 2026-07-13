@@ -1,59 +1,94 @@
+<!-- Colaboradores metric cards wrapper -->
 <div class="metricas">
 
-  <!-- Card 1: No asignados / Asignados -->
   <div class="metricas__card">
     <div class="metricas__card-content">
       <div class="metricas__top">
-        <img
-          src="assets/iconos/card-project.svg"
-          alt="proyectos"
-          class="metricas__icon"
-          width="20"
-          height="20"
-        />
-        <span class="metricas__numero">
-          {{ mostrandoAsignados ? asignados : noAsignados }}
+        <span class="metricas__icon-box metricas__icon-box--total" aria-hidden="true">
+          <img
+            class="metricas__icon"
+            src="assets/iconos/Iconos-Sidebar%26Cards/Colaboradores/totalColab.svg"
+            alt=""
+          />
         </span>
+
+        <span class="metricas__numero">{{ totalColaboradores }}</span>
       </div>
-      <span class="metricas__label">
-        {{ mostrandoAsignados ? 'Asignados' : 'No asignados' }}
-      </span>
+
+      <span class="metricas__label">Total colaboradores</span>
     </div>
-    <button
-      class="metricas__filter-btn"
-      (click)="toggleAsignados()"
-      [title]="mostrandoAsignados ? 'Ver no asignados' : 'Ver asignados'"
-    >
-      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
-    </button>
   </div>
 
-  <!-- Card 2: Inactivos / Activos -->
   <div class="metricas__card">
     <div class="metricas__card-content">
       <div class="metricas__top">
-        <img
-          src="assets/iconos/card-user.svg"
-          alt="usuarios"
-          class="metricas__icon"
-          width="20"
-          height="20"
-        />
-        <span class="metricas__numero">
-          {{ mostrandoActivos ? activos : inactivos }}
+        <span class="metricas__icon-box metricas__icon-box--activos" aria-hidden="true">
+          <img
+            class="metricas__icon"
+            src="assets/iconos/Iconos-Sidebar%26Cards/Colaboradores/colabActivos.svg"
+            alt=""
+          />
         </span>
+
+        <span class="metricas__numero">{{ activos }}</span>
       </div>
-      <span class="metricas__label">
-        {{ mostrandoActivos ? 'Activos' : 'Inactivos' }}
-      </span>
+
+      <span class="metricas__label">Activos</span>
     </div>
-    <button
-      class="metricas__filter-btn"
-      (click)="toggleActivos()"
-      [title]="mostrandoActivos ? 'Ver inactivos' : 'Ver activos'"
-    >
-      <img src="assets/iconos/filter.svg" alt="filtrar" width="14" height="14" />
-    </button>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__icon-box metricas__icon-box--inactivos" aria-hidden="true">
+          <img
+            class="metricas__icon"
+            src="assets/iconos/Iconos-Sidebar%26Cards/Colaboradores/colabInactivos.svg"
+            alt=""
+          />
+        </span>
+
+        <span class="metricas__numero">{{ inactivos }}</span>
+      </div>
+
+      <span class="metricas__label">Inactivos</span>
+    </div>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__icon-box metricas__icon-box--asignados" aria-hidden="true">
+          <img
+            class="metricas__icon"
+            src="assets/iconos/Iconos-Sidebar%26Cards/Colaboradores/colabAsignados.svg"
+            alt=""
+          />
+        </span>
+
+        <span class="metricas__numero">{{ asignados }}</span>
+      </div>
+
+      <span class="metricas__label">Asignados</span>
+    </div>
+  </div>
+
+  <div class="metricas__card">
+    <div class="metricas__card-content">
+      <div class="metricas__top">
+        <span class="metricas__icon-box metricas__icon-box--no-asignados" aria-hidden="true">
+          <img
+            class="metricas__icon"
+            src="assets/iconos/Iconos-Sidebar%26Cards/Colaboradores/colabNoAsignados.svg"
+            alt=""
+          />
+        </span>
+
+        <span class="metricas__numero">{{ noAsignados }}</span>
+      </div>
+
+      <span class="metricas__label">No asignados</span>
+    </div>
   </div>
 
 </div>

@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ExcelService } from '../../services/excel.service';
-import { ActividadesActions } from './actividades.actions'; 
-import { catchError, map, mergeMap, of } from 'rxjs';
+import { ActividadesActions } from './actividades.actions';
+import { catchError, map, mergeMap, of, switchMap } from 'rxjs';
 import { Actividad } from '../../models/actividad.model';
 
 @Injectable()
@@ -11,16 +11,22 @@ export class ActividadesEffects {
   private excelService = inject(ExcelService);
 
   private getValue(source: any, keys: string[], fallback: any = '') {
-    const key = keys.find(k => source?.[k] !== undefined && source?.[k] !== null);
-    return key ? source[key] : fallback;
+    const key = keys.find(k => {
+      const value = source?.[k];
+      return value !== undefined &&
+        value !== null &&
+        (typeof value !== 'string' || value.trim() !== '');
+    });
+    const value = key ? source[key] : fallback;
+    return typeof value === 'string' ? value.trim() : value;
   }
 
   private normalizarActividad(item: any): Actividad {
     return {
       id: String(this.getValue(item, ['id', 'Id'], crypto.randomUUID())),
       colaborador: this.getValue(item, ['colaborador', 'Colaborador'], 'Sin colaborador'),
-      proyecto: this.getValue(item, ['proyecto', 'Proyecto', 'descripcionActividad', 'DescripcionActividad'], 'Sin proyecto'),
-      cliente: this.getValue(item, ['cliente', 'Cliente'], 'Sin cliente'),
+      proyecto: this.getValue(item, ['proyecto', 'Proyecto', 'proyectoNombre', 'ProyectoNombre', 'descripcionActividad', 'DescripcionActividad'], 'Sin proyecto'),
+      cliente: this.getValue(item, ['cliente', 'Cliente', 'clienteNombre', 'ClienteNombre'], 'Sin cliente'),
       liderTecnico: this.getValue(item, ['liderTecnico', 'LiderTecnico'], ''),
       fecha: this.getValue(item, ['fecha', 'Fecha', 'fechaActividad', 'FechaActividad'], undefined),
       nroHoras: Number(this.getValue(item, ['nroHoras', 'NroHoras', 'cantidadHoras', 'CantidadHoras'], 0)),
@@ -32,25 +38,21 @@ export class ActividadesEffects {
     const lista = Array.isArray(response)
       ? response
       : this.getValue(response, ['actividades', 'Actividades', 'items', 'Items', 'data', 'Data'], []);
-
     return Array.isArray(lista) ? lista.map(item => this.normalizarActividad(item)) : [];
   }
 
   private obtenerErrores(error: any): string[] {
     const body = error?.error;
     if (!body || typeof body === 'string') return [];
-
     const errores = this.getValue(body, ['erroresValidacion', 'ErroresValidacion', 'errors', 'Errors'], []);
     if (Array.isArray(errores)) return errores.map(String);
     if (typeof errores === 'object') return Object.values(errores).flat().map(String);
-
     return [];
   }
 
   private obtenerMensajeError(error: any): string {
     const body = error?.error;
     if (typeof body === 'string') return body;
-
     return this.getValue(
       body,
       ['message', 'Message', 'mensaje', 'Mensaje', 'title', 'Title'],
@@ -58,6 +60,28 @@ export class ActividadesEffects {
     );
   }
 
+  // Efecto: carga inicial desde la BD al arrancar
+  cargarActividades$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ActividadesActions.cargarActividades),
+      switchMap(() =>
+        this.excelService.obtenerActividades().pipe(
+          map((response: any) =>
+            ActividadesActions.cargarActividadesSuccess({
+              actividades: this.obtenerActividades(response)
+            })
+          ),
+          catchError((error) =>
+            of(ActividadesActions.cargarActividadesFailure({
+              error: this.obtenerMensajeError(error)
+            }))
+          )
+        )
+      )
+    )
+  );
+
+  // Efecto: importar Excel — al tener éxito, también recarga la tabla desde BD
   importarExcel$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ActividadesActions.importarExcel),
@@ -72,19 +96,27 @@ export class ActividadesEffects {
                 errores: this.getValue(response, ['erroresValidacion', 'ErroresValidacion'], [])
               });
             }
-            
-            return ActividadesActions.importarExcelSuccess({ 
+
+            return ActividadesActions.importarExcelSuccess({
               actividades: this.obtenerActividades(response)
             });
           }),
-          catchError((error) => {
-            return of(ActividadesActions.importarExcelFailure({
+          catchError((error) =>
+            of(ActividadesActions.importarExcelFailure({
               error: this.obtenerMensajeError(error),
               errores: this.obtenerErrores(error)
-            }));
-          })
+            }))
+          )
         )
       )
+    )
+  );
+
+  // ✅ Efecto: recargar tabla desde BD tras importar con éxito (se mantiene para actualizar datos)
+  recargarTrasImportar$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ActividadesActions.importarExcelSuccess),
+      map(() => ActividadesActions.cargarActividades())
     )
   );
 }

@@ -35,7 +35,7 @@
       [filtros]="filtros"
       (verMas)="abrirModalDetalle($event)"
       (editar)="abrirModalEditar($event)"
-      (eliminar)="solicitarEliminarProyecto($event)"
+      (inactivar)="solicitarCambiarEstadoProyecto($event)"
     ></app-tabla>
   </div>
 </section>
@@ -48,24 +48,25 @@
   @if (modalCrearVisible) {
     <app-proyecto-form
       [proyecto]="proyectoSeleccionado"
+      [guardando]="guardandoProyecto"
       (guardarProyecto)="guardarProyecto($event)"
     ></app-proyecto-form>
   }
 </app-modal-base>
 
 <app-confirm-dialog
-  [visible]="confirmEliminarVisible"
-  titulo="Eliminar proyecto"
-  mensaje="Esta accion eliminara el proyecto seleccionado. Deseas continuar?"
+  [visible]="confirmCambioEstadoVisible"
+  [titulo]="confirmTitulo"
+  [mensaje]="confirmMensaje"
   textoCancelar="Cancelar"
-  textoConfirmar="Eliminar"
-  (cancelar)="cancelarEliminarProyecto()"
-  (confirmar)="confirmarEliminarProyecto()"
+  [textoConfirmar]="confirmTextoConfirmar"
+  (cancelar)="cancelarCambiarEstadoProyecto()"
+  (confirmar)="confirmarCambiarEstadoProyecto()"
 ></app-confirm-dialog>
 
 <app-success-modal
   [visible]="successCrearVisible"
-  mensaje="El nuevo proyecto ha sido creado exitosamente"
+  mensaje="Proyecto creado correctamente"
   (cerrar)="cerrarSuccessCrear()"
 ></app-success-modal>
 
@@ -107,64 +108,103 @@
         </div>
 
         <div>
+          <span>Cliente</span>
+          <strong>{{ proyectoDetalle.cliente || 'Sin cliente' }}</strong>
+        </div>
+
+        <div>
           <span>Rango de fechas</span>
           <strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong>
         </div>
+
+        <div>
+          <span>Observación</span>
+          <strong>{{ proyectoDetalle.observacion || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Fecha fin real</span>
+          <strong>{{ formatearFecha(proyectoDetalle.fechaFinReal) }}</strong>
+        </div>
+
+        @if (proyectoDetalle.idEstadoProyecto === idEstadoEnEspera) {
+          <div>
+            <span>Fecha inicio espera</span>
+            <strong>{{ formatearFecha(proyectoDetalle.fechaInicioEspera) }}</strong>
+          </div>
+          <div>
+            <span>Fecha fin espera</span>
+            <strong>{{ formatearFecha(proyectoDetalle.fechaFinEspera) }}</strong>
+          </div>
+        }
       </section>
 
-      <section class="proyecto-detalle__leader">
-        <h4>Lider</h4>
+      <section class="proyecto-detalle__leaders">
+        <h4>Líderes</h4>
 
-        <div class="proyecto-detalle__leader-grid">
-          <div>
-            <span>Nombre</span>
-            <strong>{{ proyectoDetalle.lider || '-' }}</strong>
+        @for (lider of proyectoDetalle.lideres || []; track lider.lider) {
+        <div class="proyecto-detalle__leader-card">
+          <div class="proyecto-detalle__leader-grid">
+            <div>
+              <span>Nombre</span>
+              <strong>{{ lider.lider || '-' }}</strong>
+            </div>
+
+            <div>
+              <span>Costo/hora</span>
+              <strong>${{ lider.costoHoraLider || 0 }}/hora</strong>
+            </div>
+
+            <div>
+              <span>Horas</span>
+              <strong>{{ lider.horasLider || 0 }}</strong>
+            </div>
           </div>
 
-          <div>
-            <span>Costo/hora</span>
-            <strong>${{ proyectoDetalle.costoHoraLider || 0 }}/hora</strong>
-          </div>
+          <div class="proyecto-detalle__resources">
+            <mat-accordion>
+              <mat-expansion-panel class="proyecto-detalle__resources-panel">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Recursos asignados</mat-panel-title>
+                  <mat-panel-description>
+                    {{ (lider.recursos || []).length }} recurso{{ (lider.recursos || []).length === 1 ? '' : 's' }}
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
 
-          <div>
-            <span>Horas</span>
-            <strong>{{ proyectoDetalle.horasLider || 0 }}</strong>
+                <div class="proyecto-detalle__table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Rol asignado</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Costo/hora</th>
+                        <th>Horas</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      @for (recurso of lider.recursos || []; track recurso.nombre) {
+                        <tr>
+                          <td>{{ recurso.tipo }}</td>
+                          <td>{{ recurso.nombre }}</td>
+                          <td>{{ recurso.rol }}</td>
+                          <td>{{ formatearFecha(recurso.entrada) }}</td>
+                          <td>{{ formatearFecha(recurso.salida) }}</td>
+                          <td>${{ recurso.costoHora }}/hora</td>
+                          <td>{{ recurso.horas }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
           </div>
         </div>
-      </section>
-
-      <section class="proyecto-detalle__resources">
-        <h4>Recursos</h4>
-
-        <div class="proyecto-detalle__table">
-          <table>
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Nombre</th>
-                <th>Rol asignado</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-                <th>Costo/hora</th>
-                <th>Horas</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              @for (recurso of proyectoDetalle.recursos || []; track recurso.nombre) {
-                <tr>
-                  <td>{{ recurso.tipo }}</td>
-                  <td>{{ recurso.nombre }}</td>
-                  <td>{{ recurso.rol }}</td>
-                  <td>{{ formatearFecha(recurso.entrada) }}</td>
-                  <td>{{ formatearFecha(recurso.salida) }}</td>
-                  <td>${{ recurso.costoHora }}/hora</td>
-                  <td>{{ recurso.horas }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        }
       </section>
     </article>
   }

@@ -1,144 +1,176 @@
-<div class="modal-overlay" (click)="onOverlay($event)">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+<div class="modal-backdrop">
+  <form class="modal-form" [formGroup]="form" (ngSubmit)="onSubmit()" (click)="$event.stopPropagation()">
 
-    <!-- Header -->
-    <div class="modal-header">
-      <h2 class="modal-titulo">Editar cliente</h2>
-      <button class="btn-cerrar" (click)="cancelar.emit()">✕</button>
+    <div class="modal-form__header">
+      <div>
+        <h2 class="modal-form__title">Editar Cliente</h2>
+        <p class="modal-form__subtitle">{{ cliente.nombreComercial }}</p>
+      </div>
+
+      <button class="modal-form__close" (click)="cancelar.emit()" type="button" aria-label="Cerrar">
+        <span class="material-icons">close</span>
+      </button>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="modal-form__body">
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Informaci&oacute;n General
+        </div>
 
-      <!-- Sección Información General -->
-      <div class="seccion-titulo">
-        <span class="barra"></span> Información General
+        <div class="form-grid form-grid--2">
+          <div class="form-field">
+            <div class="float-select">
+              <select
+                class="float-select__input"
+                formControlName="tipoId"
+                [class.float-select__input--error]="campoInvalido('tipoId')">
+                <option value=""></option>
+                <option *ngFor="let t of tipos" [value]="t.valor">{{ t.valor }}</option>
+              </select>
+
+              <label class="float-select__label" [class.float-select__label--up]="tieneValor('tipoId')">
+                Tipo de Identificador <span class="req">*</span>
+              </label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('tipoId')">
+              {{ mensajeErrorCampo('tipoId') }}
+            </span>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="identificador"
+                placeholder=" "
+                (input)="limpiarIdentificador()"
+                [class.float-field__input--error]="campoInvalido('identificador')" />
+
+              <label class="float-field__label">N&uacute;m. Identificaci&oacute;n <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('identificador')">
+              {{ mensajeErrorIdentificacion() }}
+            </span>
+          </div>
+
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="nombreComercial"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('nombreComercial')" />
+
+              <label class="float-field__label">Nombre Comercial <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('nombreComercial')">
+              {{ mensajeErrorCampo('nombreComercial') }}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div class="form-grid">
-
-        <!-- Estado -->
-        <div class="campo campo-full">
-          <div class="floating-field" [class.focused]="focusEstado || form.get('estado')?.value">
-            <select formControlName="estado" class="input-field select-field"
-              (focus)="focusEstado=true" (blur)="focusEstado=false"
-              [class.error]="campoInvalido('estado')">
-              <option value="" disabled></option>
-              <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
-            </select>
-            <label class="floating-label">Estado</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('estado')">Campo requerido</span>
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__bar"></span>
+          Datos de contacto
         </div>
 
-        <!-- Tipo de Identificador -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusTipo || form.get('tipoId')?.value">
-            <select formControlName="tipoId" class="input-field select-field"
-              (focus)="focusTipo=true" (blur)="focusTipo=false"
-              [class.error]="campoInvalido('tipoId')">
-              <option value="" disabled></option>
-              <option *ngFor="let t of tipos" [value]="t">{{ t }}</option>
-            </select>
-            <label class="floating-label">Tipo de Identificador</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('tipoId')">Campo requerido</span>
-        </div>
+        <div class="form-grid form-grid--2">
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="nombres"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('nombres')" />
 
-        <!-- Num. Identificación -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusIdent || form.get('identificador')?.value">
-            <input formControlName="identificador" class="input-field"
-              (focus)="focusIdent=true" (blur)="focusIdent=false"
-              [class.error]="campoInvalido('identificador')"/>
-            <label class="floating-label">Num. Identificación</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('identificador')">Campo requerido</span>
-        </div>
+              <label class="float-field__label">Nombres <span class="req">*</span></label>
+            </div>
 
-        <!-- Nombre Comercial -->
-        <div class="campo campo-full">
-          <div class="floating-field" [class.focused]="focusNombre || form.get('nombreComercial')?.value">
-            <input formControlName="nombreComercial" class="input-field"
-              (focus)="focusNombre=true" (blur)="focusNombre=false"
-              [class.error]="campoInvalido('nombreComercial')"/>
-            <label class="floating-label">Nombre Comercial</label>
+            <span class="form-field__error" *ngIf="campoInvalido('nombres')">
+              {{ mensajeErrorCampo('nombres') }}
+            </span>
           </div>
-          <span class="error-msg" *ngIf="campoInvalido('nombreComercial')">Campo requerido</span>
-        </div>
 
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="apellidos"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('apellidos')" />
+
+              <label class="float-field__label">Apellidos <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('apellidos')">
+              {{ mensajeErrorCampo('apellidos') }}
+            </span>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="correoElectronico"
+                type="email"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('correoElectronico')" />
+
+              <label class="float-field__label">Correo electr&oacute;nico <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('correoElectronico')">
+              {{ mensajeErrorCampo('correoElectronico') }}
+            </span>
+          </div>
+
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="telefono"
+                placeholder=" "
+                (input)="limpiarTelefono()"
+                [class.float-field__input--error]="campoInvalido('telefono')" />
+
+              <label class="float-field__label">Tel&eacute;fono <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('telefono')">
+              {{ mensajeErrorCampo('telefono') }}
+            </span>
+          </div>
+
+          <div class="form-field form-field--full">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                formControlName="direccion"
+                placeholder=" "
+                [class.float-field__input--error]="campoInvalido('direccion')" />
+
+              <label class="float-field__label">Direcci&oacute;n <span class="req">*</span></label>
+            </div>
+
+            <span class="form-field__error" *ngIf="campoInvalido('direccion')">
+              {{ mensajeErrorCampo('direccion') }}
+            </span>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <!-- Sección Datos de contacto -->
-      <div class="seccion-titulo mt-contacto">
-        <span class="barra"></span> Datos de contacto
-      </div>
-
-      <div class="form-grid">
-
-        <!-- Nombres -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusNombres || form.get('nombres')?.value">
-            <input formControlName="nombres" class="input-field"
-              (focus)="focusNombres=true" (blur)="focusNombres=false"
-              [class.error]="campoInvalido('nombres')"/>
-            <label class="floating-label">Nombres</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('nombres')">Campo requerido</span>
-        </div>
-
-        <!-- Apellidos -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusApellidos || form.get('apellidos')?.value">
-            <input formControlName="apellidos" class="input-field"
-              (focus)="focusApellidos=true" (blur)="focusApellidos=false"
-              [class.error]="campoInvalido('apellidos')"/>
-            <label class="floating-label">Apellidos</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('apellidos')">Campo requerido</span>
-        </div>
-
-        <!-- Correo -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusCorreo || form.get('correoElectronico')?.value">
-            <input formControlName="correoElectronico" class="input-field" type="email"
-              (focus)="focusCorreo=true" (blur)="focusCorreo=false"
-              [class.error]="campoInvalido('correoElectronico')"/>
-            <label class="floating-label">Correo electrónico</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('correoElectronico')">
-            {{ form.get('correoElectronico')?.hasError('required') ? 'Campo requerido' : 'Correo inválido' }}
-          </span>
-        </div>
-
-        <!-- Teléfono -->
-        <div class="campo">
-          <div class="floating-field" [class.focused]="focusTelefono || form.get('telefono')?.value">
-            <input formControlName="telefono" class="input-field"
-              (focus)="focusTelefono=true" (blur)="focusTelefono=false"
-              [class.error]="campoInvalido('telefono')"/>
-            <label class="floating-label">Teléfono</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('telefono')">Campo requerido</span>
-        </div>
-
-        <!-- Dirección -->
-        <div class="campo campo-full">
-          <div class="floating-field" [class.focused]="focusDireccion || form.get('direccion')?.value">
-            <input formControlName="direccion" class="input-field"
-              (focus)="focusDireccion=true" (blur)="focusDireccion=false"
-              [class.error]="campoInvalido('direccion')"/>
-            <label class="floating-label">Dirección</label>
-          </div>
-          <span class="error-msg" *ngIf="campoInvalido('direccion')">Campo requerido</span>
-        </div>
-
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button type="submit" class="btn-agregar">Guardar Cambios +</button>
-      </div>
-
-    </form>
-  </div>
+    <div class="modal-form__footer">
+      <button class="modal-form__btn modal-form__btn--save" type="submit">
+        Guardar
+      </button>
+    </div>
+  </form>
 </div>

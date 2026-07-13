@@ -1,0 +1,25 @@
+<div class="modal-overlay" *ngIf="mostrar" (click)="cerrarModal.emit()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-icon">
+      <span class="material-symbols-outlined">delete</span>
+    </div>
+
+    <h2 class="modal-title">¿Eliminar actividad?</h2>
+
+    <p class="modal-mensaje">
+      Esta acción eliminará la actividad <strong *ngIf="descripcionActividad; else sinDesc">{{ descripcionActividad }}</strong><ng-template #sinDesc><strong>sin descripción</strong></ng-template> permanentemente.
+    </p>
+
+    <div class="modal-form__error-banner" *ngIf="error">
+      <span class="material-icons">error_outline</span>
+      <span>{{ error }}</span>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" type="button" (click)="cerrarModal.emit()">Cancelar</button>
+      <button class="btn-eliminar" type="button" (click)="confirmarEliminar.emit()">Eliminar</button>
+    </div>
+
+  </div>
+</div>

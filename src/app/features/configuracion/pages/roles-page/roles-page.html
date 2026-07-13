@@ -1,42 +1,219 @@
-<section class="page">
-  <div class="hero">
-    <div>
-      <h2>Roles</h2>
+<section class="page" (click)="cerrarExpandido(); cerrarDropdowns()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Roles</h1>
+  </div>
+
+  <!-- Cards resumen -->
+  <div class="cards-row">
+
+    <!-- Total roles -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--total-roles">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
+            </svg>
+          </div>
+          <span class="card-number">{{ totalRoles() }}</span>
+        </div>
+        <span class="card-label">Total roles</span>
+      </div>
     </div>
-    <app-boton label="Nuevo Rol" icon="add" (clicked)="openModal()" />
+
+    <!-- Activos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--active">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
+              <polyline points="15 19 17 21 21 16"/>
+            </svg>
+          </div>
+          <span class="card-number">{{ rolesActivos() }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <div class="card-icon card-icon--inactive">
+            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
+            </svg>
+          </div>
+          <span class="card-number">{{ rolesInactivos() }}</span>
+        </div>
+        <span class="card-label">Inactivos</span>
+      </div>
+    </div>
+
   </div>
 
-  <div class="stats-grid">
-    <article>
-      <span>Roles activos</span>
-      <strong>{{ roles().length }}</strong>
-    </article>
-    <article>
-      <span>Modulos cubiertos</span>
-      <strong>14</strong>
-    </article>
-    <article>
-      <span>Acceso critico</span>
-      <strong>1</strong>
-    </article>
-  </div>
-
-  <div class="panel">
-    <div class="toolbar">
-      <app-search-input
-        placeholder="Buscar por nombre de rol, descripcion o modulo..."
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <img src="assets/iconos/buscar.svg" alt="buscar" class="search-icon" width="16" height="16" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por nombre de rol, descripción o módulo..."
         [value]="query()"
-        (valueChange)="query.set($event)"
+        (input)="setQuery($any($event.target).value)"
+        autocomplete="off"
       />
+      @if (query()) {
+        <button class="search-clear" (click)="setQuery('')" type="button">
+          <span class="material-icons">close</span>
+        </button>
+      }
     </div>
 
-    <app-tabla
-      [columns]="columns"
-      [rows]="$any(filteredRoles())"
-      emptyMessage="No se encontraron roles."
-      (view)="viewRol($any($event))"
-      (edit)="openModal($any($event))"
-      (delete)="deleteRol($any($event))"
-    />
+    <div class="estado-filter">
+      <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
+        <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
+        <span>{{ labelEstado() }}</span>
+      </button>
+
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="estado-dropdown-list">
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('Activo'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Activo'">
+              <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Activos</span>
+          </button>
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Inactivo'">
+              <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Inactivos</span>
+          </button>
+        </div>
+        <button class="estado-dropdown-clear" (click)="seleccionarEstado(''); $event.stopPropagation()" type="button">
+          Limpiar filtro
+        </button>
+      </div>
+    </div>
+
+    <div class="search-spacer"></div>
+
+    <div class="usuarios-actions">
+      <button
+        mat-flat-button
+        type="button"
+        class="page-create"
+        (click)="openModal()"
+      >
+        <span class="page-create-content">
+          Crear
+          <img src="assets/iconos/btn-agregar.svg" alt="">
+        </span>
+      </button>
+    </div>
   </div>
+
+  <!-- Panel / Tabla -->
+  <div class="panel">
+
+    @if (estadoError()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ estadoError() }}</span>
+      </div>
+    }
+
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="roles-table">
+          <thead>
+            <tr>
+              <th>Rol</th>
+              <th>Descripción</th>
+              <th>Módulos accesibles</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredRoles().length === 0) {
+              <tr>
+                <td colspan="5" class="empty-state">No se encontraron roles.</td>
+              </tr>
+            }
+
+            @for (rol of rolesPaginados(); track rol.id) {
+              <tr>
+                <td>
+                  <strong class="role-name">{{ rol.nombre }}</strong>
+                </td>
+                <td>{{ rol.descripcion }}</td>
+                <td>
+                  <div class="module-list-wrap">
+                    <div class="module-list">
+                      @for (modulo of visibleModulos(rol); track modulo.id) {
+                        <span class="module-chip">{{ modulo.nombre }}</span>
+                      }
+                      @if (modulosOcultos(rol) > 0) {
+                        <button
+                          type="button"
+                          class="module-chip module-chip--more"
+                          [class.module-chip--more-active]="estaExpandido(rol.id)"
+                          (click)="toggleModulosExpandidos($event, rol.id)"
+                          [attr.aria-expanded]="estaExpandido(rol.id)"
+                          [attr.aria-label]="'Ver ' + modulosOcultos(rol) + ' módulos más de ' + rol.nombre"
+                        >
+                          {{ estaExpandido(rol.id) ? 'Cerrar' : '+' + modulosOcultos(rol) + ' más' }}
+                        </button>
+                      }
+                    </div>
+
+                    @if (estaExpandido(rol.id)) {
+                      <div class="module-expand-list" (click)="$event.stopPropagation()">
+                        @for (modulo of modulosOcultosList(rol); track modulo.id) {
+                          <span class="module-chip module-chip--expand">{{ modulo.nombre }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [class.status-pill--inactive]="!rol.activo">
+                    {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <app-action-menu
+                    [itemId]="rol.id.toString()"
+                    [acciones]="obtenerAccionesRol(rol)"
+                  ></app-action-menu>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <app-paginacion
+    [paginaActual]="paginaActualNormalizada()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalRegistros()"
+    [porPagina]="porPagina"
+    (paginaCambia)="irAPagina($event)"
+  />
+
 </section>
+
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

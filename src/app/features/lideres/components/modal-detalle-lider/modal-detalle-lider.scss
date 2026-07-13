@@ -71,7 +71,12 @@ $inactivo: #ef4444;
   margin: 0;
 }
 
-// ── Badge estado ───────────────────────────────────────────
+.detalle-separador {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0 0 16px;
+}
+
 .badge-estado {
   display: inline-flex;
   align-items: center;
@@ -98,14 +103,13 @@ $inactivo: #ef4444;
 }
 
 .badge-inactivo {
-  .badge-circulo { background: #ef4444; }
+  .badge-circulo { background: #9ca3af; }
 }
 
-// ── Info row ───────────────────────────────────────────────
 .detalle-info-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+   gap: 5px;
   margin-bottom: 20px;
 }
 
@@ -115,6 +119,7 @@ $inactivo: #ef4444;
   gap: 4px;
   font-size: 14px;
   color: $text-light;
+  padding-left: -2;
 }
 
 .detalle-icon {
@@ -123,7 +128,6 @@ $inactivo: #ef4444;
   opacity: 0.6;
 }
 
-// ── Ícono con flechita ─────────────────────────────────────
 .detalle-icon-wrapper {
   position: relative;
   width: 24px;
@@ -142,7 +146,7 @@ $inactivo: #ef4444;
   opacity: 1;
   filter: invert(40%);
 }
-// ── Sección contacto ───────────────────────────────────────
+
 .detalle-seccion-titulo {
   display: flex;
   align-items: center;
@@ -155,7 +159,30 @@ $inactivo: #ef4444;
   color: #163572;
   margin-bottom: 16px;
   padding-top: 16px;
-  border-top: 1px solid $border;
+  border-top: none;
+}
+
+// ← fix 3: flecha alineada a la izquierda con la barra de Datos de contacto
+.detalle-seccion-titulo--toggle {
+  cursor: pointer;
+  user-select: none;
+  gap: 0px;
+  margin-left:-8px; // ← ajusta este valor hasta que la flecha quede alineada con la barra azul
+
+  .detalle-linea-azul {
+    display: none;
+  }
+}
+
+.detalle-toggle-arrow {
+  font-size: 20px;
+  color: $primary;
+  transition: transform 0.2s ease;
+  margin-left: 0;
+
+  &.rotated {
+    transform: rotate(-90deg);
+  }
 }
 
 .detalle-linea-azul {
@@ -165,16 +192,18 @@ $inactivo: #ef4444;
   border-radius: 2px;
 }
 
+// ← fix 2: alineación label + valor en columna
 .detalle-contacto-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 8px 24px;
+  margin-bottom: 16px;
 }
 
 .detalle-contacto-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .detalle-contacto-label {
@@ -191,9 +220,174 @@ $inactivo: #ef4444;
   opacity: 0.6;
 }
 
+// ← fix 1 y 2: color azul y alineación bajo el label
 .detalle-contacto-valor {
   font-size: 13px;
   color: $text-dark;
+padding-left: 20px;
+  margin-top: 2px;
 
   &.azul { color: $primary; }
+}
+.detalle-proyectos {
+  padding-top: 4px;
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    margin-left: 10px;
+    padding: 0 6px;
+    background: #f3f4f6;
+    color: #163572;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 5px;
+    border: 1px solid #d1d5db;
+    line-height: 1;
+  }
+
+  &__lista {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__empty {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 16px 0;
+    margin: 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    gap: 12px;
+  }
+
+  &__item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  &__item-nombre {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+  }
+
+  &__item-cliente {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  &__item-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  &__item-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .estado--progreso {
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    .detalle-proyectos__item-dot { background: #2563eb; }
+  }
+
+  .estado--completado {
+    color: #15803d;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    .detalle-proyectos__item-dot { background: #16a34a; }
+  }
+
+  .estado--pausa {
+    color: #d97706;
+    border-color: #fde68a;
+    background: #fffbeb;
+    .detalle-proyectos__item-dot { background: #f59e0b; }
+  }
+
+  .estado--cancelado {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fef2f2;
+    .detalle-proyectos__item-dot { background: #dc2626; }
+  }
+
+  .estado--inactivo {
+    color: #6b7280;
+    border-color: #e5e7eb;
+    background: #f9fafb;
+    .detalle-proyectos__item-dot { background: #9ca3af; }
+  }
+
+  .estado--aprobado {
+    color: #AF52DE;
+    border-color: #e9d5ff;
+    background: #faf5ff;
+    .detalle-proyectos__item-dot { background: #AF52DE; }
+  }
+
+  .estado--aplazado {
+    color: #FFD60A;
+    border-color: #fef08a;
+    background: #fefce8;
+    .detalle-proyectos__item-dot { background: #FFD60A; }
+  }
+
+  .estado--planificacion {
+    color: #00C7BE;
+    border-color: #a5f3fc;
+    background: #ecfeff;
+    .detalle-proyectos__item-dot { background: #00C7BE; }
+  }
+
+  .estado--espera {
+    color: #FF8D28;
+    border-color: #fed7aa;
+    background: #fff7ed;
+    .detalle-proyectos__item-dot { background: #FF8D28; }
+  }
+
+  .estado--activo {
+    color: #15803d;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    .detalle-proyectos__item-dot { background: #26BF4D; }
+  }
 }

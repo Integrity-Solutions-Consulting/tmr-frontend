@@ -1,9 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { ProyectosService } from '../servicios/proyectos.service';
-import { cargarProyectos, cargarProyectosExito } from './proyectos.actions';
+import { 
+  cargarProyectos, 
+  cargarProyectosExito,
+  agregarProyecto,
+  editarProyecto
+} from './proyectos.actions';
 
 @Injectable()
 export class ProyectosEffects {
@@ -13,10 +19,36 @@ export class ProyectosEffects {
   cargarProyectos$ = createEffect(() =>
     this.actions$.pipe(
       ofType(cargarProyectos),
-      map(() => {
-        const proyectos = this.proyectosService.obtenerProyectos();
+      switchMap(() => 
+        this.proyectosService.obtenerProyectos().pipe(
+          map(proyectos => cargarProyectosExito({ proyectos })),
+          catchError(() => of(cargarProyectosExito({ proyectos: [] })))
+        )
+      )
+    )
+  );
 
-        return cargarProyectosExito({ proyectos });
+  agregarProyecto$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(agregarProyecto),
+      switchMap(({ proyecto }) =>
+        this.proyectosService.crearProyecto(proyecto).pipe(
+          map(() => cargarProyectos()),
+          catchError(() => of(cargarProyectos()))
+        )
+      )
+    )
+  );
+
+  editarProyecto$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(editarProyecto),
+      switchMap(({ proyecto }) => {
+        console.log('effect proyecto.id:', proyecto.id); // ← agrega esto
+        return this.proyectosService.actualizarProyecto(proyecto.id, proyecto).pipe(
+          map(() => cargarProyectos()),
+          catchError(() => of(cargarProyectos()))
+        );
       })
     )
   );

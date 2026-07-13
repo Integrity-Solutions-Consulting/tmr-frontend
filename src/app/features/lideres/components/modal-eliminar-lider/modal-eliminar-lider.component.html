@@ -1,0 +1,25 @@
+<div class="modal-overlay" *ngIf="mostrar">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-icon">
+      <span class="material-symbols-outlined">delete</span>
+    </div>
+
+    <h2 class="modal-title">¿Eliminar líder?</h2>
+
+    <p class="modal-mensaje">
+      Esta acción eliminará a <strong>{{ nombreLider }}</strong> permanentemente y lo desvinculará de los proyectos asociados.
+    </p>
+
+    <div class="modal-form__error-banner" *ngIf="error">
+      <span class="material-icons">error_outline</span>
+      <span>{{ error }}</span>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="cerrarModal.emit()">Cancelar</button>
+      <button class="btn-eliminar" (click)="confirmarEliminar.emit()">Eliminar</button>
+    </div>
+
+  </div>
+</div>

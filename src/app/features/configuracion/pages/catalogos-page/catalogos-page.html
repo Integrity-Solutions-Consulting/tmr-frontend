@@ -1,0 +1,233 @@
+<div class="catalogos-layout" (click)="cerrarDropdowns()">
+  <!-- Sidebar of Master Catalogs -->
+  <aside class="catalogos-sidebar">
+    <h3 class="sidebar-title">Catálogos Maestros</h3>
+    <ul class="sidebar-list">
+      @for (master of catalogosMaestros(); track master.id) {
+        <li
+          class="sidebar-item"
+          [class.sidebar-item--active]="selectedMaster()?.id === master.id"
+          (click)="seleccionarMaestro(master)"
+        >
+          <mat-icon class="sidebar-item-icon">folder_open</mat-icon>
+          <span class="sidebar-item-text">{{ master.descripcion || master.codigo }}</span>
+        </li>
+      }
+      @if (catalogosMaestros().length === 0) {
+        <li class="sidebar-empty">No hay catálogos disponibles</li>
+      }
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <section class="page catalogos-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">Catálogo: {{ selectedMaster()?.descripcion || selectedMaster()?.codigo || 'Cargando...' }}</h1>
+    </div>
+
+    <!-- Cards Summary -->
+    <div class="cards-row">
+
+      <!-- Total items -->
+      <div class="summary-card">
+        <div class="card-left">
+          <div class="card-top-row">
+            <div class="card-icon card-icon--total-items">
+              <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="9" rx="1"/>
+                <rect x="14" y="3" width="7" height="5" rx="1"/>
+                <rect x="14" y="12" width="7" height="9" rx="1"/>
+                <rect x="3" y="16" width="7" height="5" rx="1"/>
+              </svg>
+            </div>
+            <span class="card-number">{{ totalDetalles() }}</span>
+          </div>
+          <span class="card-label">Total de ítems</span>
+        </div>
+      </div>
+
+      <!-- Activos -->
+      <div class="summary-card">
+        <div class="card-left">
+          <div class="card-top-row">
+            <div class="card-icon card-icon--active">
+              <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <span class="card-number">{{ detallesActivos() }}</span>
+          </div>
+          <span class="card-label">Activos</span>
+        </div>
+      </div>
+
+      <!-- Inactivos -->
+      <div class="summary-card">
+        <div class="card-left">
+          <div class="card-top-row">
+            <div class="card-icon card-icon--inactive">
+              <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <span class="card-number">{{ detallesInactivos() }}</span>
+          </div>
+          <span class="card-label">Inactivos</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Search and Actions Bar -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <img src="assets/iconos/buscar.svg" alt="buscar" class="search-icon" width="16" height="16" />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Buscar por código, valor o descripción..."
+          [value]="query()"
+          (input)="setQuery($any($event.target).value)"
+          autocomplete="off"
+        />
+        @if (query()) {
+          <button class="search-clear" (click)="setQuery('')" type="button">
+            <span class="material-icons">close</span>
+          </button>
+        }
+      </div>
+
+      <div class="estado-filter">
+        <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
+          <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
+          <span>{{ labelEstado() }}</span>
+        </button>
+
+        <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+          <div class="estado-dropdown-list">
+            <button class="estado-dropdown-item" (click)="seleccionarEstado('Activo'); $event.stopPropagation()" type="button">
+              <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Activo'">
+                <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
+              </div>
+              <span class="estado-dropdown-label">Activos</span>
+            </button>
+            <button class="estado-dropdown-item" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()" type="button">
+              <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Inactivo'">
+                <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
+              </div>
+              <span class="estado-dropdown-label">Inactivos</span>
+            </button>
+          </div>
+          <button class="estado-dropdown-clear" (click)="seleccionarEstado(''); $event.stopPropagation()" type="button">
+            Limpiar filtro
+          </button>
+        </div>
+      </div>
+
+      <div class="search-spacer"></div>
+
+      <div class="usuarios-actions">
+        <button
+          mat-flat-button
+          type="button"
+          class="page-create"
+          (click)="openModal()"
+          [disabled]="!selectedMaster()"
+        >
+          <span class="page-create-content">
+            Crear
+            <img src="assets/iconos/btn-agregar.svg" alt="">
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    @if (estadoError()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ estadoError() }}</span>
+      </div>
+    }
+
+    <!-- Panel / Table -->
+    <div class="panel">
+      <div class="table-scroll-container">
+        <div class="table-wrapper">
+          <table class="roles-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Valor / Nombre</th>
+                <th>Descripción</th>
+                <th>Orden</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (filteredDetalles().length === 0) {
+                <tr>
+                  <td colspan="6" class="empty-state">No se encontraron ítems en este catálogo.</td>
+                </tr>
+              }
+
+              @for (detalle of detallesPaginados(); track detalle.id) {
+                <tr>
+                  <td>
+                    <strong class="role-name">{{ detalle.codigoValor }}</strong>
+                  </td>
+                  <td>{{ detalle.valor }}</td>
+                  <td>{{ detalle.descripcion || '-' }}</td>
+                  <td>{{ detalle.orden !== null && detalle.orden !== undefined ? detalle.orden : '-' }}</td>
+                  <td>
+                    <span class="status-pill" [class.status-pill--inactive]="!detalle.activo">
+                      {{ detalle.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="actions-cell">
+                    <app-action-menu
+                      [itemId]="detalle.id.toString()"
+                      [acciones]="obtenerAccionesDetalle(detalle)"
+                    ></app-action-menu>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <app-paginacion
+      [paginaActual]="paginaActualNormalizada()"
+      [totalPaginas]="totalPaginas()"
+      [total]="totalRegistros()"
+      [porPagina]="porPagina"
+      (paginaCambia)="irAPagina($event)"
+    />
+
+  </section>
+</div>
+
+<app-confirm-dialog
+  [visible]="confirmVisible()"
+  titulo="Eliminar Ítem"
+  [mensaje]="confirmMensaje()"
+  textoConfirmar="Eliminar"
+  textoCancelar="Cancelar"
+  (confirmar)="onConfirmarEliminar()"
+  (cancelar)="onCancelarEliminar()"
+/>
+
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

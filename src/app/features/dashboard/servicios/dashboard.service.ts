@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { DashboardData } from '../modelos/dashboard.model';
 
 @Injectable({
@@ -8,7 +9,7 @@ import { DashboardData } from '../modelos/dashboard.model';
 })
 export class DashboardService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5091/api/dashboard';
+  private apiUrl = `${environment.apiUrl}/dashboard`;
 
   getDashboardData(rango?: string): Observable<DashboardData> {
     let params = {};
@@ -16,5 +17,31 @@ export class DashboardService {
       params = { rango };
     }
     return this.http.get<DashboardData>(this.apiUrl, { params });
+  }
+
+  getHorasIncompletasProyecto(idProyecto: number, rango?: string): Observable<any[]> {
+    let params = {};
+    if (rango) {
+      params = { rango };
+    }
+    return this.http.get<any[]>(`${this.apiUrl}/proyectos/${idProyecto}/horas-incompletas`, { params });
+  }
+
+  getMisHorasIncompletas(rango?: string): Observable<any> {
+    let params = {};
+    if (rango) {
+      params = { rango };
+    }
+    return this.http.get<any>(`${this.apiUrl}/mis-horas-incompletas`, { params });
+  }
+
+  enviarNotificacionEmail(idEmpleado: number, nombreCompleto: string, proyecto: string, horasFaltantes: number): Observable<any> {
+    const payload = {
+      idEmpleado,
+      nombreCompleto,
+      proyecto,
+      horasFaltantes
+    };
+    return this.http.post<any>(`${this.apiUrl}/notificar-faltantes-email`, payload);
   }
 }

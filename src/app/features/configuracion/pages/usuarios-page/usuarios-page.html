@@ -1,42 +1,196 @@
-<section class="page">
-  <div class="hero">
-    <div>
-      <h2>Usuarios</h2>
+<section class="page" (click)="cerrarDropdowns()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Usuarios</h1>
+  </div>
+
+  <!-- Cards resumen -->
+  <div class="cards-row">
+
+    <!-- Total usuarios -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <span class="card-icon card-icon--total-usuarios" aria-hidden="true">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20a8 8 0 0 1 16 0" />
+            </svg>
+          </span>
+          <span class="card-number">{{ totalUsuarios() }}</span>
+        </div>
+        <span class="card-label">Total usuarios</span>
+      </div>
     </div>
-    <app-boton label="Nuevo Usuario" icon="person_add" (clicked)="openModal()" />
+
+    <!-- Activos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <span class="card-icon card-icon--active" aria-hidden="true">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20a8 8 0 0 1 16 0" />
+              <path d="M17.2 8.8l1.5 1.5 2.6-2.6" stroke-width="1.8" />
+            </svg>
+          </span>
+          <span class="card-number">{{ activos() }}</span>
+        </div>
+        <span class="card-label">Activos</span>
+      </div>
+    </div>
+
+    <!-- Inactivos -->
+    <div class="summary-card">
+      <div class="card-left">
+        <div class="card-top-row">
+          <span class="card-icon card-icon--inactive" aria-hidden="true">
+            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20a8 8 0 0 1 16 0" />
+              <path d="M17.8 7.8 21 11M21 7.8 17.8 11" stroke-width="1.8" />
+            </svg>
+          </span>
+          <span class="card-number">{{ inactivos() }}</span>
+        </div>
+        <span class="card-label">Inactivos</span>
+      </div>
+    </div>
+
   </div>
 
-  <div class="stats-grid">
-    <article>
-      <span>Usuarios</span>
-      <strong>{{ usuarios().length }}</strong>
-    </article>
-    <article>
-      <span>Activos</span>
-      <strong>{{ activos() }}</strong>
-    </article>
-    <article>
-      <span>Roles disponibles</span>
-      <strong>{{ roles().length }}</strong>
-    </article>
-  </div>
 
-  <div class="panel">
-    <div class="toolbar">
-      <app-search-input
-        placeholder="Buscar por nombres, identificacion, correo o rol..."
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <img src="assets/iconos/buscar.svg" alt="buscar" class="search-icon" width="16" height="16" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por usuario, nombre, correo o rol..."
         [value]="query()"
-        (valueChange)="query.set($event)"
+        (input)="setQuery($any($event.target).value)"
+        autocomplete="off"
       />
+      @if (query()) {
+        <button class="search-clear" (click)="setQuery('')" type="button">
+          <span class="material-icons">close</span>
+        </button>
+      }
     </div>
 
-    <app-tabla
-      [columns]="columns"
-      [rows]="$any(filteredUsuarios())"
-      emptyMessage="No se encontraron usuarios."
-      (view)="viewUsuario($any($event))"
-      (edit)="openModal($any($event))"
-      (delete)="deleteUsuario($any($event))"
-    />
+    <div class="estado-filter">
+      <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
+        <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
+        <span>{{ labelEstado() }}</span>
+      </button>
+
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="estado-dropdown-list">
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('activos'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroActivo() === 'activos'">
+              <span class="material-icons" *ngIf="filtroActivo() === 'activos'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Activos</span>
+          </button>
+          <button class="estado-dropdown-item" (click)="seleccionarEstado('inactivos'); $event.stopPropagation()" type="button">
+            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroActivo() === 'inactivos'">
+              <span class="material-icons" *ngIf="filtroActivo() === 'inactivos'">check</span>
+            </div>
+            <span class="estado-dropdown-label">Inactivos</span>
+          </button>
+        </div>
+        <button class="estado-dropdown-clear" (click)="seleccionarEstado('todos'); $event.stopPropagation()" type="button">
+          Limpiar filtro
+        </button>
+      </div>
+    </div>
+
+    <div class="search-spacer"></div>
+
+    <div class="usuarios-actions">
+      <app-descarga-menu
+        [opciones]="opcionesDescarga"
+        etiquetaBoton="Descargar"
+      ></app-descarga-menu>
+
+      <button
+        mat-flat-button
+        type="button"
+        class="page-create"
+        (click)="openModal()"
+      >
+        <span class="page-create-content">
+          Agregar
+          <img src="assets/iconos/btn-agregar.svg" alt="">
+        </span>
+      </button>
+    </div>
   </div>
+
+  <!-- Tabla -->
+  <div class="panel">
+    <div class="table-scroll-container">
+      <div class="table-wrapper">
+        <table class="usuarios-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Correo electrónico</th>
+              <th>Roles</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if ($any(filteredUsuarios()).length === 0) {
+              <tr>
+                <td colspan="6" class="empty-state">No se encontraron usuarios</td>
+              </tr>
+            }
+            @for (usuario of usuariosPaginados(); track usuario.id) {
+              <tr>
+                <td>{{ usuario.usuario }}</td>
+                <td>{{ displayUsuarioNombre(usuario) }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                  <div class="roles-cell">
+                    @for (role of resolveRoleNames(usuario.rolesids); track role) {
+                      <span class="badge badge--role">{{ displayRoleName(role) }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <app-badge-estado [estado]="usuario.estado"></app-badge-estado>
+                </td>
+                <td class="actions-cell">
+                  <app-action-menu
+                    [itemId]="usuario.id.toString()"
+                    [acciones]="obtenerAccionesUsuario(usuario)"
+                  ></app-action-menu>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <app-paginacion
+    [paginaActual]="paginaActualNormalizada()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalRegistros()"
+    [porPagina]="porPagina"
+    (paginaCambia)="irAPagina($event)"
+  />
+
 </section>
+
+<app-success-modal
+  [visible]="exitoVisible()"
+  [mensaje]="exitoMensaje()"
+  (cerrar)="cerrarExito()"
+/>

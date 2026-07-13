@@ -5,17 +5,17 @@
 
 .descarga-menu__trigger {
   height: 40px;
-  padding: 0 16px;
+  padding: 9px 16px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
   color: #737373;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font: inherit;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -84,6 +84,7 @@
   color: #ffffff !important;
   font-size: 11px;
   font-weight: 600;
+  font-family: 'Inter', sans-serif;
   box-shadow: none !important;
 }
 

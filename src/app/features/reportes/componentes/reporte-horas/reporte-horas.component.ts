@@ -2,26 +2,30 @@ import { Component, signal, computed, OnInit, inject, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';
-import { HeaderComponent } from '../../../../shared/componentes/header/header.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { ReportesService } from '../../servicios/reportes.service';
 
-import { TablaComponent } from '../../../../shared/componentes/tabla-colega/tabla.component';
-import { ColumnDefinition } from '../../../../shared/componentes/tabla-colega/tabla.types';
+import { TablaComponent } from '../../../../shared/components/tabla-colega/tabla.component';
+import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tabla.types';
+import { MatIconModule } from '@angular/material/icon';
+import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
+import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 @Component({
   selector: 'app-reporte-horas',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
   templateUrl: './reporte-horas.component.html',
   styleUrl: './reporte-horas.component.scss'
 })
 export class ReporteHorasComponent {
   columnasTabla: ColumnDefinition[] = [
     { header: 'Cliente', property: 'cliente', type: 'text' },
+    { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado' },
     { header: 'Mes', property: 'mes', type: 'text' },
     { header: 'Año', property: 'anio', type: 'text' },
     { header: 'Recursos', property: 'recursos', type: 'text' },
-    { header: 'Horas', property: 'horas', type: 'custom' }
+    { header: 'Horas', property: 'horas', type: 'text' }
   ];
 
   Math = Math;
@@ -32,8 +36,8 @@ export class ReporteHorasComponent {
   anios: string[] = [];
 
   busquedaCliente = signal('');
-  mesSeleccionado = signal('');
-  anioSeleccionado = signal('');
+  mesSeleccionado = signal('ALL');
+  anioSeleccionado = signal('ALL');
   forzarMostrar = signal(false);
 
   paginaActual = signal(1);
@@ -85,10 +89,7 @@ export class ReporteHorasComponent {
     });
   }
 
-  mostrarDatos = computed(() => {
-    const hayFiltros = this.busquedaCliente() !== '' || this.mesSeleccionado() !== '' || this.anioSeleccionado() !== '';
-    return hayFiltros || this.forzarMostrar();
-  });
+  mostrarDatos = computed(() => true);
 
   datosFiltrados = computed(() => this.datos());
 
@@ -159,104 +160,88 @@ export class ReporteHorasComponent {
   }
 
   async exportarExcel() {
-    const data = this.datosFiltrados();
-    if (data.length === 0) return;
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      mes: this.mesSeleccionado() || undefined,
+      anio: this.anioSeleccionado() || undefined
+    };
 
-    const { Workbook } = await import('exceljs');
-    const workbook = new Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de Horas');
+    const total = this.totalItems();
+    if (total === 0) return;
 
-    // 1. Columnas y anchos recomendados
-    worksheet.columns = [
-      { header: 'Cliente', key: 'cliente', width: 30 },
-      { header: 'Mes', key: 'mes', width: 15 },
-      { header: 'Año', key: 'anio', width: 15 },
-      { header: 'Recursos', key: 'recursos', width: 15 },
-      { header: 'Horas', key: 'horas', width: 15 }
-    ];
+    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
 
-    // 2. Agregar datos
-    data.forEach(item => {
-      worksheet.addRow({
-        cliente: item.cliente,
-        mes: item.mes,
-        anio: item.anio,
-        recursos: item.recursos,
-        horas: Number(item.horas)
-      });
+        await exportarReporteExcel({
+          titulo: 'Reporte de Horas por Cliente',
+          nombreArchivo: 'Horas',
+          nombreHoja: 'Reporte de Horas',
+          columnas: [
+            { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
+            { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
+            { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
+            { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+            { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+          ],
+          filas: data.map((item) => [
+            item.cliente,
+            item.estadoCliente,
+            item.mes,
+            item.anio,
+            item.recursos,
+            Number(item.horas).toFixed(1),
+          ]),
+          columnaEstado: 1,
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar Excel:', err)
     });
+  }
 
-    // 3. Aplicar estilos a la cabecera
-    const headerRow = worksheet.getRow(1);
-    headerRow.height = 25;
-    headerRow.eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF163572' } // Color de marca principal #163572
-      };
-      cell.font = {
-        name: 'Segoe UI',
-        size: 11,
-        bold: true,
-        color: { argb: 'FFFFFFFF' }
-      };
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center'
-      };
+  async exportarPDF() {
+    const filtros = {
+      cliente: this.busquedaCliente() || undefined,
+      mes: this.mesSeleccionado() || undefined,
+      anio: this.anioSeleccionado() || undefined
+    };
+
+    const total = this.totalItems();
+    if (total === 0) return;
+
+    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
+      next: async (res) => {
+        const data = res.data || [];
+        if (data.length === 0) return;
+
+        await exportarReportePdf({
+          titulo: 'Reporte de Horas por Cliente',
+          nombreArchivo: 'Horas',
+          nombreHoja: 'Reporte de Horas',
+          columnas: [
+            { encabezado: 'Cliente', anchoPdf: 75 },
+            { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
+            { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
+            { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
+            { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
+            { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
+          ],
+          filas: data.map((item) => [
+            item.cliente,
+            item.estadoCliente,
+            item.mes,
+            item.anio,
+            item.recursos,
+            Number(item.horas).toFixed(1),
+          ]),
+          columnaEstado: 1,
+          orientacionPdf: 'landscape',
+        });
+      },
+      error: (err) => console.error('Error al exportar PDF:', err)
     });
-
-    // 4. Aplicar estilos a las celdas de datos
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // Omitir cabecera
-
-      row.height = 20;
-
-      // Cebra (alternar fondo gris y blanco)
-      const fillType = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-
-      row.eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: fillType }
-        };
-        cell.font = {
-          name: 'Segoe UI',
-          size: 10,
-          color: { argb: 'FF334155' } // Gris oscuro #334155
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
-        };
-        
-        // Centrar las columnas numéricas y de fechas, texto alineado a la izquierda
-        if (cell.address.startsWith('B') || cell.address.startsWith('C') || cell.address.startsWith('D') || cell.address.startsWith('E')) {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'center'
-          };
-        } else {
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: 'left'
-          };
-        }
-      });
-    });
-
-    // 5. Descargar archivo
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Reporte_Horas_${new Date().toISOString().slice(0, 10)}.xlsx`;
-    link.click();
-    URL.revokeObjectURL(url);
   }
 }

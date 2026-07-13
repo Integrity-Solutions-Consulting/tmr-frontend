@@ -1,11 +1,381 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterOutlet } from '@angular/router';
+import { TokenMonitorService } from './core/services/token-monitor.service';
+import { UserActivityService } from './core/services/user-activity.service';
+import { AuthService } from './features/auth/servicios/auth.service';
+import { TokenService } from './features/auth/servicios/token.service';
+import { AuthResponse } from './features/auth/modelos/auth.models';
+import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
+import { CambiarPasswordModalComponent } from './features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
+import { Subject } from 'rxjs';
+import { filter, takeUntil, switchMap } from 'rxjs/operators';
+import { NavigationEnd } from '@angular/router';
+
+interface SessionExpirationResult {
+  action: 'extend' | 'logout' | 'timeout';
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.component.html', // Cámbialo a este nombre
+  templateUrl: './app.component.html',
   styleUrl: './app.scss'
 })
-export class AppComponent {}
+export class AppComponent implements OnInit, OnDestroy {
+  private activeErrors = new Map<HTMLElement, { errorEl: HTMLElement; timeoutId: number }>();
+
+  private destroy$ = new Subject<void>();
+  private tokenMonitor = inject(TokenMonitorService);
+  private userActivity = inject(UserActivityService);
+  private authService = inject(AuthService);
+  private tokenService = inject(TokenService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private currentDialogRef: any; // Referencia al modal abierto
+  private passwordDialogRef: any;
+
+  @HostListener('document:beforeinput', ['$event'])
+  onBeforeInput(event: InputEvent): void {
+    if (!this.isEditableElement(event.target) || !event.data || !this.hasEmoji(event.data)) {
+      return;
+    }
+
+    event.preventDefault();
+    this.showInvalidCharacterMessage(event.target as HTMLElement);
+  }
+
+  @HostListener('document:input', ['$event'])
+  onInput(event: Event): void {
+    const target = event.target;
+
+    if (!this.isEditableElement(target)) {
+      return;
+    }
+
+    const currentValue = this.getEditableValue(target);
+
+    if (!this.hasEmoji(currentValue)) {
+      return;
+    }
+
+    this.setEditableValue(target, this.removeEmojis(currentValue));
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    this.showInvalidCharacterMessage(target as HTMLElement);
+  }
+
+  // ===== ACTIVITY TRACKING LISTENERS =====
+  // Estos @HostListener capturan la actividad del usuario para el sistema de token refresh
+
+  @HostListener('document:mousedown')
+  onMouseDown(): void {
+    this.userActivity.recordActivity('mousedown');
+  }
+
+  @HostListener('document:keydown')
+  onKeyDown(): void {
+    this.userActivity.recordActivity('keydown');
+  }
+
+  @HostListener('document:touchstart')
+  onTouchStart(): void {
+    this.userActivity.recordActivity('touchstart');
+  }
+
+  @HostListener('document:click')
+  onClick(): void {
+    this.userActivity.recordActivity('click');
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.userActivity.recordActivity('scroll');
+  }
+
+  @HostListener('window:focus')
+  onFocus(): void {
+    this.userActivity.recordActivity('focus');
+  }
+  // ========================================
+
+  ngOnInit(): void {
+    // Iniciar monitoreo si hay token válido
+    if (this.tokenService.isTokenValid()) {
+      this.userActivity.startTracking();
+      this.tokenMonitor.startMonitoring();
+      this.enforcePasswordChange();
+    }
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => this.enforcePasswordChange());
+
+    // ← NUEVO: Escuchar refresh silencioso (con actividad)
+    this.tokenMonitor
+      .onSilentRefreshNeeded()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('🔄 Actividad detectada - Refresh automático...');
+        this.performSilentRefresh();
+      });
+
+    // Escuchar advertencia de expiración (sin actividad)
+    this.tokenMonitor
+      .onExpirationWarning()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('⚠️ Sin actividad - Mostrando modal...');
+        this.showExpirationModal();
+      });
+
+    // Escuchar cuando el token expira
+    this.tokenMonitor
+      .onTokenExpired()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        console.log('⏰ Token expirado detectado');
+        // Si el modal está abierto, cerrarlo y redirigir
+        if (this.currentDialogRef) {
+          this.currentDialogRef.close();
+        }
+        this.handleTokenExpired();
+      });
+  }
+
+  /**
+   * Muestra modal 1 minuto antes de expiración del token
+   */
+  private showExpirationModal(): void {
+    console.log('🔔 Mostrando modal de expiración de sesión...');
+    this.currentDialogRef = this.dialog.open(SessionExpirationModalComponent, {
+      disableClose: true,
+      width: '400px',
+      panelClass: 'session-expiration-dialog'
+    });
+
+    this.currentDialogRef
+      .afterClosed()
+      .pipe(
+        switchMap((result: SessionExpirationResult) => {
+          console.log('🔄 Resultado del modal:', result);
+          
+          if (result?.action === 'extend') {
+            // Usuario aceptó extender sesión - realizar refresh
+            console.log('✅ Usuario aceptó extender sesión, refrescando token...');
+            return this.authService.refreshTokenRequest();
+          } else if (result?.action === 'logout' || result?.action === 'timeout') {
+            // Usuario rechazó o timeout — cerrar sesión con el RT (sin necesitar AT válido)
+            const actionLabel = result?.action === 'timeout' ? '⏰ Timeout' : '❌ Usuario rechazó';
+            console.log(`${actionLabel} extender sesión — cerrando sesión con RT en BD...`);
+            return this.authService.logoutWithRefreshToken();
+          } else {
+            // Modal cerrado sin acción
+            console.log('❌ Modal cerrado sin acción, cerrando sesión...');
+            throw new Error('Modal closed without action');
+          }
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: any) => {
+          // Verificar si fue refresh o logout
+          if (response && 'accessToken' in response) {
+            // Es un refresh token response
+            console.log('✅ Token refrescado, reiniciando monitoreo...');
+            this.authService.updateTokens(response);
+            this.tokenMonitor.stopMonitoring();
+            this.tokenMonitor.startMonitoring();
+            console.log('✅ Sesión extendida exitosamente');
+            this.currentDialogRef = null;
+          } else {
+            // Es un logout-rt response (void / null) — limpiar y redirigir
+            console.log('✅ Sesión desactivada en BD (RT logout), redirigiendo a login...');
+            this.currentDialogRef = null;
+            this.handleTokenExpired();
+          }
+        },
+        error: (err: any) => {
+          // Si hay error en logout o refresh, hacer logout local y redirigir
+          console.warn('❌ Error en operación (se procede con logout local):', err?.message);
+          this.currentDialogRef = null;
+          this.handleTokenExpired();
+        }
+      });
+  }
+
+  /**
+   * Realiza refresh silencioso cuando hay actividad
+   */
+  private performSilentRefresh(): void {
+    console.log('🔄 Iniciando refresh automático por actividad...');
+    this.authService.refreshTokenRequest().subscribe({
+      next: (response: AuthResponse) => {
+        console.log('✅ Token refrescado automáticamente');
+        this.authService.updateTokens(response);
+        
+        // Reiniciar monitoreo para siguiente ciclo
+        this.tokenMonitor.stopMonitoring();
+        this.tokenMonitor.startMonitoring();
+        console.log('✅ Sesión extendida automáticamente');
+      },
+      error: (err) => {
+        console.error('❌ Error en refresh automático:', err);
+        this.handleTokenExpired();
+      }
+    });
+  }
+
+  /**
+   * Redirige a login cuando token expira
+   */
+  private handleTokenExpired(): void {
+    // Cerrar el modal si está abierto
+    if (this.currentDialogRef) {
+      console.log('🔐 Cerrando modal de sesión expirada...');
+      this.currentDialogRef.close();
+      this.currentDialogRef = null;
+    }
+
+    // Intentar desactivar la sesión en BD usando el RT antes de limpiar el storage
+    // Best-effort: si falla (p. ej. no hay RT o red caída) se ignora y se procede
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      console.log('🔒 handleTokenExpired — cerrando sesión con RT en BD (best-effort)...');
+      this.authService.logoutWithRefreshToken().subscribe({
+        next: () => console.log('✅ Sesión desactivada en BD al expirar token'),
+        error: (err: any) => console.warn('⚠️ No se pudo notificar al BD (se procede igual):', err?.message)
+      });
+    }
+
+    this.userActivity.stopTracking();
+    this.tokenService.clear();
+    this.tokenMonitor.stopMonitoring();
+    this.router.navigate(['/auth/login'], {
+      queryParams: { reason: 'session-expired' }
+    });
+  }
+
+  private enforcePasswordChange(): void {
+    if (!this.tokenService.isTokenValid() || !this.authService.debeCambiarPassword()) {
+      return;
+    }
+
+    if (this.router.url.startsWith('/auth/login') || this.passwordDialogRef) {
+      return;
+    }
+
+    this.passwordDialogRef = this.dialog.open(CambiarPasswordModalComponent, {
+      panelClass: 'tmr-dialog-panel',
+      disableClose: true,
+      data: { obligatorio: true },
+    });
+
+    this.passwordDialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((actualizado: boolean) => {
+        this.passwordDialogRef = null;
+        if (!actualizado && this.authService.debeCambiarPassword()) {
+          this.enforcePasswordChange();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.userActivity.stopTracking();
+    this.tokenMonitor.stopMonitoring();
+    this.activeErrors.forEach((val) => {
+      window.clearTimeout(val.timeoutId);
+      val.errorEl.remove();
+    });
+    this.activeErrors.clear();
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private hasEmoji(value: string): boolean {
+    return /[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\uFE0F]/u.test(value);
+  }
+
+  private removeEmojis(value: string): string {
+    return value.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\uFE0F]/gu, '');
+  }
+
+  private isEditableElement(target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement | HTMLElement {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    if (target instanceof HTMLTextAreaElement) {
+      return true;
+    }
+
+    if (target instanceof HTMLInputElement) {
+      return !this.ignoredInputTypes.has(target.type);
+    }
+
+    return target.isContentEditable;
+  }
+
+  private getEditableValue(target: HTMLInputElement | HTMLTextAreaElement | HTMLElement): string {
+    return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+      ? target.value
+      : target.textContent ?? '';
+  }
+
+  private setEditableValue(target: HTMLInputElement | HTMLTextAreaElement | HTMLElement, value: string): void {
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      target.value = value;
+      return;
+    }
+
+    target.textContent = value;
+  }
+
+  private showInvalidCharacterMessage(target: HTMLElement): void {
+    let container: HTMLElement | null = target.closest('.form-field, .float-field, .float-select, .email-compose');
+    if (!container) {
+      container = target.parentElement;
+    }
+    if (!container) {
+      return;
+    }
+
+    const existing = this.activeErrors.get(container);
+    if (existing) {
+      window.clearTimeout(existing.timeoutId);
+      const timeoutId = window.setTimeout(() => {
+        existing.errorEl.remove();
+        this.activeErrors.delete(container!);
+      }, 2500);
+      existing.timeoutId = timeoutId;
+    } else {
+      const errorEl = document.createElement('span');
+      errorEl.className = 'form-field__error app-dynamic-character-error';
+      errorEl.textContent = 'Ingrese un caracter valido';
+      errorEl.style.color = '#ef4444';
+      errorEl.style.fontSize = '11px';
+      errorEl.style.marginTop = '4px';
+      errorEl.style.display = 'block';
+
+      container.appendChild(errorEl);
+
+      const timeoutId = window.setTimeout(() => {
+        errorEl.remove();
+        this.activeErrors.delete(container!);
+      }, 2500);
+
+      this.activeErrors.set(container, { errorEl, timeoutId });
+    }
+  }
+
+  private readonly ignoredInputTypes = new Set([
+    'button', 'checkbox', 'color', 'date', 'file', 'hidden', 'image', 'radio',
+    'range', 'reset', 'submit',
+  ]);
+}

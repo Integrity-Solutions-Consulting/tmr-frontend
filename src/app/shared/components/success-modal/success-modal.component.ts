@@ -11,8 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class SuccessModalComponent {
   @Input() visible = false;
-  @Input() mensaje = 'Operacion realizada exitosamente';
-  @Input() textoBoton = 'Aceptar';
+  @Input() mensaje = 'Operación realizada exitosamente';
 
   @Output() cerrar = new EventEmitter<void>();
 

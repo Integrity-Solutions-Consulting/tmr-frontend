@@ -3,6 +3,7 @@ import { authRoutes } from './features/auth/auth.routes';
 import { AppLayout } from './core/layout/app-layout/app-layout';
 import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   // ── Raíz → Dashboard ───────────────────────────────────────
@@ -21,6 +22,7 @@ export const routes: Routes = [
       // Dashboard
       {
         path: 'dashboard',
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
             m => m.DashboardPageComponent
@@ -28,11 +30,12 @@ export const routes: Routes = [
       },
 
       // Proyectos
-      { path: 'proyectos', component: ProyectosPage },
+      { path: 'proyectos', component: ProyectosPage, canActivate: [roleGuard] },
 
       // Colaboradores
       {
         path: 'colaboradores',
+        canActivate: [roleGuard],
         loadChildren: () =>
           import('./features/colaboradores/colaboradores.routes').then(
             m => m.COLABORADORES_ROUTES
@@ -42,6 +45,7 @@ export const routes: Routes = [
       // Clientes
       {
         path: 'clientes',
+        canActivate: [roleGuard],
         loadChildren: () =>
           import('./features/clientes/clientes.routes').then(m => m.clientesRoutes),
       },
@@ -49,6 +53,7 @@ export const routes: Routes = [
       // Líderes
       {
         path: 'lideres',
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./features/lideres/components/lideres.component').then(
             m => m.LideresComponent
@@ -74,6 +79,7 @@ export const routes: Routes = [
       // Reportes
       {
         path: 'reportes',
+        canActivate: [roleGuard],
         children: [
           { path: '', redirectTo: 'horas', pathMatch: 'full' },
           {
@@ -96,6 +102,7 @@ export const routes: Routes = [
       // Configuración (Usuarios, Roles, Feriados)
       {
         path: 'configuracion',
+        canActivate: [roleGuard],
         children: [
           { path: '', redirectTo: 'usuarios', pathMatch: 'full' },
           {
@@ -117,6 +124,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/configuracion/pages/feriados-page/feriados-page').then(
                 m => m.FeriadosPage
+              ),
+          },
+          {
+            path: 'catalogos',
+            loadComponent: () =>
+              import('./features/configuracion/pages/catalogos-page/catalogos-page').then(
+                m => m.CatalogosPage
               ),
           },
         ],

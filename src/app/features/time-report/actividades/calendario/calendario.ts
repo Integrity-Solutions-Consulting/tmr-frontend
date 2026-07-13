@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, signal, computed } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,7 @@ interface DiaCalendario {
     esFinDeSemana: boolean;
     esFeriado: boolean;
     horas: number;
+    actividades: any[];
 }
 
 @Component({
@@ -35,12 +36,23 @@ interface DiaCalendario {
 })
 export class Calendario {
     @Output() diaSeleccionado = new EventEmitter<Date>();
+    @Output() editarActividadEvent = new EventEmitter<any>();
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
 
     public nombresDias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-    public mesesNombres = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    public mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    constructor() {
+        effect(() => {
+            const fecha = this._fechaActual();
+            const y = fecha.getFullYear();
+            const m = fecha.getMonth() + 1;
+            this.actividadesService.cargarCalendario(y, m);
+            this.actividadesService.cargarResumen(y, m);
+        });
+    }
 
     private _fechaActual = signal(new Date());
     public mesSeleccionado = this._fechaActual().getMonth();
@@ -82,16 +94,29 @@ export class Calendario {
     });
 
     private crearDia(fecha: Date, esMesActual: boolean, hoy: Date): DiaCalendario {
-        const horas = this.actividadesService.getActividadesPorFecha(fecha)
-            .reduce((acc: number, curr: any) => acc + (curr.numeroHoras || 0), 0);
+        const actividades = this.actividadesService.getActividadesPorFecha(fecha);
+        const horas = actividades.reduce((acc: number, curr: any) => acc + (curr.cantidadhoras || 0), 0);
         return {
             fecha,
             esMesActual,
             esHoy: this.mismaFecha(fecha, hoy),
             esFinDeSemana: fecha.getDay() === 0 || fecha.getDay() === 6,
             esFeriado: this.feriadosService.esFeriado(fecha),
-            horas
+            horas,
+            actividades
         };
+    }
+
+    editarActividad(event: MouseEvent, actividad: any) {
+        event.stopPropagation();
+        this.editarActividadEvent.emit(actividad);
+    }
+
+    getActividadClass(act: any): string {
+        const id = Number(act.idtipoactividad || 1);
+        if (id % 3 === 0) return 'type-nacional';
+        if (id % 3 === 1) return 'type-local';
+        return 'type-religioso';
     }
 
     private mismaFecha(a: Date, b: Date): boolean {

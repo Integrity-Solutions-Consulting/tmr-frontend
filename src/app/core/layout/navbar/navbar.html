@@ -1,21 +1,44 @@
 <header class="navbar">
+  <button class="navbar__hamburger" (click)="toggleSidebar()" aria-label="Menú">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+
   <div class="navbar__spacer"></div>
 
   <div class="navbar__user">
-    <button type="button" class="navbar__profile-trigger" (click)="togglePerfil()">
-      Hola, Marlene
+    <!-- Notificaciones en App (Campana) -->
+    <div class="navbar__bell-wrapper">
+      <button type="button" class="navbar__bell-btn" (click)="toggleNotificaciones()" aria-label="Notificaciones">
+        <span class="material-symbols-outlined navbar__bell-icon" [class.navbar__bell-icon--active]="tieneNotificaciones">notifications</span>
+        <span class="navbar__bell-badge" *ngIf="tieneNotificaciones"></span>
+      </button>
+
+      <!-- Panel Dropdown de Notificaciones -->
+      <div class="navbar__bell-dropdown" *ngIf="notificacionesAbierto">
+        <div class="navbar__bell-dropdown-header">Notificaciones</div>
+        <div class="navbar__bell-dropdown-body">
+          <div class="navbar__bell-item" *ngIf="tieneNotificaciones">
+            <span class="material-symbols-outlined navbar__bell-item-icon">warning</span>
+            <div class="navbar__bell-item-content">
+              <span class="navbar__bell-item-title">Horas Pendientes</span>
+              <span class="navbar__bell-item-desc">Tienes <strong>{{ horasFaltantes }} horas</strong> pendientes por reportar en este periodo.</span>
+            </div>
+          </div>
+          <div class="navbar__bell-empty" *ngIf="!tieneNotificaciones">
+            <span class="material-symbols-outlined navbar__bell-empty-icon">check_circle</span>
+            <span class="navbar__bell-empty-text">¡Estás al día con tus horas!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="navbar__profile-text">Hola, {{ user.name.split(' ')[0] }}</span>
+
+    <button type="button" class="navbar__profile-btn" (click)="togglePerfil()" aria-label="Menú de usuario">
+      <span class="material-symbols-outlined navbar__profile-btn-icon">account_circle</span>
     </button>
 
-    <button type="button" class="navbar__notification" aria-label="Notificaciones">
-      <span class="navbar__notification-dot"></span>
-    </button>
-
-    <app-profile-popover
-      [abierto]="perfilAbierto"
-      nombre="Marlene Canizares"
-      correo="marlene.canizares@integritysolutions.com.ec"
-      (cerrar)="cerrarPerfil()"
-      (cerrarSesion)="cerrarSesion()"
-    ></app-profile-popover>
+    <app-profile-popover [abierto]="perfilAbierto" [nombre]="user.name" [correo]="user.email" (cerrar)="cerrarPerfil()"
+      (cerrarSesion)="cerrarSesion()" (cambiarPassword)="abrirCambiarPassword()"></app-profile-popover>
   </div>
 </header>

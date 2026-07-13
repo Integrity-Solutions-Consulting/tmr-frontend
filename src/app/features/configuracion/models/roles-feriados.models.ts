@@ -1,15 +1,16 @@
 export interface Rol {
   id: number;
   nombre: string;
-  descripcion?: string | null;
-  modulos: Array<'dashboard' | 'proyectos' | 'actividades' | 'seguimiento'>;
+  descripcion: string;
+  modulos: number[];
   activo: boolean;
 }
 
 export interface RolCreate {
   nombre: string;
-  descripcion?: string;
-  modulos: Array<'dashboard' | 'proyectos' | 'actividades' | 'seguimiento'>;
+  descripcion: string;
+  modulos: number[];
+  activo: boolean;
 }
 
 export interface Feriado {

@@ -22,50 +22,49 @@
     z-index: 10;
     background: white;
     border-radius: 30px;
-    padding: 40px;
+    padding: 24px;               
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 450px;
+    max-width: 380px;            
     animation: slideUp 0.5s ease-out;
 
-  .logo-container {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100%;
-    margin-bottom: 30px;
-    
-    .logo {
-        height: 180px;
+    .logo-container {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100%;
+      margin-bottom: 20px;       
+      
+      .logo {
+        height: 100px;      
         width: auto;
         display: block;
-        }
+      }
     }
 
     .title {
-      font-size: 24px;
+      font-size: 20px;           
       font-weight: 600;
       color: #1a3a52;
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;      
       margin-top: 0;
     }
 
     .form {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-
+      gap: 15px;                
       .form-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;                
 
         .input-field {
-          padding: 12px 14px;
+          padding: 8px 12px;     
           border: 1px solid #ddd;
           border-radius: 6px;
-          font-size: 14px;
+          font-size: 13px;       
           font-family: inherit;
           transition: all 0.3s ease;
 
@@ -85,37 +84,38 @@
 
           &::placeholder {
             color: #999;
+            font-size: 12px;
           }
         }
 
         .error-message {
-          font-size: 12px;
+          font-size: 11px;       
           color: #dc3545;
-          min-height: 16px;
+          min-height: 14px;
         }
       }
 
       .global-error {
-        padding: 12px;
+        padding: 8px;            
         background-color: #f8d7da;
         border: 1px solid #f5c6cb;
         border-radius: 6px;
         color: #721c24;
-        font-size: 14px;
+        font-size: 12px;        
         text-align: center;
       }
 
       .submit-button {
-        padding: 12px 24px;
+        padding: 8px 16px;       
         background-color: #0a2463;
         color: white;
         border: none;
         border-radius: 6px;
-        font-size: 16px;
+        font-size: 14px;        
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 10px;
+        margin-top: 6px;         
 
         &:hover:not(:disabled) {
           background-color: #051838;
@@ -135,40 +135,17 @@
 
     .forgot-password {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 14px;          
 
       a {
         color: #0066cc;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 12px;         
         transition: color 0.3s ease;
 
         &:hover {
           color: #0052a3;
           text-decoration: underline;
-        }
-      }
-    }
-
-    .demo-access {
-      text-align: center;
-      margin-top: 12px;
-
-      .demo-button {
-        background: none;
-        border: 1px dashed #cbd5e1;
-        border-radius: 6px;
-        color: #64748b;
-        font-size: 12px;
-        padding: 8px 20px;
-        cursor: pointer;
-        width: 100%;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: #f8fafc;
-          border-color: #163572;
-          color: #163572;
         }
       }
     }
@@ -190,19 +167,24 @@
 @media (max-width: 600px) {
   .login-container {
     .login-card {
-      padding: 30px 20px;
-      max-width: calc(100% - 40px);
+      padding: 20px 16px;        
+      max-width: calc(100% - 32px);
+
+      .logo-container .logo {
+        height: 80px;            // logo mvil
+      }
 
       .title {
-        font-size: 20px;
+        font-size: 18px;
+        margin-bottom: 16px;
       }
 
       .form {
-        gap: 16px;
+        gap: 12px;
 
         .submit-button {
-          padding: 10px 20px;
-          font-size: 15px;
+          padding: 6px 12px;
+          font-size: 13px;
         }
       }
     }
