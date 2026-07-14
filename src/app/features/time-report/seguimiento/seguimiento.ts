@@ -656,7 +656,9 @@ export class SeguimientoComponent implements AfterViewInit {
 
             const workbook = new ExcelJS.Workbook();
 
-            Object.keys(groupsByClient).forEach((clientName, clientIdx) => {
+            const clientNames = Object.keys(groupsByClient);
+            for (let clientIdx = 0; clientIdx < clientNames.length; clientIdx++) {
+                const clientName = clientNames[clientIdx];
                 const clientActividades = groupsByClient[clientName];
 
                 // Limpiar nombre de hoja para que sea válido en Excel
@@ -748,17 +750,20 @@ export class SeguimientoComponent implements AfterViewInit {
                     lider: string,
                     req: string,
                     desc: string,
+                    isRecurrente: boolean,
                     hoursByDay: { [dateStr: string]: number }
                 } } = {};
 
                 clientActividades.forEach(act => {
-                    const key = `${act.tipoActividad}|${act.liderProyecto}|${act.codigoRequerimiento}|${act.descripcion}`;
+                    const isRec = !!(act.esRecurrente || act.recurrente);
+                    const key = `${act.tipoActividad}|${act.liderProyecto}|${act.codigoRequerimiento}|${act.descripcion}|${isRec}`;
                     if (!groupedRows[key]) {
                         groupedRows[key] = {
                             tipo: act.tipoActividad,
                             lider: act.liderProyecto,
                             req: act.codigoRequerimiento,
                             desc: act.descripcion,
+                            isRecurrente: isRec,
                             hoursByDay: {}
                         };
                     }
@@ -770,12 +775,13 @@ export class SeguimientoComponent implements AfterViewInit {
                 let currentRow = 9;
                 let seqNum = 1;
 
-                const alternatingFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+                const alternatingFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
                 const whiteFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-                const weekendFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
-                const feriadoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFFFF0' } }; // Soft yellow
-                const vacacionesFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } }; // Amber pastel
-                const permisoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1E7DD' } }; // Green pastel
+                const weekendFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8DB4E2' } };
+                const feriadoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } }; 
+                const vacacionesFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC000' } }; 
+                const permisoFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF76933C' } };
+                const recurrenteFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCC0DA' } };
 
                 Object.keys(groupedRows).forEach(key => {
                     const group = groupedRows[key];
@@ -833,6 +839,8 @@ export class SeguimientoComponent implements AfterViewInit {
                                 cell.fill = vacacionesFill;
                             } else if (hasVal && group.tipo === 'Permiso') {
                                 cell.fill = permisoFill;
+                            } else if (hasVal && group.isRecurrente) {
+                                cell.fill = recurrenteFill;
                             } else if (isFeriado) {
                                 cell.fill = feriadoFill;
                             } else if (isWeekend) {
@@ -909,6 +917,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 const nomFerRow = totalRow + 11;
                 const nomPermRow = totalRow + 12;
                 const nomWkRow = totalRow + 13;
+                const nomRecRow = totalRow + 14;
 
                 worksheet.getCell(nomTitleRow, 2).value = 'Nomenclatura';
                 worksheet.getCell(nomTitleRow, 2).font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF163572' } };
@@ -917,7 +926,8 @@ export class SeguimientoComponent implements AfterViewInit {
                     { row: nomVacRow, label: 'Vacaciones', fill: vacacionesFill },
                     { row: nomFerRow, label: 'Feriado', fill: feriadoFill },
                     { row: nomPermRow, label: 'Permiso', fill: permisoFill },
-                    { row: nomWkRow, label: 'Fines de Semana', fill: weekendFill }
+                    { row: nomWkRow, label: 'Fines de Semana', fill: weekendFill },
+                    { row: nomRecRow, label: 'Actividad Recurrente', fill: recurrenteFill }
                 ];
 
                 legendCells.forEach(item => {
@@ -936,15 +946,16 @@ export class SeguimientoComponent implements AfterViewInit {
 
                 // Llamar a la estandarización de cabeceras corporativas
                 const currentMonthName = startDate.toLocaleString('es-EC', { month: 'long' }).toUpperCase();
-                void estandarizarCabeceraExcelExistente(
+                await estandarizarCabeceraExcelExistente(
                     workbook,
                     worksheet,
                     `TIME REPORT - ${clientName.toUpperCase()}`,
                     totalCols,
                     `${currentMonthName} ${startDate.getFullYear()}`,
-                    6
+                    8,
+                    false
                 );
-            });
+            }
 
             // Guardar archivo y disparar descarga
             const buffer = await workbook.xlsx.writeBuffer();
