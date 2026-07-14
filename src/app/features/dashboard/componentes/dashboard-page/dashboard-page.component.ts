@@ -10,6 +10,8 @@ import { DashboardMetricasComponent } from './dashboard-metricas/dashboard-metri
 import { ProximosACerrarComponent } from './proximamente-cerrar/proximamente-cerrar.component';
 import { GraficoHorasComponent } from './grafico-horas/grafico-horas.component';
 import { DashboardService } from '../../servicios/dashboard.service';
+import { exportarReporteExcel } from '../../../../shared/utils/reporte-export.utils';
+
 
 @Component({
   selector: 'app-dashboard-page',
@@ -125,6 +127,40 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
         this.enviandoAlerta[idEmp] = false;
         this.errorAlerta[idEmp] = err.error?.mensaje || 'Error al enviar correo';
       }
+    });
+  }
+
+  async descargarReporteHorasFaltantesExcel(): Promise<void> {
+    if (!this.selectedProyecto || this.horasIncompletas.length === 0) return;
+
+    const tituloReporte = `Reporte de Horas Faltantes - ${this.selectedProyecto.proyecto}`;
+    const nombreArchivo = `Horas_Faltantes_${this.selectedProyecto.proyecto.replace(/\s+/g, '_')}`;
+
+    const filas: Array<Array<string | number>> = [];
+    for (const colab of this.horasIncompletas) {
+      for (const dia of colab.diasIncompletos) {
+        filas.push([
+          colab.nombreCompleto,
+          colab.correo || 'Sin correo',
+          dia.fecha,
+          dia.horasRegistradas,
+          dia.horasFaltantes
+        ]);
+      }
+    }
+
+    await exportarReporteExcel({
+      titulo: tituloReporte,
+      nombreArchivo: nombreArchivo,
+      nombreHoja: 'Faltantes',
+      columnas: [
+        { encabezado: 'Colaborador', anchoExcel: 35 },
+        { encabezado: 'Correo', anchoExcel: 35 },
+        { encabezado: 'Fecha Incompleta', anchoExcel: 18, alineacion: 'center' },
+        { encabezado: 'Horas Registradas', anchoExcel: 18, alineacion: 'right' },
+        { encabezado: 'Horas Faltantes', anchoExcel: 18, alineacion: 'right' },
+      ],
+      filas: filas
     });
   }
 

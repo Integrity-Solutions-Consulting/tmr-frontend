@@ -44,9 +44,17 @@
         <span class="drawer-subtitle">Colaboradores con Horas Faltantes</span>
         <h2 class="drawer-title" *ngIf="selectedProyecto">{{ selectedProyecto.proyecto }}</h2>
       </div>
-      <button class="drawer-close-btn" (click)="cerrarDrawer()" aria-label="Cerrar">
-        <mat-icon>close</mat-icon>
-      </button>
+      <div class="drawer-header-actions">
+        <button class="btn-download-excel" 
+                *ngIf="horasIncompletas.length > 0 && !loadingIncompletas"
+                (click)="descargarReporteHorasFaltantesExcel()"
+                title="Descargar Reporte Excel">
+          <img src="assets/iconos/download.svg" alt="Descargar">
+        </button>
+        <button class="drawer-close-btn" (click)="cerrarDrawer()" aria-label="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     </div>
     
     <div class="drawer-body">
