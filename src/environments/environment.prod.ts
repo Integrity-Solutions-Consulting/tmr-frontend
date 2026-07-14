@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '/api'
+  apiUrl: ''
 };
+
+//segundo test. patch version
