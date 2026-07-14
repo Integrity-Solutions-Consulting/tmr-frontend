@@ -44,9 +44,17 @@
         <span class="drawer-subtitle">Colaboradores con Horas Faltantes</span>
         <h2 class="drawer-title" *ngIf="selectedProyecto">{{ selectedProyecto.proyecto }}</h2>
       </div>
-      <button class="drawer-close-btn" (click)="cerrarDrawer()" aria-label="Cerrar">
-        <mat-icon>close</mat-icon>
-      </button>
+      <div class="drawer-header-actions">
+        <button class="btn-download-excel" 
+                *ngIf="horasIncompletas.length > 0 && !loadingIncompletas"
+                (click)="descargarReporteHorasFaltantesExcel()"
+                title="Descargar Reporte Excel">
+          <img src="assets/iconos/download.svg" alt="Descargar">
+        </button>
+        <button class="drawer-close-btn" (click)="cerrarDrawer()" aria-label="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     </div>
     
     <div class="drawer-body">
@@ -77,9 +85,32 @@
                   <span class="missing-badge">Faltan: <strong>{{ colab.horasFaltantes }}h</strong></span>
                 </div>
               </div>
-              <button class="expand-btn">
-                <mat-icon>{{ expandedCollaborators[colab.idEmpleado] ? 'expand_less' : 'expand_more' }}</mat-icon>
-              </button>
+              
+              <div class="action-buttons-group">
+                <!-- Botón de envío de correo SMTP directo (Servidor) -->
+                <button class="btn-email-server-alert" 
+                        [class.sending]="enviandoAlerta[colab.idEmpleado]"
+                        (click)="$event.stopPropagation(); enviarAlertaEmailServer(colab)" 
+                        [disabled]="enviandoAlerta[colab.idEmpleado]"
+                        title="Enviar correo de recordatorio">
+                  <mat-icon *ngIf="!enviandoAlerta[colab.idEmpleado]">mail</mat-icon>
+                  <mat-icon class="spinning-icon" *ngIf="enviandoAlerta[colab.idEmpleado]">sync</mat-icon>
+                </button>
+                
+                <button class="expand-btn">
+                  <mat-icon>{{ expandedCollaborators[colab.idEmpleado] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Mensaje de éxito / error en el envío -->
+            <div class="alert-feedback-banner success" *ngIf="exitoAlerta[colab.idEmpleado]">
+              <mat-icon>check_circle</mat-icon>
+              <span>¡Correo enviado con éxito!</span>
+            </div>
+            <div class="alert-feedback-banner error" *ngIf="errorAlerta[colab.idEmpleado]">
+              <mat-icon>error</mat-icon>
+              <span>{{ errorAlerta[colab.idEmpleado] }}</span>
             </div>
             
             <!-- Desglose de días con registros insuficientes -->

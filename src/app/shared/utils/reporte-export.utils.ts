@@ -12,8 +12,13 @@ export interface ReporteTabularConfig {
   titulo: string;
   nombreArchivo: string;
   nombreHoja: string;
+
   columnas: ColumnaReporte[];
   filas: Array<Array<string | number>>;
+
+  columnasSalida?: ColumnaReporte[];
+  filasSalida?: Array<Array<string | number>>;
+
   columnaEstado?: number;
   orientacionPdf?: 'portrait' | 'landscape';
   formatoPdf?: 'letter' | 'a4' | 'a3';
@@ -472,6 +477,60 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
     margin: { left: 0, right: 0, bottom: 18, top: 0 },
     didDrawPage: dibujarCabecera,
   });
+
+
+ //=====================================================
+  // SEGUNDA TABLA: DATOS DE SALIDA
+  //=====================================================
+
+  if (
+    config.columnasSalida &&
+    config.filasSalida &&
+    config.filasSalida.length > 0
+  ) {
+
+    const ultimaTabla = (doc as any).lastAutoTable;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(22,53,114);
+
+    doc.text(
+      'DATOS DE SALIDA',
+      0,
+      ultimaTabla.finalY + 10
+    );
+
+    autoTable(doc,{
+      startY: ultimaTabla.finalY + 14,
+
+      head:[
+        config.columnasSalida.map(c=>c.encabezado)
+      ],
+
+      body: config.filasSalida,
+
+      theme:'grid',
+
+      headStyles:{
+        fillColor:[22,53,114],
+        textColor:255,
+        fontStyle:'bold',
+        halign:'center'
+      },
+
+      alternateRowStyles:{
+        fillColor:[248,250,252]
+      },
+
+      styles:{
+        font:'helvetica',
+        fontSize:8,
+        cellPadding:2
+      }
+    });
+
+  }
 
   const pageCount = doc.getNumberOfPages();
   for (let page = 1; page <= pageCount; page++) {
