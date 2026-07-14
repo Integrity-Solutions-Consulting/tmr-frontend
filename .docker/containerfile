@@ -21,7 +21,7 @@ COPY . .
 # Si se pasa un valor de API_URL en el build, lo inyectamos en el environment correspondiente
 RUN if [ -n "$API_URL" ]; then \
       if [ "$BUILD_CONFIG" = "development" ]; then \
-        printf "export const environment = {\n  production: false,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.ts; \
+        printf "export const environment = {\n  production: false,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.dev.ts; \
       else \
         printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
       fi \
