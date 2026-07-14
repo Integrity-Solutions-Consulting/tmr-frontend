@@ -18,9 +18,13 @@ RUN npm ci --legacy-peer-deps --include=dev
 # Copiar todo el código
 COPY . .
 
-# Si se pasa un valor de API_URL en el build, lo inyectamos en el environment de producción
+# Si se pasa un valor de API_URL en el build, lo inyectamos en el environment correspondiente
 RUN if [ -n "$API_URL" ]; then \
-      printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
+      if [ "$BUILD_CONFIG" = "development" ]; then \
+        printf "export const environment = {\n  production: false,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.ts; \
+      else \
+        printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
+      fi \
     fi
 
 # Construir la aplicación - usa las definiciones de environments.ts
