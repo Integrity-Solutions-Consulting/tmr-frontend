@@ -24,9 +24,7 @@ export interface ReporteTabularConfig {
   formatoPdf?: 'letter' | 'a4' | 'a3';
 }
 
-
-
-const COLOR_CABECERA = 'FF1F497D';
+const COLOR_CABECERA = 'FF163572';
 const COLOR_TABLA = 'FF163572';
 const COLOR_TEXTO = 'FF334155';
 const COLOR_BORDE = 'FFE2E8F0';
@@ -103,6 +101,7 @@ export async function estandarizarCabeceraExcelExistente(
   cantidadColumnas: number,
   detalle?: string,
   filaEncabezados = 4,
+  aplicarFiltro = true
 ): Promise<void> {
   try { worksheet.unMergeCells(1, 1, 1, cantidadColumnas); } catch { }
   try { worksheet.unMergeCells(2, 1, 2, cantidadColumnas); } catch { }
@@ -141,10 +140,14 @@ export async function estandarizarCabeceraExcelExistente(
   }
 
   worksheet.views = [{ state: 'frozen', ySplit: filaEncabezados }];
-  worksheet.autoFilter = {
-    from: { row: filaEncabezados, column: 1 },
-    to: { row: filaEncabezados, column: cantidadColumnas },
-  };
+  
+  if (aplicarFiltro) {
+    worksheet.autoFilter = {
+      from: { row: filaEncabezados, column: 1 },
+      to: { row: filaEncabezados, column: cantidadColumnas },
+    };
+  }
+
   worksheet.pageSetup = {
     orientation: cantidadColumnas > 6 ? 'landscape' : 'portrait',
     fitToPage: true,
