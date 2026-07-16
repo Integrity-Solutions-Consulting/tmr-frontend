@@ -22,7 +22,18 @@ jobs:
           # workflow protection.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           release-type: simple
-
+          
+      - name: Wait for PR checks and auto-merge Release PR
+        if: steps.release.outputs.prs_created == 'true'
+        run: |
+          pr_number=$(echo '${{ steps.release.outputs.pr }}' | jq -r '.number')
+          echo "Habilitando auto-merge en PR #$pr_number"
+          gh pr merge "$pr_number" \
+            --auto \
+            --merge \
+            --delete-branch=false
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 # How this works:
 # 1. Every push to main updates a "Release PR" with a changelog and next
 #    version number, computed from Conventional Commit messages
