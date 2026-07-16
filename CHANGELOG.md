@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.0...v1.1.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* docker url_api validation ([cf290d4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/cf290d430594a107cf047677ab9025db0ec75c0e))
+* docker url_api validation ([6d99b80](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6d99b800ddf55bd0240ce226943233c6437ffbcf))
+
 ## [1.1.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.0.1...v1.1.0) (2026-07-15)
 
 
