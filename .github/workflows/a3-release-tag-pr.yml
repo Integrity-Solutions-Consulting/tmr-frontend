@@ -29,6 +29,7 @@ jobs:
           pr_number=$(echo '${{ steps.release.outputs.pr }}' | jq -r '.number')
           echo "Habilitando auto-merge en PR #$pr_number"
           gh pr merge "$pr_number" \
+            --repo "${{ github.repository }}" \
             --auto \
             --merge \
             --delete-branch=false
