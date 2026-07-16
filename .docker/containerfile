@@ -2,12 +2,20 @@
 FROM node:20-alpine AS builder
 
 # 1. Definimos los ARG necesarios para la compilación
-ARG BUILD_CONFIG=production
+ARG BUILD_CONFIG
 ARG API_URL
 
 # Convertir ARG en ENV
 ENV BUILD_CONFIG=$BUILD_CONFIG
 ENV API_URL=$API_URL
+
+# Validar que los argumentos requeridos estén presentes
+RUN if [ -z "$BUILD_CONFIG" ]; then \
+      echo "ERROR: BUILD_CONFIG is required (must be 'development' or 'production')"; exit 1; \
+    fi
+RUN if [ -z "$API_URL" ]; then \
+      echo "ERROR: API_URL is required"; exit 1; \
+    fi
 
 WORKDIR /app
 
@@ -18,13 +26,13 @@ RUN npm ci --legacy-peer-deps --include=dev
 # Copiar todo el código
 COPY . .
 
-# Si se pasa un valor de API_URL en el build, lo inyectamos en el environment correspondiente
-RUN if [ -n "$API_URL" ]; then \
-      if [ "$BUILD_CONFIG" = "development" ]; then \
-        printf "export const environment = {\n  production: false,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.dev.ts; \
-      else \
-        printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
-      fi \
+# Inyectar API_URL en el archivo de environment correspondiente
+RUN if [ "$BUILD_CONFIG" = "development" ]; then \
+      printf "export const environment = {\n  production: false,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.dev.ts; \
+    elif [ "$BUILD_CONFIG" = "production" ]; then \
+      printf "export const environment = {\n  production: true,\n  apiUrl: '%s'\n};\n" "$API_URL" > src/environments/environment.prod.ts; \
+    else \
+      echo "ERROR: BUILD_CONFIG must be 'development' or 'production', got: $BUILD_CONFIG"; exit 1; \
     fi
 
 # Construir la aplicación - usa las definiciones de environments.ts
