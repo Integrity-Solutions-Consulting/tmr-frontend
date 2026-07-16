@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.1...v1.1.2) (2026-07-16)
+
+
+### Bug Fixes
+
+* logo test deploy ([f250f91](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f250f91edb81276ec233f2e14cec568579ecf04d))
+* logo test deploy ([21ddf08](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/21ddf0838c1d54d64e158c8fc9df86b8a5a7b365))
+
 ## [1.1.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.0...v1.1.1) (2026-07-16)
 
 
