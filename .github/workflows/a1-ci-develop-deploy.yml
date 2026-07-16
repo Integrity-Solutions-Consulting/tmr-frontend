@@ -50,7 +50,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          no-cache: true
           build-args: |
             BUILD_CONFIG=development
             API_URL=${{ secrets.API_URL_DEV }}
