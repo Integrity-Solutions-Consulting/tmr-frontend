@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.1.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.1...v1.1.2) (2026-07-16)
+
+
+### Bug Fixes
+
+* logo test deploy ([f250f91](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f250f91edb81276ec233f2e14cec568579ecf04d))
+* logo test deploy ([21ddf08](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/21ddf0838c1d54d64e158c8fc9df86b8a5a7b365))
+
+## [1.1.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.0...v1.1.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* docker url_api validation ([cf290d4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/cf290d430594a107cf047677ab9025db0ec75c0e))
+* docker url_api validation ([6d99b80](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6d99b800ddf55bd0240ce226943233c6437ffbcf))
+
+## [1.1.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.0.1...v1.1.0) (2026-07-15)
+
+
+### Features
+
+* agregar boton de exportacion a Excel en el Drawer de horas faltantes ([8ec1ff1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8ec1ff15b8a224b09f5cb1e3f22c3ee80d79624c))
+
+
+### Bug Fixes
+
+* configurar apiUrl relativa como /api en produccion ([3c6eef9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/3c6eef9b8994c49797bd3e0df6632169537a35bc))
+* configurar apiUrl relativa como /api en produccion ([47f5d22](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/47f5d2242b41bc5b3da364b70f5092393b1c8766))
+* disable cache de cocker ([044a1d4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/044a1d48bbfbcba796ef68816e1c3d340f021715))
+* disable cache de cocker ([68c9f06](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/68c9f0617dd87feb3ffb37d6f15686fa49dc3b1b))
+* docker file ([901a4a5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/901a4a5a8359d6bc7a0319c13476a0c8f26e1e9a))
+* docker file ([94c83d5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/94c83d5037aedb69d609e1872ae0a2c4a3f318af))
+* identificacion de colores de una exportacion en excel ([8e79344](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8e79344af458cad75bd7cac09fe7abad2956f726))
+* identificacion de colores de una exportacion en excel ([16a7851](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/16a7851c84831aa2f0ce4320f53b8b122b89b6bf))
+
 ## [1.0.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.0.0...v1.0.1) (2026-07-13)
 
 
