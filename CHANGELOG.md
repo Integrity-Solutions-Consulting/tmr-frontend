@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.4...v1.2.0) (2026-07-17)
+
+
+### Features
+
+* ready para deploy ([e5b18ab](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e5b18ab6b1c4972e934a84a138b731356657c48a))
+
 ## [1.1.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.3...v1.1.4) (2026-07-17)
 
 
