@@ -13,7 +13,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    environment: production
     permissions:
       contents: read
       packages: write
@@ -58,8 +57,16 @@ jobs:
             BUILD_CONFIG=production
             API_URL=${{ secrets.API_URL_PROD }}
 
+  deploy-prod:
+    name: Disparar redeploy en Dokploy (Prod)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    # Job separado a propósito: si el webhook de Dokploy falla, se puede
+    # re-ejecutar SOLO este job desde la UI de GitHub sin rebuildear y
+    # re-pushear la imagen de producción otra vez.
+    steps:
       - name: Disparar redeploy en Dokploy (Prod)
-        if: success()
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
