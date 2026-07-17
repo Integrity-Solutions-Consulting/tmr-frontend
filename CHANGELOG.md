@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.3...v1.1.4) (2026-07-17)
+
+
+### Bug Fixes
+
+* test auto merge en release pr ([098b7a8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/098b7a8d307357c4b96ba967e33a9aebe84b756b))
+
 ## [1.1.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.1.2...v1.1.3) (2026-07-16)
 
 
