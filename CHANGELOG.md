@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.1...v1.2.2) (2026-07-17)
+
+
+### Bug Fixes
+
+* tab icon ([6e43552](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6e43552a713db44a1bab5e7ede7d8e176f857525))
+
 ## [1.2.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.0...v1.2.1) (2026-07-17)
 
 
