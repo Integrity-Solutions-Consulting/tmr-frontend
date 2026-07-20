@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.2...v1.2.3) (2026-07-20)
+
+
+### Bug Fixes
+
+* **dashboard:** métrica de avance de jornada basada en completitud topeada al 100% (AD) ([8ec0697](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8ec06970c6f4f689899d494a26af0e42cd885e83))
+* **env:** revert apiUrl to empty string for dev deployment (AD) ([33b50be](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/33b50be46edd6de2ea17a5d8184082d8963a623e))
+* Merge pull request [#242](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/issues/242) from Integrity-Solutions-Consulting/develop ([5db9014](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5db90143091a70f8a4a3fb5c1ab7e3bcfa738cf5))
+
 ## [1.2.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.1...v1.2.2) (2026-07-17)
 
 
