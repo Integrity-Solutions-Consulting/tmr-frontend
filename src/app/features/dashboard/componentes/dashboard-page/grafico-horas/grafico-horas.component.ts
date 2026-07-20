@@ -62,15 +62,24 @@ export class GraficoHorasComponent {
 
   getAvanceJornada(): number {
     if (!this.horasData || this.horasData.length === 0) return 0;
-    const totalReportadas = this.horasData.reduce((sum, item) => sum + item.horas, 0);
-    const totalAsignadas = this.horasData.reduce((sum, item) => sum + item.horasAsignadas, 0);
+    
+    let totalEfectivo = 0;
+    let totalAsignadas = 0;
+
+    for (const item of this.horasData) {
+      if (item.horasAsignadas && item.horasAsignadas > 0) {
+        totalAsignadas += item.horasAsignadas;
+        totalEfectivo += Math.min(item.horas, item.horasAsignadas);
+      }
+    }
+
     if (totalAsignadas === 0) return 0;
-    return (totalReportadas / totalAsignadas) * 100;
+    return Math.min((totalEfectivo / totalAsignadas) * 100, 100);
   }
 
   getPorcentajeProyecto(item: HorasPorProyecto): number {
     if (!item.horasAsignadas || item.horasAsignadas === 0) return 0;
-    return (item.horas / item.horasAsignadas) * 100;
+    return Math.min((item.horas / item.horasAsignadas) * 100, 100);
   }
 
   // Carousel Navigation
