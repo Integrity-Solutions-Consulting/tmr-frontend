@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.4...v1.2.5) (2026-07-27)
+
+
+### Bug Fixes
+
+* added fechainicioreal como campo ([d0a68f1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d0a68f19a20899d4a61fa2edfa0520f1e9362dc7))
+
 ## [1.2.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.3...v1.2.4) (2026-07-20)
 
 
