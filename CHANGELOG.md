@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.3...v1.2.4) (2026-07-20)
+
+
+### Bug Fixes
+
+* test url send to prod ([f70011c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f70011c91b096f3c6b43037e0559942af6f57b31))
+
 ## [1.2.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.2...v1.2.3) (2026-07-20)
 
 

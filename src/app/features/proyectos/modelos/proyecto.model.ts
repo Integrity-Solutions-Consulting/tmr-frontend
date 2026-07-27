@@ -48,6 +48,7 @@ export interface Proyecto {
   recursos?: RecursoProyecto[];
   // Nuevos campos
   observacion?: string;
+  fechaInicioReal?: string | null;
   fechaFinReal?: string | null;
   fechaInicioEspera?: string | null;
   fechaFinEspera?: string | null;
