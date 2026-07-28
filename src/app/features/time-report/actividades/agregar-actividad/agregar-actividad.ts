@@ -19,6 +19,7 @@ import { environment } from '../../../../../environments/environment';
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
 import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/modal-eliminar-actividad.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -37,7 +38,8 @@ import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/moda
         MatDatepickerModule,
         MatNativeDateModule,
         MatAutocompleteModule,
-        ModalEliminarActividadComponent
+        ModalEliminarActividadComponent,
+        ConfirmDialogComponent
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -53,6 +55,7 @@ export class AgregarActividad implements OnInit {
     public esEdicion = false;
     public mostrarEliminar = false;
     public errorEliminar: string | null = null;
+    public mostrarConfirmacionHoras = false;
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
@@ -437,18 +440,40 @@ export class AgregarActividad implements OnInit {
     guardar() {
         if (this.form.valid) {
             const rawValue = this.form.getRawValue();
-            const formValue = {
-                ...rawValue,
-                fechaActividad: this.formatFecha(rawValue.fechaActividad),
-                fechaInicio: this.formatFecha(rawValue.fechaInicio),
-                fechaFin: this.formatFecha(rawValue.fechaFin)
-            };
-            if (this.esEdicion) {
-                this.actividadesService.actualizarActividad(this.data.actividad.id, formValue);
-            } else {
-                this.actividadesService.agregarActividad(formValue);
+            const esRecurrente = rawValue.esRecurrente;
+            const horas = esRecurrente ? Number(rawValue.horasPorDia) : Number(rawValue.numeroHoras);
+
+            if (horas > 8) {
+                this.mostrarConfirmacionHoras = true;
+                return;
             }
-            this.dialogRef.close();
+
+            this.ejecutarGuardar();
         }
+    }
+
+    confirmarGuardar() {
+        this.mostrarConfirmacionHoras = false;
+        this.ejecutarGuardar();
+    }
+
+    cancelarGuardar() {
+        this.mostrarConfirmacionHoras = false;
+    }
+
+    private ejecutarGuardar() {
+        const rawValue = this.form.getRawValue();
+        const formValue = {
+            ...rawValue,
+            fechaActividad: this.formatFecha(rawValue.fechaActividad),
+            fechaInicio: this.formatFecha(rawValue.fechaInicio),
+            fechaFin: this.formatFecha(rawValue.fechaFin)
+        };
+        if (this.esEdicion) {
+            this.actividadesService.actualizarActividad(this.data.actividad.id, formValue);
+        } else {
+            this.actividadesService.agregarActividad(formValue);
+        }
+        this.dialogRef.close();
     }
 }

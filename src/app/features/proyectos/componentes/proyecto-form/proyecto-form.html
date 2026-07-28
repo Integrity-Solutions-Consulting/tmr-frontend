@@ -130,15 +130,26 @@
       <mat-hint>Opcional</mat-hint>
     </mat-form-field>
 
-    <!-- ── Fecha Fin Real (solo edición) ────── -->
+    <!-- ── Fechas Reales (solo edición) ────── -->
     @if (proyecto) {
-      <div class="proyecto-form__field proyecto-form__date-field" style="margin-top: 8px;">
-        <input class="proyecto-form__date-control" type="date"
-               formControlName="fechaFinReal">
-        <label class="proyecto-form__date-label">Fecha fin real</label>
-        <div class="proyecto-form__date-error"
-             *ngIf="campoInvalido('fechaFinReal') && formulario.controls['fechaFinReal'].hasError('fechaInvalida')">
-          Fecha inválida
+      <div class="proyecto-form__grid" style="margin-top: 8px;">
+        <div class="proyecto-form__field proyecto-form__date-field">
+          <input class="proyecto-form__date-control" type="date"
+                 formControlName="fechaInicioReal">
+          <label class="proyecto-form__date-label">Fecha inicio real</label>
+          <div class="proyecto-form__date-error"
+               *ngIf="campoInvalido('fechaInicioReal') && formulario.controls['fechaInicioReal'].hasError('fechaInvalida')">
+            Fecha inválida
+          </div>
+        </div>
+        <div class="proyecto-form__field proyecto-form__date-field">
+          <input class="proyecto-form__date-control" type="date"
+                 formControlName="fechaFinReal">
+          <label class="proyecto-form__date-label">Fecha fin real</label>
+          <div class="proyecto-form__date-error"
+               *ngIf="campoInvalido('fechaFinReal') && formulario.controls['fechaFinReal'].hasError('fechaInvalida')">
+            Fecha inválida
+          </div>
         </div>
       </div>
     }

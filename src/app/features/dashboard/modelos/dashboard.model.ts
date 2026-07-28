@@ -20,6 +20,7 @@ export interface ProyectoResumen {
 }
 
 export interface HorasPorProyecto {
+  id: number;
   proyecto: string;
   horas: number;
   codigo: string;

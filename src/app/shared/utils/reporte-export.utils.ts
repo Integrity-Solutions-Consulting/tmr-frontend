@@ -12,14 +12,19 @@ export interface ReporteTabularConfig {
   titulo: string;
   nombreArchivo: string;
   nombreHoja: string;
+
   columnas: ColumnaReporte[];
   filas: Array<Array<string | number>>;
+
+  columnasSalida?: ColumnaReporte[];
+  filasSalida?: Array<Array<string | number>>;
+
   columnaEstado?: number;
   orientacionPdf?: 'portrait' | 'landscape';
   formatoPdf?: 'letter' | 'a4' | 'a3';
 }
 
-const COLOR_CABECERA = 'FF1F497D';
+const COLOR_CABECERA = 'FF163572';
 const COLOR_TABLA = 'FF163572';
 const COLOR_TEXTO = 'FF334155';
 const COLOR_BORDE = 'FFE2E8F0';
@@ -96,6 +101,7 @@ export async function estandarizarCabeceraExcelExistente(
   cantidadColumnas: number,
   detalle?: string,
   filaEncabezados = 4,
+  aplicarFiltro = true
 ): Promise<void> {
   try { worksheet.unMergeCells(1, 1, 1, cantidadColumnas); } catch { }
   try { worksheet.unMergeCells(2, 1, 2, cantidadColumnas); } catch { }
@@ -134,10 +140,14 @@ export async function estandarizarCabeceraExcelExistente(
   }
 
   worksheet.views = [{ state: 'frozen', ySplit: filaEncabezados }];
-  worksheet.autoFilter = {
-    from: { row: filaEncabezados, column: 1 },
-    to: { row: filaEncabezados, column: cantidadColumnas },
-  };
+  
+  if (aplicarFiltro) {
+    worksheet.autoFilter = {
+      from: { row: filaEncabezados, column: 1 },
+      to: { row: filaEncabezados, column: cantidadColumnas },
+    };
+  }
+
   worksheet.pageSetup = {
     orientation: cantidadColumnas > 6 ? 'landscape' : 'portrait',
     fitToPage: true,
@@ -467,6 +477,60 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
     margin: { left: 0, right: 0, bottom: 18, top: 0 },
     didDrawPage: dibujarCabecera,
   });
+
+
+ //=====================================================
+  // SEGUNDA TABLA: DATOS DE SALIDA
+  //=====================================================
+
+  if (
+    config.columnasSalida &&
+    config.filasSalida &&
+    config.filasSalida.length > 0
+  ) {
+
+    const ultimaTabla = (doc as any).lastAutoTable;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(22,53,114);
+
+    doc.text(
+      'DATOS DE SALIDA',
+      0,
+      ultimaTabla.finalY + 10
+    );
+
+    autoTable(doc,{
+      startY: ultimaTabla.finalY + 14,
+
+      head:[
+        config.columnasSalida.map(c=>c.encabezado)
+      ],
+
+      body: config.filasSalida,
+
+      theme:'grid',
+
+      headStyles:{
+        fillColor:[22,53,114],
+        textColor:255,
+        fontStyle:'bold',
+        halign:'center'
+      },
+
+      alternateRowStyles:{
+        fillColor:[248,250,252]
+      },
+
+      styles:{
+        font:'helvetica',
+        fontSize:8,
+        cellPadding:2
+      }
+    });
+
+  }
 
   const pageCount = doc.getNumberOfPages();
   for (let page = 1; page <= pageCount; page++) {

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { forkJoin, of, Subject, switchMap, takeUntil, catchError, map } from 'rxjs';
 import { exportarReporteExcelMultihoja, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
 import { CatalogosService, CargoItem, CatalogoItem } from '../../servicios/catalogos.service';
@@ -470,25 +470,50 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
               { encabezado: 'Dirección', anchoPdf: 28 },
               { encabezado: 'Proyectos asignados', anchoPdf: 36 },
             ],
-            filas: colaboradores.map((colaborador) => [
-              colaborador.asociacion ?? '-',
-              colaborador.tipoContrato ?? '-',
-              colaborador.estado ?? '-',
-              colaborador.numeroIdentificacion ?? colaborador.identificacion ?? '-',
-              colaborador.nombres ?? '-',
-              colaborador.apellidos ?? '-',
-              this.formatearFechaValor(colaborador.fechaNacimiento),
-              colaborador.genero ?? '-',
-              colaborador.departamento ?? '-',
-              this.formatearFechaValor(colaborador.fechaContratacion),
-              colaborador.cargo ?? '-',
-              colaborador.modalidad ?? '-',
-              colaborador.categoria ?? '-',
-              colaborador.correoElectronico ?? '-',
-              colaborador.telefono ?? '-',
-              colaborador.direccion ?? '-',
-              this.formatearProyectosColaborador(colaborador),
+
+            filas: colaboradores
+              .filter(c => c.estado === 'Activo')
+              .map(c => [
+                c.asociacion ?? '-',
+                c.tipoContrato ?? '-',
+                c.estado ?? '-',
+                c.numeroIdentificacion ?? c.identificacion ?? '-',
+                c.nombres ?? '-',
+                c.apellidos ?? '-',
+                this.formatearFechaValor(c.fechaNacimiento),
+                c.genero ?? '-',
+                c.departamento ?? '-',
+                this.formatearFechaValor(c.fechaContratacion),
+                c.cargo ?? '-',
+                c.modalidad ?? '-',
+                c.categoria ?? '-',
+                c.correoElectronico ?? '-',
+                c.telefono ?? '-',
+                c.direccion ?? '-',
+                this.formatearProyectosColaborador(c),
             ]),
+
+            columnasSalida: [
+              { encabezado: 'Núm. ID', anchoPdf: 20 },
+              { encabezado: 'Nombre', anchoPdf: 35 },
+              { encabezado: 'Fecha salida', anchoPdf: 20 },
+              { encabezado: 'Tipo salida', anchoPdf: 25 },
+              { encabezado: 'Causa salida', anchoPdf: 55 },
+              { encabezado: 'Reemplazo', anchoPdf: 35 },
+            ],
+
+            filasSalida: colaboradores
+              .filter(c => c.estado === 'Inactivo')
+              .map(c => [
+                c.numeroIdentificacion ?? c.identificacion ?? '-',
+                `${c.nombres ?? ''} ${c.apellidos ?? ''}`.trim(),
+                this.formatearFechaValor(c.fechaSalida),
+                c.tipoSalida ?? '-',
+                c.causaSalida ?? '-',
+                c.reemplazoNombre ?? '-',
+            ]),
+
+
             columnaEstado: 2,
             orientacionPdf: 'landscape',
             formatoPdf: 'a3',
@@ -508,6 +533,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           const inactivosCount = colaboradores.filter(c => c.estado === 'Inactivo').length;
           const noAsignadosCount = colaboradores.filter(c => (!c.proyectosAsignados || c.proyectosAsignados.length === 0) && c.estado === 'Activo').length;
           const asignadosCount = colaboradores.filter(c => c.proyectosAsignados && c.proyectosAsignados.length > 0 && c.estado === 'Activo').length;
+
 
           void exportarReporteExcelMultihoja(
             [
@@ -534,44 +560,59 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   { encabezado: 'Dirección', anchoExcel: 36 },
                   { encabezado: 'Proyectos asignados', anchoExcel: 54 },
                 ],
-                filas: colaboradores.map(c => [
-                  c.asociacion ?? '-',
-                  c.tipoContrato ?? '-',
-                  c.estado ?? '-',
-                  c.numeroIdentificacion ?? c.identificacion ?? '-',
-                  c.nombres ?? '-',
-                  c.apellidos ?? '-',
-                  this.formatearFechaValor(c.fechaNacimiento),
-                  c.genero ?? '-',
-                  c.departamento ?? '-',
-                  this.formatearFechaValor(c.fechaContratacion),
-                  c.cargo ?? '-',
-                  c.modalidad ?? '-',
-                  c.categoria ?? '-',
-                  c.correoElectronico ?? '-',
-                  c.telefono ?? '-',
-                  c.direccion ?? '-',
-                  this.formatearProyectosColaborador(c),
-                ]),
+                filas: colaboradores
+                  .filter(c => c.estado === 'Activo')
+                  .map(c => [
+                    c.asociacion ?? '-',
+                    c.tipoContrato ?? '-',
+                    c.estado ?? '-',
+                    c.numeroIdentificacion ?? c.identificacion ?? '-',
+                    c.nombres ?? '-',
+                    c.apellidos ?? '-',
+                    this.formatearFechaValor(c.fechaNacimiento),
+                    c.genero ?? '-',
+                    c.departamento ?? '-',
+                    this.formatearFechaValor(c.fechaContratacion),
+                    c.cargo ?? '-',
+                    c.modalidad ?? '-',
+                    c.categoria ?? '-',
+                    c.correoElectronico ?? '-',
+                    c.telefono ?? '-',
+                    c.direccion ?? '-',
+                    this.formatearProyectosColaborador(c),
+                  ]),
                 columnaEstado: 2,
               },
+
               {
-                titulo: 'Resumen de Colaboradores',
-                nombreArchivo: 'Resumen',
-                nombreHoja: 'Resumen',
+                titulo: 'Datos de salida',
+                nombreArchivo: 'DatosSalida',
+                nombreHoja: 'Datos de salida',
+
                 columnas: [
-                  { encabezado: 'Métrica', anchoExcel: 30 },
-                  { encabezado: 'Total', anchoExcel: 12 },
+                  { encabezado: 'Código', anchoExcel: 15 },
+                  { encabezado: 'Identificación', anchoExcel: 20 },
+                  { encabezado: 'Nombres', anchoExcel: 25 },
+                  { encabezado: 'Apellidos', anchoExcel: 25 },
+                  { encabezado: 'Fecha salida', anchoExcel: 18 },
+                  { encabezado: 'Tipo salida', anchoExcel: 22 },
+                  { encabezado: 'Causa salida', anchoExcel: 35 },
+                  { encabezado: 'Reemplazo', anchoExcel: 25 },
                 ],
-                filas: [
-                  ['Total colaboradores', colaboradores.length],
-                  ['Activos', activosCount],
-                  ['Inactivos', inactivosCount],
-                  ['No asignados (0 proyectos)', noAsignadosCount],
-                  ['Asignados (1+ proyectos)', asignadosCount],
-                ],
-                columnaEstado: 2,
-              }
+
+                filas: colaboradores
+                  .filter(c => c.estado === 'Inactivo')  
+                  .map(c => [
+                    c.codigoEmpleado ?? '-',
+                    c.numeroIdentificacion ?? c.identificacion ?? '-',
+                    c.nombres ?? '-',
+                    c.apellidos ?? '-',
+                    this.formatearFechaValor(c.fechaSalida),
+                    c.tipoSalida ?? '-',
+                    c.causaSalida ?? '-',
+                    c.reemplazoNombre ?? '-',
+                  ]),
+              },
             ],
             'Colaboradores'
           );
@@ -597,15 +638,34 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
     return proyectos.map(p => `${p.nombre} - ${p.cliente} - ${p.estado}`).join('; ');
   }
   // ── Toast ────────────────────────────────────────────────
-private obtenerColaboradoresParaExportar() {
-  return this.svc.getColaboradores(this.filtros, 1, 9999).pipe(
-    switchMap(res => {
-      const colaboradores = res.data ?? [];
-      if (!colaboradores.length) return of([]);
-      return forkJoin(colaboradores.map(col => this.svc.getColaboradorById(col.id)));
-    })
-  );
-}
+  private obtenerColaboradoresParaExportar() {
+    return this.svc.getColaboradores(this.filtros, 1, 9999).pipe(
+      switchMap(res => {
+        const colaboradores = res.data ?? [];
+
+        console.table(
+          colaboradores.map(c => ({
+            id: c.id,
+            codigo: c.codigoEmpleado,
+            nombre: c.nombreCompleto
+          }))
+        );
+
+        return forkJoin(
+          colaboradores.map(c =>
+            this.svc.getColaboradorById(c.id).pipe(
+              catchError(error => {
+                console.error(`Error cargando colaborador ${c.id}`, error);
+                return of(null);
+              })
+            )
+          )
+        ).pipe(
+          map(resultado => resultado.filter((c): c is Colaborador => c !== null))
+        );
+      })
+    );
+  }
 
   onToastCerrado(id: number): void { }
 

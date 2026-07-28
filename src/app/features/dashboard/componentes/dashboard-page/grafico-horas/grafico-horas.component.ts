@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { HorasPorProyecto, ProyectosPorCliente } from '../../../modelos/dashboard.model';
@@ -12,6 +12,12 @@ import { ReducePipe } from './reduce.pipe';
   styleUrls: ['./grafico-horas.component.scss']
 })
 export class GraficoHorasComponent {
+
+  @Output() proyectoSelect = new EventEmitter<HorasPorProyecto>();
+
+  onProyectoClick(item: HorasPorProyecto): void {
+    this.proyectoSelect.emit(item);
+  }
 
   @Input() set horasData(data: HorasPorProyecto[]) {
     this._horasData = data;
@@ -42,8 +48,11 @@ export class GraficoHorasComponent {
   }
 
   getAltura(item: HorasPorProyecto): number {
-    const porcentaje = this.getPorcentajeProyecto(item);
-    return Math.min(porcentaje, 100);
+    if (item.horasAsignadas && item.horasAsignadas > 0) {
+      return Math.min((item.horas / item.horasAsignadas) * 100, 100);
+    }
+    if (this.maximo === 0) return 0;
+    return (item.horas / this.maximo) * 100;
   }
 
   getNombreProyectoCorto(nombre: string): string {
@@ -53,15 +62,24 @@ export class GraficoHorasComponent {
 
   getAvanceJornada(): number {
     if (!this.horasData || this.horasData.length === 0) return 0;
-    const totalReportadas = this.horasData.reduce((sum, item) => sum + item.horas, 0);
-    const totalAsignadas = this.horasData.reduce((sum, item) => sum + item.horasAsignadas, 0);
+    
+    let totalEfectivo = 0;
+    let totalAsignadas = 0;
+
+    for (const item of this.horasData) {
+      if (item.horasAsignadas && item.horasAsignadas > 0) {
+        totalAsignadas += item.horasAsignadas;
+        totalEfectivo += Math.min(item.horas, item.horasAsignadas);
+      }
+    }
+
     if (totalAsignadas === 0) return 0;
-    return (totalReportadas / totalAsignadas) * 100;
+    return Math.min((totalEfectivo / totalAsignadas) * 100, 100);
   }
 
   getPorcentajeProyecto(item: HorasPorProyecto): number {
     if (!item.horasAsignadas || item.horasAsignadas === 0) return 0;
-    return (item.horas / item.horasAsignadas) * 100;
+    return Math.min((item.horas / item.horasAsignadas) * 100, 100);
   }
 
   // Carousel Navigation

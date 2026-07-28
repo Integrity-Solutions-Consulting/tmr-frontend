@@ -102,6 +102,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     estado: ['Activo'],
     idEstadoProyecto: this.fb.control<number | null>(null),
     observacion: [''],
+    fechaInicioReal: [null as string | null, [this.fechaValida()]],
     fechaFinReal: [null as string | null, [this.fechaValida()]],
     fechaInicioEspera: [null as string | null, [this.fechaValida()]],
     fechaFinEspera: [null as string | null, [this.fechaValida()]],
@@ -233,6 +234,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       estado: this.normalizarEstadoProyecto(proyecto),
       idEstadoProyecto: proyecto.idEstadoProyecto ?? null,
       observacion: proyecto.observacion ?? '',
+      fechaInicioReal: this.normalizarFecha(proyecto.fechaInicioReal),
       fechaFinReal: this.normalizarFecha(proyecto.fechaFinReal),
       fechaInicioEspera: this.normalizarFecha(proyecto.fechaInicioEspera),
       fechaFinEspera: this.normalizarFecha(proyecto.fechaFinEspera),
@@ -322,7 +324,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       codigo: '', nombre: '', cliente: '', tipo: '',
       idCliente: null, fechaInicio: '', fechaFin: '', presupuesto: '', horas: '',
       numeroRecursos: 0, estado: 'Activo', idEstadoProyecto: null,
-      observacion: '', fechaFinReal: '', fechaInicioEspera: '', fechaFinEspera: ''
+      observacion: '', fechaInicioReal: '', fechaFinReal: '', fechaInicioEspera: '', fechaFinEspera: ''
     });
     this.formulario.controls.estado.enable({ emitEvent: false });
     this.lideres.clear();
@@ -621,6 +623,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       estado: this.proyecto ? (valor.estado || 'Activo') : 'Activo',
       idEstadoProyecto: valor.idEstadoProyecto ?? undefined,
       observacion: valor.observacion ?? null,
+      fechaInicioReal: this.normalizarFecha(valor.fechaInicioReal),
       fechaFinReal: this.normalizarFecha(valor.fechaFinReal),
       fechaInicioEspera: this.normalizarFecha(valor.fechaInicioEspera),
       fechaFinEspera: this.normalizarFecha(valor.fechaFinEspera),

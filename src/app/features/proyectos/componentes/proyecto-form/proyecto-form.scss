@@ -237,6 +237,10 @@
     font-weight: 500;
   }
 
+  .mat-mdc-form-field-hint {
+    color: #d1d5db !important;
+  }
+
   .mat-mdc-form-field-subscript-wrapper {
     min-height: 22px;
   }
@@ -517,7 +521,7 @@
   }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
+// ── Responsive -────────────────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
   .proyecto-form__grid {
