@@ -42,21 +42,6 @@
           </div>
         </div>
         <div class="detalle-field">
-          <span class="material-icons detalle-field__icon">notes</span>
-          <div>
-            <p class="detalle-field__label">Descripción</p>
-            <p class="detalle-field__value">{{ data.detalle!.descripcion || 'Sin descripción' }}</p>
-          </div>
-        </div>
-        <div class="detalle-field">
-          <span class="material-icons detalle-field__icon">sort</span>
-          <div>
-            <p class="detalle-field__label">Orden</p>
-            <p class="detalle-field__value">{{ data.detalle!.orden !== null && data.detalle!.orden !== undefined ? data.detalle!.orden : 'No definido' }}</p>
-          </div>
-        </div>
-
-        <div class="detalle-field">
           <span class="material-icons detalle-field__icon">info</span>
           <div>
             <p class="detalle-field__label">Estado</p>
@@ -76,6 +61,20 @@
     <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
       <!-- Código -->
       <div class="form-field" [class.form-field--full]="!isEdit">
+        @if (isCargo) {
+        <div class="float-select">
+          <select class="float-select__input" formControlName="codigoValor" [class.float-select__input--error]="campoInvalido('codigoValor')">
+            <option value="" disabled selected></option>
+            @for (dep of departamentos(); track dep.id) {
+            <option [value]="dep.id">{{ dep.valor }}</option>
+            }
+          </select>
+          <label class="float-select__label float-select__label--up">Departamento <span class="req">*</span></label>
+        </div>
+        @if (campoInvalido('codigoValor')) {
+        <span class="form-field__error">Campo requerido</span>
+        }
+        } @else {
         <div class="float-field">
           <input class="float-field__input" type="text" formControlName="codigoValor" placeholder=" "
             [class.float-field__input--error]="campoInvalido('codigoValor')" style="text-transform: uppercase;" />
@@ -88,6 +87,7 @@
           @else if (form.controls.codigoValor.errors?.['pattern']) { Solo letras, números, - y _ }
           @else if (form.controls.codigoValor.errors?.['duplicateCodigo']) { Ya existe este código en el catálogo }
         </span>
+        }
         }
       </div>
 
@@ -121,33 +121,7 @@
       }
     </div>
 
-    <!-- Fila 2: Orden | Valor Extra -->
-    <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
-      <!-- Orden -->
-      <div class="form-field">
-        <div class="float-field">
-          <input class="float-field__input" type="number" formControlName="orden" placeholder=" "
-            [class.float-field__input--error]="campoInvalido('orden')" />
-          <label class="float-field__label">Orden (opcional)</label>
-        </div>
-        @if (campoInvalido('orden')) {
-        <span class="form-field__error">
-          @if (form.controls.orden.errors?.['min']) { Debe ser mayor o igual a 0 }
-        </span>
-        }
-      </div>
 
-
-    </div>
-
-    <!-- Descripción -->
-    <div class="form-field" style="margin-bottom: 24px;">
-      <div class="float-field">
-        <textarea class="float-field__input float-field__input--textarea" formControlName="descripcion" placeholder=" "
-          rows="2" style="height: 80px; padding: 10px 12px; resize: none;"></textarea>
-        <label class="float-field__label">Descripción (opcional)</label>
-      </div>
-    </div>
 
     }
 

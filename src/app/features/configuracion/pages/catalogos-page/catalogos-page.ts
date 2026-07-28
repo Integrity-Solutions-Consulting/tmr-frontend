@@ -233,11 +233,10 @@ export class CatalogosPage implements OnInit {
         } else if (mode === 'edit') {
           this.configuracionService.actualizarDetalle(result.id, {
             valor: result.valor,
-            descripcion: result.descripcion,
-            orden: result.orden,
             valorExtra: result.valorExtra,
             activo: result.activo,
             idCatalogo: currentMaster.id,
+            codigoValor: result.codigoValor,
           }).subscribe({
             next: () => {
               this.cargarDetalles(currentMaster.id);
@@ -272,11 +271,10 @@ export class CatalogosPage implements OnInit {
 
     this.configuracionService.actualizarDetalle(detalle.id, {
       valor: detalle.valor,
-      descripcion: detalle.descripcion,
-      orden: detalle.orden,
       valorExtra: detalle.valorExtra,
       activo: !detalle.activo,
       idCatalogo: currentMaster.id,
+      codigoValor: detalle.codigoValor,
     }).subscribe({
       next: () => {
         this.cargarDetalles(currentMaster.id);

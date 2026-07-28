@@ -164,8 +164,6 @@
               <tr>
                 <th>Código</th>
                 <th>Valor / Nombre</th>
-                <th>Descripción</th>
-                <th>Orden</th>
                 <th>Estado</th>
                 <th></th>
               </tr>
@@ -173,7 +171,7 @@
             <tbody>
               @if (filteredDetalles().length === 0) {
                 <tr>
-                  <td colspan="6" class="empty-state">No se encontraron ítems en este catálogo.</td>
+                  <td colspan="4" class="empty-state">No se encontraron ítems en este catálogo.</td>
                 </tr>
               }
 
@@ -183,8 +181,6 @@
                     <strong class="role-name">{{ detalle.codigoValor }}</strong>
                   </td>
                   <td>{{ detalle.valor }}</td>
-                  <td>{{ detalle.descripcion || '-' }}</td>
-                  <td>{{ detalle.orden !== null && detalle.orden !== undefined ? detalle.orden : '-' }}</td>
                   <td>
                     <span class="status-pill" [class.status-pill--inactive]="!detalle.activo">
                       {{ detalle.activo ? 'Activo' : 'Inactivo' }}

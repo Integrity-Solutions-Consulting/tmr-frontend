@@ -99,5 +99,6 @@ export interface UpdateCatalogoDetalleRequest {
   valorExtra?: string;
   activo?: boolean;
   idCatalogo?: number;
+  codigoValor?: string;
 }
 

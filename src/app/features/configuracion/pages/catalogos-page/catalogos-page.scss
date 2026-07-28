@@ -521,12 +521,10 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   // Ancho de columnas para Catálogos
-  th:nth-child(1), td:nth-child(1) { width: 15%; } // Código
-  th:nth-child(2), td:nth-child(2) { width: 25%; } // Valor
-  th:nth-child(3), td:nth-child(3) { width: 37%; } // Descripción
-  th:nth-child(4), td:nth-child(4) { width: 10%; } // Orden
-  th:nth-child(5), td:nth-child(5) { width: 10%; } // Estado
-  th:nth-child(6), td:nth-child(6) { width: 3%; }  // Acciones
+  th:nth-child(1), td:nth-child(1) { width: 30%; } // Código
+  th:nth-child(2), td:nth-child(2) { width: 50%; } // Valor / Nombre
+  th:nth-child(3), td:nth-child(3) { width: 15%; } // Estado
+  th:nth-child(4), td:nth-child(4) { width: 5%; }  // Acciones
 
   thead {
     background: #F9FAFB;
