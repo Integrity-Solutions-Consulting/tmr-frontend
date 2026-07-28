@@ -668,32 +668,9 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = control.value;
       if (!valor) return null;
-
-      let fecha: Date | null = null;
-      if (valor instanceof Date) {
-        fecha = isNaN(valor.getTime()) ? null : valor;
-      } else {
-        fecha = this.parseFechaString(String(valor));
-      }
-
-      if (!fecha || Number.isNaN(fecha.getTime())) {
-        return { fechaInvalida: true };
-      }
-
-      const fechaSinHora = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-
-      if (fechaSinHora < hoy) {
-        return { fechaInvalida: true };
-      }
-
-      const anioMaximoPermitido = new Date().getFullYear() + 100;
-      if (fecha.getFullYear() > anioMaximoPermitido) {
-        return { fechaInvalida: true };
-      }
-
-      return null;
+      if (valor instanceof Date && !isNaN(valor.getTime())) return null;
+      const fecha = this.parseFechaString(String(valor));
+      return fecha && !isNaN(fecha.getTime()) ? null : { fechaInvalida: true };
     };
   }
 
