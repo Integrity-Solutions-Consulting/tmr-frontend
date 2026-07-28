@@ -358,6 +358,10 @@ export class ConfiguracionService {
     return this.http.get<CatalogoDetalle[]>(`${environment.apiUrl}/configuracion/catalogos/${idCatalogo}/detalles`);
   }
 
+  getDetallesPorCatalogoCodigo(codigoCatalogo: string): Observable<CatalogoDetalle[]> {
+    return this.http.get<CatalogoDetalle[]>(`${environment.apiUrl}/configuracion/catalogos/codigo/${codigoCatalogo}/detalles`);
+  }
+
   crearDetalle(payload: CreateCatalogoDetalleRequest): Observable<CatalogoDetalle> {
     return this.http.post<CatalogoDetalle>(`${environment.apiUrl}/configuracion/catalogos/detalles`, payload);
   }
