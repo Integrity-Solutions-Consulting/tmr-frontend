@@ -60,21 +60,8 @@
     <!-- Fila 1: Código | Estado -->
     <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
       <!-- Código -->
+      @if (!isSpecial) {
       <div class="form-field" [class.form-field--full]="!isEdit">
-        @if (isCargo) {
-        <div class="float-select">
-          <select class="float-select__input" formControlName="codigoValor" [class.float-select__input--error]="campoInvalido('codigoValor')">
-            <option value="" disabled selected></option>
-            @for (dep of departamentos(); track dep.id) {
-            <option [value]="dep.id">{{ dep.valor }}</option>
-            }
-          </select>
-          <label class="float-select__label float-select__label--up">Departamento <span class="req">*</span></label>
-        </div>
-        @if (campoInvalido('codigoValor')) {
-        <span class="form-field__error">Campo requerido</span>
-        }
-        } @else {
         <div class="float-field">
           <input class="float-field__input" type="text" formControlName="codigoValor" placeholder=" "
             [class.float-field__input--error]="campoInvalido('codigoValor')" style="text-transform: uppercase;" />
@@ -88,8 +75,8 @@
           @else if (form.controls.codigoValor.errors?.['duplicateCodigo']) { Ya existe este código en el catálogo }
         </span>
         }
-        }
       </div>
+      }
 
       <!-- Estado -->
       @if (isEdit) {

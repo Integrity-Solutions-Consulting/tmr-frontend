@@ -4,8 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { CatalogoDetalle } from '../../models/configuracion.models';
-import { ConfiguracionService } from '../../services/configuracion.service';
-import { OnInit, signal } from '@angular/core';
 
 export type CatalogoModalMode = 'create' | 'edit' | 'view';
 
@@ -27,26 +25,22 @@ export interface CatalogoModalData {
   templateUrl: './catalogos-form-modal.html',
   styleUrl: './catalogos-form-modal.scss',
 })
-export class CatalogosFormModal implements OnInit {
+export class CatalogosFormModal {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<CatalogosFormModal>);
-  private readonly configuracionService = inject(ConfiguracionService);
   readonly data = inject<CatalogoModalData>(MAT_DIALOG_DATA);
 
-  readonly isCargo = this.data.idCatalogo === -103;
-  readonly departamentos = signal<CatalogoDetalle[]>([]);
+  readonly isSpecial = [-101, -102, -103].includes(this.data.idCatalogo);
 
   readonly form = this.fb.nonNullable.group({
     codigoValor: [
-      this.data.detalle?.valorExtra ?? (this.data.detalle?.codigoValor ?? ''),
-      this.data.idCatalogo === -103 
-        ? [Validators.required]
-        : [
-            Validators.required,
-            Validators.minLength(1),
-            Validators.pattern('^[a-zA-Z0-9_-]+$'),
-            this.duplicateCodigoValidator(),
-          ],
+      this.data.detalle?.codigoValor ?? '',
+      this.isSpecial ? [] : [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.pattern('^[a-zA-Z0-9_-]+$'),
+        this.duplicateCodigoValidator(),
+      ],
     ],
     valor: [
       this.data.detalle?.valor ?? '',
@@ -61,22 +55,7 @@ export class CatalogosFormModal implements OnInit {
 
   constructor() {
     if (this.isEdit || this.isView) {
-      if (!this.isCargo) {
-        this.form.controls.codigoValor.disable();
-      }
-    }
-  }
-
-  ngOnInit(): void {
-    if (this.isCargo) {
-      this.configuracionService.getDetallesPorCatalogoCodigo('DEP').subscribe({
-        next: (deps) => this.departamentos.set(deps),
-        error: (err) => console.error(err)
-      });
-      // Patch with the actual ID from valorExtra, or fallback
-      if (this.data.detalle?.valorExtra) {
-        this.form.controls.codigoValor.setValue(this.data.detalle.valorExtra);
-      }
+      this.form.controls.codigoValor.disable();
     }
   }
 
@@ -114,7 +93,7 @@ export class CatalogosFormModal implements OnInit {
     this.dialogRef.close({
       id: this.data.detalle?.id ?? 0,
       idCatalogo: this.data.idCatalogo,
-      codigoValor: this.isCargo ? rawValue.codigoValor : rawValue.codigoValor.toUpperCase().trim(),
+      codigoValor: this.isSpecial ? 'AUTO' : rawValue.codigoValor.toUpperCase().trim(),
       valor: rawValue.valor.trim(),
       activo: rawValue.activo,
     });
