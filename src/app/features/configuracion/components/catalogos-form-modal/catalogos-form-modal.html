@@ -60,6 +60,7 @@
     <!-- Fila 1: Código | Estado -->
     <div class="form-grid form-grid--2" style="margin-bottom: 20px;">
       <!-- Código -->
+      @if (!isSpecial) {
       <div class="form-field" [class.form-field--full]="!isEdit">
         @if (isCargo) {
         <div class="float-select">
@@ -90,6 +91,7 @@
         }
         }
       </div>
+      }
 
       <!-- Estado -->
       @if (isEdit) {
