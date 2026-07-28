@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.7...v1.2.8) (2026-07-28)
+
+
+### Bug Fixes
+
+* Modificacion en catalogo en cargos ([df40cad](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/df40cad00a16a52d9273fbc6dfda0e76581f609d))
+* Se elimino el campo codigo de catalogo ([38bfb22](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/38bfb225ef41aa4bd8f72a7754232906ec5acf3e))
+
 ## [1.2.7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.6...v1.2.7) (2026-07-28)
 
 
