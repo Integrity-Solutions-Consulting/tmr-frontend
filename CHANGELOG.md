@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.5...v1.2.6) (2026-07-28)
+
+
+### Bug Fixes
+
+* Se modificó el diseño del catalogo cargo ([a975aa0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a975aa09228028ca092d1aa355445cacd1556e32))
+
 ## [1.2.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.4...v1.2.5) (2026-07-27)
 
 
