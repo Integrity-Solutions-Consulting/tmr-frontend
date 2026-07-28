@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.6...v1.2.7) (2026-07-28)
+
+
+### Bug Fixes
+
+* fechas en proyectos forms ([5410ced](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5410cedcfa32b8873edf0251086c342f96f40996))
+* fechas en proyectos forms ([8ddea98](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8ddea98cee592af1090d8be3a80072d4dadce1f0))
+
 ## [1.2.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.5...v1.2.6) (2026-07-28)
 
 
