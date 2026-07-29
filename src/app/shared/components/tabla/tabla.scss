@@ -71,12 +71,16 @@
     text-align: center;
   }
 
+  // ── FIX: columna Código un poco más ancha ─────────────────────────────
   ::ng-deep .mat-column-codigo {
-    width: 80px;
+    width: 110px;
   }
 
+  // ── FIX: columna Nombre con ancho fijo y recorte reforzado ─────────────
   ::ng-deep .mat-column-nombre {
     width: 220px;
+    max-width: 220px;
+    overflow: hidden;
   }
 
   ::ng-deep .mat-column-cliente {
@@ -177,6 +181,8 @@
   min-width: 0;
 
   .tabla__proyecto-nombre {
+    display: block;
+    max-width: 100%;
     color: #737373;
     font-size: 14px;
     font-weight: 400;

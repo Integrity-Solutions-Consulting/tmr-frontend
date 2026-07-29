@@ -59,6 +59,15 @@
   width: 100%;
 }
 
+// ── FIX: campo de Observación sin flecha de redimensionar ─────────────────
+.proyecto-form__observacion {
+  textarea {
+    resize: none;
+    min-height: 60px;
+    overflow-y: auto;
+  }
+}
+
 .proyecto-form__search-wrapper {
   width: 100%;
 }
@@ -160,22 +169,9 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
 
-  // ⬇ FIX OBSERVACIÓN: más alto el contenedor del textarea para dar aire al label flotado
-  .mat-mdc-text-field-wrapper.mdc-text-field--textarea {
-    height: auto !important;
-    min-height: 100px !important;
-    align-items: stretch;
-    overflow: visible !important; // evita que el texto se recorte arriba
-  }
-
   .mat-mdc-form-field-flex {
     height: 42px;
     align-items: center;
-  }
-
-  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mat-mdc-form-field-flex {
-    height: auto !important;
-    align-items: stretch;
   }
 
   .mdc-text-field--outlined .mat-mdc-form-field-infix,
@@ -184,21 +180,6 @@
     min-height: 42px;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
-  }
-
-  // ⬇ FIX OBSERVACIÓN: más padding-top en el infix para separar el texto del label
-  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mat-mdc-form-field-infix {
-    min-height: 84px !important;
-    padding-top: 40px !important;
-    padding-bottom: 12px !important;
-    overflow: visible !important;
-  }
-
-  // ⬇ FIX OBSERVACIÓN: line-height controlado para que el primer renglón no quede pegado arriba
-  .mat-mdc-text-field-wrapper.mdc-text-field--textarea textarea.mat-mdc-input-element {
-    line-height: 1.4 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
   }
 
   .mat-mdc-input-element,
@@ -223,11 +204,6 @@
     background: #ffffff !important;
     padding: 0 4px !important;
     z-index: 2 !important;
-  }
-
-  // ⬇ FIX OBSERVACIÓN: ajustado para que el label quede sobre el borde, no sobre el texto
-  .mat-mdc-text-field-wrapper.mdc-text-field--textarea .mdc-floating-label--float-above {
-    transform: translateY(-37px) scale(0.75) !important;
   }
 
   .mat-mdc-form-field-error {
@@ -282,6 +258,49 @@
 
   .mat-mdc-text-field-wrapper.mdc-text-field--invalid {
     border-color: #dc2626;
+  }
+}
+
+// ── FIX OBSERVACIÓN: selectores directos, no dependen de mdc-text-field--textarea ──
+:host ::ng-deep .proyecto-form__observacion {
+  &.mat-mdc-form-field {
+    height: auto;
+  }
+
+  .mat-mdc-text-field-wrapper,
+  .mat-mdc-form-field-flex,
+  .mat-mdc-form-field-infix {
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    min-height: 100px !important;
+    align-items: flex-start !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    align-items: flex-start !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 84px !important;
+    padding-top: 40px !important;
+    padding-bottom: 12px !important;
+    overflow: visible !important;
+  }
+
+  .mdc-floating-label--float-above {
+    transform: translateY(-37px) scale(0.75) !important;
+  }
+
+  textarea.mat-mdc-input-element {
+    min-height: 60px;
+    line-height: 1.4 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    resize: none !important;
   }
 }
 
