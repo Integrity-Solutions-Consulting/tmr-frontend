@@ -283,6 +283,37 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--invalid {
     border-color: #dc2626;
   }
+
+  // ════════════════════════════════════════════════════════════════════
+  // ⬇ FIX ROBUSTO OBSERVACIÓN: ancla el arreglo a NUESTRA propia clase
+  // (.proyecto-form__observacion), en vez de depender de la clase interna
+  // "mdc-text-field--textarea" que Angular Material podría no agregar
+  // en todos los casos/versiones. Esto garantiza que TODAS las cajas que
+  // envuelven al textarea (wrapper > flex > infix) crezcan de verdad,
+  // evitando que el texto quede montado encima del label o cortado.
+  // ════════════════════════════════════════════════════════════════════
+  .proyecto-form__observacion {
+    .mat-mdc-text-field-wrapper {
+      height: auto !important;
+      min-height: 90px !important;
+      align-items: stretch !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height: auto !important;
+      align-items: stretch !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 74px !important;
+      padding-top: 24px !important;
+      padding-bottom: 12px !important;
+    }
+
+    .mdc-floating-label--float-above {
+      transform: translateY(-30px) scale(0.75) !important;
+    }
+  }
 }
 
 // ── Grid info general ────────────────────────────────────────────────────────
