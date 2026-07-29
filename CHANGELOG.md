@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.8...v1.2.9) (2026-07-29)
+
+
+### Bug Fixes
+
+* modal mas tabla ([93532ce](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/93532cebee5b2f775f62f391ea6ea42b83d2a7e0))
+* modal mas tabla ([4d343fb](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/4d343fb9fb769878313fed7e076b405ba1323fe0))
+* proyectoo ([6a8e7fe](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6a8e7fe5465361ebbabacf5e78a1760f133aad61))
+
 ## [1.2.8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.7...v1.2.8) (2026-07-28)
 
 
