@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.9...v1.3.0) (2026-07-30)
+
+
+### Features
+
+* olvidaste + reset contraseña service ([8819a7e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8819a7eb2abc09e87e0c1410521a3a27208406d2))
+
 ## [1.2.9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.8...v1.2.9) (2026-07-29)
 
 
