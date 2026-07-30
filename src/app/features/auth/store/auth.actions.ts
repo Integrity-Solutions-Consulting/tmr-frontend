@@ -1,7 +1,8 @@
 import { createAction, props } from '@ngrx/store';
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
-import { AuthResponse, ForgotPasswordResponse } from '../modelos/auth.models';
+import { ResetPasswordRequest } from '../modelos/reset-password-request.interface';
+import { AuthResponse, ForgotPasswordResponse, ResetPasswordResponse } from '../modelos/auth.models';
 
 export const login = createAction(
   '[Auth] Login',
@@ -51,6 +52,21 @@ export const forgotPasswordSuccess = createAction(
 
 export const forgotPasswordFailure = createAction(
   '[Auth] Forgot Password Failure',
+  props<{ error: string }>()
+);
+
+export const resetPassword = createAction(
+  '[Auth] Reset Password',
+  props<{ request: ResetPasswordRequest }>()
+);
+
+export const resetPasswordSuccess = createAction(
+  '[Auth] Reset Password Success',
+  props<{ response: ResetPasswordResponse }>()
+);
+
+export const resetPasswordFailure = createAction(
+  '[Auth] Reset Password Failure',
   props<{ error: string }>()
 );
 

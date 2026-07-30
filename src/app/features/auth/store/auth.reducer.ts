@@ -89,9 +89,28 @@ export const authReducer = createReducer(
     ...state,
     loading: false,
     error: null,
-    successMessage: response.message,
+    successMessage: response.message || response.data?.message || 'Revisa tu correo para recuperar tu contraseña',
   })),
   on(AuthActions.forgotPasswordFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+    successMessage: null,
+  })),
+  // Reset password actions
+  on(AuthActions.resetPassword, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+    successMessage: null,
+  })),
+  on(AuthActions.resetPasswordSuccess, (state, { response }) => ({
+    ...state,
+    loading: false,
+    error: null,
+    successMessage: response.message || response.data?.message || 'Contraseña restablecida exitosamente',
+  })),
+  on(AuthActions.resetPasswordFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,

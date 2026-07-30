@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { AuthResponse, User, ForgotPasswordResponse, ChangePasswordRequest } from '../modelos/auth.models';
+import { AuthResponse, User, ForgotPasswordResponse, ChangePasswordRequest, ResetPasswordResponse } from '../modelos/auth.models';
 import { LoginRequest } from '../modelos/login-request.interface';
 import { ForgotPasswordRequest } from '../modelos/forgot-password-request.interface';
+import { ResetPasswordRequest } from '../modelos/reset-password-request.interface';
 import { TokenService } from './token.service';
 
 import { environment } from '../../../../environments/environment';
@@ -114,6 +115,13 @@ export class AuthService {
     const request: ForgotPasswordRequest = { email };
     return this.http.post<ForgotPasswordResponse>(
       `${this.API_URL}/forgot-password`,
+      request
+    );
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<ResetPasswordResponse> {
+    return this.http.post<ResetPasswordResponse>(
+      `${this.API_URL}/reset-password`,
       request
     );
   }

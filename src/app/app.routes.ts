@@ -12,6 +12,9 @@ export const routes: Routes = [
   // ── Auth (sin sidebar) ───────────────────────────────────
   { path: 'auth', children: authRoutes },
 
+  // ── Reset Password (standalone route for email links) ───
+  { path: 'reset', redirectTo: 'auth/reset', pathMatch: 'full' },
+
   // ── App principal (sidebar + navbar) — requiere auth ─────
   {
     path: '',

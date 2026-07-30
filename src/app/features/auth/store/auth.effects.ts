@@ -153,4 +153,38 @@ export class AuthEffects {
       )
     )
   );
+
+  resetPassword$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.resetPassword),
+      switchMap(({ request }) =>
+        this.authService.resetPassword(request).pipe(
+          map((response) =>
+            AuthActions.resetPasswordSuccess({ response })
+          ),
+          catchError((error) => {
+            const errorMessage = this.extractResetPasswordError(error);
+            return of(AuthActions.resetPasswordFailure({ error: errorMessage }));
+          })
+        )
+      )
+    )
+  );
+
+  private extractResetPasswordError(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const body = error.error;
+      if (body) {
+        if (Array.isArray(body.errors) && body.errors.length > 0 && body.errors[0].message) {
+          return body.errors[0].message;
+        }
+        if (typeof body.message === 'string' && body.message) {
+          return body.message;
+        }
+      }
+      if (error.status === 400) return 'Los datos proporcionados son inválidos.';
+      if (error.status === 0) return 'No se pudo conectar al servidor. Verifique su conexión.';
+    }
+    return (error as any)?.message || 'Error al restablecer la contraseña.';
+  }
 }

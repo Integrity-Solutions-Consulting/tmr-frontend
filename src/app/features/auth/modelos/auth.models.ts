@@ -33,6 +33,19 @@ export interface AuthResponse {
 
 export interface ForgotPasswordResponse {
   message: string;
+  data?: {
+    message?: string;
+    expirationTime?: string;
+  };
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  success?: boolean;
+  data?: {
+    message?: string;
+    success?: boolean;
+  };
 }
 
 export interface AuthState {
