@@ -98,7 +98,6 @@ export class AuthService {
     const user = this.getCurrentUser();
     if (!user) return;
     this.tokenService.setUser(JSON.stringify({ ...user, debeCambiarPassword: valor }));
-    console.log('🔐 debeCambiarPassword actualizado en localStorage:', valor);
   }
 
   /**
