@@ -30,8 +30,10 @@
         [class.actividad-modal__input-wrap--error]="form.get('tipoActividad')?.invalid && form.get('tipoActividad')?.touched">
         <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/actividades.svg"
           alt="tipo" />
-        <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un tipo"
-          [matAutocomplete]="autoTipo" formControlName="tipoActividad" />
+        <input class="actividad-modal__input" type="text" placeholder="Seleccione un tipo"
+          [matAutocomplete]="autoTipo" formControlName="tipoActividad" readonly
+          (click)="triggerTipo.openPanel()" #triggerTipo="matAutocompleteTrigger" />
+        <mat-icon class="actividad-modal__input-icon" (click)="triggerTipo.openPanel()" style="cursor: pointer;">expand_more</mat-icon>
         <mat-autocomplete #autoTipo="matAutocomplete" [displayWith]="displayTipoActividadFn.bind(this)">
           @for (tipo of tiposActividadFiltrados(); track tipo.id) {
           <mat-option [value]="tipo.id">{{ tipo.nombre }}</mat-option>
@@ -59,7 +61,8 @@
           alt="proyecto" />
         <input class="actividad-modal__input" type="text" placeholder="Seleccione un proyecto"
           [matAutocomplete]="autoProyecto" formControlName="proyectoId" readonly
-          (click)="triggerProyecto.openPanel()" #triggerProyecto="matAutocompleteTrigger" style="cursor: pointer;" />
+          (click)="triggerProyecto.openPanel()" #triggerProyecto="matAutocompleteTrigger" />
+        <mat-icon class="actividad-modal__input-icon" (click)="triggerProyecto.openPanel()" style="cursor: pointer;">expand_more</mat-icon>
         <mat-autocomplete #autoProyecto="matAutocomplete" [displayWith]="displayProyectoFn.bind(this)">
           @for (proyecto of proyectosFiltrados(); track proyecto.id) {
           <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
