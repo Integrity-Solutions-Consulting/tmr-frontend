@@ -1,0 +1,75 @@
+<div class="configuracion-modal">
+  <div class="configuracion-modal__header">
+    <div class="configuracion-modal__header-info">
+      <div class="configuracion-modal__icon">
+        <span class="material-icons">settings</span>
+      </div>
+      <div>
+        <h2 class="configuracion-modal__title">Configuración</h2>
+        <p class="configuracion-modal__subtitle">Preferencias del sistema</p>
+      </div>
+    </div>
+    <button class="configuracion-modal__close" type="button" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="configuracion-modal__body">
+    <section class="configuracion-modal__section">
+      <div class="configuracion-modal__section-header">
+        <span class="material-icons">palette</span>
+        <h3>Apariencia</h3>
+      </div>
+      <p class="configuracion-modal__section-desc">
+        Selecciona la apariencia preferida para la interfaz.
+      </p>
+
+      <div class="configuracion-modal__theme-options">
+        <button
+          type="button"
+          class="configuracion-modal__theme-card"
+          [class.configuracion-modal__theme-card--active]="temaSeleccionado === 'light'"
+          (click)="seleccionarTema('light')"
+        >
+          <div class="configuracion-modal__theme-preview configuracion-modal__theme-preview--light">
+            <span class="material-icons">wb_sunny</span>
+          </div>
+          <span class="configuracion-modal__theme-label">Claro</span>
+          @if (temaSeleccionado === 'light') {
+            <span class="material-icons configuracion-modal__check">check_circle</span>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="configuracion-modal__theme-card"
+          [class.configuracion-modal__theme-card--active]="temaSeleccionado === 'dark'"
+          (click)="seleccionarTema('dark')"
+        >
+          <div class="configuracion-modal__theme-preview configuracion-modal__theme-preview--dark">
+            <span class="material-icons">dark_mode</span>
+          </div>
+          <span class="configuracion-modal__theme-label">Oscuro</span>
+          @if (temaSeleccionado === 'dark') {
+            <span class="material-icons configuracion-modal__check">check_circle</span>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="configuracion-modal__theme-card"
+          [class.configuracion-modal__theme-card--active]="temaSeleccionado === 'system'"
+          (click)="seleccionarTema('system')"
+        >
+          <div class="configuracion-modal__theme-preview configuracion-modal__theme-preview--system">
+            <span class="material-icons">desktop_windows</span>
+          </div>
+          <span class="configuracion-modal__theme-label">Sistema</span>
+          @if (temaSeleccionado === 'system') {
+            <span class="material-icons configuracion-modal__check">check_circle</span>
+          }
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

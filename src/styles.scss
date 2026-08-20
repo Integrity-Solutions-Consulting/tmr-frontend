@@ -393,3 +393,2042 @@ body {
     overflow: hidden !important;
   }
 }
+
+/* ============================================================= */
+/*  SISTEMA GLOBAL DE TEMA OSCURO (EXCLUSIVO HTML[DATA-THEME="DARK"]) */
+/* ============================================================= */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --primario: #3b82f6;
+  --oscuro: #1e3a8a;
+  --secundario: #27272a;
+  --borde: #3f3f46;
+
+  --texto: #f4f4f5;
+  --texto-gris: #a1a1aa;
+
+  --bg-app: #18181b;
+  --bg-card: #27272a;
+  --bg-surface: #202124;
+  --bg-hover: #3f3f46;
+
+  --text-main: #f4f4f5;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+
+  --border-color: #3f3f46;
+
+  --primary-color: #3b82f6;
+  --primary-text: #ffffff;
+
+  --icon-color: #d4d4d8;
+
+  --input-bg: #27272a;
+  --input-border: #52525b;
+
+  --shadow-color: rgba(0, 0, 0, 0.5);
+
+  /* ── Layout principal, app container & fondos ───────────────────── */
+  html,
+  body,
+  .layout,
+  .layout__main,
+  .layout__content,
+  .app-layout,
+  .main-content,
+  .content-container,
+  app-app-layout,
+  app-dashboard-page,
+  app-proyectos-page,
+  app-clientes-page,
+  app-colaboradores-page,
+  app-usuarios-page,
+  app-roles-page,
+  app-feriados-page,
+  app-catalogos-page,
+  app-lideres,
+  app-actividades,
+  app-carga-actividades,
+  app-reporte-fechas,
+  app-reporte-horas {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+  }
+
+  /* ── Headers de Página reutilizables (app-header) ───────────────── */
+  app-header,
+  .header-container {
+    .header-title,
+    h1 {
+      color: var(--primary-color) !important;
+    }
+
+    .header-subtitle,
+    p {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* ── Navbar superior ────────────────────────────────────────────── */
+  .navbar {
+    background-color: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .navbar__hamburger,
+    .navbar__bell-btn,
+    .navbar__profile-btn {
+      color: var(--icon-color) !important;
+    }
+
+    .navbar__profile-text {
+      color: var(--text-secondary) !important;
+    }
+
+    .navbar__bell-dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+      color: var(--text-main) !important;
+
+      .navbar__bell-dropdown-header {
+        background-color: var(--bg-surface) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+      }
+
+      .navbar__bell-dropdown-body {
+        background-color: var(--bg-card) !important;
+      }
+
+      .navbar__bell-item {
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .navbar__bell-item-title {
+        color: var(--text-main) !important;
+      }
+
+      .navbar__bell-item-desc {
+        color: var(--text-secondary) !important;
+      }
+
+      .navbar__bell-empty-text {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* ── Profile Popover ────────────────────────────────────────────── */
+  .profile-popover__card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+
+    .profile-popover__user-info {
+      strong { color: var(--text-main) !important; }
+      span { color: var(--text-muted) !important; }
+    }
+
+    .profile-popover__divider {
+      border-top: 1px solid var(--border-color) !important;
+    }
+
+    .profile-popover__item {
+      color: var(--text-secondary) !important;
+
+      .material-icons {
+        color: var(--icon-color) !important;
+      }
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--primary-color) !important;
+
+        .material-icons {
+          color: var(--primary-color) !important;
+        }
+      }
+
+      &--logout {
+        color: #f87171 !important;
+
+        .material-icons {
+          color: #f87171 !important;
+        }
+
+        &:hover {
+          background-color: rgba(220, 38, 38, 0.15) !important;
+          color: #ef4444 !important;
+
+          .material-icons {
+            color: #ef4444 !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* ── Sidebar lateral ────────────────────────────────────────────── */
+  .sidebar {
+    background-color: var(--bg-card) !important;
+    border-right: 1px solid var(--border-color) !important;
+
+    .sidebar__logo {
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .sidebar__link {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--text-main) !important;
+      }
+
+      &.active {
+        background-color: var(--bg-surface) !important;
+        color: var(--primary-color) !important;
+        border-left-color: var(--primary-color) !important;
+      }
+    }
+
+    .sidebar__group-title {
+      color: var(--text-muted) !important;
+    }
+  }
+
+  /* ── Tarjeta de Login ───────────────────────────────────────────── */
+  .login-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    color: var(--text-main) !important;
+
+    .title {
+      color: var(--text-main) !important;
+    }
+
+    input {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* ── 1. Filtros y Buscadores Compartidos ────────────────────────── */
+  .filters-bar {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+
+    .search-input {
+      span { color: var(--icon-color) !important; }
+      input {
+        color: var(--text-main) !important;
+        &::placeholder { color: var(--text-muted) !important; }
+      }
+    }
+
+    .custom-select, .date-group {
+      border-left-color: var(--border-color) !important;
+    }
+
+    .custom-select {
+      color: var(--primary-color) !important;
+      option {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+    }
+
+    .date-group {
+      label { color: var(--text-muted) !important; }
+      input { color: var(--text-main) !important; }
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+
+      &:not(:disabled) {
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        &:hover { background: var(--bg-hover) !important; }
+      }
+    }
+  }
+
+  /* ── 2. Tablas Compartidas ──────────────────────────────────────── */
+  .table-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .data-table,
+  .mat-mdc-table,
+  table {
+    background: var(--bg-card) !important;
+
+    th,
+    .mat-mdc-header-cell {
+      background: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    td,
+    .mat-mdc-cell {
+      border-bottom: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .colab-name {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    tr:hover,
+    .mat-mdc-row:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  .empty-state {
+    .empty-icon { color: var(--border-color) !important; }
+    h3 { color: var(--text-main) !important; }
+    p { color: var(--text-muted) !important; }
+  }
+
+  /* ── Badges de Estado (.status-badge, .seguimiento-badge, app-badge-estado) ── */
+  .status-badge,
+  .seguimiento-badge,
+  .badge {
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &.active,
+    &.completed,
+    &.seguimiento-activo,
+    &.seguimiento-completado,
+    &.badge--completado {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      color: #4ade80 !important;
+
+      .status-dot,
+      &::before {
+        background-color: #4ade80 !important;
+      }
+    }
+
+    &.progress,
+    &.seguimiento-progreso,
+    &.badge--en-progreso {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      color: #60a5fa !important;
+
+      .status-dot,
+      &::before {
+        background-color: #60a5fa !important;
+      }
+    }
+
+    &.waiting,
+    &.seguimiento-espera,
+    &.badge--pendiente {
+      background-color: rgba(249, 115, 22, 0.2) !important;
+      border-color: rgba(249, 115, 22, 0.4) !important;
+      color: #fb923c !important;
+
+      .status-dot,
+      &::before {
+        background-color: #fb923c !important;
+      }
+    }
+
+    &.cancelled,
+    &.seguimiento-cancelado {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #f87171 !important;
+
+      .status-dot,
+      &::before {
+        background-color: #f87171 !important;
+      }
+    }
+
+    &.planning,
+    &.seguimiento-planificacion {
+      background-color: rgba(20, 184, 166, 0.2) !important;
+      border-color: rgba(20, 184, 166, 0.4) !important;
+      color: #2dd4bf !important;
+
+      .status-dot,
+      &::before {
+        background-color: #2dd4bf !important;
+      }
+    }
+
+    &.inactive,
+    &.seguimiento-inactivo {
+      background-color: rgba(161, 161, 170, 0.2) !important;
+      border-color: rgba(161, 161, 170, 0.4) !important;
+      color: #a1a1aa !important;
+
+      .status-dot,
+      &::before {
+        background-color: #a1a1aa !important;
+      }
+    }
+  }
+
+  /* ── 3. Angular Material Overlays & Diálogos Reutilizables ──────── */
+  .cdk-overlay-container,
+  body {
+    .mat-mdc-dialog-container,
+    .mat-mdc-dialog-surface,
+    .mdc-dialog__surface {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .mat-mdc-select-panel,
+    .mat-mdc-autocomplete-panel,
+    .mat-autocomplete-panel,
+    .mat-mdc-menu-panel,
+    .mat-menu-panel,
+    .mat-datepicker-content,
+    .mdc-menu-surface {
+      background-color: var(--bg-card) !important;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .mat-mdc-option,
+      .mat-option,
+      .mdc-list-item,
+      .mat-mdc-menu-item {
+        background-color: var(--bg-card) !important;
+        background: var(--bg-card) !important;
+        color: var(--text-main) !important;
+
+        .mdc-list-item__primary-text,
+        .mat-option-text,
+        span,
+        div {
+          color: var(--text-main) !important;
+        }
+
+        &:hover,
+        &.mdc-list-item--selected,
+        &.mat-mdc-option-active,
+        &.mat-selected {
+          background-color: var(--bg-hover) !important;
+          background: var(--bg-hover) !important;
+
+          .mdc-list-item__primary-text,
+          .mat-option-text,
+          span,
+          div {
+            color: var(--primary-color) !important;
+          }
+        }
+      }
+    }
+  }
+
+  .mat-mdc-autocomplete-panel,
+  .mat-autocomplete-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-menu-panel,
+  .mat-menu-panel,
+  .mdc-menu-surface {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .mat-mdc-option,
+    .mat-option,
+    .mdc-list-item,
+    .mat-mdc-menu-item {
+      background-color: var(--bg-card) !important;
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mdc-list-item__primary-text,
+      .mat-option-text,
+      span,
+      div {
+        color: var(--text-main) !important;
+      }
+
+      &:hover,
+      &.mdc-list-item--selected,
+      &.mat-mdc-option-active,
+      &.mat-selected {
+        background-color: var(--bg-hover) !important;
+        background: var(--bg-hover) !important;
+
+        .mdc-list-item__primary-text,
+        .mat-option-text,
+        span,
+        div {
+          color: var(--primary-color) !important;
+        }
+      }
+    }
+  }
+
+  /* ── Menú de Descarga Reutilizable (app-descarga-menu & app-descargar-menu) ── */
+  app-descarga-menu,
+  app-descargar-menu,
+  .descarga-menu,
+  .descargar {
+    .descarga-menu__trigger,
+    .descargar__btn {
+      background: var(--bg-surface) !important;
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+
+      span {
+        color: #ffffff !important;
+      }
+
+      img, svg {
+        filter: brightness(0) invert(1) !important;
+        color: #ffffff !important;
+      }
+
+      &:hover,
+      &--open {
+        background: var(--bg-hover) !important;
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .descarga-menu__panel,
+    .descargar__panel {
+      background: var(--bg-card) !important;
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+      color: var(--text-main) !important;
+
+      label,
+      .descargar__title {
+        color: var(--text-secondary) !important;
+      }
+
+      .descarga-menu__select {
+        background: var(--input-bg) !important;
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: #ffffff !important;
+
+        .mat-mdc-select-value,
+        .mat-mdc-select-placeholder,
+        span {
+          color: #ffffff !important;
+        }
+
+        .mat-mdc-select-arrow {
+          color: var(--text-secondary) !important;
+        }
+      }
+
+      .descarga-menu__download,
+      .descargar__option {
+        background: #163572 !important;
+        background-color: #163572 !important;
+        color: #ffffff !important;
+
+        span {
+          color: #ffffff !important;
+        }
+
+        &:hover {
+          background: #122d63 !important;
+          background-color: #122d63 !important;
+        }
+      }
+    }
+  }
+
+  .descarga-menu__select-panel {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .mat-mdc-option,
+    .mat-option {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      &:hover, &.mdc-list-item--selected {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* ── 4. Modales Específicos del Sistema & Modal Base ──────────────── */
+  .modal,
+  .modal-base,
+  app-modal-base .modal,
+  .mi-perfil-modal,
+  .configuracion-modal,
+  .detail-modal,
+  .confirm-dialog,
+  .confirm-modal,
+  .success-modal {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .modal__header h2,
+    h1, h2, h3, h4 {
+      color: var(--primary-color) !important;
+    }
+
+    p, span, label {
+      color: var(--text-secondary) !important;
+    }
+
+    .mi-perfil-modal__field,
+    .detail-modal__field,
+    .info-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .mi-perfil-modal__value,
+    .detail-modal__value {
+      color: var(--text-main) !important;
+    }
+
+    .mi-perfil-modal__close,
+    .configuracion-modal__close,
+    .modal-close-btn {
+      color: var(--text-muted) !important;
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--text-main) !important;
+      }
+    }
+
+    .configuracion-modal__theme-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      &--active {
+        border-color: var(--primary-color) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
+      }
+    }
+  }
+
+  /* ── 5. Inputs y Formularios Generales ──────────────────────────── */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--text-main) !important;
+
+    &::placeholder {
+      color: var(--text-muted) !important;
+    }
+
+    &:focus {
+      border-color: var(--primary-color) !important;
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════ */
+  /*  FASE 4: MÓDULOS PRINCIPALES (PROYECTOS, CLIENTES, COLABORADORES) */
+  /* ═════════════════════════════════════════════════════════════════ */
+
+  /* ── 1. Feature Proyectos ───────────────────────────────────────── */
+  .proyectos-page {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    color: var(--text-main) !important;
+
+    .proyectos-page__header h2 {
+      color: var(--primary-color) !important;
+    }
+  }
+
+  /* Filtros de Proyectos */
+  .filtros {
+    .mat-mdc-text-field-wrapper,
+    .filtros__dropdown-wrapper {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+
+    .filtros__search-icon {
+      border-color: var(--text-secondary) !important;
+      &::after {
+        background: var(--text-secondary) !important;
+      }
+    }
+
+    .filtros__dropdown-label,
+    .mat-mdc-input-element,
+    input {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+        font-weight: 400 !important;
+      }
+    }
+
+    .filtros__dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .filtros__dropdown-option,
+    .filtros__dropdown-limpiar {
+      color: var(--text-main) !important;
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* Botón y Menú de Descargar */
+  .descarga-menu__trigger,
+  .btn-descargar {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    img { filter: brightness(0) invert(1); }
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  .descarga-menu__panel {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+
+    label {
+      color: var(--text-secondary) !important;
+    }
+
+    .descarga-menu__select {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+
+    .descarga-menu__download {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+  }
+
+  /* Paginación y Pie de Tabla (.tabla-footer, .paginacion, app-paginacion) */
+  .tabla-footer,
+  div.tabla-footer,
+  app-paginacion,
+  .paginacion,
+  div.paginacion {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    p, span, label, div {
+      color: var(--text-secondary) !important;
+    }
+
+    .paginacion__info,
+    .paginacion__pagina-info,
+    .paginacion__dots {
+      color: var(--text-secondary) !important;
+
+      strong {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .paginacion__btn {
+      background-color: var(--bg-surface) !important;
+      background: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover:not(:disabled):not(.paginacion__btn--activo) {
+        background-color: var(--bg-hover) !important;
+        background: var(--bg-hover) !important;
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+      }
+
+      &.paginacion__btn--activo,
+      &--activo {
+        background-color: #163572 !important;
+        background: #163572 !important;
+        border-color: #163572 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  /* Modal Formulario Crear / Editar Proyecto */
+  .proyecto-form {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+
+    .proyecto-form__section {
+      background: transparent !important;
+
+      h3, .proyecto-form__subtitle {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .proyecto-form__leader-header h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-form__search,
+    .proyecto-form__date-control {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+    }
+
+    .proyecto-form__date-label {
+      background-color: var(--bg-card) !important;
+      color: var(--text-secondary) !important;
+    }
+
+    .proyecto-form__status-card,
+    .proyecto-form__leader-block,
+    .proyecto-form__leader,
+    .proyecto-form__resource {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .proyecto-form__status-card strong {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-form__actions button,
+    .proyecto-form__add,
+    .proyecto-form__section-header button {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+    }
+
+    .mat-mdc-input-element,
+    .mat-mdc-select-value,
+    input, textarea, select {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+    }
+
+    .mdc-floating-label,
+    .mat-mdc-floating-label,
+    .mdc-floating-label--float-above {
+      background-color: var(--bg-card) !important;
+      color: var(--text-secondary) !important;
+    }
+
+    .mat-datepicker-toggle {
+      color: var(--icon-color) !important;
+    }
+  }
+
+  /* Modal Detalle del Proyecto */
+  .proyecto-detalle {
+    color: var(--text-main) !important;
+
+    .proyecto-detalle__header {
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    .proyecto-detalle__title h3,
+    .proyecto-detalle strong,
+    .proyecto-detalle h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-detalle__codigo,
+    .proyecto-detalle__header p,
+    .proyecto-detalle span {
+      color: var(--text-secondary) !important;
+    }
+
+    .proyecto-detalle__metrics div,
+    .proyecto-detalle__summary div,
+    .proyecto-detalle__leader-card,
+    .proyecto-detalle__leader-grid div,
+    .proyecto-detalle__resources-panel {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .proyecto-detalle__resources-panel {
+      .mat-expansion-panel-header-title,
+      .mat-expansion-panel-header-description {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .proyecto-detalle__table {
+      border-color: var(--border-color) !important;
+
+      th {
+        background-color: var(--bg-card) !important;
+        color: var(--text-secondary) !important;
+      }
+
+      td {
+        border-bottom-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+      }
+    }
+  }
+
+  /* ── 2. Feature Clientes ────────────────────────────────────────── */
+  .clientes-page,
+  .lista-clientes,
+  .modal-crear,
+  .modal-editar,
+  .modal-detalle,
+  .modal-descarga {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    .form-group label,
+    .detail-label,
+    .field-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .detail-value,
+    .cliente-info {
+      color: var(--text-main) !important;
+    }
+
+    .detail-card,
+    .cliente-card,
+    .form-container {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+  }
+
+  /* ── 3. Feature Colaboradores ───────────────────────────────────── */
+  .colaboradores-page,
+  .cards-metricas,
+  .filtros-colaboradores,
+  .tabla-colaboradores,
+  .modal-crear-colaborador,
+  .modal-editar-colaborador,
+  .modal-detalle-colaborador,
+  .modal-registrar-salida,
+  .descargar-menu {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .modal-title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    .metric-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      
+      .metric-value { color: var(--text-main) !important; }
+      .metric-label { color: var(--text-secondary) !important; }
+    }
+
+    .detail-field,
+    .info-box,
+    .form-section {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    label, .label-text {
+      color: var(--text-secondary) !important;
+    }
+
+    .value-text {
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════ */
+  /*  FASE 5: MÓDULOS DE CONFIGURACIÓN Y LÍDERES                      */
+  /* ═════════════════════════════════════════════════════════════════ */
+
+  /* ── 1. Usuarios, Roles, Feriados, Catálogos ────────────────────── */
+  .usuarios-page,
+  .roles-page,
+  .feriados-page,
+  .catalogos-page,
+  .usuarios-form-modal,
+  .usuario-detalle-modal,
+  .roles-form-modal,
+  .feriados-form-modal,
+  .catalogos-form-modal {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    label, .field-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .form-section, .info-card, .detail-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+  }
+
+  /* ── 2. Calendario de Feriados y Calendario de Actividades ──────── */
+  .feriados-calendar,
+  .calendario-container,
+  .calendar-wrapper,
+  .fc, .fc-theme-standard {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .fc-toolbar-title {
+      color: var(--primary-color) !important;
+    }
+
+    .fc-col-header-cell,
+    .fc-scrollgrid-section-header th {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .fc-daygrid-day,
+    .fc-day,
+    .fc-dayframe {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .fc-day-other {
+      background-color: var(--bg-app) !important;
+      opacity: 0.5;
+    }
+
+    .fc-day-today {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+  }
+
+  /* ── 3. Líderes & Modales ───────────────────────────────────────── */
+  .lideres-page,
+  .lideres-component,
+  .lideres-container,
+  app-lideres,
+  app-modal-lider,
+  app-modal-detalle-lider,
+  app-modal-eliminar-lider,
+  .modal-lider,
+  .modal-detalle-lider,
+  .modal-eliminar-lider,
+  .modal-confirmacion,
+  .detalle-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    .page-title,
+    .modal-title,
+    .section-title,
+    .detalle-nombre,
+    .detalle-seccion-titulo,
+    h1, h2, h3, h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .section-line,
+    .detalle-linea-azul {
+      background-color: var(--primary-color) !important;
+    }
+
+    .summary-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .card-number {
+        color: var(--text-main) !important;
+      }
+
+      .card-label {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .card-icon--internal {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      background: rgba(59, 130, 246, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #60a5fa !important;
+        color: #60a5fa !important;
+      }
+    }
+
+    .card-icon--external {
+      background-color: rgba(168, 85, 247, 0.15) !important;
+      background: rgba(168, 85, 247, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #c084fc !important;
+        color: #c084fc !important;
+      }
+    }
+
+    .card-icon--active {
+      background-color: rgba(34, 197, 94, 0.15) !important;
+      background: rgba(34, 197, 94, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #4ade80 !important;
+        color: #4ade80 !important;
+      }
+    }
+
+    .card-icon--inactive {
+      background-color: rgba(161, 161, 170, 0.15) !important;
+      background: rgba(161, 161, 170, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #a1a1aa !important;
+        color: #a1a1aa !important;
+      }
+    }
+
+    .search-input,
+    .estado-filter-wrapper,
+    .estado-select,
+    .form-input,
+    .custom-select,
+    .dropdown-search-box {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+      }
+    }
+
+    .custom-select-value,
+    .estado-texto {
+      color: #ffffff !important;
+    }
+
+    .custom-select-options,
+    .dropdown-list,
+    .estado-dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      li, .dropdown-option {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+          color: var(--primary-color) !important;
+        }
+      }
+    }
+
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .lideres-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .client-chip {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      color: #60a5fa !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .btn-primary,
+    .btn-guardar {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+
+    .btn-outline,
+    .modal-close,
+    .detalle-close {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .detalle-info-item span,
+    .detalle-contacto-valor {
+      color: var(--text-main) !important;
+    }
+
+    .detalle-contacto-label,
+    .detalle-codigo {
+      color: var(--text-secondary) !important;
+    }
+
+    .detalle-proyectos__item {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+
+      .detalle-proyectos__item-nombre {
+        color: var(--text-main) !important;
+      }
+
+      .detalle-proyectos__item-cliente {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* Ultra-specific Overrides for Modals and Download Popovers */
+  html[data-theme="dark"] {
+    div.modal-card,
+    div.detalle-card,
+    div.descargar__panel,
+    div.descarga-menu__panel,
+    div.descarga-dropdown,
+    .modal-card,
+    .detalle-card,
+    .descargar__panel,
+    .descarga-menu__panel,
+    .descarga-dropdown {
+      background-color: #27272a !important;
+      background: #27272a !important;
+      border: 1px solid #3f3f46 !important;
+      color: #f4f4f5 !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    p.descargar__title,
+    p.descarga-titulo,
+    .descargar__title,
+    .descarga-titulo {
+      color: #a1a1aa !important;
+    }
+
+    .btn-descarga {
+      background: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background: #122d63 !important;
+      }
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════ */
+  /*  FASE 6: TIME REPORT, CARGA DE ACTIVIDADES, REPORTES Y DASHBOARD  */
+  /* ═════════════════════════════════════════════════════════════════ */
+
+  /* ── 1. Actividades y Calendario ────────────────────────────────── */
+  .actividades-page,
+  .actividades-container,
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-main) !important;
+
+    .metric-value,
+    .metric-name {
+      color: var(--text-main) !important;
+    }
+
+    .metric-desc {
+      color: var(--text-muted) !important;
+    }
+
+    .metric-divider {
+      background-color: var(--border-color) !important;
+    }
+  }
+
+  .btn-agregar {
+    background-color: #163572 !important;
+    color: #ffffff !important;
+    border: 1px solid #163572 !important;
+
+    &:hover {
+      background-color: #122d63 !important;
+    }
+  }
+
+  .btn-reporte {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  /* ── 2. Seguimiento ─────────────────────────────────────────────── */
+  .seguimiento-page,
+  .seguimiento-container {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+
+    .header-title, h1, h2 {
+      color: var(--primary-color) !important;
+    }
+
+    .filters-card,
+    .metrics-bar,
+    .table-scroll-container {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .filter-input,
+    .filter-select,
+    .date-input {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+        font-weight: 400 !important;
+      }
+    }
+
+    option {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+    }
+
+    .toggle-group {
+      border-color: var(--border-color) !important;
+    }
+
+    .toggle-btn {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+
+      &.active {
+        background-color: #163572 !important;
+        color: #ffffff !important;
+      }
+    }
+
+    .btn-descargar,
+    .btn-descargar.enabled {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .download-icon {
+        color: var(--text-main) !important;
+      }
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .seguimiento-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  .btn-agregar {
+    background-color: #163572 !important;
+    color: #ffffff !important;
+    border: 1px solid #163572 !important;
+
+    &:hover {
+      background-color: #122d63 !important;
+    }
+  }
+
+  .btn-reporte {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  /* Calendario Grid & Controles */
+  .calendar-grid {
+    border-color: var(--border-color) !important;
+
+    .day-header {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .day-cell {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+
+      &:hover:not(.other-month) {
+        background-color: var(--bg-hover) !important;
+      }
+
+      &.weekend:not(.today):not(.holiday) {
+        background-color: #1c1d21 !important;
+      }
+
+      &.holiday {
+        background-color: rgba(34, 197, 94, 0.15) !important;
+        border-left: 2px solid #22c55e !important;
+      }
+
+      &.today {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        outline: 2px solid #f59e0b !important;
+      }
+
+      &.other-month {
+        background-color: #151619 !important;
+        opacity: 0.5;
+      }
+    }
+
+    .day-number {
+      color: var(--text-secondary) !important;
+    }
+
+    .day-hours-text.blue-text {
+      color: #60a5fa !important;
+    }
+
+    .day-hours-text.yellow-text {
+      color: #fb923c !important;
+    }
+  }
+
+  .month-year-label {
+    color: var(--primary-color) !important;
+  }
+
+  .nav-controls .nav-btn,
+  .nav-controls .hoy-btn {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  /* Chips de actividad (Tipo Nacional, Local, Religioso en modo oscuro) */
+  .actividad-chip,
+  .actividad-tipo {
+    &.type-nacional {
+      color: #4ade80 !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      background-color: rgba(34, 197, 94, 0.2) !important;
+    }
+
+    &.type-local {
+      color: #60a5fa !important;
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      background-color: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    &.type-religioso {
+      color: #fb923c !important;
+      border-color: rgba(249, 115, 22, 0.4) !important;
+      background-color: rgba(249, 115, 22, 0.2) !important;
+    }
+  }
+
+  /* Modal Agregar Actividad */
+  .actividad-modal {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .actividad-modal__header {
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__title {
+      color: var(--primary-color) !important;
+    }
+
+    .actividad-modal__subtitle {
+      color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__close {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .actividad-modal__label {
+      color: var(--text-main) !important;
+    }
+
+    .actividad-modal__input-wrap,
+    .actividad-modal__select {
+      background-color: var(--input-bg) !important;
+      border: 1.5px solid var(--input-border) !important;
+      color: #ffffff !important;
+    }
+
+    .actividad-modal__input,
+    .actividad-modal__textarea,
+    input, textarea, select {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+    }
+
+    .actividad-modal__input::placeholder {
+      color: #cbd5e1 !important;
+    }
+
+    .actividad-modal__input-icon,
+    .actividad-modal__info-icon,
+    .actividad-modal__select-wrap::after {
+      color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__checkbox-container {
+      color: var(--text-main) !important;
+    }
+
+    .actividad-modal__checkmark {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+    }
+
+    .actividad-modal__recurrence-panel {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__footer {
+      border-top-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__btn--save {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+    }
+
+    .actividad-modal__btn--cancel {
+      background-color: var(--bg-surface) !important;
+      border: 1.5px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* ── 2. Carga Actividades ───────────────────────────────────────── */
+  .carga-actividades-container,
+  .carga-actividades-card,
+  app-carga-actividades-component,
+  app-carga-actividades {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+
+    .page-title, h1, h2, h3 {
+      color: var(--primary-color) !important;
+    }
+
+    .stats-card,
+    .content-card,
+    .table-card,
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .stats-label { color: var(--text-secondary) !important; }
+    .stats-value { color: var(--text-main) !important; }
+    .stats-icon-circle { background-color: var(--bg-surface) !important; color: var(--primary-color) !important; }
+
+    .search-input-wrapper,
+    .date-controls {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+
+      input {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+
+        &::placeholder {
+          color: #cbd5e1 !important;
+        }
+      }
+
+      label, .material-icons {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .data-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .font-bold {
+        color: var(--text-main) !important;
+      }
+    }
+
+    .client-tag {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      color: #60a5fa !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .status-badge {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      color: #4ade80 !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+
+      .dot {
+        background-color: #4ade80 !important;
+      }
+    }
+
+    .upload-box, .file-dropzone {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* ── 3. Reportes (Fechas & Horas) ───────────────────────────────── */
+  .reporte-fechas-container,
+  .reporte-horas-container,
+  .reporte-card,
+  app-reporte-fechas,
+  app-reporte-horas,
+  .report-wrapper {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    h1, h2, h3, .report-title, .title {
+      color: var(--primary-color) !important;
+    }
+
+    .report-subtitle, p {
+      color: var(--text-secondary) !important;
+    }
+
+    .metrica-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .metrica-valor {
+        color: var(--text-main) !important;
+      }
+
+      .metrica-label {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .filter-input,
+    .filter-select,
+    .btn-clear {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+      }
+    }
+
+    option {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+    }
+
+    .filter-label,
+    .filter-icon,
+    .filter-icon-right {
+      color: var(--text-secondary) !important;
+    }
+
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .report-table {
+      th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom-color: var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom-color: var(--border-color) !important;
+      }
+
+      .data-row:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .text-dark {
+        color: var(--text-main) !important;
+      }
+
+      .text-highlight {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .btn-secondary,
+    .btn-pdf,
+    .btn-descargar {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* ── 4. Dashboard ───────────────────────────────────────────────── */
+  .dashboard-container {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    color: var(--text-main) !important;
+  }
+
+  .dashboard-header {
+    h1 {
+      color: var(--primary-color) !important;
+    }
+
+    .rango-select {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* Métricas del Dashboard */
+  .metrica-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    .metrica-valor {
+      color: var(--text-main) !important;
+    }
+
+    .metrica-label {
+      color: var(--text-muted) !important;
+    }
+  }
+
+  /* Próximos a cerrar */
+  .proximamente-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .card-header h2 {
+      color: var(--primary-color) !important;
+    }
+
+    .project-item {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+
+    .project-codigo {
+      color: var(--text-muted) !important;
+    }
+
+    .project-nombre {
+      color: var(--text-main) !important;
+    }
+
+    .project-detail-row,
+    .detail-text,
+    .detail-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    .project-hours-badge {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+
+      .hours-count {
+        color: var(--text-main) !important;
+      }
+
+      .hours-label {
+        color: var(--text-muted) !important;
+      }
+    }
+  }
+
+  /* Gráfico de horas */
+  .grafico-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .card-header-carousel {
+      background-color: var(--bg-card) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .carousel-title,
+    .stat-value,
+    .donut-center-value,
+    .donut-table .font-bold {
+      color: var(--primary-color) !important;
+    }
+
+    .nav-btn,
+    .stat-label,
+    .donut-center-label,
+    .donut-table th,
+    .donut-table .text-muted,
+    .bar-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .bar-column {
+      background-color: var(--bg-card) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .grafico-stats,
+    .donut-table th,
+    .donut-table td {
+      border-color: var(--border-color) !important;
+    }
+
+    .donut-table td {
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* Drawer / Panel Desplegable */
+  .drawer-panel {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .drawer-header {
+      background-color: var(--bg-surface) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .drawer-title {
+      color: var(--text-main) !important;
+    }
+
+    .collaborator-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+
+      &.expanded {
+        background-color: var(--bg-card) !important;
+        border-color: var(--primary-color) !important;
+      }
+    }
+
+    .colab-name {
+      color: var(--text-main) !important;
+    }
+
+    .collaborator-detail {
+      background-color: var(--bg-card) !important;
+      border-top-color: var(--border-color) !important;
+    }
+
+    .day-date,
+    .day-registered {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* CDK MatDialog Containers & Dialog Surfaces */
+  .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+  .mat-mdc-dialog-surface {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+  }
+
+  /* Sobrescritura global del Autofill claro de navegadores en modo oscuro */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+  }
+}

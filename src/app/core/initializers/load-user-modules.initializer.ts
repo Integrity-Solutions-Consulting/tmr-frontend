@@ -23,19 +23,14 @@ export async function loadUserModulesInitializer(): Promise<void> {
   try {
     // Si no hay token válido, no hay nada que precargar
     if (!tokenService.isTokenValid()) {
-      console.log('📍 loadUserModulesInitializer: No hay token válido, omitiendo precarga');
       return;
     }
-
-    console.log('📍 loadUserModulesInitializer: Token válido encontrado, precargando módulos...');
 
     // Obtener módulos del backend
     const modules = await firstValueFrom(authService.getUserModules());
     
     // Guardar en memoria
     userModulesService.setModules(Array.isArray(modules) ? modules : []);
-    
-    console.log('✅ loadUserModulesInitializer: Módulos precargados exitosamente');
   } catch (error) {
     // Si falla la precarga, solo loguear el error pero NO impedir que la app arranque
     console.warn('⚠️  loadUserModulesInitializer: Error al precargar módulos', error);

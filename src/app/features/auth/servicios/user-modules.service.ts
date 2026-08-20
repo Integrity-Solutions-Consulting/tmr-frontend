@@ -39,7 +39,6 @@ export class UserModulesService {
    */
   setModules(modules: string[]): void {
     const validModules = Array.isArray(modules) ? modules : [];
-    console.log('🔐 UserModulesService: Módulos cargados en memoria:', validModules);
     this.modules$.next(validModules);
   }
 
@@ -56,7 +55,6 @@ export class UserModulesService {
    * Limpia los módulos del usuario (se llama al logout)
    */
   clearModules(): void {
-    console.log('🧹 UserModulesService: Módulos limpiados');
     this.modules$.next([]);
   }
 }

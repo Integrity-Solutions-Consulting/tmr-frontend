@@ -41,3 +41,25 @@
 
   &:hover { background: #162C56; }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .descarga-dropdown {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .descarga-titulo {
+    color: #a1a1aa !important;
+  }
+
+  .btn-descarga {
+    background: #163572 !important;
+    color: #ffffff !important;
+
+    &:hover {
+      background: #122d63 !important;
+    }
+  }
+}

@@ -269,3 +269,90 @@ h3 {
     min-height: 94px;
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .calendar-card {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .calendar-header {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-bottom-color: #3f3f46 !important;
+
+    h3 {
+      color: #3b82f6 !important;
+    }
+  }
+
+  .calendar-actions button {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+    &:hover { background: #3f3f46 !important; }
+  }
+
+  .weekday-grid {
+    background-color: #202124 !important;
+    border-bottom-color: #3f3f46 !important;
+  }
+
+  .weekday {
+    color: #a1a1aa !important;
+  }
+
+  .day-cell {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-right-color: #3f3f46 !important;
+    border-bottom-color: #3f3f46 !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    &.muted {
+      background-color: #18181b !important;
+      .day-number { color: #52525b !important; }
+    }
+
+    &.today {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      box-shadow: inset 0 0 0 1px #3b82f6 !important;
+    }
+  }
+
+  .day-number {
+    color: #ffffff !important;
+  }
+
+  .today .day-number {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+  }
+
+  /* Chips de feriados en el calendario */
+  .holiday-chip {
+    &.type-nacional {
+      background: rgba(34, 197, 94, 0.2) !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      color: #4ade80 !important;
+    }
+
+    &.type-local {
+      background: rgba(249, 115, 22, 0.2) !important;
+      border-color: rgba(249, 115, 22, 0.4) !important;
+      color: #fb923c !important;
+    }
+
+    &.type-religioso {
+      background: rgba(168, 85, 247, 0.2) !important;
+      border-color: rgba(168, 85, 247, 0.4) !important;
+      color: #c084fc !important;
+    }
+  }
+}

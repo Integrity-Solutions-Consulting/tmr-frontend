@@ -305,3 +305,61 @@ $text-light: #7C7C7C;
     flex-shrink: 0;
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .modal-card {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .modal-title,
+  .section-title {
+    color: #3b82f6 !important;
+  }
+
+  .section-line {
+    background: #3b82f6 !important;
+  }
+
+  .modal-close {
+    color: #a1a1aa !important;
+    &:hover { background: #3f3f46 !important; }
+  }
+
+  .form-input,
+  .custom-select,
+  .dropdown-search-box {
+    background-color: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+
+    &::placeholder {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .custom-select-value {
+    color: #ffffff !important;
+    &.placeholder { color: #cbd5e1 !important; }
+  }
+
+  .custom-select-options,
+  .dropdown-list {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+
+    li {
+      color: #f4f4f5 !important;
+      &:hover { background-color: #3f3f46 !important; color: #3b82f6 !important; }
+    }
+  }
+
+  .btn-guardar {
+    background: #163572 !important;
+    color: #ffffff !important;
+    &:hover { background: #122d63 !important; }
+  }
+}

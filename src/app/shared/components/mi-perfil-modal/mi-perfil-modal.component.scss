@@ -1,0 +1,155 @@
+.mi-perfil-modal {
+  width: min(500px, 92vw);
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.mi-perfil-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+
+  .mi-perfil-modal__header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mi-perfil-modal__avatar {
+    color: #163572;
+    .material-icons {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  .mi-perfil-modal__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #163572;
+  }
+
+  .mi-perfil-modal__subtitle {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .mi-perfil-modal__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 4px;
+    border-radius: 6px;
+
+    .material-icons {
+      font-size: 20px;
+    }
+
+    &:hover {
+      color: #334155;
+      background: #f1f5f9;
+    }
+  }
+}
+
+.mi-perfil-modal__body {
+  padding: 20px 0;
+}
+
+.mi-perfil-modal__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mi-perfil-modal__field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.mi-perfil-modal__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.mi-perfil-modal__value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.mi-perfil-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+
+  .mi-perfil-modal__btn-close {
+    background: #163572 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 0 20px !important;
+    height: 38px !important;
+    font-weight: 600 !important;
+
+    &:hover {
+      background: #122d63 !important;
+    }
+  }
+}
+
+:host-context(html[data-theme="dark"]) {
+  .mi-perfil-modal {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    color: #f4f4f5 !important;
+
+    &__header {
+      border-bottom-color: #3f3f46 !important;
+    }
+
+    &__avatar .material-icons,
+    &__title {
+      color: #3b82f6 !important;
+    }
+
+    &__subtitle {
+      color: #a1a1aa !important;
+    }
+
+    &__close {
+      color: #a1a1aa !important;
+      &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+    }
+
+    &__field {
+      background-color: #202124 !important;
+      border-color: #3f3f46 !important;
+    }
+
+    &__label {
+      color: #a1a1aa !important;
+    }
+
+    &__value {
+      color: #ffffff !important;
+    }
+
+    &__footer {
+      border-top-color: #3f3f46 !important;
+    }
+  }
+}

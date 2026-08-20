@@ -391,3 +391,114 @@ padding-left: 20px;
     .detalle-proyectos__item-dot { background: #26BF4D; }
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .detalle-card {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .detalle-nombre {
+    color: #3b82f6 !important;
+  }
+
+  .detalle-seccion-titulo {
+    color: #3b82f6 !important;
+  }
+
+  .detalle-linea-azul {
+    background: #3b82f6 !important;
+  }
+
+  .detalle-codigo,
+  .detalle-info-item,
+  .detalle-contacto-label,
+  .detalle-proyectos__item-cliente {
+    color: #a1a1aa !important;
+  }
+
+  .detalle-contacto-valor {
+    color: #ffffff !important;
+    &.azul {
+      color: #60a5fa !important;
+    }
+  }
+
+  /* Insignia de estado del líder (Activo/Inactivo) */
+  .badge-estado {
+    background: rgba(34, 197, 94, 0.2) !important;
+    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+    color: #4ade80 !important;
+
+    .badge-circulo {
+      background: #4ade80 !important;
+    }
+  }
+
+  .badge-inactivo {
+    background: rgba(161, 161, 170, 0.2) !important;
+    border: 1px solid rgba(161, 161, 170, 0.4) !important;
+    color: #a1a1aa !important;
+
+    .badge-circulo {
+      background: #a1a1aa !important;
+    }
+  }
+
+  /* Lista de Proyectos Vinculados */
+  .detalle-proyectos__count {
+    background: #202124 !important;
+    color: #60a5fa !important;
+    border-color: #3f3f46 !important;
+  }
+
+  .detalle-proyectos__item {
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+  }
+
+  .detalle-proyectos__item-nombre {
+    color: #ffffff !important;
+  }
+
+  /* Badges de estado en proyectos vinculados */
+  .estado--activo,
+  .estado--completado {
+    color: #4ade80 !important;
+    background: rgba(34, 197, 94, 0.2) !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    .detalle-proyectos__item-dot { background: #4ade80 !important; }
+  }
+
+  .estado--progreso {
+    color: #60a5fa !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    .detalle-proyectos__item-dot { background: #60a5fa !important; }
+  }
+
+  .estado--pausa,
+  .estado--espera {
+    color: #fbbf24 !important;
+    background: rgba(245, 158, 11, 0.2) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    .detalle-proyectos__item-dot { background: #fbbf24 !important; }
+  }
+
+  .estado--cancelado {
+    color: #f87171 !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    .detalle-proyectos__item-dot { background: #f87171 !important; }
+  }
+
+  .estado--inactivo {
+    color: #a1a1aa !important;
+    background: rgba(161, 161, 170, 0.2) !important;
+    border-color: rgba(161, 161, 170, 0.4) !important;
+    .detalle-proyectos__item-dot { background: #a1a1aa !important; }
+  }
+}

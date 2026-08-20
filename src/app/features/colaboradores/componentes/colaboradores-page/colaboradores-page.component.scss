@@ -180,3 +180,32 @@
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .colabs-page__wrapper {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .colabs-page__title {
+    color: #3b82f6 !important;
+  }
+
+  .colabs-page__btn-agregar {
+    background: #163572 !important;
+    color: #ffffff !important;
+    &:hover { background: #122d63 !important; }
+  }
+
+  .confirm-card {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+
+    &__title { color: #3b82f6 !important; }
+    &__mensaje { color: #a1a1aa !important; }
+  }
+}
