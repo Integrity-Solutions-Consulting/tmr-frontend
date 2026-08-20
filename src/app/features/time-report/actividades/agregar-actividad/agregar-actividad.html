@@ -57,8 +57,9 @@
         [class.actividad-modal__input-wrap--error]="form.get('proyectoId')?.invalid && form.get('proyectoId')?.touched">
         <img class="actividad-modal__input-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
           alt="proyecto" />
-        <input class="actividad-modal__input" type="text" placeholder="Busque y seleccione un proyecto"
-          [matAutocomplete]="autoProyecto" formControlName="proyectoId" />
+        <input class="actividad-modal__input" type="text" placeholder="Seleccione un proyecto"
+          [matAutocomplete]="autoProyecto" formControlName="proyectoId" readonly
+          (click)="triggerProyecto.openPanel()" #triggerProyecto="matAutocompleteTrigger" style="cursor: pointer;" />
         <mat-autocomplete #autoProyecto="matAutocomplete" [displayWith]="displayProyectoFn.bind(this)">
           @for (proyecto of proyectosFiltrados(); track proyecto.id) {
           <mat-option [value]="proyecto.id">{{ proyecto.nombre }}</mat-option>
@@ -83,7 +84,7 @@
       <div class="actividad-modal__input-wrap"
         [class.actividad-modal__input-wrap--error]="form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched">
         <input class="actividad-modal__input" formControlName="codigoRequerimiento" maxlength="50"
-          placeholder="Ej. REQ-101" autocomplete="off" />
+          placeholder="Ej. REQ-101" autocomplete="off" readonly />
         <span class="actividad-modal__input-hint">{{ form.get('codigoRequerimiento')?.value?.length || 0 }}/50</span>
       </div>
       @if (form.get('codigoRequerimiento')?.invalid && form.get('codigoRequerimiento')?.touched) {

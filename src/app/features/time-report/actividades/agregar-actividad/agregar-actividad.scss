@@ -9,10 +9,18 @@ $border-color: #d6e0ec;
 $error-color: #dc2626;
 
 /* ── Contenedor principal ──────────────────────────────────────── */
+:host {
+  --modal-width: 100%;
+  --modal-max-width: 560px;
+  --modal-padding-x: 28px;
+}
+
 .actividad-modal {
   display: flex;
   flex-direction: column;
-  width: min(95vw, 560px);
+  width: var(--modal-width);
+  max-width: var(--modal-max-width);
+  box-sizing: border-box;
   max-height: 90vh;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -27,9 +35,10 @@ $error-color: #dc2626;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 24px 28px 16px;
+  padding: 24px var(--modal-padding-x) 16px;
   border-bottom: 1px solid #e8edf5;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .actividad-modal__header-text {
@@ -107,11 +116,12 @@ $error-color: #dc2626;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px 28px;
+  padding: 20px var(--modal-padding-x);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
+  box-sizing: border-box;
 }
 
 .actividad-modal__body::-webkit-scrollbar {
@@ -440,9 +450,10 @@ $error-color: #dc2626;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-  padding: 16px 28px 22px;
+  padding: 16px var(--modal-padding-x) 22px;
   border-top: 1px solid #e8edf5;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .spacer {
@@ -539,11 +550,8 @@ $error-color: #dc2626;
 
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .actividad-modal__header,
-  .actividad-modal__body,
-  .actividad-modal__footer {
-    padding-left: 18px !important;
-    padding-right: 18px !important;
+  :host {
+    --modal-padding-x: 18px;
   }
 
   .actividad-modal__field--width-80 {
