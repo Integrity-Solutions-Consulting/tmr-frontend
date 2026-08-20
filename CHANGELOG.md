@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.0...v1.3.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* Modificaciones en el responsive y campos de agregar actividades ([0280bc4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0280bc46210657605bfb772ca8a28fdc2e7ed289))
+
 ## [1.3.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.2.9...v1.3.0) (2026-07-30)
 
 
