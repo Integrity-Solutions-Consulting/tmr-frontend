@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterOutlet } from '@angular/router';
 import { TokenMonitorService } from './core/services/token-monitor.service';
 import { UserActivityService } from './core/services/user-activity.service';
+import { ThemeService } from './core/services/theme.service';
 import { AuthService } from './features/auth/servicios/auth.service';
 import { TokenService } from './features/auth/servicios/token.service';
 import { AuthResponse } from './features/auth/modelos/auth.models';
@@ -30,6 +31,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private tokenMonitor = inject(TokenMonitorService);
   private userActivity = inject(UserActivityService);
+  private themeService = inject(ThemeService);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
   private dialog = inject(MatDialog);
@@ -101,6 +103,9 @@ export class AppComponent implements OnInit, OnDestroy {
   // ========================================
 
   ngOnInit(): void {
+    // Inicialización del sistema global de temas (1 sola vez al arrancar la app)
+    this.themeService.initializeTheme();
+
     // Iniciar monitoreo si hay token válido
     if (this.tokenService.isTokenValid()) {
       this.userActivity.startTracking();

@@ -3,17 +3,33 @@
     <button class="profile-popover__overlay" type="button" aria-label="Cerrar perfil" (click)="cerrar.emit()"></button>
 
     <section class="profile-popover__card" role="menu">
-      <strong>{{ nombre }}</strong>
-      <span>{{ correo }}</span>
+      <div class="profile-popover__user-info">
+        <strong>{{ nombre }}</strong>
+        <span>{{ correo }}</span>
+      </div>
 
-      <button mat-button type="button" class="profile-popover__change-password" (click)="onCambiarPassword()">
-        <span class="material-icons">vpn_key</span>
-        Cambiar Contraseña
+      <hr class="profile-popover__divider" />
+
+      <button mat-button type="button" class="profile-popover__item" (click)="onMiPerfil()">
+        <span class="material-icons">person</span>
+        Mi perfil
       </button>
 
-      <button mat-button type="button" class="profile-popover__logout" (click)="onCerrarSesion()">
-        <span aria-hidden="true">↪</span>
-        Cerrar Sesion
+      <button mat-button type="button" class="profile-popover__item" (click)="onConfiguracion()">
+        <span class="material-icons">settings</span>
+        Configuración
+      </button>
+
+      <button mat-button type="button" class="profile-popover__item" (click)="onCambiarPassword()">
+        <span class="material-icons">vpn_key</span>
+        Cambiar contraseña
+      </button>
+
+      <hr class="profile-popover__divider" />
+
+      <button mat-button type="button" class="profile-popover__item profile-popover__item--logout" (click)="onCerrarSesion()">
+        <span class="material-icons">logout</span>
+        Cerrar sesión
       </button>
     </section>
   </div>

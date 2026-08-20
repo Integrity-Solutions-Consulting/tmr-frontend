@@ -18,61 +18,92 @@
   position: relative;
   z-index: 91;
   width: 260px;
-  padding: 16px;
+  padding: 14px 12px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  font-family: 'Inter', sans-serif;
 }
 
-.profile-popover__card strong {
-  color: #111827;
-  font-size: 13px;
-  font-weight: 600;
+.profile-popover__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px 8px;
+
+  strong {
+    color: #111827;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  span {
+    color: #6b7280;
+    font-size: 11.5px;
+    font-weight: 400;
+  }
 }
 
-.profile-popover__card span {
-  color: #737373;
-  font-size: 11px;
-  font-weight: 400;
+.profile-popover__divider {
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  margin: 6px 0;
+  width: 100%;
 }
 
-.profile-popover__change-password {
+.profile-popover__item {
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
-  margin-top: 12px;
-  padding: 0 !important;
-  color: #737373 !important;
-  font-size: 13px;
-  font-weight: 600;
-}
+  width: 100%;
+  padding: 8px 10px !important;
+  border-radius: 8px !important;
+  color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
 
-.profile-popover__change-password span {
-  margin-right: 8px;
-  color: #737373;
-  font-size: 18px;
-}
+  .material-icons {
+    margin-right: 10px;
+    color: #6b7280;
+    font-size: 18px;
+    transition: color 0.15s ease;
+  }
 
-.profile-popover__logout {
-  justify-content: flex-start;
-  margin-top: 8px;
-  padding: 0 !important;
-  color: #737373 !important;
-  font-size: 13px;
-  font-weight: 600;
-}
+  &:hover {
+    background-color: #f3f4f6 !important;
+    color: #163572 !important;
 
-.profile-popover__logout span {
-  margin-right: 8px;
-  color: #737373;
-  font-size: 16px;
+    .material-icons {
+      color: #163572;
+    }
+  }
+
+  &--logout {
+    color: #dc2626 !important;
+
+    .material-icons {
+      color: #dc2626;
+    }
+
+    &:hover {
+      background-color: #fef2f2 !important;
+      color: #b91c1c !important;
+
+      .material-icons {
+        color: #b91c1c;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
   .profile-popover {
-    right: -46px;
+    right: -10px;
   }
 }
 

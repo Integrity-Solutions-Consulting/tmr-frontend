@@ -591,3 +591,86 @@
   overflow: hidden !important;
   border-radius: 16px !important;
 }
+
+:host-context(html[data-theme="dark"]) {
+  .modal-form {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+
+    &__header,
+    &__footer {
+      border-color: #3f3f46 !important;
+    }
+
+    &__title { color: #3b82f6 !important; }
+    &__subtitle { color: #a1a1aa !important; }
+
+    &__close {
+      color: #a1a1aa !important;
+      &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+    }
+
+    &__btn--cancel {
+      background: #202124 !important;
+      border-color: #3f3f46 !important;
+      color: #ffffff !important;
+      &:hover { background: #3f3f46 !important; }
+    }
+
+    &__btn--save {
+      background: #163572 !important;
+      color: #ffffff !important;
+      &:hover:not(:disabled) { background: #122d63 !important; }
+    }
+  }
+
+  .form-section__title { color: #3b82f6 !important; }
+  .form-section__bar { background: #3b82f6 !important; }
+
+  /* Floating inputs y selects */
+  .float-field__input,
+  .float-select__input,
+  .check-field {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+
+    &:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    }
+  }
+
+  .float-select__input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-color: #202124 !important;
+  }
+
+  .float-field__label,
+  .float-select__label {
+    background-color: transparent !important;
+    color: #a1a1aa !important;
+  }
+
+  .float-field__input:focus ~ .float-field__label,
+  .float-field__input:not(:placeholder-shown) ~ .float-field__label,
+  .float-select__input:focus ~ .float-select__label,
+  .float-select__label--up,
+  .float-field__label--always {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    color: #60a5fa !important;
+  }
+
+  .email-compose__suffix {
+    background: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #e4e4e7 !important;
+  }
+}

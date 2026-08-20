@@ -1,0 +1,61 @@
+<div class="mi-perfil-modal">
+  <div class="mi-perfil-modal__header">
+    <div class="mi-perfil-modal__header-info">
+      <div class="mi-perfil-modal__avatar">
+        <span class="material-icons">account_circle</span>
+      </div>
+      <div>
+        <h2 class="mi-perfil-modal__title">Mi Perfil</h2>
+        <p class="mi-perfil-modal__subtitle">Información del usuario autenticado</p>
+      </div>
+    </div>
+    <button class="mi-perfil-modal__close" type="button" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="mi-perfil-modal__body">
+    <div class="mi-perfil-modal__grid">
+      @if (data.nombre) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">Nombre</span>
+          <span class="mi-perfil-modal__value">{{ data.nombre }}</span>
+        </div>
+      }
+
+      @if (data.correo) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">Correo electrónico</span>
+          <span class="mi-perfil-modal__value">{{ data.correo }}</span>
+        </div>
+      }
+
+      @if (data.telefono) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">Teléfono</span>
+          <span class="mi-perfil-modal__value">{{ data.telefono }}</span>
+        </div>
+      }
+
+      @if (data.cargo) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">Cargo</span>
+          <span class="mi-perfil-modal__value">{{ data.cargo }}</span>
+        </div>
+      }
+
+      @if (data.idEmpleado) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">ID de Empleado</span>
+          <span class="mi-perfil-modal__value">{{ data.idEmpleado }}</span>
+        </div>
+      }
+
+      @if (data.fechaCreacion) {
+        <div class="mi-perfil-modal__field">
+          <span class="mi-perfil-modal__label">Cuenta creada</span>
+          <span class="mi-perfil-modal__value">{{ data.fechaCreacion }}</span>
+        </div>
+      }
+  </div>
+</div>

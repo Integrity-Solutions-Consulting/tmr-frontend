@@ -145,6 +145,50 @@ import { CommonModule } from '@angular/common';
       background: #ef4444;
       color: #ffffff;
     }
+
+    :host-context(html[data-theme="dark"]) {
+      .confirm-dialog__backdrop {
+        background: rgba(0, 0, 0, 0.65) !important;
+      }
+
+      .confirm-dialog {
+        background-color: #27272a !important;
+        background: #27272a !important;
+        border-color: #3f3f46 !important;
+        color: #f4f4f5 !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+
+        h2 {
+          color: #3b82f6 !important;
+        }
+
+        p {
+          color: #a1a1aa !important;
+        }
+
+        .confirm-dialog__close {
+          color: #a1a1aa !important;
+          &:hover {
+            background: #3f3f46 !important;
+            color: #ffffff !important;
+          }
+        }
+
+        .confirm-dialog__icon {
+          background: rgba(239, 68, 68, 0.15) !important;
+          color: #f87171 !important;
+        }
+
+        .confirm-dialog__button--secondary {
+          background: #202124 !important;
+          border-color: #3f3f46 !important;
+          color: #ffffff !important;
+          &:hover {
+            background: #3f3f46 !important;
+          }
+        }
+      }
+    }
   `]
 })
 export class ConfirmDialogComponent {

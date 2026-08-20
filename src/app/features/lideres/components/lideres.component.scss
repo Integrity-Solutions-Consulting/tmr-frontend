@@ -970,3 +970,85 @@ $hover-row: rgba(#163572, 0.04);
     transform: translateY(0);
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .summary-card {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .card-number {
+    color: #ffffff !important;
+  }
+
+  .card-label {
+    color: #a1a1aa !important;
+  }
+
+  .card-icon--internal {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-radius: 8px !important;
+
+    svg, img {
+      stroke: #60a5fa !important;
+      color: #60a5fa !important;
+    }
+
+    .card-svg-arrow {
+      stroke: #60a5fa !important;
+    }
+  }
+
+  .card-icon--external {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+    background: rgba(168, 85, 247, 0.15) !important;
+    border-radius: 8px !important;
+
+    svg, img {
+      stroke: #c084fc !important;
+      color: #c084fc !important;
+    }
+
+    .card-svg-arrow {
+      stroke: #c084fc !important;
+    }
+  }
+
+  .card-icon--active {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    background: rgba(34, 197, 94, 0.15) !important;
+    border-radius: 8px !important;
+
+    svg, img {
+      stroke: #4ade80 !important;
+      color: #4ade80 !important;
+    }
+
+    .card-svg-arrow {
+      stroke: #4ade80 !important;
+    }
+  }
+
+  .card-icon--inactive {
+    background-color: rgba(161, 161, 170, 0.15) !important;
+    background: rgba(161, 161, 170, 0.15) !important;
+    border-radius: 8px !important;
+
+    svg, img {
+      stroke: #a1a1aa !important;
+      color: #a1a1aa !important;
+    }
+
+    .card-svg-arrow {
+      stroke: #a1a1aa !important;
+    }
+  }
+}

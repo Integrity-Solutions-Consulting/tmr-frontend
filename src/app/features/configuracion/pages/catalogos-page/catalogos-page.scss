@@ -621,3 +621,240 @@ $hover-row:     rgba(#163572, 0.04);
     height: 20px;
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  /* Sidebar de Catálogos Maestros */
+  .catalogos-sidebar {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .sidebar-title {
+    color: #3b82f6 !important;
+  }
+
+  .sidebar-item {
+    &-icon { color: #a1a1aa !important; }
+    &-text { color: #e4e4e7 !important; }
+
+    &:hover {
+      background-color: #3f3f46 !important;
+
+      .sidebar-item-icon,
+      .sidebar-item-text {
+        color: #ffffff !important;
+      }
+    }
+
+    &--active {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      border-color: #3b82f6 !important;
+
+      .sidebar-item-icon,
+      .sidebar-item-text {
+        color: #60a5fa !important;
+      }
+    }
+  }
+
+  .sidebar-empty {
+    color: #a1a1aa !important;
+  }
+
+  /* Contenido Principal */
+  .page {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .page-title {
+    color: #3b82f6 !important;
+  }
+
+  /* Cards resumen superiores */
+  .summary-card {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .card-number {
+    color: #ffffff !important;
+  }
+
+  .card-label {
+    color: #a1a1aa !important;
+  }
+
+  .card-icon {
+    &--total-items {
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #f87171 !important;
+    }
+
+    &--active {
+      background: rgba(34, 197, 94, 0.15) !important;
+      color: #4ade80 !important;
+    }
+
+    &--inactive {
+      background: rgba(161, 161, 170, 0.15) !important;
+      color: #a1a1aa !important;
+    }
+  }
+
+  /* Buscador y Filtro Estado */
+  .search-input-wrapper {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+  }
+
+  .search-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .search-input {
+    color: #ffffff !important;
+    background: transparent !important;
+
+    &::placeholder {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .estado-filter-btn {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+
+    span {
+      color: #ffffff !important;
+    }
+
+    img, .estado-filter-icon {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    &:hover {
+      background-color: #27272a !important;
+    }
+  }
+
+  .estado-dropdown {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .estado-dropdown-item {
+    color: #f4f4f5 !important;
+    &:hover { background-color: #3f3f46 !important; }
+  }
+
+  .estado-dropdown-label {
+    color: #f4f4f5 !important;
+  }
+
+  .estado-dropdown-checkbox {
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+
+    &--active {
+      background: #163572 !important;
+      border-color: #163572 !important;
+    }
+  }
+
+  .estado-dropdown-clear {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #a1a1aa !important;
+    border-top-color: #3f3f46 !important;
+
+    &:hover {
+      background-color: #3f3f46 !important;
+      background: #3f3f46 !important;
+      color: #3b82f6 !important;
+    }
+  }
+
+  .page-create {
+    background-color: #163572 !important;
+    color: #ffffff !important;
+    &:hover:not(:disabled) { background-color: #122d63 !important; }
+  }
+
+  /* Tabla de Catálogos */
+  .panel {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+  }
+
+  .roles-table {
+    background-color: #202124 !important;
+
+    thead {
+      background-color: #202124 !important;
+      border-bottom-color: #3f3f46 !important;
+
+      th {
+        background-color: #202124 !important;
+        color: #a1a1aa !important;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom-color: #3f3f46 !important;
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.03) !important;
+        }
+      }
+
+      td {
+        color: #e4e4e7 !important;
+      }
+    }
+  }
+
+  .role-name {
+    color: #ffffff !important;
+  }
+
+  .status-pill {
+    background-color: rgba(34, 197, 94, 0.2) !important;
+    color: #4ade80 !important;
+
+    &::before {
+      background-color: #4ade80 !important;
+    }
+
+    &--inactive {
+      background-color: rgba(161, 161, 170, 0.2) !important;
+      color: #a1a1aa !important;
+
+      &::before {
+        background-color: #a1a1aa !important;
+      }
+    }
+  }
+
+  .actions-cell {
+    background-color: #202124 !important;
+  }
+}

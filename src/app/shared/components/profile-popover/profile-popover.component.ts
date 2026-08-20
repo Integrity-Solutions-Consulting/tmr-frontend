@@ -14,9 +14,21 @@ export class ProfilePopoverComponent {
   @Input() nombre = '';
   @Input() correo = '';
 
-  @Output() cerrar = new EventEmitter<void>();
-  @Output() cerrarSesion = new EventEmitter<void>();
+  @Output() miPerfil = new EventEmitter<void>();
+  @Output() configuracion = new EventEmitter<void>();
   @Output() cambiarPassword = new EventEmitter<void>();
+  @Output() cerrarSesion = new EventEmitter<void>();
+  @Output() cerrar = new EventEmitter<void>();
+
+  onMiPerfil(): void {
+    this.miPerfil.emit();
+    this.cerrar.emit();
+  }
+
+  onConfiguracion(): void {
+    this.configuracion.emit();
+    this.cerrar.emit();
+  }
 
   onCambiarPassword(): void {
     this.cambiarPassword.emit();

@@ -190,3 +190,50 @@
     }
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .login-card {
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+
+    .title {
+      color: #ffffff !important;
+    }
+
+    .form .form-group .input-field {
+      background-color: #202124 !important;
+      background: #202124 !important;
+      border-color: #3f3f46 !important;
+      color: #ffffff !important;
+
+      &::placeholder {
+        color: #9ca3af !important;
+      }
+
+      &:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+      }
+
+      /* Sobrescritura del Autofill de Chrome/Edge en modo oscuro */
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
+        -webkit-text-fill-color: #ffffff !important;
+        caret-color: #ffffff !important;
+        transition: background-color 5000s ease-in-out 0s !important;
+      }
+    }
+
+    .forgot-password a {
+      color: #60a5fa !important;
+
+      &:hover {
+        color: #93c5fd !important;
+      }
+    }
+  }
+}

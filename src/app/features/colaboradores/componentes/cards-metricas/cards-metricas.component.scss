@@ -111,3 +111,52 @@
     white-space: nowrap;
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .metricas__card {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .metricas__numero {
+    color: #ffffff !important;
+  }
+
+  .metricas__label {
+    color: #a1a1aa !important;
+  }
+
+  .metricas__icon-box {
+    &--total {
+      background: rgba(249, 115, 22, 0.15) !important;
+      color: #fb923c !important;
+    }
+
+    &--activos {
+      background: rgba(34, 197, 94, 0.15) !important;
+      color: #4ade80 !important;
+    }
+
+    &--inactivos {
+      background: rgba(161, 161, 170, 0.15) !important;
+      color: #a1a1aa !important;
+    }
+
+    &--asignados {
+      background: rgba(59, 130, 246, 0.15) !important;
+      color: #60a5fa !important;
+    }
+
+    &--no-asignados {
+      background: rgba(168, 85, 247, 0.15) !important;
+      color: #c084fc !important;
+    }
+  }
+}

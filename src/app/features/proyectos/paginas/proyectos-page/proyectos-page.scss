@@ -279,6 +279,58 @@
   }
 }
 
+:host-context(html[data-theme="dark"]) {
+  .proyectos-page {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    &__header h2 {
+      color: #3b82f6 !important;
+    }
+  }
+
+  .proyecto-detalle {
+    color: #f4f4f5 !important;
+
+    &__header {
+      border-bottom-color: #3f3f46 !important;
+    }
+
+    &__title h3 {
+      color: #3b82f6 !important;
+    }
+
+    &__metrics div,
+    &__summary div,
+    &__leader-card {
+      background-color: #202124 !important;
+      border-color: #3f3f46 !important;
+    }
+
+    &__metrics strong {
+      color: #ffffff !important;
+    }
+
+    &__table {
+      border-color: #3f3f46 !important;
+
+      th {
+        background-color: #202124 !important;
+        border-bottom-color: #3f3f46 !important;
+        color: #a1a1aa !important;
+      }
+
+      td {
+        border-bottom-color: #3f3f46 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
 @media (max-width: 1440px) {
   .proyectos-page {
     max-width: 1220px;
