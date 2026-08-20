@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.2...v1.3.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* agregado tema para apariencia ([b6cc9f7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b6cc9f7eb64eafafe26922f1b3a7888c003225be))
+
 ## [1.3.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.1...v1.3.2) (2026-08-20)
 
 
