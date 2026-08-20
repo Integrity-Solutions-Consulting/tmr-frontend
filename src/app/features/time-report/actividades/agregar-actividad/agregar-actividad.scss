@@ -236,9 +236,10 @@ $error-color: #dc2626;
   }
 
   &[readonly] {
-    cursor: default;
+    cursor: pointer;
     color: #475569;
     background: transparent;
+    caret-color: transparent;
   }
 }
 
