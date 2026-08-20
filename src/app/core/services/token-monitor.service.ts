@@ -20,7 +20,6 @@ export class TokenMonitorService {
   private silentRefreshNeeded$ = new Subject<void>();
   private checkInterval: any;
   private warningEmitted = false;
-  private readonly DEBUG = true; // Habilitar logs de debug
 
   constructor(
     private tokenService: TokenService,
@@ -56,9 +55,6 @@ export class TokenMonitorService {
    */
   startMonitoring(): void {
     if (this.checkInterval) {
-      if (this.DEBUG) {
-        console.warn('⚠️ TokenMonitor: Ya está activo, deteniendo anterior...');
-      }
       clearInterval(this.checkInterval);
     }
 
@@ -77,26 +73,14 @@ export class TokenMonitorService {
     }
 
     const expirationTime = new Date(decoded.exp * 1000);
-    if (this.DEBUG) {
-      console.log(`✅ TokenMonitor INICIADO`);
-      console.log(`   Token expirará en: ${expirationTime.toLocaleTimeString()}`);
-      console.log(`   Tiempo hasta expiración: ${this.getTimeUntilExpiration()}s`);
-    }
 
     // Usar NgZone para no ejecutar en Angular zone y evitar cambios de detección innecesarios
     this.ngZone.runOutsideAngular(() => {
       this.checkInterval = setInterval(() => {
         const timeUntilExpiration = this.getTimeUntilExpiration();
 
-        if (this.DEBUG) {
-          console.log(`⏱️  TokenMonitor: ${timeUntilExpiration}s hasta expiración`);
-        }
-
         if (timeUntilExpiration <= 0) {
           // Token expiró
-          if (this.DEBUG) {
-            console.warn('❌ TokenMonitor: TOKEN EXPIRADO');
-          }
           this.ngZone.run(() => {
             this.tokenExpired$.next();
           });
@@ -104,25 +88,16 @@ export class TokenMonitorService {
         } else if (timeUntilExpiration <= TOKEN_CONFIG.EXPIRATION_WARNING_SECONDS && !this.warningEmitted) {
           // Faltan 60 segundos o menos (emitir solo una vez)
           // Verificar actividad del usuario
-          if (this.DEBUG) {
-            console.log(`⏰ TokenMonitor: Verificando actividad del usuario...`);
-          }
           const hasActivity = this.userActivity.isUserActive(TOKEN_CONFIG.ACTIVITY_CHECK_WINDOW);
 
           if (hasActivity) {
             // Hay actividad - refresh silencioso
-            if (this.DEBUG) {
-              console.log(`✅ TokenMonitor: Actividad detectada - Refresh silencioso`);
-            }
             this.warningEmitted = true;
             this.ngZone.run(() => {
               this.silentRefreshNeeded$.next();
             });
           } else {
             // Sin actividad - mostrar modal
-            if (this.DEBUG) {
-              console.warn(`⚠️  TokenMonitor: ADVERTENCIA DE EXPIRACIÓN (${timeUntilExpiration}s restantes)`);
-            }
             this.warningEmitted = true;
             this.ngZone.run(() => {
               this.expirationWarning$.next();
@@ -138,9 +113,6 @@ export class TokenMonitorService {
    */
   stopMonitoring(): void {
     if (this.checkInterval) {
-      if (this.DEBUG) {
-        console.log('🛑 TokenMonitor DETENIDO');
-      }
       clearInterval(this.checkInterval);
       this.checkInterval = null;
     }
@@ -162,9 +134,7 @@ export class TokenMonitorService {
     return Math.floor((expirationTime - now) / 1000);
   }
 
-  /**
-   * Retorna los segundos restantes (para debug)
-   */
+  /** Retorna los segundos restantes. */
   getSecondsRemaining(): number {
     return this.getTimeUntilExpiration();
   }

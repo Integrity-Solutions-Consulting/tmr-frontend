@@ -39,8 +39,6 @@ export const roleGuard: CanActivateFn = (route) => {
     const requiredModule = pathModuleMap[path];
     // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
-      console.warn(`Acceso denegado a la ruta ${path}. Se requiere el módulo ${requiredModule}`);
-      
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
       if (path === 'dashboard') {
         router.navigate(['/time-report/actividades']);

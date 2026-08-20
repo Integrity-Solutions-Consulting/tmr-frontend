@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.1...v1.3.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* Modificacion en agregar actividades en el campo tip de actividad ([6c3c8e5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6c3c8e5278955dae771bb0c52b09891747c799c7))
+
 ## [1.3.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.0...v1.3.1) (2026-08-20)
 
 
