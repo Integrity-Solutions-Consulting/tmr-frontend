@@ -175,3 +175,51 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+:host-context(html[data-theme="dark"]) {
+  .tabla-wrapper {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .tabla {
+    background-color: #202124 !important;
+    background: #202124 !important;
+
+    &__head {
+      background-color: #202124 !important;
+      background: #202124 !important;
+      border-bottom: 2px solid #3f3f46 !important;
+    }
+
+    &__th {
+      background-color: #202124 !important;
+      background: #202124 !important;
+      color: #a1a1aa !important;
+    }
+
+    &__row {
+      border-bottom: 1px solid #3f3f46 !important;
+      &:hover {
+        background: rgba(255, 255, 255, 0.04) !important;
+      }
+    }
+
+    &__td {
+      color: #ffffff !important;
+    }
+
+    &__dropdown {
+      background-color: #27272a !important;
+      background: #27272a !important;
+      border-color: #3f3f46 !important;
+    }
+
+    &__dropdown-item {
+      color: #ffffff !important;
+      &:hover { background: #3f3f46 !important; }
+    }
+  }
+}
+

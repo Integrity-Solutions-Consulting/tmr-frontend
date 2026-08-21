@@ -170,3 +170,37 @@
   overflow: hidden !important;
   border-radius: 16px !important;
 }
+
+:host-context(html[data-theme="dark"]) {
+  .modal-card {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+
+    &__header { border-color: #3f3f46 !important; }
+    &__nombre { color: #3b82f6 !important; }
+
+    &__close {
+      color: #a1a1aa !important;
+      &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+    }
+  }
+
+  .detalle-section__title {
+    color: #3b82f6 !important;
+  }
+
+  .detalle-section__bar {
+    background: #3b82f6 !important;
+  }
+
+  .detalle-field__label {
+    color: #a1a1aa !important;
+  }
+
+  .detalle-field__value {
+    color: #ffffff !important;
+  }
+}

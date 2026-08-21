@@ -38,7 +38,15 @@
       <span class="material-symbols-outlined navbar__profile-btn-icon">account_circle</span>
     </button>
 
-    <app-profile-popover [abierto]="perfilAbierto" [nombre]="user.name" [correo]="user.email" (cerrar)="cerrarPerfil()"
-      (cerrarSesion)="cerrarSesion()" (cambiarPassword)="abrirCambiarPassword()"></app-profile-popover>
+    <app-profile-popover
+      [abierto]="perfilAbierto"
+      [nombre]="user.name"
+      [correo]="user.email"
+      (miPerfil)="abrirMiPerfil()"
+      (configuracion)="abrirConfiguracion()"
+      (cambiarPassword)="abrirCambiarPassword()"
+      (cerrarSesion)="cerrarSesion()"
+      (cerrar)="cerrarPerfil()"
+    ></app-profile-popover>
   </div>
 </header>

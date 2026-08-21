@@ -9,6 +9,8 @@ import * as AuthActions from '../../store/auth.actions';
 import * as AuthSelectors from '../../store/auth.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { TokenService } from '../../servicios/token.service';
+import { ThemeService } from '../../../../core/services/theme.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +20,14 @@ import { TokenService } from '../../servicios/token.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  private themeService = inject(ThemeService);
+
+  get logoSrc(): string {
+    return this.themeService.activeTheme() === 'dark'
+      ? 'assets/imagenes/logo_isc2.png'
+      : 'assets/imagenes/logo-isc.png';
+  }
+
   loginForm!: FormGroup;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;

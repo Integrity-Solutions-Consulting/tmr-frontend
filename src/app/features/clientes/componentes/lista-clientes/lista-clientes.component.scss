@@ -752,3 +752,212 @@ td {
     font-size: 12px;
   }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .clientes-container {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #f4f4f5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .titulo-pagina {
+    color: #3b82f6 !important;
+  }
+
+  /* Cards resumen superiores */
+  .card-resumen {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .card-resumen-numero {
+    color: #ffffff !important;
+  }
+
+  .card-resumen-label {
+    color: #a1a1aa !important;
+  }
+
+  .card-resumen-icono {
+    &--total {
+      background: rgba(168, 85, 247, 0.15) !important;
+    }
+
+    &--activos {
+      background: rgba(34, 197, 94, 0.15) !important;
+    }
+
+    &--inactivos {
+      background: rgba(161, 161, 170, 0.15) !important;
+    }
+  }
+
+  /* Barra de acciones (Buscador y Estado) */
+  .input-busqueda-wrap {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+  }
+
+  .icono-busqueda {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .input-busqueda {
+    color: #ffffff !important;
+    background: transparent !important;
+    &::placeholder { color: #cbd5e1 !important; }
+  }
+
+  .select-estado-wrap {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+
+    img { filter: brightness(0) invert(1) !important; }
+
+    &:hover, &.activo {
+      background-color: #27272a !important;
+      background: #27272a !important;
+    }
+  }
+
+  .select-estado-texto {
+    color: #ffffff !important;
+  }
+
+  .dropdown-estado {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .dropdown-opcion {
+    color: #f4f4f5 !important;
+    &:hover { background-color: #3f3f46 !important; }
+  }
+
+  .opcion-label { color: #f4f4f5 !important; }
+
+  .checkbox {
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    &.checked {
+      background: #163572 !important;
+      border-color: #163572 !important;
+    }
+  }
+
+  .dropdown-limpiar {
+    color: #a1a1aa !important;
+    border-top-color: #3f3f46 !important;
+    &:hover {
+      background-color: #3f3f46 !important;
+      color: #3b82f6 !important;
+    }
+  }
+
+  .btn-descargar {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+    img { filter: brightness(0) invert(1) !important; }
+    &:hover { background: #27272a !important; }
+  }
+
+  .btn-agregar {
+    background: #163572 !important;
+    color: #ffffff !important;
+    &:hover { background: #122d63 !important; }
+  }
+
+  /* Tabla de Clientes */
+  .tabla-wrap {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+  }
+
+  .tabla {
+    background-color: #202124 !important;
+
+    thead tr {
+      background-color: #202124 !important;
+      border-bottom-color: #3f3f46 !important;
+    }
+
+    th {
+      background-color: #202124 !important;
+      color: #a1a1aa !important;
+    }
+
+    tbody tr {
+      border-bottom-color: #3f3f46 !important;
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+      }
+    }
+
+    td {
+      color: #e4e4e7 !important;
+    }
+
+    .td-nombre {
+      color: #ffffff !important;
+    }
+  }
+
+  .estado-badge {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: #3f3f46 !important;
+    color: #a1a1aa !important;
+
+    &.activo {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      color: #4ade80 !important;
+
+      .estado-dot {
+        background-color: #4ade80 !important;
+      }
+    }
+
+    &.inactivo {
+      background-color: rgba(161, 161, 170, 0.2) !important;
+      border-color: rgba(161, 161, 170, 0.4) !important;
+      color: #a1a1aa !important;
+
+      .estado-dot {
+        background-color: #a1a1aa !important;
+      }
+    }
+  }
+
+  .btn-menu {
+    color: #a1a1aa !important;
+    &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+  }
+
+  .menu-desplegable {
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .menu-item {
+    color: #f4f4f5 !important;
+    &:hover { background: #3f3f46 !important; color: #3b82f6 !important; }
+  }
+}

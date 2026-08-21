@@ -200,3 +200,85 @@
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0);    }
 }
+
+:host-context(html[data-theme="dark"]) {
+  .filtros__search {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    color: #ffffff !important;
+  }
+
+  .filtros__search-input {
+    color: #ffffff !important;
+    background: transparent !important;
+
+    &::placeholder {
+      color: #cbd5e1 !important;
+    }
+  }
+
+  .filtros__search-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .filtros__estado-btn {
+    background-color: #202124 !important;
+    background: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    color: #ffffff !important;
+
+    span {
+      color: #ffffff !important;
+    }
+
+    img, .filtros__estado-icon {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    &:hover,
+    &--active {
+      background-color: #27272a !important;
+      background: #27272a !important;
+    }
+  }
+
+  .filtros__dropdown {
+    background-color: #27272a !important;
+    background: #27272a !important;
+    border: 1px solid #3f3f46 !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .filtros__dropdown-item {
+    color: #f4f4f5 !important;
+
+    &:hover {
+      background-color: #3f3f46 !important;
+    }
+  }
+
+  .filtros__dropdown-label {
+    color: #f4f4f5 !important;
+  }
+
+  .filtros__dropdown-checkbox {
+    background: #202124 !important;
+    border-color: #3f3f46 !important;
+
+    &--active {
+      background: #163572 !important;
+      border-color: #163572 !important;
+    }
+  }
+
+  .filtros__dropdown-clear {
+    color: #a1a1aa !important;
+    border-top-color: #3f3f46 !important;
+
+    &:hover {
+      background-color: #3f3f46 !important;
+      color: #3b82f6 !important;
+    }
+  }
+}

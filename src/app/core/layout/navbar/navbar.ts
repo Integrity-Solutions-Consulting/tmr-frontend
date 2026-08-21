@@ -6,6 +6,9 @@ import { AuthService } from '../../../features/auth/servicios/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CambiarPasswordModalComponent } from '../../../features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
 import { DashboardService } from '../../../features/dashboard/servicios/dashboard.service';
+import { UsuariosService } from '../../../features/configuracion/services/usuarios.service';
+import { MiPerfilModalComponent, MiPerfilData } from '../../../shared/components/mi-perfil-modal/mi-perfil-modal.component';
+import { ConfiguracionModalComponent } from '../../../shared/components/configuracion-modal/configuracion-modal.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -18,6 +21,7 @@ import { CommonModule } from '@angular/common';
 export class Navbar implements OnInit {
   private store = inject(Store);
   private authService = inject(AuthService);
+  private usuariosService = inject(UsuariosService);
   private dialog = inject(MatDialog);
   private dashboardService = inject(DashboardService);
   private elementRef = inject(ElementRef);
@@ -91,6 +95,53 @@ export class Navbar implements OnInit {
     document.body.classList.toggle('sidebar-open');
   }
 
+  abrirMiPerfil(): void {
+    this.perfilAbierto = false;
+    const currentUser = this.authService.getCurrentUser() as any;
+
+    const profileData: MiPerfilData = {
+      nombre: currentUser?.name || currentUser?.nombres || this.user.name,
+      correo: currentUser?.email || this.user.email,
+      idEmpleado: currentUser?.idEmpleado || currentUser?.id || undefined,
+      cargo: currentUser?.cargo || undefined,
+      telefono: currentUser?.telefono || undefined,
+      fechaCreacion: this.formatDate(currentUser?.fechaCreacion || currentUser?.creadoEn || currentUser?.createdAt)
+    };
+
+    if (currentUser?.idEmpleado) {
+      this.usuariosService.obtenerColaboradorDetalle(currentUser.idEmpleado).subscribe({
+        next: (colab) => {
+          if (colab) {
+            profileData.cargo = colab.cargo || profileData.cargo;
+            if (colab.nombreCompleto) {
+              profileData.nombre = colab.nombreCompleto;
+            }
+          }
+          this.openMiPerfilDialog(profileData);
+        },
+        error: () => this.openMiPerfilDialog(profileData)
+      });
+    } else {
+      this.openMiPerfilDialog(profileData);
+    }
+  }
+
+  private openMiPerfilDialog(data: MiPerfilData): void {
+    this.dialog.open(MiPerfilModalComponent, {
+      data,
+      panelClass: 'tmr-dialog-panel',
+      disableClose: true
+    });
+  }
+
+  abrirConfiguracion(): void {
+    this.perfilAbierto = false;
+    this.dialog.open(ConfiguracionModalComponent, {
+      panelClass: 'tmr-dialog-panel',
+      disableClose: true
+    });
+  }
+
   abrirCambiarPassword(): void {
     this.perfilAbierto = false;
     this.dialog.open(CambiarPasswordModalComponent, {
@@ -102,5 +153,19 @@ export class Navbar implements OnInit {
   cerrarSesion(): void {
     this.perfilAbierto = false;
     this.store.dispatch(AuthActions.logout());
+  }
+
+  private formatDate(dateStr?: string): string | undefined {
+    if (!dateStr) return undefined;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return undefined;
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return undefined;
+    }
   }
 }

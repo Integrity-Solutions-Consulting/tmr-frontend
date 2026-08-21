@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TokenService } from '../../../features/auth/servicios/token.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,6 +13,13 @@ import { TokenService } from '../../../features/auth/servicios/token.service';
 })
 export class Sidebar {
   private readonly tokenService = inject(TokenService);
+  readonly themeService = inject(ThemeService);
+
+  get logoSrc(): string {
+    return this.themeService.activeTheme() === 'dark'
+      ? 'assets/imagenes/logo_isc2.png'
+      : 'assets/imagenes/logo-isc.png';
+  }
 
   /** Estado abierto/cerrado de los grupos colapsables */
   trOpen  = false;   // Time Report
