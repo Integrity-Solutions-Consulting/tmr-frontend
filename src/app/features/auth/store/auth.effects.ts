@@ -51,11 +51,11 @@ export class AuthEffects {
 
             return this.authService.getUserModules().pipe(
               tap((modules) => {
-                console.log("Módulos recibidos desde backend:", modules);
+                //console.log("Módulos recibidos desde backend:", modules);
                 this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
               }),
               tap(() => {
-                console.log('🔄 Iniciando monitoreo de token...');
+                //console.log('🔄 Iniciando monitoreo de token...');
                 this.tokenMonitor.startMonitoring();
               }),
               switchMap(() => {
