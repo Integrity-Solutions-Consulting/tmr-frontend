@@ -411,7 +411,11 @@
     }
 
     .col-nombre {
-        /* Distribuido equitativamente */
+        width: 250px !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
     }
 
     .col-proyecto {

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.3...v1.3.4) (2026-08-21)
+
+
+### Bug Fixes
+
+* clean up de logs ([591ab39](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/591ab3985f723c26c4ce8a58953d43986c4e0181))
+* temas para apariencia ([a6ca13a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a6ca13a13362912fa4089592b448688d0bb9aaa8))
+
 ## [1.3.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.2...v1.3.3) (2026-08-20)
 
 
