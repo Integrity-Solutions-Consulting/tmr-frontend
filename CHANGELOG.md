@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.4...v1.3.5) (2026-08-28)
+
+
+### Bug Fixes
+
+* arreglo de columna ([d92410c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d92410cf8995ba8212bd5b32f164d2ec316ed89d))
+
 ## [1.3.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.3...v1.3.4) (2026-08-21)
 
 
