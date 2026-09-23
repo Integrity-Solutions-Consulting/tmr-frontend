@@ -123,11 +123,19 @@
         </div>
 
         <!-- Descargar -->
-        <button class="btn-descargar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
-            (click)="descargarSeleccionados()">
-            Descargar
-            <span class="material-symbols-outlined download-icon">file_download</span>
+        <button class="btn-descargar" [class.enabled]="selection.hasValue()"
+            [class.loading]="isDownloading" [disabled]="!selection.hasValue() || isDownloading"
+            (click)="descargarSeleccionados()" [attr.aria-busy]="isDownloading">
+            <span *ngIf="isDownloading" class="download-spinner" aria-hidden="true"></span>
+            {{ isDownloading ? 'Preparando...' : 'Descargar' }}{{ !isDownloading && selection.selected.length > 1 ? ' (' + selection.selected.length + ')' : '' }}
+            <span *ngIf="!isDownloading" class="material-symbols-outlined download-icon">file_download</span>
         </button>
+    </div>
+
+    <div *ngIf="downloadMessage" class="download-feedback" [class.success]="downloadMessageType === 'success'"
+        [class.error]="downloadMessageType === 'error'" [class.info]="downloadMessageType === 'info'" role="status">
+        <span class="material-symbols-outlined">{{ downloadMessageType === 'success' ? 'check_circle' : downloadMessageType === 'error' ? 'error' : 'hourglass_top' }}</span>
+        <span>{{ downloadMessage }}</span>
     </div>
 
     <!-- ===== TABLE ===== -->

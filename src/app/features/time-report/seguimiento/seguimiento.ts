@@ -66,6 +66,9 @@ export class SeguimientoComponent implements AfterViewInit {
     ];
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
+    public isDownloading = false;
+    public downloadMessage = '';
+    public downloadMessageType: 'success' | 'error' | 'info' = 'info';
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
@@ -259,12 +262,48 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     public async descargarSeleccionados() {
-        if (!this.selection.hasValue()) return;
+        if (!this.selection.hasValue() || this.isDownloading) return;
+
         const seleccionados = [...this.selection.selected];
-        for (const col of seleccionados) {
-            await this.descargarDetalle(col);
+        this.isDownloading = true;
+        this.downloadMessage = `Preparando ${seleccionados.length === 1 ? 'el reporte seleccionado' : `los ${seleccionados.length} reportes seleccionados`}...`;
+        this.downloadMessageType = 'info';
+
+        try {
+            if (seleccionados.length === 1) {
+                await this.descargarDetalle(seleccionados[0], true);
+            } else {
+                await this.descargarReportesZip(seleccionados);
+            }
+            this.selection.clear();
+            this.downloadMessage = 'Reportes preparados correctamente.';
+            this.downloadMessageType = 'success';
+        } catch (error) {
+            console.error('Error preparando reportes seleccionados', error);
+            this.downloadMessage = 'No se pudieron preparar los reportes. Intenta nuevamente.';
+            this.downloadMessageType = 'error';
+        } finally {
+            this.isDownloading = false;
         }
-        this.selection.clear();
+    }
+
+    private async descargarReportesZip(colaboradores: Colaborador[]): Promise<void> {
+        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple`, {
+            ids: colaboradores.map(col => Number(col.id)),
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta
+        }, { observe: 'response', responseType: 'blob' }));
+
+        if (!response.body || response.body.size === 0) {
+            throw new Error('El servidor no devolvió un ZIP válido.');
+        }
+
+        const url = window.URL.createObjectURL(response.body);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Seguimiento_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
@@ -616,7 +655,7 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    public async descargarDetalle(col: Colaborador) {
+    public async descargarDetalle(col: Colaborador, propagarError = false) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
             const res = await lastValueFrom(
@@ -630,6 +669,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
             if (!rawActividades || rawActividades.length === 0) {
                 console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                if (propagarError) throw new Error(`No hay actividades registradas para ${col.nombre} en este rango.`);
                 return;
             }
 
@@ -969,6 +1009,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
         } catch (error) {
             console.error(`Error descargando el detalle de ${col.nombre}:`, error);
+            if (propagarError) throw error;
         }
     }
 
