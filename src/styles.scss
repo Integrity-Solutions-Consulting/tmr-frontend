@@ -2,8 +2,19 @@
 @use 'styles/variables' as *;
 @use 'styles/shared-components';
 
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.actividad-tour-popover {
+  z-index: 10001 !important;
+  min-width: 280px !important;
+  max-width: 320px !important;
+  pointer-events: auto !important;
+}
+
+.driver-overlay {
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
 
 html {
   height: 100%;

@@ -15,7 +15,12 @@
       </p>
     </div>
     <div class="actividad-modal__header-actions">
-      <button class="actividad-modal__help" type="button" aria-label="Ayuda para agregar actividad">
+      <button
+        class="actividad-modal__help"
+        type="button"
+        aria-label="Ayuda para agregar actividad"
+        (click)="iniciarTutorial()"
+      >
         <mat-icon aria-hidden="true">help_outline</mat-icon>
       </button>
       <button class="actividad-modal__close" type="button" (click)="cancelar()" aria-label="Cerrar">
@@ -27,7 +32,7 @@
   <!-- Body -->
   <div class="actividad-modal__body">
     <!-- Tipo de Actividad -->
-    <div class="actividad-modal__field actividad-modal__field--width-80">
+    <div class="actividad-modal__field actividad-modal__field--width-80" data-tour="tipo-actividad">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Tipo de Actividad <span class="req">*</span></label>
         <mat-icon class="actividad-modal__info-icon" matTooltip="Seleccione el tipo de actividad"
@@ -82,7 +87,7 @@
     </div>
 
     <!-- Proyecto -->
-    <div class="actividad-modal__field actividad-modal__field--width-80">
+    <div class="actividad-modal__field actividad-modal__field--width-80" data-tour="proyecto">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label">Proyecto <span class="req">*</span></label>
         <mat-icon
@@ -139,7 +144,7 @@
     </div>
 
     <!-- Código de Requerimiento -->
-    <div class="actividad-modal__field actividad-modal__field--width-80">
+    <div class="actividad-modal__field actividad-modal__field--width-80" data-tour="codigo-requerimiento">
       <div class="actividad-modal__label-row">
         <label class="actividad-modal__label"
           >Código de Requerimiento <span class="req">*</span></label
@@ -210,7 +215,7 @@
     @if (!form.get('esRecurrente')?.value) {
       <div class="actividad-modal__two-col actividad-modal__field--width-80">
         <!-- Fecha Actividad -->
-        <div class="actividad-modal__field fecha-field">
+        <div class="actividad-modal__field fecha-field" data-tour="fecha">
           <div class="actividad-modal__label-row">
             <label class="actividad-modal__label">Fecha Actividad <span class="req">*</span></label>
           </div>
@@ -243,7 +248,7 @@
         </div>
 
         <!-- Número de Horas -->
-        <div class="actividad-modal__field horas-field">
+        <div class="actividad-modal__field horas-field" data-tour="horas">
           <div class="actividad-modal__label-row">
             <label class="actividad-modal__label">Número de Horas <span class="req">*</span></label>
             <mat-icon
@@ -288,7 +293,7 @@
 
     <!-- Recurrente Checkbox (sólo si no es edición) -->
     @if (!esEdicion) {
-      <div class="actividad-modal__recurrente-row">
+      <div class="actividad-modal__recurrente-row" data-tour="recurrente">
         <label class="actividad-modal__checkbox-container">
           <input type="checkbox" formControlName="esRecurrente" />
           <span class="actividad-modal__checkmark"></span>
@@ -475,6 +480,7 @@
       type="submit"
       [disabled]="form.invalid"
       (click)="guardar()"
+      data-tour="guardar"
     >
       Guardar
     </button>
