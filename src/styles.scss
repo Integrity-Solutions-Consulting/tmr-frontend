@@ -678,14 +678,14 @@ html[data-theme="dark"] {
 
     th,
     .mat-mdc-header-cell {
-      background: var(--bg-surface) !important;
+      //background: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
     }
 
     td,
     .mat-mdc-cell {
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
       .colab-name {
@@ -844,6 +844,59 @@ html[data-theme="dark"] {
             color: var(--primary-color) !important;
           }
         }
+      }
+    }
+
+    .mat-datepicker-content {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mat-calendar,
+      .mat-calendar-header,
+      .mat-calendar-content {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+
+      .mat-calendar-period-button,
+      .mat-calendar-previous-button,
+      .mat-calendar-next-button {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .mat-calendar-table-header,
+      .mat-calendar-body-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-calendar-body-cell-content {
+        color: var(--text-main) !important;
+        border-color: transparent !important;
+      }
+
+      .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .mat-calendar-body-selected {
+        background-color: var(--primary-color) !important;
+        color: #ffffff !important;
+      }
+
+      .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-calendar-body-disabled {
+        color: var(--text-muted) !important;
+      }
+
+      .mat-calendar-body-cell-container {
+        color: var(--text-main) !important;
       }
     }
   }
@@ -2092,7 +2145,100 @@ html[data-theme="dark"] {
     }
   }
 
+  /* Modal Generar Reporte */
+  .modal-wrap {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .modal-title {
+      color: var(--primary-color) !important;
+    }
+
+    .empleado-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .empleado-value {
+      color: var(--text-main) !important;
+    }
+
+    .mat-mdc-form-field {
+      --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+      --mdc-outlined-text-field-input-text-color: var(--text-main);
+      --mdc-outlined-text-field-outline-color: var(--input-border);
+      --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
+      --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+      --mat-select-enabled-trigger-text-color: var(--text-main);
+      --mat-select-enabled-arrow-color: var(--text-secondary);
+      --mat-select-focused-arrow-color: var(--primary-color);
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--input-border) !important;
+      }
+
+      &:hover .mdc-notched-outline__leading,
+      &:hover .mdc-notched-outline__notch,
+      &:hover .mdc-notched-outline__trailing {
+        border-color: var(--text-secondary) !important;
+      }
+
+      &.mat-focused .mdc-notched-outline__leading,
+      &.mat-focused .mdc-notched-outline__notch,
+      &.mat-focused .mdc-notched-outline__trailing {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-placeholder {
+        color: var(--text-main) !important;
+      }
+
+      .mat-mdc-select-arrow {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
   /* Calendario Grid & Controles */
+  .calendar-wrapper {
+    background-color: var(--bg-card) !important;
+    color: var(--phase6-text) !important;
+
+    .calendar-topbar {
+      color: var(--phase6-text) !important;
+    }
+
+    .month-title-wrap {
+      color: var(--phase6-text) !important;
+
+      .month-select {
+        color-scheme: dark;
+
+        option {
+          background-color: var(--phase6-bg-surface) !important;
+          color: var(--phase6-text) !important;
+        }
+      }
+    }
+
+    .month-year-label {
+      color: var(--phase6-primary-hover) !important;
+    }
+
+    .dropdown-chevron,
+    .legend {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
   .calendar-grid {
     border-color: var(--border-color) !important;
 
@@ -2131,7 +2277,12 @@ html[data-theme="dark"] {
     }
 
     .day-number {
-      color: var(--text-secondary) !important;
+      color: var(--phase6-text-secondary) !important;
+    }
+
+    .day-cell-header,
+    .day-hours-block {
+      color: var(--phase6-text) !important;
     }
 
     .day-hours-text.blue-text {
@@ -2208,6 +2359,18 @@ html[data-theme="dark"] {
       }
     }
 
+    .actividad-modal__help {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: rgba(59, 130, 246, 0.14) !important;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+      }
+    }
+
     .actividad-modal__label {
       color: var(--text-main) !important;
     }
@@ -2234,6 +2397,34 @@ html[data-theme="dark"] {
     .actividad-modal__info-icon,
     .actividad-modal__select-wrap::after {
       color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__input-wrap {
+      .actividad-modal__input-icon {
+        color: var(--text-secondary) !important;
+      }
+
+      img.actividad-modal__input-icon {
+        filter: brightness(0) saturate(100%) invert(83%) sepia(8%) saturate(450%) hue-rotate(182deg) brightness(92%) contrast(88%);
+      }
+    }
+
+    .actividad-modal__info-icon {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .actividad-modal__close {
+      img {
+        filter: brightness(0) invert(1);
+      }
+
+      &:hover img {
+        filter: brightness(0) saturate(100%) invert(65%) sepia(82%) saturate(1700%) hue-rotate(190deg) brightness(102%) contrast(101%);
+      }
     }
 
     .actividad-modal__checkbox-container {
@@ -2263,6 +2454,17 @@ html[data-theme="dark"] {
       background-color: var(--bg-surface) !important;
       border: 1.5px solid var(--border-color) !important;
       color: var(--text-main) !important;
+    }
+  }
+
+  .actividad-modal__input-wrap {
+    .mat-datepicker-toggle {
+      color: var(--text-secondary) !important;
+
+      .mat-mdc-icon-button:hover {
+        color: var(--text-main) !important;
+        background-color: var(--bg-hover) !important;
+      }
     }
   }
 
