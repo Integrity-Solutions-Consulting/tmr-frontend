@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.5...v1.4.0) (2026-09-24)
+
+
+### Features
+
+* inclusion de zip para seguimiento ([17808cd](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/17808cd6bd42142374ea3a9fb545b0f052ec2850))
+* inclusion de zip para seguimiento ([33fa09c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/33fa09ccaecc13399e2da85a9f4a53bbef4abf3f))
+
 ## [1.3.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.4...v1.3.5) (2026-08-28)
 
 
