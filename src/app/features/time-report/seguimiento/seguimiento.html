@@ -25,7 +25,7 @@
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
+                <span class="metric-value">{{ metricas.horasPendientes | horasFormat }}</span>
                 <span class="metric-name">Horas por registrar</span>
                 <span class="metric-desc">Pendientes por completar</span>
             </div>
@@ -36,7 +36,7 @@
                 <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
+                <span class="metric-value">{{ metricas.horasRegistradas | horasFormat }}</span>
                 <span class="metric-name">Horas registradas</span>
                 <span class="metric-desc">Total del periodo</span>
             </div>
@@ -48,7 +48,7 @@
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
+                <span class="metric-value">{{ metricas.promedioPorDia | horasFormat }}</span>
                 <span class="metric-name">Promedio por día</span>
                 <span class="metric-desc">Horas registradas</span>
             </div>
@@ -60,7 +60,7 @@
                     src="assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg" alt="colaboradores" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
+                <span class="metric-value">{{ metricas.colaboradoresActivos }}</span>
                 <span class="metric-name">Colaboradores activos</span>
                 <span class="metric-desc">Con reporte en el periodo</span>
             </div>
@@ -72,7 +72,7 @@
                     alt="proyectos" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
+                <span class="metric-value">{{ metricas.proyectosUnicos }}</span>
                 <span class="metric-name">Proyectos</span>
                 <span class="metric-desc">Con actividades</span>
             </div>
@@ -186,6 +186,10 @@
                                 <mat-icon>more_vert</mat-icon>
                             </button>
                             <mat-menu #rowMenu="matMenu">
+                                <!-- sm - Nueva opción: abre el calendario del colaborador en un modal de solo lectura -->
+                                <button mat-menu-item (click)="verCalendarioColaborador(el)">
+                                    <mat-icon>calendar_month</mat-icon> Ver detalle
+                                </button>
                                 <button mat-menu-item (click)="descargarDetalle(el)">
                                     <mat-icon>download</mat-icon> Descargar detalle
                                 </button>

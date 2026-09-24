@@ -33,8 +33,9 @@
         }
 
         @for (dia of diasCalendario(); track dia.fecha.toISOString()) {
+        <!-- sm - class.readonly agregada para dar feedback visual (cursor) cuando el calendario es de solo lectura -->
         <div class="day-cell" [class.weekend]="dia.esFinDeSemana" [class.holiday]="dia.esFeriado && dia.esMesActual"
-            [class.today]="dia.esHoy" [class.other-month]="!dia.esMesActual"
+            [class.today]="dia.esHoy" [class.other-month]="!dia.esMesActual" [class.readonly]="soloLectura"
             (click)="dia.esMesActual && seleccionarDia(dia.fecha)">
 
             <div class="day-cell-header">

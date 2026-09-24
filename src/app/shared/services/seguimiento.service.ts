@@ -37,31 +37,34 @@ export class SeguimientoService {
     this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
         this._colaboradores.set(data || []);
-
-        // Calcular métricas basadas en el conjunto filtrado
-        const totalRegistradas = (data || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
-        const totalPendientes = (data || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
-        const promedio = (data && data.length > 0) ? (totalRegistradas / data.length) : 0;
-        const activos = (data || []).filter(c => Number(c.nroHoras || 0) > 0).length;
-
-        // Proyectos únicos
-        const proyectosSet = new Set<string>();
-        (data || []).forEach(c => {
-          if (c.proyecto) {
-            c.proyecto.split(',').forEach(p => proyectosSet.add(p.trim()));
-          }
-        });
-
-        this._metricas.set({
-          horasPendientes: totalPendientes,
-          horasRegistradas: totalRegistradas,
-          promedioPorDia: promedio,
-          colaboradoresActivos: activos,
-          proyectosUnicos: proyectosSet.size
-        });
+        this._metricas.set(this.calcularMetricas(data || []));
       },
       error: (err) => console.error('Error al cargar seguimiento', err)
     });
+  }
+  //SM -Extraer la lógica de cálculo de métricas a un método separado para poder reutilizarlo en otros lugares
+  //SM - Arreglar el cálculo de promedio para que se calcule sobre los días con reporte
+  calcularMetricas(colaboradores: Colaborador[]): MetricasSeguimiento {
+    const totalRegistradas = (colaboradores || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
+    const totalPendientes = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
+    const totalDiasConReporte = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasConReporte || 0), 0);
+    const promedio = totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0;
+    //Se actualizo calculo de promedio, para que para que el promedio sea calculado sobre los días con reporte, no sobre todos los colaboradores
+    //por lo cual se agrego una nueva variable totalDiasConReporte que suma los días con reporte de todos los colaboradores
+    const activos = (colaboradores || []).filter(c => Number(c.nroHoras || 0) > 0).length;
+
+    const proyectosSet = new Set<string>();
+    (colaboradores || []).forEach(c => {
+      if (c.proyecto) c.proyecto.split(',').forEach(p => proyectosSet.add(p.trim()));
+    });
+
+    return {
+      horasPendientes: totalPendientes,
+      horasRegistradas: totalRegistradas,
+      promedioPorDia: promedio,
+      colaboradoresActivos: activos,
+      proyectosUnicos: proyectosSet.size
+    };
   }
 
   aprobarColaboradores(ids: (number | string)[]): void {
