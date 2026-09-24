@@ -366,6 +366,23 @@
         cursor: default;
         opacity: 0.5;
     }
+
+    // sm - Modo solo lectura (modal "Ver calendario" desde Seguimiento): sin cursor de click ni hover de selección.
+    &.readonly {
+        cursor: default;
+
+        &:hover:not(.other-month) {
+            background: #F9FAFB;
+        }
+
+        &.weekend:not(.today):not(.holiday):hover {
+            background: #EEF3FB;
+        }
+
+        .actividad-chip {
+            cursor: default;
+        }
+    }
 }
 
 .day-cell-header {
