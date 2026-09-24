@@ -291,9 +291,11 @@ export class SeguimientoComponent implements AfterViewInit {
             this.selection.clear();
             this.mostrarFeedback('Reportes preparados correctamente.', 'success');
         } catch (error) {
-            console.error('Error preparando reportes seleccionados', error);
-            const detalle = await this.obtenerDetalleError(error);
-            this.mostrarFeedback(detalle || 'No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
+            const status = (error as { status?: number } | null)?.status;
+            const mensaje = status === 404 && formato === 'pdf'
+                ? 'La descarga PDF aún no está disponible en el servidor. Intenta más tarde.'
+                : 'No se pudieron preparar los reportes. Intenta nuevamente.';
+            this.mostrarFeedback(mensaje, 'error');
         } finally {
             this.isDownloading = false;
         }
@@ -337,25 +339,6 @@ export class SeguimientoComponent implements AfterViewInit {
                 this.downloadMessage = '';
             }, 4500);
         }
-    }
-
-    private async obtenerDetalleError(error: unknown): Promise<string> {
-        const httpError = error as { error?: unknown; message?: string };
-        const payload = httpError?.error;
-        if (payload instanceof Blob) {
-            const contenido = await payload.text();
-            try {
-                const json = JSON.parse(contenido);
-                return json.detail || json.message || json.title || httpError.message || '';
-            } catch {
-                return contenido || httpError.message || '';
-            }
-        }
-        if (payload && typeof payload === 'object') {
-            const json = payload as { detail?: string; message?: string; title?: string };
-            return json.detail || json.message || json.title || httpError.message || '';
-        }
-        return httpError?.message || '';
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
