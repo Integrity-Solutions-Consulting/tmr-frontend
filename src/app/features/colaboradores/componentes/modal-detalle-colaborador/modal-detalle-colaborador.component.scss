@@ -510,18 +510,18 @@
 
 :host-context(html[data-theme="dark"]) {
   .modal-card {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border: 1px solid #3f3f46 ;
+    color: #f4f4f5 ;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
   }
 
   .modal-card__header,
   .detalle-proyectos,
   .detalle-salida,
   .detalle-reemplazo {
-    border-color: #3f3f46 !important;
+    border-color: #3f3f46 ;
   }
 
   .modal-card__nombre,
@@ -529,41 +529,41 @@
   .detalle-proyectos__label,
   .detalle-salida__label,
   .detalle-reemplazo__label {
-    color: #3b82f6 !important;
+    color: #3b82f6 ;
   }
 
   .detalle-section__bar {
-    background: #3b82f6 !important;
+    background: #3b82f6 ;
   }
 
   .modal-card__close {
-    color: #a1a1aa !important;
-    &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+    color: #a1a1aa ;
+    &:hover { background: #3f3f46 ; color: #ffffff ; }
   }
 
   .modal-card__codigo,
   .detalle-field__label,
   .detalle-proyectos__item-cliente,
   .detalle-salida__vacio {
-    color: #a1a1aa !important;
+    color: #a1a1aa ;
   }
 
   .detalle-field__value {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   .detalle-proyectos__count {
-    background: #202124 !important;
-    color: #60a5fa !important;
-    border-color: #3f3f46 !important;
+    background: #202124 ;
+    color: #60a5fa ;
+    border-color: #3f3f46 ;
   }
 
   .detalle-proyectos__item {
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background: #202124 ;
+    border-color: #3f3f46 ;
 
     .detalle-proyectos__item-nombre {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
   }
 }

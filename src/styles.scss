@@ -420,24 +420,24 @@ html[data-theme="dark"] {
   --texto: #f4f4f5;
   --texto-gris: #a1a1aa;
 
-  --bg-app: #18181b;
-  --bg-card: #27272a;
-  --bg-surface: #202124;
-  --bg-hover: #3f3f46;
+  --bg-app: var(--phase6-bg-app);
+  --bg-card: var(--phase6-bg-card);
+  --bg-surface: var(--phase6-bg-surface);
+  --bg-hover: var(--phase6-bg-hover);
 
-  --text-main: #f4f4f5;
-  --text-secondary: #d4d4d8;
-  --text-muted: #a1a1aa;
+  --text-main: var(--phase6-text);
+  --text-secondary: var(--phase6-text-secondary);
+  --text-muted: var(--phase6-text-muted);
 
-  --border-color: #3f3f46;
+  --border-color: var(--phase6-border);
 
   --primary-color: #3b82f6;
   --primary-text: #ffffff;
 
   --icon-color: #d4d4d8;
 
-  --input-bg: #27272a;
-  --input-border: #52525b;
+  --input-bg: var(--phase6-bg-surface);
+  --input-border: var(--phase6-border);
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 
@@ -822,7 +822,6 @@ html[data-theme="dark"] {
     .mat-datepicker-content,
     .mdc-menu-surface {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -831,7 +830,6 @@ html[data-theme="dark"] {
       .mdc-list-item,
       .mat-mdc-menu-item {
         background-color: var(--bg-card) !important;
-        background: var(--bg-card) !important;
         color: var(--text-main) !important;
 
         .mdc-list-item__primary-text,
@@ -919,7 +917,6 @@ html[data-theme="dark"] {
   .mat-menu-panel,
   .mdc-menu-surface {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -928,7 +925,6 @@ html[data-theme="dark"] {
     .mdc-list-item,
     .mat-mdc-menu-item {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       color: var(--text-main) !important;
 
       .mdc-list-item__primary-text,
@@ -962,7 +958,6 @@ html[data-theme="dark"] {
   .descargar {
     .descarga-menu__trigger,
     .descargar__btn {
-      background: var(--bg-surface) !important;
       background-color: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: #ffffff !important;
@@ -986,7 +981,6 @@ html[data-theme="dark"] {
 
     .descarga-menu__panel,
     .descargar__panel {
-      background: var(--bg-card) !important;
       background-color: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
@@ -1034,7 +1028,6 @@ html[data-theme="dark"] {
 
   .descarga-menu__select-panel {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
 
     .mat-mdc-option,
@@ -1236,7 +1229,6 @@ html[data-theme="dark"] {
   .paginacion,
   div.paginacion {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -1256,7 +1248,6 @@ html[data-theme="dark"] {
 
     .paginacion__btn {
       background-color: var(--bg-surface) !important;
-      background: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -1694,7 +1685,7 @@ html[data-theme="dark"] {
       }
 
       tr:hover {
-        background-color: var(--bg-hover) !important;
+        background-color: var(--phase6-bg-surface) !important;
       }
     }
 
@@ -1762,8 +1753,7 @@ html[data-theme="dark"] {
     .descargar__panel,
     .descarga-menu__panel,
     .descarga-dropdown {
-      background-color: #27272a !important;
-      background: #27272a !important;
+      background-color: var(--phase6-bg-app) !important;
       border: 1px solid #3f3f46 !important;
       color: #f4f4f5 !important;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
@@ -1792,10 +1782,10 @@ html[data-theme="dark"] {
 
   --phase6-bg-app: #18181b;
   --phase6-bg-panel: #182235;
-  --phase6-bg-card: #1e293b;
-  --phase6-bg-surface: #263449;
+  --phase6-bg-card: #27272A;
+  --phase6-bg-surface: #202124;
   --phase6-bg-hover: #334155;
-  --phase6-border: #3b4a60;
+  --phase6-border: #3f3f46;
   --phase6-text: #f8fafc;
   --phase6-text-secondary: #cbd5e1;
   --phase6-text-muted: #94a3b8;
@@ -1857,7 +1847,7 @@ html[data-theme="dark"] {
   .report-wrapper,
   .dashboard-container {
     //background-color: var(--phase6-bg-card) !important;
-    border-color: var(--phase6-border) !important;
+    //border-color: var(--phase6-border) !important;
     color: var(--phase6-text) !important;
   }
 
@@ -2054,7 +2044,7 @@ html[data-theme="dark"] {
   /* ── 2. Seguimiento ─────────────────────────────────────────────── */
   .seguimiento-page,
   .seguimiento-container {
-    background-color: var(--bg-app) !important;
+    background-color: var(--phase6-bg-app) !important;
     color: var(--text-main) !important;
 
     .header-title, h1, h2 {
@@ -2122,6 +2112,7 @@ html[data-theme="dark"] {
       thead, th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
+        font-weight: bolder !important;
         border-bottom: 1px solid var(--border-color) !important;
       }
 
@@ -2859,5 +2850,20 @@ html[data-theme="dark"] {
     -webkit-text-fill-color: #ffffff !important;
     caret-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s !important;
+  }
+      /* Override for tables to ensure dark gray #202124 instead of blue */
+  .seguimiento-page .table-scroll-container,
+  .seguimiento-page .table-wrapper,
+  .seguimiento-table,
+  app-carga-actividades .table-card,
+  app-carga-actividades .table-scroll-container,
+  app-carga-actividades .table-wrapper,
+  app-carga-actividades table,
+  app-carga-actividades .data-table {
+    background-color: #202124 !important;
+    
+    th, thead, thead th {
+      background-color: #202124 !important;
+    }
   }
 }

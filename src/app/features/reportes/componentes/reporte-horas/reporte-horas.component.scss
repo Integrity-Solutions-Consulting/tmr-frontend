@@ -440,48 +440,48 @@ input.filter-input {
 
 :host-context(html[data-theme="dark"]) {
   .report-wrapper {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border-color: #3f3f46 ;
+    color: #f4f4f5 ;
   }
 
   .table-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
   .report-table {
-    background-color: #202124 !important;
+    background-color: #202124 ;
 
     th {
-      background-color: #202124 !important;
-      border-bottom: 2px solid #3f3f46 !important;
-      color: #a1a1aa !important;
+      background-color: #202124 ;
+      border-bottom: 2px solid #3f3f46 ;
+      color: #a1a1aa ;
     }
 
     td {
-      border-bottom: 1px solid #3f3f46 !important;
-      color: #ffffff !important;
+      border-bottom: 1px solid #3f3f46 ;
+      color: #ffffff ;
     }
 
     tr:hover {
-      background-color: rgba(255, 255, 255, 0.04) !important;
+      background-color: rgba(255, 255, 255, 0.04) ;
     }
   }
 
   .filter-input {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
   }
 
   .btn-clear {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #a1a1aa !important;
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #a1a1aa ;
   }
 }
 

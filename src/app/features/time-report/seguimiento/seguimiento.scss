@@ -1,3 +1,11 @@
+@use "sass:color";
+// Variables locales
+$dark-navy: #1A1A2E;
+$primary-blue: #163572;
+$gray-bg: #F3F4F6;
+$border-color: #E5E7EB;
+$text-muted: #9CA3AF;
+
 .seguimiento-page {
     display: flex;
     flex-direction: column;
@@ -16,7 +24,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background: #F3F4F6;
+    background: $gray-bg;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
@@ -304,7 +312,7 @@
 
 .seguimiento-table {
     width: 100%;
-    min-width: 1100px;
+    min-width: 1400px;
     table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
@@ -708,6 +716,7 @@
     width: 18px !important;
     height: 18px !important;
     pointer-events: none !important;
+    color: #cbd5e1 !important;
 }
 
 .download-icon {
@@ -746,70 +755,151 @@
   .seguimiento-card,
   .report-wrapper,
   .seguimiento-page {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    //background-color: #27272a ;
+    //background: #27272a ;
+    //border: 1px solid #3f3f46 ;
+    color: #f4f4f5 ;
+    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
   .filters-card {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
   }
 
   .table-scroll-container,
   .table-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
   .seguimiento-table {
-    background-color: #202124 !important;
+    background-color: #202124 ;
 
     thead, thead th {
-      background-color: #202124 !important;
-      border-bottom: 2px solid #3f3f46 !important;
-      color: #a1a1aa !important;
+      background-color: #202124 ;
+      border-bottom: 2px solid #3f3f46 ;
+      color: #a1a1aa ;
     }
 
     tbody tr {
       border-bottom: 1px solid #3f3f46 !important;
       &:hover {
-        background: rgba(255, 255, 255, 0.04) !important;
+        background-color: #27272a !important;
+      }
+      &.selected-row {
+        background-color: #3f3f46 !important;
       }
     }
 
     tbody td {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
   }
 
   .tabla-footer {
-    background-color: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    color: #a1a1aa !important;
+    background-color: #202124 ;
+    border: 1px solid #3f3f46 ;
+    color: #a1a1aa ;
 
     ::ng-deep .mat-mdc-icon-button {
-      background-color: #27272a !important;
-      border-color: #3f3f46 !important;
-      color: #ffffff !important;
+      background-color: #27272a ;
+      border-color: #3f3f46 ;
+      color: #ffffff ;
     }
   }
 
   .filter-input,
   .filter-select {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
   }
 
   .btn-reporte {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
+  }
+
+  .metric-icon-wrap {
+    &.blue, &.green, &.purple, &.orange, &.gray {
+      background-color: var(--phase6-bg-surface);
+    }
+    &.blue, &.purple {
+      color: var(--phase6-primary);
+    }
+    &.green {
+      color: #4ade80;
+    }
+    &.orange {
+      color: #fbbf24;
+    }
+    &.gray {
+      color: var(--phase6-text-muted);
+    }
+    
+    /* Filtros SVG para los iconos de metricas que usan <img> */
+    &.blue img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
+    &.green img { filter: brightness(0) saturate(100%) invert(77%) sepia(43%) saturate(583%) hue-rotate(85deg) brightness(97%) contrast(85%); }
+    &.purple img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
+    &.orange img { filter: brightness(0) saturate(100%) invert(79%) sepia(35%) saturate(836%) hue-rotate(345deg) brightness(102%) contrast(98%); }
+    &.gray img { filter: brightness(0) saturate(100%) invert(67%) sepia(16%) saturate(232%) hue-rotate(174deg) brightness(90%) contrast(86%); }
+  }
+
+      /* --- Solo textos e iconos de busqueda, cliente, fechas y descargar --- */
+  .filter-label,
+  .filter-input,
+  .filter-select,
+  .filter-input::placeholder,
+  .filter-select::placeholder,
+  .btn-descargar {
+    color: #cbd5e1 !important;
+  }
+
+  .btn-descargar .download-icon {
+    color: #cbd5e1 !important;
+  }
+
+
+
+  /* Filtro de color #cbd5e1 para iconos de busqueda, cliente y fechas */
+  .filter-icon-img,
+  .select-chevron-img,
+  .filter-icon,
+  .filter-input::-webkit-calendar-picker-indicator {
+    filter: brightness(0) saturate(100%) invert(91%) sepia(11%) saturate(547%) hue-rotate(176deg) brightness(96%) contrast(89%) !important;
+  }
+
+  /* --- Checkboxes de la tabla --- */
+  .seguimiento-table {
+    mat-checkbox {
+      --mdc-checkbox-unselected-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-unselected-hover-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-hover-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-focus-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-checkmark-color: #202124 !important;
+    }
+
+    ::ng-deep {
+      .mdc-checkbox__background {
+        border-color: #cbd5e1 !important;
+      }
+      .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
+      .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
+        background-color: #cbd5e1 !important;
+        border-color: #cbd5e1 !important;
+      }
+      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__checkmark {
+        color: #202124 !important;
+      }
+      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__mixedmark {
+        border-color: #202124 !important;
+      }
+    }
   }
 }
