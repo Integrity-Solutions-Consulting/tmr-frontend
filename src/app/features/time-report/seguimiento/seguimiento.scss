@@ -285,6 +285,39 @@
             border-color: #163572;
         }
     }
+
+    &.loading {
+        color: #163572;
+        cursor: wait;
+        opacity: 0.8;
+    }
+}
+
+.download-spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid #cbd5e1;
+    border-top-color: #163572;
+    border-radius: 50%;
+    animation: seguimiento-spin 0.75s linear infinite;
+}
+
+.download-feedback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+
+    &.info { color: #1d4ed8; background: #eff6ff; }
+    &.success { color: #15803d; background: #f0fdf4; }
+    &.error { color: #b91c1c; background: #fef2f2; }
+}
+
+@keyframes seguimiento-spin {
+    to { transform: rotate(360deg); }
 }
 
 /* ---- TABLE ---- */
