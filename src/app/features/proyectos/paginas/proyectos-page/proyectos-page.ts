@@ -78,7 +78,7 @@ export class ProyectosPage implements OnDestroy {
   proyectoDetalle: Proyecto | null = null;
   proyectoPendienteCambioEstado: Proyecto | null = null;
 
-  private successModalTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private successModalTimeoutId: number | null = null;
 
   filtros: FiltrosProyecto = {
     busqueda: '',

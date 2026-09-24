@@ -20,6 +20,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { HttpClient } from '@angular/common/http';
+import { ActividadSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -290,20 +291,35 @@ export class SeguimientoComponent implements AfterViewInit {
             }
             this.selection.clear();
             this.mostrarFeedback('Reportes preparados correctamente.', 'success');
-        } catch (error) {
-            const status = (error as { status?: number } | null)?.status;
-            const mensaje = status === 404 && formato === 'pdf'
-                ? 'La descarga PDF aún no está disponible en el servidor. Intenta más tarde.'
-                : 'No se pudieron preparar los reportes. Intenta nuevamente.';
-            this.mostrarFeedback(mensaje, 'error');
+        } catch {
+            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
         } finally {
             this.isDownloading = false;
         }
     }
 
     private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
-        // Se conserva la ruta histórica para ambos formatos. El formato viaja
-        // explícitamente en el body para mantener compatibilidad con el backend Dev.
+        if (formato === 'pdf') {
+            const fechaDesde = this.fechaDesde;
+            const fechaHasta = this.fechaHasta;
+            const contenido = await crearZipSeguimientoPdf(colaboradores, fechaDesde, fechaHasta, async id => {
+                const respuesta = await lastValueFrom(this.http.get<{ actividades: ActividadSeguimientoPdf[] }>(
+                    `${environment.apiUrl}/time-report/seguimiento/colaborador/${id}/actividades`,
+                    { params: { fechaDesde, fechaHasta } },
+                ));
+                return respuesta.actividades;
+            });
+            const url = URL.createObjectURL(new Blob([contenido], { type: 'application/zip' }));
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_PDF_${fechaDesde}_a_${fechaHasta}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return;
+        }
+        // Excel conserva la descarga múltiple del servidor.
         const endpoint = environment.apiUrl + '/time-report/seguimiento/descarga-multiple';
         const response = await lastValueFrom(this.http.post(endpoint, {
             ids: colaboradores.map(col => Number(col.id)),
@@ -323,7 +339,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const url = window.URL.createObjectURL(response.body);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `Seguimiento_${formato === 'pdf' ? 'PDF' : 'Excel'}_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
         anchor.click();
         window.URL.revokeObjectURL(url);
     }
