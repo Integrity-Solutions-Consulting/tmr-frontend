@@ -30,7 +30,6 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import * as ExcelJS from 'exceljs';
 import { lastValueFrom } from 'rxjs';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
-import Swal from 'sweetalert2';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 
@@ -279,24 +278,45 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
+        this.isDownloading = true;
+        this.downloadMessage = `Preparando ${seleccionados.length === 1 ? 'el reporte seleccionado' : `los ${seleccionados.length} reportes seleccionados`}...`;
+        this.downloadMessageType = 'info';
 
-        //sm - Mostrar un modal de espera mientras se descargan los reportes
-        Swal.fire({
-            title: 'Generando reportes...',
-            text: `Descargando ${seleccionados.length} archivo(s), por favor espera.`,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
+        try {
+            if (seleccionados.length === 1) {
+                await this.descargarDetalle(seleccionados[0], true);
+            } else {
+                await this.descargarReportesZip(seleccionados);
             }
-        });
+            this.selection.clear();
+            this.downloadMessage = 'Reportes preparados correctamente.';
+            this.downloadMessageType = 'success';
+        } catch (error) {
+            console.error('Error preparando reportes seleccionados', error);
+            this.downloadMessage = 'No se pudieron preparar los reportes. Intenta nuevamente.';
+            this.downloadMessageType = 'error';
+        } finally {
+            this.isDownloading = false;
+        }
+    }
 
-        for (const col of seleccionados) {
-            await this.descargarDetalle(col, false);
+    private async descargarReportesZip(colaboradores: Colaborador[]): Promise<void> {
+        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple`, {
+            ids: colaboradores.map(col => Number(col.id)),
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta
+        }, { observe: 'response', responseType: 'blob' }));
+
+        if (!response.body || response.body.size === 0) {
+            throw new Error('El servidor no devolvió un ZIP válido.');
         }
 
-        this.selection.clear();
-        Swal.close();
+        const url = window.URL.createObjectURL(response.body);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Seguimiento_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
@@ -658,7 +678,7 @@ export class SeguimientoComponent implements AfterViewInit {
         });
     }
 
-    public async descargarDetalle(col: Colaborador, mostrarAvisoSinActividades: boolean = true) {
+    public async descargarDetalle(col: Colaborador, propagarError = false) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
             const res = await lastValueFrom(
@@ -671,16 +691,8 @@ export class SeguimientoComponent implements AfterViewInit {
             const feriados = res.feriados || [];
 
             if (!rawActividades || rawActividades.length === 0) {
-                if(mostrarAvisoSinActividades){
-                    console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
-                    //Para que no solo avise por consola, sino en el front, se puede usar un modal de alerta con SweetAlert2
-                    await Swal.fire({
-                        icon: 'info',
-                        title: 'Sin actividades',
-                        text: `${col.nombre} no tiene actividades registradas en el rango de fechas seleccionado.`,
-                        confirmButtonColor: '#163572'
-                    });
-                }
+                console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                if (propagarError) throw new Error(`No hay actividades registradas para ${col.nombre} en este rango.`);
                 return;
             }
 
