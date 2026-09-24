@@ -299,7 +299,12 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
-        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple/${formato}`, {
+        // Excel conserva la ruta histórica; PDF usa la ruta explícita para no caer
+        // silenciosamente en la generación XLSX de versiones anteriores del backend.
+        const endpoint = formato === 'pdf'
+            ? `${environment.apiUrl}/time-report/seguimiento/descarga-multiple/pdf`
+            : `${environment.apiUrl}/time-report/seguimiento/descarga-multiple`;
+        const response = await lastValueFrom(this.http.post(endpoint, {
             ids: colaboradores.map(col => Number(col.id)),
             fechaDesde: this.fechaDesde,
             fechaHasta: this.fechaHasta,
