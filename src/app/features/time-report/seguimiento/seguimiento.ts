@@ -292,7 +292,8 @@ export class SeguimientoComponent implements AfterViewInit {
             this.mostrarFeedback('Reportes preparados correctamente.', 'success');
         } catch (error) {
             console.error('Error preparando reportes seleccionados', error);
-            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
+            const detalle = await this.obtenerDetalleError(error);
+            this.mostrarFeedback(detalle || 'No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
         } finally {
             this.isDownloading = false;
         }
@@ -301,7 +302,9 @@ export class SeguimientoComponent implements AfterViewInit {
     private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
         // Se conserva la ruta histórica para ambos formatos. El formato viaja
         // explícitamente en el body para mantener compatibilidad con el backend Dev.
-        const endpoint = `${environment.apiUrl}/time-report/seguimiento/descarga-multiple`;
+        const endpoint = formato === 'pdf'
+            ? `${environment.apiUrl}/time-report/seguimiento/descarga-multiple-pdf`
+            : `${environment.apiUrl}/time-report/seguimiento/descarga-multiple`;
         const response = await lastValueFrom(this.http.post(endpoint, {
             ids: colaboradores.map(col => Number(col.id)),
             fechaDesde: this.fechaDesde,
@@ -311,6 +314,10 @@ export class SeguimientoComponent implements AfterViewInit {
 
         if (!response.body || response.body.size === 0) {
             throw new Error('El servidor no devolvió un ZIP válido.');
+        }
+
+        if (response.headers.get('Content-Type')?.toLowerCase().split(';')[0] !== 'application/zip') {
+            throw new Error(`El servidor no devolvió un ZIP ${formato.toUpperCase()}.`);
         }
 
         const url = window.URL.createObjectURL(response.body);
@@ -330,6 +337,25 @@ export class SeguimientoComponent implements AfterViewInit {
                 this.downloadMessage = '';
             }, 4500);
         }
+    }
+
+    private async obtenerDetalleError(error: unknown): Promise<string> {
+        const httpError = error as { error?: unknown; message?: string };
+        const payload = httpError?.error;
+        if (payload instanceof Blob) {
+            const contenido = await payload.text();
+            try {
+                const json = JSON.parse(contenido);
+                return json.detail || json.message || json.title || httpError.message || '';
+            } catch {
+                return contenido || httpError.message || '';
+            }
+        }
+        if (payload && typeof payload === 'object') {
+            const json = payload as { detail?: string; message?: string; title?: string };
+            return json.detail || json.message || json.title || httpError.message || '';
+        }
+        return httpError?.message || '';
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
