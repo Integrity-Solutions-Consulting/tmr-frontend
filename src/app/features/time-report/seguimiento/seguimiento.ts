@@ -299,7 +299,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
-        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple`, {
+        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple/${formato}`, {
             ids: colaboradores.map(col => Number(col.id)),
             fechaDesde: this.fechaDesde,
             fechaHasta: this.fechaHasta,
