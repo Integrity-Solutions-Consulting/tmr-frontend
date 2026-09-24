@@ -15,6 +15,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
@@ -28,6 +29,10 @@ import { PaginacionComponent } from '../../../shared/components/paginacion/pagin
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as ExcelJS from 'exceljs';
 import { lastValueFrom } from 'rxjs';
+import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+import Swal from 'sweetalert2';
+// sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
+import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 
 @Component({
     selector: 'app-seguimiento',
@@ -49,6 +54,7 @@ import { lastValueFrom } from 'rxjs';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
+        MatDialogModule,
         PaginacionComponent,
         HeaderComponent,
         HorasFormatPipe
@@ -59,6 +65,7 @@ import { lastValueFrom } from 'rxjs';
 export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
+    private dialog = inject(MatDialog);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -100,7 +107,14 @@ export class SeguimientoComponent implements AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
 
     // Reactividad vía Signals desde el Servicio de Negocio
-    public metricas = computed(() => this.seguimientoService.getMetricas());
+    //public metricas = computed(() => this.seguimientoService.getMetricas());
+    //SM - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados, y si no hay selección, se muestren las métricas generales
+    get metricas(): MetricasSeguimiento {
+        if (this.selection.hasValue()) {
+            return this.seguimientoService.calcularMetricas(this.selection.selected);
+        }
+        return this.seguimientoService.getMetricas();
+    }
 
     // Ordenación manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
@@ -265,45 +279,24 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
-        this.isDownloading = true;
-        this.downloadMessage = `Preparando ${seleccionados.length === 1 ? 'el reporte seleccionado' : `los ${seleccionados.length} reportes seleccionados`}...`;
-        this.downloadMessageType = 'info';
 
-        try {
-            if (seleccionados.length === 1) {
-                await this.descargarDetalle(seleccionados[0], true);
-            } else {
-                await this.descargarReportesZip(seleccionados);
+        //sm - Mostrar un modal de espera mientras se descargan los reportes
+        Swal.fire({
+            title: 'Generando reportes...',
+            text: `Descargando ${seleccionados.length} archivo(s), por favor espera.`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
-            this.selection.clear();
-            this.downloadMessage = 'Reportes preparados correctamente.';
-            this.downloadMessageType = 'success';
-        } catch (error) {
-            console.error('Error preparando reportes seleccionados', error);
-            this.downloadMessage = 'No se pudieron preparar los reportes. Intenta nuevamente.';
-            this.downloadMessageType = 'error';
-        } finally {
-            this.isDownloading = false;
-        }
-    }
+        });
 
-    private async descargarReportesZip(colaboradores: Colaborador[]): Promise<void> {
-        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple`, {
-            ids: colaboradores.map(col => Number(col.id)),
-            fechaDesde: this.fechaDesde,
-            fechaHasta: this.fechaHasta
-        }, { observe: 'response', responseType: 'blob' }));
-
-        if (!response.body || response.body.size === 0) {
-            throw new Error('El servidor no devolvió un ZIP válido.');
+        for (const col of seleccionados) {
+            await this.descargarDetalle(col, false);
         }
 
-        const url = window.URL.createObjectURL(response.body);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = `Seguimiento_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
-        anchor.click();
-        window.URL.revokeObjectURL(url);
+        this.selection.clear();
+        Swal.close();
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
@@ -655,7 +648,17 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    public async descargarDetalle(col: Colaborador, propagarError = false) {
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
+    public verCalendarioColaborador(col: Colaborador): void {
+        this.dialog.open(CalendarioColaboradorModal, {
+            data: { colaborador: col },
+            width: '900px',
+            maxHeight: '90vh',
+            panelClass: 'tmr-dialog-panel'
+        });
+    }
+
+    public async descargarDetalle(col: Colaborador, mostrarAvisoSinActividades: boolean = true) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
             const res = await lastValueFrom(
@@ -668,8 +671,16 @@ export class SeguimientoComponent implements AfterViewInit {
             const feriados = res.feriados || [];
 
             if (!rawActividades || rawActividades.length === 0) {
-                console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
-                if (propagarError) throw new Error(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                if(mostrarAvisoSinActividades){
+                    console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                    //Para que no solo avise por consola, sino en el front, se puede usar un modal de alerta con SweetAlert2
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Sin actividades',
+                        text: `${col.nombre} no tiene actividades registradas en el rango de fechas seleccionado.`,
+                        confirmButtonColor: '#163572'
+                    });
+                }
                 return;
             }
 

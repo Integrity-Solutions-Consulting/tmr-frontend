@@ -1,0 +1,18 @@
+<!-- sm - Header del modal: nombre del colaborador + botón cerrar (solo cierra el overlay, no navega). -->
+<div class="calcol-modal">
+    <div class="calcol-modal__header">
+        <div class="calcol-modal__header-text">
+            <h2 class="calcol-modal__title">Calendario de {{ data.colaborador.nombre }}</h2>
+            <p class="calcol-modal__subtitle">Solo lectura</p>
+        </div>
+        <button class="calcol-modal__close" type="button" (click)="cerrar()" aria-label="Cerrar">
+            <img src="assets/iconos/x.svg" alt="Cerrar" />
+        </button>
+    </div>
+
+    <!-- sm - idEmpleadoOverride: carga las actividades de este colaborador (no las del usuario logueado). -->
+    <!-- sm - soloLectura: bloquea agregar/editar actividades; la navegación entre meses sigue disponible. -->
+    <div class="calcol-modal__body">
+        <app-calendario [idEmpleadoOverride]="idEmpleado" [soloLectura]="true"></app-calendario>
+    </div>
+</div>
