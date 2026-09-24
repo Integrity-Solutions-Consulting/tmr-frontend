@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.0...v1.4.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* add sweetalert2 dependency ([71625cc](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/71625cce40bc55138764587478cb24985e897261))
+* arreglo de json, correcion por el zip ([9a8a07b](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/9a8a07b063a03d1b36371bceb3223db5c1da7ad5))
+* correcion de errores de zip ([ea29d35](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ea29d354703916e12929da7c411786f1e02d8bde))
+* resolucion de conflictos ([1fdd9b9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1fdd9b98e51aae2bf50e8f1f8ddf716813d43f9e))
+
 ## [1.4.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.3.5...v1.4.0) (2026-09-24)
 
 
