@@ -20,6 +20,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { HttpClient } from '@angular/common/http';
+import { ActividadSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -75,6 +76,7 @@ export class SeguimientoComponent implements AfterViewInit {
     public isDownloading = false;
     public downloadMessage = '';
     public downloadMessageType: 'success' | 'error' | 'info' = 'info';
+    private feedbackTimer?: ReturnType<typeof setTimeout>;
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
@@ -274,49 +276,83 @@ export class SeguimientoComponent implements AfterViewInit {
             : this.dataSource.data.forEach(row => this.selection.select(row));
     }
 
-    public async descargarSeleccionados() {
+    public async descargarSeleccionados(formato: 'xlsx' | 'pdf') {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
         this.isDownloading = true;
-        this.downloadMessage = `Preparando ${seleccionados.length === 1 ? 'el reporte seleccionado' : `los ${seleccionados.length} reportes seleccionados`}...`;
-        this.downloadMessageType = 'info';
+        this.mostrarFeedback(`Preparando ${formato === 'pdf' ? 'PDF' : 'Excel'}${seleccionados.length > 1 ? ` de ${seleccionados.length} colaboradores` : ''}...`, 'info', false);
 
         try {
-            if (seleccionados.length === 1) {
+            if (seleccionados.length === 1 && formato === 'xlsx') {
                 await this.descargarDetalle(seleccionados[0], true);
             } else {
-                await this.descargarReportesZip(seleccionados);
+                await this.descargarReportesZip(seleccionados, formato);
             }
             this.selection.clear();
-            this.downloadMessage = 'Reportes preparados correctamente.';
-            this.downloadMessageType = 'success';
-        } catch (error) {
-            console.error('Error preparando reportes seleccionados', error);
-            this.downloadMessage = 'No se pudieron preparar los reportes. Intenta nuevamente.';
-            this.downloadMessageType = 'error';
+            this.mostrarFeedback('Reportes preparados correctamente.', 'success');
+        } catch {
+            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
         } finally {
             this.isDownloading = false;
         }
     }
 
-    private async descargarReportesZip(colaboradores: Colaborador[]): Promise<void> {
-        const response = await lastValueFrom(this.http.post(`${environment.apiUrl}/time-report/seguimiento/descarga-multiple`, {
+    private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
+        if (formato === 'pdf') {
+            const fechaDesde = this.fechaDesde;
+            const fechaHasta = this.fechaHasta;
+            const contenido = await crearZipSeguimientoPdf(colaboradores, fechaDesde, fechaHasta, async id => {
+                const respuesta = await lastValueFrom(this.http.get<{ actividades: ActividadSeguimientoPdf[] }>(
+                    `${environment.apiUrl}/time-report/seguimiento/colaborador/${id}/actividades`,
+                    { params: { fechaDesde, fechaHasta } },
+                ));
+                return respuesta.actividades;
+            });
+            const url = URL.createObjectURL(new Blob([contenido], { type: 'application/zip' }));
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_PDF_${fechaDesde}_a_${fechaHasta}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return;
+        }
+        // Excel conserva la descarga múltiple del servidor.
+        const endpoint = environment.apiUrl + '/time-report/seguimiento/descarga-multiple';
+        const response = await lastValueFrom(this.http.post(endpoint, {
             ids: colaboradores.map(col => Number(col.id)),
             fechaDesde: this.fechaDesde,
-            fechaHasta: this.fechaHasta
+            fechaHasta: this.fechaHasta,
+            formato
         }, { observe: 'response', responseType: 'blob' }));
 
         if (!response.body || response.body.size === 0) {
             throw new Error('El servidor no devolvió un ZIP válido.');
         }
 
+        if (response.headers.get('Content-Type')?.toLowerCase().split(';')[0] !== 'application/zip') {
+            throw new Error(`El servidor no devolvió un ZIP ${formato.toUpperCase()}.`);
+        }
+
         const url = window.URL.createObjectURL(response.body);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `Seguimiento_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
         anchor.click();
         window.URL.revokeObjectURL(url);
+    }
+
+    private mostrarFeedback(message: string, type: 'success' | 'error' | 'info', autoHide = true): void {
+        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
+        this.downloadMessage = message;
+        this.downloadMessageType = type;
+        if (autoHide) {
+            this.feedbackTimer = setTimeout(() => {
+                this.downloadMessage = '';
+            }, 4500);
+        }
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {

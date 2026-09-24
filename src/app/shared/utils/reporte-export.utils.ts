@@ -22,6 +22,7 @@ export interface ReporteTabularConfig {
   columnaEstado?: number;
   orientacionPdf?: 'portrait' | 'landscape';
   formatoPdf?: 'letter' | 'a4' | 'a3';
+  subtituloPdf?: string;
 }
 
 const COLOR_CABECERA = 'FF163572';
@@ -407,6 +408,11 @@ export async function exportarReporteExcelMultihoja(
 }
 
 export async function exportarReportePdf(config: ReporteTabularConfig): Promise<void> {
+  const doc = await crearReportePdf(config);
+  doc.save(`Reporte_${config.nombreArchivo}_${fechaArchivo()}.pdf`);
+}
+
+export async function crearReportePdf(config: ReporteTabularConfig): Promise<jsPDF> {
   const orientation = config.orientacionPdf ?? (config.columnas.length > 6 ? 'landscape' : 'portrait');
   const doc = new jsPDF({
     orientation,
@@ -431,6 +437,9 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
     doc.text(titleLines, pageWidth * 0.73, titleLines.length > 1 ? 16 : 17, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
+    if (config.subtituloPdf) {
+      doc.text(config.subtituloPdf, pageWidth / 2, 27, { align: 'center', maxWidth: pageWidth - 12 });
+    }
   };
   const anchoUtil = pageWidth - margin * 2;
   const totalSolicitado = config.columnas.reduce((t, c) => t + (c.anchoPdf ?? 0), 0);
@@ -474,7 +483,7 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
         data.cell.styles.fontStyle = 'bold';
       }
     },
-    margin: { left: 0, right: 0, bottom: 18, top: 0 },
+    margin: { left: 0, right: 0, bottom: 18, top: 30 },
     didDrawPage: dibujarCabecera,
   });
 
@@ -545,7 +554,7 @@ export async function exportarReportePdf(config: ReporteTabularConfig): Promise<
     doc.text(fecha, pageWidth - margin, footerY + 4, { align: 'right' });
   }
 
-  doc.save(`Reporte_${config.nombreArchivo}_${fechaArchivo()}.pdf`);
+  return doc;
 }
 
 export async function obtenerLogoReporte(): Promise<string | null> {
