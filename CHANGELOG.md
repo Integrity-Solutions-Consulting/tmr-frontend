@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.1...v1.4.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* arreglo de zip en modulo de pdf v2 ([a16fbf2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a16fbf2b67d1a5d658daab362565670db87f1150))
+* descargar zip con pdf o xlsx ([9ac8e8c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/9ac8e8c8f35c64dd8513f027d2ea7f222041f6b1))
+* in english zip con pdf v3 ([b8fad59](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b8fad5947ee5ae3630d3f0d4f642ad68fa9ec239))
+* in english zip con pdf v4 ([4054985](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/40549859f240dc9e43431d5e3ce38d2efaa30492))
+* in english zip con pdf v5 ([788eac0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/788eac009cfdd4cf68d2c1221dfd691e2edda7c9))
+* in english zip con pdf v6 ([5a5f70c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5a5f70cbdcb15a0c4a624c6b120becc588d7363e))
+* in english zip con pdf v7 ([7a5aa60](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/7a5aa601e8629a7e8529a60869e3cf2deeea7fb9))
+* in english zip con pdf v8 ([d34af6a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d34af6ae54942d7bbdbd533af676b1513cb079b4))
+
 ## [1.4.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.0...v1.4.1) (2026-09-24)
 
 
