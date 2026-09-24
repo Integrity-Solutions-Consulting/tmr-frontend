@@ -1084,3 +1084,5 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 }
+
+//comentario de prueba
