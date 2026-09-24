@@ -15,6 +15,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
@@ -28,6 +29,9 @@ import { PaginacionComponent } from '../../../shared/components/paginacion/pagin
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as ExcelJS from 'exceljs';
 import { lastValueFrom } from 'rxjs';
+import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+// sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
+import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 
 @Component({
     selector: 'app-seguimiento',
@@ -49,6 +53,7 @@ import { lastValueFrom } from 'rxjs';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
+        MatDialogModule,
         PaginacionComponent,
         HeaderComponent,
         HorasFormatPipe
@@ -59,6 +64,7 @@ import { lastValueFrom } from 'rxjs';
 export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
+    private dialog = inject(MatDialog);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -100,7 +106,14 @@ export class SeguimientoComponent implements AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
 
     // Reactividad vía Signals desde el Servicio de Negocio
-    public metricas = computed(() => this.seguimientoService.getMetricas());
+    //public metricas = computed(() => this.seguimientoService.getMetricas());
+    //SM - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados, y si no hay selección, se muestren las métricas generales
+    get metricas(): MetricasSeguimiento {
+        if (this.selection.hasValue()) {
+            return this.seguimientoService.calcularMetricas(this.selection.selected);
+        }
+        return this.seguimientoService.getMetricas();
+    }
 
     // Ordenación manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
@@ -653,6 +666,16 @@ export class SeguimientoComponent implements AfterViewInit {
     public filtrarClientes(event: any) {
         const val = event?.target ? event.target.value : event;
         this.clienteFilter.set(val || '');
+    }
+
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
+    public verCalendarioColaborador(col: Colaborador): void {
+        this.dialog.open(CalendarioColaboradorModal, {
+            data: { colaborador: col },
+            width: '900px',
+            maxHeight: '90vh',
+            panelClass: 'tmr-dialog-panel'
+        });
     }
 
     public async descargarDetalle(col: Colaborador, propagarError = false) {
