@@ -125,11 +125,21 @@
         <!-- Descargar -->
         <button class="btn-descargar" [class.enabled]="selection.hasValue()"
             [class.loading]="isDownloading" [disabled]="!selection.hasValue() || isDownloading"
-            (click)="descargarSeleccionados()" [attr.aria-busy]="isDownloading">
+            [matMenuTriggerFor]="descargaMenu" [attr.aria-busy]="isDownloading">
             <span *ngIf="isDownloading" class="download-spinner" aria-hidden="true"></span>
             {{ isDownloading ? 'Preparando...' : 'Descargar' }}{{ !isDownloading && selection.selected.length > 1 ? ' (' + selection.selected.length + ')' : '' }}
             <span *ngIf="!isDownloading" class="material-symbols-outlined download-icon">file_download</span>
         </button>
+        <mat-menu #descargaMenu="matMenu">
+            <button mat-menu-item (click)="descargarSeleccionados('xlsx')" [disabled]="isDownloading">
+                <mat-icon>table_view</mat-icon>
+                Descargar Excel (.xlsx)
+            </button>
+            <button mat-menu-item (click)="descargarSeleccionados('pdf')" [disabled]="isDownloading">
+                <mat-icon>picture_as_pdf</mat-icon>
+                Descargar PDF
+            </button>
+        </mat-menu>
     </div>
 
     <div *ngIf="downloadMessage" class="download-feedback" [class.success]="downloadMessageType === 'success'"

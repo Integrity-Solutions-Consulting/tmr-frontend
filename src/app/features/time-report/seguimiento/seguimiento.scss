@@ -303,6 +303,10 @@
 }
 
 .download-feedback {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -310,6 +314,9 @@
     border-radius: 10px;
     font-size: 13px;
     font-weight: 500;
+    max-width: min(420px, calc(100vw - 48px));
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+    animation: seguimiento-feedback-in 0.2s ease-out;
 
     &.info { color: #1d4ed8; background: #eff6ff; }
     &.success { color: #15803d; background: #f0fdf4; }
@@ -318,6 +325,11 @@
 
 @keyframes seguimiento-spin {
     to { transform: rotate(360deg); }
+}
+
+@keyframes seguimiento-feedback-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ---- TABLE ---- */
