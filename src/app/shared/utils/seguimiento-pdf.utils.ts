@@ -74,11 +74,17 @@ export async function crearReporteSeguimientoPdf(
       startY: 39, head, body: body.concat([total]), theme: 'grid', margin: { left: 10, right: 10, bottom: 14 }, tableWidth: 'auto',
       styles: { font: 'helvetica', fontSize: 3.8, cellPadding: 0.65, minCellWidth: 0, lineColor: [210, 220, 235], lineWidth: 0.12, valign: 'middle' },
       headStyles: { fillColor: AZUL, textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 3.6, cellPadding: 0.55, minCellWidth: 0 },
-      columnStyles: Object.assign({ 0: { cellWidth: 5, halign: 'center' }, 1: { cellWidth: 16 }, 2: { cellWidth: 20 }, 3: { cellWidth: 21 }, 4: { cellWidth: 42 }, 5: { cellWidth: 12, halign: 'center' }, [6 + fechas.length]: { cellWidth: 12, halign: 'center' } }, Object.fromEntries(fechas.map((_, i) => [6 + i, { cellWidth: 3.7, halign: 'center' }]))) as any,
+      columnStyles: Object.assign({ 0: { cellWidth: 9.5, halign: 'center' }, 1: { cellWidth: 16 }, 2: { cellWidth: 20 }, 3: { cellWidth: 21 }, 4: { cellWidth: 39 }, 5: { cellWidth: 12, halign: 'center' }, [6 + fechas.length]: { cellWidth: 12, halign: 'center' } }, Object.fromEntries(fechas.map((_, i) => [6 + i, { cellWidth: 3.7, halign: 'center' }]))) as any,
       alternateRowStyles: { fillColor: [255, 255, 255] },
       didParseCell: (data: any) => {
         const esTotal = data.row.index === body.length;
         if (esTotal) {
+          if (data.column.index === 0) {
+            data.cell.text = ['TOTAL'];
+            data.cell.styles.cellWidth = 9.5;
+            data.cell.styles.overflow = 'hidden';
+            data.cell.styles.halign = 'center';
+          }
           data.cell.styles.fontStyle = 'bold'; data.cell.styles.textColor = AZUL; data.cell.styles.lineColor = AZUL; data.cell.styles.lineWidth = 0.35;
           if (data.column.index >= 6 && data.column.index < 6 + fechas.length) {
             const color = colorDia(fechas[data.column.index - 6], feriados); if (color) data.cell.styles.fillColor = color;
@@ -104,12 +110,26 @@ function dibujarCabecera(doc: jsPDF, logo: string | null, cliente: string, colab
   if (logo) doc.addImage(logo, 'PNG', 12, 12, 28, 12);
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text('TIME REPORT - ' + cliente.toUpperCase(), width / 2, 21, { align: 'center' });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.text(mes(desde) + ' ' + desde.slice(0, 4) + ' | Generado: ' + new Date().toLocaleDateString('es-EC'), width - 12, 28, { align: 'right' });
-  doc.setTextColor(...AZUL); doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.text('Cliente:', 11, 35); doc.setTextColor(25, 25, 25); doc.text(cliente, 35, 35); doc.setTextColor(...AZUL); doc.text('Nombre del consultor:', 11, 38); doc.setTextColor(25, 25, 25); doc.text(colaborador, 35, 38);
+  doc.setTextColor(...AZUL); doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
+  const etiquetaCliente = 'Cliente:';
+  const etiquetaConsultor = 'Nombre del consultor:';
+  const valorX = Math.max(35, 11 + doc.getTextWidth(etiquetaConsultor) + 4);
+  doc.text(etiquetaCliente, 11, 35); doc.setTextColor(25, 25, 25); doc.text(cliente, valorX, 35);
+  doc.setTextColor(...AZUL); doc.text(etiquetaConsultor, 11, 38); doc.setTextColor(25, 25, 25);
+  const espacioNombre = width - valorX - 12;
+  const anchoNombre = doc.getTextWidth(colaborador);
+  doc.setFontSize(anchoNombre > espacioNombre ? Math.max(5.5, 7 * espacioNombre / anchoNombre) : 7);
+  doc.text(colaborador, valorX, 38);
 }
 
 function dibujarFirmasYLeyenda(doc: jsPDF, finalY: number, colaborador: string, cliente: string, filas: FilaPdf[]): void {
-  const width = doc.internal.pageSize.getWidth(); let y = finalY + 13;
+  const width = doc.internal.pageSize.getWidth(); let y = finalY + 27;
   if (y > doc.internal.pageSize.getHeight() - 45) { doc.addPage(); y = 20; }
+  const anchoFirma = 58;
+  doc.setDrawColor(80, 80, 80);
+  doc.setLineWidth(0.25);
+  doc.line(15, y - 4, 15 + anchoFirma, y - 4);
+  doc.line(width / 2, y - 4, width / 2 + anchoFirma, y - 4);
   doc.setFontSize(6.5); doc.setTextColor(25, 25, 25); doc.setFont('helvetica', 'italic'); doc.text('Elaborado por: ' + colaborador, 15, y); doc.text('Revisado y Aprobado por: ' + lideres(filas), width / 2, y);
   doc.setFont('helvetica', 'bold'); doc.text('ISC INTEGRITY SOLUTIONS & CONSULTING CIA. LTDA.', 15, y + 4); doc.text('Empresa: ' + cliente, width / 2, y + 4);
   doc.setFont('helvetica', 'bold'); doc.setTextColor(...AZUL); doc.text('Nomenclatura', 15, y + 14);
