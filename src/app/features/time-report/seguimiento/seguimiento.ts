@@ -20,7 +20,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { HttpClient } from '@angular/common/http';
-import { ActividadSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
+import { ActividadSeguimientoPdf, DatosSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -303,11 +303,11 @@ export class SeguimientoComponent implements AfterViewInit {
             const fechaDesde = this.fechaDesde;
             const fechaHasta = this.fechaHasta;
             const contenido = await crearZipSeguimientoPdf(colaboradores, fechaDesde, fechaHasta, async id => {
-                const respuesta = await lastValueFrom(this.http.get<{ actividades: ActividadSeguimientoPdf[] }>(
+                const respuesta = await lastValueFrom(this.http.get<DatosSeguimientoPdf>(
                     `${environment.apiUrl}/time-report/seguimiento/colaborador/${id}/actividades`,
                     { params: { fechaDesde, fechaHasta } },
                 ));
-                return respuesta.actividades;
+                return respuesta;
             });
             const url = URL.createObjectURL(new Blob([contenido], { type: 'application/zip' }));
             const anchor = document.createElement('a');
