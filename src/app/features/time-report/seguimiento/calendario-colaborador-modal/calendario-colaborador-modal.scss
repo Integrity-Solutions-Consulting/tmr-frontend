@@ -1,0 +1,80 @@
+// sm - Estilos calcados del header de agregar-actividad.scss para mantener el mismo look de modal en toda la app.
+$primary-blue: #163572;
+$text-muted: #64748b;
+
+:host {
+    --modal-width: 100%;
+    --modal-max-width: 900px;
+}
+
+.calcol-modal {
+    display: flex;
+    flex-direction: column;
+    width: var(--modal-width);
+    max-width: var(--modal-max-width);
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background-color: #ffffff;
+}
+
+.calcol-modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid #e8edf5;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.calcol-modal__header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calcol-modal__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: $primary-blue;
+    line-height: 1.2;
+}
+
+.calcol-modal__subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: $text-muted;
+    font-weight: 500;
+}
+
+.calcol-modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid #0f172a;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    img {
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        background: #f1f5f9;
+    }
+}
+
+.calcol-modal__body {
+    padding: 20px 28px 28px;
+    overflow-y: auto;
+}

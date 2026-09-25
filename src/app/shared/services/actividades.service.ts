@@ -32,11 +32,13 @@ export class ActividadesService {
   private _horasPorRegistrar = signal<number>(0);
   public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
 
-  cargarResumen(anio?: number, mes?: number): void {
+  // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
+  // en vez de siempre usar al usuario logueado.
+  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number): void {
     const user = this.authService.getCurrentUser();
-    if (!user) return;
+    if (!idEmpleadoOverride && !user) return;
 
-    const empId = user.idEmpleado ?? user.id;
+    const empId = idEmpleadoOverride ?? (user!.idEmpleado ?? user!.id);
     let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
     if (anio && mes) {
       url += `&anio=${anio}&mes=${mes}`;
@@ -52,13 +54,15 @@ export class ActividadesService {
     });
   }
 
-  cargarCalendario(anio: number, mes: number): void {
+  // sm - idEmpleadoOverride permite pedir el calendario de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
+  // en vez de siempre usar al usuario logueado.
+  cargarCalendario(anio: number, mes: number, idEmpleadoOverride?: number): void {
     this.currentAnio.set(anio);
     this.currentMes.set(mes);
     const user = this.authService.getCurrentUser();
-    if (!user) return;
+    if (!idEmpleadoOverride && !user) return;
 
-    const empId = user.idEmpleado ?? user.id;
+    const empId = idEmpleadoOverride ?? (user!.idEmpleado ?? user!.id);
     this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${empId}&anio=${anio}&mes=${mes}`).subscribe({
       next: (data) => {
         const mapped = (data || []).map(item => ({
