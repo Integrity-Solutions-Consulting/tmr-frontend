@@ -1228,7 +1228,7 @@ html[data-theme="dark"] {
   app-paginacion,
   .paginacion,
   div.paginacion {
-    background-color: var(--bg-card) !important;
+    background-color: #202124 !important;
     border-color: var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -1669,7 +1669,7 @@ html[data-theme="dark"] {
 
     .table-wrapper {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--phase6-border) !important;
     }
 
     .lideres-table {
@@ -1846,8 +1846,6 @@ html[data-theme="dark"] {
   .carga-actividades-card,
   .report-wrapper,
   .dashboard-container {
-    //background-color: var(--phase6-bg-card) !important;
-    //border-color: var(--phase6-border) !important;
     color: var(--phase6-text) !important;
   }
 
@@ -1868,7 +1866,6 @@ html[data-theme="dark"] {
   .table-card,
   .content-card,
   .table-wrapper,
-  .report-wrapper,
   .dashboard-container,
   .proximamente-card,
   .grafico-card {
@@ -2573,10 +2570,7 @@ html[data-theme="dark"] {
   /* ── 3. Reportes (Fechas & Horas) ───────────────────────────────── */
   .reporte-fechas-container,
   .reporte-horas-container,
-  .reporte-card,
-  app-reporte-fechas,
-  app-reporte-horas,
-  .report-wrapper {
+  .reporte-card {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
@@ -2855,7 +2849,6 @@ html[data-theme="dark"] {
   .seguimiento-page .table-scroll-container,
   .seguimiento-page .table-wrapper,
   .seguimiento-table,
-  app-carga-actividades .table-card,
   app-carga-actividades .table-scroll-container,
   app-carga-actividades .table-wrapper,
   app-carga-actividades table,
@@ -2866,4 +2859,16 @@ html[data-theme="dark"] {
       background-color: #202124 !important;
     }
   }
+}
+/* Override for Carga de Actividades table-card to be borderless and transparent */
+html[data-theme="dark"] app-carga-actividades .table-card,
+app-carga-actividades .table-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] app-carga-actividades,
+html[data-theme="dark"] app-carga-actividades-component {
+  background-color: #18181b !important;
 }

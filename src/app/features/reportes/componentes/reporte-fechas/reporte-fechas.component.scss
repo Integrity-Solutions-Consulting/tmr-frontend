@@ -20,10 +20,10 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: transparent;
+  border: none;
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  box-shadow: none;
   padding: 28px 28px 22px;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -457,9 +457,9 @@
 
 :host-context(html[data-theme="dark"]) {
   .report-wrapper {
-    background-color: #27272a ;
-    background: #27272a ;
-    border-color: #3f3f46 ;
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none;
     color: #f4f4f5 ;
   }
 
@@ -494,7 +494,7 @@
 
   .metrica-card {
     background-color: #202124 ;
-    border-color: #3f3f46 ;
+    border: none;
   }
 
   .metrica-valor {
@@ -507,13 +507,13 @@
 
   .filter-input {
     background-color: #202124 ;
-    border-color: #3f3f46 ;
+    border: none;
     color: #ffffff ;
   }
 
   .btn-clear {
     background-color: #202124 ;
-    border-color: #3f3f46 ;
+    border: none;
     color: #a1a1aa ;
   }
 }

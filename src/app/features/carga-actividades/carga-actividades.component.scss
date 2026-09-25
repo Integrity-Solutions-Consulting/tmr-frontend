@@ -143,16 +143,7 @@ $primary-color: #163572; $bg-color: #f3f4f6; $border-color: #e5e7eb; $text-muted
   }
 }
 
-.table-card {
-  padding: 28px 28px;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow: visible;
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
-}
+.table-card { padding: 28px 28px; background: transparent; display: flex; flex-direction: column; gap: 1rem; overflow: visible; border: none; }
 
 .table-scroll-container {
   background: #ffffff;
@@ -220,7 +211,7 @@ $primary-color: #163572; $bg-color: #f3f4f6; $border-color: #e5e7eb; $text-muted
       box-sizing: border-box;
     }
 
-    th:nth-child(1), td:nth-child(1) { width: 64px; }
+    th:nth-child(1), td:nth-child(1) { width: 32px; min-width: 32px; max-width: 32px; text-align: left; padding-left: 12px; padding-right: 0; }
     th:nth-child(2), td:nth-child(2) { width: 240px; }
     th:nth-child(3), td:nth-child(3) { width: 140px; }
     th:nth-child(4), td:nth-child(4) { width: 180px; }
@@ -604,4 +595,52 @@ $primary-color: #163572; $bg-color: #f3f4f6; $border-color: #e5e7eb; $text-muted
   .btn-secondary { padding: 0.5rem; font-size: 0.88rem; }
   .search-input-wrapper input { font-size: 0.9rem; }
   .data-table tbody td::before { min-width: 60px; }
+}
+
+:host-context(html[data-theme="dark"]) {
+  .table-scroll-container {
+    border-color: #3f3f46;
+  }
+
+  .data-table {
+    thead, thead th {
+      border-bottom: 2px solid #3f3f46;
+      color: #a1a1aa;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #3f3f46 !important;
+      &:hover {
+        background-color: #27272a !important;
+      }
+      &.selected-row {
+        background-color: #3f3f46 !important;
+      }
+    }
+
+    tbody td {
+      color: #ffffff;
+    }
+    
+    input[type="checkbox"] {
+      accent-color: #cbd5e1;
+    }
+  }
+}
+app-paginacion {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 9px 12px 9px 16px;
+}
+
+:host-context(html[data-theme="dark"]) {
+  app-paginacion {
+    background-color: #202124 !important;
+    border: 1px solid #3f3f46 !important;
+    border-top: 0 !important;
+    color: #a1a1aa !important;
+  }
 }
