@@ -2,8 +2,19 @@
 @use 'styles/variables' as *;
 @use 'styles/shared-components';
 
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.actividad-tour-popover {
+  z-index: 10001 !important;
+  min-width: 280px !important;
+  max-width: 320px !important;
+  pointer-events: auto !important;
+}
+
+.driver-overlay {
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
 
 html {
   height: 100%;
@@ -409,24 +420,24 @@ html[data-theme="dark"] {
   --texto: #f4f4f5;
   --texto-gris: #a1a1aa;
 
-  --bg-app: #18181b;
-  --bg-card: #27272a;
-  --bg-surface: #202124;
-  --bg-hover: #3f3f46;
+  --bg-app: var(--phase6-bg-app);
+  --bg-card: var(--phase6-bg-card);
+  --bg-surface: var(--phase6-bg-surface);
+  --bg-hover: var(--phase6-bg-hover);
 
-  --text-main: #f4f4f5;
-  --text-secondary: #d4d4d8;
-  --text-muted: #a1a1aa;
+  --text-main: var(--phase6-text);
+  --text-secondary: var(--phase6-text-secondary);
+  --text-muted: var(--phase6-text-muted);
 
-  --border-color: #3f3f46;
+  --border-color: var(--phase6-border);
 
   --primary-color: #3b82f6;
   --primary-text: #ffffff;
 
   --icon-color: #d4d4d8;
 
-  --input-bg: #27272a;
-  --input-border: #52525b;
+  --input-bg: var(--phase6-bg-surface);
+  --input-border: var(--phase6-border);
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 
@@ -678,14 +689,14 @@ html[data-theme="dark"] {
 
     th,
     .mat-mdc-header-cell {
-      background: var(--bg-surface) !important;
+      //background: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
     }
 
     td,
     .mat-mdc-cell {
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
       .colab-name {
@@ -811,7 +822,6 @@ html[data-theme="dark"] {
     .mat-datepicker-content,
     .mdc-menu-surface {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -820,7 +830,6 @@ html[data-theme="dark"] {
       .mdc-list-item,
       .mat-mdc-menu-item {
         background-color: var(--bg-card) !important;
-        background: var(--bg-card) !important;
         color: var(--text-main) !important;
 
         .mdc-list-item__primary-text,
@@ -846,6 +855,59 @@ html[data-theme="dark"] {
         }
       }
     }
+
+    .mat-datepicker-content {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mat-calendar,
+      .mat-calendar-header,
+      .mat-calendar-content {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+
+      .mat-calendar-period-button,
+      .mat-calendar-previous-button,
+      .mat-calendar-next-button {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .mat-calendar-table-header,
+      .mat-calendar-body-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-calendar-body-cell-content {
+        color: var(--text-main) !important;
+        border-color: transparent !important;
+      }
+
+      .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .mat-calendar-body-selected {
+        background-color: var(--primary-color) !important;
+        color: #ffffff !important;
+      }
+
+      .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-calendar-body-disabled {
+        color: var(--text-muted) !important;
+      }
+
+      .mat-calendar-body-cell-container {
+        color: var(--text-main) !important;
+      }
+    }
   }
 
   .mat-mdc-autocomplete-panel,
@@ -855,7 +917,6 @@ html[data-theme="dark"] {
   .mat-menu-panel,
   .mdc-menu-surface {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -864,7 +925,6 @@ html[data-theme="dark"] {
     .mdc-list-item,
     .mat-mdc-menu-item {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       color: var(--text-main) !important;
 
       .mdc-list-item__primary-text,
@@ -898,7 +958,6 @@ html[data-theme="dark"] {
   .descargar {
     .descarga-menu__trigger,
     .descargar__btn {
-      background: var(--bg-surface) !important;
       background-color: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: #ffffff !important;
@@ -922,7 +981,6 @@ html[data-theme="dark"] {
 
     .descarga-menu__panel,
     .descargar__panel {
-      background: var(--bg-card) !important;
       background-color: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
@@ -970,7 +1028,6 @@ html[data-theme="dark"] {
 
   .descarga-menu__select-panel {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
 
     .mat-mdc-option,
@@ -1055,7 +1112,7 @@ html[data-theme="dark"] {
   .form-control,
   .form-select {
     background-color: var(--input-bg) !important;
-    border: 1px solid var(--input-border) !important;
+    //order: 1px solid var(--input-border) !important;
     color: var(--text-main) !important;
 
     &::placeholder {
@@ -1171,8 +1228,7 @@ html[data-theme="dark"] {
   app-paginacion,
   .paginacion,
   div.paginacion {
-    background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
+    background-color: #202124 !important;
     border-color: var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -1192,7 +1248,6 @@ html[data-theme="dark"] {
 
     .paginacion__btn {
       background-color: var(--bg-surface) !important;
-      background: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -1614,7 +1669,7 @@ html[data-theme="dark"] {
 
     .table-wrapper {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--phase6-border) !important;
     }
 
     .lideres-table {
@@ -1630,7 +1685,7 @@ html[data-theme="dark"] {
       }
 
       tr:hover {
-        background-color: var(--bg-hover) !important;
+        background-color: var(--phase6-bg-surface) !important;
       }
     }
 
@@ -1698,8 +1753,7 @@ html[data-theme="dark"] {
     .descargar__panel,
     .descarga-menu__panel,
     .descarga-dropdown {
-      background-color: #27272a !important;
-      background: #27272a !important;
+      background-color: var(--phase6-bg-app) !important;
       border: 1px solid #3f3f46 !important;
       color: #f4f4f5 !important;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
@@ -1726,6 +1780,18 @@ html[data-theme="dark"] {
   /*  FASE 6: TIME REPORT, CARGA DE ACTIVIDADES, REPORTES Y DASHBOARD  */
   /* ═════════════════════════════════════════════════════════════════ */
 
+  --phase6-bg-app: #18181b;
+  --phase6-bg-panel: #182235;
+  --phase6-bg-card: #27272A;
+  --phase6-bg-surface: #202124;
+  --phase6-bg-hover: #334155;
+  --phase6-border: #3f3f46;
+  --phase6-text: #f8fafc;
+  --phase6-text-secondary: #cbd5e1;
+  --phase6-text-muted: #94a3b8;
+  --phase6-primary: #60a5fa;
+  --phase6-primary-hover: #93c5fd;
+
   /* ── 1. Actividades y Calendario ────────────────────────────────── */
   .actividades-page,
   .actividades-container,
@@ -1733,8 +1799,8 @@ html[data-theme="dark"] {
   .metrics-bar,
   .mobile-actividades-seccion {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    //border: 1px solid var(--border-color) !important;
+    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     color: var(--text-main) !important;
 
     .metric-value,
@@ -1752,12 +1818,12 @@ html[data-theme="dark"] {
   }
 
   .btn-agregar {
-    background-color: #163572 !important;
-    color: #ffffff !important;
-    border: 1px solid #163572 !important;
+    background-color: var(--phase6-primary) !important;
+    color: #0f172a !important;
+    border: 1px solid var(--phase6-primary) !important;
 
     &:hover {
-      background-color: #122d63 !important;
+      background-color: var(--phase6-primary-hover) !important;
     }
   }
 
@@ -1771,10 +1837,211 @@ html[data-theme="dark"] {
     }
   }
 
+  .actividades-page,
+  .actividades-container,
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .report-wrapper,
+  .dashboard-container {
+    color: var(--phase6-text) !important;
+  }
+
+  .actividades-page,
+  .actividades-container,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .seguimiento-page,
+  .seguimiento-container,
+  .dashboard-container {
+    background-color: var(--phase6-bg-app) !important;
+  }
+
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .filters-card,
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28) !important;
+  }
+
+  .actividad-card,
+  .no-actividades-msg,
+  .horas-badge,
+  .actividad-horas-badge {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .actividad-card:hover {
+    background-color: var(--phase6-bg-hover) !important;
+    border-color: var(--phase6-primary) !important;
+  }
+
+  .actividad-card .actividad-proyecto,
+  .actividad-card .actividad-desc,
+  .no-actividades-msg,
+  .horas-badge {
+    color: var(--phase6-text-secondary) !important;
+  }
+
+  .actividad-card .actividad-card-footer {
+    color: var(--phase6-text-muted) !important;
+    border-top-color: var(--phase6-border) !important;
+  }
+
+  .actividad-card .actividad-horas-badge {
+    color: var(--phase6-primary-hover) !important;
+    background-color: rgba(96, 165, 250, 0.14) !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.green,
+  .metrics-bar .metric-icon-wrap.purple,
+  .metrics-bar .metric-icon-wrap.orange {
+    background-color: var(--phase6-bg-surface) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.purple {
+    color: var(--phase6-primary) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.green { color: #4ade80 !important; }
+  .metrics-bar .metric-icon-wrap.orange { color: #fbbf24 !important; }
+
+  .metrics-bar .metric-value,
+  .metrics-bar .metric-name { color: var(--phase6-text) !important; }
+  .metrics-bar .metric-desc { color: var(--phase6-text-muted) !important; }
+
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .report-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    background-color: var(--phase6-bg-panel) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .data-table,
+  .report-table,
+  .seguimiento-table,
+  .donut-table {
+    background-color: var(--phase6-bg-panel) !important;
+
+    th,
+    thead,
+    thead th {
+      background-color: var(--phase6-bg-surface) !important;
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    td {
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    tr:hover,
+    tbody tr:hover {
+      background-color: rgba(96, 165, 250, 0.08) !important;
+    }
+  }
+
+  .search-input-wrapper,
+  .date-controls,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select,
+  .btn-clear {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .search-input-wrapper input,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select {
+    color: var(--phase6-text) !important;
+
+    &::placeholder {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
+  .filter-label,
+  .filter-icon,
+  .filter-icon-right,
+  .date-controls label,
+  .stats-label,
+  .metrica-label {
+    color: var(--phase6-text-muted) !important;
+  }
+
+  .stats-value,
+  .metrica-valor,
+  .font-bold,
+  .text-dark,
+  .text-highlight {
+    color: var(--phase6-text) !important;
+  }
+
+  .page-title,
+  .dashboard-header h1,
+  .report-title,
+  .month-year-label,
+  .card-header h2,
+  .carousel-title,
+  .stat-value,
+  .donut-center-value {
+    color: var(--phase6-primary-hover) !important;
+  }
+
+  .proximamente-card .project-item,
+  .project-hours-badge,
+  .collaborator-card {
+    background-color: var(--phase6-bg-card) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .card-header-carousel,
+  .drawer-panel .drawer-header {
+    background-color: var(--phase6-bg-surface) !important;
+    border-bottom-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .bar-column {
+    background-color: var(--phase6-bg-hover) !important;
+  }
+
+  .grafico-card .bar-column:hover {
+    background-color: #475569 !important;
+  }
+
+  .grafico-card .grafico-stats,
+  .grafico-card .donut-table th,
+  .grafico-card .donut-table td {
+    border-color: var(--phase6-border) !important;
+  }
+
   /* ── 2. Seguimiento ─────────────────────────────────────────────── */
   .seguimiento-page,
   .seguimiento-container {
-    background-color: var(--bg-app) !important;
+    background-color: var(--phase6-bg-app) !important;
     color: var(--text-main) !important;
 
     .header-title, h1, h2 {
@@ -1842,6 +2109,7 @@ html[data-theme="dark"] {
       thead, th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
+        font-weight: bolder !important;
         border-bottom: 1px solid var(--border-color) !important;
       }
 
@@ -1876,7 +2144,100 @@ html[data-theme="dark"] {
     }
   }
 
+  /* Modal Generar Reporte */
+  .modal-wrap {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .modal-title {
+      color: var(--primary-color) !important;
+    }
+
+    .empleado-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .empleado-value {
+      color: var(--text-main) !important;
+    }
+
+    .mat-mdc-form-field {
+      --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+      --mdc-outlined-text-field-input-text-color: var(--text-main);
+      --mdc-outlined-text-field-outline-color: var(--input-border);
+      --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
+      --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+      --mat-select-enabled-trigger-text-color: var(--text-main);
+      --mat-select-enabled-arrow-color: var(--text-secondary);
+      --mat-select-focused-arrow-color: var(--primary-color);
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--input-border) !important;
+      }
+
+      &:hover .mdc-notched-outline__leading,
+      &:hover .mdc-notched-outline__notch,
+      &:hover .mdc-notched-outline__trailing {
+        border-color: var(--text-secondary) !important;
+      }
+
+      &.mat-focused .mdc-notched-outline__leading,
+      &.mat-focused .mdc-notched-outline__notch,
+      &.mat-focused .mdc-notched-outline__trailing {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-placeholder {
+        color: var(--text-main) !important;
+      }
+
+      .mat-mdc-select-arrow {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
   /* Calendario Grid & Controles */
+  .calendar-wrapper {
+    background-color: var(--bg-card) !important;
+    color: var(--phase6-text) !important;
+
+    .calendar-topbar {
+      color: var(--phase6-text) !important;
+    }
+
+    .month-title-wrap {
+      color: var(--phase6-text) !important;
+
+      .month-select {
+        color-scheme: dark;
+
+        option {
+          background-color: var(--phase6-bg-surface) !important;
+          color: var(--phase6-text) !important;
+        }
+      }
+    }
+
+    .month-year-label {
+      color: var(--phase6-primary-hover) !important;
+    }
+
+    .dropdown-chevron,
+    .legend {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
   .calendar-grid {
     border-color: var(--border-color) !important;
 
@@ -1915,7 +2276,12 @@ html[data-theme="dark"] {
     }
 
     .day-number {
-      color: var(--text-secondary) !important;
+      color: var(--phase6-text-secondary) !important;
+    }
+
+    .day-cell-header,
+    .day-hours-block {
+      color: var(--phase6-text) !important;
     }
 
     .day-hours-text.blue-text {
@@ -1992,6 +2358,18 @@ html[data-theme="dark"] {
       }
     }
 
+    .actividad-modal__help {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: rgba(59, 130, 246, 0.14) !important;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+      }
+    }
+
     .actividad-modal__label {
       color: var(--text-main) !important;
     }
@@ -2018,6 +2396,34 @@ html[data-theme="dark"] {
     .actividad-modal__info-icon,
     .actividad-modal__select-wrap::after {
       color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__input-wrap {
+      .actividad-modal__input-icon {
+        color: var(--text-secondary) !important;
+      }
+
+      img.actividad-modal__input-icon {
+        filter: brightness(0) saturate(100%) invert(83%) sepia(8%) saturate(450%) hue-rotate(182deg) brightness(92%) contrast(88%);
+      }
+    }
+
+    .actividad-modal__info-icon {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .actividad-modal__close {
+      img {
+        filter: brightness(0) invert(1);
+      }
+
+      &:hover img {
+        filter: brightness(0) saturate(100%) invert(65%) sepia(82%) saturate(1700%) hue-rotate(190deg) brightness(102%) contrast(101%);
+      }
     }
 
     .actividad-modal__checkbox-container {
@@ -2047,6 +2453,17 @@ html[data-theme="dark"] {
       background-color: var(--bg-surface) !important;
       border: 1.5px solid var(--border-color) !important;
       color: var(--text-main) !important;
+    }
+  }
+
+  .actividad-modal__input-wrap {
+    .mat-datepicker-toggle {
+      color: var(--text-secondary) !important;
+
+      .mat-mdc-icon-button:hover {
+        color: var(--text-main) !important;
+        background-color: var(--bg-hover) !important;
+      }
     }
   }
 
@@ -2153,10 +2570,7 @@ html[data-theme="dark"] {
   /* ── 3. Reportes (Fechas & Horas) ───────────────────────────────── */
   .reporte-fechas-container,
   .reporte-horas-container,
-  .reporte-card,
-  app-reporte-fechas,
-  app-reporte-horas,
-  .report-wrapper {
+  .reporte-card {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
@@ -2431,4 +2845,30 @@ html[data-theme="dark"] {
     caret-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s !important;
   }
+      /* Override for tables to ensure dark gray #202124 instead of blue */
+  .seguimiento-page .table-scroll-container,
+  .seguimiento-page .table-wrapper,
+  .seguimiento-table,
+  app-carga-actividades .table-scroll-container,
+  app-carga-actividades .table-wrapper,
+  app-carga-actividades table,
+  app-carga-actividades .data-table {
+    background-color: #202124 !important;
+    
+    th, thead, thead th {
+      background-color: #202124 !important;
+    }
+  }
+}
+/* Override for Carga de Actividades table-card to be borderless and transparent */
+html[data-theme="dark"] app-carga-actividades .table-card,
+app-carga-actividades .table-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] app-carga-actividades,
+html[data-theme="dark"] app-carga-actividades-component {
+  background-color: #18181b !important;
 }
