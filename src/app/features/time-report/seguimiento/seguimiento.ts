@@ -15,10 +15,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 import { HttpClient } from '@angular/common/http';
+import { ActividadSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -28,6 +30,9 @@ import { PaginacionComponent } from '../../../shared/components/paginacion/pagin
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as ExcelJS from 'exceljs';
 import { lastValueFrom } from 'rxjs';
+import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+// sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
+import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 
 @Component({
     selector: 'app-seguimiento',
@@ -49,6 +54,7 @@ import { lastValueFrom } from 'rxjs';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
+        MatDialogModule,
         PaginacionComponent,
         HeaderComponent,
         HorasFormatPipe
@@ -59,6 +65,7 @@ import { lastValueFrom } from 'rxjs';
 export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
+    private dialog = inject(MatDialog);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -66,6 +73,10 @@ export class SeguimientoComponent implements AfterViewInit {
     ];
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
+    public isDownloading = false;
+    public downloadMessage = '';
+    public downloadMessageType: 'success' | 'error' | 'info' = 'info';
+    private feedbackTimer?: ReturnType<typeof setTimeout>;
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
@@ -97,7 +108,14 @@ export class SeguimientoComponent implements AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
 
     // Reactividad vía Signals desde el Servicio de Negocio
-    public metricas = computed(() => this.seguimientoService.getMetricas());
+    //public metricas = computed(() => this.seguimientoService.getMetricas());
+    //SM - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados, y si no hay selección, se muestren las métricas generales
+    get metricas(): MetricasSeguimiento {
+        if (this.selection.hasValue()) {
+            return this.seguimientoService.calcularMetricas(this.selection.selected);
+        }
+        return this.seguimientoService.getMetricas();
+    }
 
     // Ordenación manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
@@ -258,13 +276,83 @@ export class SeguimientoComponent implements AfterViewInit {
             : this.dataSource.data.forEach(row => this.selection.select(row));
     }
 
-    public async descargarSeleccionados() {
-        if (!this.selection.hasValue()) return;
+    public async descargarSeleccionados(formato: 'xlsx' | 'pdf') {
+        if (!this.selection.hasValue() || this.isDownloading) return;
+
         const seleccionados = [...this.selection.selected];
-        for (const col of seleccionados) {
-            await this.descargarDetalle(col);
+        this.isDownloading = true;
+        this.mostrarFeedback(`Preparando ${formato === 'pdf' ? 'PDF' : 'Excel'}${seleccionados.length > 1 ? ` de ${seleccionados.length} colaboradores` : ''}...`, 'info', false);
+
+        try {
+            if (seleccionados.length === 1 && formato === 'xlsx') {
+                await this.descargarDetalle(seleccionados[0], true);
+            } else {
+                await this.descargarReportesZip(seleccionados, formato);
+            }
+            this.selection.clear();
+            this.mostrarFeedback('Reportes preparados correctamente.', 'success');
+        } catch {
+            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
+        } finally {
+            this.isDownloading = false;
         }
-        this.selection.clear();
+    }
+
+    private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<void> {
+        if (formato === 'pdf') {
+            const fechaDesde = this.fechaDesde;
+            const fechaHasta = this.fechaHasta;
+            const contenido = await crearZipSeguimientoPdf(colaboradores, fechaDesde, fechaHasta, async id => {
+                const respuesta = await lastValueFrom(this.http.get<{ actividades: ActividadSeguimientoPdf[] }>(
+                    `${environment.apiUrl}/time-report/seguimiento/colaborador/${id}/actividades`,
+                    { params: { fechaDesde, fechaHasta } },
+                ));
+                return respuesta.actividades;
+            });
+            const url = URL.createObjectURL(new Blob([contenido], { type: 'application/zip' }));
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_PDF_${fechaDesde}_a_${fechaHasta}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return;
+        }
+        // Excel conserva la descarga múltiple del servidor.
+        const endpoint = environment.apiUrl + '/time-report/seguimiento/descarga-multiple';
+        const response = await lastValueFrom(this.http.post(endpoint, {
+            ids: colaboradores.map(col => Number(col.id)),
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            formato
+        }, { observe: 'response', responseType: 'blob' }));
+
+        if (!response.body || response.body.size === 0) {
+            throw new Error('El servidor no devolvió un ZIP válido.');
+        }
+
+        if (response.headers.get('Content-Type')?.toLowerCase().split(';')[0] !== 'application/zip') {
+            throw new Error(`El servidor no devolvió un ZIP ${formato.toUpperCase()}.`);
+        }
+
+        const url = window.URL.createObjectURL(response.body);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    private mostrarFeedback(message: string, type: 'success' | 'error' | 'info', autoHide = true): void {
+        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
+        this.downloadMessage = message;
+        this.downloadMessageType = type;
+        if (autoHide) {
+            this.feedbackTimer = setTimeout(() => {
+                this.downloadMessage = '';
+            }, 4500);
+        }
     }
 
     public async descargarSeguimientoColaborador(col: Colaborador) {
@@ -616,7 +704,17 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    public async descargarDetalle(col: Colaborador) {
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
+    public verCalendarioColaborador(col: Colaborador): void {
+        this.dialog.open(CalendarioColaboradorModal, {
+            data: { colaborador: col },
+            width: '900px',
+            maxHeight: '90vh',
+            panelClass: 'tmr-dialog-panel'
+        });
+    }
+
+    public async descargarDetalle(col: Colaborador, propagarError = false) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
             const res = await lastValueFrom(
@@ -630,6 +728,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
             if (!rawActividades || rawActividades.length === 0) {
                 console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                if (propagarError) throw new Error(`No hay actividades registradas para ${col.nombre} en este rango.`);
                 return;
             }
 
@@ -969,6 +1068,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
         } catch (error) {
             console.error(`Error descargando el detalle de ${col.nombre}:`, error);
+            if (propagarError) throw error;
         }
     }
 
@@ -1043,3 +1143,5 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 }
+
+//comentario de prueba
