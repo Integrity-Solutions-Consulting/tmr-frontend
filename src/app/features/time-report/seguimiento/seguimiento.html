@@ -18,14 +18,19 @@
     </app-header>
 
     <!-- ===== METRICS BAR ===== -->
-    <div class="metrics-bar">
+    <!-- sm - La barra de métricas siempre está visible (sin saltos). Queda "en blanco" (con guion y atenuada) si no hay
+         colaboradores seleccionados o si están seleccionados todos; con uno o varios (no todos) muestra sus métricas. -->
+    <div class="metrics-bar" [class.metrics-bar--blank]="metricasEnBlanco">
         <div class="metric-item">
             <div class="metric-icon-wrap blue">
                 <img class="metric-icon-img blue-icon"
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas.horasPendientes | horasFormat }}</span>
+                <!-- sm - "@for" con un solo valor: al cambiar el texto se vuelve a crear el span y se reproduce la animación de entrada. -->
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasPendientes | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Horas por registrar</span>
                 <span class="metric-desc">Pendientes por completar</span>
             </div>
@@ -36,7 +41,9 @@
                 <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas.horasRegistradas | horasFormat }}</span>
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasRegistradas | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Horas registradas</span>
                 <span class="metric-desc">Total del periodo</span>
             </div>
@@ -48,12 +55,15 @@
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas.promedioPorDia | horasFormat }}</span>
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.promedioPorDia | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Promedio por día</span>
                 <span class="metric-desc">Horas registradas</span>
             </div>
         </div>
-
+    <!-- Ocultamiento de Iconos de Proyectos y Colaboradores -->
+    <!-- 
         <div class="metric-item">
             <div class="metric-icon-wrap orange">
                 <img class="metric-icon-img orange-icon"
@@ -64,9 +74,9 @@
                 <span class="metric-name">Colaboradores activos</span>
                 <span class="metric-desc">Con reporte en el periodo</span>
             </div>
-        </div>
+        </div> -->
 
-        <div class="metric-item">
+        <!-- <div class="metric-item">
             <div class="metric-icon-wrap gray">
                 <img class="metric-icon-img gray-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
                     alt="proyectos" />
@@ -76,7 +86,13 @@
                 <span class="metric-name">Proyectos</span>
                 <span class="metric-desc">Con actividades</span>
             </div>
-        </div>
+        </div> -->
+
+        <!-- sm - Texto de ayuda del estado en blanco; siempre ocupa su lugar y solo cambia su opacidad para no mover la barra. -->
+        <span class="metrics-hint" [class.visible]="metricasEnBlanco" [attr.aria-hidden]="!metricasEnBlanco">
+            <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+            Selecciona uno o varios colaboradores para ver sus métricas
+        </span>
     </div>
 
     <!-- ===== FILTER BAR ===== -->
@@ -141,6 +157,34 @@
             </button>
         </mat-menu>
     </div>
+
+    <!-- sm - Toast animado de descarga de seleccionados: reemplaza el mensaje "Preparando..." con título, barra de progreso y botón Cancelar. -->
+    <!-- sm - Con "warning" (varios colaboradores y algunos sin actividades) cambia el icono y el acento a advertencia. -->
+    <section *ngIf="progresoDescarga.visible" class="download-progress-toast" [class.closing]="progresoDescarga.cerrando"
+        [class.warning]="progresoDescarga.conAviso" role="status" aria-live="polite">
+        <div class="download-progress-header">
+            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">{{ progresoDescarga.conAviso ? 'info' : 'cloud_download' }}</span>
+            <span class="download-progress-title">{{ progresoDescarga.titulo }}</span>
+        </div>
+        <div class="download-progress-body">
+            <div class="download-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                [attr.aria-valuenow]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"
+                [attr.aria-label]="progresoDescarga.titulo">
+                <div class="download-progress-fill" [class.indeterminate]="progresoDescarga.indeterminado"
+                    [style.width.%]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"></div>
+            </div>
+            <div class="download-progress-labels">
+                <span>{{ progresoDescarga.detalle }}</span>
+                <span *ngIf="!progresoDescarga.indeterminado" class="download-progress-percent">{{ progresoDescarga.progreso }}%</span>
+            </div>
+        </div>
+        <div class="download-progress-actions">
+            <button type="button" class="download-progress-cancel" (click)="cancelarDescarga()"
+                [disabled]="progresoDescarga.progreso >= 100 || progresoDescarga.detalle === 'Cancelando...'">
+                Cancelar
+            </button>
+        </div>
+    </section>
 
     <div *ngIf="downloadMessage" class="download-feedback" [class.success]="downloadMessageType === 'success'"
         [class.error]="downloadMessageType === 'error'" [class.info]="downloadMessageType === 'info'" role="status">

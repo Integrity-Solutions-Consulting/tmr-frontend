@@ -323,6 +323,158 @@
     &.error { color: #b91c1c; background: #fef2f2; }
 }
 
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+.download-progress-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 16px 18px 14px;
+    border-radius: 12px;
+    background: rgba(#163572, 0.94);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+    transform: translateX(-50%);
+    animation: seguimiento-toast-in 0.25s ease-out;
+
+    &.closing {
+        animation: seguimiento-toast-out 0.2s ease-in forwards;
+    }
+
+    // sm - Estado de advertencia: descarga completada pero con colaboradores sin actividades (barra y borde en ámbar).
+    &.warning {
+        border-left: 4px solid #f59e0b;
+
+        .download-progress-icon {
+            color: #fbbf24;
+            animation: none;
+        }
+
+        .download-progress-fill {
+            background: #fbbf24;
+        }
+    }
+}
+
+.download-progress-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.download-progress-icon {
+    font-size: 24px;
+    color: #ffffff;
+    animation: seguimiento-icon-pulse 1.4s ease-in-out infinite;
+}
+
+.download-progress-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.download-progress-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.download-progress-track {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+}
+
+.download-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: #ffffff;
+    transition: width 0.3s ease;
+
+    // sm - Barra indeterminada: un segmento que se desliza mientras el servidor genera el archivo.
+    &.indeterminate {
+        position: absolute;
+        width: 40%;
+        animation: seguimiento-progress-indeterminate 1.2s ease-in-out infinite;
+    }
+}
+
+.download-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.download-progress-percent {
+    font-variant-numeric: tabular-nums;
+}
+
+.download-progress-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.download-progress-cancel {
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    background: transparent;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+@keyframes seguimiento-toast-in {
+    from { opacity: 0; transform: translate(-50%, -12px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes seguimiento-toast-out {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, -12px); }
+}
+
+@keyframes seguimiento-progress-indeterminate {
+    from { left: -40%; }
+    to { left: 100%; }
+}
+
+@keyframes seguimiento-icon-pulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(2px); }
+}
+
+// sm - Respeta la preferencia de "reducir movimiento" del sistema operativo.
+@media (prefers-reduced-motion: reduce) {
+    .download-progress-toast,
+    .download-progress-icon,
+    .download-progress-fill.indeterminate {
+        animation: none;
+    }
+}
+
 @keyframes seguimiento-spin {
     to { transform: rotate(360deg); }
 }
@@ -586,6 +738,71 @@
 
 
 /* ---- METRICS BAR ---- */
+// sm - Estado "en blanco" de la barra de métricas (sin selección o con todos seleccionados):
+// la barra no se oculta (evita el salto de la tabla); los valores muestran guion y todo se atenúa suavemente.
+.metrics-bar {
+    .metric-icon-wrap,
+    .metric-value {
+        transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    // sm - Cada vez que cambia un valor, el span se vuelve a crear (ver @for en el HTML) y entra con esta animación.
+    .metric-value {
+        animation: seguimiento-metric-in 0.3s ease-out;
+    }
+
+    &.metrics-bar--blank {
+        .metric-icon-wrap {
+            opacity: 0.45;
+            filter: grayscale(1);
+        }
+
+        // sm - Se usa opacidad (no color) para que también funcione en tema oscuro, donde el color del valor se fuerza con !important.
+        .metric-value {
+            opacity: 0.4;
+        }
+    }
+}
+
+// sm - Texto de ayuda del estado en blanco: siempre reserva su espacio y solo cambia de opacidad, así la barra no se mueve.
+.metrics-hint {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+
+    .material-symbols-outlined {
+        font-size: 18px;
+        color: #163572;
+    }
+
+    &.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@keyframes seguimiento-metric-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { transform: translateY(0); }
+}
+
+// sm - Sin animaciones si el sistema tiene activado "reducir movimiento".
+@media (prefers-reduced-motion: reduce) {
+    .metrics-bar .metric-icon-wrap,
+    .metrics-bar .metric-value,
+    .metrics-hint {
+        transition: none;
+        animation: none;
+    }
+}
+
 .metrics-bar {
     background: white;
     border-radius: 10px;

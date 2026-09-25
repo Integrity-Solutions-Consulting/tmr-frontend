@@ -1,6 +1,8 @@
 @use '@angular/material' as mat;
 @use 'styles/variables' as *;
 @use 'styles/shared-components';
+// sm - Estilos de los pop ups de SweetAlert2 con el diseño de los modales de TMR.
+@use 'styles/sweetalert';
 
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

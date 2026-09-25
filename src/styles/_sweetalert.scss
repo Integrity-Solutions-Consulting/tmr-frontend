@@ -1,0 +1,125 @@
+// sm - Estilos globales para los pop ups de SweetAlert2 con el diseño de los modales de TMR.
+// Van en estilos globales porque SweetAlert2 inserta el pop up directamente en el <body>,
+// fuera del encapsulamiento de los componentes. Se aplican solo con customClass "tmr-swal".
+
+// sm - Fondo oscurecido igual que .modal-overlay de la app.
+.swal2-container.tmr-swal-container.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+// sm - Tarjeta: mismo tamaño, radio y sombra que .modal-card (modal de eliminar actividad).
+.swal2-popup.tmr-swal {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-family: 'Inter', sans-serif;
+  gap: 0;
+}
+
+// sm - Icono: círculo celeste con borde azul y Material Symbol, como .modal-icon.
+.swal2-icon.tmr-swal__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border: 2px solid #163572 !important;
+  border-radius: 50%;
+  background: #EEF3FB;
+  color: #163572 !important;
+
+  .swal2-icon-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // sm - Icono del calendario con la "x" (event_busy) en rojo; el círculo y su borde se mantienen en azul.
+  .material-symbols-outlined {
+    font-size: 32px;
+    color: #dc2626;
+  }
+}
+
+// sm - Título: 18px, negrita, color de texto principal.
+.swal2-title.tmr-swal__title {
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+// sm - Mensaje: 14px gris, con el nombre y las fechas resaltados.
+.swal2-html-container.tmr-swal__text {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7280;
+
+  strong {
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+}
+
+.swal2-actions.tmr-swal__actions {
+  width: 100%;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+// sm - Botón primario: igual al botón principal de los modales (#163572, 40px de alto, radio 8px).
+.tmr-swal__btn-primary {
+  flex: 1;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #163572;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #162C56; }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.3);
+  }
+}
+
+// sm - Tema oscuro: mismos colores que usa la app para .modal-card en html[data-theme="dark"].
+html[data-theme="dark"] {
+  .swal2-container.tmr-swal-container.swal2-backdrop-show {
+    background: rgba(0, 0, 0, 0.65);
+  }
+
+  .swal2-popup.tmr-swal {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .swal2-icon.tmr-swal__icon {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: #3b82f6 !important;
+
+    // sm - Rojo más claro para que el icono se lea bien sobre fondo oscuro.
+    .material-symbols-outlined { color: #f87171; }
+  }
+
+  .swal2-title.tmr-swal__title { color: #f4f4f5; }
+
+  .swal2-html-container.tmr-swal__text {
+    color: #a1a1aa;
+
+    strong { color: #f4f4f5; }
+  }
+
+  .tmr-swal__btn-primary:hover { background: #122d63; }
+}
