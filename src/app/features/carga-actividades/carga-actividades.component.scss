@@ -1,8 +1,8 @@
 @use "sass:color";
 $white: #ffffff;
-$primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted: #64748b;
+$primary-color: #163572; $bg-color: #f3f4f6; $border-color: #e5e7eb; $text-muted: #6b7280;
 
-.dashboard-container { padding: 2rem; background-color: $bg-color; min-height: 100vh; font-family: sans-serif; }
+.dashboard-container { padding: 2rem; background-color: $bg-color; min-height: 100vh; font-family: 'Inter', sans-serif; }
 .header-main-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; 
   .page-title { color: $primary-color; font-size: 1.8rem; font-weight: 800; margin: 0; }
 }
@@ -44,16 +44,92 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  font-family: 'Inter', sans-serif;
+  color: #cbd5e1;
+
+  .material-icons {
+    color: #cbd5e1;
+  }
+
   .search-input-wrapper { 
     flex: 0 1 350px; 
     min-width: 250px;
+    background: transparent;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    border-radius: 8px;
+    padding: 0 1rem;
+    height: 44px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    input {
+      color: #cbd5e1;
+      font-family: 'Inter', sans-serif;
+      height: 100%;
+      padding: 0;
+      &::placeholder { color: #cbd5e1; opacity: 0.8; }
+    }
   }
+
   .date-controls {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    border-radius: 8px;
+    padding: 0 1rem;
+    height: 44px;
+    box-sizing: border-box;
+    gap: 1.5rem;
+
+    .date-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      label { 
+        color: #cbd5e1; 
+        font-family: 'Inter', sans-serif; 
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin: 0;
+      }
+      input { 
+        color: #cbd5e1; 
+        font-family: 'Inter', sans-serif;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-size: 0.85rem;
+        color-scheme: dark; /* Makes the native calendar icon light colored */
+      }
+    }
   }
+
   .btn-secondary {
     flex-shrink: 0;
     margin-left: auto;
+    background: transparent;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    color: #cbd5e1;
+    font-family: 'Inter', sans-serif;
+    border-radius: 8px;
+    padding: 0 1.2rem;
+    height: 44px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+
+    .material-icons {
+      color: #cbd5e1;
+    }
+    
+    &:hover {
+      background: rgba(203, 213, 225, 0.1);
+      border-color: rgba(203, 213, 225, 0.5);
+    }
   }
 }
 
@@ -79,74 +155,69 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 }
 
 .table-scroll-container {
-  display: flex;
-  gap: 6px;
-  align-items: stretch;
-  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
+  overflow: auto;
+  box-shadow: none;
+  width: 100%;
   max-height: calc(100vh - 420px);
 }
 
 .table-wrapper {
-  background: $white;
-  border-radius: 10px;
-  border: 1px solid #E5E5E5;
-  overflow: hidden;
+  overflow-x: auto;
   width: 100%;
   min-height: 0;
 }
 
 .data-table {
   width: 100%;
+  min-width: 1000px;
   table-layout: auto;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 14px;
-  border-radius: 10px;
-  overflow: hidden;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
 
   thead {
-    background: $white;
-    border-bottom: 2px solid $border-color;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     position: sticky;
     top: 0;
     z-index: 2;
 
     th {
-      padding: 13px 16px;
+      padding: 14px 10px;
       text-align: left;
-      font-weight: 600;
-      color: #737373;
-      font-size: 14px;
-      white-space: normal;
-      background: $white;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: 500;
+      color: #6b7280;
+      font-size: 13px;
+      white-space: nowrap;
+      background: #ffffff;
+      user-select: none;
+      box-sizing: border-box;
     }
-
-    tr:first-child th:first-child { border-top-left-radius: 10px; }
-    tr:first-child th:last-child { border-top-right-radius: 10px; }
   }
 
   tbody {
     tr {
-      border-bottom: 1px solid $border-color;
-      transition: background 0.12s ease;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.12s;
 
       &:last-child { border-bottom: none; }
-      &:last-child td:first-child { border-bottom-left-radius: 10px; }
-      &:last-child td:last-child { border-bottom-right-radius: 10px; }
-      &:hover { background: rgba(59, 130, 246, 0.04); }
+      &:hover { background: #f9fafb; }
+      &.selected-row { background: #f3f4f6; }
     }
 
     td {
-      padding: 13px 16px;
+      padding: 14px 10px;
       color: #4b5563;
       font-weight: 400;
       vertical-align: middle;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
-      word-break: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
     }
 
     th:nth-child(1), td:nth-child(1) { width: 64px; }
@@ -314,18 +385,21 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
   .toolbar-section--row {
     justify-content: flex-start;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
   .toolbar-section .search-input-wrapper {
     min-width: 220px;
     flex: 1 1 40%;
   }
   .toolbar-section .date-controls {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     display: flex;
     gap: 0.5rem;
   }
   .toolbar-section .btn-secondary {
-    margin-left: 0.5rem;
+    margin-left: 0;
+    flex: 1 1 auto;
+    justify-content: center;
   }
   .table-scroll-container { max-height: calc(100vh - 380px); }
 }
@@ -365,6 +439,7 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
     order: 1;
     min-width: 0;
     width: 100%;
+    flex: none;
     padding: 0 0.75rem;
   }
 
@@ -421,6 +496,7 @@ $primary-color: #003366; $bg-color: #f4f7f9; $border-color: #e2e8f0; $text-muted
 
   .data-table {
     display: block;
+    min-width: 100%;
 
     thead { display: none; }
 

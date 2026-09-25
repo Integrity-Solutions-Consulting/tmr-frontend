@@ -426,24 +426,12 @@ $text-muted: #9CA3AF;
         text-overflow: clip !important;
     }
 
-    .col-proyecto {
-        /* Distribuido equitativamente */
-    }
-
-    .col-cliente {
-        /* Distribuido equitativamente */
-    }
-
-    .col-lider {
-        /* Distribuido equitativamente */
-    }
-
     .col-horas {
-        text-align: center;
+        text-align: start;
     }
 
     .col-estado {
-        text-align: center;
+        text-align: start;
     }
 
     .col-dias-reporte {
