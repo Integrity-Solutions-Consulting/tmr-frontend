@@ -391,75 +391,75 @@
 
 :host-context(html[data-theme="dark"]) {
   .modal-form {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border: 1px solid #3f3f46 ;
+    color: #f4f4f5 ;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
 
     &__header,
     &__footer {
-      border-color: #3f3f46 !important;
+      border-color: #3f3f46 ;
     }
 
     &__title,
     .modal-card__nombre {
-      color: #3b82f6 !important;
+      color: #3b82f6 ;
     }
 
     &__close {
-      color: #a1a1aa !important;
-      &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+      color: #a1a1aa ;
+      &:hover { background: #3f3f46 ; color: #ffffff ; }
     }
 
     &__btn--save {
-      background: #163572 !important;
-      color: #ffffff !important;
-      &:hover { background: #122d63 !important; }
+      background: #163572 ;
+      color: #ffffff ;
+      &:hover { background: #122d63 ; }
     }
   }
 
   .detalle-field__label {
-    color: #a1a1aa !important;
+    color: #a1a1aa ;
   }
 
   .detalle-field__value {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   /* Floating inputs y selects */
   .float-field__input,
   .float-select__input {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
 
     &:focus {
-      border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+      border-color: #3b82f6 ;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
     }
   }
 
   .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 12px center !important;
-    background-color: #202124 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
+    background-repeat: no-repeat ;
+    background-position: right 12px center ;
+    background-color: #202124 ;
   }
 
   .float-field__label,
   .float-select__label {
-    background-color: transparent !important;
-    color: #a1a1aa !important;
+    background-color: transparent ;
+    color: #a1a1aa ;
   }
 
   .float-field__input:focus ~ .float-field__label,
   .float-field__input:not(:placeholder-shown) ~ .float-field__label,
   .float-select__input:focus ~ .float-select__label,
   .float-select__label--up {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    color: #60a5fa !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    color: #60a5fa ;
   }
 }

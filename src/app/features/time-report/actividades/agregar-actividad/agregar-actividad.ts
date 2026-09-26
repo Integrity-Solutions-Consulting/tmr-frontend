@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnInit, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, Inject, inject, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -18,6 +18,7 @@ import { environment } from '../../../../../environments/environment';
 
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
+import { TourService } from '../../../../shared/services/tour.service';
 import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/modal-eliminar-actividad.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -44,12 +45,13 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
 })
-export class AgregarActividad implements OnInit {
+export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     private fb = inject(FormBuilder);
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
     private dialogRef = inject(MatDialogRef<AgregarActividad>);
     private http = inject(HttpClient);
+    private tourService = inject(TourService);
 
     public form!: FormGroup;
     public esEdicion = false;
@@ -82,6 +84,18 @@ export class AgregarActividad implements OnInit {
     public formState = toSignal(this.fb.group({}).valueChanges); // Se asignará en ngOnInit
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
+
+    iniciarTutorial(): void {
+        this.tourService.startAgregarActividadTour();
+    }
+
+    ngAfterViewInit(): void {
+        this.tourService.prepareAgregarActividadTour();
+    }
+
+    ngOnDestroy(): void {
+        this.tourService.destroyAgregarActividadTour();
+    }
 
     private formatFecha(d: Date | string | null | undefined): string {
         if (!d) return '';

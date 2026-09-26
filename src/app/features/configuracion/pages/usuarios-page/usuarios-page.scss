@@ -576,185 +576,185 @@ $hover-row:     rgba(#163572, 0.04);
 
 :host-context(html[data-theme="dark"]) {
   .page {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border-color: #3f3f46 ;
+    color: #f4f4f5 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
   }
 
   .page-title {
-    color: #3b82f6 !important;
+    color: #3b82f6 ;
   }
 
   /* Cards resumen superiores */
   .summary-card {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    border-radius: 12px ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
 
     &:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) ;
     }
   }
 
   .card-number {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   .card-label {
-    color: #a1a1aa !important;
+    color: #a1a1aa ;
   }
 
   .card-icon {
     &--total-usuarios {
-      background: rgba(249, 115, 22, 0.15) !important;
-      color: #fb923c !important;
+      background: rgba(249, 115, 22, 0.15) ;
+      color: #fb923c ;
     }
 
     &--active {
-      background: rgba(34, 197, 94, 0.15) !important;
-      color: #4ade80 !important;
+      background: rgba(34, 197, 94, 0.15) ;
+      color: #4ade80 ;
     }
 
     &--inactive {
-      background: rgba(161, 161, 170, 0.15) !important;
-      color: #a1a1aa !important;
+      background: rgba(161, 161, 170, 0.15) ;
+      color: #a1a1aa ;
     }
   }
 
   /* Buscador y Filtro Estado */
   .search-input-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
   }
 
   .search-icon {
-    filter: brightness(0) invert(1) !important;
+    filter: brightness(0) invert(1) ;
   }
 
   .search-input {
-    color: #ffffff !important;
-    background: transparent !important;
+    color: #ffffff ;
+    background: transparent ;
 
     &::placeholder {
-      color: #cbd5e1 !important;
+      color: #cbd5e1 ;
     }
   }
 
   .estado-filter-btn {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
 
     span {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     img, .estado-filter-icon {
-      filter: brightness(0) invert(1) !important;
+      filter: brightness(0) invert(1) ;
     }
 
     &:hover {
-      background-color: #27272a !important;
+      background-color: #27272a ;
     }
   }
 
   .estado-dropdown {
-    background-color: #27272a !important;
-    border-color: #3f3f46 !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    background-color: #27272a ;
+    border-color: #3f3f46 ;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
   }
 
   .estado-dropdown-item {
-    color: #f4f4f5 !important;
-    &:hover { background-color: #3f3f46 !important; }
+    color: #f4f4f5 ;
+    &:hover { background-color: #3f3f46 ; }
   }
 
   .estado-dropdown-label {
-    color: #f4f4f5 !important;
+    color: #f4f4f5 ;
   }
 
   .estado-dropdown-checkbox {
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background: #202124 ;
+    border-color: #3f3f46 ;
 
     &--active {
-      background: #163572 !important;
-      border-color: #163572 !important;
+      background: #163572 ;
+      border-color: #163572 ;
     }
   }
 
   .estado-dropdown-clear {
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #a1a1aa !important;
-    border-top-color: #3f3f46 !important;
+    background: transparent ;
+    background-color: transparent ;
+    color: #a1a1aa ;
+    border-top-color: #3f3f46 ;
 
     &:hover {
-      background-color: #3f3f46 !important;
-      background: #3f3f46 !important;
-      color: #3b82f6 !important;
+      background-color: #3f3f46 ;
+      background: #3f3f46 ;
+      color: #3b82f6 ;
     }
   }
 
   .page-create {
-    background: #163572 !important;
-    color: #ffffff !important;
-    &:hover { background: #122d63 !important; }
+    background: #163572 ;
+    color: #ffffff ;
+    &:hover { background: #122d63 ; }
   }
 
   /* Tabla de Usuarios */
   .table-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
   }
 
   .usuarios-table {
-    background-color: #202124 !important;
+    background-color: #202124 ;
 
     thead {
-      background-color: #202124 !important;
-      border-bottom-color: #3f3f46 !important;
+      background-color: #202124 ;
+      border-bottom-color: #3f3f46 ;
 
       th {
-        background-color: #202124 !important;
-        color: #a1a1aa !important;
+        background-color: #202124 ;
+        color: #a1a1aa ;
       }
     }
 
     tbody {
       tr {
-        border-bottom-color: #3f3f46 !important;
+        border-bottom-color: #3f3f46 ;
         &:hover {
-          background-color: rgba(255, 255, 255, 0.03) !important;
+          background-color: rgba(255, 255, 255, 0.03) ;
         }
       }
 
       td {
-        color: #e4e4e7 !important;
+        color: #e4e4e7 ;
       }
     }
   }
 
   .badge--role {
-    background-color: rgba(59, 130, 246, 0.15) !important;
-    border-color: rgba(59, 130, 246, 0.3) !important;
-    color: #60a5fa !important;
+    background-color: rgba(59, 130, 246, 0.15) ;
+    border-color: rgba(59, 130, 246, 0.3) ;
+    color: #60a5fa ;
   }
 
   .actions-cell {
-    background-color: #202124 !important;
-    box-shadow: -8px 0 12px rgba(32, 33, 36, 0.9) !important;
+    background-color: #202124 ;
+    box-shadow: -8px 0 12px rgba(32, 33, 36, 0.9) ;
   }
 
   .usuarios-table tbody tr:hover .actions-cell {
-    background-color: #27272a !important;
+    background-color: #27272a ;
   }
 }
