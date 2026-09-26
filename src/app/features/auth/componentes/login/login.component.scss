@@ -193,27 +193,27 @@
 
 :host-context(html[data-theme="dark"]) {
   .login-card {
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    background: #27272a ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
 
     .title {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     .form .form-group .input-field {
-      background-color: #202124 !important;
-      background: #202124 !important;
-      border-color: #3f3f46 !important;
-      color: #ffffff !important;
+      background-color: #202124 ;
+      background: #202124 ;
+      border-color: #3f3f46 ;
+      color: #ffffff ;
 
       &::placeholder {
-        color: #9ca3af !important;
+        color: #9ca3af ;
       }
 
       &:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        border-color: #3b82f6 ;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
       }
 
       /* Sobrescritura del Autofill de Chrome/Edge en modo oscuro */
@@ -221,18 +221,18 @@
       &:-webkit-autofill:hover,
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
-        -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
-        -webkit-text-fill-color: #ffffff !important;
-        caret-color: #ffffff !important;
-        transition: background-color 5000s ease-in-out 0s !important;
+        -webkit-box-shadow: 0 0 0 1000px #202124 inset ;
+        -webkit-text-fill-color: #ffffff ;
+        caret-color: #ffffff ;
+        transition: background-color 5000s ease-in-out 0s ;
       }
     }
 
     .forgot-password a {
-      color: #60a5fa !important;
+      color: #60a5fa ;
 
       &:hover {
-        color: #93c5fd !important;
+        color: #93c5fd ;
       }
     }
   }

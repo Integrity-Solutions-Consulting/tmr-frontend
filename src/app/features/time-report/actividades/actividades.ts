@@ -56,6 +56,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { fecha: this.fechaSeleccionada },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -71,6 +73,8 @@ export class Actividades implements OnInit {
                 maxHeight: '90vh',
                 data: { fecha },
                 disableClose: true,
+                autoFocus: false,
+                restoreFocus: false,
                 panelClass: 'tmr-dialog-panel'
             });
         }
@@ -84,6 +88,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { fecha },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -96,6 +102,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { actividad },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }

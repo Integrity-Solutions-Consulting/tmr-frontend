@@ -83,6 +83,14 @@ $error-color: #dc2626;
   font-weight: 500;
 }
 
+.actividad-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.actividad-modal__help,
 .actividad-modal__close {
   display: inline-flex;
   align-items: center;
@@ -109,6 +117,20 @@ $error-color: #dc2626;
     border-color: $focus-blue;
     color: $focus-blue;
   }
+}
+
+.actividad-modal__help {
+  color: #475569;
+
+  &:hover {
+    background: #eff6ff;
+    border-color: $focus-blue;
+    color: $focus-blue;
+  }
+}
+
+.actividad-modal__close {
+  color: #0f172a;
 }
 
 /* ── Body ─────────────────────────────────────────────────────── */
@@ -207,7 +229,7 @@ $error-color: #dc2626;
   }
 
   &--date {
-    padding-right: 6px;
+    padding-right: 8px;
   }
 }
 
@@ -523,28 +545,62 @@ $error-color: #dc2626;
 }
 
 /* ── Material Datepicker Adjustments inside Wrapper ───────────────── */
-.actividad-modal__input-wrap {
-  ::v-deep {
-    .mat-datepicker-toggle {
-      color: #94a3b8;
-      
-      .mat-mdc-icon-button {
-        width: 34px;
-        height: 34px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+:host ::ng-deep .actividad-modal__input-wrap--date {
+  .mat-datepicker-toggle {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #94a3b8;
 
-        .mat-mdc-button-touch-target {
-          display: none;
-        }
+    .mat-mdc-icon-button,
+    button.mat-mdc-icon-button {
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 30px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      padding: 0 !important;
+      border-radius: 16px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+      color: inherit !important;
+      box-shadow: none !important;
+    }
 
-        &:hover {
-          color: #334155;
-          background: #f1f5f9;
-        }
-      }
+    .mat-mdc-button-touch-target,
+    .mat-mdc-button-persistent-ripple,
+    .mat-ripple,
+    .mat-ripple-element {
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 10px !important;
+      inset: 0 !important;
+    }
+
+    .mat-datepicker-toggle-default-icon {
+      display: block;
+      width: 16px !important;
+      height: 16px !important;
+      margin: 0 auto;
+      flex-shrink: 0;
+      color: inherit !important;
+      fill: currentColor !important;
+    }
+
+    &:hover .mat-mdc-icon-button {
+      color: #334155 !important;
+      background: transparent !important;
     }
   }
 }
