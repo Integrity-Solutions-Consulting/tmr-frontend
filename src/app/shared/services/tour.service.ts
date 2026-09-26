@@ -59,7 +59,6 @@ export class TourService {
     this.agregarActividadTour.addSteps([
       {
         id: 'intro',
-        attachTo: { element: '.actividad-modal__header', on: 'right-start' },
         title: 'Guía para registrar una actividad',
         text: 'Esta guía te mostrará paso a paso cómo registrar una actividad.',
         buttons: [
@@ -88,27 +87,33 @@ export class TourService {
         text: 'Escribe el código de la tarea o requerimiento. Si el proyecto lo tiene configurado, puede aparecer automáticamente.'
       },
       {
+        id: 'descripcion',
+        attachTo: { element: '[data-tour="descripcion"]', on: 'right' },
+        title: '4. Descripción',
+        text: 'Añade una descripción breve de la actividad realizada. Es opcional, pero ayuda a entender el trabajo registrado.'
+      },
+      {
         id: 'fecha',
         attachTo: { element: '[data-tour="fecha"]', on: 'right' },
-        title: '4. Fecha de la actividad',
+        title: '5. Fecha de la actividad',
         text: 'Selecciona el día en que realizaste la actividad. También puedes usar el icono del calendario.'
       },
       {
         id: 'horas',
         attachTo: { element: '[data-tour="horas"]', on: 'right' },
-        title: '5. Número de horas',
+        title: '6. Número de horas',
         text: 'Indica cuánto tiempo trabajaste. Puedes escribir horas completas o decimales, como 4.5.'
       },
       {
         id: 'recurrente',
         attachTo: { element: '[data-tour="recurrente"]', on: 'right' },
-        title: '6. Actividad recurrente',
+        title: '7. Actividad recurrente',
         text: 'Marca esta opción solamente si la misma actividad se repite durante varios días. Al activarla aparecerán las fechas de inicio, fin y las horas por día.'
       },
       {
         id: 'guardar',
         attachTo: { element: '[data-tour="guardar"]', on: 'right-end' },
-        title: '7. Guardar',
+        title: '8. Guardar',
         text: 'Revisa la información y presiona Guardar para registrar la actividad.',
         buttons: [
           {
