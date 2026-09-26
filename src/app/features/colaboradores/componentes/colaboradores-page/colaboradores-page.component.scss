@@ -183,29 +183,29 @@
 
 :host-context(html[data-theme="dark"]) {
   .colabs-page__wrapper {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border-color: #3f3f46 ;
+    color: #f4f4f5 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
   }
 
   .colabs-page__title {
-    color: #3b82f6 !important;
+    color: #3b82f6 ;
   }
 
   .colabs-page__btn-agregar {
-    background: #163572 !important;
-    color: #ffffff !important;
-    &:hover { background: #122d63 !important; }
+    background: #163572 ;
+    color: #ffffff ;
+    &:hover { background: #122d63 ; }
   }
 
   .confirm-card {
-    background-color: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
+    background-color: #27272a ;
+    border-color: #3f3f46 ;
+    color: #f4f4f5 ;
 
-    &__title { color: #3b82f6 !important; }
-    &__mensaje { color: #a1a1aa !important; }
+    &__title { color: #3b82f6 ; }
+    &__mensaje { color: #a1a1aa ; }
   }
 }

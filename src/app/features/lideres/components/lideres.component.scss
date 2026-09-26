@@ -973,82 +973,82 @@ $hover-row: rgba(#163572, 0.04);
 
 :host-context(html[data-theme="dark"]) {
   .summary-card {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    border-radius: 12px ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
 
     &:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) ;
     }
   }
 
   .card-number {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   .card-label {
-    color: #a1a1aa !important;
+    color: #a1a1aa ;
   }
 
   .card-icon--internal {
-    background-color: rgba(59, 130, 246, 0.15) !important;
-    background: rgba(59, 130, 246, 0.15) !important;
-    border-radius: 8px !important;
+    background-color: rgba(59, 130, 246, 0.15) ;
+    background: rgba(59, 130, 246, 0.15) ;
+    border-radius: 8px ;
 
     svg, img {
-      stroke: #60a5fa !important;
-      color: #60a5fa !important;
+      stroke: #60a5fa ;
+      color: #60a5fa ;
     }
 
     .card-svg-arrow {
-      stroke: #60a5fa !important;
+      stroke: #60a5fa ;
     }
   }
 
   .card-icon--external {
-    background-color: rgba(168, 85, 247, 0.15) !important;
-    background: rgba(168, 85, 247, 0.15) !important;
-    border-radius: 8px !important;
+    background-color: rgba(168, 85, 247, 0.15) ;
+    background: rgba(168, 85, 247, 0.15) ;
+    border-radius: 8px ;
 
     svg, img {
-      stroke: #c084fc !important;
-      color: #c084fc !important;
+      stroke: #c084fc ;
+      color: #c084fc ;
     }
 
     .card-svg-arrow {
-      stroke: #c084fc !important;
+      stroke: #c084fc ;
     }
   }
 
   .card-icon--active {
-    background-color: rgba(34, 197, 94, 0.15) !important;
-    background: rgba(34, 197, 94, 0.15) !important;
-    border-radius: 8px !important;
+    background-color: rgba(34, 197, 94, 0.15) ;
+    background: rgba(34, 197, 94, 0.15) ;
+    border-radius: 8px ;
 
     svg, img {
-      stroke: #4ade80 !important;
-      color: #4ade80 !important;
+      stroke: #4ade80 ;
+      color: #4ade80 ;
     }
 
     .card-svg-arrow {
-      stroke: #4ade80 !important;
+      stroke: #4ade80 ;
     }
   }
 
   .card-icon--inactive {
-    background-color: rgba(161, 161, 170, 0.15) !important;
-    background: rgba(161, 161, 170, 0.15) !important;
-    border-radius: 8px !important;
+    background-color: rgba(161, 161, 170, 0.15) ;
+    background: rgba(161, 161, 170, 0.15) ;
+    border-radius: 8px ;
 
     svg, img {
-      stroke: #a1a1aa !important;
-      color: #a1a1aa !important;
+      stroke: #a1a1aa ;
+      color: #a1a1aa ;
     }
 
     .card-svg-arrow {
-      stroke: #a1a1aa !important;
+      stroke: #a1a1aa ;
     }
   }
 }
