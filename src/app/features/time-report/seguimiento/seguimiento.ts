@@ -222,6 +222,11 @@ export class SeguimientoComponent implements AfterViewInit {
             }));
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
+            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, así que cualquier
+            // selección previa queda con referencias huérfanas (el checkbox del header se veía
+            // "indeterminado" y el footer de métricas podía mostrar la selección vieja). Se limpia
+            // para que la selección siempre corresponda a la data recién cargada/filtrada.
+            this.selection.clear();
         });
     }
 
@@ -311,14 +316,18 @@ export class SeguimientoComponent implements AfterViewInit {
         });
     }
 
+    // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado
+    // (rango de fechas/cliente del backend + búsqueda de texto del cliente), no solo dataSource.data
+    // (que ignora la búsqueda de texto) ni la página visible.
     public isAllSelected() {
-        return this.selection.selected.length === this.dataSource.data.length;
+        const filtrados = this.dataSource.filteredData;
+        return filtrados.length > 0 && this.selection.selected.length === filtrados.length;
     }
 
     public masterToggle() {
         this.isAllSelected()
             ? this.selection.clear()
-            : this.dataSource.data.forEach(row => this.selection.select(row));
+            : this.dataSource.filteredData.forEach(row => this.selection.select(row));
     }
 
     public async descargarSeleccionados(formato: 'xlsx' | 'pdf') {
@@ -597,108 +606,6 @@ export class SeguimientoComponent implements AfterViewInit {
     private formatearFechaPopup(fecha: string): string {
         const [anio, mes, dia] = (fecha ?? '').split('-');
         return anio && mes && dia ? `${dia}/${mes}/${anio}` : fecha;
-    }
-
-    public async descargarSeguimientoColaborador(col: Colaborador) {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Seguimiento');
-
-        const headerFill: ExcelJS.Fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF163572' }
-        };
-        const headerFont: Partial<ExcelJS.Font> = {
-            name: 'Arial',
-            size: 11,
-            bold: true,
-            color: { argb: 'FFFFFFFF' }
-        };
-
-        worksheet.mergeCells('A1:H1');
-        const titleCell = worksheet.getCell('A1');
-        titleCell.value = `Seguimiento de Colaborador - ${col.nombre}`;
-        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
-        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
-        worksheet.getRow(1).height = 30;
-
-        worksheet.mergeCells('A2:H2');
-        const subtitleCell = worksheet.getCell('A2');
-        subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
-        subtitleCell.font = { name: 'Arial', size: 10, italic: true };
-        worksheet.getRow(2).height = 20;
-
-        worksheet.addRow([]);
-
-        const headers = [
-            'Colaborador', 'Proyecto', 'Cliente', 'Líder Técnico', 'Horas Registradas', 'Seguimiento', 'Días con Reporte', 'Días a Completar'
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.height = 24;
-        headerRow.eachCell((cell) => {
-            cell.fill = headerFill;
-            cell.font = headerFont;
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
-            cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'medium' },
-                right: { style: 'thin' }
-            };
-        });
-
-        const row = worksheet.addRow([
-            col.nombre,
-            col.proyecto,
-            col.cliente,
-            col.liderTecnico,
-            Number(col.nroHoras),
-            col.estado,
-            Number(col.diasConReporte),
-            Number(col.diasACompletar)
-        ]);
-        row.height = 22;
-        
-        row.getCell(5).alignment = { horizontal: 'right' };
-        row.getCell(6).alignment = { horizontal: 'center' };
-        row.getCell(7).alignment = { horizontal: 'center' };
-        row.getCell(8).alignment = { horizontal: 'center' };
-
-        row.eachCell((cell) => {
-            cell.border = {
-                top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
-            };
-        });
-
-        worksheet.columns.forEach((column, i) => {
-            if (i === 0) column.width = 30;
-            else if (i === 1) column.width = 25;
-            else if (i === 2) column.width = 25;
-            else if (i === 3) column.width = 25;
-            else if (i === 4) column.width = 18;
-            else if (i === 5) column.width = 15;
-            else if (i === 6) column.width = 18;
-            else if (i === 7) column.width = 18;
-        });
-
-        await estandarizarCabeceraExcelExistente(
-            workbook,
-            worksheet,
-            `Seguimiento de Colaborador - ${col.nombre}`,
-            8,
-            `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`,
-        );
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Seguimiento_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
-        a.click();
-        window.URL.revokeObjectURL(url);
     }
 
     public async exportarExcel() {
