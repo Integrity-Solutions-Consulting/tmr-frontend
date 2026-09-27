@@ -46,11 +46,11 @@ export class TourService {
           {
             text: 'Atrás',
             secondary: true,
-            action() { this.back(); }
+            action: () => this.agregarActividadTour?.back()
           },
           {
             text: 'Siguiente',
-            action() { this.next(); }
+            action: () => this.agregarActividadTour?.next()
           }
         ]
       }
@@ -64,7 +64,7 @@ export class TourService {
         buttons: [
           {
             text: 'Comenzar',
-            action() { this.next(); }
+            action: () => this.agregarActividadTour?.next()
           }
         ]
       },
@@ -119,11 +119,11 @@ export class TourService {
           {
             text: 'Atrás',
             secondary: true,
-            action() { this.back(); }
+            action: () => this.agregarActividadTour?.back()
           },
           {
             text: 'Siguiente',
-            action() { this.next(); }
+            action: () => this.agregarActividadTour?.next()
           }
         ]
       },
@@ -134,7 +134,7 @@ export class TourService {
         buttons: [
           {
             text: 'Finalizar',
-            action() { this.complete(); }
+            action: () => this.agregarActividadTour?.complete()
           }
         ]
       }

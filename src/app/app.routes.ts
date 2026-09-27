@@ -99,6 +99,13 @@ export const routes: Routes = [
                 m => m.ReporteFechasComponent
               ),
           },
+          {
+            path: 'plantillas',
+            loadComponent: () =>
+              import('./features/reportes/componentes/gestor-plantillas/gestor-plantillas.component').then(
+                m => m.GestorPlantillasComponent
+              ),
+          },
         ],
       },
 
