@@ -21,7 +21,7 @@ import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
 // sm - HttpEventType/HttpResponse para leer el progreso de descarga del ZIP de Excel.
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
-import { ActividadSeguimientoPdf, DatosSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
+import { ActividadSeguimientoPdf, DatosSeguimientoPdf, crearReporteSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -30,6 +30,7 @@ import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as ExcelJS from 'exceljs';
+import JSZip from 'jszip';
 // sm - Operadores para cancelar la descarga (takeUntil) y leer su progreso (tap/filter).
 import { Observable, Subject, filter, lastValueFrom, takeUntil, tap } from 'rxjs';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
@@ -331,8 +332,12 @@ export class SeguimientoComponent implements AfterViewInit {
         try {
             // sm - Cantidad de colaboradores descargados sin actividades (solo aplica a descargas de 2 o más).
             let sinActividades = 0;
-            if (seleccionados.length === 1 && formato === 'xlsx') {
-                await this.descargarDetalle(seleccionados[0], true);
+            if (seleccionados.length === 1) {
+                if (formato === 'xlsx') {
+                    await this.descargarDetalle(seleccionados[0], true);
+                } else {
+                    await this.descargarPdfDetalle(seleccionados[0]);
+                }
             } else {
                 sinActividades = await this.descargarReportesZip(seleccionados, formato);
             }
@@ -429,7 +434,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Devuelve cuántos colaboradores del ZIP no tenían actividades, para avisarlo al final del toast.
-    private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf'): Promise<number> {
+    private async descargarReportesZip(colaboradores: Colaborador[], formato: string): Promise<number> {
         if (formato === 'pdf') {
             const fechaDesde = this.fechaDesde;
             const fechaHasta = this.fechaHasta;
@@ -467,6 +472,37 @@ export class SeguimientoComponent implements AfterViewInit {
             return sinActividades;
         }
         // Excel conserva la descarga múltiple del servidor.
+        if (formato === 'xlsx') {
+            const zip = new JSZip();
+            let sinActividades = 0;
+            for (let indice = 0; indice < colaboradores.length; indice++) {
+                if (this.descargaCancelada) throw new DescargaCanceladaError();
+                const colaborador = colaboradores[indice];
+                const contenido = await this.descargarDetalle(colaborador, true, true);
+                if (!contenido) {
+                    sinActividades++;
+                } else {
+                    const nombre = colaborador.nombre.replace(/[<>:\"/\\|?*\x00-\x1f]/g, '_').trim() || `colaborador_${indice + 1}`;
+                    zip.file(`Reporte_${nombre}.xlsx`, contenido);
+                }
+                this.actualizarProgresoDescarga(
+                    ((indice + 1) / colaboradores.length) * 90,
+                    `${indice + 1} de ${colaboradores.length} reportes generados`,
+                );
+            }
+            const contenidoZip = await zip.generateAsync({ type: 'blob' }, metadata => {
+                this.actualizarProgresoDescarga(90 + metadata.percent * 0.1, 'Comprimiendo archivos...');
+            });
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            const url = window.URL.createObjectURL(contenidoZip);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+            return sinActividades;
+        }
+
         const endpoint = environment.apiUrl + '/time-report/seguimiento/descarga-multiple';
         // sm - Se piden los eventos HTTP para mostrar en el toast el avance de la descarga del ZIP (bytes recibidos).
         const response = await this.esperarCancelable(this.http.post(endpoint, {
@@ -922,7 +958,30 @@ export class SeguimientoComponent implements AfterViewInit {
         });
     }
 
-    public async descargarDetalle(col: Colaborador, propagarError = false) {
+    private async descargarPdfDetalle(col: Colaborador): Promise<void> {
+        const fechaDesde = this.fechaDesde;
+        const fechaHasta = this.fechaHasta;
+        const respuesta = await this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
+            `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`,
+            { params: { fechaDesde, fechaHasta } },
+        ));
+        if (!respuesta.actividades || respuesta.actividades.length === 0) {
+            throw new SinActividadesError(col.nombre);
+        }
+        this.actualizarProgresoDescarga(40, 'Generando reporte PDF...');
+        const contenido = await crearReporteSeguimientoPdf(col.nombre, fechaDesde, fechaHasta, respuesta);
+        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        const url = URL.createObjectURL(new Blob([contenido], { type: 'application/pdf' }));
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Reporte_${col.nombre.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || 'colaborador'}.pdf`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    public async descargarDetalle(col: Colaborador, propagarError = false, devolverBuffer = false) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
             const peticionDetalle = this.http.get<{ actividades: any[], feriados: string[] }>(urlDetalle, {
@@ -937,6 +996,7 @@ export class SeguimientoComponent implements AfterViewInit {
             const feriados = res.feriados || [];
 
             if (!rawActividades || rawActividades.length === 0) {
+                if (devolverBuffer) return undefined;
                 // sm - Descarga individual sin actividades: si viene del botón "Descargar" se propaga para que lo maneje
                 // descargarSeleccionados; si viene del menú de la fila se muestra el pop up directamente.
                 if (propagarError) throw new SinActividadesError(col.nombre);
@@ -1270,6 +1330,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
             // Guardar archivo y disparar descarga
             const buffer = await workbook.xlsx.writeBuffer();
+            if (devolverBuffer) return buffer;
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1277,10 +1338,12 @@ export class SeguimientoComponent implements AfterViewInit {
             a.download = `Reporte_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
             a.click();
             window.URL.revokeObjectURL(url);
+            return undefined;
 
         } catch (error) {
             console.error(`Error descargando el detalle de ${col.nombre}:`, error);
             if (propagarError) throw error;
+            return undefined;
         }
     }
 

@@ -77,6 +77,7 @@ export async function crearReporteSeguimientoPdf(
       columnStyles: Object.assign({ 0: { cellWidth: 9.5, halign: 'center' }, 1: { cellWidth: 16 }, 2: { cellWidth: 20 }, 3: { cellWidth: 21 }, 4: { cellWidth: 39 }, 5: { cellWidth: 12, halign: 'center' }, [6 + fechas.length]: { cellWidth: 12, halign: 'center' } }, Object.fromEntries(fechas.map((_, i) => [6 + i, { cellWidth: 3.7, halign: 'center' }]))) as any,
       alternateRowStyles: { fillColor: [255, 255, 255] },
       didParseCell: (data: any) => {
+        if (data.section !== 'body') return;
         const esTotal = data.row.index === body.length;
         if (esTotal) {
           if (data.column.index === 0) {
