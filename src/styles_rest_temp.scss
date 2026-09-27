@@ -1,0 +1,2857 @@
+﻿
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Inter,
+    density: 0,
+  ));
+}
+
+body {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  height: 100%;
+}
+
+:root {
+  --primario:   #163572;
+  --oscuro:     #162056;
+  --secundario: #F5F5F5;
+  --borde:      #e5e7eb;
+  --texto:      #111827;
+  --texto-gris: #737373;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+/* Estilos globales de TMR Frontend - Estructura Refactorizada */
+@import url('@angular/material/prebuilt-themes/indigo-pink.css');
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   ESTILOS DE LEGACY / DASHBOARD (TraÃ­dos de Master)
+   ========================================================================== */
+
+.dashboard-container {
+  display: block;
+  padding: 2.5rem 5rem;
+  background-color: #fbfcff;
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+
+  * { box-sizing: border-box; }
+
+  .user-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .user-info {
+      font-size: 14px;
+      color: #1e293b;
+      margin: 0;
+      .user-name { font-weight: 700; color: #163572; }
+    }
+
+    .icon-badge {
+      position: relative;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      .dot-indicator {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+    }
+  }
+
+  .header-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #163572;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+  }
+
+  .stats-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+
+    .stats-icon-circle {
+      width: 38px;
+      height: 38px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #163572;
+      span { font-size: 20px; }
+    }
+
+    .stats-info {
+      .stats-label {
+        font-size: 10px;
+        color: #94a3b8;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 0.3px;
+      }
+      .stats-value {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+      }
+    }
+  }
+
+  .btn-primary {
+    background: #163572;
+    color: #fff;
+    padding: 0.8rem 1.6rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    &:hover { background: #0e244d; transform: translateY(-1px); }
+  }
+
+  .filters-bar {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+
+    .search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      span { color: #cbd5e0; font-size: 22px; }
+      input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 14px;
+        color: #475569;
+        background: transparent;
+        &::placeholder { color: #cbd5e0; }
+      }
+    }
+
+    .custom-select, .date-group {
+      border-left: 1px solid #f1f5f9;
+      padding-left: 1.5rem;
+    }
+
+    .custom-select {
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      color: #163572;
+      outline: none;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .date-group {
+      display: flex;
+      flex-direction: column;
+      label { font-size: 10px; font-weight: 800; color: #cbd5e0; margin-bottom: 3px; }
+      input { border: none; font-size: 13px; color: #475569; outline: none; background: transparent; }
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #cbd5e0;
+      border: 1.5px solid #f1f5f9;
+      padding: 0.7rem 1.4rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      &:not(:disabled) {
+        color: #163572;
+        border-color: #163572;
+        &:hover { background: #f8fafc; }
+      }
+    }
+  }
+
+  .table-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 0;
+    .empty-icon { font-size: 70px; color: #f1f5f9; margin-bottom: 1.5rem; }
+    h3 { font-size: 20px; font-weight: 800; color: #163572; margin: 0; }
+    p { font-size: 15px; color: #94a3b8; margin-top: 10px; }
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    th {
+      background: #f8fafc;
+      padding: 1.2rem 1rem;
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    td { padding: 1.2rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #475569; }
+    .colab-name { font-weight: 800; color: #163572; }
+  }
+}
+
+/* RESET GLOBAL */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* BODY */
+
+body {
+  color-scheme: light;
+  background-color: #f5f5f5;
+  color: var(--mat-sys-on-surface);
+
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 14px;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* You can add global styles to this file, and also import other style files */
+.notranslate { font-family: 'Material Icons' !important; }
+.animate-spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* â”€â”€ MatDialog panel override â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.tmr-dialog-panel .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tmr-dialog-panel .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18) !important;
+}
+
+
+/* ============================================================= */
+/*  RESPONSIVE NAVBAR â€“ HAMBURGUESA (PRUEBA) */
+/* ============================================================= */
+
+@media (max-width: 1024px) {
+  .navbar__hamburger {
+    display: block !important;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #163572;
+    margin-right: 8px;
+    z-index: 2000;
+  }
+
+  .navbar__profile-trigger,
+  .navbar__notification {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .navbar__hamburger {
+    display: none !important;
+  }
+}
+
+/* ============================================================= */
+/*  SCROLL RESPONSIVO PARA TABLAS */
+/* ============================================================= */
+
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-container .mat-table,
+.table-scroll-container table {
+  min-width: 100%;
+}
+
+/* â”€â”€ Session Expiration Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.session-expiration-dialog.cdk-overlay-pane {
+  border-radius: 30px !important;
+  overflow: hidden !important;
+}
+
+.session-expiration-dialog {
+  .mat-mdc-dialog-container {
+    border-radius: 30px !important;
+    overflow: hidden !important;
+  }
+
+  .mdc-dialog__surface {
+    border-radius: 30px !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ============================================================= */
+/*  SISTEMA GLOBAL DE TEMA OSCURO (EXCLUSIVO HTML[DATA-THEME="DARK"]) */
+/* ============================================================= */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --primario: #3b82f6;
+  --oscuro: #1e3a8a;
+  --secundario: #27272a;
+  --borde: #3f3f46;
+
+  --texto: #f4f4f5;
+  --texto-gris: #a1a1aa;
+
+  --bg-app: var(--phase6-bg-app);
+  --bg-card: var(--phase6-bg-card);
+  --bg-surface: var(--phase6-bg-surface);
+  --bg-hover: var(--phase6-bg-hover);
+
+  --text-main: var(--phase6-text);
+  --text-secondary: var(--phase6-text-secondary);
+  --text-muted: var(--phase6-text-muted);
+
+  --border-color: var(--phase6-border);
+
+  --primary-color: #3b82f6;
+  --primary-text: #ffffff;
+
+  --icon-color: #d4d4d8;
+
+  --input-bg: var(--phase6-bg-surface);
+  --input-border: var(--phase6-border);
+
+  --shadow-color: rgba(0, 0, 0, 0.5);
+
+  /* â”€â”€ Layout principal, app container & fondos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  html,
+  body,
+  .layout,
+  .layout__main,
+  .layout__content,
+  .app-layout,
+  .main-content,
+  .content-container,
+  app-app-layout,
+  app-dashboard-page,
+  app-proyectos-page,
+  app-clientes-page,
+  app-colaboradores-page,
+  app-usuarios-page,
+  app-roles-page,
+  app-feriados-page,
+  app-catalogos-page,
+  app-lideres,
+  app-actividades,
+  app-carga-actividades,
+  app-reporte-fechas,
+  app-reporte-horas {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+  }
+
+  /* â”€â”€ Headers de PÃ¡gina reutilizables (app-header) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  app-header,
+  .header-container {
+    .header-title,
+    h1 {
+      color: var(--primary-color) !important;
+    }
+
+    .header-subtitle,
+    p {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* â”€â”€ Navbar superior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .navbar {
+    background-color: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .navbar__hamburger,
+    .navbar__bell-btn,
+    .navbar__profile-btn {
+      color: var(--icon-color) !important;
+    }
+
+    .navbar__profile-text {
+      color: var(--text-secondary) !important;
+    }
+
+    .navbar__bell-dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+      color: var(--text-main) !important;
+
+      .navbar__bell-dropdown-header {
+        background-color: var(--bg-surface) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+      }
+
+      .navbar__bell-dropdown-body {
+        background-color: var(--bg-card) !important;
+      }
+
+      .navbar__bell-item {
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .navbar__bell-item-title {
+        color: var(--text-main) !important;
+      }
+
+      .navbar__bell-item-desc {
+        color: var(--text-secondary) !important;
+      }
+
+      .navbar__bell-empty-text {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ Profile Popover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .profile-popover__card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+
+    .profile-popover__user-info {
+      strong { color: var(--text-main) !important; }
+      span { color: var(--text-muted) !important; }
+    }
+
+    .profile-popover__divider {
+      border-top: 1px solid var(--border-color) !important;
+    }
+
+    .profile-popover__item {
+      color: var(--text-secondary) !important;
+
+      .material-icons {
+        color: var(--icon-color) !important;
+      }
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--primary-color) !important;
+
+        .material-icons {
+          color: var(--primary-color) !important;
+        }
+      }
+
+      &--logout {
+        color: #f87171 !important;
+
+        .material-icons {
+          color: #f87171 !important;
+        }
+
+        &:hover {
+          background-color: rgba(220, 38, 38, 0.15) !important;
+          color: #ef4444 !important;
+
+          .material-icons {
+            color: #ef4444 !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* â”€â”€ Sidebar lateral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .sidebar {
+    background-color: var(--bg-card) !important;
+    border-right: 1px solid var(--border-color) !important;
+
+    .sidebar__logo {
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .sidebar__link {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--text-main) !important;
+      }
+
+      &.active {
+        background-color: var(--bg-surface) !important;
+        color: var(--primary-color) !important;
+        border-left-color: var(--primary-color) !important;
+      }
+    }
+
+    .sidebar__group-title {
+      color: var(--text-muted) !important;
+    }
+  }
+
+  /* â”€â”€ Tarjeta de Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .login-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    color: var(--text-main) !important;
+
+    .title {
+      color: var(--text-main) !important;
+    }
+
+    input {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* â”€â”€ 1. Filtros y Buscadores Compartidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .filters-bar {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+
+    .search-input {
+      span { color: var(--icon-color) !important; }
+      input {
+        color: var(--text-main) !important;
+        &::placeholder { color: var(--text-muted) !important; }
+      }
+    }
+
+    .custom-select, .date-group {
+      border-left-color: var(--border-color) !important;
+    }
+
+    .custom-select {
+      color: var(--primary-color) !important;
+      option {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+    }
+
+    .date-group {
+      label { color: var(--text-muted) !important; }
+      input { color: var(--text-main) !important; }
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+
+      &:not(:disabled) {
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        &:hover { background: var(--bg-hover) !important; }
+      }
+    }
+  }
+
+  /* â”€â”€ 2. Tablas Compartidas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .table-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .data-table,
+  .mat-mdc-table,
+  table {
+    background: var(--bg-card) !important;
+
+    th,
+    .mat-mdc-header-cell {
+      //background: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    td,
+    .mat-mdc-cell {
+      //border-bottom: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .colab-name {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    tr:hover,
+    .mat-mdc-row:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  .empty-state {
+    .empty-icon { color: var(--border-color) !important; }
+    h3 { color: var(--text-main) !important; }
+    p { color: var(--text-muted) !important; }
+  }
+
+  /* â”€â”€ Badges de Estado (.status-badge, .seguimiento-badge, app-badge-estado) â”€â”€ */
+  .status-badge,
+  .seguimiento-badge,
+  .badge {
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &.active,
+    &.completed,
+    &.seguimiento-activo,
+    &.seguimiento-completado,
+    &.badge--completado {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      color: #4ade80 !important;
+
+      .status-dot,
+      &::before {
+        background-color: #4ade80 !important;
+      }
+    }
+
+    &.progress,
+    &.seguimiento-progreso,
+    &.badge--en-progreso {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      color: #60a5fa !important;
+
+      .status-dot,
+      &::before {
+        background-color: #60a5fa !important;
+      }
+    }
+
+    &.waiting,
+    &.seguimiento-espera,
+    &.badge--pendiente {
+      background-color: rgba(249, 115, 22, 0.2) !important;
+      border-color: rgba(249, 115, 22, 0.4) !important;
+      color: #fb923c !important;
+
+      .status-dot,
+      &::before {
+        background-color: #fb923c !important;
+      }
+    }
+
+    &.cancelled,
+    &.seguimiento-cancelado {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #f87171 !important;
+
+      .status-dot,
+      &::before {
+        background-color: #f87171 !important;
+      }
+    }
+
+    &.planning,
+    &.seguimiento-planificacion {
+      background-color: rgba(20, 184, 166, 0.2) !important;
+      border-color: rgba(20, 184, 166, 0.4) !important;
+      color: #2dd4bf !important;
+
+      .status-dot,
+      &::before {
+        background-color: #2dd4bf !important;
+      }
+    }
+
+    &.inactive,
+    &.seguimiento-inactivo {
+      background-color: rgba(161, 161, 170, 0.2) !important;
+      border-color: rgba(161, 161, 170, 0.4) !important;
+      color: #a1a1aa !important;
+
+      .status-dot,
+      &::before {
+        background-color: #a1a1aa !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 3. Angular Material Overlays & DiÃ¡logos Reutilizables â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .cdk-overlay-container,
+  body {
+    .mat-mdc-dialog-container,
+    .mat-mdc-dialog-surface,
+    .mdc-dialog__surface {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .mat-mdc-select-panel,
+    .mat-mdc-autocomplete-panel,
+    .mat-autocomplete-panel,
+    .mat-mdc-menu-panel,
+    .mat-menu-panel,
+    .mat-datepicker-content,
+    .mdc-menu-surface {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .mat-mdc-option,
+      .mat-option,
+      .mdc-list-item,
+      .mat-mdc-menu-item {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+
+        .mdc-list-item__primary-text,
+        .mat-option-text,
+        span,
+        div {
+          color: var(--text-main) !important;
+        }
+
+        &:hover,
+        &.mdc-list-item--selected,
+        &.mat-mdc-option-active,
+        &.mat-selected {
+          background-color: var(--bg-hover) !important;
+          background: var(--bg-hover) !important;
+
+          .mdc-list-item__primary-text,
+          .mat-option-text,
+          span,
+          div {
+            color: var(--primary-color) !important;
+          }
+        }
+      }
+    }
+
+    .mat-datepicker-content {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mat-calendar,
+      .mat-calendar-header,
+      .mat-calendar-content {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+
+      .mat-calendar-period-button,
+      .mat-calendar-previous-button,
+      .mat-calendar-next-button {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .mat-calendar-table-header,
+      .mat-calendar-body-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-calendar-body-cell-content {
+        color: var(--text-main) !important;
+        border-color: transparent !important;
+      }
+
+      .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .mat-calendar-body-selected {
+        background-color: var(--primary-color) !important;
+        color: #ffffff !important;
+      }
+
+      .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-calendar-body-disabled {
+        color: var(--text-muted) !important;
+      }
+
+      .mat-calendar-body-cell-container {
+        color: var(--text-main) !important;
+      }
+    }
+  }
+
+  .mat-mdc-autocomplete-panel,
+  .mat-autocomplete-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-menu-panel,
+  .mat-menu-panel,
+  .mdc-menu-surface {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .mat-mdc-option,
+    .mat-option,
+    .mdc-list-item,
+    .mat-mdc-menu-item {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mdc-list-item__primary-text,
+      .mat-option-text,
+      span,
+      div {
+        color: var(--text-main) !important;
+      }
+
+      &:hover,
+      &.mdc-list-item--selected,
+      &.mat-mdc-option-active,
+      &.mat-selected {
+        background-color: var(--bg-hover) !important;
+        background: var(--bg-hover) !important;
+
+        .mdc-list-item__primary-text,
+        .mat-option-text,
+        span,
+        div {
+          color: var(--primary-color) !important;
+        }
+      }
+    }
+  }
+
+  /* â”€â”€ MenÃº de Descarga Reutilizable (app-descarga-menu & app-descargar-menu) â”€â”€ */
+  app-descarga-menu,
+  app-descargar-menu,
+  .descarga-menu,
+  .descargar {
+    .descarga-menu__trigger,
+    .descargar__btn {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+
+      span {
+        color: #ffffff !important;
+      }
+
+      img, svg {
+        filter: brightness(0) invert(1) !important;
+        color: #ffffff !important;
+      }
+
+      &:hover,
+      &--open {
+        background: var(--bg-hover) !important;
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .descarga-menu__panel,
+    .descargar__panel {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+      color: var(--text-main) !important;
+
+      label,
+      .descargar__title {
+        color: var(--text-secondary) !important;
+      }
+
+      .descarga-menu__select {
+        background: var(--input-bg) !important;
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: #ffffff !important;
+
+        .mat-mdc-select-value,
+        .mat-mdc-select-placeholder,
+        span {
+          color: #ffffff !important;
+        }
+
+        .mat-mdc-select-arrow {
+          color: var(--text-secondary) !important;
+        }
+      }
+
+      .descarga-menu__download,
+      .descargar__option {
+        background: #163572 !important;
+        background-color: #163572 !important;
+        color: #ffffff !important;
+
+        span {
+          color: #ffffff !important;
+        }
+
+        &:hover {
+          background: #122d63 !important;
+          background-color: #122d63 !important;
+        }
+      }
+    }
+  }
+
+  .descarga-menu__select-panel {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .mat-mdc-option,
+    .mat-option {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      &:hover, &.mdc-list-item--selected {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 4. Modales EspecÃ­ficos del Sistema & Modal Base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .modal,
+  .modal-base,
+  app-modal-base .modal,
+  .mi-perfil-modal,
+  .configuracion-modal,
+  .detail-modal,
+  .confirm-dialog,
+  .confirm-modal,
+  .success-modal {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    .modal__header h2,
+    h1, h2, h3, h4 {
+      color: var(--primary-color) !important;
+    }
+
+    p, span, label {
+      color: var(--text-secondary) !important;
+    }
+
+    .mi-perfil-modal__field,
+    .detail-modal__field,
+    .info-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .mi-perfil-modal__value,
+    .detail-modal__value {
+      color: var(--text-main) !important;
+    }
+
+    .mi-perfil-modal__close,
+    .configuracion-modal__close,
+    .modal-close-btn {
+      color: var(--text-muted) !important;
+      &:hover {
+        background-color: var(--bg-hover) !important;
+        color: var(--text-main) !important;
+      }
+    }
+
+    .configuracion-modal__theme-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      &--active {
+        border-color: var(--primary-color) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 5. Inputs y Formularios Generales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    background-color: var(--input-bg) !important;
+    //order: 1px solid var(--input-border) !important;
+    color: var(--text-main) !important;
+
+    &::placeholder {
+      color: var(--text-muted) !important;
+    }
+
+    &:focus {
+      border-color: var(--primary-color) !important;
+    }
+  }
+
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  FASE 4: MÃ“DULOS PRINCIPALES (PROYECTOS, CLIENTES, COLABORADORES) */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+  /* â”€â”€ 1. Feature Proyectos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .proyectos-page {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    color: var(--text-main) !important;
+
+    .proyectos-page__header h2 {
+      color: var(--primary-color) !important;
+    }
+  }
+
+  /* Filtros de Proyectos */
+  .filtros {
+    .mat-mdc-text-field-wrapper,
+    .filtros__dropdown-wrapper {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+
+    .filtros__search-icon {
+      border-color: var(--text-secondary) !important;
+      &::after {
+        background: var(--text-secondary) !important;
+      }
+    }
+
+    .filtros__dropdown-label,
+    .mat-mdc-input-element,
+    input {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+        font-weight: 400 !important;
+      }
+    }
+
+    .filtros__dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .filtros__dropdown-option,
+    .filtros__dropdown-limpiar {
+      color: var(--text-main) !important;
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* BotÃ³n y MenÃº de Descargar */
+  .descarga-menu__trigger,
+  .btn-descargar {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    img { filter: brightness(0) invert(1); }
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  .descarga-menu__panel {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+
+    label {
+      color: var(--text-secondary) !important;
+    }
+
+    .descarga-menu__select {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+
+    .descarga-menu__download {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+  }
+
+  /* PaginaciÃ³n y Pie de Tabla (.tabla-footer, .paginacion, app-paginacion) */
+  .tabla-footer,
+  div.tabla-footer,
+  app-paginacion,
+  .paginacion,
+  div.paginacion {
+    background-color: #202124 !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    p, span, label, div {
+      color: var(--text-secondary) !important;
+    }
+
+    .paginacion__info,
+    .paginacion__pagina-info,
+    .paginacion__dots {
+      color: var(--text-secondary) !important;
+
+      strong {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .paginacion__btn {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover:not(:disabled):not(.paginacion__btn--activo) {
+        background-color: var(--bg-hover) !important;
+        background: var(--bg-hover) !important;
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+      }
+
+      &.paginacion__btn--activo,
+      &--activo {
+        background-color: #163572 !important;
+        background: #163572 !important;
+        border-color: #163572 !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  /* Modal Formulario Crear / Editar Proyecto */
+  .proyecto-form {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+
+    .proyecto-form__section {
+      background: transparent !important;
+
+      h3, .proyecto-form__subtitle {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .proyecto-form__leader-header h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-form__search,
+    .proyecto-form__date-control {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+    }
+
+    .proyecto-form__date-label {
+      background-color: var(--bg-card) !important;
+      color: var(--text-secondary) !important;
+    }
+
+    .proyecto-form__status-card,
+    .proyecto-form__leader-block,
+    .proyecto-form__leader,
+    .proyecto-form__resource {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .proyecto-form__status-card strong {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-form__actions button,
+    .proyecto-form__add,
+    .proyecto-form__section-header button {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+    }
+
+    .mat-mdc-input-element,
+    .mat-mdc-select-value,
+    input, textarea, select {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+    }
+
+    .mdc-floating-label,
+    .mat-mdc-floating-label,
+    .mdc-floating-label--float-above {
+      background-color: var(--bg-card) !important;
+      color: var(--text-secondary) !important;
+    }
+
+    .mat-datepicker-toggle {
+      color: var(--icon-color) !important;
+    }
+  }
+
+  /* Modal Detalle del Proyecto */
+  .proyecto-detalle {
+    color: var(--text-main) !important;
+
+    .proyecto-detalle__header {
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    .proyecto-detalle__title h3,
+    .proyecto-detalle strong,
+    .proyecto-detalle h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .proyecto-detalle__codigo,
+    .proyecto-detalle__header p,
+    .proyecto-detalle span {
+      color: var(--text-secondary) !important;
+    }
+
+    .proyecto-detalle__metrics div,
+    .proyecto-detalle__summary div,
+    .proyecto-detalle__leader-card,
+    .proyecto-detalle__leader-grid div,
+    .proyecto-detalle__resources-panel {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .proyecto-detalle__resources-panel {
+      .mat-expansion-panel-header-title,
+      .mat-expansion-panel-header-description {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .proyecto-detalle__table {
+      border-color: var(--border-color) !important;
+
+      th {
+        background-color: var(--bg-card) !important;
+        color: var(--text-secondary) !important;
+      }
+
+      td {
+        border-bottom-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 2. Feature Clientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .clientes-page,
+  .lista-clientes,
+  .modal-crear,
+  .modal-editar,
+  .modal-detalle,
+  .modal-descarga {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    .form-group label,
+    .detail-label,
+    .field-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .detail-value,
+    .cliente-info {
+      color: var(--text-main) !important;
+    }
+
+    .detail-card,
+    .cliente-card,
+    .form-container {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+  }
+
+  /* â”€â”€ 3. Feature Colaboradores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .colaboradores-page,
+  .cards-metricas,
+  .filtros-colaboradores,
+  .tabla-colaboradores,
+  .modal-crear-colaborador,
+  .modal-editar-colaborador,
+  .modal-detalle-colaborador,
+  .modal-registrar-salida,
+  .descargar-menu {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .modal-title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    .metric-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      
+      .metric-value { color: var(--text-main) !important; }
+      .metric-label { color: var(--text-secondary) !important; }
+    }
+
+    .detail-field,
+    .info-box,
+    .form-section {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    label, .label-text {
+      color: var(--text-secondary) !important;
+    }
+
+    .value-text {
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  FASE 5: MÃ“DULOS DE CONFIGURACIÃ“N Y LÃDERES                      */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+  /* â”€â”€ 1. Usuarios, Roles, Feriados, CatÃ¡logos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .usuarios-page,
+  .roles-page,
+  .feriados-page,
+  .catalogos-page,
+  .usuarios-form-modal,
+  .usuario-detalle-modal,
+  .roles-form-modal,
+  .feriados-form-modal,
+  .catalogos-form-modal {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    h1, h2, h3, .title, .section-title {
+      color: var(--primary-color) !important;
+    }
+
+    label, .field-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .form-section, .info-card, .detail-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+  }
+
+  /* â”€â”€ 2. Calendario de Feriados y Calendario de Actividades â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .feriados-calendar,
+  .calendario-container,
+  .calendar-wrapper,
+  .fc, .fc-theme-standard {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .fc-toolbar-title {
+      color: var(--primary-color) !important;
+    }
+
+    .fc-col-header-cell,
+    .fc-scrollgrid-section-header th {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .fc-daygrid-day,
+    .fc-day,
+    .fc-dayframe {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+
+    .fc-day-other {
+      background-color: var(--bg-app) !important;
+      opacity: 0.5;
+    }
+
+    .fc-day-today {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+  }
+
+  /* â”€â”€ 3. LÃ­deres & Modales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .lideres-page,
+  .lideres-component,
+  .lideres-container,
+  app-lideres,
+  app-modal-lider,
+  app-modal-detalle-lider,
+  app-modal-eliminar-lider,
+  .modal-lider,
+  .modal-detalle-lider,
+  .modal-eliminar-lider,
+  .modal-confirmacion,
+  .detalle-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    .page-title,
+    .modal-title,
+    .section-title,
+    .detalle-nombre,
+    .detalle-seccion-titulo,
+    h1, h2, h3, h4 {
+      color: var(--primary-color) !important;
+    }
+
+    .section-line,
+    .detalle-linea-azul {
+      background-color: var(--primary-color) !important;
+    }
+
+    .summary-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .card-number {
+        color: var(--text-main) !important;
+      }
+
+      .card-label {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .card-icon--internal {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      background: rgba(59, 130, 246, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #60a5fa !important;
+        color: #60a5fa !important;
+      }
+    }
+
+    .card-icon--external {
+      background-color: rgba(168, 85, 247, 0.15) !important;
+      background: rgba(168, 85, 247, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #c084fc !important;
+        color: #c084fc !important;
+      }
+    }
+
+    .card-icon--active {
+      background-color: rgba(34, 197, 94, 0.15) !important;
+      background: rgba(34, 197, 94, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #4ade80 !important;
+        color: #4ade80 !important;
+      }
+    }
+
+    .card-icon--inactive {
+      background-color: rgba(161, 161, 170, 0.15) !important;
+      background: rgba(161, 161, 170, 0.15) !important;
+      border-radius: 8px !important;
+
+      svg, img {
+        stroke: #a1a1aa !important;
+        color: #a1a1aa !important;
+      }
+    }
+
+    .search-input,
+    .estado-filter-wrapper,
+    .estado-select,
+    .form-input,
+    .custom-select,
+    .dropdown-search-box {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+      }
+    }
+
+    .custom-select-value,
+    .estado-texto {
+      color: #ffffff !important;
+    }
+
+    .custom-select-options,
+    .dropdown-list,
+    .estado-dropdown {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      li, .dropdown-option {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+          color: var(--primary-color) !important;
+        }
+      }
+    }
+
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border-color: var(--phase6-border) !important;
+    }
+
+    .lideres-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--phase6-bg-surface) !important;
+      }
+    }
+
+    .client-chip {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      color: #60a5fa !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .btn-primary,
+    .btn-guardar {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background-color: #122d63 !important;
+      }
+    }
+
+    .btn-outline,
+    .modal-close,
+    .detalle-close {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .detalle-info-item span,
+    .detalle-contacto-valor {
+      color: var(--text-main) !important;
+    }
+
+    .detalle-contacto-label,
+    .detalle-codigo {
+      color: var(--text-secondary) !important;
+    }
+
+    .detalle-proyectos__item {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+
+      .detalle-proyectos__item-nombre {
+        color: var(--text-main) !important;
+      }
+
+      .detalle-proyectos__item-cliente {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* Ultra-specific Overrides for Modals and Download Popovers */
+  html[data-theme="dark"] {
+    div.modal-card,
+    div.detalle-card,
+    div.descargar__panel,
+    div.descarga-menu__panel,
+    div.descarga-dropdown,
+    .modal-card,
+    .detalle-card,
+    .descargar__panel,
+    .descarga-menu__panel,
+    .descarga-dropdown {
+      background-color: var(--phase6-bg-app) !important;
+      border: 1px solid #3f3f46 !important;
+      color: #f4f4f5 !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    p.descargar__title,
+    p.descarga-titulo,
+    .descargar__title,
+    .descarga-titulo {
+      color: #a1a1aa !important;
+    }
+
+    .btn-descarga {
+      background: #163572 !important;
+      color: #ffffff !important;
+
+      &:hover {
+        background: #122d63 !important;
+      }
+    }
+  }
+
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  FASE 6: TIME REPORT, CARGA DE ACTIVIDADES, REPORTES Y DASHBOARD  */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+  --phase6-bg-app: #18181b;
+  --phase6-bg-panel: #182235;
+  --phase6-bg-card: #27272A;
+  --phase6-bg-surface: #202124;
+  --phase6-bg-hover: #334155;
+  --phase6-border: #3f3f46;
+  --phase6-text: #f8fafc;
+  --phase6-text-secondary: #cbd5e1;
+  --phase6-text-muted: #94a3b8;
+  --phase6-primary: #60a5fa;
+  --phase6-primary-hover: #93c5fd;
+
+  /* â”€â”€ 1. Actividades y Calendario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .actividades-page,
+  .actividades-container,
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion {
+    background-color: var(--bg-card) !important;
+    //border: 1px solid var(--border-color) !important;
+    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-main) !important;
+
+    .metric-value,
+    .metric-name {
+      color: var(--text-main) !important;
+    }
+
+    .metric-desc {
+      color: var(--text-muted) !important;
+    }
+
+    .metric-divider {
+      background-color: var(--border-color) !important;
+    }
+  }
+
+  .btn-agregar {
+    background-color: var(--phase6-primary) !important;
+    color: #0f172a !important;
+    border: 1px solid var(--phase6-primary) !important;
+
+    &:hover {
+      background-color: var(--phase6-primary-hover) !important;
+    }
+  }
+
+  .btn-reporte {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  .actividades-page,
+  .actividades-container,
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .report-wrapper,
+  .dashboard-container {
+    color: var(--phase6-text) !important;
+  }
+
+  .actividades-page,
+  .actividades-container,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .seguimiento-page,
+  .seguimiento-container,
+  .dashboard-container {
+    background-color: var(--phase6-bg-app) !important;
+  }
+
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .filters-card,
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28) !important;
+  }
+
+  .actividad-card,
+  .no-actividades-msg,
+  .horas-badge,
+  .actividad-horas-badge {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .actividad-card:hover {
+    background-color: var(--phase6-bg-hover) !important;
+    border-color: var(--phase6-primary) !important;
+  }
+
+  .actividad-card .actividad-proyecto,
+  .actividad-card .actividad-desc,
+  .no-actividades-msg,
+  .horas-badge {
+    color: var(--phase6-text-secondary) !important;
+  }
+
+  .actividad-card .actividad-card-footer {
+    color: var(--phase6-text-muted) !important;
+    border-top-color: var(--phase6-border) !important;
+  }
+
+  .actividad-card .actividad-horas-badge {
+    color: var(--phase6-primary-hover) !important;
+    background-color: rgba(96, 165, 250, 0.14) !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.green,
+  .metrics-bar .metric-icon-wrap.purple,
+  .metrics-bar .metric-icon-wrap.orange {
+    background-color: var(--phase6-bg-surface) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.purple {
+    color: var(--phase6-primary) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.green { color: #4ade80 !important; }
+  .metrics-bar .metric-icon-wrap.orange { color: #fbbf24 !important; }
+
+  .metrics-bar .metric-value,
+  .metrics-bar .metric-name { color: var(--phase6-text) !important; }
+  .metrics-bar .metric-desc { color: var(--phase6-text-muted) !important; }
+
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .report-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    background-color: var(--phase6-bg-panel) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .data-table,
+  .report-table,
+  .seguimiento-table,
+  .donut-table {
+    background-color: var(--phase6-bg-panel) !important;
+
+    th,
+    thead,
+    thead th {
+      background-color: var(--phase6-bg-surface) !important;
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    td {
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    tr:hover,
+    tbody tr:hover {
+      background-color: rgba(96, 165, 250, 0.08) !important;
+    }
+  }
+
+  .search-input-wrapper,
+  .date-controls,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select,
+  .btn-clear {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .search-input-wrapper input,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select {
+    color: var(--phase6-text) !important;
+
+    &::placeholder {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
+  .filter-label,
+  .filter-icon,
+  .filter-icon-right,
+  .date-controls label,
+  .stats-label,
+  .metrica-label {
+    color: var(--phase6-text-muted) !important;
+  }
+
+  .stats-value,
+  .metrica-valor,
+  .font-bold,
+  .text-dark,
+  .text-highlight {
+    color: var(--phase6-text) !important;
+  }
+
+  .page-title,
+  .dashboard-header h1,
+  .report-title,
+  .month-year-label,
+  .card-header h2,
+  .carousel-title,
+  .stat-value,
+  .donut-center-value {
+    color: var(--phase6-primary-hover) !important;
+  }
+
+  .proximamente-card .project-item,
+  .project-hours-badge,
+  .collaborator-card {
+    background-color: var(--phase6-bg-card) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .card-header-carousel,
+  .drawer-panel .drawer-header {
+    background-color: var(--phase6-bg-surface) !important;
+    border-bottom-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .bar-column {
+    background-color: var(--phase6-bg-hover) !important;
+  }
+
+  .grafico-card .bar-column:hover {
+    background-color: #475569 !important;
+  }
+
+  .grafico-card .grafico-stats,
+  .grafico-card .donut-table th,
+  .grafico-card .donut-table td {
+    border-color: var(--phase6-border) !important;
+  }
+
+  /* â”€â”€ 2. Seguimiento â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .seguimiento-page,
+  .seguimiento-container {
+    background-color: var(--phase6-bg-app) !important;
+    color: var(--text-main) !important;
+
+    .header-title, h1, h2 {
+      color: var(--primary-color) !important;
+    }
+
+    .filters-card,
+    .metrics-bar,
+    .table-scroll-container {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .filter-input,
+    .filter-select,
+    .date-input {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+        font-weight: 400 !important;
+      }
+    }
+
+    option {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+    }
+
+    .toggle-group {
+      border-color: var(--border-color) !important;
+    }
+
+    .toggle-btn {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+
+      &.active {
+        background-color: #163572 !important;
+        color: #ffffff !important;
+      }
+    }
+
+    .btn-descargar,
+    .btn-descargar.enabled {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .download-icon {
+        color: var(--text-main) !important;
+      }
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .seguimiento-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        font-weight: bolder !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  .btn-agregar {
+    background-color: #163572 !important;
+    color: #ffffff !important;
+    border: 1px solid #163572 !important;
+
+    &:hover {
+      background-color: #122d63 !important;
+    }
+  }
+
+  .btn-reporte {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  /* Modal Generar Reporte */
+  .modal-wrap {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .modal-title {
+      color: var(--primary-color) !important;
+    }
+
+    .empleado-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .empleado-value {
+      color: var(--text-main) !important;
+    }
+
+    .mat-mdc-form-field {
+      --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+      --mdc-outlined-text-field-input-text-color: var(--text-main);
+      --mdc-outlined-text-field-outline-color: var(--input-border);
+      --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
+      --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+      --mat-select-enabled-trigger-text-color: var(--text-main);
+      --mat-select-enabled-arrow-color: var(--text-secondary);
+      --mat-select-focused-arrow-color: var(--primary-color);
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--input-border) !important;
+      }
+
+      &:hover .mdc-notched-outline__leading,
+      &:hover .mdc-notched-outline__notch,
+      &:hover .mdc-notched-outline__trailing {
+        border-color: var(--text-secondary) !important;
+      }
+
+      &.mat-focused .mdc-notched-outline__leading,
+      &.mat-focused .mdc-notched-outline__notch,
+      &.mat-focused .mdc-notched-outline__trailing {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-placeholder {
+        color: var(--text-main) !important;
+      }
+
+      .mat-mdc-select-arrow {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* Calendario Grid & Controles */
+  .calendar-wrapper {
+    background-color: var(--bg-card) !important;
+    color: var(--phase6-text) !important;
+
+    .calendar-topbar {
+      color: var(--phase6-text) !important;
+    }
+
+    .month-title-wrap {
+      color: var(--phase6-text) !important;
+
+      .month-select {
+        color-scheme: dark;
+
+        option {
+          background-color: var(--phase6-bg-surface) !important;
+          color: var(--phase6-text) !important;
+        }
+      }
+    }
+
+    .month-year-label {
+      color: var(--phase6-primary-hover) !important;
+    }
+
+    .dropdown-chevron,
+    .legend {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
+  .calendar-grid {
+    border-color: var(--border-color) !important;
+
+    .day-header {
+      background-color: var(--bg-surface) !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .day-cell {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+
+      &:hover:not(.other-month) {
+        background-color: var(--bg-hover) !important;
+      }
+
+      &.weekend:not(.today):not(.holiday) {
+        background-color: #1c1d21 !important;
+      }
+
+      &.holiday {
+        background-color: rgba(34, 197, 94, 0.15) !important;
+        border-left: 2px solid #22c55e !important;
+      }
+
+      &.today {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        outline: 2px solid #f59e0b !important;
+      }
+
+      &.other-month {
+        background-color: #151619 !important;
+        opacity: 0.5;
+      }
+    }
+
+    .day-number {
+      color: var(--phase6-text-secondary) !important;
+    }
+
+    .day-cell-header,
+    .day-hours-block {
+      color: var(--phase6-text) !important;
+    }
+
+    .day-hours-text.blue-text {
+      color: #60a5fa !important;
+    }
+
+    .day-hours-text.yellow-text {
+      color: #fb923c !important;
+    }
+  }
+
+  .month-year-label {
+    color: var(--primary-color) !important;
+  }
+
+  .nav-controls .nav-btn,
+  .nav-controls .hoy-btn {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+
+    &:hover {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  /* Chips de actividad (Tipo Nacional, Local, Religioso en modo oscuro) */
+  .actividad-chip,
+  .actividad-tipo {
+    &.type-nacional {
+      color: #4ade80 !important;
+      border-color: rgba(34, 197, 94, 0.4) !important;
+      background-color: rgba(34, 197, 94, 0.2) !important;
+    }
+
+    &.type-local {
+      color: #60a5fa !important;
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      background-color: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    &.type-religioso {
+      color: #fb923c !important;
+      border-color: rgba(249, 115, 22, 0.4) !important;
+      background-color: rgba(249, 115, 22, 0.2) !important;
+    }
+  }
+
+  /* Modal Agregar Actividad */
+  .actividad-modal {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .actividad-modal__header {
+      border-bottom-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__title {
+      color: var(--primary-color) !important;
+    }
+
+    .actividad-modal__subtitle {
+      color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__close {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .actividad-modal__help {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: rgba(59, 130, 246, 0.14) !important;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .actividad-modal__label {
+      color: var(--text-main) !important;
+    }
+
+    .actividad-modal__input-wrap,
+    .actividad-modal__select {
+      background-color: var(--input-bg) !important;
+      border: 1.5px solid var(--input-border) !important;
+      color: #ffffff !important;
+    }
+
+    .actividad-modal__input,
+    .actividad-modal__textarea,
+    input, textarea, select {
+      color: #ffffff !important;
+      font-weight: 500 !important;
+    }
+
+    .actividad-modal__input::placeholder {
+      color: #cbd5e1 !important;
+    }
+
+    .actividad-modal__input-icon,
+    .actividad-modal__info-icon,
+    .actividad-modal__select-wrap::after {
+      color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__input-wrap {
+      .actividad-modal__input-icon {
+        color: var(--text-secondary) !important;
+      }
+
+      img.actividad-modal__input-icon {
+        filter: brightness(0) saturate(100%) invert(83%) sepia(8%) saturate(450%) hue-rotate(182deg) brightness(92%) contrast(88%);
+      }
+    }
+
+    .actividad-modal__info-icon {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .actividad-modal__close {
+      img {
+        filter: brightness(0) invert(1);
+      }
+
+      &:hover img {
+        filter: brightness(0) saturate(100%) invert(65%) sepia(82%) saturate(1700%) hue-rotate(190deg) brightness(102%) contrast(101%);
+      }
+    }
+
+    .actividad-modal__checkbox-container {
+      color: var(--text-main) !important;
+    }
+
+    .actividad-modal__checkmark {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+    }
+
+    .actividad-modal__recurrence-panel {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__footer {
+      border-top-color: var(--border-color) !important;
+    }
+
+    .actividad-modal__btn--save {
+      background-color: #163572 !important;
+      color: #ffffff !important;
+    }
+
+    .actividad-modal__btn--cancel {
+      background-color: var(--bg-surface) !important;
+      border: 1.5px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  .actividad-modal__input-wrap {
+    .mat-datepicker-toggle {
+      color: var(--text-secondary) !important;
+
+      .mat-mdc-icon-button:hover {
+        color: var(--text-main) !important;
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 2. Carga Actividades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .carga-actividades-container,
+  .carga-actividades-card,
+  app-carga-actividades-component,
+  app-carga-actividades {
+    background-color: var(--bg-app) !important;
+    color: var(--text-main) !important;
+
+    .page-title, h1, h2, h3 {
+      color: var(--primary-color) !important;
+    }
+
+    .stats-card,
+    .content-card,
+    .table-card,
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .stats-label { color: var(--text-secondary) !important; }
+    .stats-value { color: var(--text-main) !important; }
+    .stats-icon-circle { background-color: var(--bg-surface) !important; color: var(--primary-color) !important; }
+
+    .search-input-wrapper,
+    .date-controls {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+
+      input {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+
+        &::placeholder {
+          color: #cbd5e1 !important;
+        }
+      }
+
+      label, .material-icons {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .data-table {
+      thead, th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+
+      tr:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .font-bold {
+        color: var(--text-main) !important;
+      }
+    }
+
+    .client-tag {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+      color: #60a5fa !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .status-badge {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      color: #4ade80 !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+
+      .dot {
+        background-color: #4ade80 !important;
+      }
+    }
+
+    .upload-box, .file-dropzone {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* â”€â”€ 3. Reportes (Fechas & Horas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .reporte-fechas-container,
+  .reporte-horas-container,
+  .reporte-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    h1, h2, h3, .report-title, .title {
+      color: var(--primary-color) !important;
+    }
+
+    .report-subtitle, p {
+      color: var(--text-secondary) !important;
+    }
+
+    .metrica-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      .metrica-valor {
+        color: var(--text-main) !important;
+      }
+
+      .metrica-label {
+        color: var(--text-secondary) !important;
+      }
+    }
+
+    .filter-input,
+    .filter-select,
+    .btn-clear {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+
+      &::placeholder {
+        color: #cbd5e1 !important;
+      }
+    }
+
+    option {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+    }
+
+    .filter-label,
+    .filter-icon,
+    .filter-icon-right {
+      color: var(--text-secondary) !important;
+    }
+
+    .table-wrapper {
+      background-color: var(--bg-card) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .report-table {
+      th {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-secondary) !important;
+        border-bottom-color: var(--border-color) !important;
+      }
+
+      td {
+        color: var(--text-main) !important;
+        border-bottom-color: var(--border-color) !important;
+      }
+
+      .data-row:hover {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .text-dark {
+        color: var(--text-main) !important;
+      }
+
+      .text-highlight {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .btn-secondary,
+    .btn-pdf,
+    .btn-descargar {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 4. Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  .dashboard-container {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    color: var(--text-main) !important;
+  }
+
+  .dashboard-header {
+    h1 {
+      color: var(--primary-color) !important;
+    }
+
+    .rango-select {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* MÃ©tricas del Dashboard */
+  .metrica-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    .metrica-valor {
+      color: var(--text-main) !important;
+    }
+
+    .metrica-label {
+      color: var(--text-muted) !important;
+    }
+  }
+
+  /* PrÃ³ximos a cerrar */
+  .proximamente-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .card-header h2 {
+      color: var(--primary-color) !important;
+    }
+
+    .project-item {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+
+    .project-codigo {
+      color: var(--text-muted) !important;
+    }
+
+    .project-nombre {
+      color: var(--text-main) !important;
+    }
+
+    .project-detail-row,
+    .detail-text,
+    .detail-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    .project-hours-badge {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+
+      .hours-count {
+        color: var(--text-main) !important;
+      }
+
+      .hours-label {
+        color: var(--text-muted) !important;
+      }
+    }
+  }
+
+  /* GrÃ¡fico de horas */
+  .grafico-card {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+
+    .card-header-carousel {
+      background-color: var(--bg-card) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .carousel-title,
+    .stat-value,
+    .donut-center-value,
+    .donut-table .font-bold {
+      color: var(--primary-color) !important;
+    }
+
+    .nav-btn,
+    .stat-label,
+    .donut-center-label,
+    .donut-table th,
+    .donut-table .text-muted,
+    .bar-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .bar-column {
+      background-color: var(--bg-card) !important;
+
+      &:hover {
+        background-color: var(--bg-hover) !important;
+      }
+    }
+
+    .grafico-stats,
+    .donut-table th,
+    .donut-table td {
+      border-color: var(--border-color) !important;
+    }
+
+    .donut-table td {
+      color: var(--text-main) !important;
+    }
+  }
+
+  /* Drawer / Panel Desplegable */
+  .drawer-panel {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .drawer-header {
+      background-color: var(--bg-surface) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .drawer-title {
+      color: var(--text-main) !important;
+    }
+
+    .collaborator-card {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+
+      &.expanded {
+        background-color: var(--bg-card) !important;
+        border-color: var(--primary-color) !important;
+      }
+    }
+
+    .colab-name {
+      color: var(--text-main) !important;
+    }
+
+    .collaborator-detail {
+      background-color: var(--bg-card) !important;
+      border-top-color: var(--border-color) !important;
+    }
+
+    .day-date,
+    .day-registered {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  /* CDK MatDialog Containers & Dialog Surfaces */
+  .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+  .mat-mdc-dialog-surface {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+  }
+
+  /* Sobrescritura global del Autofill claro de navegadores en modo oscuro */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+  }
+      /* Override for tables to ensure dark gray #202124 instead of blue */
+  .seguimiento-page .table-scroll-container,
+  .seguimiento-page .table-wrapper,
+  .seguimiento-table,
+  app-carga-actividades .table-scroll-container,
+  app-carga-actividades .table-wrapper,
+  app-carga-actividades table,
+  app-carga-actividades .data-table {
+    background-color: #202124 !important;
+    
+    th, thead, thead th {
+      background-color: #202124 !important;
+    }
+  }
+}
+/* Override for Carga de Actividades table-card to be borderless and transparent */
+html[data-theme="dark"] app-carga-actividades .table-card,
+app-carga-actividades .table-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] app-carga-actividades,
+html[data-theme="dark"] app-carga-actividades-component {
+  background-color: #18181b !important;
+}

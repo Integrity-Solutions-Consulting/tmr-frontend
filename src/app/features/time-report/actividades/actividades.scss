@@ -17,7 +17,7 @@ $text-muted: #9CA3AF;
 /* ---- HEADER ---- */
 .header-right {
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 12px;
 }
 
@@ -433,4 +433,4 @@ $text-muted: #9CA3AF;
             grid-column: span 1;
         }
     }
-}
+}

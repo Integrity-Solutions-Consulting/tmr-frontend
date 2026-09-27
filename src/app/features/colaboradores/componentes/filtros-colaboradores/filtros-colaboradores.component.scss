@@ -203,82 +203,82 @@
 
 :host-context(html[data-theme="dark"]) {
   .filtros__search {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    color: #ffffff ;
   }
 
   .filtros__search-input {
-    color: #ffffff !important;
-    background: transparent !important;
+    color: #ffffff ;
+    background: transparent ;
 
     &::placeholder {
-      color: #cbd5e1 !important;
+      color: #cbd5e1 ;
     }
   }
 
   .filtros__search-icon {
-    filter: brightness(0) invert(1) !important;
+    filter: brightness(0) invert(1) ;
   }
 
   .filtros__estado-btn {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    color: #ffffff ;
 
     span {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     img, .filtros__estado-icon {
-      filter: brightness(0) invert(1) !important;
+      filter: brightness(0) invert(1) ;
     }
 
     &:hover,
     &--active {
-      background-color: #27272a !important;
-      background: #27272a !important;
+      background-color: #27272a ;
+      background: #27272a ;
     }
   }
 
   .filtros__dropdown {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
   }
 
   .filtros__dropdown-item {
-    color: #f4f4f5 !important;
+    color: #f4f4f5 ;
 
     &:hover {
-      background-color: #3f3f46 !important;
+      background-color: #3f3f46 ;
     }
   }
 
   .filtros__dropdown-label {
-    color: #f4f4f5 !important;
+    color: #f4f4f5 ;
   }
 
   .filtros__dropdown-checkbox {
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background: #202124 ;
+    border-color: #3f3f46 ;
 
     &--active {
-      background: #163572 !important;
-      border-color: #163572 !important;
+      background: #163572 ;
+      border-color: #163572 ;
     }
   }
 
   .filtros__dropdown-clear {
-    color: #a1a1aa !important;
-    border-top-color: #3f3f46 !important;
+    color: #a1a1aa ;
+    border-top-color: #3f3f46 ;
 
     &:hover {
-      background-color: #3f3f46 !important;
-      color: #3b82f6 !important;
+      background-color: #3f3f46 ;
+      color: #3b82f6 ;
     }
   }
 }

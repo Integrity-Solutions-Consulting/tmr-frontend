@@ -113,43 +113,43 @@
 
 :host-context(html[data-theme="dark"]) {
   .mi-perfil-modal {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    color: #f4f4f5 !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    color: #f4f4f5 ;
 
     &__header {
-      border-bottom-color: #3f3f46 !important;
+      border-bottom-color: #3f3f46 ;
     }
 
     &__avatar .material-icons,
     &__title {
-      color: #3b82f6 !important;
+      color: #3b82f6 ;
     }
 
     &__subtitle {
-      color: #a1a1aa !important;
+      color: #a1a1aa ;
     }
 
     &__close {
-      color: #a1a1aa !important;
-      &:hover { background: #3f3f46 !important; color: #ffffff !important; }
+      color: #a1a1aa ;
+      &:hover { background: #3f3f46 ; color: #ffffff ; }
     }
 
     &__field {
-      background-color: #202124 !important;
-      border-color: #3f3f46 !important;
+      background-color: #202124 ;
+      border-color: #3f3f46 ;
     }
 
     &__label {
-      color: #a1a1aa !important;
+      color: #a1a1aa ;
     }
 
     &__value {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     &__footer {
-      border-top-color: #3f3f46 !important;
+      border-top-color: #3f3f46 ;
     }
   }
 }
