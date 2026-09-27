@@ -1,5 +1,74 @@
-<div class="gestor-plantillas-container">
-  <h2>Administrador de Plantillas</h2>
-  <p>Desde aquí podrás gestionar las plantillas para la generación de reportes (Microservicio de Documentos).</p>
-  <!-- Espacio para la interfaz (lista de plantillas, carga de nuevas plantillas, etc.) -->
+<div class="report-wrapper">
+
+  <app-header title="Gestor de Plantillas" subtitle="Administra los documentos para la generación de reportes.">
+  </app-header>
+
+  <div class="filters-container" style="margin-top: 16px;">
+    <div class="filter-group" style="flex: 2;">
+      <label class="filter-label">Subir nueva plantilla</label>
+      <div class="filter-input-wrapper">
+        <input type="file" (change)="onFileSelected($event)" accept=".docx,.xlsx,.pdf" class="filter-input" style="padding: 8px 16px;">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <button class="btn-clear" style="width: 100%; height: 42px; background-color: #163572; color: white; font-weight: bold;" (click)="uploadTemplate()" [disabled]="!selectedFile">
+        Subir Archivo
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="uploadStatus" class="filters-container" style="margin-bottom: 16px;">
+    <div class="badge" [ngStyle]="{'background-color': uploadStatus.includes('Error') ? '#fee2e2' : '#dcfce7', 'color': uploadStatus.includes('Error') ? '#991b1b' : '#166534', 'border': 'none', 'font-size': '14px', 'padding': '8px 12px'}">
+      {{ uploadStatus }}
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white">
+      <div class="empty-content">
+        <h3>Cargando plantillas...</h3>
+      </div>
+    </div>
+  } @else if (templates.length === 0) {
+    <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white">
+      <div class="empty-content">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h3>No hay plantillas disponibles</h3>
+        <p>Sube un archivo para comenzar a generar reportes.</p>
+        <button (click)="loadTemplates()" class="btn-link">Recargar lista</button>
+      </div>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Nombre de Archivo</th>
+            <th class="text-center">Tamaño</th>
+            <th class="text-center">Última Modificación</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tmpl of templates" class="data-row">
+            <td class="font-medium text-dark">{{ tmpl.name }}</td>
+            <td class="text-center">{{ formatBytes(tmpl.size) }}</td>
+            <td class="text-center">{{ tmpl.modifiedAt | date:'medium' }}</td>
+            <td class="text-center">
+              <button class="btn-clear" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; color: #163572;">Usar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  }
+
 </div>
