@@ -63,9 +63,8 @@ export class SeguimientoService {
     // Si el backend aún no envía estos campos, se usa el cálculo anterior como respaldo.
     const tieneDatosPromedio = (colaboradores || []).some(c => c.diasLaborables != null);
     const totalDiasLaborables = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasLaborables || 0), 0);
-    const totalHorasDiasLaborables = (colaboradores || []).reduce((acc, c) => acc + Number(c.horasDiasLaborables || 0), 0);
     const promedio = tieneDatosPromedio
-      ? (totalDiasLaborables > 0 ? totalHorasDiasLaborables / totalDiasLaborables : 0)
+      ? (totalDiasLaborables > 0 ? totalRegistradas / totalDiasLaborables : 0)
       : (totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0);
     //Se actualizo calculo de promedio, para que para que el promedio sea calculado sobre los días con reporte, no sobre todos los colaboradores
     //por lo cual se agrego una nueva variable totalDiasConReporte que suma los días con reporte de todos los colaboradores
