@@ -46,9 +46,27 @@ export class SeguimientoService {
   //SM - Arreglar el cálculo de promedio para que se calcule sobre los días con reporte
   calcularMetricas(colaboradores: Colaborador[]): MetricasSeguimiento {
     const totalRegistradas = (colaboradores || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
-    const totalPendientes = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
+    // sm - Se comenta el cálculo anterior porque usaba 8 h para todos (también pasantes) y contaba días sin reporte
+    // en lugar de horas faltantes (un día con 2 h registradas contaba como completo).
+    // const totalPendientes = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
+    // sm - Nuevo cálculo: suma las "horas por registrar" que calcula el backend por colaborador (jornada 8 h o 6 h
+    // para pasantes, solo días laborables del rango sin feriados y solo los días que trabajó).
+    // Si el backend aún no envía el campo, se usa el cálculo anterior como respaldo para no mostrar 0.
+    const totalPendientes = (colaboradores || []).reduce((acc, c) =>
+      acc + (c.horasPorRegistrar != null ? Number(c.horasPorRegistrar) : Number(c.diasACompletar || 0) * 8), 0);
     const totalDiasConReporte = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasConReporte || 0), 0);
-    const promedio = totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0;
+    // sm - Se comenta el promedio anterior: dividía entre "días con reporte", que ahora son solo los días que cumplen
+    // la jornada mínima, así que el promedio saldría inflado.
+    // const promedio = totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0;
+    // sm - Nuevo promedio: horas registradas en días laborables ÷ días laborables del periodo (hasta hoy, sin fines
+    // de semana ni feriados, y solo los días que trabajó cada colaborador). Se suman los de todos los seleccionados.
+    // Si el backend aún no envía estos campos, se usa el cálculo anterior como respaldo.
+    const tieneDatosPromedio = (colaboradores || []).some(c => c.diasLaborables != null);
+    const totalDiasLaborables = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasLaborables || 0), 0);
+    const totalHorasDiasLaborables = (colaboradores || []).reduce((acc, c) => acc + Number(c.horasDiasLaborables || 0), 0);
+    const promedio = tieneDatosPromedio
+      ? (totalDiasLaborables > 0 ? totalHorasDiasLaborables / totalDiasLaborables : 0)
+      : (totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0);
     //Se actualizo calculo de promedio, para que para que el promedio sea calculado sobre los días con reporte, no sobre todos los colaboradores
     //por lo cual se agrego una nueva variable totalDiasConReporte que suma los días con reporte de todos los colaboradores
     const activos = (colaboradores || []).filter(c => Number(c.nroHoras || 0) > 0).length;
