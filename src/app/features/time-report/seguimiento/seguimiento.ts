@@ -93,9 +93,6 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
-    public downloadMessage = '';
-    public downloadMessageType: 'success' | 'error' | 'info' = 'info';
-    private feedbackTimer?: ReturnType<typeof setTimeout>;
     // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
     public progresoDescarga = {
         visible: false,
@@ -350,7 +347,6 @@ export class SeguimientoComponent implements AfterViewInit {
                 // sm - Se completa la barra al 100% antes de cerrar el toast y mostrar el mensaje de éxito.
                 await this.finalizarProgresoDescarga();
             }
-            this.mostrarFeedback('Reportes preparados correctamente.', 'success');
         } catch (error) {
             // sm - Cualquier fin anticipado (sin actividades, cancelación o error) cierra el toast de progreso.
             this.cerrarProgresoDescarga();
@@ -361,10 +357,8 @@ export class SeguimientoComponent implements AfterViewInit {
             }
             // sm - Si el usuario pulsó "Cancelar" en el toast, se informa sin tratarlo como error.
             if (error instanceof DescargaCanceladaError) {
-                this.mostrarFeedback('Descarga cancelada.', 'info');
                 return;
             }
-            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
         } finally {
             this.isDownloading = false;
         }
@@ -373,7 +367,6 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Muestra el toast de descarga. El PDF avanza por colaborador (progreso real);
     // el Excel se genera en el servidor, así que arranca con barra indeterminada hasta que llegan bytes.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
-        this.ocultarFeedback();
         this.descargaCancelada = false;
         this.progresoDescarga = {
             visible: true,
@@ -537,22 +530,6 @@ export class SeguimientoComponent implements AfterViewInit {
         // sm - En Excel el ZIP lo arma el servidor, así que los vacíos se cuentan con los datos de la tabla
         // (mismo rango de fechas): sin horas ni días con reporte = sin actividades.
         return colaboradores.filter(col => !Number(col.nroHoras) && !Number(col.diasConReporte)).length;
-    }
-
-    private mostrarFeedback(message: string, type: 'success' | 'error' | 'info', autoHide = true): void {
-        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
-        this.downloadMessage = message;
-        this.downloadMessageType = type;
-        if (autoHide) {
-            this.feedbackTimer = setTimeout(() => {
-                this.downloadMessage = '';
-            }, 4500);
-        }
-    }
-
-    private ocultarFeedback(): void {
-        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
-        this.downloadMessage = '';
     }
 
     // sm - Pop up de SweetAlert2 que avisa que el colaborador no tiene actividades en el rango de fechas seleccionado.
