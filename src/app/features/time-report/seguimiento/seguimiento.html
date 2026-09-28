@@ -237,18 +237,10 @@
                         <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>
                         <td class="col-dias-completar center">{{ el.diasACompletar }}</td>
                         <td class="col-acciones" (click)="$event.stopPropagation()">
-                            <button class="action-btn" [matMenuTriggerFor]="rowMenu">
-                                <mat-icon>more_vert</mat-icon>
+                            <button class="action-btn" type="button" (click)="verCalendarioColaborador(el)"
+                                title="Ver detalle" aria-label="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
                             </button>
-                            <mat-menu #rowMenu="matMenu">
-                                <!-- sm - Nueva opción: abre el calendario del colaborador en un modal de solo lectura -->
-                                <button mat-menu-item (click)="verCalendarioColaborador(el)">
-                                    <mat-icon>calendar_month</mat-icon> Ver detalle
-                                </button>
-                                <button mat-menu-item (click)="descargarDetalle(el)">
-                                    <mat-icon>download</mat-icon> Descargar detalle
-                                </button>
-                            </mat-menu>
                         </td>
                     </tr>
                     <tr *ngIf="totalRegistros === 0">

@@ -470,7 +470,10 @@ $text-muted: #9CA3AF;
 
 .seguimiento-table {
     width: 100%;
-    min-width: 1400px;
+    // sm - Antes 1400px fijo: obligaba a scroll horizontal incluso en pantallas de escritorio normales.
+    // Con columnas en % la tabla se reparte al 100% del contenedor; este min-width solo entra en juego
+    // (mostrando el scroll horizontal de .table-wrapper) cuando la ventana se achica de verdad.
+    min-width: 960px;
     table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
@@ -576,32 +579,50 @@ $text-muted: #9CA3AF;
         }
     }
 
+    // sm - Anchos en % (en vez de px fijos) para que las columnas se repartan al 100% del contenedor
+    // y la tabla quepa en la ventana sin scroll horizontal en pantallas normales.
     .col-nombre {
-        width: 250px !important;
+        width: 16%;
         white-space: normal !important;
         word-wrap: break-word !important;
         overflow: visible !important;
         text-overflow: clip !important;
     }
 
+    .col-proyecto {
+        width: 14%;
+    }
+
+    .col-cliente {
+        width: 12%;
+    }
+
+    .col-lider {
+        width: 13%;
+    }
+
     .col-horas {
+        width: 9%;
         text-align: start;
     }
 
     .col-estado {
+        width: 10%;
         text-align: start;
     }
 
     .col-dias-reporte {
+        width: 9%;
         text-align: center;
     }
 
     .col-dias-completar {
+        width: 9%;
         text-align: center;
     }
 
     .col-acciones {
-        width: 60px;
+        width: 48px;
         text-align: center;
         padding: 14px 4px;
     }
