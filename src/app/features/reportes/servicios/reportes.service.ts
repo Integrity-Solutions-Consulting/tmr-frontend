@@ -70,4 +70,22 @@ export class ReportesService {
       }))
     );
   }
+
+  // ==========================================================
+  // MÉTODOS PARA EL MOTOR DE PLANTILLAS
+  // ==========================================================
+
+  generarDocumento(payload: { templateName: string, format: string, data: any }): Observable<{ jobId: string }> {
+    return this.http.post<{ jobId: string }>(`${this.apiUrl}/documentos/generar`, payload);
+  }
+
+  consultarEstadoDocumento(jobId: string): Observable<{ status: string, resultUrl?: string, error?: string }> {
+    return this.http.get<{ status: string, resultUrl?: string, error?: string }>(`${this.apiUrl}/documentos/estado/${jobId}`);
+  }
+
+  descargarDocumento(filename: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/documentos/descargar/${filename}`, {
+      responseType: 'blob'
+    });
+  }
 }

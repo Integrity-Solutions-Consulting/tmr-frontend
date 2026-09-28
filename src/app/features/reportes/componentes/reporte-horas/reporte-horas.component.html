@@ -4,7 +4,8 @@
     <app-descargar-menu 
       [disabled]="datosFiltrados().length === 0"
       (descargarPDF)="exportarPDF()" 
-      (descargarExcel)="exportarExcel()">
+      (descargarExcel)="exportarExcel()"
+      (descargarWord)="exportarWord()">
     </app-descargar-menu>
   </app-header>
 

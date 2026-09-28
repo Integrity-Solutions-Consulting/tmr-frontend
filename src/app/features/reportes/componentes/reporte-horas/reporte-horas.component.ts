@@ -160,49 +160,18 @@ export class ReporteHorasComponent {
   }
 
   async exportarExcel() {
-    const filtros = {
-      cliente: this.busquedaCliente() || undefined,
-      mes: this.mesSeleccionado() || undefined,
-      anio: this.anioSeleccionado() || undefined
-    };
-
-    const total = this.totalItems();
-    if (total === 0) return;
-
-    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
-
-        await exportarReporteExcel({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar Excel:', err)
-    });
+    this.generarDocumentoMotor('xlsx');
   }
 
   async exportarPDF() {
+    this.generarDocumentoMotor('pdf');
+  }
+
+  async exportarWord() {
+    this.generarDocumentoMotor('docx');
+  }
+
+  private generarDocumentoMotor(formato: 'pdf' | 'xlsx' | 'docx') {
     const filtros = {
       cliente: this.busquedaCliente() || undefined,
       mes: this.mesSeleccionado() || undefined,
@@ -213,35 +182,70 @@ export class ReporteHorasComponent {
     if (total === 0) return;
 
     this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
+      next: (res) => {
         const data = res.data || [];
         if (data.length === 0) return;
 
-        await exportarReportePdf({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
+        // Formatear datos para Carbone
+        const payload = {
+          templateName: formato === 'xlsx' ? 'reporte_horas.xlsx' : 'reporte_horas.docx',
+          format: formato,
+          data: {
+            titulo: 'Reporte de Horas por Cliente',
+            fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+            items: data.map(item => ({
+              cliente: item.cliente || '-',
+              estadoCliente: item.estadoCliente || '-',
+              mes: item.mes || '-',
+              anio: item.anio || '-',
+              recursos: item.recursos || '0',
+              horas: Number(item.horas || 0).toFixed(1)
+            }))
+          }
+        };
+
+        // 1. Solicitar generación
+        this.reportesService.generarDocumento(payload).subscribe({
+          next: (jobRes) => {
+            console.log('Generando documento...', jobRes.jobId);
+            this.pollEstadoDocumento(jobRes.jobId, formato);
+          },
+          error: (err) => console.error('Error al generar documento:', err)
         });
       },
-      error: (err) => console.error('Error al exportar PDF:', err)
+      error: (err) => console.error('Error al obtener datos:', err)
     });
+  }
+
+  private pollEstadoDocumento(jobId: string, formato: string) {
+    const intervalo = setInterval(() => {
+      this.reportesService.consultarEstadoDocumento(jobId).subscribe({
+        next: (statusRes) => {
+          if (statusRes.status === 'completed' && statusRes.resultUrl) {
+            clearInterval(intervalo);
+            // resultUrl: /api/reports/download/output_xxxxx.pdf
+            const filename = statusRes.resultUrl.split('/').pop()!;
+            this.reportesService.descargarDocumento(filename).subscribe({
+              next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Reporte_Horas_${new Date().getTime()}.${formato}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+              },
+              error: (err) => console.error('Error al descargar archivo:', err)
+            });
+          } else if (statusRes.status === 'failed') {
+            clearInterval(intervalo);
+            console.error('La generación del documento falló:', statusRes.error);
+          }
+        },
+        error: (err) => {
+          clearInterval(intervalo);
+          console.error('Error al consultar estado:', err);
+        }
+      });
+    }, 2000);
   }
 }

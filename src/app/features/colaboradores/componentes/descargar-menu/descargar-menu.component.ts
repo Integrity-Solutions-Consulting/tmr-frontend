@@ -12,6 +12,7 @@ export class DescargarMenuComponent {
   @Input()  disabled       = false;
   @Output() descargarPDF   = new EventEmitter<void>();
   @Output() descargarExcel = new EventEmitter<void>();
+  @Output() descargarWord  = new EventEmitter<void>();
  
   abierto = false;
  
@@ -27,6 +28,11 @@ export class DescargarMenuComponent {
   onExcel(): void {
     this.abierto = false;
     this.descargarExcel.emit();
+  }
+
+  onWord(): void {
+    this.abierto = false;
+    this.descargarWord.emit();
   }
  
   cerrar(): void {
