@@ -10,69 +10,34 @@
     </app-header>
 
     <!-- ===== METRICS BAR ===== -->
-    <div class="metrics-bar">
-
-        <!-- Horas por registrar -->
-        <div class="metric-item">
-            <div class="metric-icon-wrap blue">
-                <mat-icon>schedule</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ actividadesService.horasPorRegistrar() | horasFormat }}</span>
-                <span class="metric-name">Horas por registrar</span>
-                <span class="metric-desc">Horas pendientes del día</span>
-            </div>
-        </div>
-
-        <div class="metric-divider"></div>
-
-        <!-- Horas registradas hoy -->
-        <div class="metric-item">
-            <div class="metric-icon-wrap green">
-                <mat-icon>check_circle</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ actividadesService.horasRegistradasHoy() | horasFormat }}</span>
-                <span class="metric-name">Horas registradas</span>
-                <span class="metric-desc">Total del día</span>
-            </div>
-        </div>
-
-        <div class="metric-divider"></div>
-
-        <!-- Horas de la semana -->
-        <div class="metric-item">
-            <div class="metric-icon-wrap purple">
-                <mat-icon>calendar_today</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ actividadesService.horasSemanaActual() | horasFormat }}</span>
-                <span class="metric-name">Horas de la semana</span>
-                <span class="metric-desc">Total acumulado</span>
-            </div>
-        </div>
-
-        <div class="metric-divider"></div>
-
-        <!-- Horas del mes -->
-        <div class="metric-item">
-            <div class="metric-icon-wrap orange">
-                <mat-icon>bar_chart</mat-icon>
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ actividadesService.horasMesActual() | horasFormat }}</span>
-                <span class="metric-name">Horas del mes</span>
-                <span class="metric-desc">Total acumulado</span>
-            </div>
-        </div>
-
+    <!-- sm - Mismas métricas y diseño que Seguimiento (app-metricas-horas), del usuario de la sesión y del mes que muestra
+         el calendario. Nunca quedan en guion: si no hay registros se muestra 0.
+         Se reemplazan las tarjetas anteriores: "Horas por registrar" (del día), "Horas registradas" (hoy),
+         "Horas de la semana" y "Horas del mes" (esta última se deja comentada abajo). -->
+    <app-metricas-horas
+        [horasPorRegistrar]="actividadesService.horasPorRegistrar()"
+        [horasRegistradas]="actividadesService.horasRegistradas()"
+        [promedioPorDia]="actividadesService.promedioPorDia()">
         <div class="footer-spacer"></div>
 
         <button mat-stroked-button class="btn-reporte" (click)="abrirGenerarReporte()">
             <mat-icon>description</mat-icon>
             Generar Reporte
         </button>
+    </app-metricas-horas>
+
+    <!-- sm - Tarjeta "Horas del mes" comentada: se reemplaza por las métricas de Seguimiento.
+    <div class="metric-item">
+        <div class="metric-icon-wrap orange">
+            <mat-icon>bar_chart</mat-icon>
+        </div>
+        <div class="metric-texts">
+            <span class="metric-value">{{ actividadesService.horasMesActual() | horasFormat }}</span>
+            <span class="metric-name">Horas del mes</span>
+            <span class="metric-desc">Total acumulado</span>
+        </div>
     </div>
+    -->
 
     <!-- ===== CALENDAR CARD ===== -->
     <main class="calendar-card">

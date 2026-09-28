@@ -6,7 +6,8 @@ export interface Colaborador {
   cliente: string;
   liderTecnico: string;
   nroHoras: number;
-  estado: 'Completo' | 'En progreso' | 'Pendiente';
+  // sm - Estado automático según los días del periodo; '-' cuando el periodo no tiene días laborables.
+  estado: 'Completo' | 'En progreso' | 'Pendiente' | '-';
   diasConReporte: number;
   diasACompletar: number;
   // sm - Campos que envía el backend de Seguimiento para calcular "Horas por registrar".

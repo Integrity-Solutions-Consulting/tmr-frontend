@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Colaborador } from '../models/colaborador.model';
 import { SeguimientoFiltros, MetricasSeguimiento } from '../models/seguimiento.model';
 import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,9 @@ import { environment } from '../../../environments/environment';
 export class SeguimientoService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/time-report/seguimiento`;
+
+  // sm - Petición de carga en curso, para cancelarla si llega un filtro nuevo antes de que responda.
+  private cargaEnCurso?: Subscription;
 
   private _colaboradores = signal<Colaborador[]>([]);
   public colaboradores = this._colaboradores.asReadonly();
@@ -26,15 +30,17 @@ export class SeguimientoService {
     return this._metricas();
   }
 
-  cargarColaboradores(filtros: any): void {
+  cargarColaboradores(filtros: SeguimientoFiltros): void {
     let params = new HttpParams()
       .set('fechaDesde', filtros.fechaDesde || '')
       .set('fechaHasta', filtros.fechaHasta || '');
-    if (filtros.busqueda) params = params.set('busqueda', filtros.busqueda);
+    // sm - La búsqueda (colaborador/proyecto) ya no se envía: se filtra en el frontend sobre los datos cargados.
     if (filtros.clienteSeleccionado) params = params.set('clienteSeleccionado', filtros.clienteSeleccionado);
-    if (filtros.periodo) params = params.set('periodo', filtros.periodo);
 
-    this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
+    // sm - Se cancela la carga anterior si sigue en curso: así una respuesta vieja que llegue tarde
+    // no pisa los datos del último filtro aplicado.
+    this.cargaEnCurso?.unsubscribe();
+    this.cargaEnCurso = this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
         this._colaboradores.set(data || []);
         this._metricas.set(this.calcularMetricas(data || []));
@@ -84,15 +90,16 @@ export class SeguimientoService {
     };
   }
 
-  aprobarColaboradores(ids: (number | string)[]): void {
-    const idsNum = ids.map(id => Number(id));
-    this.http.post(`${this.apiUrl}/aprobar`, { ids: idsNum }).subscribe({
-      next: () => {
-        this._colaboradores.update(prev =>
-          prev.map(c => idsNum.includes(Number(c.id)) ? { ...c, estado: 'Completo' } : c)
-        );
-      },
-      error: (err) => console.error('Error al aprobar', err)
-    });
-  }
+  // sm - Se comenta: la funcionalidad de aprobar horas se retira de Seguimiento (el estado ahora es automático).
+  // aprobarColaboradores(ids: (number | string)[]): void {
+  //   const idsNum = ids.map(id => Number(id));
+  //   this.http.post(`${this.apiUrl}/aprobar`, { ids: idsNum }).subscribe({
+  //     next: () => {
+  //       this._colaboradores.update(prev =>
+  //         prev.map(c => idsNum.includes(Number(c.id)) ? { ...c, estado: 'Completo' } : c)
+  //       );
+  //     },
+  //     error: (err) => console.error('Error al aprobar', err)
+  //   });
+  // }
 }

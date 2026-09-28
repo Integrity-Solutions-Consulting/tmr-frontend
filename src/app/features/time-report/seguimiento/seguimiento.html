@@ -18,82 +18,15 @@
     </app-header>
 
     <!-- ===== METRICS BAR ===== -->
-    <!-- sm - La barra de métricas siempre está visible (sin saltos). Queda "en blanco" (con guion y atenuada) si no hay
-         colaboradores seleccionados o si están seleccionados todos; con uno o varios (no todos) muestra sus métricas. -->
-    <div class="metrics-bar" [class.metrics-bar--blank]="metricasEnBlanco">
-        <div class="metric-item">
-            <div class="metric-icon-wrap blue">
-                <img class="metric-icon-img blue-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
-            </div>
-            <div class="metric-texts">
-                <!-- sm - "@for" con un solo valor: al cambiar el texto se vuelve a crear el span y se reproduce la animación de entrada. -->
-                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasPendientes | horasFormat)]; track valor) {
-                    <span class="metric-value">{{ valor }}</span>
-                }
-                <span class="metric-name">Horas por registrar</span>
-                <span class="metric-desc">Pendientes por completar</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap green">
-                <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
-            </div>
-            <div class="metric-texts">
-                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasRegistradas | horasFormat)]; track valor) {
-                    <span class="metric-value">{{ valor }}</span>
-                }
-                <span class="metric-name">Horas registradas</span>
-                <span class="metric-desc">Total del periodo</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap purple">
-                <img class="metric-icon-img purple-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
-            </div>
-            <div class="metric-texts">
-                @for (valor of [metricasEnBlanco ? '—' : (metricas.promedioPorDia | horasFormat)]; track valor) {
-                    <span class="metric-value">{{ valor }}</span>
-                }
-                <span class="metric-name">Promedio por día</span>
-                <span class="metric-desc">Horas registradas</span>
-            </div>
-        </div>
-    <!-- Ocultamiento de Iconos de Proyectos y Colaboradores -->
-    <!--
-        <div class="metric-item">
-            <div class="metric-icon-wrap orange">
-                <img class="metric-icon-img orange-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg" alt="colaboradores" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.colaboradoresActivos }}</span>
-                <span class="metric-name">Colaboradores activos</span>
-                <span class="metric-desc">Con reporte en el periodo</span>
-            </div>
-        </div> -->
-
-        <!-- <div class="metric-item">
-            <div class="metric-icon-wrap gray">
-                <img class="metric-icon-img gray-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
-                    alt="proyectos" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.proyectosUnicos }}</span>
-                <span class="metric-name">Proyectos</span>
-                <span class="metric-desc">Con actividades</span>
-            </div>
-        </div> -->
-
-        <!-- sm - Texto de ayuda del estado en blanco; siempre ocupa su lugar y solo cambia su opacidad para no mover la barra. -->
-        <span class="metrics-hint" [class.visible]="metricasEnBlanco" [attr.aria-hidden]="!metricasEnBlanco">
-            <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
-            Selecciona uno o varios colaboradores para ver sus métricas
-        </span>
-    </div>
+    <!-- sm - Barra de métricas compartida con Actividades (app-metricas-horas). Siempre visible; queda "en blanco"
+         (con guion y atenuada) si no hay colaboradores seleccionados o si están seleccionados todos. -->
+    <app-metricas-horas
+        [horasPorRegistrar]="metricas.horasPendientes"
+        [horasRegistradas]="metricas.horasRegistradas"
+        [promedioPorDia]="metricas.promedioPorDia"
+        [enBlanco]="metricasEnBlanco"
+        textoAyuda="Selecciona uno o varios colaboradores para ver sus métricas">
+    </app-metricas-horas>
 
     <!-- ===== FILTER BAR ===== -->
     <div class="filters-card">
@@ -102,8 +35,9 @@
         <div class="filter-group">
             <label class="filter-label">Búsqueda</label>
             <div class="filter-input-wrapper">
-                <input class="filter-input" type="text" placeholder="Buscar colaborador, proyecto, cliente..."
-                    [(ngModel)]="busqueda" (input)="aplicarFiltros()" />
+                <!-- sm - Búsqueda solo por colaborador y proyecto, local (no recarga desde el servidor). -->
+                <input class="filter-input" type="text" placeholder="Buscar colaborador o proyecto..."
+                    [(ngModel)]="busqueda" (input)="aplicarBusqueda()" />
                 <img class="filter-icon-img" src="assets/iconos/buscar.svg" alt="buscar" />
             </div>
         </div>
@@ -113,11 +47,13 @@
             <label class="filter-label">Cliente</label>
             <div class="filter-input-wrapper">
                 <input class="filter-input" type="text" placeholder="Todos los clientes"
-                    [(ngModel)]="clienteSeleccionado" (input)="filtrarClientes($event); aplicarFiltros()"
+                    [(ngModel)]="clienteSeleccionado" (input)="onClienteInput($event)"
                     [matAutocomplete]="autoCliente" />
                 <img class="filter-icon-img" src="assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg"
                     alt="cliente" />
-                <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="aplicarFiltros()">
+                <!-- sm - La tabla se filtra por cliente solo al elegir una opción (no con cada letra escrita). -->
+                <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event.option.value)"
+                    (closed)="onClientePanelCerrado()">
                     <mat-option value="">Todos los clientes</mat-option>
                     @for (c of clientesFiltrados(); track c.id) {
                     <mat-option [value]="c.nombre">{{ c.nombre }}</mat-option>
@@ -158,11 +94,10 @@
     </div>
 
     <!-- sm - Toast animado de descarga de seleccionados: reemplaza el mensaje "Preparando..." con título, barra de progreso y botón Cancelar. -->
-    <!-- sm - Con "warning" (varios colaboradores y algunos sin actividades) cambia el icono y el acento a advertencia. -->
     <section *ngIf="progresoDescarga.visible" class="download-progress-toast" [class.closing]="progresoDescarga.cerrando"
-        [class.warning]="progresoDescarga.conAviso" role="status" aria-live="polite">
+        role="status" aria-live="polite">
         <div class="download-progress-header">
-            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">{{ progresoDescarga.conAviso ? 'info' : 'cloud_download' }}</span>
+            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">cloud_download</span>
             <span class="download-progress-title">{{ progresoDescarga.titulo }}</span>
         </div>
         <div class="download-progress-body">
@@ -226,13 +161,15 @@
                         <td class="col-lider" [title]="el.liderTecnico">{{ el.liderTecnico }}</td>
                         <td class="col-horas">{{ el.nroHoras | horasFormat }}</td>
                         <td class="col-estado">
-                            <span class="badge" [ngClass]="{
+                            <!-- sm - Estado automático; "-" cuando el periodo no tiene días laborables (se muestra sin badge). -->
+                            <span *ngIf="el.estado !== '-'; else sinEstado" class="badge" [ngClass]="{
                                 'badge--completado': el.estado === 'Completo',
                                 'badge--en-progreso': el.estado === 'En progreso',
                                 'badge--pendiente': el.estado === 'Pendiente'
                             }">
                                 {{ el.estado }}
                             </span>
+                            <ng-template #sinEstado>-</ng-template>
                         </td>
                         <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>
                         <td class="col-dias-completar center">{{ el.diasACompletar }}</td>
