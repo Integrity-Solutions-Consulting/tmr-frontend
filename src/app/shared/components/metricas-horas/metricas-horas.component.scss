@@ -1,0 +1,186 @@
+// sm - Estilos de la barra de métricas de horas, compartidos por Seguimiento y Actividades
+// (movidos desde seguimiento.scss para no duplicarlos).
+:host {
+    display: block;
+}
+
+// sm - Estado "en blanco" de la barra de métricas (sin selección o con todos seleccionados):
+// la barra no se oculta (evita el salto de la tabla); los valores muestran guion y todo se atenúa suavemente.
+.metrics-bar {
+    .metric-icon-wrap,
+    .metric-value {
+        transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    // sm - Cada vez que cambia un valor, el span se vuelve a crear (ver @for en el HTML) y entra con esta animación.
+    .metric-value {
+        animation: metricas-horas-in 0.3s ease-out;
+    }
+
+    &.metrics-bar--blank {
+        .metric-icon-wrap {
+            opacity: 0.45;
+            filter: grayscale(1);
+        }
+
+        // sm - Se usa opacidad (no color) para que también funcione en tema oscuro, donde el color del valor se fuerza con !important.
+        .metric-value {
+            opacity: 0.4;
+        }
+    }
+}
+
+// sm - Texto de ayuda del estado en blanco: siempre reserva su espacio y solo cambia de opacidad, así la barra no se mueve.
+.metrics-hint {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+
+    .material-symbols-outlined {
+        font-size: 18px;
+        color: #163572;
+    }
+
+    &.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@keyframes metricas-horas-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { transform: translateY(0); }
+}
+
+// sm - Sin animaciones si el sistema tiene activado "reducir movimiento".
+@media (prefers-reduced-motion: reduce) {
+    .metrics-bar .metric-icon-wrap,
+    .metrics-bar .metric-value,
+    .metrics-hint {
+        transition: none;
+        animation: none;
+    }
+}
+
+.metrics-bar {
+    background: white;
+    border-radius: 10px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+}
+
+.metric-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metric-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+    }
+
+    &.blue {
+        background: #EEF3FB;
+        color: #163572;
+    }
+
+    &.green {
+        background: #DCFCE7;
+        color: #15803D;
+    }
+
+    &.purple {
+        background: #EDE9FE;
+        color: #7C3AED;
+    }
+
+    &.orange {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+
+    &.gray {
+        background: #F3F4F6;
+        color: #6B7280;
+    }
+}
+
+.metric-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.metric-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1A1A2E;
+    line-height: 1.2;
+}
+
+.metric-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.metric-desc {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+
+.metric-icon-img {
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
+}
+
+// sm - Tema oscuro de los iconos de la barra (movido desde seguimiento.scss).
+:host-context(html[data-theme="dark"]) {
+  .metric-icon-wrap {
+    &.blue, &.green, &.purple, &.orange, &.gray {
+      background-color: var(--phase6-bg-surface);
+    }
+    &.blue, &.purple {
+      color: var(--phase6-primary);
+    }
+    &.green {
+      color: #4ade80;
+    }
+    &.orange {
+      color: #fbbf24;
+    }
+    &.gray {
+      color: var(--phase6-text-muted);
+    }
+    
+    /* Filtros SVG para los iconos de metricas que usan <img> */
+    &.blue img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
+    &.green img { filter: brightness(0) saturate(100%) invert(77%) sepia(43%) saturate(583%) hue-rotate(85deg) brightness(97%) contrast(85%); }
+    &.purple img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
+    &.orange img { filter: brightness(0) saturate(100%) invert(79%) sepia(35%) saturate(836%) hue-rotate(345deg) brightness(102%) contrast(98%); }
+    &.gray img { filter: brightness(0) saturate(100%) invert(67%) sepia(16%) saturate(232%) hue-rotate(174deg) brightness(90%) contrast(86%); }
+  }
+}

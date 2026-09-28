@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { obtenerLogoReporte } from './reporte-export.utils';
@@ -28,23 +27,6 @@ const FERIADO: Color = [255, 255, 0];
 const VACACIONES: Color = [255, 192, 0];
 const PERMISO: Color = [118, 147, 60];
 const RECURRENTE: Color = [204, 192, 218];
-
-export async function crearZipSeguimientoPdf(
-  colaboradores: ReadonlyArray<{ id: number | string; nombre: string }>,
-  fechaDesde: string,
-  fechaHasta: string,
-  cargarActividades: (id: number | string) => Promise<DatosSeguimientoPdf>,
-): Promise<Uint8Array<ArrayBuffer>> {
-  const zip = new JSZip();
-  for (const [indice, colaborador] of colaboradores.entries()) {
-    const datos = await cargarActividades(colaborador.id);
-    const contenido = await crearReporteSeguimientoPdf(colaborador.nombre, fechaDesde, fechaHasta, datos);
-    if (new TextDecoder().decode(contenido.slice(0, 5)) !== '%PDF-') throw new Error('No se pudo generar el PDF.');
-    const nombre = colaborador.nombre.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().slice(0, 100) || 'colaborador';
-    zip.file('Reporte_' + nombre + '_' + (indice + 1) + '.pdf', contenido);
-  }
-  return new Uint8Array(await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' }));
-}
 
 export async function crearReporteSeguimientoPdf(
   nombreColaborador: string,
