@@ -15,10 +15,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { estandarizarCabeceraExcelExistente, exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
-import { HttpClient } from '@angular/common/http';
+// sm - HttpEventType/HttpResponse para leer el progreso de descarga del ZIP de Excel.
+import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
+import { ActividadSeguimientoPdf, DatosSeguimientoPdf, crearReporteSeguimientoPdf, crearZipSeguimientoPdf } from '../../../shared/utils/seguimiento-pdf.utils';
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
@@ -27,7 +30,28 @@ import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import * as ExcelJS from 'exceljs';
-import { lastValueFrom } from 'rxjs';
+import JSZip from 'jszip';
+// sm - Operadores para cancelar la descarga (takeUntil) y leer su progreso (tap/filter).
+import { Observable, Subject, filter, lastValueFrom, takeUntil, tap } from 'rxjs';
+import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+// sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
+import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
+// sm - SweetAlert2 para avisar con un pop up cuando la descarga de un solo colaborador no tiene actividades.
+import Swal from 'sweetalert2';
+
+// sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
+class SinActividadesError extends Error {
+    constructor(public readonly colaborador: string) {
+        super(`No hay actividades registradas para ${colaborador} en este rango.`);
+    }
+}
+
+// sm - Error propio para identificar que el usuario canceló la descarga desde el toast de progreso.
+class DescargaCanceladaError extends Error {
+    constructor() {
+        super('Descarga cancelada por el usuario.');
+    }
+}
 
 @Component({
     selector: 'app-seguimiento',
@@ -49,6 +73,7 @@ import { lastValueFrom } from 'rxjs';
         MatCheckboxModule,
         MatMenuModule,
         MatAutocompleteModule,
+        MatDialogModule,
         PaginacionComponent,
         HeaderComponent,
         HorasFormatPipe
@@ -59,6 +84,7 @@ import { lastValueFrom } from 'rxjs';
 export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
+    private dialog = inject(MatDialog);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -66,6 +92,24 @@ export class SeguimientoComponent implements AfterViewInit {
     ];
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
+    public isDownloading = false;
+    public downloadMessage = '';
+    public downloadMessageType: 'success' | 'error' | 'info' = 'info';
+    private feedbackTimer?: ReturnType<typeof setTimeout>;
+    // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
+    public progresoDescarga = {
+        visible: false,
+        cerrando: false,
+        titulo: '',
+        detalle: '',
+        progreso: 0,
+        indeterminado: true,
+        // sm - true cuando la descarga terminó con colaboradores sin actividades (el toast se pinta como advertencia).
+        conAviso: false,
+    };
+    // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la petición HTTP en curso.
+    private cancelarDescarga$ = new Subject<void>();
+    private descargaCancelada = false;
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
@@ -82,10 +126,16 @@ export class SeguimientoComponent implements AfterViewInit {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
     })();
+    // sm - Se comenta el valor por defecto anterior (último día del mes actual) porque "Fecha hasta" debe iniciar en el día de hoy.
+    // public fechaHasta = (() => {
+    //     const d = new Date();
+    //     const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    //     return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+    // })();
+    // sm - Nuevo valor por defecto: la fecha de hoy (fecha local del navegador, formato yyyy-MM-dd).
     public fechaHasta = (() => {
         const d = new Date();
-        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-        return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     })();
     public periodo: 'quincena' | 'mes-completo' = 'mes-completo';
 
@@ -97,7 +147,20 @@ export class SeguimientoComponent implements AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
 
     // Reactividad vía Signals desde el Servicio de Negocio
-    public metricas = computed(() => this.seguimientoService.getMetricas());
+    //public metricas = computed(() => this.seguimientoService.getMetricas());
+    //SM - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados
+    get metricas(): MetricasSeguimiento {
+        if (this.selection.hasValue()) {
+            return this.seguimientoService.calcularMetricas(this.selection.selected);
+        }
+        return this.seguimientoService.getMetricas();
+    }
+
+    // sm - La barra de métricas queda "en blanco" (valores con guion) cuando no hay ningún colaborador seleccionado
+    // o cuando están seleccionados todos; solo muestra valores con una selección parcial (uno o varios, no todos).
+    get metricasEnBlanco(): boolean {
+        return !this.selection.hasValue() || this.isAllSelected();
+    }
 
     // Ordenación manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
@@ -159,6 +222,11 @@ export class SeguimientoComponent implements AfterViewInit {
             }));
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
+            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, así que cualquier
+            // selección previa queda con referencias huérfanas (el checkbox del header se veía
+            // "indeterminado" y el footer de métricas podía mostrar la selección vieja). Se limpia
+            // para que la selección siempre corresponda a la data recién cargada/filtrada.
+            this.selection.clear();
         });
     }
 
@@ -248,125 +316,296 @@ export class SeguimientoComponent implements AfterViewInit {
         });
     }
 
+    // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado
+    // (rango de fechas/cliente del backend + búsqueda de texto del cliente), no solo dataSource.data
+    // (que ignora la búsqueda de texto) ni la página visible.
     public isAllSelected() {
-        return this.selection.selected.length === this.dataSource.data.length;
+        const filtrados = this.dataSource.filteredData;
+        return filtrados.length > 0 && this.selection.selected.length === filtrados.length;
     }
 
     public masterToggle() {
         this.isAllSelected()
             ? this.selection.clear()
-            : this.dataSource.data.forEach(row => this.selection.select(row));
+            : this.dataSource.filteredData.forEach(row => this.selection.select(row));
     }
 
-    public async descargarSeleccionados() {
-        if (!this.selection.hasValue()) return;
+    public async descargarSeleccionados(formato: 'xlsx' | 'pdf') {
+        if (!this.selection.hasValue() || this.isDownloading) return;
+
         const seleccionados = [...this.selection.selected];
-        for (const col of seleccionados) {
-            await this.descargarDetalle(col);
+        this.isDownloading = true;
+        // sm - En lugar del mensaje "Preparando...", se muestra el toast animado con barra de progreso.
+        this.iniciarProgresoDescarga(formato, seleccionados.length);
+
+        try {
+            // sm - Cantidad de colaboradores descargados sin actividades (solo aplica a descargas de 2 o más).
+            let sinActividades = 0;
+            if (seleccionados.length === 1) {
+                if (formato === 'xlsx') {
+                    await this.descargarDetalle(seleccionados[0], true);
+                } else {
+                    await this.descargarPdfDetalle(seleccionados[0]);
+                }
+            } else {
+                sinActividades = await this.descargarReportesZip(seleccionados, formato);
+            }
+            // sm - Ya no se limpia la selección al terminar la descarga: los colaboradores quedan seleccionados
+            // y la barra de métricas (que depende de la selección) sigue visible.
+            // sm - Con varios colaboradores no se usa pop up: si hubo vacíos se avisa en el texto final del toast.
+            if (seleccionados.length > 1 && sinActividades > 0) {
+                await this.finalizarProgresoDescarga(`Descarga completada · ${sinActividades} de ${seleccionados.length} sin actividades`, true);
+            } else {
+                // sm - Se completa la barra al 100% antes de cerrar el toast y mostrar el mensaje de éxito.
+                await this.finalizarProgresoDescarga();
+            }
+            this.mostrarFeedback('Reportes preparados correctamente.', 'success');
+        } catch (error) {
+            // sm - Cualquier fin anticipado (sin actividades, cancelación o error) cierra el toast de progreso.
+            this.cerrarProgresoDescarga();
+            // sm - Si el único colaborador seleccionado no tiene actividades, se muestra el pop up en lugar del error genérico.
+            if (error instanceof SinActividadesError) {
+                this.mostrarPopupSinActividades(error.colaborador);
+                return;
+            }
+            // sm - Si el usuario pulsó "Cancelar" en el toast, se informa sin tratarlo como error.
+            if (error instanceof DescargaCanceladaError) {
+                this.mostrarFeedback('Descarga cancelada.', 'info');
+                return;
+            }
+            this.mostrarFeedback('No se pudieron preparar los reportes. Intenta nuevamente.', 'error');
+        } finally {
+            this.isDownloading = false;
         }
-        this.selection.clear();
     }
 
-    public async descargarSeguimientoColaborador(col: Colaborador) {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Seguimiento');
-
-        const headerFill: ExcelJS.Fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF163572' }
+    // sm - Muestra el toast de descarga. El PDF avanza por colaborador (progreso real);
+    // el Excel se genera en el servidor, así que arranca con barra indeterminada hasta que llegan bytes.
+    private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
+        this.ocultarFeedback();
+        this.descargaCancelada = false;
+        this.progresoDescarga = {
+            visible: true,
+            cerrando: false,
+            titulo: `Descargando ${formato === 'pdf' ? 'PDF' : 'Excel'}${cantidad > 1 ? ` de ${cantidad} colaboradores` : ''}`,
+            detalle: formato === 'pdf' ? `0 de ${cantidad} reportes generados` : 'Generando reporte...',
+            progreso: 0,
+            indeterminado: formato === 'xlsx',
+            conAviso: false,
         };
-        const headerFont: Partial<ExcelJS.Font> = {
-            name: 'Arial',
-            size: 11,
-            bold: true,
-            color: { argb: 'FFFFFFFF' }
+    }
+
+    // sm - Actualiza el porcentaje y el texto del toast; al recibir un valor la barra deja de ser indeterminada.
+    private actualizarProgresoDescarga(progreso: number, detalle: string): void {
+        this.progresoDescarga = {
+            ...this.progresoDescarga,
+            progreso: Math.min(100, Math.max(0, Math.round(progreso))),
+            detalle,
+            indeterminado: false,
         };
+    }
 
-        worksheet.mergeCells('A1:H1');
-        const titleCell = worksheet.getCell('A1');
-        titleCell.value = `Seguimiento de Colaborador - ${col.nombre}`;
-        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
-        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
-        worksheet.getRow(1).height = 30;
+    // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animación de salida.
+    // Si hay aviso (colaboradores sin actividades) el toast cambia a estilo de advertencia y se mantiene más tiempo para poder leerlo.
+    private async finalizarProgresoDescarga(detalle = 'Descarga completada', conAviso = false): Promise<void> {
+        this.actualizarProgresoDescarga(100, detalle);
+        this.progresoDescarga = { ...this.progresoDescarga, conAviso };
+        await new Promise(resolve => setTimeout(resolve, conAviso ? 3500 : 600));
+        this.cerrarProgresoDescarga();
+    }
 
-        worksheet.mergeCells('A2:H2');
-        const subtitleCell = worksheet.getCell('A2');
-        subtitleCell.value = `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`;
-        subtitleCell.font = { name: 'Arial', size: 10, italic: true };
-        worksheet.getRow(2).height = 20;
+    // sm - Cierra el toast con la animación de salida y luego lo quita del DOM.
+    private cerrarProgresoDescarga(): void {
+        if (!this.progresoDescarga.visible) return;
+        this.progresoDescarga = { ...this.progresoDescarga, cerrando: true };
+        setTimeout(() => {
+            this.progresoDescarga = { ...this.progresoDescarga, visible: false, cerrando: false };
+        }, 200);
+    }
 
-        worksheet.addRow([]);
+    // sm - Botón "Cancelar" del toast: corta la petición HTTP en curso y marca la descarga como cancelada.
+    public cancelarDescarga(): void {
+        if (!this.isDownloading || this.descargaCancelada) return;
+        this.descargaCancelada = true;
+        this.cancelarDescarga$.next();
+        this.progresoDescarga = { ...this.progresoDescarga, detalle: 'Cancelando...' };
+    }
 
-        const headers = [
-            'Colaborador', 'Proyecto', 'Cliente', 'Líder Técnico', 'Horas Registradas', 'Seguimiento', 'Días con Reporte', 'Días a Completar'
-        ];
-        const headerRow = worksheet.addRow(headers);
-        headerRow.height = 24;
-        headerRow.eachCell((cell) => {
-            cell.fill = headerFill;
-            cell.font = headerFont;
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
-            cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'medium' },
-                right: { style: 'thin' }
-            };
-        });
+    // sm - Espera una petición HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
+    private async esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
+        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        try {
+            return await lastValueFrom(peticion.pipe(takeUntil(this.cancelarDescarga$)));
+        } catch (error) {
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            throw error;
+        }
+    }
 
-        const row = worksheet.addRow([
-            col.nombre,
-            col.proyecto,
-            col.cliente,
-            col.liderTecnico,
-            Number(col.nroHoras),
-            col.estado,
-            Number(col.diasConReporte),
-            Number(col.diasACompletar)
-        ]);
-        row.height = 22;
-        
-        row.getCell(5).alignment = { horizontal: 'right' };
-        row.getCell(6).alignment = { horizontal: 'center' };
-        row.getCell(7).alignment = { horizontal: 'center' };
-        row.getCell(8).alignment = { horizontal: 'center' };
+    // sm - Devuelve cuántos colaboradores del ZIP no tenían actividades, para avisarlo al final del toast.
+    private async descargarReportesZip(colaboradores: Colaborador[], formato: string): Promise<number> {
+        if (formato === 'pdf') {
+            const fechaDesde = this.fechaDesde;
+            const fechaHasta = this.fechaHasta;
+            // sm - Contador de colaboradores ya consultados para calcular el avance real del toast.
+            let procesados = 0;
+            // sm - En PDF se cuentan los vacíos con la respuesta real de cada colaborador.
+            let sinActividades = 0;
+            const contenido = await crearZipSeguimientoPdf(colaboradores, fechaDesde, fechaHasta, async id => {
+                // sm - Cuando se pide el colaborador N, el PDF del anterior ya se generó: se refleja en la barra.
+                // El 90% se reparte entre colaboradores y el 10% restante queda para comprimir el ZIP.
+                this.actualizarProgresoDescarga((procesados / colaboradores.length) * 90, `${procesados} de ${colaboradores.length} reportes generados`);
+                const respuesta = await this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
+                    `${environment.apiUrl}/time-report/seguimiento/colaborador/${id}/actividades`,
+                    { params: { fechaDesde, fechaHasta } },
+                ));
+                procesados++;
+                // sm - Con un solo colaborador y sin actividades no se genera el ZIP: se corta aquí para mostrar el pop up.
+                // Con 2 o más colaboradores se sigue igual (PDF con "Sin actividades en el periodo") y sin pop up.
+                if (colaboradores.length === 1 && (!respuesta.actividades || respuesta.actividades.length === 0)) {
+                    throw new SinActividadesError(colaboradores[0].nombre);
+                }
+                if (!respuesta.actividades || respuesta.actividades.length === 0) sinActividades++;
+                return respuesta;
+            });
+            // sm - Si se canceló mientras se generaba el último PDF, no se descarga el ZIP.
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            const url = URL.createObjectURL(new Blob([contenido], { type: 'application/zip' }));
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_PDF_${fechaDesde}_a_${fechaHasta}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return sinActividades;
+        }
+        // Excel conserva la descarga múltiple del servidor.
+        if (formato === 'xlsx') {
+            const zip = new JSZip();
+            let sinActividades = 0;
+            for (let indice = 0; indice < colaboradores.length; indice++) {
+                if (this.descargaCancelada) throw new DescargaCanceladaError();
+                const colaborador = colaboradores[indice];
+                const contenido = await this.descargarDetalle(colaborador, true, true);
+                if (!contenido) {
+                    sinActividades++;
+                } else {
+                    const nombre = colaborador.nombre.replace(/[<>:\"/\\|?*\x00-\x1f]/g, '_').trim() || `colaborador_${indice + 1}`;
+                    zip.file(`Reporte_${nombre}.xlsx`, contenido);
+                }
+                this.actualizarProgresoDescarga(
+                    ((indice + 1) / colaboradores.length) * 90,
+                    `${indice + 1} de ${colaboradores.length} reportes generados`,
+                );
+            }
+            const contenidoZip = await zip.generateAsync({ type: 'blob' }, metadata => {
+                this.actualizarProgresoDescarga(90 + metadata.percent * 0.1, 'Comprimiendo archivos...');
+            });
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            const url = window.URL.createObjectURL(contenidoZip);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+            return sinActividades;
+        }
 
-        row.eachCell((cell) => {
-            cell.border = {
-                top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
-            };
-        });
+        const endpoint = environment.apiUrl + '/time-report/seguimiento/descarga-multiple';
+        // sm - Se piden los eventos HTTP para mostrar en el toast el avance de la descarga del ZIP (bytes recibidos).
+        const response = await this.esperarCancelable(this.http.post(endpoint, {
+            ids: colaboradores.map(col => Number(col.id)),
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            formato
+        }, { observe: 'events', reportProgress: true, responseType: 'blob' }).pipe(
+            tap(evento => {
+                // sm - Mientras el servidor genera el ZIP la barra sigue indeterminada; al llegar bytes se muestra el porcentaje.
+                if (evento.type === HttpEventType.DownloadProgress && evento.total) {
+                    this.actualizarProgresoDescarga((evento.loaded / evento.total) * 100, `Descargando ${this.formatearTamano(evento.loaded)} de ${this.formatearTamano(evento.total)}`);
+                }
+            }),
+            filter((evento): evento is HttpResponse<Blob> => evento.type === HttpEventType.Response),
+        ));
 
-        worksheet.columns.forEach((column, i) => {
-            if (i === 0) column.width = 30;
-            else if (i === 1) column.width = 25;
-            else if (i === 2) column.width = 25;
-            else if (i === 3) column.width = 25;
-            else if (i === 4) column.width = 18;
-            else if (i === 5) column.width = 15;
-            else if (i === 6) column.width = 18;
-            else if (i === 7) column.width = 18;
-        });
+        if (!response.body || response.body.size === 0) {
+            throw new Error('El servidor no devolvió un ZIP válido.');
+        }
 
-        await estandarizarCabeceraExcelExistente(
-            workbook,
-            worksheet,
-            `Seguimiento de Colaborador - ${col.nombre}`,
-            8,
-            `Periodo: del ${this.fechaDesde} al ${this.fechaHasta}`,
-        );
-        const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Seguimiento_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
-        a.click();
+        if (response.headers.get('Content-Type')?.toLowerCase().split(';')[0] !== 'application/zip') {
+            throw new Error(`El servidor no devolvió un ZIP ${formato.toUpperCase()}.`);
+        }
+
+        const url = window.URL.createObjectURL(response.body);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Seguimiento_Excel_${this.fechaDesde}_a_${this.fechaHasta}.zip`;
+        anchor.click();
         window.URL.revokeObjectURL(url);
+        // sm - En Excel el ZIP lo arma el servidor, así que los vacíos se cuentan con los datos de la tabla
+        // (mismo rango de fechas): sin horas ni días con reporte = sin actividades.
+        return colaboradores.filter(col => !Number(col.nroHoras) && !Number(col.diasConReporte)).length;
+    }
+
+    private mostrarFeedback(message: string, type: 'success' | 'error' | 'info', autoHide = true): void {
+        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
+        this.downloadMessage = message;
+        this.downloadMessageType = type;
+        if (autoHide) {
+            this.feedbackTimer = setTimeout(() => {
+                this.downloadMessage = '';
+            }, 4500);
+        }
+    }
+
+    private ocultarFeedback(): void {
+        if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
+        this.downloadMessage = '';
+    }
+
+    // sm - Pop up de SweetAlert2 que avisa que el colaborador no tiene actividades en el rango de fechas seleccionado.
+    // sm - Usa las clases "tmr-swal" (styles/_sweetalert.scss) para verse igual que los modales de la app:
+    // tarjeta blanca, icono en círculo azul, título oscuro, texto gris y botón primario #163572 (con soporte de tema oscuro).
+    private mostrarPopupSinActividades(colaborador: string): void {
+        void Swal.fire({
+            icon: 'info',
+            iconHtml: '<span class="material-symbols-outlined">event_busy</span>',
+            title: 'Sin actividades',
+            html: `<strong>${this.escaparHtml(colaborador)}</strong> no tiene actividades registradas entre `
+                + `<strong>${this.formatearFechaPopup(this.fechaDesde)}</strong> y <strong>${this.formatearFechaPopup(this.fechaHasta)}</strong>.`,
+            confirmButtonText: 'Entendido',
+            buttonsStyling: false,
+            customClass: {
+                container: 'tmr-swal-container',
+                popup: 'tmr-swal',
+                icon: 'tmr-swal__icon',
+                title: 'tmr-swal__title',
+                htmlContainer: 'tmr-swal__text',
+                actions: 'tmr-swal__actions',
+                confirmButton: 'tmr-swal__btn-primary',
+            },
+        });
+    }
+
+    private escaparHtml(texto: string): string {
+        return String(texto ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    private formatearTamano(bytes: number): string {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    private formatearFechaPopup(fecha: string): string {
+        const [anio, mes, dia] = (fecha ?? '').split('-');
+        return anio && mes && dia ? `${dia}/${mes}/${anio}` : fecha;
     }
 
     public async exportarExcel() {
@@ -616,20 +855,59 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    public async descargarDetalle(col: Colaborador) {
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
+    public verCalendarioColaborador(col: Colaborador): void {
+        this.dialog.open(CalendarioColaboradorModal, {
+            data: { colaborador: col },
+            width: '900px',
+            maxHeight: '90vh',
+            panelClass: 'tmr-dialog-panel'
+        });
+    }
+
+    private async descargarPdfDetalle(col: Colaborador): Promise<void> {
+        const fechaDesde = this.fechaDesde;
+        const fechaHasta = this.fechaHasta;
+        const respuesta = await this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
+            `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`,
+            { params: { fechaDesde, fechaHasta } },
+        ));
+        if (!respuesta.actividades || respuesta.actividades.length === 0) {
+            throw new SinActividadesError(col.nombre);
+        }
+        this.actualizarProgresoDescarga(40, 'Generando reporte PDF...');
+        const contenido = await crearReporteSeguimientoPdf(col.nombre, fechaDesde, fechaHasta, respuesta);
+        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        const url = URL.createObjectURL(new Blob([contenido], { type: 'application/pdf' }));
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Reporte_${col.nombre.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || 'colaborador'}.pdf`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    public async descargarDetalle(col: Colaborador, propagarError = false, devolverBuffer = false) {
         try {
             const urlDetalle = `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`;
-            const res = await lastValueFrom(
-                this.http.get<{ actividades: any[], feriados: string[] }>(urlDetalle, {
-                    params: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta }
-                })
-            );
+            const peticionDetalle = this.http.get<{ actividades: any[], feriados: string[] }>(urlDetalle, {
+                params: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta }
+            });
+            // sm - Desde el botón "Descargar" (propagarError) la petición se puede cancelar con el toast; desde el menú de la fila no hay toast.
+            const res = propagarError
+                ? await this.esperarCancelable(peticionDetalle)
+                : await lastValueFrom(peticionDetalle);
 
             const rawActividades = res.actividades || [];
             const feriados = res.feriados || [];
 
             if (!rawActividades || rawActividades.length === 0) {
-                console.warn(`No hay actividades registradas para ${col.nombre} en este rango.`);
+                if (devolverBuffer) return undefined;
+                // sm - Descarga individual sin actividades: si viene del botón "Descargar" se propaga para que lo maneje
+                // descargarSeleccionados; si viene del menú de la fila se muestra el pop up directamente.
+                if (propagarError) throw new SinActividadesError(col.nombre);
+                this.mostrarPopupSinActividades(col.nombre);
                 return;
             }
 
@@ -959,6 +1237,7 @@ export class SeguimientoComponent implements AfterViewInit {
 
             // Guardar archivo y disparar descarga
             const buffer = await workbook.xlsx.writeBuffer();
+            if (devolverBuffer) return buffer;
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -966,9 +1245,12 @@ export class SeguimientoComponent implements AfterViewInit {
             a.download = `Reporte_${col.nombre.replace(/\s+/g, '_')}.xlsx`;
             a.click();
             window.URL.revokeObjectURL(url);
+            return undefined;
 
         } catch (error) {
             console.error(`Error descargando el detalle de ${col.nombre}:`, error);
+            if (propagarError) throw error;
+            return undefined;
         }
     }
 
@@ -1043,3 +1325,5 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 }
+
+//comentario de prueba

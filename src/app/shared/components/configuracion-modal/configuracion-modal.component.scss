@@ -196,80 +196,80 @@
 
 :host-context(html[data-theme="dark"]) {
   .configuracion-modal {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    color: #f4f4f5 !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    color: #f4f4f5 ;
 
     &__header {
-      border-bottom-color: #3f3f46 !important;
+      border-bottom-color: #3f3f46 ;
     }
 
     &__icon .material-icons,
     &__section-header .material-icons {
-      color: #94a3b8 !important;
+      color: #94a3b8 ;
     }
 
     &__title,
     &__section-header h3 {
-      color: #3b82f6 !important;
+      color: #3b82f6 ;
     }
 
     &__subtitle,
     &__section-desc {
-      color: #a1a1aa !important;
+      color: #a1a1aa ;
     }
 
     &__close {
-      color: #a1a1aa !important;
+      color: #a1a1aa ;
 
       &:hover {
-        background: #3f3f46 !important;
-        color: #ffffff !important;
+        background: #3f3f46 ;
+        color: #ffffff ;
       }
     }
 
     &__theme-card {
-      background-color: #202124 !important;
-      border-color: #3f3f46 !important;
+      background-color: #202124 ;
+      border-color: #3f3f46 ;
 
       &:hover {
-        background-color: #27272a !important;
-        border-color: #52525b !important;
+        background-color: #27272a ;
+        border-color: #52525b ;
       }
 
       &--active {
-        border-color: #3b82f6 !important;
-        background-color: rgba(59, 130, 246, 0.15) !important;
+        border-color: #3b82f6 ;
+        background-color: rgba(59, 130, 246, 0.15) ;
       }
     }
 
     &__theme-preview {
       &--light {
-        background: rgba(245, 158, 11, 0.2) !important;
-        color: #fbbf24 !important;
+        background: rgba(245, 158, 11, 0.2) ;
+        color: #fbbf24 ;
       }
 
       &--dark {
-        background: rgba(59, 130, 246, 0.25) !important;
-        color: #60a5fa !important;
+        background: rgba(59, 130, 246, 0.25) ;
+        color: #60a5fa ;
       }
 
       &--system {
-        background: rgba(161, 161, 170, 0.2) !important;
-        color: #e4e4e7 !important;
+        background: rgba(161, 161, 170, 0.2) ;
+        color: #e4e4e7 ;
       }
     }
 
     &__theme-label {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     &__check {
-      color: #3b82f6 !important;
+      color: #3b82f6 ;
     }
 
     &__footer {
-      border-top-color: #3f3f46 !important;
+      border-top-color: #3f3f46 ;
     }
   }
 }

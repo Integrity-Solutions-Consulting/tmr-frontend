@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Output, Input, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,6 +38,12 @@ export class Calendario {
     @Output() diaSeleccionado = new EventEmitter<Date>();
     @Output() editarActividadEvent = new EventEmitter<any>();
 
+    // sm - Nuevos inputs para poder incrustar este mismo calendario dentro del modal de "Ver calendario" de Seguimiento:
+    // idEmpleadoOverride carga las actividades de OTRO colaborador (en vez del usuario logueado) y soloLectura bloquea
+    // agregar/editar actividades (la navegación entre meses sigue funcionando igual).
+    @Input() idEmpleadoOverride?: number;
+    @Input() soloLectura = false;
+
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
 
@@ -49,8 +55,8 @@ export class Calendario {
             const fecha = this._fechaActual();
             const y = fecha.getFullYear();
             const m = fecha.getMonth() + 1;
-            this.actividadesService.cargarCalendario(y, m);
-            this.actividadesService.cargarResumen(y, m);
+            this.actividadesService.cargarCalendario(y, m, this.idEmpleadoOverride);
+            this.actividadesService.cargarResumen(y, m, this.idEmpleadoOverride);
         });
     }
 
@@ -109,6 +115,8 @@ export class Calendario {
 
     editarActividad(event: MouseEvent, actividad: any) {
         event.stopPropagation();
+        // sm - En modo solo lectura no se permite abrir el modal de edición de actividad.
+        if (this.soloLectura) return;
         this.editarActividadEvent.emit(actividad);
     }
 
@@ -144,6 +152,8 @@ export class Calendario {
     }
 
     seleccionarDia(fecha: Date) {
+        // sm - En modo solo lectura no se permite abrir el modal de agregar actividad al hacer clic en un día.
+        if (this.soloLectura) return;
         this.diaSeleccionado.emit(fecha);
     }
 }

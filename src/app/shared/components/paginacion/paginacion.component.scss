@@ -40,7 +40,7 @@
     padding: 0 5px;
     border: 1px solid #e5e7eb;
     border-radius: 5px;
-    background: #ffffff;
+    background: transparent;
     color: #737373;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
@@ -82,5 +82,35 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     color: #737373;
+  }
+}
+:host-context(html[data-theme="dark"]) {
+  .paginacion {
+    background-color: transparent; border: none;
+    padding: 8px 4px;
+    
+    &__info,
+    &__pagina-info,
+    &__dots {
+      color: #a1a1aa;
+    }
+
+    &__btn {
+      background: #27272a;
+      border-color: #3f3f46;
+      color: #ffffff;
+
+      &:hover:not(:disabled):not(.paginacion__btn--activo) {
+        background: #3f3f46;
+        border-color: #52525b;
+        color: #ffffff;
+      }
+
+      &--activo {
+        background: #163572;
+        border-color: #163572;
+        color: #ffffff;
+      }
+    }
   }
 }

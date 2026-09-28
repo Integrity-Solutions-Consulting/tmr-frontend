@@ -18,14 +18,19 @@
     </app-header>
 
     <!-- ===== METRICS BAR ===== -->
-    <div class="metrics-bar">
+    <!-- sm - La barra de métricas siempre está visible (sin saltos). Queda "en blanco" (con guion y atenuada) si no hay
+         colaboradores seleccionados o si están seleccionados todos; con uno o varios (no todos) muestra sus métricas. -->
+    <div class="metrics-bar" [class.metrics-bar--blank]="metricasEnBlanco">
         <div class="metric-item">
             <div class="metric-icon-wrap blue">
                 <img class="metric-icon-img blue-icon"
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasPendientes | horasFormat }}</span>
+                <!-- sm - "@for" con un solo valor: al cambiar el texto se vuelve a crear el span y se reproduce la animación de entrada. -->
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasPendientes | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Horas por registrar</span>
                 <span class="metric-desc">Pendientes por completar</span>
             </div>
@@ -36,7 +41,9 @@
                 <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().horasRegistradas | horasFormat }}</span>
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.horasRegistradas | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Horas registradas</span>
                 <span class="metric-desc">Total del periodo</span>
             </div>
@@ -48,35 +55,44 @@
                     src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().promedioPorDia | horasFormat }}</span>
+                @for (valor of [metricasEnBlanco ? '—' : (metricas.promedioPorDia | horasFormat)]; track valor) {
+                    <span class="metric-value">{{ valor }}</span>
+                }
                 <span class="metric-name">Promedio por día</span>
                 <span class="metric-desc">Horas registradas</span>
             </div>
         </div>
-
+    <!-- Ocultamiento de Iconos de Proyectos y Colaboradores -->
+    <!--
         <div class="metric-item">
             <div class="metric-icon-wrap orange">
                 <img class="metric-icon-img orange-icon"
                     src="assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg" alt="colaboradores" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().colaboradoresActivos }}</span>
+                <span class="metric-value">{{ metricas.colaboradoresActivos }}</span>
                 <span class="metric-name">Colaboradores activos</span>
                 <span class="metric-desc">Con reporte en el periodo</span>
             </div>
-        </div>
+        </div> -->
 
-        <div class="metric-item">
+        <!-- <div class="metric-item">
             <div class="metric-icon-wrap gray">
                 <img class="metric-icon-img gray-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
                     alt="proyectos" />
             </div>
             <div class="metric-texts">
-                <span class="metric-value">{{ metricas().proyectosUnicos }}</span>
+                <span class="metric-value">{{ metricas.proyectosUnicos }}</span>
                 <span class="metric-name">Proyectos</span>
                 <span class="metric-desc">Con actividades</span>
             </div>
-        </div>
+        </div> -->
+
+        <!-- sm - Texto de ayuda del estado en blanco; siempre ocupa su lugar y solo cambia su opacidad para no mover la barra. -->
+        <span class="metrics-hint" [class.visible]="metricasEnBlanco" [attr.aria-hidden]="!metricasEnBlanco">
+            <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+            Selecciona uno o varios colaboradores para ver sus métricas
+        </span>
     </div>
 
     <!-- ===== FILTER BAR ===== -->
@@ -123,11 +139,57 @@
         </div>
 
         <!-- Descargar -->
-        <button class="btn-descargar" [class.enabled]="selection.hasValue()" [disabled]="!selection.hasValue()"
-            (click)="descargarSeleccionados()">
-            Descargar
-            <span class="material-symbols-outlined download-icon">file_download</span>
+        <button class="btn-descargar" [class.enabled]="selection.hasValue()"
+            [class.loading]="isDownloading" [disabled]="!selection.hasValue() || isDownloading"
+            [matMenuTriggerFor]="descargaMenu" [attr.aria-busy]="isDownloading">
+            <span *ngIf="isDownloading" class="download-spinner" aria-hidden="true"></span>
+            {{ isDownloading ? 'Preparando...' : 'Descargar' }}{{ !isDownloading && selection.selected.length > 1 ? ' (' + selection.selected.length + ')' : '' }}
+            <span *ngIf="!isDownloading" class="material-symbols-outlined download-icon">file_download</span>
         </button>
+        <mat-menu #descargaMenu="matMenu">
+            <button mat-menu-item (click)="descargarSeleccionados('xlsx')" [disabled]="isDownloading">
+                <mat-icon>table_view</mat-icon>
+                Descargar Excel (.xlsx)
+            </button>
+            <button mat-menu-item (click)="descargarSeleccionados('pdf')" [disabled]="isDownloading">
+                <mat-icon>picture_as_pdf</mat-icon>
+                Descargar PDF
+            </button>
+        </mat-menu>
+    </div>
+
+    <!-- sm - Toast animado de descarga de seleccionados: reemplaza el mensaje "Preparando..." con título, barra de progreso y botón Cancelar. -->
+    <!-- sm - Con "warning" (varios colaboradores y algunos sin actividades) cambia el icono y el acento a advertencia. -->
+    <section *ngIf="progresoDescarga.visible" class="download-progress-toast" [class.closing]="progresoDescarga.cerrando"
+        [class.warning]="progresoDescarga.conAviso" role="status" aria-live="polite">
+        <div class="download-progress-header">
+            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">{{ progresoDescarga.conAviso ? 'info' : 'cloud_download' }}</span>
+            <span class="download-progress-title">{{ progresoDescarga.titulo }}</span>
+        </div>
+        <div class="download-progress-body">
+            <div class="download-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                [attr.aria-valuenow]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"
+                [attr.aria-label]="progresoDescarga.titulo">
+                <div class="download-progress-fill" [class.indeterminate]="progresoDescarga.indeterminado"
+                    [style.width.%]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"></div>
+            </div>
+            <div class="download-progress-labels">
+                <span>{{ progresoDescarga.detalle }}</span>
+                <span *ngIf="!progresoDescarga.indeterminado" class="download-progress-percent">{{ progresoDescarga.progreso }}%</span>
+            </div>
+        </div>
+        <div class="download-progress-actions">
+            <button type="button" class="download-progress-cancel" (click)="cancelarDescarga()"
+                [disabled]="progresoDescarga.progreso >= 100 || progresoDescarga.detalle === 'Cancelando...'">
+                Cancelar
+            </button>
+        </div>
+    </section>
+
+    <div *ngIf="downloadMessage" class="download-feedback" [class.success]="downloadMessageType === 'success'"
+        [class.error]="downloadMessageType === 'error'" [class.info]="downloadMessageType === 'info'" role="status">
+        <span class="material-symbols-outlined">{{ downloadMessageType === 'success' ? 'check_circle' : downloadMessageType === 'error' ? 'error' : 'hourglass_top' }}</span>
+        <span>{{ downloadMessage }}</span>
     </div>
 
     <!-- ===== TABLE ===== -->
@@ -182,14 +244,10 @@
                         <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>
                         <td class="col-dias-completar center">{{ el.diasACompletar }}</td>
                         <td class="col-acciones" (click)="$event.stopPropagation()">
-                            <button class="action-btn" [matMenuTriggerFor]="rowMenu">
-                                <mat-icon>more_vert</mat-icon>
+                            <button class="action-btn" type="button" (click)="verCalendarioColaborador(el)"
+                                title="Ver detalle" aria-label="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
                             </button>
-                            <mat-menu #rowMenu="matMenu">
-                                <button mat-menu-item (click)="descargarDetalle(el)">
-                                    <mat-icon>download</mat-icon> Descargar detalle
-                                </button>
-                            </mat-menu>
                         </td>
                     </tr>
                     <tr *ngIf="totalRegistros === 0">

@@ -24,10 +24,10 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: transparent;
+  border: none;
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  box-shadow: none;
   padding: 28px 28px 22px;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -440,48 +440,64 @@ input.filter-input {
 
 :host-context(html[data-theme="dark"]) {
   .report-wrapper {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none;
+    color: #f4f4f5 ;
   }
 
   .table-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
   .report-table {
-    background-color: #202124 !important;
+    background-color: #202124 ;
 
     th {
-      background-color: #202124 !important;
-      border-bottom: 2px solid #3f3f46 !important;
-      color: #a1a1aa !important;
+      background-color: #202124 ;
+      border-bottom: 2px solid #3f3f46 ;
+      color: #a1a1aa ;
     }
 
     td {
-      border-bottom: 1px solid #3f3f46 !important;
-      color: #ffffff !important;
+      border-bottom: 1px solid #3f3f46 ;
+      color: #ffffff ;
     }
 
     tr:hover {
-      background-color: rgba(255, 255, 255, 0.04) !important;
+      background-color: rgba(255, 255, 255, 0.04) ;
     }
   }
 
   .filter-input {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    border: none;
+    color: #ffffff ;
   }
 
   .btn-clear {
-    background-color: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #a1a1aa !important;
+    background-color: #202124 ;
+    border: none;
+    color: #a1a1aa ;
   }
 }
 
+
+:host-context(html[data-theme="dark"]) {
+  .report-table {
+    td {
+      border-bottom: 1px solid #3f3f46 !important;
+    }
+    tr {
+      &:hover {
+        background-color: #27272a !important;
+      }
+      &.selected-row {
+        background-color: #3f3f46 !important;
+      }
+    }
+  }
+}
