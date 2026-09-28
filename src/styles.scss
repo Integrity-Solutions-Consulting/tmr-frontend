@@ -144,67 +144,21 @@ mat-dialog-container,
   border: 1.5px solid var(--border-default) !important;
 }
 
-/* Modo oscuro del SHEPHERD.JS  */
+/* Modo oscuro del SHEPHERD.JS — uses CSS variables that auto-switch */
 html[data-theme="dark"] .shepherd-element.actividad-tour-step {
-  background: #27272a !important;
-  border-color: #3f3f46 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-content {
-  background: #27272a !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-header {
-  background: #27272a !important;
-  border-bottom-color: #3f3f46 !important;
-}
-
 html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-title {
-  color: #60a5fa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-cancel-icon {
-  color: #71717a !important;
+  color: var(--text-title) !important;
 }
 
 html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-cancel-icon:hover {
-  color: #e4e4e7 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-text {
-  background: #27272a !important;
-  color: #a1a1aa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-footer {
-  background: #27272a !important;
-  border-top-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary) {
-  background: #163572 !important;
-  color: #ffffff !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary {
-  background: #18181b !important;
-  color: #a1a1aa !important;
-  border-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
-  border-color: #60a5fa !important;
-  color: #60a5fa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-arrow::before {
-  background: #27272a !important;
-  border-color: #3f3f46 !important;
+  color: var(--text-main) !important;
 }
 
 html[data-theme="dark"] .shepherd-enabled.shepherd-target {
-  outline-color: #60a5fa !important;
+  outline-color: var(--status-info) !important;
   box-shadow: 0 0 0 5px rgba(96, 165, 250, 0.18) !important;
 }
 
@@ -233,9 +187,6 @@ body {
     /* ==========================================================================
      TOKENS SEMANTICOS (FASE 1)
      ========================================================================== */
-
-
-
 
   /* Fondos (Backgrounds) */
   --bg-app: #F5F7FC;
@@ -310,6 +261,15 @@ body {
   --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
   --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, 0.2);
   --validation-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.08);
+
+  /* Scrollbar */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c7c7c7;
+  --scrollbar-thumb-hover: #a0a0a0;
+
+  /* Autofill */
+  --autofill-bg: #ffffff;
+  --autofill-text: #0F1F33;
 }
 
 * {
@@ -317,9 +277,9 @@ body {
 }
 
 ::-webkit-scrollbar       { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
 
 /* Estilos globales de TMR Frontend - Estructura Refactorizada */
@@ -712,7 +672,7 @@ html[data-theme="dark"] {
   --text-muted: #6B8599;
   --text-disabled: #4A5568;
   --text-title: #3b82f6;
-  --text-inverse: #0A0A0A;
+  --text-inverse: #ffffff;
 
   /* Interacciones / Botones (Buttons/Primary) */
   --primary-color: #1565C0;
@@ -724,7 +684,14 @@ html[data-theme="dark"] {
   /* Formularios (Inputs) */
   --input-bg: #1C1C1C;
 
-  /* Sombras (Shadows) */
+  /* Scrollbar */
+  --scrollbar-track: #1C1C1C;
+  --scrollbar-thumb: #3f3f46;
+  --scrollbar-thumb-hover: #52525b;
+
+  /* Autofill */
+  --autofill-bg: #202124;
+  --autofill-text: #ffffff;
 
 
 
@@ -772,7 +739,7 @@ html[data-theme="dark"] {
   /* â”€â”€ Profile Popover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .profile-popover__card {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
 
     .profile-popover__user-info {
@@ -781,7 +748,7 @@ html[data-theme="dark"] {
     }
 
     .profile-popover__divider {
-      border-top: 1px solid var(--border-color) !important;
+      border-top: 1px solid var(--border-default) !important;
     }
 
     .profile-popover__item {
@@ -823,7 +790,7 @@ html[data-theme="dark"] {
   /* â”€â”€ Tarjeta de Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .login-card {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
     color: var(--text-main) !important;
 
@@ -833,7 +800,7 @@ html[data-theme="dark"] {
 
     input {
       background-color: var(--input-bg) !important;
-      border-color: var(--input-border) !important;
+      border-color: var(--border-input) !important;
       color: var(--text-main) !important;
     }
   }
@@ -841,7 +808,7 @@ html[data-theme="dark"] {
   /* â”€â”€ 1. Filtros y Buscadores Compartidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .filters-bar {
     background: var(--bg-card) !important;
-    border-color: var(--border-color) !important;
+    border-color: var(--border-default) !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
 
     .search-input {
@@ -853,7 +820,7 @@ html[data-theme="dark"] {
     }
 
     .custom-select, .date-group {
-      border-left-color: var(--border-color) !important;
+      border-left-color: var(--border-default) !important;
     }
 
     .custom-select {
@@ -872,7 +839,7 @@ html[data-theme="dark"] {
     .btn-secondary {
       background: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
 
       &:not(:disabled) {
         color: var(--primary-color) !important;
@@ -885,7 +852,7 @@ html[data-theme="dark"] {
   /* â”€â”€ 2. Tablas Compartidas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .table-card {
     background: var(--bg-card) !important;
-    border-color: var(--border-color) !important;
+    border-color: var(--border-default) !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
   }
 
@@ -898,12 +865,12 @@ html[data-theme="dark"] {
     .mat-mdc-header-cell {
       //background: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      //border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-default) !important;
     }
 
     td,
     .mat-mdc-cell {
-      //border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       .colab-name {
@@ -918,7 +885,7 @@ html[data-theme="dark"] {
   }
 
   .empty-state {
-    .empty-icon { color: var(--border-color) !important; }
+    .empty-icon { color: var(--border-default) !important; }
     h3 { color: var(--text-main) !important; }
     p { color: var(--text-muted) !important; }
   }
@@ -928,7 +895,7 @@ html[data-theme="dark"] {
   .seguimiento-badge,
   .badge {
     background-color: var(--bg-surface) !important;
-    border-color: var(--border-color) !important;
+    border-color: var(--border-default) !important;
     color: var(--text-main) !important;
 
     &.active,
@@ -1017,7 +984,7 @@ html[data-theme="dark"] {
     .mdc-dialog__surface {
       background-color: var(--bg-card) !important;
       color: var(--text-main) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
     }
 
@@ -1029,7 +996,7 @@ html[data-theme="dark"] {
     .mat-datepicker-content,
     .mdc-menu-surface {
       background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       .mat-mdc-option,
@@ -1124,7 +1091,7 @@ html[data-theme="dark"] {
   .mat-menu-panel,
   .mdc-menu-surface {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
 
     .mat-mdc-option,
@@ -1166,7 +1133,7 @@ html[data-theme="dark"] {
     .descarga-menu__trigger,
     .descargar__btn {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: #ffffff !important;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
 
@@ -1189,7 +1156,7 @@ html[data-theme="dark"] {
     .descarga-menu__panel,
     .descargar__panel {
       background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
       color: var(--text-main) !important;
 
@@ -1201,7 +1168,7 @@ html[data-theme="dark"] {
       .descarga-menu__select {
         background: var(--input-bg) !important;
         background-color: var(--input-bg) !important;
-        border: 1px solid var(--input-border) !important;
+        border: 1px solid var(--border-input) !important;
         color: #ffffff !important;
 
         .mat-mdc-select-value,
@@ -1235,7 +1202,7 @@ html[data-theme="dark"] {
 
   .descarga-menu__select-panel {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
 
     .mat-mdc-option,
     .mat-option {
@@ -1259,7 +1226,7 @@ html[data-theme="dark"] {
   .confirm-modal,
   .success-modal {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
 
     .modal__header h2,
@@ -1275,7 +1242,7 @@ html[data-theme="dark"] {
     .detail-modal__field,
     .info-card {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .mi-perfil-modal__value,
@@ -1295,7 +1262,7 @@ html[data-theme="dark"] {
 
     .configuracion-modal__theme-card {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
 
       &:hover {
         background-color: var(--bg-hover) !important;
@@ -1319,7 +1286,7 @@ html[data-theme="dark"] {
   .form-control,
   .form-select {
     background-color: var(--input-bg) !important;
-    //order: 1px solid var(--input-border) !important;
+    //order: 1px solid var(--border-input) !important;
     color: var(--text-main) !important;
 
     &::placeholder {
@@ -1354,7 +1321,7 @@ html[data-theme="dark"] {
 
     .metric-card {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
 
       .metric-value { color: var(--text-main) !important; }
       .metric-label { color: var(--text-secondary) !important; }
@@ -1364,7 +1331,7 @@ html[data-theme="dark"] {
     .info-box,
     .form-section {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     label, .label-text {
@@ -1403,7 +1370,7 @@ html[data-theme="dark"] {
 
     .form-section, .info-card, .detail-card {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
   }
 
@@ -1423,14 +1390,14 @@ html[data-theme="dark"] {
     .fc-scrollgrid-section-header th {
       background-color: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .fc-daygrid-day,
     .fc-day,
     .fc-dayframe {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
       color: var(--text-main) !important;
     }
 
@@ -1458,7 +1425,7 @@ html[data-theme="dark"] {
   .modal-confirmacion,
   .detalle-card {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 
@@ -1478,7 +1445,7 @@ html[data-theme="dark"] {
 
     .summary-card {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       .card-number {
@@ -1541,7 +1508,7 @@ html[data-theme="dark"] {
     .custom-select,
     .dropdown-search-box {
       background-color: var(--input-bg) !important;
-      border: 1px solid var(--input-border) !important;
+      border: 1px solid var(--border-input) !important;
       color: #ffffff !important;
       font-weight: 500 !important;
 
@@ -1559,7 +1526,7 @@ html[data-theme="dark"] {
     .dropdown-list,
     .estado-dropdown {
       background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       li, .dropdown-option {
@@ -1581,12 +1548,12 @@ html[data-theme="dark"] {
       thead, th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       td {
         color: var(--text-main) !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       tr:hover {
@@ -1614,7 +1581,7 @@ html[data-theme="dark"] {
     .modal-close,
     .detalle-close {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       &:hover {
@@ -1634,7 +1601,7 @@ html[data-theme="dark"] {
 
     .detalle-proyectos__item {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
 
       .detalle-proyectos__item-nombre {
         color: var(--text-main) !important;
@@ -1686,7 +1653,7 @@ html[data-theme="dark"] {
   .metrics-bar,
   .mobile-actividades-seccion {
     background-color: var(--bg-card) !important;
-    //border: 1px solid var(--border-color) !important;
+    //border: 1px solid var(--border-default) !important;
     //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     color: var(--text-main) !important;
 
@@ -1700,7 +1667,7 @@ html[data-theme="dark"] {
     }
 
     .metric-divider {
-      background-color: var(--border-color) !important;
+      background-color: var(--border-default) !important;
     }
   }
 
@@ -1716,7 +1683,7 @@ html[data-theme="dark"] {
 
   .btn-reporte {
     background-color: var(--bg-surface) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
 
     &:hover {
@@ -1939,7 +1906,7 @@ html[data-theme="dark"] {
     .metrics-bar,
     .table-scroll-container {
       background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
@@ -1948,7 +1915,7 @@ html[data-theme="dark"] {
     .filter-select,
     .date-input {
       background-color: var(--input-bg) !important;
-      border: 1px solid var(--input-border) !important;
+      border: 1px solid var(--border-input) !important;
       color: #ffffff !important;
       font-weight: 500 !important;
 
@@ -1964,7 +1931,7 @@ html[data-theme="dark"] {
     }
 
     .toggle-group {
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .toggle-btn {
@@ -1980,7 +1947,7 @@ html[data-theme="dark"] {
     .btn-descargar,
     .btn-descargar.enabled {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       .download-icon {
@@ -1997,12 +1964,12 @@ html[data-theme="dark"] {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
         font-weight: bolder !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       td {
         color: var(--text-main) !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       tr:hover {
@@ -2023,7 +1990,7 @@ html[data-theme="dark"] {
 
   .btn-reporte {
     background-color: var(--bg-surface) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
 
     &:hover {
@@ -2051,7 +2018,7 @@ html[data-theme="dark"] {
     .mat-mdc-form-field {
       --mdc-outlined-text-field-label-text-color: var(--text-secondary);
       --mdc-outlined-text-field-input-text-color: var(--text-main);
-      --mdc-outlined-text-field-outline-color: var(--input-border);
+      --mdc-outlined-text-field-outline-color: var(--border-input);
       --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
       --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
       --mat-select-enabled-trigger-text-color: var(--text-main);
@@ -2061,7 +2028,7 @@ html[data-theme="dark"] {
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--input-border) !important;
+        border-color: var(--border-input) !important;
       }
 
       &:hover .mdc-notched-outline__leading,
@@ -2126,17 +2093,17 @@ html[data-theme="dark"] {
   }
 
   .calendar-grid {
-    border-color: var(--border-color) !important;
+    border-color: var(--border-default) !important;
 
     .day-header {
       background-color: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .day-cell {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
 
       &:hover:not(.other-month) {
         background-color: var(--bg-hover) !important;
@@ -2187,7 +2154,7 @@ html[data-theme="dark"] {
   .nav-controls .nav-btn,
   .nav-controls .hoy-btn {
     background-color: var(--bg-surface) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
 
     &:hover {
@@ -2221,10 +2188,10 @@ html[data-theme="dark"] {
   .actividad-modal {
     background-color: var(--bg-card) !important;
     color: var(--text-main) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
 
     .actividad-modal__header {
-      border-bottom-color: var(--border-color) !important;
+      border-bottom-color: var(--border-default) !important;
     }
 
     .actividad-modal__title {
@@ -2237,7 +2204,7 @@ html[data-theme="dark"] {
 
     .actividad-modal__close {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
       color: var(--text-main) !important;
 
       &:hover {
@@ -2247,7 +2214,7 @@ html[data-theme="dark"] {
 
     .actividad-modal__help {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
       color: var(--text-secondary) !important;
 
       &:hover {
@@ -2264,7 +2231,7 @@ html[data-theme="dark"] {
     .actividad-modal__input-wrap,
     .actividad-modal__select {
       background-color: var(--input-bg) !important;
-      border: 1.5px solid var(--input-border) !important;
+      border: 1.5px solid var(--border-input) !important;
       color: #ffffff !important;
     }
 
@@ -2319,16 +2286,16 @@ html[data-theme="dark"] {
 
     .actividad-modal__checkmark {
       background-color: var(--input-bg) !important;
-      border-color: var(--input-border) !important;
+      border-color: var(--border-input) !important;
     }
 
     .actividad-modal__recurrence-panel {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .actividad-modal__footer {
-      border-top-color: var(--border-color) !important;
+      border-top-color: var(--border-default) !important;
     }
 
     .actividad-modal__btn--save {
@@ -2338,7 +2305,7 @@ html[data-theme="dark"] {
 
     .actividad-modal__btn--cancel {
       background-color: var(--bg-surface) !important;
-      border: 1.5px solid var(--border-color) !important;
+      border: 1.5px solid var(--border-default) !important;
       color: var(--text-main) !important;
     }
   }
@@ -2371,7 +2338,7 @@ html[data-theme="dark"] {
     .table-card,
     .table-wrapper {
       background-color: var(--bg-card) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
@@ -2383,7 +2350,7 @@ html[data-theme="dark"] {
     .search-input-wrapper,
     .date-controls {
       background-color: var(--input-bg) !important;
-      border: 1px solid var(--input-border) !important;
+      border: 1px solid var(--border-input) !important;
       color: #ffffff !important;
 
       input {
@@ -2402,7 +2369,7 @@ html[data-theme="dark"] {
 
     .btn-secondary {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       &:hover {
@@ -2414,12 +2381,12 @@ html[data-theme="dark"] {
       thead, th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       td {
         color: var(--text-main) !important;
-        border-bottom: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-default) !important;
       }
 
       tr:hover {
@@ -2449,7 +2416,7 @@ html[data-theme="dark"] {
 
     .upload-box, .file-dropzone {
       background-color: var(--bg-surface) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
       color: var(--text-secondary) !important;
     }
   }
@@ -2459,7 +2426,7 @@ html[data-theme="dark"] {
   .reporte-horas-container,
   .reporte-card {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 
@@ -2473,7 +2440,7 @@ html[data-theme="dark"] {
 
     .metrica-card {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       .metrica-valor {
@@ -2489,7 +2456,7 @@ html[data-theme="dark"] {
     .filter-select,
     .btn-clear {
       background-color: var(--input-bg) !important;
-      border: 1px solid var(--input-border) !important;
+      border: 1px solid var(--border-input) !important;
       color: #ffffff !important;
       font-weight: 500 !important;
 
@@ -2511,19 +2478,19 @@ html[data-theme="dark"] {
 
     .table-wrapper {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--border-default) !important;
     }
 
     .report-table {
       th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
-        border-bottom-color: var(--border-color) !important;
+        border-bottom-color: var(--border-default) !important;
       }
 
       td {
         color: var(--text-main) !important;
-        border-bottom-color: var(--border-color) !important;
+        border-bottom-color: var(--border-default) !important;
       }
 
       .data-row:hover {
@@ -2543,7 +2510,7 @@ html[data-theme="dark"] {
     .btn-pdf,
     .btn-descargar {
       background-color: var(--bg-surface) !important;
-      border: 1px solid var(--border-color) !important;
+      border: 1px solid var(--border-default) !important;
       color: var(--text-main) !important;
 
       &:hover {
@@ -2565,12 +2532,12 @@ html[data-theme="dark"] {
   input:-webkit-autofill:active,
   textarea:-webkit-autofill,
   select:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
-    -webkit-text-fill-color: #ffffff !important;
-    caret-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+    -webkit-text-fill-color: var(--autofill-text) !important;
+    caret-color: var(--autofill-text) !important;
     transition: background-color 5000s ease-in-out 0s !important;
   }
-      /* Override for tables to ensure dark gray #202124 instead of blue */
+
   .seguimiento-page .table-scroll-container,
   .seguimiento-page .table-wrapper,
   .seguimiento-table,
@@ -2578,10 +2545,10 @@ html[data-theme="dark"] {
   app-carga-actividades .table-wrapper,
   app-carga-actividades table,
   app-carga-actividades .data-table {
-    background-color: #202124 !important;
+    background-color: var(--bg-card) !important;
 
     th, thead, thead th {
-      background-color: #202124 !important;
+      background-color:var(--bg-card) !important;
     }
   }
 }
@@ -2597,3 +2564,4 @@ html[data-theme="dark"] app-carga-actividades,
 html[data-theme="dark"] app-carga-actividades-component {
   background-color: #18181b !important;
 }
+

@@ -1,3 +1,4 @@
+
 .colabs-page {
   display: flex;
   flex-direction: column;
@@ -5,18 +6,17 @@
   min-height: 0;
 
   &__wrapper {
-  background: var(--bg-card);
-  border-radius: 18px;
-  border: 1px solid var(--border-default);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  padding: 8px 24px 16px 24px; 
-  display: flex;
-  flex-direction: column;
-  gap:12px;
-}
+    background: var(--bg-card);
+    border-radius: 18px;
+    border: 1px solid var(--border-default);
+    box-shadow: var(--elevation-card);
+    padding: 8px 24px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
   &__title {
-    //font-family: 'Inter', sans-serif;
     font-size: 32px;
     font-weight: 800;
     color: var(--primary-color);
@@ -70,7 +70,9 @@
     transition: background 0.15s;
     white-space: nowrap;
 
-    &:hover { background: #122d63; }
+    &:hover {
+      background: var(--primary-hover);
+    }
   }
 
   &__table-container {
@@ -83,11 +85,12 @@
 }
 
 // ── Confirm modal — FUERA de .colabs-page ─────────────
+
 .confirm-overlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(0,0,0,0.35);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,7 +101,7 @@
   position: relative;
   background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+  box-shadow: var(--elevation-card);
   padding: 36px 32px 28px;
   display: flex;
   flex-direction: column;
@@ -120,7 +123,9 @@
     margin-bottom: 4px;
   }
 
-  &__icon { font-size: 32px; }
+  &__icon {
+    font-size: 32px;
+  }
 
   &__title {
     font-family: 'Inter', sans-serif;
@@ -136,7 +141,10 @@
     color: var(--text-secondary);
     margin: 0;
     line-height: 1.5;
-    strong { color: #374151; }
+
+    strong {
+      color: var(--text-body);
+    }
   }
 
   &__actions {
@@ -160,46 +168,42 @@
     &--cancel {
       background: var(--bg-soft);
       color: var(--text-body);
-      &:hover { background: #e5e7eb; }
+
+      &:hover {
+        background: var(--border-soft);
+      }
     }
 
     &--confirm {
       background: var(--primary-color);
       color: var(--text-inverse);
-      &:hover { background: #122d63; }
+
+      &:hover {
+        background: var(--primary-hover);
+      }
     }
   }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-:host-context(html[data-theme="dark"]) {
-  .colabs-page__wrapper {
-    background-color: #27272a ;
-    border-color: var(--border-default) ;
-    color: #f4f4f5 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
+  from {
+    opacity: 0;
+    transform: translateY(16px);
   }
 
-  .colabs-page__btn-agregar {
-    background: #163572 ;
-    &:hover { background: #122d63 ; }
-  }
-
-  .confirm-card {
-    background-color: #27272a ;
-    border-color: var(--border-default) ;
-    color: #f4f4f5 ;
-
-    &__title { color: #3b82f6 ; }
-    &__mensaje { color: #a1a1aa ; }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+

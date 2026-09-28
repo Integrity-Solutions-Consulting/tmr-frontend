@@ -1,4 +1,4 @@
-:host {
+scss:host {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -25,7 +25,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 18px 24px 12px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -73,7 +73,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #e5e7eb;
+      background: var(--border-soft);
       border-radius: 3px;
     }
   }
@@ -84,7 +84,7 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 14px 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -108,13 +108,14 @@
       color: var(--text-inverse);
 
       &:hover {
-        background: #122d63;
+        background: var(--primary-hover);
       }
     }
   }
 }
 
 // ── Grid ─────────────────────────────────────────────
+
 .form-grid {
   display: grid;
   column-gap: 26px;
@@ -150,6 +151,7 @@
 }
 
 // ── Floating Input ─────────────────────────────────────
+
 .float-field {
   position: relative;
   width: 100%;
@@ -174,15 +176,15 @@
     }
 
     &--error {
-      border-color: #dc2626;
+      border-color: var(--status-danger-text);
 
       &:focus {
         box-shadow: var(--validation-ring-danger);
       }
     }
 
-    &:focus ~ .float-field__label,
-    &:not(:placeholder-shown) ~ .float-field__label {
+    &:focus~.float-field__label,
+    &:not(:placeholder-shown)~.float-field__label {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
@@ -195,8 +197,8 @@
       padding: 10px 12px;
       resize: none;
 
-      &:focus ~ .float-field__label,
-      &:not(:placeholder-shown) ~ .float-field__label {
+      &:focus~.float-field__label,
+      &:not(:placeholder-shown)~.float-field__label {
         top: 0;
         transform: translateY(-50%);
         font-size: 11px;
@@ -225,6 +227,7 @@
 }
 
 // ── Floating Select ───────────────────────────────────
+
 .float-select {
   position: relative;
   width: 100%;
@@ -243,9 +246,12 @@
     box-sizing: border-box;
     cursor: pointer;
     appearance: none;
+
+    // Excepción técnica: el color está embebido dentro del SVG data URI.
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
+
     transition: border-color 0.15s, box-shadow 0.15s;
 
     &:focus {
@@ -278,7 +284,7 @@
     }
   }
 
-  &__input:focus ~ &__label {
+  &__input:focus~&__label {
     top: 0;
     transform: translateY(-50%);
     font-size: 11px;
@@ -287,6 +293,7 @@
 }
 
 // ── Status pill (view mode) ────────────────────────────────────
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -295,17 +302,18 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--status-success-text);
-  background: #BBF7D0;
+  background: var(--status-success-bg-soft);
   border: 1px solid var(--status-success-border);
 }
 
 .status-pill--inactive {
   color: var(--text-secondary);
   background: var(--bg-soft);
-  border-color: #F3F4F6;
+  border-color: var(--border-default);
 }
 
 // ── Detail Section (View Mode) ─────────────────────────────────
+
 .detalle-section {
   margin-bottom: 20px;
 }
@@ -362,6 +370,7 @@
 }
 
 // ── Overrides CDK MatDialog ──────────────────────────────────
+
 ::ng-deep .catalogos-form-dialog-panel {
   width: 560px !important;
   max-width: calc(100vw - 32px) !important;
@@ -389,55 +398,3 @@
   border-radius: 16px !important;
 }
 
-:host-context(html[data-theme="dark"]) {
-  .modal-form {
-    background-color: #27272a ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-
-    &__header,
-    &__footer {
-      border-color: #3f3f46 ;
-    }
-
-    &__close {
-      &:hover { background: #3f3f46 ; color: #ffffff ; }
-    }
-
-    &__btn--save {
-      background: #163572 ;
-      &:hover { background: #122d63 ; }
-    }
-  }
-
-  /* Floating inputs y selects */
-  .float-field__input,
-  .float-select__input {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
-    }
-  }
-
-  .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
-    background-repeat: no-repeat ;
-    background-position: right 12px center ;
-    background-color: #202124 ;
-  }
-
-  .float-field__label,
-  .float-select__label {
-    background-color: transparent ;
-  }
-
-  .float-field__input:focus ~ .float-field__label,
-  .float-field__input:not(:placeholder-shown) ~ .float-field__label,
-  .float-select__input:focus ~ .float-select__label,
-  .float-select__label--up {
-    background-color: #202124 ;
-    background: #202124 ;
-  }
-}

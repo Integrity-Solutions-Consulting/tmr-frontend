@@ -1,4 +1,4 @@
-.descarga {
+scss .descarga {
   position: relative;
 
   &__btn {
@@ -15,7 +15,7 @@
     border: 1px solid var(--border-default);
     border-radius: 8px;
 
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    box-shadow: var(--elevation-card);
 
     cursor: pointer;
 
@@ -63,7 +63,7 @@
     border: 1px solid var(--border-default);
     border-radius: 10px;
 
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--elevation-dropdown);
   }
 
   &__title {
@@ -73,7 +73,7 @@
 
     color: var(--text-subtle);
 
-    border-bottom: 1px solid var(--border-table);
+    border-bottom: 1px solid var(--border-default);
 
     font-size: 12px;
     font-weight: 500;
@@ -116,3 +116,4 @@
     }
   }
 }
+

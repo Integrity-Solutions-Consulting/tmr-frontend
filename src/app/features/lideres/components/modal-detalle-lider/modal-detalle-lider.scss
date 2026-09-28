@@ -1,6 +1,6 @@
-$primary: #163572;
+$primary: var(--primary-color);
 $primary-dark: #162C56;
-$white: #ffffff;
+$white: var(--bg-card);
 $border: #E5E5E5;
 $text-dark: #1a1a2e;
 $text-mid: #4a4a6a;
@@ -25,7 +25,7 @@ $inactivo: #ef4444;
   width: 560px;
   max-width: 95vw;
   padding: 32px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--elevation-card);
 }
 
 .detalle-header {
@@ -103,7 +103,7 @@ $inactivo: #ef4444;
 }
 
 .badge-inactivo {
-  .badge-circulo { background: #9ca3af; }
+  .badge-circulo { background: var(--text-muted); }
 }
 
 .detalle-info-row {
@@ -353,7 +353,7 @@ padding-left: 20px;
     color: var(--text-secondary);
     border-color: var(--border-default);
     background: var(--bg-subtle);
-    .detalle-proyectos__item-dot { background: #9ca3af; }
+    .detalle-proyectos__item-dot { background: var(--text-muted); }
   }
 
   .estado--aprobado {
@@ -392,32 +392,3 @@ padding-left: 20px;
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .detalle-card {
-    background-color: #27272a ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-  }
-
-  /* Badges de estado en proyectos vinculados */
-  .estado--activo,
-  .estado--completado {
-    .detalle-proyectos__item-dot { background: #4ade80 ; }
-  }
-
-  .estado--progreso {
-    .detalle-proyectos__item-dot { background: #60a5fa ; }
-  }
-
-  .estado--pausa,
-  .estado--espera {
-    .detalle-proyectos__item-dot { background: #fbbf24 ; }
-  }
-
-  .estado--cancelado {
-    .detalle-proyectos__item-dot { background: #f87171 ; }
-  }
-
-  .estado--inactivo {
-    .detalle-proyectos__item-dot { background: #a1a1aa ; }
-  }
-}

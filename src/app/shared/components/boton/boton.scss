@@ -1,4 +1,4 @@
-.app-boton {
+scss .app-boton {
   border-radius: 8px !important;
   font-family: 'Inter', sans-serif !important;
   font-weight: 600 !important;
@@ -35,8 +35,8 @@
     box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background-color: #162C56 !important;
-      box-shadow: 0 4px 12px rgba(22, 53, 114, 0.3) !important;
+      background-color: var(--primary-hover) !important;
+      box-shadow: var(--elevation-card) !important;
     }
   }
 
@@ -55,7 +55,7 @@
     color: var(--text-inverse) !important;
 
     &:hover:not(:disabled) {
-      background-color: #dc2626 !important;
+      background-color: var(--status-danger-text) !important;
     }
   }
 
@@ -66,3 +66,4 @@
     box-shadow: none !important;
   }
 }
+

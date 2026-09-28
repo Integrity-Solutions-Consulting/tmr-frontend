@@ -1,4 +1,4 @@
-:host {
+scss:host {
   display: block;
   width: 100%;
   min-width: 0;
@@ -19,7 +19,7 @@
   justify-content: flex-start;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--elevation-card, 0 1px 3px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--elevation-card);
   border: 1px solid var(--border-default);
   transition: transform 0.2s, box-shadow 0.2s;
 
@@ -67,23 +67,23 @@
   }
 
   &.proyectos {
-    background: rgba(59, 130, 246, 0.1);
+    background: var(--status-info-bg-soft);
     color: var(--status-info-text);
   }
 
   &.horas {
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--status-success-bg-soft);
     color: var(--status-success-text);
   }
 
   &.colaboradores {
-    background: rgba(168, 85, 247, 0.1);
-    color: #f97316;
+    background: var(--primary-light);
+    color: var(--primary-color);
   }
 
   &.clientes {
-    background: rgba(249, 115, 22, 0.1);
-    color: #a855f7;
+    background: var(--status-warning-bg-soft);
+    color: var(--status-warning-text);
   }
 }
 
@@ -112,3 +112,4 @@
     height: 40px;
   }
 }
+

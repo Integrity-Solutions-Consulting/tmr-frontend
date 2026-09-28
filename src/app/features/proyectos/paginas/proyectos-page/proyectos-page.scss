@@ -1,3 +1,9 @@
+@use 'sass:color';
+
+/* ============================================================
+   CONTENEDOR PRINCIPAL
+   ============================================================ */
+
 .proyectos-page {
   width: 100%;
   max-width: 1280px;
@@ -9,6 +15,10 @@
   padding: 28px 28px 22px;
   box-sizing: border-box;
 }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 .proyectos-page__header {
   display: flex;
@@ -26,6 +36,10 @@
   }
 }
 
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
 .proyectos-page__toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -33,6 +47,10 @@
   align-items: center;
   margin-bottom: 16px;
 }
+
+/* ============================================================
+   ACCIONES
+   ============================================================ */
 
 .proyectos-page__actions {
   display: flex;
@@ -54,25 +72,29 @@
   }
 }
 
+/* ============================================================
+   BOTÓN CREAR
+   ============================================================ */
+
 .proyectos-page__create {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
 
   min-width: 100px;
   height: 40px;
   padding: 0 18px;
 
-  background: var(--primary-color);
-  color: var(--text-inverse);
+  background: var(--primary-color) !important;
+  color: var(--text-inverse) !important;
+  border: none;
   border-radius: 8px;
   box-shadow: none;
   white-space: nowrap;
   line-height: 1;
 
   &:hover {
-    background: var(--primary-hover);
+    background: var(--primary-hover) !important;
   }
 
   ::ng-deep .mdc-button__label {
@@ -93,9 +115,17 @@
   line-height: 1;
 }
 
+/* ============================================================
+   CONTENIDO
+   ============================================================ */
+
 .proyectos-page__content {
   margin-top: 0;
 }
+
+/* ============================================================
+   DETALLE DEL PROYECTO
+   ============================================================ */
 
 .proyecto-detalle {
   display: flex;
@@ -103,6 +133,10 @@
   gap: 18px;
   color: var(--text-main);
 }
+
+/* ============================================================
+   HEADER DEL DETALLE
+   ============================================================ */
 
 .proyecto-detalle__header {
   display: grid;
@@ -143,6 +177,10 @@
   font-weight: 400;
 }
 
+/* ============================================================
+   MÉTRICAS DEL PROYECTO
+   ============================================================ */
+
 .proyecto-detalle__metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -163,6 +201,10 @@
   }
 }
 
+/* ============================================================
+   RESUMEN Y GRID DE LÍDERES
+   ============================================================ */
+
 .proyecto-detalle__summary,
 .proyecto-detalle__leader-grid {
   display: grid;
@@ -176,6 +218,10 @@
     border: 1px solid var(--border-default);
   }
 }
+
+/* ============================================================
+   LÍDERES
+   ============================================================ */
 
 .proyecto-detalle__leaders {
   display: flex;
@@ -196,6 +242,10 @@
 .proyecto-detalle__leader-grid {
   grid-template-columns: 1fr 140px 120px;
 }
+
+/* ============================================================
+   RECURSOS
+   ============================================================ */
 
 .proyecto-detalle__resources {
   display: flex;
@@ -224,26 +274,36 @@
   }
 }
 
-.proyecto-detalle span {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--text-subtle);
-  font-size: 12px;
-  font-weight: 400;
+/* ============================================================
+   TEXTOS DEL DETALLE
+   ============================================================ */
+
+.proyecto-detalle {
+  span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-subtle);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  strong {
+    color: var(--primary-color);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  h4 {
+    margin: 0 0 10px;
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 600;
+  }
 }
 
-.proyecto-detalle strong {
-  color: var(--primary-color);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.proyecto-detalle h4 {
-  margin: 0 0 10px;
-  color: var(--primary-color);
-  font-size: 14px;
-  font-weight: 600;
-}
+/* ============================================================
+   TABLA DEL PROYECTO
+   ============================================================ */
 
 .proyecto-detalle__table {
   overflow-x: auto;
@@ -280,12 +340,19 @@
   }
 }
 
+/* ============================================================
+   RESPONSIVE - DESKTOP
+   ============================================================ */
 
 @media (max-width: 1440px) {
   .proyectos-page {
     max-width: 1220px;
   }
 }
+
+/* ============================================================
+   RESPONSIVE - TABLET
+   ============================================================ */
 
 @media (max-width: 1024px) {
   .proyectos-page {
@@ -306,6 +373,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   RESPONSIVE - MOBILE
+   ============================================================ */
 
 @media (max-width: 768px) {
   .proyectos-page {
@@ -332,6 +403,10 @@
     margin-inline: -2px;
   }
 }
+
+/* ============================================================
+   RESPONSIVE - MOBILE PEQUEÑO
+   ============================================================ */
 
 @media (max-width: 480px) {
   .proyectos-page {

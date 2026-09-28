@@ -52,7 +52,7 @@ h3 {
 .calendar-scroll {
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--text-disabled) transparent;
 }
 
 .calendar-scroll::-webkit-scrollbar {
@@ -61,7 +61,7 @@ h3 {
 
 .calendar-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #cbd5e1;
+  background: var(--text-disabled);
 }
 
 .calendar-grid {
@@ -220,8 +220,8 @@ h3 {
 ::ng-deep .holiday-menu.mat-mdc-menu-panel {
   min-width: 140px !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  background: var(--bg-card) !important;
+  box-shadow: var(--elevation-card);
 }
 
 ::ng-deep .holiday-menu .mat-mdc-menu-content {
@@ -270,75 +270,4 @@ h3 {
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .calendar-card {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-    color: #f4f4f5 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
 
-  .calendar-actions button {
-    background-color: #27272a ;
-    border-color: #3f3f46 ;
-    color: #f4f4f5 ;
-    &:hover { background: #3f3f46 ; }
-  }
-
-  .weekday-grid {
-    background-color: #202124 ;
-    border-bottom-color: #3f3f46 ;
-  }
-
-  .day-cell {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-right-color: #3f3f46 ;
-    border-bottom-color: #3f3f46 ;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.04) ;
-    }
-
-    &.muted {
-      background-color: #18181b ;
-      .day-number { color: #52525b ; }
-    }
-
-    &.today {
-      background-color: rgba(59, 130, 246, 0.15) ;
-      box-shadow: inset 0 0 0 1px #3b82f6 ;
-    }
-  }
-
-  .day-number {
-    color: #ffffff ;
-  }
-
-  .today .day-number {
-    background-color: #3b82f6 ;
-    color: #ffffff ;
-  }
-
-  /* Chips de feriados en el calendario */
-  .holiday-chip {
-    &.type-nacional {
-      background: rgba(34, 197, 94, 0.2) ;
-      border-color: rgba(34, 197, 94, 0.4) ;
-      color: #4ade80 ;
-    }
-
-    &.type-local {
-      background: rgba(249, 115, 22, 0.2) ;
-      border-color: rgba(249, 115, 22, 0.4) ;
-      color: #fb923c ;
-    }
-
-    &.type-religioso {
-      background: rgba(168, 85, 247, 0.2) ;
-      border-color: rgba(168, 85, 247, 0.4) ;
-      color: #c084fc ;
-    }
-  }
-}

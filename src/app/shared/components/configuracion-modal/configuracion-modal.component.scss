@@ -1,3 +1,5 @@
+
+
 .configuracion-modal {
   width: min(520px, 92vw);
   padding: 24px;
@@ -10,7 +12,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-table);
+  border-bottom: 1px solid var(--border-default);
 
   .configuracion-modal__header-info {
     display: flex;
@@ -54,8 +56,8 @@
     }
 
     &:hover {
-      color: #334155;
-      background: #f1f5f9;
+      color: var(--text-body);
+      background: var(--bg-hover);
     }
   }
 }
@@ -84,7 +86,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-main);
   }
 }
 
@@ -122,7 +124,7 @@
 
   &--active {
     border-color: var(--primary-color) !important;
-    background: #f0f4fa !important;
+    background: var(--primary-light) !important;
   }
 }
 
@@ -140,24 +142,24 @@
 
   &--light {
     background: var(--status-warning-bg-soft);
-    color: #b45309;
+    color: var(--status-warning-text);
   }
 
   &--dark {
-    background: #e0e7ff;
-    color: #3730a3;
+    background: var(--bg-hover);
+    color: var(--primary-hover);
   }
 
   &--system {
     background: var(--bg-surface);
-    color: #334155;
+    color: var(--text-body);
   }
 }
 
 .configuracion-modal__theme-label {
   font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .configuracion-modal__check {
@@ -172,7 +174,7 @@
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
-  border-top: 1px solid var(--border-table);
+  border-top: 1px solid var(--border-default);
 
   .configuracion-modal__btn-close {
     background: var(--primary-color) !important;
@@ -183,7 +185,7 @@
     font-weight: 600 !important;
 
     &:hover {
-      background: #122d63 !important;
+      background: var(--primary-hover) !important;
     }
   }
 }
@@ -194,44 +196,3 @@
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .configuracion-modal {
-    background-color: var(--bg-surface) ;
-    color: #f4f4f5 ;
-
-    &__header {
-      border-bottom-color: #3f3f46 ;
-    }
-
-    &__theme-card {
-      background-color: var(--bg-app) ;
-      border-color: #3f3f46 ;
-
-      &:hover {
-        background-color: var(--bg-surface) ;
-      }
-
-      &--active {
-        background-color: rgba(59, 130, 246, 0.15) ;
-      }
-    }
-
-    &__theme-preview {
-      &--light {
-        color: #fbbf24 ;
-      }
-
-      &--dark {
-        color: #60a5fa ;
-      }
-
-      &--system {
-        color: #e4e4e7 ;
-      }
-    }
-
-    &__footer {
-      border-top-color: #3f3f46 ;
-    }
-  }
-}

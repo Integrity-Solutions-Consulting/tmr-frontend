@@ -1,7 +1,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.40);
+  background: var(--overlay-backdrop);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -27,7 +27,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 22px 24px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -58,7 +58,7 @@
     transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
 
-    .material-icons {
+     .material-icons {
       font-size: 20px;
     }
 
@@ -66,6 +66,8 @@
       color: var(--text-body);
       background: var(--bg-soft);
     }
+
+    
   }
 
   &__body {
@@ -73,7 +75,7 @@
     padding: 20px 24px;
     flex: 1;
 
-    &::-webkit-scrollbar {
+     &::-webkit-scrollbar {
       width: 6px;
     }
 
@@ -82,9 +84,11 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #e5e7eb;
+      background: var(--border-soft);
       border-radius: 3px;
     }
+
+    
   }
 
   &__footer {
@@ -93,7 +97,7 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -111,7 +115,7 @@
     transition: all 0.15s;
     border: none;
 
-    .material-icons {
+     .material-icons {
       font-size: 18px;
     }
 
@@ -130,13 +134,16 @@
       color: var(--text-inverse);
 
       &:hover {
-        background: #122d63;
+        background: var(--primary-hover);
       }
     }
+
+    
   }
 }
 
 // ── Sección ──────────────────────────────────────────
+
 .form-section {
   margin-bottom: 28px;
 
@@ -159,12 +166,13 @@
     flex-shrink: 0;
   }
 
-  .form-grid + .form-grid {
+  .form-grid+.form-grid {
     margin-top: 18px;
   }
 }
 
 // ── Toggle para sección reemplazo ─────────────────────
+
 .form-section__toggle {
   background: none;
   border: none;
@@ -180,7 +188,7 @@
   text-align: left;
 
   &:hover {
-    color: #7c3aed;
+    color: var(--primary-color);
   }
 
   .material-icons {
@@ -201,6 +209,7 @@
 }
 
 // ── Grid ─────────────────────────────────────────────
+
 .form-grid {
   display: grid;
   column-gap: 26px;
@@ -216,6 +225,7 @@
   flex-direction: column;
   gap: 4px;
   min-height: 58px;
+  position: relative;
 
   &--full {
     grid-column: 1 / -1;
@@ -243,6 +253,7 @@
 }
 
 // ── Floating Input ─────────────────────────────────────
+
 .float-field {
   position: relative;
   width: 100%;
@@ -261,21 +272,21 @@
     box-sizing: border-box;
     transition: border-color 0.15s, box-shadow 0.15s;
 
-    &:focus {
+     &:focus {
       border-color: var(--primary-color);
       box-shadow: var(--focus-ring-primary);
     }
 
     &--error {
-      border-color: #dc2626;
+      border-color: var(--status-danger-text);
 
       &:focus {
         box-shadow: var(--validation-ring-danger);
       }
     }
 
-    &:focus ~ .float-field__label,
-    &:not(:placeholder-shown) ~ .float-field__label {
+    &:focus~.float-field__label,
+    &:not(:placeholder-shown)~.float-field__label {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
@@ -283,13 +294,15 @@
       background: var(--bg-card);
     }
 
-    &--date ~ .float-field__label {
+    &--date~.float-field__label {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
       color: var(--text-subtle);
       background: var(--bg-card);
     }
+
+    
   }
 
   &__label {
@@ -308,16 +321,19 @@
     white-space: nowrap;
     line-height: 1;
 
-    &--always {
+     &--always {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
       color: var(--text-subtle);
     }
+
+    
   }
 }
 
 // ── Floating Select ───────────────────────────────────
+
 .float-select {
   position: relative;
   width: 100%;
@@ -336,9 +352,11 @@
     box-sizing: border-box;
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+
+     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
+
     transition: border-color 0.15s, box-shadow 0.15s;
 
     &:focus {
@@ -347,12 +365,14 @@
     }
 
     &--error {
-      border-color: #dc2626;
+      border-color: var(--status-danger-text);
 
       &:focus {
         box-shadow: var(--validation-ring-danger);
       }
     }
+
+    
   }
 
   &__label {
@@ -371,15 +391,17 @@
     white-space: nowrap;
     line-height: 1;
 
-    &--up {
+     &--up {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
       color: var(--text-subtle);
     }
+
+    
   }
 
-  &__input:focus ~ &__label {
+  &__input:focus~&__label {
     top: 0;
     transform: translateY(-50%);
     font-size: 11px;
@@ -397,7 +419,7 @@
   left: 0;
   right: 0;
   margin-top: 4px;
-  background: white;
+  background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   box-shadow: var(--elevation-dropdown);
@@ -411,7 +433,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: var(--border-default);
     border-radius: 2px;
   }
 
@@ -423,9 +445,11 @@
     align-items: center;
     transition: background 0.15s;
 
-    &:hover {
+     &:hover {
       background: var(--bg-soft);
     }
+
+    
   }
 
   &__nombre {
@@ -452,7 +476,7 @@
     font-size: 12px;
     color: var(--text-disabled);
     font-style: italic;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-default);
     background: var(--bg-surface);
   }
 }
@@ -495,22 +519,21 @@
     justify-content: center;
     border-radius: 4px;
 
-    &:hover {
-      background: #e5e7eb;
+     &:hover {
+      background: var(--border-soft);
       color: var(--text-main);
     }
 
     .material-icons {
       font-size: 18px;
     }
+
+    
   }
 }
 
-// Posición relativa para el dropdown
-.form-field {
-  position: relative;
-}
 // ── Campos deshabilitados ─────────────────────────────
+
 .float-field__input:disabled {
   background: var(--bg-soft);
   color: var(--text-secondary);
@@ -545,83 +568,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-:host-context(html[data-theme="dark"]) {
-  .modal-form {
-
-    &__btn--cancel {
-      &:hover { background: #3f3f46 ; }
-    }
-
-    &__btn--save {
-      background: #163572 ;
-      &:hover { background: #122d63 ; }
-    }
-  }
-
-  .form-section__toggle {
-    &:hover { color: #60a5fa ; }
-    .material-icons { color: #a1a1aa ; }
-  }
-
-  /* Floating inputs y selects */
-  .float-field__input,
-  .float-select__input {
-    background-color: #202124 ;
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
-    }
-
-    &:focus ~ .float-field__label,
-    &:not(:placeholder-shown) ~ .float-field__label,
-    &--date ~ .float-field__label {
-      background-color: #202124 ;
-    }
-
-    &:disabled {
-      background: #18181b ;
-      border-color: #27272a ;
-    }
-  }
-
-  .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
-    background-repeat: no-repeat ;
-    background-position: right 12px center ;
-    background-color: #202124 ;
-  }
-
-  .float-field__label,
-  .float-select__label {
-    background-color: transparent ;
-
-    &--always,
-    &--up {
-      background-color: #202124 ;
-    }
-  }
-
-  .float-select__input:focus ~ .float-select__label {
-    background-color: #202124 ;
-  }
-
-  .reemplazo-dropdown {
-    background-color: var(--bg-surface) ;
-
-    &__item {
-      &:hover { background: #3f3f46 ; }
-    }
-
-    &__nombre { color: #f4f4f5 ; }
-    &__identificacion { color: #a1a1aa ; }
-  }
-
-  .reemplazo-seleccionado {
-    border: 1px solid var(--border-default) ;
-    &__nombre { color: #ffffff ; }
-    &__identificacion { color: #a1a1aa ; }
   }
 }

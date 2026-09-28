@@ -1,326 +1,170 @@
-@use "sass:color";
-
-
+@use "sass:color";  
 
 .calendar-wrapper {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 16px;
-
 }
-
-
 
 .calendar-topbar {
-
     display: grid;
-
     grid-template-columns: 1fr auto 1fr;
-
     align-items: center;
-
 }
-
-
 
 .nav-controls {
-
     display: flex;
-
     align-items: center;
-
     gap: 4px;
-
     justify-self: start;
 
-
-
     .nav-btn {
-
         width: 32px;
-
         height: 32px;
-
         border: 1px solid var(--border-default);
-
         border-radius: 6px;
-
-        background: white;
-
+        background: var(--bg-card);
         cursor: pointer;
-
         display: flex;
-
         align-items: center;
-
         justify-content: center;
-
         color: var(--text-body);
-
         transition: background 0.15s;
 
-
-
-        &:hover {
-
+         &:hover {
             background: var(--bg-soft);
-
         }
-
-
 
         mat-icon {
-
             font-size: 20px;
-
             width: 20px;
-
             height: 20px;
-
         }
 
+        
     }
-
-
 
     .hoy-btn {
-
         height: 32px;
-
         padding: 0 12px;
-
         border: 1px solid var(--border-default);
-
         border-radius: 6px;
-
-        background: white;
-
+        background: var(--bg-card);
         cursor: pointer;
-
         font-size: 13px;
-
         font-family: 'Inter', sans-serif;
-
         font-weight: 500;
-
         color: var(--text-body);
-
         display: flex;
-
         align-items: center;
-
         gap: 4px;
-
         margin-left: 4px;
-
         transition: background 0.15s;
 
-
-
-        &:hover {
-
+         &:hover {
             background: var(--bg-soft);
-
         }
-
-
 
         .hoy-icon {
-
             font-size: 16px;
-
             width: 16px;
-
             height: 16px;
-
         }
 
+        
     }
-
 }
-
-
 
 .month-title-wrap {
-
     display: flex;
-
     align-items: center;
-
     gap: 4px;
-
     cursor: pointer;
-
     position: relative;
-
     grid-column: 2;
-
     justify-self: center;
 
-
-
     .month-select {
-
         position: absolute;
-
         opacity: 0;
-
         width: 100%;
-
         height: 100%;
-
         cursor: pointer;
-
     }
-
-
 
     .month-year-label {
-
         font-size: 18px;
-
         font-weight: 600;
-
-        color: #1A1A2E;
-
+        color: var(--text-title);
         font-family: 'Inter', sans-serif;
-
     }
-
-
 
     .dropdown-chevron {
-
         font-size: 20px;
-
         width: 20px;
-
         height: 20px;
-
         color: var(--text-secondary);
-
     }
-
 }
-
-
 
 .legend {
-
     display: flex;
-
     gap: 20px;
-
     font-size: 13px;
-
     color: var(--text-secondary);
-
     visibility: hidden;
 
-
-
     .legend-item {
-
         display: flex;
-
         align-items: center;
-
         gap: 6px;
-
         font-weight: 400;
-
     }
-
-
 
     .legend-dot {
-
         width: 10px;
-
         height: 10px;
-
         border-radius: 50%;
 
-
-
-        &.blue {
-
+         &.blue {
             background: var(--primary-color);
-
         }
-
-
 
         &.yellow {
-
             background: var(--status-warning-bg-solid);
-
         }
-
-
 
         &.gray {
-
-            background: #D1D5DB;
-
+            background: var(--text-muted);
         }
 
+        
     }
-
 }
 
-
-
-/* ---- GRID ---- */
-
+/* ── GRID ─────────────────────────────────────────────────────── */
 .calendar-grid {
-
     display: grid;
-
     grid-template-columns: repeat(7, 1fr);
-
     border: 1px solid var(--border-default);
-
     border-radius: 8px;
-
     overflow: hidden;
-
 }
-
-
 
 .day-header {
-
     padding: 10px 0;
-
     text-align: center;
-
     font-size: 13px;
-
     font-weight: 600;
-
     color: var(--text-secondary);
-
-    background: white;
-
+    background: var(--bg-card);
     border-bottom: 1px solid var(--border-default);
-
     border-right: 1px solid var(--border-default);
 
-
-
     &:last-child {
-
         border-right: none;
-
     }
-
 }
-
-
 
 .day-cell {
     height: 130px;
@@ -342,46 +186,49 @@
     }
 
     &:hover:not(.other-month) {
-        background: #D9E5F8;
+        background: var(--bg-hover);
     }
 
     &.weekend:not(.today):not(.holiday) {
-        background: #EEF3FB;
+        background: var(--bg-soft);
     }
 
     &.holiday {
-        background: #E2EFDA;
-        border-left: 2px solid #A9D08E;
+        background: var(--status-success-bg-soft);
+        border-left: 2px solid var(--status-success-border);
     }
 
     &.today {
-        background: #FFFBEB;
-        outline: 2px solid #F59E0B;
+        background: var(--status-warning-bg-soft);
+        outline: 2px solid var(--status-warning-bg-solid);
         outline-offset: -1px;
         z-index: 1;
     }
 
     &.other-month {
-        background: white;
+        background: var(--bg-card);
         cursor: default;
         opacity: 0.5;
     }
 
-    // sm - Modo solo lectura (modal "Ver calendario" desde Seguimiento): sin cursor de click ni hover de selección.
+    // Modo solo lectura:
+    // modal "Ver calendario" desde Seguimiento.
     &.readonly {
         cursor: default;
 
-        &:hover:not(.other-month) {
+         &:hover:not(.other-month) {
             background: var(--bg-subtle);
         }
 
         &.weekend:not(.today):not(.holiday):hover {
-            background: #EEF3FB;
+            background: var(--bg-soft);
         }
 
         .actividad-chip {
             cursor: default;
         }
+
+        
     }
 }
 
@@ -400,7 +247,7 @@
     flex: 1;
     overflow-y: auto;
     scrollbar-width: none;
-    
+
     &::-webkit-scrollbar {
         display: none;
     }
@@ -423,7 +270,7 @@
 
     &:hover {
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: var(--elevation-card);
     }
 
     .act-hours {
@@ -441,21 +288,21 @@
     }
 
     &.type-nacional {
-        color: #0a6f43;
-        border-color: #cbeedb;
-        background: #eaf8f1;
+        color: var(--status-success-text);
+        border-color: var(--status-success-border);
+        background: var(--status-success-bg-soft);
     }
 
     &.type-local {
-        color: #1551c8;
-        border-color: #d6e6ff;
-        background: #edf5ff;
+        color: var(--status-info-text);
+        border-color: var(--status-info-border);
+        background: var(--status-info-bg-soft);
     }
 
     &.type-religioso {
-        color: #9a4a08;
-        border-color: #f6dfbd;
-        background: #fff4e5;
+        color: var(--status-warning-text);
+        border-color: var(--status-warning-border);
+        background: var(--status-warning-bg-soft);
     }
 }
 
@@ -465,42 +312,25 @@
     color: var(--text-secondary);
 }
 
-
-
 .day-hours-block {
-
     display: flex;
-
     flex-direction: column;
-
     align-items: flex-start;
-
     gap: 2px;
 
-
-
     .day-hours-text {
-
         font-size: 12px;
-
         font-weight: 600;
 
-
-
-        &.blue-text {
-
+         &.blue-text {
             color: var(--primary-color);
-
         }
-
-
 
         &.yellow-text {
-
             color: var(--status-warning-text);
-
         }
 
+        
     }
 
     .hours-dot {
@@ -508,17 +338,19 @@
         height: 8px;
         border-radius: 50%;
 
-        &.blue-dot {
+         &.blue-dot {
             background: var(--primary-color);
         }
 
         &.yellow-dot {
             background: var(--status-warning-bg-solid);
         }
+
+        
     }
 }
 
-/* ===== ESTILOS RESPONSIVOS DEL CALENDARIO ===== */
+/* ── ESTILOS RESPONSIVOS DEL CALENDARIO ───────────────────────── */
 @media (max-width: 768px) {
     .calendar-topbar {
         display: flex;
@@ -533,21 +365,25 @@
     .nav-controls {
         width: 100%;
         justify-content: center;
-        
-        .hoy-btn {
+
+         .hoy-btn {
             flex-grow: 1;
             max-width: 120px;
             justify-content: center;
         }
+
+        
     }
 
     .month-title-wrap {
         justify-content: center;
         width: 100%;
-        
-        .month-year-label {
+
+         .month-year-label {
             font-size: 16px;
         }
+
+        
     }
 
     .legend {
@@ -569,10 +405,12 @@
         justify-content: center;
         align-items: center;
 
-        &.today {
-            outline: 2px solid #F59E0B;
+         &.today {
+            outline: 2px solid var(--status-warning-bg-solid);
             outline-offset: -1px;
         }
+
+        
     }
 
     .day-cell-header {
@@ -582,24 +420,26 @@
         width: 100%;
         height: 100%;
         gap: 4px;
-        
-        .day-hours-block {
+
+         .day-hours-block {
             display: flex;
             justify-content: center;
             width: 100%;
-            
+
             .day-hours-text {
                 font-size: 10.5px;
                 font-weight: 700;
                 line-height: 1;
             }
         }
-        
+
         .day-number {
             font-size: 13.5px;
             font-weight: 700;
             line-height: 1;
         }
+
+        
     }
 
     .day-actividades-block {

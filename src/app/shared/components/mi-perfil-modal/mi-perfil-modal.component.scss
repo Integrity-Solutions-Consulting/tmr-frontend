@@ -1,4 +1,4 @@
-.mi-perfil-modal {
+scss .mi-perfil-modal {
   width: min(500px, 92vw);
   padding: 24px;
   font-family: 'Inter', sans-serif;
@@ -10,7 +10,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-table);
+  border-bottom: 1px solid var(--border-default);
 
   .mi-perfil-modal__header-info {
     display: flex;
@@ -20,6 +20,7 @@
 
   .mi-perfil-modal__avatar {
     color: var(--primary-color);
+
     .material-icons {
       font-size: 36px;
       width: 36px;
@@ -53,8 +54,8 @@
     }
 
     &:hover {
-      color: #334155;
-      background: #f1f5f9;
+      color: var(--text-body);
+      background: var(--bg-hover);
     }
   }
 }
@@ -88,14 +89,14 @@
 .mi-perfil-modal__value {
   font-size: 13.5px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .mi-perfil-modal__footer {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
-  border-top: 1px solid var(--border-table);
+  border-top: 1px solid var(--border-default);
 
   .mi-perfil-modal__btn-close {
     background: var(--primary-color) !important;
@@ -106,32 +107,8 @@
     font-weight: 600 !important;
 
     &:hover {
-      background: #122d63 !important;
+      background: var(--primary-hover) !important;
     }
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .mi-perfil-modal {
-    background-color: #27272a ;
-    background: #27272a ;
-    color: #f4f4f5 ;
-
-    &__header {
-      border-bottom-color: #3f3f46 ;
-    }
-
-    &__close {
-      &:hover { background: #3f3f46 ; color: #ffffff ; }
-    }
-
-    &__field {
-      background-color: var(--bg-app) ;
-      border-color: #3f3f46 ;
-    }
-
-    &__footer {
-      border-top-color: #3f3f46 ;
-    }
-  }
-}

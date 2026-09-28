@@ -1,4 +1,6 @@
+scss
 /* ── Contenedor principal ──────────────────────────────────────── */
+
 .feriado-modal {
   display: flex;
   flex-direction: column;
@@ -11,13 +13,14 @@
 }
 
 /* ── Header ───────────────────────────────────────────────────── */
+
 .feriado-modal__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   padding: 24px 28px 16px;
-  border-bottom: 1px solid #e8edf5;
+  border-bottom: 1px solid var(--border-default);
   flex-shrink: 0;
 }
 
@@ -37,9 +40,20 @@
   letter-spacing: 0.04em;
   width: fit-content;
 
-  &--new  { background: #dbeafe; color: #1d4ed8; }
-  &--edit { background: #fef3c7; color: #92400e; }
-  &--view { background: #f1f5f9; color: #475569; }
+  &--new {
+    background: var(--status-info-bg-soft);
+    color: var(--status-info-text);
+  }
+
+  &--edit {
+    background: var(--status-warning-bg-soft);
+    color: var(--status-warning-text);
+  }
+
+  &--view {
+    background: var(--bg-soft);
+    color: var(--text-secondary);
+  }
 }
 
 .feriado-modal__title {
@@ -72,12 +86,20 @@
   flex-shrink: 0;
   margin-top: 2px;
 
-  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 
-  &:hover { background: #f1f5f9; color: #334155; }
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-body);
+  }
 }
 
 /* ── Body ─────────────────────────────────────────────────────── */
+
 .feriado-modal__body {
   display: flex;
   flex-direction: column;
@@ -86,13 +108,20 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--text-disabled) transparent;
 
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { border-radius: 999px; background: #bdc9d9; }
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--text-disabled);
+  }
 }
 
 /* ── Row ──────────────────────────────────────────────────────── */
+
 .feriado-modal__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -104,6 +133,7 @@
 }
 
 /* ── Field ────────────────────────────────────────────────────── */
+
 .feriado-modal__field {
   display: flex;
   flex-direction: column;
@@ -116,7 +146,10 @@
   color: var(--primary-color);
   letter-spacing: 0;
 
-  .req { color: #dc2626; margin-left: 2px; }
+  .req {
+    color: var(--status-danger-text);
+    margin-left: 2px;
+  }
 }
 
 .feriado-modal__optional {
@@ -126,6 +159,7 @@
 }
 
 /* ── Floating Fields & Selects ─────────────────────────────────── */
+
 .float-field,
 .float-select {
   position: relative;
@@ -151,7 +185,7 @@
   }
 
   &--error {
-    border-color: #dc2626;
+    border-color: var(--status-danger-text);
 
     &:focus {
       box-shadow: var(--validation-ring-danger);
@@ -163,8 +197,8 @@
   height: 48px;
   padding: 0 12px;
 
-  &:focus ~ .float-field__label,
-  &:not(:placeholder-shown) ~ .float-field__label {
+  &:focus~.float-field__label,
+  &:not(:placeholder-shown)~.float-field__label {
     top: 0;
     color: var(--text-subtle);
     background: var(--bg-card);
@@ -172,7 +206,7 @@
     transform: translateY(-50%);
   }
 
-  &--date ~ .float-field__label {
+  &--date~.float-field__label {
     top: 0;
     color: var(--text-subtle);
     background: var(--bg-card);
@@ -185,8 +219,8 @@
     padding: 10px 12px;
     resize: none;
 
-    &:focus ~ .float-field__label,
-    &:not(:placeholder-shown) ~ .float-field__label {
+    &:focus~.float-field__label,
+    &:not(:placeholder-shown)~.float-field__label {
       top: 0;
       color: var(--text-subtle);
       background: var(--bg-card);
@@ -226,12 +260,15 @@
   padding: 0 36px 0 12px;
   cursor: pointer;
   appearance: none;
+
+  /* Excepción técnica: color del SVG embebido */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
 
-.float-select__input:focus ~ .float-select__label,
+.float-select__input:focus~.float-select__label,
 .float-select__label--up {
   top: 0;
   color: var(--text-subtle);
@@ -255,6 +292,7 @@
 }
 
 /* ── View values ──────────────────────────────────────────────── */
+
 .feriado-modal__view-value {
   min-height: 42px;
   display: flex;
@@ -263,7 +301,7 @@
 
 .feriado-modal__view-text {
   font-size: 13px;
-  color: #334155;
+  color: var(--text-body);
   font-weight: 500;
 }
 
@@ -278,6 +316,7 @@
 }
 
 /* ── Tipo badges ──────────────────────────────────────────────── */
+
 .tipo-badge {
   display: inline-flex;
   align-items: center;
@@ -286,12 +325,24 @@
   font-size: 12px;
   font-weight: 700;
 
-  &--nacional    { background: #dbeafe; color: #1d4ed8; }
-  &--local       { background: #d1fae5; color: #065f46; }
-  &--institucional { background: #ede9fe; color: #5b21b6; }
+  &--nacional {
+    background: var(--status-info-bg-soft);
+    color: var(--status-info-text);
+  }
+
+  &--local {
+    background: var(--status-success-bg-soft);
+    color: var(--status-success-text);
+  }
+
+  &--institucional {
+    background: var(--bg-soft);
+    color: var(--primary-color);
+  }
 }
 
 /* ── Status pill ──────────────────────────────────────────────── */
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -300,17 +351,18 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--status-success-text);
-  background: #BBF7D0;
+  background: var(--status-success-bg-soft);
   border: 1px solid var(--status-success-border);
 
   &--inactive {
     color: var(--text-secondary);
     background: var(--bg-soft);
-    border-color: #F3F4F6;
+    border-color: var(--border-default);
   }
 }
 
 /* ── Toggle switch ────────────────────────────────────────────── */
+
 .feriado-modal__check-field {
   display: flex;
   align-items: center;
@@ -329,11 +381,11 @@
 .feriado-modal__toggle-input {
   display: none;
 
-  &:checked + .feriado-modal__toggle-track {
-    background: #0c3b73;
+  &:checked+.feriado-modal__toggle-track {
+    background: var(--primary-color);
   }
 
-  &:checked + .feriado-modal__toggle-track .feriado-modal__toggle-thumb {
+  &:checked+.feriado-modal__toggle-track .feriado-modal__toggle-thumb {
     transform: translateX(18px);
   }
 }
@@ -342,7 +394,7 @@
   width: 38px;
   height: 20px;
   border-radius: 999px;
-  background: #cbd5e1;
+  background: var(--text-disabled);
   position: relative;
   transition: background 0.2s ease;
   flex-shrink: 0;
@@ -356,24 +408,25 @@
   height: 16px;
   border-radius: 50%;
   background: var(--bg-card);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: var(--elevation-card);
   transition: transform 0.2s ease;
 }
 
 .feriado-modal__toggle-label {
   font-size: 13px;
-  color: #334155;
+  color: var(--text-body);
   font-weight: 600;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */
+
 .feriado-modal__footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 28px 22px;
-  border-top: 1px solid #e8edf5;
+  border-top: 1px solid var(--border-default);
   flex-shrink: 0;
 }
 
@@ -393,25 +446,44 @@
   border: none;
   transition: all 0.15s ease;
 
-  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
 
   &--cancel {
-    border: 1.5px solid #d6e0ec;
+    border: 1.5px solid var(--border-soft);
     background: var(--bg-card);
     color: var(--text-secondary);
-    &:hover { background: var(--bg-app); }
+
+    &:hover {
+      background: var(--bg-app);
+    }
   }
 
   &--save {
     background: var(--primary-color);
     color: var(--text-inverse);
-    &:hover { background: #162C56; box-shadow: 0 4px 12px rgba(22, 53, 114, 0.3); }
-    &:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+    &:hover {
+      background: var(--primary-hover);
+      box-shadow: var(--elevation-card);
+    }
+
+    &:disabled {
+      background: var(--text-disabled);
+      color: var(--text-inverse);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
   }
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */
+
 @media (max-width: 520px) {
+
   .feriado-modal__header,
   .feriado-modal__body,
   .feriado-modal__footer {
@@ -433,56 +505,3 @@
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .feriado-modal {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-  }
-
-  .feriado-modal__header,
-  .feriado-modal__footer {
-    border-color: #3f3f46 ;
-  }
-
-  .feriado-modal__close {
-    &:hover { background: #3f3f46 ; color: #ffffff ; }
-  }
-
-  .float-field__input,
-  .float-select__input {
-    background-color: var(--bg-app) ;
-    border-color: #3f3f46 ;
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
-    }
-  }
-
-  .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
-    background-repeat: no-repeat ;
-    background-position: right 12px center ;
-    background-color: var(--bg-app) ;
-  }
-
-  .float-field__label,
-  .float-select__label {
-    background-color: transparent ;
-  }
-
-  .float-field__input:focus ~ .float-field__label,
-  .float-field__input:not(:placeholder-shown) ~ .float-field__label,
-  .float-select__input:focus ~ .float-select__label,
-  .float-select__label--up,
-  .float-field__label--always {
-    background-color: var(--bg-app) ;
-  }
-
-  .feriado-modal__btn--cancel {
-    border-color: #3f3f46 ;
-    &:hover { background: #3f3f46 ; }
-  }
-
-  .feriado-modal__btn--save {
-    &:hover:not(:disabled) { background: #122d63 ; }
-  }
-}

@@ -1,3 +1,5 @@
+
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -18,7 +20,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #8e8e93;
+    background-color: var(--text-muted);
     flex-shrink: 0;
   }
 
@@ -27,79 +29,113 @@
   }
 
   &.active {
-    background-color: #ecfdf5;
+    background-color: var(--status-success-bg-soft);
     border-color: var(--status-success-border);
-    color: #166534;
-    .status-dot { background-color: #22c55e; }
+    color: var(--status-success-text);
+
+    .status-dot {
+      background-color: var(--status-success-bg-solid);
+    }
   }
 
   &.progress {
     background-color: var(--status-info-bg-soft);
     border-color: var(--status-info-border);
     color: var(--status-info-text);
-    .status-dot { background-color: #3b82f6; }
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.completed {
-    background-color: #ecfdf5;
+    background-color: var(--status-success-bg-soft);
     border-color: var(--status-success-border);
     color: var(--status-success-text);
-    .status-dot { background-color: #22c55e; }
+
+    .status-dot {
+      background-color: var(--status-success-bg-solid);
+    }
   }
 
   &.cancelled {
     background-color: var(--status-danger-bg-soft);
     border-color: var(--status-danger-border);
-    color: #b91c1c;
-    .status-dot { background-color: #ef4444; }
+    color: var(--status-danger-text);
+
+    .status-dot {
+      background-color: var(--status-danger-bg-solid);
+    }
   }
 
   &.waiting {
-    background-color: #fff7ed;
-    border-color: #fed7aa;
-    color: #c2410c;
-    .status-dot { background-color: #ff8d28; }
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+
+    .status-dot {
+      background-color: var(--status-warning-bg-solid);
+    }
   }
 
   &.inactive {
     background-color: var(--bg-soft);
     border-color: var(--border-default);
-    color: #8e8e93;
-    .status-dot { background-color: #8e8e93; }
+    color: var(--text-muted);
+
+    .status-dot {
+      background-color: var(--text-muted);
+    }
   }
 
   &.approved {
-    background-color: #f5f3ff;
-    border-color: #e9d5ff;
-    color: #7131ca;
-    .status-dot { background-color: #af52de; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.planning {
-    background-color: #ecfeff;
-    border-color: #a5f3fc;
-    color: #0f766e;
-    .status-dot { background-color: #00a6a0; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.delayed {
-    background-color: #fff7cd;
-    border-color: #fef08a;
-    color: #78350f;
-    .status-dot { background-color: #d6a800; }
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+
+    .status-dot {
+      background-color: var(--status-warning-bg-solid);
+    }
   }
 
   &.development {
-    background-color: #f0f9ff;
-    border-color: #dbeafe;
-    color: #134e4a;
-    .status-dot { background-color: #0284c7; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.sin-seguimiento {
     background-color: var(--bg-subtle);
     border-color: var(--border-default);
     color: var(--text-secondary);
-    .status-dot { background-color: #9ca3af; }
+
+    .status-dot {
+      background-color: var(--text-muted);
+    }
   }
 }
+

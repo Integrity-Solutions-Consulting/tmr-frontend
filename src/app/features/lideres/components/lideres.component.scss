@@ -1,14 +1,14 @@
-$primary: #163572;
+$primary: var(--primary-color);
 $primary-dark: #162C56;
 $secondary: #F5F5F5;
-$white: #ffffff;
+$white: var(--bg-card);
 $text-dark: #1a1a2e;
 $text-mid: #4a4a6a;
 $text-light: #7C7C7C;
-$border: #D1D5DB;
+$border: var(--border-default);
 $activo: #22c55e;
 $inactivo: #ef4444;
-$hover-row: rgba(#163572, 0.04);
+$hover-row: rgba(var(--primary-color), 0.04);
 
 .lideres-container {
   width: 100%;
@@ -123,7 +123,7 @@ $hover-row: rgba(#163572, 0.04);
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--elevation-card);
   transition: box-shadow 0.2s;
   box-sizing: border-box;
 
@@ -640,9 +640,9 @@ $hover-row: rgba(#163572, 0.04);
 ::ng-deep .mat-mdc-menu-panel {
   border-radius: 12px !important;
   padding: 6px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--elevation-card);
   min-width: 140px !important;
-  background: #ffffff !important;
+  background: var(--bg-card) !important;
 }
 
 ::ng-deep .mat-mdc-menu-item {
@@ -686,7 +686,7 @@ $hover-row: rgba(#163572, 0.04);
   background: $white;
   border: 1px solid $border;
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: var(--elevation-card);
   min-width: 180px;
   z-index: 100;
   padding: 8px;
@@ -831,7 +831,7 @@ $hover-row: rgba(#163572, 0.04);
 
 // ── Colores por tipo de card ──────────────────────────────
 .card-icon--internal {
-  background: #EEF3FB;
+  background: var(--bg-soft);
   border-radius: 8px;
   position: relative;
 
@@ -898,7 +898,7 @@ $hover-row: rgba(#163572, 0.04);
   font-family: 'Inter', sans-serif;
   padding: 3px 10px;
   color: var(--primary-color);
-  background: #EEF3FB;
+  background: var(--bg-soft);
   border: 1px solid #d8e8fb;
   white-space: nowrap;
   min-width: 0;
@@ -921,7 +921,7 @@ $hover-row: rgba(#163572, 0.04);
 
   &:hover {
     background: var(--bg-hover);
-    color: #1e293b;
+    color: var(--text-main);
   }
 
   &:focus-visible {
@@ -953,7 +953,7 @@ $hover-row: rgba(#163572, 0.04);
 }
 
 .client-chip--expand {
-  color: #334155;
+  color: var(--text-body);
   background: #f1f5f9;
   border-color: var(--border-soft);
   max-width: 100%;
@@ -971,77 +971,3 @@ $hover-row: rgba(#163572, 0.04);
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .summary-card {
-    background-color: var(--bg-app) ;
-    border-radius: 12px ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-
-    &:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) ;
-    }
-  }
-
-  .card-number {
-    color: #ffffff ;
-  }
-
-  .card-icon--internal {
-    background-color: rgba(59, 130, 246, 0.15) ;
-    background: rgba(59, 130, 246, 0.15) ;
-    border-radius: 8px ;
-
-    svg, img {
-      stroke: #60a5fa ;
-      color: #60a5fa ;
-    }
-
-    .card-svg-arrow {
-      stroke: #60a5fa ;
-    }
-  }
-
-  .card-icon--external {
-    background-color: rgba(168, 85, 247, 0.15) ;
-    background: rgba(168, 85, 247, 0.15) ;
-    border-radius: 8px ;
-
-    svg, img {
-      stroke: #c084fc ;
-      color: #c084fc ;
-    }
-
-    .card-svg-arrow {
-      stroke: #c084fc ;
-    }
-  }
-
-  .card-icon--active {
-    background-color: rgba(34, 197, 94, 0.15) ;
-    background: rgba(34, 197, 94, 0.15) ;
-    border-radius: 8px ;
-
-    svg, img {
-      stroke: #4ade80 ;
-      color: #4ade80 ;
-    }
-
-    .card-svg-arrow {
-      stroke: #4ade80 ;
-    }
-  }
-
-  .card-icon--inactive {
-    background-color: rgba(161, 161, 170, 0.15) ;
-    background: rgba(161, 161, 170, 0.15) ;
-    border-radius: 8px ;
-
-    svg, img {
-      stroke: #a1a1aa ;
-    }
-
-    .card-svg-arrow {
-      stroke: #a1a1aa ;
-    }
-  }
-}

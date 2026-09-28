@@ -1,10 +1,4 @@
 @use "sass:color";
-// Variables locales
-$dark-navy: #1A1A2E;
-$primary-blue: #163572;
-$gray-bg: #F3F4F6;
-$border-color: var(--border-default);
-$text-muted: #9CA3AF;
 
 .seguimiento-page {
     display: flex;
@@ -24,28 +18,30 @@ $text-muted: #9CA3AF;
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background: $gray-bg;
+    background: var(--bg-soft);
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-body);
 
-    mat-icon {
+     mat-icon {
         font-size: 17px;
         width: 17px;
         height: 17px;
         color: var(--text-secondary);
     }
+
+    
 }
 
 .btn-reporte {
     padding: 8px 16px !important;
-    border: 1px solid #94a3b8 !important;
+    border: 1px solid var(--border-soft) !important;
     border-radius: 12px !important;
     font-size: 14px !important;
     font-weight: 700 !important;
     color: var(--text-secondary) !important;
-    background-color: white !important;
+    background-color: var(--bg-card) !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -55,7 +51,7 @@ $text-muted: #9CA3AF;
     font-family: 'Inter', sans-serif !important;
     transition: all 0.2s ease-in-out !important;
 
-    .expand-icon {
+     .expand-icon {
         font-size: 16px !important;
         width: 16px !important;
         height: 16px !important;
@@ -72,18 +68,20 @@ $text-muted: #9CA3AF;
         opacity: 0.5 !important;
         cursor: not-allowed !important;
     }
+
+    
 }
 
 /* ---- FILTERS ---- */
 .filters-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
     align-items: flex-end !important;
     gap: 16px !important;
     flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--elevation-card);
 }
 
 .filter-group {
@@ -99,28 +97,32 @@ $text-muted: #9CA3AF;
     position: relative !important;
     width: 100%;
 
-    &:focus-within .filter-icon {
+     &:focus-within .filter-icon {
         color: var(--primary-color) !important;
     }
+
+    
 }
 
 .filter-input {
     width: 100% !important;
     padding: 10px 16px !important;
-    background-color: white !important;
+    background-color: var(--input-bg) !important;
     border: 1px solid var(--border-input) !important;
     border-radius: 12px !important;
     outline: none !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    color: #1e293b !important;
+    color: var(--text-main) !important;
     font-family: 'Inter', sans-serif !important;
     transition: all 0.2s !important;
     box-sizing: border-box !important;
 
-    &:focus {
+     &:focus {
         box-shadow: 0 0 0 1px var(--primary-color) !important;
     }
+
+    
 }
 
 .filter-input-wrapper .filter-input {
@@ -142,13 +144,13 @@ $text-muted: #9CA3AF;
 .filter-select {
     width: 100% !important;
     padding: 10px 32px 10px 40px !important;
-    background-color: white !important;
+    background-color: var(--input-bg) !important;
     border: 1px solid var(--border-input) !important;
     border-radius: 12px !important;
     outline: none !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    color: #1e293b !important;
+    color: var(--text-main) !important;
     font-family: 'Inter', sans-serif !important;
     transition: all 0.2s !important;
     box-sizing: border-box !important;
@@ -156,9 +158,11 @@ $text-muted: #9CA3AF;
     -webkit-appearance: none !important;
     cursor: pointer !important;
 
-    &:focus {
+     &:focus {
         box-shadow: 0 0 0 1px var(--primary-color) !important;
     }
+
+    
 }
 
 .select-chevron {
@@ -224,7 +228,7 @@ $text-muted: #9CA3AF;
 .toggle-btn {
     padding: 8px 16px;
     border: none;
-    background: white;
+    background: var(--bg-card);
     font-size: 13px;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
@@ -236,12 +240,13 @@ $text-muted: #9CA3AF;
     transition: all 0.15s;
     height: 100%;
     box-sizing: border-box;
-    transition: all 0.15s;
 
-    &.active {
+     &.active {
         background: var(--primary-color);
-        color: white;
+        color: var(--text-inverse);
     }
+
+    
 }
 
 .check-icon {
@@ -269,7 +274,7 @@ $text-muted: #9CA3AF;
     transition: all 0.15s ease;
     box-sizing: border-box;
 
-    .download-icon {
+     .download-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
@@ -289,7 +294,7 @@ $text-muted: #9CA3AF;
         }
 
         &:hover {
-            background: rgba(var(--primary-color), 0.06);
+            background: var(--primary-light);
             border-color: var(--primary-color);
         }
     }
@@ -299,6 +304,8 @@ $text-muted: #9CA3AF;
         cursor: wait;
         opacity: 0.8;
     }
+
+    
 }
 
 .download-spinner {
@@ -323,21 +330,45 @@ $text-muted: #9CA3AF;
     font-size: 13px;
     font-weight: 500;
     max-width: min(420px, calc(100vw - 48px));
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+    box-shadow: var(--elevation-card);
     animation: seguimiento-feedback-in 0.2s ease-out;
 
-    &.info { color: #1d4ed8; background: #eff6ff; }
-    &.success { color: #15803d; background: #f0fdf4; }
-    &.error { color: #b91c1c; background: #fef2f2; }
+     &.info {
+        color: var(--status-info-text);
+        background: var(--status-info-bg-soft);
+    }
+
+    &.success {
+        color: var(--status-success-text);
+        background: var(--status-success-bg-soft);
+    }
+
+    &.error {
+        color: var(--status-danger-text);
+        background: var(--status-danger-bg-soft);
+    }
+
+    
 }
 
 @keyframes seguimiento-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes seguimiento-feedback-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+     to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    
 }
 
 /* ---- TABLE ---- */
@@ -351,7 +382,7 @@ $text-muted: #9CA3AF;
 }
 
 .table-wrapper {
-    overflow-x: auto; // permite scroll horizontal
+    overflow-x: auto;
     width: 100%;
 }
 
@@ -364,7 +395,7 @@ $text-muted: #9CA3AF;
     font-size: 13px;
     font-family: 'Inter', sans-serif;
 
-    thead {
+     thead {
         background: var(--bg-card);
         border-bottom: 1px solid var(--border-default);
         position: sticky;
@@ -395,7 +426,7 @@ $text-muted: #9CA3AF;
 
     tbody {
         tr {
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid var(--border-default);
             transition: background 0.12s;
 
             &:last-child {
@@ -413,7 +444,7 @@ $text-muted: #9CA3AF;
 
         td {
             padding: 14px 10px;
-            color: #4b5563;
+            color: var(--text-secondary);
             font-weight: 400;
             vertical-align: middle;
             white-space: nowrap;
@@ -492,6 +523,8 @@ $text-muted: #9CA3AF;
         text-align: center;
         padding: 14px 4px;
     }
+
+    
 }
 
 /* Badge de Estado Ovalado y de Fondo Blanco */
@@ -504,14 +537,14 @@ $text-muted: #9CA3AF;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 400;
-    color: #4b5563;
+    color: var(--text-secondary);
     border: 1px solid var(--border-default);
     background: var(--bg-card);
     min-width: 90px;
     height: 24px;
     box-sizing: border-box;
 
-    &::before {
+     &::before {
         content: '';
         width: 6px;
         height: 6px;
@@ -533,9 +566,11 @@ $text-muted: #9CA3AF;
 
     &--pendiente {
         &::before {
-            background: #f97316;
+            background: var(--status-warning-bg-solid);
         }
     }
+
+    
 }
 
 .action-btn {
@@ -550,7 +585,7 @@ $text-muted: #9CA3AF;
     justify-content: center;
     transition: all 0.15s;
 
-    mat-icon {
+     mat-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
@@ -560,6 +595,8 @@ $text-muted: #9CA3AF;
         background: var(--bg-soft);
         color: var(--text-main);
     }
+
+    
 }
 
 .empty-state {
@@ -581,13 +618,13 @@ $text-muted: #9CA3AF;
 
 /* ---- METRICS BAR ---- */
 .metrics-bar {
-    background: white;
+    background: var(--bg-card);
     border-radius: 10px;
     padding: 16px 24px;
     display: flex;
     align-items: center;
     gap: 32px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--elevation-card);
     flex-wrap: wrap;
 }
 
@@ -606,25 +643,25 @@ $text-muted: #9CA3AF;
     justify-content: center;
     flex-shrink: 0;
 
-    mat-icon {
+     mat-icon {
         font-size: 22px;
         width: 22px;
         height: 22px;
     }
 
     &.blue {
-        background: #EEF3FB;
+        background: var(--primary-light);
         color: var(--primary-color);
     }
 
     &.green {
-        background: #DCFCE7;
+        background: var(--status-success-bg-soft);
         color: var(--status-success-text);
     }
 
     &.purple {
-        background: #EDE9FE;
-        color: #7C3AED;
+        background: var(--accent-purple-bg);
+        color: var(--accent-purple);
     }
 
     &.orange {
@@ -636,6 +673,8 @@ $text-muted: #9CA3AF;
         background: var(--bg-soft);
         color: var(--text-secondary);
     }
+
+    
 }
 
 .metric-texts {
@@ -647,7 +686,7 @@ $text-muted: #9CA3AF;
 .metric-value {
     font-size: 20px;
     font-weight: 700;
-    color: #1A1A2E;
+    color: var(--text-main);
     line-height: 1.2;
 }
 
@@ -672,10 +711,10 @@ $text-muted: #9CA3AF;
     border-top: 0 !important;
     border-radius: 0 0 12px 12px !important;
     padding: 9px 12px 9px 16px !important;
-    background: #ffffff !important;
+    background: var(--bg-card) !important;
     font-family: 'Inter', sans-serif !important;
 
-    p {
+     p {
         margin: 0 !important;
         color: var(--text-subtle) !important;
         font-size: 12px !important;
@@ -709,7 +748,7 @@ $text-muted: #9CA3AF;
         padding: 4px !important;
         border: 1px solid var(--border-default) !important;
         border-radius: 7px !important;
-        background: #ffffff !important;
+        background: var(--bg-card) !important;
         color: var(--text-subtle) !important;
     }
 
@@ -721,6 +760,8 @@ $text-muted: #9CA3AF;
         opacity: 0.4 !important;
         cursor: not-allowed !important;
     }
+
+    
 }
 
 /* ---- CUSTOM SVG ICONS ---- */
@@ -747,7 +788,7 @@ $text-muted: #9CA3AF;
     width: 18px !important;
     height: 18px !important;
     pointer-events: none !important;
-    color: #cbd5e1 !important;
+    color: var(--text-disabled) !important;
 }
 
 .download-icon {
@@ -764,9 +805,11 @@ $text-muted: #9CA3AF;
     opacity: 0.6;
     transition: opacity 0.15s;
 
-    &:hover {
+     &:hover {
         opacity: 1;
     }
+
+    
 }
 
 .menu-icon-img {
@@ -780,96 +823,4 @@ $text-muted: #9CA3AF;
     width: 22px;
     height: 22px;
     vertical-align: middle;
-}
-
-:host-context(html[data-theme="dark"]) {
-  .seguimiento-card,
-  .report-wrapper,
-  .seguimiento-page {
-    //background-color: #27272a ;
-    //background: #27272a ;
-    //border: 1px solid #3f3f46 ;
-    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
-
-  .table-scroll-container,
-  .table-wrapper {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
-
-  .seguimiento-table {
-
-    tbody tr {
-      &:hover {
-        background-color: #27272a !important;
-      }
-      &.selected-row {
-        background-color: #3f3f46 !important;
-      }
-    }
-  }
-
-  .tabla-footer {
-
-    ::ng-deep .mat-mdc-icon-button {
-      background-color: #27272a ;
-      border-color: var(--border-default) ;
-    }
-  }
-
-  .filter-input,
-  .filter-select {
-    border-color: var(--border-default) ;
-  }
-
-  .btn-reporte {
-    border-color: var(--border-default) ;
-  }
-
-  .metric-icon-wrap {
-    &.blue, &.green, &.purple, &.orange, &.gray {
-      background-color: var(--phase6-bg-surface);
-    }
-    
-    /* Filtros SVG para los iconos de metricas que usan <img> */
-    &.blue img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
-    &.green img { filter: brightness(0) saturate(100%) invert(77%) sepia(43%) saturate(583%) hue-rotate(85deg) brightness(97%) contrast(85%); }
-    &.purple img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
-    &.orange img { filter: brightness(0) saturate(100%) invert(79%) sepia(35%) saturate(836%) hue-rotate(345deg) brightness(102%) contrast(98%); }
-    &.gray img { filter: brightness(0) saturate(100%) invert(67%) sepia(16%) saturate(232%) hue-rotate(174deg) brightness(90%) contrast(86%); }
-  }
-
-  /* Filtro de color #cbd5e1 para iconos de busqueda, cliente y fechas */
-  .filter-icon-img,
-  .select-chevron-img,
-  .filter-icon,
-  .filter-input::-webkit-calendar-picker-indicator {
-    filter: brightness(0) saturate(100%) invert(91%) sepia(11%) saturate(547%) hue-rotate(176deg) brightness(96%) contrast(89%) !important;
-  }
-
-  /* --- Checkboxes de la tabla --- */
-  .seguimiento-table {
-    mat-checkbox {
-      --mdc-checkbox-unselected-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-unselected-hover-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-hover-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-focus-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-checkmark-color: #202124 !important;
-    }
-
-    ::ng-deep {
-      .mdc-checkbox__background {
-        border-color: #cbd5e1 !important;
-      }
-      .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
-      .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
-        background-color: #cbd5e1 !important;
-        border-color: #cbd5e1 !important;
-      }
-      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__mixedmark {
-        border-color: #202124 !important;
-      }
-    }
-  }
 }

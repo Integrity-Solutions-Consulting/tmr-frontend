@@ -337,7 +337,7 @@
 
   &:hover {
     border-color: var(--border-soft);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    box-shadow: var(--elevation-card);
   }
 
   &.expanded {

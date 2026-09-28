@@ -1,4 +1,4 @@
-.action-menu {
+scss .action-menu {
   position: relative;
   display: inline-flex;
   justify-content: center;
@@ -12,11 +12,9 @@
   background: transparent;
   padding: 0;
   color: var(--text-subtle);
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
   transition: all 0.18s ease;
 
@@ -38,39 +36,29 @@
   right: 0;
   top: calc(100% + 6px);
   z-index: 40;
-
   min-width: 148px;
   overflow: hidden;
-
   border: 1px solid var(--border-default);
   border-radius: 10px;
   background: var(--bg-card);
-
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--elevation-dropdown);
 }
 
 .action-menu__item {
   width: 100%;
   min-height: 40px;
-
   border: none;
   background: transparent;
-
   padding: 0 14px;
-
   display: flex;
   align-items: center;
   gap: 9px;
-
   color: var(--text-subtle);
-
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-
   text-align: left;
   cursor: pointer;
-
   transition: all 0.16s ease;
 
   img {
@@ -86,10 +74,11 @@
 }
 
 .action-menu__item--danger {
-  color: #ef4444;
+  color: var(--status-danger-bg-solid);
 
   &:hover {
     background: var(--status-danger-bg-soft);
     color: var(--status-danger-text);
   }
 }
+

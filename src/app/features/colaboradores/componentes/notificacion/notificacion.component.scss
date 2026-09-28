@@ -1,8 +1,9 @@
-// ── Overlay ───────────────────────────────────────────────
+scss // ── Overlay ───────────────────────────────────────────────
+
 .notificacion-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +20,7 @@
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  box-shadow: 0 8px 32px rgba(22, 53, 114, 0.15);
+  box-shadow: var(--elevation-modal);
   min-width: 260px;
   animation: slideUp 0.25s ease;
 }
@@ -47,11 +48,24 @@
 
 // ── Animaciones ───────────────────────────────────────────
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
+

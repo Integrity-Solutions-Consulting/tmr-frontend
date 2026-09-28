@@ -1,6 +1,11 @@
+@use 'sass:color';
+
 .filtros {
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(140px, 180px) minmax(140px, 180px) minmax(140px, 180px);
+  grid-template-columns: minmax(320px, 1fr) minmax(140px, 180px) minmax(140px, 180px) minmax(
+      140px,
+      180px
+    );
   gap: 12px;
   align-items: center;
   justify-items: stretch;
@@ -8,7 +13,13 @@
   max-width: 980px;
   margin: 0 auto;
 
-  ::ng-deep .mat-mdc-form-field { width: 100%; }
+  /* ==========================================================
+      Angular Material - Form Field
+      ========================================================== */
+
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
 
   ::ng-deep .mat-mdc-text-field-wrapper {
     height: 40px;
@@ -28,25 +39,48 @@
     padding-bottom: 8px !important;
   }
 
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
 
   ::ng-deep .mat-mdc-input-element {
-    color: var(--text-subtle);
+    color: var(--text-main);
     font-size: 13px;
     font-weight: 500;
   }
 
   ::ng-deep .mat-mdc-input-element::placeholder {
-    color: var(--text-disabled);
+    color: var(--text-main) !important;
     font-size: 13px;
     font-weight: 400;
+    opacity: 1 !important;
   }
+  ::ng-deep .mat-mdc-input-element::-webkit-input-placeholder {
+    color: var(--text-main) !important;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 1 !important;
+  }
+  ::ng-deep .mat-mdc-input-element::-moz-placeholder {
+    color: var(--text-main) !important;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 1 !important;
+  }
+
+  /* ==========================================================
+      Outline
+      ========================================================== */
 
   ::ng-deep .mdc-notched-outline__leading,
   ::ng-deep .mdc-notched-outline__notch,
   ::ng-deep .mdc-notched-outline__trailing {
     border-color: var(--border-default) !important;
   }
+
+  /* ==========================================================
+      Estado Focus
+      ========================================================== */
 
   ::ng-deep .mdc-text-field--focused {
     .mdc-notched-outline__leading,
@@ -57,7 +91,9 @@
   }
 }
 
-// ── Buscador ──────────────────────────────────────────────────────────────
+/* ============================================================
+    BUSCADOR
+    ============================================================ */
 
 .filtros__search {
   position: relative;
@@ -74,7 +110,7 @@
   z-index: 2;
   width: 13px;
   height: 13px;
-  border: 1.7px solid var(--text-muted);
+  border: 1.7px solid var(--text-main);
   border-radius: 999px;
 
   &::after {
@@ -85,12 +121,14 @@
     width: 5px;
     height: 1.7px;
     border-radius: 999px;
-    background: var(--text-muted);
+    background: var(--text-main);
     transform: rotate(45deg);
   }
 }
 
-// ── Dropdown wrapper ──────────────────────────────────────────────────────
+/* ============================================================
+    DROPDOWN - WRAPPER
+    ============================================================ */
 
 .filtros__dropdown-wrapper {
   position: relative;
@@ -105,14 +143,21 @@
   background: var(--bg-card);
   cursor: pointer;
   user-select: none;
-  // color aquí controla el SVG vía currentColor
-  color: var(--text-subtle);
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+  /*
+    * Controla el SVG mediante currentColor.
+    */
+  color: var(--text-main);
+
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
 
   &.active {
     border-color: var(--primary-color);
     background: var(--bg-hover);
-    color: var(--primary-color);  // el SVG hereda este color automáticamente
+    color: var(--primary-color);
 
     .filtros__dropdown-label {
       color: var(--primary-color);
@@ -120,7 +165,10 @@
   }
 }
 
-// SVG hereda color del wrapper via currentColor — sin filter, sin fill manual
+/* ============================================================
+    ICONO DEL DROPDOWN
+    ============================================================ */
+
 .filtros__dropdown-icon {
   width: 15px;
   height: 15px;
@@ -128,9 +176,13 @@
   display: block;
 }
 
+/* ============================================================
+    LABEL DEL DROPDOWN
+    ============================================================ */
+
 .filtros__dropdown-label {
   font-size: 13px;
-  color: var(--text-subtle);
+  color: var(--text-main);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -139,7 +191,9 @@
   transition: color 0.15s;
 }
 
-// ── Dropdown panel ────────────────────────────────────────────────────────
+/* ============================================================
+    PANEL DEL DROPDOWN
+    ============================================================ */
 
 .filtros__dropdown {
   position: absolute;
@@ -148,11 +202,15 @@
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: var(--elevation-card);
   min-width: 200px;
   z-index: 200;
   padding: 8px;
 }
+
+/* ============================================================
+    OPCIONES DEL DROPDOWN
+    ============================================================ */
 
 .filtros__dropdown-option {
   display: flex;
@@ -162,10 +220,16 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
-  color: var(--text-subtle);
+  color: var(--text-main);
 
-  &:hover { background: var(--bg-hover); }
+  &:hover {
+    background: var(--bg-hover);
+  }
 }
+
+/* ============================================================
+    CHECKBOX
+    ============================================================ */
 
 .filtros__checkbox {
   width: 16px;
@@ -189,33 +253,67 @@
   }
 }
 
+/* ============================================================
+    LIMPIAR DROPDOWN
+    ============================================================ */
+
 .filtros__dropdown-limpiar {
   padding: 8px;
   font-size: 13px;
-  color: var(--text-subtle);
+  color: var(--text-main);
   cursor: pointer;
   border-top: 1px solid var(--border-default);
   margin-top: 4px;
   text-align: center;
 
-  &:hover { background: var(--bg-hover); border-radius: 6px; }
+  &:hover {
+    background: var(--bg-hover);
+    border-radius: 6px;
+  }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────
+/* ============================================================
+    RESPONSIVE - DESKTOP
+    ============================================================ */
 
 @media (max-width: 1440px) {
-  .filtros { grid-template-columns: minmax(300px, 1fr) 132px 110px; }
+  .filtros {
+    grid-template-columns: minmax(300px, 1fr) 132px 110px;
+  }
 }
+
+/* ============================================================
+    RESPONSIVE - TABLET
+    ============================================================ */
 
 @media (max-width: 1024px) {
-  .filtros { grid-template-columns: minmax(280px, 1fr) 132px 110px; gap: 12px; }
+  .filtros {
+    grid-template-columns: minmax(280px, 1fr) 132px 110px;
+    gap: 12px;
+  }
 }
+
+/* ============================================================
+    RESPONSIVE - MOBILE
+    ============================================================ */
 
 @media (max-width: 768px) {
-  .filtros { grid-template-columns: 1fr 1fr; }
-  .filtros__search { grid-column: 1 / -1; }
+  .filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filtros__search {
+    grid-column: 1 / -1;
+  }
 }
 
+/* ============================================================
+    RESPONSIVE - MOBILE PEQUEÑO
+    ============================================================ */
+
 @media (max-width: 480px) {
-  .filtros { grid-template-columns: 1fr; gap: 10px; }
+  .filtros {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }

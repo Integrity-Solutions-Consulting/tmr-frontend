@@ -1,7 +1,7 @@
-.modal-backdrop {
+scss .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.40);
+  background: var(--overlay-backdrop);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -27,7 +27,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 22px 24px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -82,7 +82,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #e5e7eb;
+      background: var(--border-soft);
       border-radius: 3px;
     }
   }
@@ -93,7 +93,7 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -127,7 +127,7 @@
       color: var(--text-inverse);
 
       &:hover:not(:disabled) {
-        background: #122d63;
+        background: var(--primary-hover);
       }
 
       &:disabled {
@@ -228,7 +228,7 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: #b6bfcb;
+    border-color: var(--border-input);
   }
 
   &:focus {
@@ -241,6 +241,9 @@
   padding-right: 36px;
   cursor: pointer;
   appearance: none;
+
+  // Excepción: color embebido dentro del SVG del data URI.
+  // Para eliminarlo completamente del SCSS habría que usar un SVG inline/currentColor.
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -248,7 +251,7 @@
 
 .float-field__input--error,
 .float-select__input--error {
-  border-color: #dc2626;
+  border-color: var(--status-danger-text);
 
   &:focus {
     box-shadow: var(--validation-ring-danger);
@@ -282,9 +285,9 @@
   line-height: 1;
 }
 
-.float-field__input:focus ~ .float-field__label,
-.float-field__input:not(:placeholder-shown) ~ .float-field__label,
-.float-select__input:focus ~ .float-select__label,
+.float-field__input:focus~.float-field__label,
+.float-field__input:not(:placeholder-shown)~.float-field__label,
+.float-select__input:focus~.float-select__label,
 .float-select__label--up,
 .float-field__label--always {
   top: 0;
@@ -301,12 +304,12 @@
   line-height: 1.45;
 }
 
-.float-field__input--textarea ~ .float-field__label {
+.float-field__input--textarea~.float-field__label {
   top: 17px;
 }
 
-.float-field__input--textarea:focus ~ .float-field__label,
-.float-field__input--textarea:not(:placeholder-shown) ~ .float-field__label {
+.float-field__input--textarea:focus~.float-field__label,
+.float-field__input--textarea:not(:placeholder-shown)~.float-field__label {
   top: 0;
   transform: translateY(-50%);
   font-size: 11px;
@@ -330,7 +333,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
+    background: var(--border-soft);
     border-radius: 3px;
   }
 }
@@ -343,7 +346,7 @@
   grid-template-columns: minmax(0, 1fr) 120px minmax(92px, 0.7fr);
   align-items: center;
   gap: 14px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-default);
   transition: background 0.15s;
 
   &:last-child {
@@ -514,56 +517,3 @@
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .modal-form {
-
-    &__title { color: #3b82f6 ; }
-    &__subtitle { color: #a1a1aa ; }
-
-    &__close {
-      &:hover { background: #3f3f46 ; color: #ffffff ; }
-    }
-
-    &__btn--cancel {
-      &:hover { background: #3f3f46 ; }
-    }
-
-    &__btn--save {
-      background: #163572 ;
-      &:hover:not(:disabled) { background: #122d63 ; }
-    }
-  }
-
-  .form-section__title { color: #3b82f6 ; }
-  .form-section__bar { background: #3b82f6 ; }
-
-  /* Floating inputs y selects */
-  .float-field__input,
-  .float-select__input {
-    background-color: #202124 ;
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
-    }
-  }
-
-  .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
-    background-repeat: no-repeat ;
-    background-position: right 12px center ;
-    background-color: #202124 ;
-  }
-
-  .float-field__label,
-  .float-select__label {
-    background-color: transparent ;
-  }
-
-  .float-field__input:focus ~ .float-field__label,
-  .float-field__input:not(:placeholder-shown) ~ .float-field__label,
-  .float-select__input:focus ~ .float-select__label,
-  .float-select__label--up,
-  .float-field__label--always {
-    background-color: #202124 ;
-  }
-}

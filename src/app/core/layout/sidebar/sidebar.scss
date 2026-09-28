@@ -19,7 +19,7 @@
       right: 0;
       bottom: 0;
       width: 1px;
-      background-color: #e5e7eb;
+      background-color: var(--border-soft);
     }
   }
 }
@@ -199,7 +199,7 @@
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--elevation-card);
     border-right: 1px solid var(--border-default);
   }
 

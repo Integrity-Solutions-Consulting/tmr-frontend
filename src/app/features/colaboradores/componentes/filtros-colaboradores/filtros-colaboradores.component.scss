@@ -15,10 +15,12 @@
     width: 360px;
     transition: border-color 0.15s;
 
-    &:focus-within {
+     &:focus-within {
       border-color: var(--primary-color);
       box-shadow: var(--focus-ring-primary);
     }
+
+    
   }
 
   &__search-icon {
@@ -38,9 +40,11 @@
     background: transparent;
     min-width: 0;
 
-    &::placeholder {
+     &::placeholder {
       color: var(--text-disabled);
     }
+
+    
   }
 
   &__search-clear {
@@ -53,8 +57,15 @@
     align-items: center;
     transition: color 0.15s;
 
-    .material-icons { font-size: 16px; }
-    &:hover { color: #374151; }
+     .material-icons {
+      font-size: 16px;
+    }
+
+    &:hover {
+      color: var(--text-body);
+    }
+
+    
   }
 
   &__estado {
@@ -78,8 +89,8 @@
     transition: all 0.15s;
     white-space: nowrap;
 
-    &:hover {
-      background: var(--bg-soft);;
+     &:hover {
+      background: var(--bg-soft);
       border-color: var(--border-soft);
       color: var(--text-body);
     }
@@ -88,6 +99,8 @@
       background: var(--bg-soft);
       border-color: var(--border-soft);
     }
+
+    
   }
 
   &__estado-icon {
@@ -103,12 +116,12 @@
     background: var(--bg-card);
     border: 1px solid var(--border-default);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    box-shadow: var(--elevation-card);
     z-index: 100;
     overflow: hidden;
     animation: dropdownFade 0.15s ease;
 
-    &-list {
+     &-list {
       padding: 0;
       display: flex;
       flex-direction: column;
@@ -126,7 +139,7 @@
       transition: background 0.12s;
 
       &:hover {
-        background: #f0f4ff;
+        background: var(--bg-hover);
       }
     }
 
@@ -146,6 +159,7 @@
       &--active {
         background: var(--primary-color);
         border-color: var(--primary-color);
+
         .material-icons {
           font-size: 14px;
           color: var(--text-inverse);
@@ -164,15 +178,15 @@
 
     &-clear {
       width: 100%;
-      padding: 12px 14px 12px 40px; /* 40px garantiza alineación exacta con el texto del checkbox */
+      padding: 12px 14px 12px 40px;
       background: none;
       border: none;
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid var(--border-default);
       font-family: 'Inter', sans-serif;
       font-size: 13.5px;
       color: var(--text-secondary);
       cursor: pointer;
-      text-align: left; 
+      text-align: left;
 
       &:hover {
         color: var(--text-secondary);
@@ -180,6 +194,8 @@
         font-weight: 500;
       }
     }
+
+    
   }
 }
 
@@ -192,73 +208,18 @@
 
   &:hover {
     color: var(--primary-color);
-    background: #f0f4ff;
+    background: var(--primary-light);
   }
 }
 
 @keyframes dropdownFade {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0);    }
-}
-
-:host-context(html[data-theme="dark"]) {
-  .filtros__search {
-    background-color: #202124 ;
-    color: #ffffff ;
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 
-  .filtros__search-icon {
-    filter: brightness(0) invert(1) ;
-  }
-
-  .filtros__estado-btn {
-    background-color: #202124 ;
-    color: #ffffff ;
-
-    span {
-      color: #ffffff ;
-    }
-
-    img, .filtros__estado-icon {
-      filter: brightness(0) invert(1) ;
-    }
-
-    &:hover,
-    &--active {
-      background-color: #27272a ;
-    }
-  }
-
-  .filtros__dropdown {
-    background-color: #27272a ;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
-  }
-
-  .filtros__dropdown-item {
-    color: #f4f4f5 ;
-
-    &:hover {
-      background-color: var(--bg-card) ;
-    }
-  }
-
-  .filtros__dropdown-label {
-    color: #f4f4f5 ;
-  }
-
-  .filtros__dropdown-checkbox {
-    border-color: var(--border-default) ;
-
-    &--active {
-      background: #163572 ;
-      border-color: #163572 ;
-    }
-  }
-
-  .filtros__dropdown-clear {
-
-    &:hover {
-      background-color: var(--bg-card) ;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

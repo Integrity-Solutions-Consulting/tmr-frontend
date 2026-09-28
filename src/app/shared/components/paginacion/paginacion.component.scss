@@ -84,24 +84,3 @@
     color: var(--text-subtle);
   }
 }
-:host-context(html[data-theme="dark"]) {
-  .paginacion {
-
-    &__btn {
-      background: #27272a;
-      border-color: var(--border-default);
-      color: #ffffff;
-
-      &:hover:not(:disabled):not(.paginacion__btn--activo) {
-        background: #3f3f46;
-        color: #ffffff;
-      }
-
-      &--activo {
-        background: #163572;
-        border-color: #163572;
-        color: #ffffff;
-      }
-    }
-  }
-}
