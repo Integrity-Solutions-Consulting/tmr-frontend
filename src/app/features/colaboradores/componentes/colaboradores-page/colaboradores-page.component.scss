@@ -5,9 +5,9 @@
   min-height: 0;
 
   &__wrapper {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 18px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   padding: 8px 24px 16px 24px; 
   display: flex;
@@ -19,7 +19,7 @@
     //font-family: 'Inter', sans-serif;
     font-size: 32px;
     font-weight: 800;
-    color: #163572;
+    color: var(--primary-color);
     padding-top: 18px;
     line-height: 1.2;
   }
@@ -59,8 +59,8 @@
     gap: 6px;
     height: 32px;
     padding: 0 14px;
-    background: #163572;
-    color: #ffffff;
+    background: var(--primary-color);
+    color: var(--text-inverse);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -96,7 +96,7 @@
 
 .confirm-card {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.14);
   padding: 36px 32px 28px;
@@ -112,11 +112,11 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    border: 3px solid #163572;
+    border: 3px solid var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #163572;
+    color: var(--primary-color);
     margin-bottom: 4px;
   }
 
@@ -126,14 +126,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-main);
     margin: 0;
   }
 
   &__mensaje {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin: 0;
     line-height: 1.5;
     strong { color: #374151; }
@@ -158,14 +158,14 @@
     transition: all 0.15s;
 
     &--cancel {
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--bg-soft);
+      color: var(--text-body);
       &:hover { background: #e5e7eb; }
     }
 
     &--confirm {
-      background: #163572;
-      color: #ffffff;
+      background: var(--primary-color);
+      color: var(--text-inverse);
       &:hover { background: #122d63; }
     }
   }
@@ -184,25 +184,19 @@
 :host-context(html[data-theme="dark"]) {
   .colabs-page__wrapper {
     background-color: #27272a ;
-    background: #27272a ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     color: #f4f4f5 ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
   }
 
-  .colabs-page__title {
-    color: #3b82f6 ;
-  }
-
   .colabs-page__btn-agregar {
     background: #163572 ;
-    color: #ffffff ;
     &:hover { background: #122d63 ; }
   }
 
   .confirm-card {
     background-color: #27272a ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     color: #f4f4f5 ;
 
     &__title { color: #3b82f6 ; }

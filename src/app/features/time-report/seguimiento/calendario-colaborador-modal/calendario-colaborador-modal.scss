@@ -16,7 +16,7 @@ $text-muted: #64748b;
     max-height: 90vh;
     overflow: hidden;
     font-family: 'Inter', 'Segoe UI', sans-serif;
-    background-color: #ffffff;
+    background-color: var(--bg-card);
 }
 
 .calcol-modal__header {
@@ -59,7 +59,7 @@ $text-muted: #64748b;
     height: 44px;
     border: 1.5px solid #0f172a;
     border-radius: 12px;
-    background: #ffffff;
+    background: var(--bg-card);
     color: #0f172a;
     cursor: pointer;
     flex-shrink: 0;

@@ -4,7 +4,7 @@
     thead th {
       font-size: 12px;
       font-weight: 800;
-      color: #64748b;
+      color: var(--text-secondary);
       letter-spacing: 0.05em;
     }
 
@@ -60,7 +60,7 @@
   font-size: 11px;
   text-transform: uppercase;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-muted);
   letter-spacing: 0.05em;
   margin-bottom: 8px;
   margin-left: 4px;
@@ -70,7 +70,7 @@
   position: relative;
 
   &:focus-within .filter-icon {
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
@@ -78,7 +78,7 @@
   width: 100%;
   padding: 10px 16px;
   background-color: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-input);
   border-radius: 12px;
   outline: none;
   font-size: 14px;
@@ -87,7 +87,7 @@
   box-sizing: border-box;
 
   &:focus {
-    box-shadow: 0 0 0 1px #163572;
+    box-shadow: 0 0 0 1px var(--primary-color);
   }
 }
 
@@ -109,7 +109,7 @@ input.filter-input {
   position: absolute;
   left: 12px;
   top: 12px;
-  color: #94a3b8;
+  color: var(--text-muted);
   transition: color 0.2s;
 }
 
@@ -117,15 +117,15 @@ input.filter-input {
   position: absolute;
   right: 12px;
   top: 12px;
-  color: #94a3b8;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
 .btn-clear {
   padding: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
   background-color: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   cursor: pointer;
   transition: color 0.2s;
@@ -137,9 +137,9 @@ input.filter-input {
 
 .table-wrapper {
   overflow-x: auto;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
 }
 
 .report-table {
@@ -151,16 +151,16 @@ input.filter-input {
     padding: 16px;
     font-size: 13px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     text-transform: uppercase;
     background-color: rgba(248, 250, 252, 0.5);
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-table);
   }
 
   td {
     padding: 16px;
     font-size: 14px;
-    color: #475569;
+    color: var(--text-secondary);
   }
 
   .text-center {
@@ -179,7 +179,7 @@ input.filter-input {
   .font-bold { font-weight: 700; }
   .font-medium { font-weight: 500; }
   .text-dark { color: #334155; }
-  .text-highlight { color: #163572; font-weight: 800; }
+  .text-highlight { color: var(--primary-color); font-weight: 800; }
 }
 
 .empty-state {
@@ -195,12 +195,12 @@ input.filter-input {
   h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin: 0;
   }
 
   p {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 14px;
     margin-top: 4px;
   }
@@ -209,7 +209,7 @@ input.filter-input {
 .empty-icon {
   width: 64px;
   height: 64px;
-  background-color: #f8fafc;
+  background-color: var(--bg-app);
   color: #cbd5e1;
   border-radius: 50%;
   display: flex;
@@ -220,7 +220,7 @@ input.filter-input {
 
 .btn-link {
   margin-top: 24px;
-  color: #163572;
+  color: var(--primary-color);
   font-weight: 700;
   font-size: 14px;
   background: none;
@@ -238,12 +238,12 @@ input.filter-input {
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .pagination-info span {
   font-weight: 700;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .pagination-controls {
@@ -258,16 +258,16 @@ input.filter-input {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   background-color: white;
-  color: #475569;
+  color: var(--text-secondary);
   font-weight: 700;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    background-color: #f8fafc;
+    background-color: var(--bg-app);
   }
 
   &:disabled {
@@ -277,7 +277,7 @@ input.filter-input {
 
   &.active {
     background-color: rgba(22, 53, 114, 0.05);
-    color: #163572;
+    color: var(--primary-color);
     border-color: rgba(22, 53, 114, 0.2);
   }
 }
@@ -306,7 +306,7 @@ input.filter-input {
 
 .metrica-card {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-card);
   border-radius: 0.75rem;
   padding: 12px 16px;
   display: flex;
@@ -331,7 +331,7 @@ input.filter-input {
 .metrica-valor {
   font-size: 22px;
   font-weight: 700;
-  color: #163572; // Color de marca principal
+  color: var(--primary-color); // Color de marca principal
   line-height: 1.1;
 }
 
@@ -361,7 +361,7 @@ input.filter-input {
   
   &.horas {
     background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    color: var(--status-success-text);
   }
   
   &.colaboradores {
@@ -433,7 +433,7 @@ input.filter-input {
 .btn-pdf {
   &:hover:not(:disabled) {
     border-color: #ef4444 !important;
-    color: #ef4444 !important;
+    color: var(--status-danger-text) !important;
     background-color: rgba(239, 68, 68, 0.05) !important;
   }
 }
@@ -447,23 +447,18 @@ input.filter-input {
   }
 
   .table-wrapper {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
+    background: var(--bg-app) ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
   .report-table {
-    background-color: #202124 ;
 
     th {
-      background-color: #202124 ;
-      border-bottom: 2px solid #3f3f46 ;
-      color: #a1a1aa ;
+      border-bottom: 2px solid var(--border-default) ;
     }
 
     td {
-      border-bottom: 1px solid #3f3f46 ;
+      border-bottom: 1px solid var(--border-default) ;
       color: #ffffff ;
     }
 
@@ -473,28 +468,18 @@ input.filter-input {
   }
 
   .filter-input {
-    background-color: #202124 ;
     border: none;
     color: #ffffff ;
   }
 
   .btn-clear {
-    background-color: #202124 ;
     border: none;
-    color: #a1a1aa ;
   }
 }
 
-
 :host-context(html[data-theme="dark"]) {
   .report-table {
-    td {
-      border-bottom: 1px solid #3f3f46 !important;
-    }
     tr {
-      &:hover {
-        background-color: #27272a !important;
-      }
       &.selected-row {
         background-color: #3f3f46 !important;
       }

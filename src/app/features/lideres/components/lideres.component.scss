@@ -14,10 +14,10 @@ $hover-row: rgba(#163572, 0.04);
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  box-shadow: var(--elevation-card);
   padding: 28px 28px 22px;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -82,7 +82,7 @@ $hover-row: rgba(#163572, 0.04);
 
   &.btn-primary {
     gap: 6px;
-    background: #163572;
+    background: var(--primary-color);
     color: $white;
     font-weight: 600;
 
@@ -94,9 +94,9 @@ $hover-row: rgba(#163572, 0.04);
   &.btn-outline {
     gap: 8px;
     background: $white;
-    color: #374151;
+    color: var(--text-body);
     font-weight: 500;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-soft);
 
     &:hover:not(:disabled) {
       background: rgba($primary, 0.06);
@@ -118,7 +118,7 @@ $hover-row: rgba(#163572, 0.04);
   flex: 0 0 204px;
   background: $white;
   border-radius: 15px;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -260,7 +260,7 @@ $hover-row: rgba(#163572, 0.04);
 
 .estado-texto {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
 }
@@ -272,7 +272,7 @@ $hover-row: rgba(#163572, 0.04);
   border: 1px solid $border;
   border-radius: 6px;
   font-size: 14px;
-  color: #737373;
+  color: var(--text-subtle);
   background: $white;
   outline: none;
   cursor: pointer;
@@ -284,7 +284,7 @@ $hover-row: rgba(#163572, 0.04);
   }
 
   option {
-    color: #737373;
+    color: var(--text-subtle);
     background: $white;
   }
 }
@@ -307,7 +307,7 @@ $hover-row: rgba(#163572, 0.04);
 .table-wrapper {
   background: $white;
   border-radius: 10px;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   overflow: auto;
   flex: 1;
   min-height: 0;
@@ -404,7 +404,7 @@ $hover-row: rgba(#163572, 0.04);
       padding: 11px 14px;
       text-align: left;
       font-weight: 600;
-      color: #737373;
+      color: var(--text-subtle);
       font-size: 14px;
       white-space: nowrap;
       background: $white;
@@ -443,7 +443,7 @@ $hover-row: rgba(#163572, 0.04);
 
     td {
       padding: 13px 16px;
-      color: #737373;
+      color: var(--text-subtle);
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
@@ -461,8 +461,8 @@ $hover-row: rgba(#163572, 0.04);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 400;
-  color: #737373;
-  border: 1px solid #E5E5E5;
+  color: var(--text-subtle);
+  border: 1px solid var(--border-default);
   background: $white;
 
   &::before {
@@ -728,7 +728,7 @@ $hover-row: rgba(#163572, 0.04);
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: #737373;
+  color: var(--text-subtle);
 
   &:hover {
     background: $secondary;
@@ -765,7 +765,7 @@ $hover-row: rgba(#163572, 0.04);
 .dropdown-limpiar {
   padding: 8px;
   font-size: 13px;
-  color: #737373;
+  color: var(--text-subtle);
   cursor: pointer;
   border-top: 1px solid $border;
   margin-top: 4px;
@@ -836,7 +836,7 @@ $hover-row: rgba(#163572, 0.04);
   position: relative;
 
   svg {
-    stroke: #163572;
+    stroke: var(--primary-color);
   }
 }
 
@@ -861,7 +861,7 @@ $hover-row: rgba(#163572, 0.04);
 }
 
 .card-icon--inactive {
-  background: #F3F4F6;
+  background: var(--bg-soft);
   border-radius: 8px;
   position: relative;
 
@@ -897,7 +897,7 @@ $hover-row: rgba(#163572, 0.04);
   line-height: 1;
   font-family: 'Inter', sans-serif;
   padding: 3px 10px;
-  color: #163572;
+  color: var(--primary-color);
   background: #EEF3FB;
   border: 1px solid #d8e8fb;
   white-space: nowrap;
@@ -909,8 +909,8 @@ $hover-row: rgba(#163572, 0.04);
 
 .client-chip--more {
   cursor: pointer;
-  color: #475569;
-  background: #f8fafc;
+  color: var(--text-secondary);
+  background: var(--bg-app);
   border: none;
   font-family: inherit;
   letter-spacing: inherit;
@@ -920,7 +920,7 @@ $hover-row: rgba(#163572, 0.04);
   text-overflow: clip;
 
   &:hover {
-    background: #e2e8f0;
+    background: var(--bg-hover);
     color: #1e293b;
   }
 
@@ -945,8 +945,8 @@ $hover-row: rgba(#163572, 0.04);
   gap: 6px;
   margin-top: 8px;
   padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   max-width: 100%;
   animation: expandIn 0.15s ease;
@@ -955,7 +955,7 @@ $hover-row: rgba(#163572, 0.04);
 .client-chip--expand {
   color: #334155;
   background: #f1f5f9;
-  border-color: #cbd5e1;
+  border-color: var(--border-soft);
   max-width: 100%;
 }
 
@@ -973,9 +973,7 @@ $hover-row: rgba(#163572, 0.04);
 
 :host-context(html[data-theme="dark"]) {
   .summary-card {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
+    background-color: var(--bg-app) ;
     border-radius: 12px ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
 
@@ -986,10 +984,6 @@ $hover-row: rgba(#163572, 0.04);
 
   .card-number {
     color: #ffffff ;
-  }
-
-  .card-label {
-    color: #a1a1aa ;
   }
 
   .card-icon--internal {
@@ -1044,7 +1038,6 @@ $hover-row: rgba(#163572, 0.04);
 
     svg, img {
       stroke: #a1a1aa ;
-      color: #a1a1aa ;
     }
 
     .card-svg-arrow {

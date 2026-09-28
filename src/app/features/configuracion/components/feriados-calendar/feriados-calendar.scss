@@ -1,7 +1,7 @@
 .calendar-card {
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--bg-card);
   box-shadow: none;
   overflow: hidden;
   font-family: 'Inter', sans-serif;
@@ -13,8 +13,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 15px 16px;
-  border-bottom: 2px solid #E5E5E5;
-  background: #ffffff;
+  border-bottom: 2px solid var(--border-default);
+  background: var(--bg-card);
 }
 
 h3,
@@ -23,7 +23,7 @@ p {
 }
 
 h3 {
-  color: #163572;
+  color: var(--primary-color);
   font-size: 18px;
   font-weight: 700;
 }
@@ -40,7 +40,7 @@ h3 {
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #737373;
+  color: var(--text-subtle);
 }
 
 .calendar-actions mat-icon {
@@ -71,13 +71,13 @@ h3 {
 }
 
 .weekday-grid {
-  border-bottom: 1px solid #E5E5E5;
-  background: #ffffff;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-card);
 }
 
 .weekday {
   padding: 10px 12px;
-  color: #737373;
+  color: var(--text-subtle);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0;
@@ -91,9 +91,9 @@ h3 {
   gap: 8px;
   padding: 9px;
   border: 0;
-  border-right: 1px solid #E5E5E5;
-  border-bottom: 1px solid #E5E5E5;
-  background: #fff;
+  border-right: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-card);
   text-align: left;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
@@ -161,14 +161,14 @@ h3 {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: #737373;
+  color: var(--text-subtle);
   font-size: 12px;
   font-weight: 800;
 }
 
 .today .day-number {
-  color: #fff;
-  background: #163572;
+  color: var(--text-inverse);
+  background: var(--primary-color);
 }
 
 .holiday-list {
@@ -230,22 +230,22 @@ h3 {
 
 ::ng-deep .holiday-menu .mat-mdc-menu-item {
   border-radius: 8px !important;
-  color: #6b7280 !important;
+  color: var(--text-secondary) !important;
   font-family: 'Inter', sans-serif !important;
   font-size: 15px !important;
   font-weight: 500 !important;
 }
 
 ::ng-deep .holiday-menu .mat-mdc-menu-item:hover {
-  background: #f3f4f6 !important;
+  background: var(--bg-soft) !important;
 }
 
 ::ng-deep .holiday-menu .mat-mdc-menu-item mat-icon {
-  color: #6b7280 !important;
+  color: var(--text-secondary) !important;
 }
 
 ::ng-deep .holiday-menu .danger {
-  color: #6b7280 !important;
+  color: var(--text-secondary) !important;
 }
 
 @media (max-width: 760px) {
@@ -279,16 +279,6 @@ h3 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
   }
 
-  .calendar-header {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-bottom-color: #3f3f46 ;
-
-    h3 {
-      color: #3b82f6 ;
-    }
-  }
-
   .calendar-actions button {
     background-color: #27272a ;
     border-color: #3f3f46 ;
@@ -299,10 +289,6 @@ h3 {
   .weekday-grid {
     background-color: #202124 ;
     border-bottom-color: #3f3f46 ;
-  }
-
-  .weekday {
-    color: #a1a1aa ;
   }
 
   .day-cell {

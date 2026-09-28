@@ -11,9 +11,9 @@
 
 .modal-form {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  box-shadow: var(--elevation-modal);
   width: 860px;
   max-width: calc(100vw - 48px);
   max-height: 92vh;
@@ -35,14 +35,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 700;
-    color: #163572;
+    color: var(--primary-color);
     margin: 0 0 4px;
   }
 
   &__subtitle {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin: 0;
   }
 
@@ -50,7 +50,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 6px;
     display: flex;
@@ -96,15 +96,15 @@
     .material-icons { font-size: 18px; }
 
     &--cancel {
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      color: #374151;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      color: var(--text-body);
       &:hover { background: #f9fafb; }
     }
 
     &--save {
-      background: #163572;
-      color: #ffffff;
+      background: var(--primary-color);
+      color: var(--text-inverse);
       &:hover { background: #122d63; }
     }
   }
@@ -121,7 +121,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #163572;
+    color: var(--primary-color);
     margin-bottom: 18px;
   }
 
@@ -132,7 +132,7 @@
   &__bar {
     width: 3px;
     height: 14px;
-    background: #163572;
+    background: var(--primary-color);
     border-radius: 2px;
     flex-shrink: 0;
   }
@@ -150,7 +150,7 @@
   padding: 8px 0;
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: var(--text-main);
   text-align: left;
 
   &:hover {
@@ -159,13 +159,13 @@
 
   .material-icons {
     font-size: 20px;
-    color: #6b7280;
+    color: var(--text-secondary);
   }
 }
 
 .opcional {
   font-weight: 400;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -195,13 +195,13 @@
 .form-field__error {
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
-  color: #dc2626;
+  color: var(--status-danger-text);
   font-weight: 500;
   padding-left: 4px;
 }
 
 .req {
-  color: #dc2626;
+  color: var(--status-danger-text);
   margin-left: 1px;
 }
 
@@ -214,19 +214,19 @@
     width: 100%;
     height: 48px;
     padding: 0 12px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-soft);
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
-    color: #374151;
-    background: #ffffff;
+    color: var(--text-body);
+    background: var(--bg-card);
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.15s, box-shadow 0.15s;
 
     &:focus {
-      border-color: #163572;
-      box-shadow: 0 0 0 3px rgba(22,53,114,0.08);
+      border-color: var(--primary-color);
+      box-shadow: var(--focus-ring-primary);
     }
 
     &--error {
@@ -239,16 +239,16 @@
       top: 0px;
       transform: translateY(-50%);
       font-size: 11px;
-      color: #737373;
-      background: #ffffff;
+      color: var(--text-subtle);
+      background: var(--bg-card);
     }
 
     &--date ~ .float-field__label {
       top: 0;
       transform: translateY(-50%);
       font-size: 11px;
-      color: #737373;
-      background: #ffffff;
+      color: var(--text-subtle);
+      background: var(--bg-card);
     }
   }
 
@@ -260,11 +260,11 @@
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
-    color: #9ca3af;
+    color: var(--text-disabled);
     pointer-events: none;
     transition: all 0.18s ease;
     padding: 0 4px;
-    background: #ffffff;
+    background: var(--bg-card);
     white-space: nowrap;
     line-height: 1;
 
@@ -272,7 +272,7 @@
       top: 0;
       transform: none;
       font-size: 11px;
-      color: #737373;
+      color: var(--text-subtle);
     }
   }
 }
@@ -286,12 +286,12 @@
     width: 100%;
     height: 48px;
     padding: 0 36px 0 12px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-soft);
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
-    color: #374151;
-    background: #ffffff;
+    color: var(--text-body);
+    background: var(--bg-card);
     outline: none;
     box-sizing: border-box;
     cursor: pointer;
@@ -302,8 +302,8 @@
     transition: border-color 0.15s;
 
     &:focus {
-      border-color: #163572;
-      box-shadow: 0 0 0 3px rgba(22,53,114,0.08);
+      border-color: var(--primary-color);
+      box-shadow: var(--focus-ring-primary);
     }
 
     &--error { border-color: #dc2626; }
@@ -317,11 +317,11 @@
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
-    color: #9ca3af;
+    color: var(--text-disabled);
     pointer-events: none;
     transition: all 0.18s ease;
     padding: 0 4px;
-    background: #ffffff;
+    background: var(--bg-card);
     white-space: nowrap;
     line-height: 1;
 
@@ -330,7 +330,7 @@
       transform: none;
       transform: translateY(-50%);
       font-size: 11px;
-      color: #737373;
+      color: var(--text-subtle);
     }
   }
 
@@ -338,7 +338,7 @@
     top: 0px;
     transform: translateY(-50%);
     font-size: 11px;
-    color: #737373;
+    color: var(--text-subtle);
   }
 }
 
@@ -353,9 +353,9 @@
   right: 0;
   margin-top: 4px;
   background: white;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--elevation-dropdown);
   max-height: 220px;
   overflow-y: auto;
   z-index: 100;
@@ -379,19 +379,19 @@
     transition: background 0.15s;
 
     &:hover {
-      background: #f3f4f6;
+      background: var(--bg-soft);
     }
   }
 
   &__nombre {
     font-size: 13px;
     font-weight: 500;
-    color: #111827;
+    color: var(--text-main);
   }
 
   &__identificacion {
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin-left: 8px;
   }
 
@@ -399,16 +399,16 @@
     padding: 12px;
     text-align: center;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
   }
 
   &__more {
     padding: 8px 12px;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     font-style: italic;
     border-top: 1px solid #f3f4f6;
-    background: #fafafa;
+    background: var(--bg-surface);
   }
 }
 
@@ -417,7 +417,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: #f3f4f6;
+  background: var(--bg-soft);
   border-radius: 8px;
   margin-top: 4px;
 
@@ -431,19 +431,19 @@
   &__nombre {
     font-size: 13px;
     font-weight: 500;
-    color: #111827;
+    color: var(--text-main);
   }
 
   &__identificacion {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--text-secondary);
   }
 
   &__remove {
     background: none;
     border: none;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--text-secondary);
     padding: 4px;
     display: flex;
     align-items: center;
@@ -452,7 +452,7 @@
 
     &:hover {
       background: #e5e7eb;
-      color: #111827;
+      color: var(--text-main);
     }
 
     .material-icons {
@@ -468,17 +468,17 @@
 
 // ── Campos deshabilitados ─────────────────────────────
 .float-field__input:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
 }
 
 .float-select__input:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
   opacity: 1;
 }
 
@@ -494,75 +494,28 @@
 
 :host-context(html[data-theme="dark"]) {
   .modal-form {
-    background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-
-    &__header,
-    &__footer {
-      border-color: #3f3f46 ;
-    }
-
-    &__title {
-      color: #3b82f6 ;
-    }
-
-    &__subtitle {
-      color: #a1a1aa ;
-    }
-
-    &__close {
-      color: #a1a1aa ;
-      &:hover {
-        background: #3f3f46 ;
-        color: #ffffff ;
-      }
-    }
 
     &__btn--cancel {
-      background: #202124 ;
-      border-color: #3f3f46 ;
-      color: #ffffff ;
       &:hover { background: #3f3f46 ; }
     }
 
     &__btn--save {
       background: #163572 ;
-      color: #ffffff ;
       &:hover { background: #122d63 ; }
     }
   }
 
-  .form-section__title {
-    color: #3b82f6 ;
-  }
-
-  .form-section__bar {
-    background: #3b82f6 ;
-  }
-
   .form-section__toggle {
-    color: #f4f4f5 ;
     &:hover { color: #60a5fa ; }
     .material-icons { color: #a1a1aa ; }
-  }
-
-  .opcional {
-    color: #a1a1aa ;
   }
 
   /* Floating inputs y selects */
   .float-field__input,
   .float-select__input {
     background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
 
     &:focus {
-      border-color: #3b82f6 ;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
     }
 
@@ -570,14 +523,11 @@
     &:not(:placeholder-shown) ~ .float-field__label,
     &--date ~ .float-field__label {
       background-color: #202124 ;
-      background: #202124 ;
-      color: #60a5fa ;
     }
 
     &:disabled {
       background: #18181b ;
       border-color: #27272a ;
-      color: #71717a ;
     }
   }
 
@@ -591,28 +541,21 @@
   .float-field__label,
   .float-select__label {
     background-color: transparent ;
-    color: #a1a1aa ;
 
     &--always,
     &--up {
       background-color: #202124 ;
-      background: #202124 ;
-      color: #60a5fa ;
     }
   }
 
   .float-select__input:focus ~ .float-select__label {
     background-color: #202124 ;
-    background: #202124 ;
-    color: #60a5fa ;
   }
 
   .reemplazo-dropdown {
-    background-color: #27272a ;
-    border-color: #3f3f46 ;
+    background-color: var(--bg-surface) ;
 
     &__item {
-      color: #f4f4f5 ;
       &:hover { background: #3f3f46 ; }
     }
 
@@ -621,8 +564,7 @@
   }
 
   .reemplazo-seleccionado {
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
+    border: 1px solid var(--border-default) ;
     &__nombre { color: #ffffff ; }
     &__identificacion { color: #a1a1aa ; }
   }

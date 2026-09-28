@@ -9,7 +9,7 @@
 }
 
 .modal-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 32px 28px;
   width: 380px;
@@ -28,12 +28,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #163572; 
+  border: 2px solid var(--primary-color); 
 
 
   .material-symbols-outlined {
     font-size: 32px;
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
@@ -47,7 +47,7 @@
 
 .modal-mensaje {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-align: center;
   margin: 0;
 
@@ -67,10 +67,10 @@
 .btn-cancelar {
   flex: 1;
   height: 40px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  background: #ffffff;
-  color: #6b7280;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -84,8 +84,8 @@
   height: 40px;
   border: none;
   border-radius: 8px;
-  background: #163572;
-  color: #ffffff;
+  background: var(--primary-color);
+  color: var(--text-inverse);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -100,9 +100,9 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 8px;
-  background-color: #fef2f2;
+  background-color: var(--status-danger-bg-soft);
   border: 1px solid #fca5a5;
-  color: #dc2626;
+  color: var(--status-danger-text);
   font-size: 12.5px;
   font-weight: 500;
   margin-top: 4px;
@@ -111,7 +111,7 @@
 
   .material-icons {
     font-size: 18px;
-    color: #dc2626;
+    color: var(--status-danger-text);
     flex-shrink: 0;
   }
 }

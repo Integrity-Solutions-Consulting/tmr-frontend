@@ -29,8 +29,8 @@
 
   // Types
   &--primary {
-    background-color: #163572 !important;
-    color: #ffffff !important;
+    background-color: var(--primary-color) !important;
+    color: var(--text-inverse) !important;
     border-radius: 6px !important;
     box-shadow: none !important;
 
@@ -41,18 +41,18 @@
   }
 
   &--secondary {
-    background-color: #ffffff !important;
-    color: #374151 !important;
-    border: 1px solid #e5e7eb !important;
+    background-color: var(--text-inverse) !important;
+    color: var(--text-body) !important;
+    border: 1px solid var(--border-default) !important;
 
     &:hover:not(:disabled) {
-      background-color: #f9fafb !important;
+      background-color: var(--bg-subtle) !important;
     }
   }
 
   &--danger {
-    background-color: #ef4444 !important;
-    color: #ffffff !important;
+    background-color: var(--status-danger-bg-solid) !important;
+    color: var(--text-inverse) !important;
 
     &:hover:not(:disabled) {
       background-color: #dc2626 !important;

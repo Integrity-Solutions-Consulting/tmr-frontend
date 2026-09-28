@@ -10,9 +10,9 @@
     height: 40px;
     padding: 0 16px;
 
-    background: #ffffff;
+    background: var(--bg-card);
 
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-default);
     border-radius: 8px;
 
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
@@ -22,7 +22,7 @@
     font: inherit;
     font-size: 13px;
     font-weight: 600;
-    color: #737373;
+    color: var(--text-subtle);
 
     transition: all 0.18s ease;
 
@@ -37,8 +37,8 @@
 
     &:hover,
     &--open {
-      background: #f8fafc;
-      border-color: #dbe2ea;
+      background: var(--bg-app);
+      border-color: var(--border-soft);
     }
   }
 
@@ -58,9 +58,9 @@
 
     padding: 8px 0;
 
-    background: #ffffff;
+    background: var(--bg-card);
 
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-default);
     border-radius: 10px;
 
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
@@ -71,9 +71,9 @@
 
     padding: 8px 14px 10px;
 
-    color: #737373;
+    color: var(--text-subtle);
 
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-table);
 
     font-size: 12px;
     font-weight: 500;
@@ -92,7 +92,7 @@
     background: transparent;
     border: none;
 
-    color: #737373;
+    color: var(--text-subtle);
 
     cursor: pointer;
 
@@ -111,8 +111,8 @@
     }
 
     &:hover {
-      background: #f8fafc;
-      color: #163572;
+      background: var(--bg-app);
+      color: var(--primary-color);
     }
   }
 }

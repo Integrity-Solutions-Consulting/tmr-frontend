@@ -12,7 +12,7 @@
 
 // ── Card ──────────────────────────────────────────────────
 .notificacion-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 14px;
   padding: 40px 48px;
   display: flex;
@@ -40,7 +40,7 @@
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #34C759;
+  color: var(--status-success-text);
   text-align: center;
   margin: 0;
 }

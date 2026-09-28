@@ -4,7 +4,7 @@
 $dark-navy: #1A1A2E;
 $primary-blue: #163572;
 $gray-bg: #F3F4F6;
-$border-color: #E5E7EB;
+$border-color: var(--border-default);
 $text-muted: #9CA3AF;
 
 .actividades-page {
@@ -30,18 +30,18 @@ $text-muted: #9CA3AF;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-body);
 
     mat-icon {
         font-size: 17px;
         width: 17px;
         height: 17px;
-        color: #6B7280;
+        color: var(--text-secondary);
     }
 }
 
 .btn-agregar {
-    background-color: #ffffff !important;
+    background-color: var(--text-inverse) !important;
     color: $primary-blue !important;
     border: 1px solid $primary-blue !important;
     border-radius: 8px !important;
@@ -67,7 +67,7 @@ $text-muted: #9CA3AF;
 
     &:hover:not(:disabled) {
         background-color: $primary-blue !important;
-        color: #ffffff !important;
+        color: var(--text-inverse) !important;
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 6px -1px rgba(22, 53, 114, 0.2), 0 2px 4px -1px rgba(22, 53, 114, 0.1) !important;
     }
@@ -127,7 +127,7 @@ $text-muted: #9CA3AF;
 
         &.green {
             background: #DCFCE7;
-            color: #15803D;
+            color: var(--status-success-text);
         }
 
         &.purple {
@@ -136,8 +136,8 @@ $text-muted: #9CA3AF;
         }
 
         &.orange {
-            background: #FEF3C7;
-            color: #D97706;
+            background: var(--status-warning-bg-soft);
+            color: var(--status-warning-text);
         }
     }
 
@@ -156,7 +156,7 @@ $text-muted: #9CA3AF;
         .metric-name {
             font-size: 13px;
             font-weight: 600;
-            color: #374151;
+            color: var(--text-body);
         }
 
         .metric-desc {
@@ -171,8 +171,8 @@ $text-muted: #9CA3AF;
 }
 
 .btn-reporte {
-    border: 1px solid #D1D5DB;
-    color: #374151;
+    border: 1px solid var(--border-soft);
+    color: var(--text-body);
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
@@ -245,7 +245,7 @@ $text-muted: #9CA3AF;
     border: 1px solid $border-color;
     border-radius: 10px;
     padding: 14px;
-    background: #FAFAFA;
+    background: var(--bg-surface);
     cursor: pointer;
     transition: all 0.16s ease;
     display: flex;
@@ -253,8 +253,8 @@ $text-muted: #9CA3AF;
     gap: 8px;
 
     &:hover {
-        background: #F3F4F6;
-        border-color: color.adjust($border-color, $lightness: -10%);
+        background: var(--bg-soft);
+    border-color: hsl(from var(--border-default) h s calc(l - 10%));
     }
 
     .actividad-card-header {
@@ -322,9 +322,9 @@ $text-muted: #9CA3AF;
         display: flex;
         align-items: center;
         gap: 4px;
-        color: #9CA3AF;
+        color: var(--text-disabled);
         font-size: 11px;
-        border-top: 1px dashed #E5E7EB;
+        border-top: 1px dashed var(--border-default);
         padding-top: 8px;
         margin-top: 2px;
 
@@ -342,14 +342,14 @@ $text-muted: #9CA3AF;
     justify-content: center;
     gap: 8px;
     padding: 24px;
-    background: #F9FAFB;
+    background: var(--bg-subtle);
     border: 1px dashed $border-color;
     border-radius: 8px;
-    color: #6B7280;
+    color: var(--text-secondary);
     font-size: 13.5px;
 
     mat-icon {
-        color: #9CA3AF;
+        color: var(--text-disabled);
         font-size: 20px;
         width: 20px;
         height: 20px;

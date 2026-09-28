@@ -26,9 +26,9 @@ $hover-row:     rgba(#163572, 0.04);
 .catalogos-sidebar {
   width: 280px;
   background: $white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  box-shadow: var(--elevation-card);
   padding: 24px 20px;
   box-sizing: border-box;
   display: flex;
@@ -72,7 +72,7 @@ $hover-row:     rgba(#163572, 0.04);
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     transition: color 0.15s ease;
   }
 
@@ -84,7 +84,7 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   &:hover {
-    background: #f3f4f6;
+    background: var(--bg-soft);
 
     .sidebar-item-icon {
       color: $primary;
@@ -95,8 +95,8 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   &--active {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    background: var(--status-info-bg-soft);
+    border: 1px solid var(--status-info-border);
 
     .sidebar-item-icon {
       color: $primary;
@@ -110,7 +110,7 @@ $hover-row:     rgba(#163572, 0.04);
 .sidebar-empty {
   padding: 12px 14px;
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--text-disabled);
   text-align: center;
   font-style: italic;
 }
@@ -123,9 +123,9 @@ $hover-row:     rgba(#163572, 0.04);
 .page {
   width: 100%;
   background: $white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+  box-shadow: var(--elevation-card);
   padding: 28px 28px 22px;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -166,7 +166,7 @@ $hover-row:     rgba(#163572, 0.04);
   flex: 0 0 204px;
   background: $white;
   border-radius: 15px;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -201,7 +201,7 @@ $hover-row:     rgba(#163572, 0.04);
   flex-shrink: 0;
   border-radius: 8px;
   background: #EEF3FB;
-  color: #163572;
+  color: var(--primary-color);
   align-self: center;
 
   &--total-items {
@@ -211,12 +211,12 @@ $hover-row:     rgba(#163572, 0.04);
 
   &--active {
     background: #e6fdee;
-    color: #34C759;
+    color: var(--status-success-text);
   }
 
   &--inactive {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: var(--bg-soft);
+    color: var(--text-secondary);
   }
 }
 
@@ -253,8 +253,8 @@ $hover-row:     rgba(#163572, 0.04);
   position: relative;
   display: flex;
   align-items: center;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
   border-radius: 8px;
   padding: 0 10px;
   height: 40px;
@@ -262,14 +262,14 @@ $hover-row:     rgba(#163572, 0.04);
   transition: border-color 0.15s;
 
   &:focus-within {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 }
 
 .search-icon {
   font-size: 17px;
-  color: #9ca3af;
+  color: var(--text-disabled);
   margin-right: 8px;
   flex-shrink: 0;
 }
@@ -280,12 +280,12 @@ $hover-row:     rgba(#163572, 0.04);
   outline: none;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  color: #374151;
+  color: var(--text-body);
   background: transparent;
   min-width: 0;
 
   &::placeholder {
-    color: #9ca3af;
+    color: var(--text-disabled);
   }
 }
 
@@ -294,7 +294,7 @@ $hover-row:     rgba(#163572, 0.04);
   border: none;
   cursor: pointer;
   padding: 0;
-  color: #9ca3af;
+  color: var(--text-disabled);
   display: flex;
   align-items: center;
   transition: color 0.15s;
@@ -314,27 +314,27 @@ $hover-row:     rgba(#163572, 0.04);
   gap: 6px;
   height: 40px;
   padding: 0 12px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
   border-radius: 8px;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  color: #374151;
+  color: var(--text-body);
   font-weight: 500;
   transition: all 0.15s;
   white-space: nowrap;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    color: #374151;
+    background: var(--bg-soft);
+    border-color: var(--border-soft);
+    color: var(--text-body);
   }
 }
 
 .estado-filter-icon {
   font-size: 18px;
-  color: #9ca3af;
+  color: var(--text-disabled);
 }
 
 .estado-dropdown {
@@ -342,8 +342,8 @@ $hover-row:     rgba(#163572, 0.04);
   top: calc(100% + 6px);
   left: 0;
   min-width: 200px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.10);
   z-index: 100;
@@ -368,12 +368,12 @@ $hover-row:     rgba(#163572, 0.04);
     text-align: left;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #374151;
+    color: var(--text-body);
     font-weight: 500;
     transition: background 0.1s;
 
     &:hover {
-      background: #f9fafb;
+      background: var(--bg-subtle);
     }
   }
 
@@ -383,7 +383,7 @@ $hover-row:     rgba(#163572, 0.04);
     justify-content: center;
     width: 18px;
     height: 18px;
-    border: 1.5px solid #d1d5db;
+    border: 1.5px solid var(--border-soft);
     border-radius: 4px;
     transition: all 0.12s;
     color: transparent;
@@ -396,16 +396,16 @@ $hover-row:     rgba(#163572, 0.04);
     &--active {
       background: $primary;
       border-color: $primary;
-      color: #ffffff;
+      color: var(--text-inverse);
     }
   }
 
   &-clear {
     width: 100%;
     padding: 10px 14px;
-    background: #f9fafb;
+    background: var(--bg-subtle);
     border: none;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border-default);
     font-family: 'Inter', sans-serif;
     font-size: 12.5px;
     font-weight: 600;
@@ -415,7 +415,7 @@ $hover-row:     rgba(#163572, 0.04);
     transition: color 0.1s, background 0.1s;
 
     &:hover {
-      background: #f3f4f6;
+      background: var(--bg-soft);
       color: $primary-dark;
     }
   }
@@ -449,7 +449,7 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   &:disabled {
-    background-color: #94a3b8;
+    background-color: var(--text-muted);
     cursor: not-allowed;
   }
 }
@@ -475,7 +475,7 @@ $hover-row:     rgba(#163572, 0.04);
   display: flex;
   flex-direction: column;
   background: $white;
-  border: 1px solid #E5E5E5;
+  border: 1px solid var(--border-default);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   overflow: hidden;
@@ -527,8 +527,8 @@ $hover-row:     rgba(#163572, 0.04);
   th:nth-child(4), td:nth-child(4) { width: 5%; }  // Acciones
 
   thead {
-    background: #F9FAFB;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-default);
   }
 
   th {
@@ -571,8 +571,8 @@ $hover-row:     rgba(#163572, 0.04);
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
-  color: #15803d;
-  background: #f0fdf4;
+  color: var(--status-success-text);
+  background: var(--status-success-bg-soft);
   white-space: nowrap;
 
   &::before {
@@ -581,12 +581,12 @@ $hover-row:     rgba(#163572, 0.04);
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #22c55e;
+    background-color: var(--status-success-bg-solid);
   }
 
   &--inactive {
-    color: #6b7280;
-    background: #f9fafb;
+    color: var(--text-secondary);
+    background: var(--bg-subtle);
 
     &::before {
       background-color: #9ca3af;
@@ -606,10 +606,10 @@ $hover-row:     rgba(#163572, 0.04);
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  background-color: #fef2f2;
+  background-color: var(--status-danger-bg-soft);
   border: 1px solid #fee2e2;
   border-radius: 12px;
-  color: #dc2626;
+  color: var(--status-danger-text);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 500;
@@ -625,62 +625,23 @@ $hover-row:     rgba(#163572, 0.04);
 :host-context(html[data-theme="dark"]) {
   /* Sidebar de Catálogos Maestros */
   .catalogos-sidebar {
-    background-color: #27272a ;
-    background: #27272a ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
-  }
-
-  .sidebar-title {
-    color: #3b82f6 ;
   }
 
   .sidebar-item {
     &-icon { color: #a1a1aa ; }
     &-text { color: #e4e4e7 ; }
-
-    &:hover {
-      background-color: #3f3f46 ;
-
-      .sidebar-item-icon,
-      .sidebar-item-text {
-        color: #ffffff ;
-      }
-    }
-
-    &--active {
-      background-color: rgba(59, 130, 246, 0.2) ;
-      border-color: #3b82f6 ;
-
-      .sidebar-item-icon,
-      .sidebar-item-text {
-        color: #60a5fa ;
-      }
-    }
-  }
-
-  .sidebar-empty {
-    color: #a1a1aa ;
   }
 
   /* Contenido Principal */
   .page {
-    background-color: #27272a ;
-    background: #27272a ;
-    border-color: #3f3f46 ;
-    color: #f4f4f5 ;
+    border-color: var(--border-default) ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
-  }
-
-  .page-title {
-    color: #3b82f6 ;
   }
 
   /* Cards resumen superiores */
   .summary-card {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
     border-radius: 12px ;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
 
@@ -689,172 +650,45 @@ $hover-row:     rgba(#163572, 0.04);
     }
   }
 
-  .card-number {
-    color: #ffffff ;
-  }
-
-  .card-label {
-    color: #a1a1aa ;
-  }
-
-  .card-icon {
-    &--total-items {
-      background: rgba(239, 68, 68, 0.15) ;
-      color: #f87171 ;
-    }
-
-    &--active {
-      background: rgba(34, 197, 94, 0.15) ;
-      color: #4ade80 ;
-    }
-
-    &--inactive {
-      background: rgba(161, 161, 170, 0.15) ;
-      color: #a1a1aa ;
-    }
-  }
-
   /* Buscador y Filtro Estado */
   .search-input-wrapper {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
+    border-color: var(--border-default) ;
   }
 
   .search-icon {
     filter: brightness(0) invert(1) ;
   }
 
-  .search-input {
-    color: #ffffff ;
-    background: transparent ;
-
-    &::placeholder {
-      color: #cbd5e1 ;
-    }
-  }
-
   .estado-filter-btn {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
-
-    span {
-      color: #ffffff ;
-    }
 
     img, .estado-filter-icon {
       filter: brightness(0) invert(1) ;
     }
-
-    &:hover {
-      background-color: #27272a ;
-    }
   }
 
   .estado-dropdown {
-    background-color: #27272a ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
   }
 
   .estado-dropdown-item {
-    color: #f4f4f5 ;
     &:hover { background-color: #3f3f46 ; }
   }
 
-  .estado-dropdown-label {
-    color: #f4f4f5 ;
-  }
-
   .estado-dropdown-checkbox {
-    background: #202124 ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
 
     &--active {
-      background: #163572 ;
       border-color: #163572 ;
     }
   }
 
-  .estado-dropdown-clear {
-    background: transparent ;
-    background-color: transparent ;
-    color: #a1a1aa ;
-    border-top-color: #3f3f46 ;
-
-    &:hover {
-      background-color: #3f3f46 ;
-      background: #3f3f46 ;
-      color: #3b82f6 ;
-    }
-  }
-
   .page-create {
-    background-color: #163572 ;
-    color: #ffffff ;
     &:hover:not(:disabled) { background-color: #122d63 ; }
   }
 
   /* Tabla de Catálogos */
   .panel {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-  }
-
-  .roles-table {
-    background-color: #202124 ;
-
-    thead {
-      background-color: #202124 ;
-      border-bottom-color: #3f3f46 ;
-
-      th {
-        background-color: #202124 ;
-        color: #a1a1aa ;
-      }
-    }
-
-    tbody {
-      tr {
-        border-bottom-color: #3f3f46 ;
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.03) ;
-        }
-      }
-
-      td {
-        color: #e4e4e7 ;
-      }
-    }
-  }
-
-  .role-name {
-    color: #ffffff ;
-  }
-
-  .status-pill {
-    background-color: rgba(34, 197, 94, 0.2) ;
-    color: #4ade80 ;
-
-    &::before {
-      background-color: #4ade80 ;
-    }
-
-    &--inactive {
-      background-color: rgba(161, 161, 170, 0.2) ;
-      color: #a1a1aa ;
-
-      &::before {
-        background-color: #a1a1aa ;
-      }
-    }
-  }
-
-  .actions-cell {
-    background-color: #202124 ;
+    border-color: var(--border-default) ;
   }
 }

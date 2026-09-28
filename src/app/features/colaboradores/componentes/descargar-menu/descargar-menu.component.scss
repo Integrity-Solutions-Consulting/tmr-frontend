@@ -7,32 +7,32 @@
     gap: 8px;
     height: 32px;
     padding: 0 14px;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
     border-radius: 8px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-body);
     transition: all 0.15s;
     white-space: nowrap;
  
     svg {
       flex-shrink: 0;
-      color: #374151;
+      color: var(--text-body);
       transition: color 0.15s;
     }
  
     &:hover {
-      background: #f3f4f6;
-      border-color: #d1d5db;
-      color: #374151;
+      background: var(--bg-soft);
+      border-color: var(--border-soft);
+      color: var(--text-body);
     }
  
     &--open {
-      background: #f3f4f6;
-      border-color: #d1d5db;
+      background: var(--bg-soft);
+      border-color: var(--border-soft);
     }
   }
  
@@ -47,8 +47,8 @@
     top: calc(100% + 8px);
     right: 0;
     width: 180px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     padding: 10px;
@@ -63,7 +63,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin: 0 0 2px 0;
   }
  
@@ -79,8 +79,8 @@
     font-family: 'Inter', sans-serif;
     font-size: 11.5px;
     font-weight: 600;
-    color: #ffffff;
-    background: #163572;
+    color: var(--text-inverse);
+    background: var(--primary-color);
     transition: background 0.15s;
  
     &:hover {
@@ -97,21 +97,16 @@
 :host-context(html[data-theme="dark"]) {
   .descargar__btn {
     background: #202124 ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     color: #ffffff ;
 
     img, svg {
       filter: brightness(0) invert(1) ;
     }
-
-    &:hover, &--open {
-      background: #27272a ;
-    }
   }
 
   .descargar__panel {
-    background: #27272a ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     color: #f4f4f5 ;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
   }

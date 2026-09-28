@@ -19,9 +19,9 @@
   z-index: 91;
   width: 260px;
   padding: 14px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--bg-card);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
   display: flex;
   flex-direction: column;
@@ -36,13 +36,13 @@
   padding: 4px 8px 8px;
 
   strong {
-    color: #111827;
+    color: var(--text-main);
     font-size: 13.5px;
     font-weight: 600;
   }
 
   span {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 11.5px;
     font-weight: 400;
   }
@@ -62,36 +62,36 @@
   width: 100%;
   padding: 8px 10px !important;
   border-radius: 8px !important;
-  color: #374151 !important;
+  color: var(--text-body) !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   transition: background-color 0.15s ease, color 0.15s ease;
 
   .material-icons {
     margin-right: 10px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 18px;
     transition: color 0.15s ease;
   }
 
   &:hover {
-    background-color: #f3f4f6 !important;
-    color: #163572 !important;
+    background-color: var(--bg-soft) !important;
+    color: var(--primary-color) !important;
 
     .material-icons {
-      color: #163572;
+      color: var(--primary-color);
     }
   }
 
   &--logout {
-    color: #dc2626 !important;
+    color: var(--status-danger-text) !important;
 
     .material-icons {
-      color: #dc2626;
+      color: var(--status-danger-text);
     }
 
     &:hover {
-      background-color: #fef2f2 !important;
+      background-color: var(--status-danger-bg-soft) !important;
       color: #b91c1c !important;
 
       .material-icons {

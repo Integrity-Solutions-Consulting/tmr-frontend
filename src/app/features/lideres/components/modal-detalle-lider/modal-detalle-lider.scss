@@ -73,7 +73,7 @@ $inactivo: #ef4444;
 
 .detalle-separador {
   height: 1px;
-  background: #f3f4f6;
+  background: var(--bg-soft);
   margin: 0 0 16px;
 }
 
@@ -86,7 +86,7 @@ $inactivo: #ef4444;
   font-size: 13px;
   font-weight: 400;
   border: 1px solid #D4D4D4;
-  background: #ffffff;
+  background: var(--bg-card);
   color: #404040;
 }
 
@@ -156,7 +156,7 @@ $inactivo: #ef4444;
   font-size: 18px;
   line-height: 28px;
   letter-spacing: 0;
-  color: #163572;
+  color: var(--primary-color);
   margin-bottom: 16px;
   padding-top: 16px;
   border-top: none;
@@ -240,12 +240,12 @@ padding-left: 20px;
     height: 22px;
     margin-left: 10px;
     padding: 0 6px;
-    background: #f3f4f6;
-    color: #163572;
+    background: var(--bg-soft);
+    color: var(--primary-color);
     font-size: 12px;
     font-weight: 700;
     border-radius: 5px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-soft);
     line-height: 1;
   }
 
@@ -259,7 +259,7 @@ padding-left: 20px;
   &__empty {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     text-align: center;
     padding: 16px 0;
     margin: 0;
@@ -270,8 +270,8 @@ padding-left: 20px;
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     gap: 12px;
   }
@@ -287,7 +287,7 @@ padding-left: 20px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-body);
     margin: 0;
   }
 
@@ -297,7 +297,7 @@ padding-left: 20px;
     gap: 4px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--text-disabled);
   }
 
   &__item-estado {
@@ -322,37 +322,37 @@ padding-left: 20px;
   }
 
   .estado--progreso {
-    color: #1d4ed8;
-    border-color: #bfdbfe;
-    background: #eff6ff;
+    color: var(--status-info-text);
+    border-color: var(--status-info-border);
+    background: var(--status-info-bg-soft);
     .detalle-proyectos__item-dot { background: #2563eb; }
   }
 
   .estado--completado {
-    color: #15803d;
-    border-color: #bbf7d0;
-    background: #f0fdf4;
+    color: var(--status-success-text);
+    border-color: var(--status-success-border);
+    background: var(--status-success-bg-soft);
     .detalle-proyectos__item-dot { background: #16a34a; }
   }
 
   .estado--pausa {
-    color: #d97706;
-    border-color: #fde68a;
+    color: var(--status-warning-text);
+    border-color: var(--status-warning-border);
     background: #fffbeb;
     .detalle-proyectos__item-dot { background: #f59e0b; }
   }
 
   .estado--cancelado {
-    color: #dc2626;
-    border-color: #fecaca;
-    background: #fef2f2;
+    color: var(--status-danger-text);
+    border-color: var(--status-danger-border);
+    background: var(--status-danger-bg-soft);
     .detalle-proyectos__item-dot { background: #dc2626; }
   }
 
   .estado--inactivo {
-    color: #6b7280;
-    border-color: #e5e7eb;
-    background: #f9fafb;
+    color: var(--text-secondary);
+    border-color: var(--border-default);
+    background: var(--bg-subtle);
     .detalle-proyectos__item-dot { background: #9ca3af; }
   }
 
@@ -385,9 +385,9 @@ padding-left: 20px;
   }
 
   .estado--activo {
-    color: #15803d;
-    border-color: #bbf7d0;
-    background: #f0fdf4;
+    color: var(--status-success-text);
+    border-color: var(--status-success-border);
+    background: var(--status-success-bg-soft);
     .detalle-proyectos__item-dot { background: #26BF4D; }
   }
 }
@@ -395,110 +395,29 @@ padding-left: 20px;
 :host-context(html[data-theme="dark"]) {
   .detalle-card {
     background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-  }
-
-  .detalle-nombre {
-    color: #3b82f6 ;
-  }
-
-  .detalle-seccion-titulo {
-    color: #3b82f6 ;
-  }
-
-  .detalle-linea-azul {
-    background: #3b82f6 ;
-  }
-
-  .detalle-codigo,
-  .detalle-info-item,
-  .detalle-contacto-label,
-  .detalle-proyectos__item-cliente {
-    color: #a1a1aa ;
-  }
-
-  .detalle-contacto-valor {
-    color: #ffffff ;
-    &.azul {
-      color: #60a5fa ;
-    }
-  }
-
-  /* Insignia de estado del líder (Activo/Inactivo) */
-  .badge-estado {
-    background: rgba(34, 197, 94, 0.2) ;
-    border: 1px solid rgba(34, 197, 94, 0.4) ;
-    color: #4ade80 ;
-
-    .badge-circulo {
-      background: #4ade80 ;
-    }
-  }
-
-  .badge-inactivo {
-    background: rgba(161, 161, 170, 0.2) ;
-    border: 1px solid rgba(161, 161, 170, 0.4) ;
-    color: #a1a1aa ;
-
-    .badge-circulo {
-      background: #a1a1aa ;
-    }
-  }
-
-  /* Lista de Proyectos Vinculados */
-  .detalle-proyectos__count {
-    background: #202124 ;
-    color: #60a5fa ;
-    border-color: #3f3f46 ;
-  }
-
-  .detalle-proyectos__item {
-    background: #202124 ;
-    border-color: #3f3f46 ;
-  }
-
-  .detalle-proyectos__item-nombre {
-    color: #ffffff ;
   }
 
   /* Badges de estado en proyectos vinculados */
   .estado--activo,
   .estado--completado {
-    color: #4ade80 ;
-    background: rgba(34, 197, 94, 0.2) ;
-    border-color: rgba(34, 197, 94, 0.4) ;
     .detalle-proyectos__item-dot { background: #4ade80 ; }
   }
 
   .estado--progreso {
-    color: #60a5fa ;
-    background: rgba(59, 130, 246, 0.2) ;
-    border-color: rgba(59, 130, 246, 0.4) ;
     .detalle-proyectos__item-dot { background: #60a5fa ; }
   }
 
   .estado--pausa,
   .estado--espera {
-    color: #fbbf24 ;
-    background: rgba(245, 158, 11, 0.2) ;
-    border-color: rgba(245, 158, 11, 0.4) ;
     .detalle-proyectos__item-dot { background: #fbbf24 ; }
   }
 
   .estado--cancelado {
-    color: #f87171 ;
-    background: rgba(239, 68, 68, 0.2) ;
-    border-color: rgba(239, 68, 68, 0.4) ;
     .detalle-proyectos__item-dot { background: #f87171 ; }
   }
 
   .estado--inactivo {
-    color: #a1a1aa ;
-    background: rgba(161, 161, 170, 0.2) ;
-    border-color: rgba(161, 161, 170, 0.4) ;
     .detalle-proyectos__item-dot { background: #a1a1aa ; }
   }
 }

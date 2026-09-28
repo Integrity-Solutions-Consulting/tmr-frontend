@@ -6,7 +6,7 @@
   max-height: 90vh;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
 }
 
@@ -46,14 +46,14 @@
   margin: 0 0 4px;
   font-size: 22px;
   font-weight: 800;
-  color: #163572;
+  color: var(--primary-color);
   line-height: 1.2;
 }
 
 .feriado-modal__subtitle {
   margin: 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -66,7 +66,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -113,7 +113,7 @@
 .feriado-modal__label {
   font-size: 13px;
   font-weight: 600;
-  color: #163572;
+  color: var(--primary-color);
   letter-spacing: 0;
 
   .req { color: #dc2626; margin-left: 2px; }
@@ -121,7 +121,7 @@
 
 .feriado-modal__optional {
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
@@ -135,26 +135,26 @@
 .float-field__input,
 .float-select__input {
   width: 100%;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   box-sizing: border-box;
-  color: #374151;
-  background-color: #ffffff;
+  color: var(--text-body);
+  background-color: var(--bg-card);
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 
   &--error {
     border-color: #dc2626;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+      box-shadow: var(--validation-ring-danger);
     }
   }
 }
@@ -166,16 +166,16 @@
   &:focus ~ .float-field__label,
   &:not(:placeholder-shown) ~ .float-field__label {
     top: 0;
-    color: #737373;
-    background: #ffffff;
+    color: var(--text-subtle);
+    background: var(--bg-card);
     font-size: 11px;
     transform: translateY(-50%);
   }
 
   &--date ~ .float-field__label {
     top: 0;
-    color: #737373;
-    background: #ffffff;
+    color: var(--text-subtle);
+    background: var(--bg-card);
     font-size: 11px;
     transform: translateY(-50%);
   }
@@ -188,8 +188,8 @@
     &:focus ~ .float-field__label,
     &:not(:placeholder-shown) ~ .float-field__label {
       top: 0;
-      color: #737373;
-      background: #ffffff;
+      color: var(--text-subtle);
+      background: var(--bg-card);
       font-size: 11px;
       transform: translateY(-50%);
     }
@@ -202,8 +202,8 @@
   top: 50%;
   left: 10px;
   padding: 0 4px;
-  color: #9ca3af;
-  background: #ffffff;
+  color: var(--text-disabled);
+  background: var(--bg-card);
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
   font-weight: 400;
@@ -216,7 +216,7 @@
 
 .float-field__label--always {
   top: 0;
-  color: #737373;
+  color: var(--text-subtle);
   font-size: 11px;
   transform: translateY(-50%);
 }
@@ -234,8 +234,8 @@
 .float-select__input:focus ~ .float-select__label,
 .float-select__label--up {
   top: 0;
-  color: #737373;
-  background: #ffffff;
+  color: var(--text-subtle);
+  background: var(--bg-card);
   font-size: 11px;
   transform: translateY(-50%);
 }
@@ -243,13 +243,13 @@
 .feriado-modal__error {
   font-size: 11.5px;
   font-weight: 600;
-  color: #dc2626;
+  color: var(--status-danger-text);
 
   &--group {
     margin: 0;
     padding: 8px 12px;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    background: var(--status-danger-bg-soft);
+    border: 1px solid var(--status-danger-border);
     border-radius: 8px;
   }
 }
@@ -272,7 +272,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   font-weight: 500;
   min-height: 42px;
 }
@@ -299,13 +299,13 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  color: #34C759;
+  color: var(--status-success-text);
   background: #BBF7D0;
-  border: 1px solid #BBF7D0;
+  border: 1px solid var(--status-success-border);
 
   &--inactive {
-    color: #6B7280;
-    background: #F3F4F6;
+    color: var(--text-secondary);
+    background: var(--bg-soft);
     border-color: #F3F4F6;
   }
 }
@@ -355,7 +355,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--bg-card);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   transition: transform 0.2s ease;
 }
@@ -397,14 +397,14 @@
 
   &--cancel {
     border: 1.5px solid #d6e0ec;
-    background: #ffffff;
-    color: #475569;
-    &:hover { background: #f8fafc; }
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    &:hover { background: var(--bg-app); }
   }
 
   &--save {
-    background: #163572;
-    color: #ffffff;
+    background: var(--primary-color);
+    color: var(--text-inverse);
     &:hover { background: #162C56; box-shadow: 0 4px 12px rgba(22, 53, 114, 0.3); }
     &:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
   }
@@ -435,10 +435,6 @@
 
 :host-context(html[data-theme="dark"]) {
   .feriado-modal {
-    background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
   }
 
@@ -447,30 +443,16 @@
     border-color: #3f3f46 ;
   }
 
-  .feriado-modal__title,
-  .feriado-modal__label {
-    color: #3b82f6 ;
-  }
-
-  .feriado-modal__subtitle,
-  .feriado-modal__optional {
-    color: #a1a1aa ;
-  }
-
   .feriado-modal__close {
-    color: #a1a1aa ;
     &:hover { background: #3f3f46 ; color: #ffffff ; }
   }
 
   .float-field__input,
   .float-select__input {
-    background-color: #202124 ;
-    background: #202124 ;
+    background-color: var(--bg-app) ;
     border-color: #3f3f46 ;
-    color: #ffffff ;
 
     &:focus {
-      border-color: #3b82f6 ;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
     }
   }
@@ -479,13 +461,12 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
     background-repeat: no-repeat ;
     background-position: right 12px center ;
-    background-color: #202124 ;
+    background-color: var(--bg-app) ;
   }
 
   .float-field__label,
   .float-select__label {
     background-color: transparent ;
-    color: #a1a1aa ;
   }
 
   .float-field__input:focus ~ .float-field__label,
@@ -493,27 +474,15 @@
   .float-select__input:focus ~ .float-select__label,
   .float-select__label--up,
   .float-field__label--always {
-    background-color: #202124 ;
-    background: #202124 ;
-    color: #60a5fa ;
+    background-color: var(--bg-app) ;
   }
 
   .feriado-modal__btn--cancel {
-    background: #202124 ;
     border-color: #3f3f46 ;
-    color: #ffffff ;
     &:hover { background: #3f3f46 ; }
   }
 
   .feriado-modal__btn--save {
-    background: #163572 ;
-    color: #ffffff ;
     &:hover:not(:disabled) { background: #122d63 ; }
-  }
-
-  .feriado-modal__view-text,
-  .feriado-modal__view-row,
-  .feriado-modal__toggle-label {
-    color: #ffffff ;
   }
 }

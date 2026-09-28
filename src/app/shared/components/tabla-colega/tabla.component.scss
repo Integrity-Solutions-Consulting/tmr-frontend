@@ -4,7 +4,7 @@
   min-width: 0;
 }
 
-.tabla-wrapper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+.tabla-wrapper { background: var(--bg-card); border: 1px solid var(--bg-surface); border-radius: 12px;
   overflow: auto;
   box-shadow: none;
   width: 100%;
@@ -29,8 +29,8 @@
   font-family: 'Inter', sans-serif;
 
   thead {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-default);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -39,10 +39,10 @@
       padding: 14px 10px;
       text-align: left;
       font-weight: 500;
-      color: #6b7280;
+      color: var(--text-secondary);
       font-size: 13px;
       white-space: nowrap;
-      background: #ffffff;
+      background: var(--bg-card);
       user-select: none;
       box-sizing: border-box;
     }
@@ -78,11 +78,11 @@
   cursor: pointer;
 
   &:hover {
-    background: #f9fafb;
+    background: var(--bg-subtle);
   }
 
   &.selected-row {
-    background: #f3f4f6;
+    background: var(--bg-soft);
   }
 
   &:last-child td {
@@ -131,13 +131,13 @@
   h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin: 0;
     margin-top: 16px;
   }
 
   p {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 14px;
     margin-top: 4px;
     margin-bottom: 0;
@@ -147,7 +147,7 @@
 .empty-icon {
   width: 64px;
   height: 64px;
-  background-color: #f8fafc;
+  background-color: var(--bg-app);
   color: #cbd5e1;
   border-radius: 50%;
   display: flex;
@@ -158,7 +158,7 @@
 .btn-empty-action {
   margin-top: 24px;
   padding: 8px 16px;
-  color: #163572;
+  color: var(--primary-color);
   font-weight: 700;
   font-size: 14px;
   background: none;
@@ -174,22 +174,22 @@
 /* Badges y componentes en línea */
 .badge-inline {
   font-size: 12px;
-  color: #64748b;
-  background-color: #f8fafc;
+  color: var(--text-secondary);
+  background-color: var(--bg-app);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-table);
   display: inline-block;
   white-space: nowrap;
 }
 
 .badge-estado {
   font-size: 12px;
-  color: #64748b;
-  background-color: #f8fafc;
+  color: var(--text-secondary);
+  background-color: var(--bg-app);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-table);
   display: inline-block;
   white-space: nowrap;
 }
@@ -204,17 +204,17 @@
 
 .action-menu-placeholder {
   font-size: 16px;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: color 0.2s;
 
   &:hover {
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
 /* Paginación */
-.pagination-wrapper { display: block; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 9px 12px 9px 16px; margin-top: 12px; }
+.pagination-wrapper { display: block; background: #ffffff; border: 1px solid var(--border-default); border-radius: 12px; padding: 9px 12px 9px 16px; margin-top: 12px; }
 
 /* Estados de tabla adicionales */
 .tabla-loading {
@@ -281,7 +281,6 @@
   }
   .pagination-wrapper {
     background-color: #202124 !important;
-    border: 1px solid #3f3f46 !important;
     color: #a1a1aa !important;
   }
 
@@ -290,12 +289,10 @@
 
     thead, thead th {
       background-color: #202124 !important;
-      border-bottom: 2px solid #3f3f46 !important;
       color: #a1a1aa !important;
     }
 
     tbody .tabla-row {
-      border-bottom: 1px solid #3f3f46 !important;
       &:hover {
         background-color: #27272a !important;
       }
@@ -305,7 +302,6 @@
     }
 
     tbody td {
-      border-bottom: 1px solid #3f3f46 !important;
       color: #ffffff !important;
     }
     

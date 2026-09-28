@@ -11,9 +11,9 @@
 
 .modal-form {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--elevation-modal);
   width: 860px;
   max-width: calc(100vw - 48px);
   max-height: 92vh;
@@ -35,14 +35,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 700;
-    color: #163572;
+    color: var(--primary-color);
     margin: 0 0 4px;
   }
 
   &__subtitle {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin: 0;
   }
 
@@ -50,7 +50,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 6px;
     display: flex;
@@ -63,8 +63,8 @@
     }
 
     &:hover {
-      color: #374151;
-      background: #f3f4f6;
+      color: var(--text-body);
+      background: var(--bg-soft);
     }
   }
 
@@ -111,8 +111,8 @@
     border: none;
 
     &--save {
-      background: #163572;
-      color: #ffffff;
+      background: var(--primary-color);
+      color: var(--text-inverse);
 
       &:hover {
         background: #122d63;
@@ -135,14 +135,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #163572;
+    color: var(--primary-color);
     margin-bottom: 18px;
   }
 
   &__bar {
     width: 3px;
     height: 14px;
-    background: #163572;
+    background: var(--primary-color);
     border-radius: 2px;
     flex-shrink: 0;
   }
@@ -171,14 +171,14 @@
   &__error {
     font-family: 'Inter', sans-serif;
     font-size: 11.5px;
-    color: #dc2626;
+    color: var(--status-danger-text);
     font-weight: 500;
     padding-left: 4px;
   }
 }
 
 .req {
-  color: #dc2626;
+  color: var(--status-danger-text);
   margin-left: 1px;
 }
 
@@ -193,19 +193,19 @@
   width: 100%;
   height: 48px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
-  color: #374151;
-  background: #ffffff;
+  color: var(--text-body);
+  background: var(--bg-card);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 }
 
@@ -223,7 +223,7 @@
   border-color: #dc2626;
 
   &:focus {
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    box-shadow: var(--validation-ring-danger);
   }
 }
 
@@ -236,11 +236,11 @@
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
   font-weight: 400;
-  color: #9ca3af;
+  color: var(--text-disabled);
   pointer-events: none;
   transition: all 0.18s ease;
   padding: 0 4px;
-  background: #ffffff;
+  background: var(--bg-card);
   white-space: nowrap;
   line-height: 1;
 }
@@ -252,7 +252,7 @@
   top: 0;
   transform: translateY(-50%);
   font-size: 11px;
-  color: #737373;
+  color: var(--text-subtle);
 }
 
 @keyframes fadeIn {
@@ -288,10 +288,7 @@
 :host-context(html[data-theme="dark"]) {
   .modal-form {
     background-color: #27272a ;
-    background: #27272a ;
     border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
 
     &__header,
     &__footer {
@@ -302,13 +299,11 @@
     &__subtitle { color: #a1a1aa ; }
 
     &__close {
-      color: #a1a1aa ;
       &:hover { background: #3f3f46 ; color: #ffffff ; }
     }
 
     &__btn--save {
       background: #163572 ;
-      color: #ffffff ;
       &:hover { background: #122d63 ; }
     }
   }
@@ -322,10 +317,8 @@
     background-color: #202124 ;
     background: #202124 ;
     border-color: #3f3f46 ;
-    color: #ffffff ;
 
     &:focus {
-      border-color: #3b82f6 ;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
     }
   }
@@ -340,7 +333,6 @@
   .float-field__label,
   .float-select__label {
     background-color: transparent ;
-    color: #a1a1aa ;
   }
 
   .float-field__input:focus ~ .float-field__label,
@@ -349,6 +341,5 @@
   .float-select__label--up {
     background-color: #202124 ;
     background: #202124 ;
-    color: #60a5fa ;
   }
 }

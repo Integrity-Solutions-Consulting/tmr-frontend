@@ -4,15 +4,15 @@
   gap: 8px;
   min-height: 26px;
   padding: 4px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--bg-card);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  color: #6b7280;
+  color: var(--text-secondary);
 
   .status-dot {
     width: 8px;
@@ -28,28 +28,28 @@
 
   &.active {
     background-color: #ecfdf5;
-    border-color: #bbf7d0;
+    border-color: var(--status-success-border);
     color: #166534;
     .status-dot { background-color: #22c55e; }
   }
 
   &.progress {
-    background-color: #eff6ff;
-    border-color: #bfdbfe;
-    color: #1d4ed8;
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
     .status-dot { background-color: #3b82f6; }
   }
 
   &.completed {
     background-color: #ecfdf5;
-    border-color: #bbf7d0;
-    color: #15803d;
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
     .status-dot { background-color: #22c55e; }
   }
 
   &.cancelled {
-    background-color: #fef2f2;
-    border-color: #fecaca;
+    background-color: var(--status-danger-bg-soft);
+    border-color: var(--status-danger-border);
     color: #b91c1c;
     .status-dot { background-color: #ef4444; }
   }
@@ -62,8 +62,8 @@
   }
 
   &.inactive {
-    background-color: #f3f4f6;
-    border-color: #e5e7eb;
+    background-color: var(--bg-soft);
+    border-color: var(--border-default);
     color: #8e8e93;
     .status-dot { background-color: #8e8e93; }
   }
@@ -97,9 +97,9 @@
   }
 
   &.sin-seguimiento {
-    background-color: #f9fafb;
-    border-color: #e5e7eb;
-    color: #6b7280;
+    background-color: var(--bg-subtle);
+    border-color: var(--border-default);
+    color: var(--text-secondary);
     .status-dot { background-color: #9ca3af; }
   }
 }

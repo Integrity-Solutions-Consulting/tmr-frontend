@@ -11,9 +11,9 @@
   inset: 50% auto auto 50%;
   transform: translate(-50%, -50%);
   z-index: 1001;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--elevation-modal);
   width: 680px;
   max-width: calc(100vw - 48px);
   max-height: 92vh;
@@ -30,7 +30,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 6px;
     display: flex;
@@ -42,8 +42,8 @@
     }
 
     &:hover {
-      color: #374151;
-      background: #f3f4f6;
+      color: var(--text-body);
+      background: var(--bg-soft);
     }
   }
 
@@ -69,7 +69,7 @@
     font-size: 26px;
     line-height: 1.18;
     font-weight: 800;
-    color: #163572;
+    color: var(--primary-color);
     margin: 0 0 14px;
     word-break: break-word;
   }
@@ -87,7 +87,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
 
     img {
       flex-shrink: 0;
@@ -119,10 +119,10 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border: 1px solid #D1D5DB;
+  border: 1px solid var(--border-soft);
   border-radius: 999px;
-  background: #FFFFFF;
-  color: #6B7280;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 500;
@@ -139,7 +139,7 @@
 
   &--activo {
     .estado-badge__dot {
-      background: #22c55e;
+      background: var(--status-success-bg-solid);
     }
   }
 
@@ -176,7 +176,7 @@
   &__bar {
     width: 3px;
     height: 14px;
-    background: #163572;
+    background: var(--primary-color);
     border-radius: 2px;
     flex-shrink: 0;
   }
@@ -185,7 +185,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
@@ -213,7 +213,7 @@
   &__label {
     font-family: 'Inter', sans-serif;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin: 0 0 4px;
   }
 
@@ -221,7 +221,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-body);
     margin: 0;
     word-break: break-word;
 
@@ -253,7 +253,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #163572;
+    color: var(--primary-color);
   }
 
   &__count {
@@ -265,7 +265,7 @@
     padding: 0 7px;
     border-radius: 999px;
     background: #e8edf7;
-    color: #163572;
+    color: var(--primary-color);
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 700;
@@ -284,7 +284,7 @@
   &__empty {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     text-align: center;
     padding: 12px 0;
     margin: 0;
@@ -296,9 +296,9 @@
     justify-content: space-between;
     gap: 16px;
     padding: 12px 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-default);
     border-radius: 12px;
-    background: #fafafa;
+    background: var(--bg-surface);
   }
 
   &__item-info {
@@ -312,7 +312,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-body);
     margin: 0;
   }
 
@@ -322,7 +322,7 @@
     gap: 4px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--text-disabled);
   }
 }
 
@@ -372,11 +372,8 @@
 
 :host-context(html[data-theme="dark"]) {
   .modal-card {
-    background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
+    background-color: var(--bg-surface) ;
     color: #f4f4f5 ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
 
     &__header { border-color: #3f3f46 ; }
     &__nombre { color: #3b82f6 ; }
@@ -390,7 +387,7 @@
 
   .estado-badge {
     background-color: rgba(255, 255, 255, 0.05) ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     color: #a1a1aa ;
 
     &--activo {
@@ -414,15 +411,6 @@
     }
   }
 
-  .detalle-section__title,
-  .detalle-proyectos__label {
-    color: #3b82f6 ;
-  }
-
-  .detalle-section__bar {
-    background: #3b82f6 ;
-  }
-
   .detalle-field__label,
   .detalle-proyectos__item-cliente,
   .detalle-proyectos__empty {
@@ -434,13 +422,11 @@
   }
 
   .detalle-proyectos__count {
-    background: #202124 ;
     color: #60a5fa ;
   }
 
   .detalle-proyectos__item {
-    background: #202124 ;
-    border-color: #3f3f46 ;
+    border-color: var(--border-default) ;
     .detalle-proyectos__item-nombre { color: #ffffff ; }
   }
 }
