@@ -1,0 +1,162 @@
+@use 'styles/variables' as *;
+@use 'styles/shared-components';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================= */
+/*  SHEPHERD.JS - Estilos del tour de registro de actividades     */
+/* ============================================================= */
+
+/* Permitir que la burbuja salga fuera del area del modal */
+.cdk-overlay-pane:has(.actividad-modal) {
+  overflow: visible !important;
+}
+
+mat-dialog-container,
+.mat-mdc-dialog-surface,
+.mdc-dialog__surface {
+  overflow: visible !important;
+}
+
+/* Resaltar el campo activo con borde azul para identificarlo */
+.shepherd-enabled.shepherd-target {
+  outline: 2px solid #163572 !important;
+  outline-offset: 3px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 5px rgba(22, 53, 114, 0.12) !important;
+  transition: outline 0.15s ease, box-shadow 0.15s ease !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* El popover - fondo azul solido */
+.shepherd-element.actividad-tour-step {
+  z-index: 1000 !important;
+  max-width: 280px !important;
+  min-width: 240px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22) !important;
+  font-family: 'Inter', sans-serif !important;
+  pointer-events: auto !important;
+  margin-left: -60px !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-content {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-header {
+  background: #163572 !important;
+  padding: 12px 16px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-title {
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-cancel-icon {
+  color: rgba(255,255,255,0.8) !important;
+  font-size: 18px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-cancel-icon:hover {
+  color: #fff !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-text {
+  padding: 12px 16px !important;
+  font-size: 12px !important;
+  color: #ffffff !important;
+  line-height: 1.6 !important;
+  background: #163572 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-footer {
+  padding: 8px 16px 12px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  border-top: 1px solid rgba(255,255,255,0.15) !important;
+  background: #163572 !important;
+  border-radius: 0 0 12px 12px !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button {
+  padding: 6px 16px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: background 0.15s ease !important;
+  pointer-events: auto !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary) {
+  background: #ffffff !important;
+  color: #163572 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary):hover {
+  background: #e8edf5 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button-secondary {
+  background: rgba(255,255,255,0.15) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
+  background: rgba(255,255,255,0.25) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-arrow::before {
+  background: #163572 !important;
+}
+
+/* Modo oscuro */
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-content {
+  background: transparent !important;
+  border: none !important;
+}
+
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-header,
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-text,
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-footer {
+  background: #1e3a8a !important;
+}
+
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-footer {
+  border-top-color: rgba(255,255,255,0.1) !important;
+}
+
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary {
+  background: rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
+  background: rgba(255,255,255,0.22) !important;
+}
+
+html[data-theme="dark"] .shepherd-enabled.shepherd-target {
+  outline-color: #60a5fa !important;
+  box-shadow: 0 0 0 5px rgba(96, 165, 250, 0.18) !important;
+}
+

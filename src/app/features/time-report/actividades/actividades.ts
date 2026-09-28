@@ -11,6 +11,7 @@ import { GenerarReporte } from './generar-reporte/generar-reporte';
 import { ActividadesService } from '../../../shared/services/actividades.service';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 
 @Component({
     selector: 'app-actividades',
@@ -22,7 +23,8 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
         MatDialogModule,
         Calendario,
         HorasFormatPipe,
-        HeaderComponent
+        HeaderComponent,
+        MetricasHorasComponent
     ],
     templateUrl: './actividades.html',
     styleUrls: ['./actividades.scss']
@@ -56,6 +58,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { fecha: this.fechaSeleccionada },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -71,6 +75,8 @@ export class Actividades implements OnInit {
                 maxHeight: '90vh',
                 data: { fecha },
                 disableClose: true,
+                autoFocus: false,
+                restoreFocus: false,
                 panelClass: 'tmr-dialog-panel'
             });
         }
@@ -84,6 +90,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { fecha },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -96,6 +104,8 @@ export class Actividades implements OnInit {
             maxHeight: '90vh',
             data: { actividad },
             disableClose: true,
+            autoFocus: false,
+            restoreFocus: false,
             panelClass: 'tmr-dialog-panel'
         });
     }

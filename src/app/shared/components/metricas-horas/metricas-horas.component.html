@@ -1,0 +1,53 @@
+<div class="metrics-bar" [class.metrics-bar--blank]="enBlanco">
+    <div class="metric-item">
+        <div class="metric-icon-wrap blue">
+            <img class="metric-icon-img blue-icon"
+                src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
+        </div>
+        <div class="metric-texts">
+            <!-- sm - "@for" con un solo valor: al cambiar el texto se vuelve a crear el span y se reproduce la animación de entrada. -->
+            @for (valor of [enBlanco ? '—' : (horasPorRegistrar | horasFormat)]; track valor) {
+                <span class="metric-value">{{ valor }}</span>
+            }
+            <span class="metric-name">Horas por registrar</span>
+            <span class="metric-desc">Pendientes por completar</span>
+        </div>
+    </div>
+
+    <div class="metric-item">
+        <div class="metric-icon-wrap green">
+            <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
+        </div>
+        <div class="metric-texts">
+            @for (valor of [enBlanco ? '—' : (horasRegistradas | horasFormat)]; track valor) {
+                <span class="metric-value">{{ valor }}</span>
+            }
+            <span class="metric-name">Horas registradas</span>
+            <span class="metric-desc">Total del periodo</span>
+        </div>
+    </div>
+
+    <div class="metric-item">
+        <div class="metric-icon-wrap purple">
+            <img class="metric-icon-img purple-icon"
+                src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
+        </div>
+        <div class="metric-texts">
+            @for (valor of [enBlanco ? '—' : (promedioPorDia | horasFormat)]; track valor) {
+                <span class="metric-value">{{ valor }}</span>
+            }
+            <span class="metric-name">Promedio por día</span>
+            <span class="metric-desc">Horas registradas</span>
+        </div>
+    </div>
+
+    @if (textoAyuda) {
+        <!-- sm - Texto de ayuda del estado en blanco; siempre ocupa su lugar y solo cambia su opacidad para no mover la barra. -->
+        <span class="metrics-hint" [class.visible]="enBlanco" [attr.aria-hidden]="!enBlanco">
+            <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+            {{ textoAyuda }}
+        </span>
+    }
+
+    <ng-content></ng-content>
+</div>

@@ -32,7 +32,9 @@ export const roleGuard: CanActivateFn = (route) => {
     'clientes': 'Clientes',
     'lideres': 'Lideres',
     'reportes': 'Reportes',
-    'configuracion': 'Configuracion'
+    'configuracion': 'Configuracion',
+    // sm - Seguimiento (Time Report): antes cualquier usuario con sesión podía entrar escribiendo la URL.
+    'seguimiento': 'Seguimiento'
   };
 
   if (path && pathModuleMap[path]) {
@@ -40,7 +42,8 @@ export const roleGuard: CanActivateFn = (route) => {
     // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
-      if (path === 'dashboard') {
+      // sm - Igual con Seguimiento: Actividades es la pantalla que tienen todos los usuarios.
+      if (path === 'dashboard' || path === 'seguimiento') {
         router.navigate(['/time-report/actividades']);
       } else {
         router.navigate(['/dashboard']);

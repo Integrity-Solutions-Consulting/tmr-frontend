@@ -17,7 +17,7 @@ $text-muted: #9CA3AF;
 /* ---- HEADER ---- */
 .header-right {
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 12px;
 }
 
@@ -83,89 +83,8 @@ $text-muted: #9CA3AF;
 }
 
 /* ---- METRICS BAR ---- */
-.metrics-bar {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 0;
-}
-
-.metric-divider {
-    width: 1px;
-    height: 48px;
-    background: $border-color;
-    margin: 0 24px;
-}
-
-.metric-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .metric-icon-wrap {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-
-        mat-icon {
-            font-size: 22px;
-            width: 22px;
-            height: 22px;
-        }
-
-        &.blue {
-            background: #EEF3FB;
-            color: $primary-blue;
-        }
-
-        &.green {
-            background: #DCFCE7;
-            color: #15803D;
-        }
-
-        &.purple {
-            background: #EDE9FE;
-            color: #7C3AED;
-        }
-
-        &.orange {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-    }
-
-    .metric-texts {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-
-        .metric-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: $dark-navy;
-            line-height: 1.2;
-        }
-
-        .metric-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .metric-desc {
-            font-size: 11px;
-            color: $text-muted;
-        }
-    }
-}
-
+// sm - Las tarjetas ahora son el componente compartido app-metricas-horas (mismo diseño que Seguimiento).
+// Aquí solo quedan los estilos del botón "Generar Reporte" que se proyecta dentro de la barra.
 .footer-spacer {
     flex: 1;
 }
@@ -401,36 +320,14 @@ $text-muted: #9CA3AF;
         }
     }
 
-    .metrics-bar {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        padding: 20px 16px;
+    // sm - En móvil el botón "Generar Reporte" ocupa todo el ancho debajo de las métricas.
+    .footer-spacer {
+        display: none;
+    }
 
-        .metric-divider {
-            display: none;
-        }
-
-        .footer-spacer {
-            display: none;
-        }
-
-        .btn-reporte {
-            grid-column: span 2;
-            width: 100%;
-            justify-content: center;
-            border-radius: 20px;
-            margin-top: 6px;
-        }
+    .btn-reporte {
+        width: 100%;
+        justify-content: center;
+        border-radius: 20px;
     }
 }
-
-@media (max-width: 480px) {
-    .metrics-bar {
-        grid-template-columns: 1fr;
-
-        .btn-reporte {
-            grid-column: span 1;
-        }
-    }
-}
