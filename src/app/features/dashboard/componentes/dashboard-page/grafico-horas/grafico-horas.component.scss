@@ -6,20 +6,20 @@
 }
 
 .grafico-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--elevation-card);
   height: 100%;
   display: flex;
   flex-direction: column;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-table);
 }
 
 .card-header-carousel {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-app);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,7 +38,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-secondary);
   border-radius: 50%;
   padding: 6px;
   display: inline-flex;
@@ -48,8 +48,8 @@
   flex-shrink: 0;
 
   &:hover {
-    background: #e2e8f0;
-    color: #1e3a5f;
+    background: var(--bg-hover);
+    color: var(--text-main);
   }
 
   mat-icon {
@@ -63,7 +63,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1e3a5f;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -79,12 +79,12 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: var(--text-disabled);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &.active {
-    background: #1e3a5f;
+    background: var(--text-body);
     transform: scale(1.25);
   }
 }
@@ -122,7 +122,7 @@
     border-radius: 3px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--text-disabled);
     border-radius: 3px;
   }
   &::-webkit-scrollbar-thumb:hover {
@@ -167,13 +167,13 @@
   transition: all 0.3s ease;
 
   &:hover {
-    background: #e2e8f0;
+    background: var(--bg-hover);
   }
 }
 
 .bar-value {
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--status-info-bg-solid) 0%, #1d4ed8 100%);
   border-radius: 0.5rem;
   display: flex;
   align-items: flex-start;
@@ -192,12 +192,12 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px var(--elevation-card);
 }
 
 .bar-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary);
   text-align: center;
   word-break: break-word;
   line-height: 1.2;
@@ -213,7 +213,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-card);
 }
 
 .stat-item {
@@ -225,7 +225,7 @@
 
 .stat-label {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
   text-transform: uppercase;
 }
@@ -233,7 +233,7 @@
 .stat-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e3a5f;
+  color: var(--text-main);
 }
 
 /* Slide 1: Donut Container Styles */
@@ -290,7 +290,7 @@
 .donut-center-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.2;
   text-transform: uppercase;
   max-width: 100px;
@@ -299,7 +299,7 @@
 .donut-center-value {
   font-size: 2.1rem;
   font-weight: 800;
-  color: #1e3a5f;
+  color: var(--text-main);
   line-height: 1.1;
   margin-top: 0.2rem;
 }
@@ -317,7 +317,7 @@
     background: #f1f5f9;
   }
   &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--text-disabled);
     border-radius: 3px;
   }
 }
@@ -331,26 +331,26 @@
     text-align: left;
     padding: 0.5rem;
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 600;
     text-transform: uppercase;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--border-table);
   }
 
   td {
     padding: 0.5rem;
-    border-bottom: 1px solid #f1f5f9;
-    color: #475569;
+    border-bottom: 1px solid var(--border-table);
+    color: var(--text-secondary);
     vertical-align: middle;
   }
 
   .font-bold {
     font-weight: 700;
-    color: #1e3a5f;
+    color: var(--text-main);
   }
 
   .text-muted {
-    color: #64748b;
+    color: var(--text-secondary);
   }
 
   .align-center {
@@ -385,7 +385,7 @@
 .no-data {
   padding: 2rem 1.5rem;
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-muted);
   flex: 1;
   display: flex;
   align-items: center;

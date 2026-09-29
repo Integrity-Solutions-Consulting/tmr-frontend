@@ -1,13 +1,5 @@
 @use "sass:color";
 
-// Variables de diseño estandarizadas
-$primary-blue: #163572;
-$focus-blue: #0c3b73;
-$text-dark: #1e293b;
-$text-muted: #64748b;
-$border-color: #d6e0ec;
-$error-color: #dc2626;
-
 /* ── Contenedor principal ──────────────────────────────────────── */
 :host {
   --modal-width: 100%;
@@ -24,7 +16,7 @@ $error-color: #dc2626;
   max-height: 90vh;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -36,7 +28,7 @@ $error-color: #dc2626;
   justify-content: space-between;
   gap: 12px;
   padding: 24px var(--modal-padding-x) 16px;
-  border-bottom: 1px solid #e8edf5;
+  border-bottom: 1px solid var(--border-default);
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -59,27 +51,27 @@ $error-color: #dc2626;
 }
 
 .actividad-modal__badge--new {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--status-info-bg-soft);
+  color: var(--status-info-text);
 }
 
 .actividad-modal__badge--edit {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--status-warning-bg-soft);
+  color: var(--status-warning-text);
 }
 
 .actividad-modal__title {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
-  color: $primary-blue;
+  color: var(--text-title);
   line-height: 1.2;
 }
 
 .actividad-modal__subtitle {
   margin: 0;
   font-size: 12px;
-  color: $text-muted;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -97,40 +89,41 @@ $error-color: #dc2626;
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1.5px solid #0f172a;
+  border: 1.5px solid var(--border-soft);
   border-radius: 12px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
   margin-top: 2px;
 
-  mat-icon, img {
+  mat-icon,
+  img {
     font-size: 20px;
     width: 20px;
     height: 20px;
   }
 
   &:hover {
-    background: #f1f5f9;
-    border-color: $focus-blue;
-    color: $focus-blue;
+    background: var(--bg-hover);
+    border-color: var(--primary-hover);
+    color: var(--primary-hover);
   }
 }
 
 .actividad-modal__help {
-  color: #475569;
+  color: var(--text-secondary);
 
   &:hover {
-    background: #eff6ff;
-    border-color: $focus-blue;
-    color: $focus-blue;
+    background: var(--status-info-bg-soft);
+    border-color: var(--primary-hover);
+    color: var(--primary-hover);
   }
 }
 
 .actividad-modal__close {
-  color: #0f172a;
+  color: var(--text-secondary);
 }
 
 /* ── Body ─────────────────────────────────────────────────────── */
@@ -142,7 +135,7 @@ $error-color: #dc2626;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   box-sizing: border-box;
 }
 
@@ -152,7 +145,11 @@ $error-color: #dc2626;
 
 .actividad-modal__body::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #bdc9d9;
+  background: var(--scrollbar-thumb);
+}
+
+.actividad-modal__body::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* ── Field ────────────────────────────────────────────────────── */
@@ -163,7 +160,7 @@ $error-color: #dc2626;
 }
 
 .actividad-modal__field--width-80 {
-  width: 100% !important;
+  width: 100%;
 }
 
 .actividad-modal__label-row {
@@ -175,11 +172,11 @@ $error-color: #dc2626;
 .actividad-modal__label {
   font-size: 12px;
   font-weight: 700;
-  color: #334155;
+  color: var(--text-body);
   letter-spacing: 0.02em;
 
   .req {
-    color: $error-color;
+    color: var(--status-danger-text);
     margin-left: 2px;
   }
 }
@@ -188,12 +185,12 @@ $error-color: #dc2626;
   font-size: 14px;
   width: 14px;
   height: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: color 0.15s ease;
 
   &:hover {
-    color: $focus-blue;
+    color: var(--primary-hover);
   }
 }
 
@@ -202,26 +199,27 @@ $error-color: #dc2626;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1.5px solid $border-color;
+  border: 1.5px solid var(--border-input);
   border-radius: 10px;
   padding: 0 14px;
-  background: #ffffff;
+  background: var(--input-bg);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
 
   &:focus-within {
-    border-color: $focus-blue;
-    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+    border-color: var(--primary-hover);
+    box-shadow: var(--focus-ring-primary);
   }
 
   &--error {
-    border-color: $error-color;
+    border-color: var(--status-danger-text);
 
-    &:focus-within {
-      border-color: $error-color;
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+   &:focus-within {
+      border-color: var(--status-danger-text);
+      box-shadow: var(--validation-ring-danger);
     }
-  }
+
+     }
 
   &--textarea {
     align-items: flex-start;
@@ -237,7 +235,7 @@ $error-color: #dc2626;
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #94a3b8;
+  color: var(--text-muted);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -249,17 +247,17 @@ $error-color: #dc2626;
   outline: none;
   background: transparent;
   font-size: 13.5px;
-  color: #1e293b;
+  color: var(--text-main);
   font-family: inherit;
   width: 100%;
 
   &::placeholder {
-    color: #b0bec5;
+    color: var(--text-muted);
   }
 
   &[readonly] {
     cursor: pointer;
-    color: #475569;
+    color: var(--text-secondary);
     background: transparent;
     caret-color: transparent;
   }
@@ -274,7 +272,7 @@ $error-color: #dc2626;
 
 .actividad-modal__input-hint {
   font-size: 11px;
-  color: $text-muted;
+  color: var(--text-muted);
   align-self: flex-end;
   margin-bottom: 8px;
   margin-left: auto;
@@ -284,7 +282,7 @@ $error-color: #dc2626;
 .actividad-modal__error {
   font-size: 11.5px;
   font-weight: 600;
-  color: $error-color;
+  color: var(--status-danger-text);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -301,31 +299,33 @@ $error-color: #dc2626;
     right: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 18px;
     pointer-events: none;
   }
 
   &--error {
     .actividad-modal__select {
-      border-color: $error-color;
-      
-      &:focus {
-        border-color: $error-color;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+      border-color: var(--status-danger-text);
+
+       &:focus {
+        border-color: var(--status-danger-text);
+        box-shadow: var(--validation-ring-danger);
       }
     }
+
+    
   }
 }
 
 .actividad-modal__select {
   width: 100%;
   min-height: 46px;
-  border: 1.5px solid $border-color;
+  border: 1.5px solid var(--border-input);
   border-radius: 10px;
   padding: 0 40px 0 14px;
-  color: #1e293b;
-  background: #ffffff;
+  color: var(--text-main);
+  background: var(--input-bg);
   font-size: 13.5px;
   font-family: inherit;
   outline: none;
@@ -334,8 +334,8 @@ $error-color: #dc2626;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:focus {
-    border-color: $focus-blue;
-    box-shadow: 0 0 0 3px rgba(12, 59, 115, 0.08);
+    border-color: var(--primary-hover);
+    box-shadow: var(--focus-ring-primary);
   }
 }
 
@@ -366,7 +366,7 @@ $error-color: #dc2626;
   user-select: none;
   font-size: 13.5px;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-body);
   gap: 10px;
 
   input {
@@ -377,16 +377,16 @@ $error-color: #dc2626;
     width: 0;
   }
 
-  &:hover input ~ .actividad-modal__checkmark {
-    border-color: #b9d2f2;
+  &:hover input~.actividad-modal__checkmark {
+    border-color: var(--border-soft);
   }
 }
 
 .actividad-modal__checkmark {
   height: 18px;
   width: 18px;
-  background-color: #ffffff;
-  border: 1.5px solid #cbd5e1;
+  background-color: var(--bg-card);
+  border: 1.5px solid var(--border-soft);
   border-radius: 5px;
   display: inline-block;
   position: relative;
@@ -401,15 +401,15 @@ $error-color: #dc2626;
     top: 2px;
     width: 4px;
     height: 8px;
-    border: solid white;
+    border: solid var(--text-inverse);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
 }
 
-.actividad-modal__checkbox-container input:checked ~ .actividad-modal__checkmark {
-  background-color: $focus-blue;
-  border-color: $focus-blue;
+.actividad-modal__checkbox-container input:checked~.actividad-modal__checkmark {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 
   &::after {
     display: block;
@@ -436,18 +436,18 @@ $error-color: #dc2626;
 
 /* ── Panel de Recurrencia ──────────────────────────────────────── */
 .actividad-modal__recurrence-panel {
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--border-default);
   border-radius: 12px;
   padding: 16px;
-  background: #f8fbff;
+  background: var(--bg-surface);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
 .actividad-modal__preview-banner {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--status-success-bg-soft);
+  color: var(--status-success-text);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 12.5px;
@@ -455,7 +455,7 @@ $error-color: #dc2626;
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--status-success-border);
   line-height: 1.4;
 }
 
@@ -463,7 +463,7 @@ $error-color: #dc2626;
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #16a34a;
+  color: var(--status-success-text);
   flex-shrink: 0;
 }
 
@@ -474,7 +474,7 @@ $error-color: #dc2626;
   align-items: center;
   gap: 10px;
   padding: 16px var(--modal-padding-x) 22px;
-  border-top: 1px solid #e8edf5;
+  border-top: 1px solid var(--border-default);
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -498,7 +498,8 @@ $error-color: #dc2626;
   border: none;
   transition: all 0.15s ease;
 
-  mat-icon, img {
+  mat-icon,
+  img {
     font-size: 18px;
     width: 18px;
     height: 18px;
@@ -506,41 +507,46 @@ $error-color: #dc2626;
   }
 
   &--cancel {
-    border: 1.5px solid $border-color;
-    background: #ffffff;
-    color: #475569;
+    border: 1.5px solid var(--border-input);
+    background: var(--bg-card);
+    color: var(--text-secondary);
 
-    &:hover {
-      background: #f8fafc;
-      border-color: #b0bec5;
+     &:hover {
+      background: var(--bg-app);
+      border-color: var(--border-soft);
     }
+
+    
   }
 
   &--save {
-    background: $focus-blue;
-    color: #ffffff;
+    background: var(--primary-hover);
+    color: var(--text-inverse);
 
-    &:hover:not(:disabled) {
-      background: color.adjust($focus-blue, $lightness: -4%);
-      box-shadow: 0 4px 14px rgba(12, 59, 115, 0.22);
+     &:hover:not(:disabled) {
+      background: var(--primary-color);
+      box-shadow: var(--elevation-card);
     }
 
     &:disabled {
-      background: #94a3b8;
+      background: var(--text-disabled);
       cursor: not-allowed;
       opacity: 0.6;
     }
+
   }
 
   &--delete {
-    background: #fef2f2;
-    color: $error-color;
-    border: 1.5px solid #fee2e2;
+    background: var(--status-danger-bg-soft);
+    color: var(--status-danger-text);
+    border: 1.5px solid var(--status-danger-border);
 
-    &:hover {
-      background: #fee2e2;
-      border-color: #fca5a5;
+     &:hover {
+      background: var(--status-danger-border);
+      border-color: var(--status-danger-text);
     }
+
+    
   }
 }
 
@@ -558,9 +564,9 @@ $error-color: #dc2626;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: #94a3b8;
+    color: var(--text-muted);
 
-    .mat-mdc-icon-button,
+     .mat-mdc-icon-button,
     button.mat-mdc-icon-button {
       width: 30px !important;
       min-width: 30px !important;
@@ -599,9 +605,11 @@ $error-color: #dc2626;
     }
 
     &:hover .mat-mdc-icon-button {
-      color: #334155 !important;
+      color: var(--text-body) !important;
       background: transparent !important;
     }
+
+    
   }
 }
 
@@ -612,7 +620,7 @@ $error-color: #dc2626;
   }
 
   .actividad-modal__field--width-80 {
-    width: 100% !important;
+    width: 100%;
   }
 
   .actividad-modal__two-col {
