@@ -1,9 +1,9 @@
-.modal-backdrop {
+scss .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
 
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--overlay-backdrop);
 
   display: flex;
   align-items: center;
@@ -18,12 +18,12 @@
   width: min(95vw, 882px);
   max-height: 90vh;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 20px;
 
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.10);
+  box-shadow: var(--elevation-modal);
 
   overflow: hidden;
 
@@ -54,7 +54,7 @@
   h2 {
     margin: 0;
 
-    color: #163572;
+    color: var(--primary-color);
 
     font-size: 30px;
     font-weight: 800;
@@ -75,7 +75,7 @@
 
   background: transparent;
 
-  color: #9ca3af;
+  color: var(--text-disabled);
 
   font-size: 18px;
   line-height: 1;
@@ -89,8 +89,8 @@
   transition: all 0.16s ease;
 
   &:hover {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--bg-soft);
+    color: var(--text-body);
   }
 }
 
@@ -156,3 +156,4 @@
     padding: 22px 16px;
   }
 }
+

@@ -1,15 +1,18 @@
+@use "sass:color";
+
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--elevation-dropdown-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1200; /* Ensure it stays above the parent dialog */
+  z-index: 1200;
+  /* Ensure it stays above the parent dialog */
 }
 
 .modal-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 32px 28px;
   width: 380px;
@@ -17,41 +20,41 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--elevation-modal);
 }
 
 .modal-icon {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #EEF3FB;
+  background: var(--primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #163572; 
+  border: 2px solid var(--primary-color);
 
   .material-symbols-outlined {
     font-size: 32px;
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-main);
   margin: 0;
   text-align: center;
 }
 
 .modal-mensaje {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-align: center;
   margin: 0;
 
   strong {
-    color: #1a1a2e;
+    color: var(--text-main);
     font-weight: 600;
   }
 }
@@ -66,16 +69,18 @@
 .btn-cancelar {
   flex: 1;
   height: 40px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  background: #ffffff;
-  color: #6b7280;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #f5f5f5; }
+  &:hover {
+    background: var(--bg-hover);
+  }
 }
 
 .btn-eliminar {
@@ -83,14 +88,16 @@
   height: 40px;
   border: none;
   border-radius: 8px;
-  background: #163572;
-  color: #ffffff;
+  background: var(--primary-color);
+  color: var(--text-inverse);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #162C56; }
+  &:hover {
+    background: var(--primary-hover);
+  }
 }
 
 .modal-form__error-banner {
@@ -99,9 +106,9 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 8px;
-  background-color: #fef2f2;
-  border: 1px solid #fca5a5;
-  color: #dc2626;
+  background-color: var(--status-danger-bg-soft);
+  border: 1px solid var(--status-danger-border);
+  color: var(--status-danger-text);
   font-size: 12.5px;
   font-weight: 500;
   margin-top: 4px;
@@ -110,7 +117,7 @@
 
   .material-icons {
     font-size: 18px;
-    color: #dc2626;
+    color: var(--status-danger-text);
     flex-shrink: 0;
   }
 }

@@ -1,29 +1,30 @@
 // Design system tokens
-$primary:        #163572;
-$primary-dark:   #162056;
-$primary-light:  rgba(22, 53, 114, 0.08);
-$secondary:      #F5F5F5;
-$accent:         #4CAF50;
-$warn:           #FF9800;
-$error:          #F44336;
-$text-primary:   #1A1A2E;
-$text-secondary: #6B7280;
-$border-color:   #E5E7EB;
-$white:          #FFFFFF;
+$primary:        var(--primary-color);
+$primary-dark:   var(--primary-hover);
+$primary-light:  var(--primary-light);
+$secondary:      var(--bg-soft);
+$accent:         var(--status-success);
+$warn:           var(--status-warning);
+$error:          var(--status-error);
+$text-primary:   var(--text-main);
+$text-secondary: var(--text-secondary);
+$border-color:   var(--border-default);
+$white:          var(--bg-card);
 
 $sidebar-width:  220px;
 $navbar-height:  64px;
 $border-radius:  8px;
-$shadow-card:    0 2px 8px rgba(0, 0, 0, 0.08);
+$shadow-card:    var(--elevation-card);
+
 // Paleta de Colores TMR
-$color-primary: #163572;
-$color-primary-light: #EEF4FF;
-$color-text-main: #1e293b;
-$color-text-muted: #5F6B7A;
-$color-text-light: #94a3b8;
-$color-border: #E5E5E5;
-$color-bg-light: #f8fafc;
-$color-danger: #f43f5e;
+$color-primary: var(--primary-color);
+$color-primary-light: var(--primary-light);
+$color-text-main: var(--text-main);
+$color-text-muted: var(--text-muted);
+$color-text-light: var(--text-disabled);
+$color-border: var(--border-default);
+$color-bg-light: var(--bg-surface);
+$color-danger: var(--status-error);
 
 // Espaciados y Bordes
 $radius-xl: 16px;
@@ -32,9 +33,9 @@ $radius-md: 8px;
 
 // Sombras
 $shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
-$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+$shadow-md: var(--elevation-card);
 
-// Mixins para reutilizar lÃ³gica compleja
+// Mixins para reutilizar lógica compleja
 @mixin flex-center {
   display: flex;
   align-items: center;
