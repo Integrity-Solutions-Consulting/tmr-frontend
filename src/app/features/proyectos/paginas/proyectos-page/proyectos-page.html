@@ -5,27 +5,28 @@
     </div>
   </div>
 
-  <div class="proyectos-page__toolbar">
+  <div class="filters-card">
     <app-proyectos-filtros
-      (filtrosChange)="aplicarFiltros($event)"
-    ></app-proyectos-filtros>
-  
-    <div class="proyectos-page__actions">
+      style="display: contents;"
+      (filtrosChange)="aplicarFiltros($event)">
+    </app-proyectos-filtros>
+
+    <div class="search-spacer" style="flex: 1;"></div>
+
+    <div class="acciones-derecha" style="display: flex; gap: 16px; align-items: flex-end;">
       <app-descarga-menu
+        style="display: contents;"
         [opciones]="opcionesDescarga"
         etiquetaBoton="Descargar"
       ></app-descarga-menu>
 
       <button
-        mat-flat-button
         type="button"
-        class="proyectos-page__create"
+        class="btn-descargar btn-agregar"
         (click)="abrirModalCrear()"
       >
-        <span class="proyectos-page__create-content">
-          Crear
-          <img src="assets/iconos/btn-agregar.svg" alt="">
-        </span>
+        Crear
+        <span class="material-icons download-icon">add</span>
       </button>
     </div>
   </div>

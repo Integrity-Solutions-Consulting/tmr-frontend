@@ -1,7 +1,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.40);
+  background: var(--overlay-backdrop);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -11,9 +11,9 @@
 
 .modal-form {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--elevation-modal);
   width: 680px;
   max-width: calc(100vw - 48px);
   max-height: 92vh;
@@ -27,7 +27,7 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 22px 24px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -35,14 +35,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 700;
-    color: #163572;
+    color: var(--primary-color);
     margin: 0 0 4px;
   }
 
   &__subtitle {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin: 0;
   }
 
@@ -50,7 +50,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 6px;
     display: flex;
@@ -63,8 +63,8 @@
     }
 
     &:hover {
-      color: #374151;
-      background: #f3f4f6;
+      color: var(--text-body);
+      background: var(--bg-soft);
     }
   }
 
@@ -82,7 +82,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #e5e7eb;
+      background: var(--border-soft);
       border-radius: 3px;
     }
   }
@@ -93,7 +93,7 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-default);
     flex-shrink: 0;
   }
 
@@ -113,21 +113,21 @@
     border: none;
 
     &--cancel {
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      color: #374151;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      color: var(--text-body);
 
       &:hover {
-        background: #f9fafb;
+        background: var(--bg-subtle);
       }
     }
 
     &--save {
-      background: #163572;
-      color: #ffffff;
+      background: var(--primary-color);
+      color: var(--text-inverse);
 
       &:hover:not(:disabled) {
-        background: #122d63;
+        background: var(--primary-hover);
       }
 
       &:disabled {
@@ -152,14 +152,14 @@
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #163572;
+    color: var(--primary-color);
     margin-bottom: 18px;
   }
 
   &__bar {
     width: 3px;
     height: 14px;
-    background: #163572;
+    background: var(--primary-color);
     border-radius: 2px;
     flex-shrink: 0;
   }
@@ -189,20 +189,20 @@
 .form-field__hint {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-disabled);
   font-style: italic;
 }
 
 .form-field__error {
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
-  color: #dc2626;
+  color: var(--status-danger-text);
   font-weight: 500;
   padding-left: 4px;
 }
 
 .req {
-  color: #dc2626;
+  color: var(--status-danger-text);
   margin-left: 1px;
 }
 
@@ -217,23 +217,23 @@
   width: 100%;
   height: 48px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
-  color: #374151;
-  background: #ffffff;
+  color: var(--text-body);
+  background: var(--bg-card);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: #b6bfcb;
+    border-color: var(--border-input);
   }
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 }
 
@@ -241,6 +241,9 @@
   padding-right: 36px;
   cursor: pointer;
   appearance: none;
+
+  // Excepción: color embebido dentro del SVG del data URI.
+  // Para eliminarlo completamente del SCSS habría que usar un SVG inline/currentColor.
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -248,19 +251,19 @@
 
 .float-field__input--error,
 .float-select__input--error {
-  border-color: #dc2626;
+  border-color: var(--status-danger-text);
 
   &:focus {
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    box-shadow: var(--validation-ring-danger);
   }
 }
 
 .float-field__input:disabled,
 .float-select__input:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
   opacity: 1;
 }
 
@@ -273,24 +276,24 @@
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
   font-weight: 400;
-  color: #9ca3af;
+  color: var(--text-disabled);
   pointer-events: none;
   transition: all 0.18s ease;
   padding: 0 4px;
-  background: #ffffff;
+  background: var(--bg-card);
   white-space: nowrap;
   line-height: 1;
 }
 
-.float-field__input:focus ~ .float-field__label,
-.float-field__input:not(:placeholder-shown) ~ .float-field__label,
-.float-select__input:focus ~ .float-select__label,
+.float-field__input:focus~.float-field__label,
+.float-field__input:not(:placeholder-shown)~.float-field__label,
+.float-select__input:focus~.float-select__label,
 .float-select__label--up,
 .float-field__label--always {
   top: 0;
   transform: translateY(-50%);
   font-size: 11px;
-  color: #737373;
+  color: var(--text-subtle);
 }
 
 .float-field__input--textarea {
@@ -301,24 +304,24 @@
   line-height: 1.45;
 }
 
-.float-field__input--textarea ~ .float-field__label {
+.float-field__input--textarea~.float-field__label {
   top: 17px;
 }
 
-.float-field__input--textarea:focus ~ .float-field__label,
-.float-field__input--textarea:not(:placeholder-shown) ~ .float-field__label {
+.float-field__input--textarea:focus~.float-field__label,
+.float-field__input--textarea:not(:placeholder-shown)~.float-field__label {
   top: 0;
   transform: translateY(-50%);
   font-size: 11px;
-  color: #737373;
+  color: var(--text-subtle);
 }
 
 .reemplazo-lista {
   max-height: 172px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--bg-card);
   margin-top: 2px;
 
   &::-webkit-scrollbar {
@@ -330,7 +333,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
+    background: var(--border-soft);
     border-radius: 3px;
   }
 }
@@ -343,7 +346,7 @@
   grid-template-columns: minmax(0, 1fr) 120px minmax(92px, 0.7fr);
   align-items: center;
   gap: 14px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-default);
   transition: background 0.15s;
 
   &:last-child {
@@ -351,7 +354,7 @@
   }
 
   &:hover {
-    background: #f9fafb;
+    background: var(--bg-subtle);
   }
 
   &__nombre,
@@ -367,17 +370,17 @@
   &__nombre {
     font-size: 13.5px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-body);
   }
 
   &__identificacion {
     font-size: 12.5px;
-    color: #6b7280;
+    color: var(--text-secondary);
   }
 
   &__cargo {
     font-size: 12.5px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     text-align: right;
   }
 }
@@ -388,8 +391,8 @@
   justify-content: space-between;
   gap: 14px;
   padding: 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   margin-top: 2px;
 
@@ -415,24 +418,24 @@
   &__nombre {
     font-size: 13.5px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-body);
   }
 
   &__identificacion {
     font-size: 12.5px;
-    color: #6b7280;
+    color: var(--text-secondary);
   }
 
   &__cargo {
     font-size: 12.5px;
-    color: #9ca3af;
+    color: var(--text-disabled);
   }
 
   &__remove {
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--text-disabled);
     padding: 4px;
     border-radius: 6px;
     display: flex;
@@ -442,8 +445,8 @@
     flex-shrink: 0;
 
     &:hover {
-      color: #374151;
-      background: #f3f4f6;
+      color: var(--text-body);
+      background: var(--bg-soft);
     }
 
     .material-icons {
@@ -457,7 +460,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #ffffff;
+  border-top-color: var(--text-inverse);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -514,78 +517,3 @@
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .modal-form {
-    background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-
-    &__header,
-    &__footer {
-      border-color: #3f3f46 ;
-    }
-
-    &__title { color: #3b82f6 ; }
-    &__subtitle { color: #a1a1aa ; }
-
-    &__close {
-      color: #a1a1aa ;
-      &:hover { background: #3f3f46 ; color: #ffffff ; }
-    }
-
-    &__btn--cancel {
-      background: #202124 ;
-      border-color: #3f3f46 ;
-      color: #ffffff ;
-      &:hover { background: #3f3f46 ; }
-    }
-
-    &__btn--save {
-      background: #163572 ;
-      color: #ffffff ;
-      &:hover:not(:disabled) { background: #122d63 ; }
-    }
-  }
-
-  .form-section__title { color: #3b82f6 ; }
-  .form-section__bar { background: #3b82f6 ; }
-
-  /* Floating inputs y selects */
-  .float-field__input,
-  .float-select__input {
-    background-color: #202124 ;
-    background: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
-
-    &:focus {
-      border-color: #3b82f6 ;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) ;
-    }
-  }
-
-  .float-select__input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFFFFF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") ;
-    background-repeat: no-repeat ;
-    background-position: right 12px center ;
-    background-color: #202124 ;
-  }
-
-  .float-field__label,
-  .float-select__label {
-    background-color: transparent ;
-    color: #a1a1aa ;
-  }
-
-  .float-field__input:focus ~ .float-field__label,
-  .float-field__input:not(:placeholder-shown) ~ .float-field__label,
-  .float-select__input:focus ~ .float-select__label,
-  .float-select__label--up,
-  .float-field__label--always {
-    background-color: #202124 ;
-    background: #202124 ;
-    color: #60a5fa ;
-  }
-}
