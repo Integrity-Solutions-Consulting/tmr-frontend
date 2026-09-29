@@ -33,17 +33,20 @@ export async function crearReporteSeguimientoPdf(
   fechaDesde: string,
   fechaHasta: string,
   datos: DatosSeguimientoPdf,
+  nombreProyecto = '',
 ): Promise<ArrayBuffer> {
   const fechas = fechasDelPeriodo(fechaDesde, fechaHasta);
   const feriados = new Set(datos.feriados ?? []);
-  const grupos = agruparPorCliente(datos.actividades ?? []);
+  const grupos = nombreProyecto
+    ? [{ cliente: nombreProyecto, clienteReal: datos.actividades[0]?.clienteProyecto || 'Sin Cliente', actividades: datos.actividades ?? [] }]
+    : agruparPorCliente(datos.actividades ?? []);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const logo = await obtenerLogoReporte();
-  if (grupos.length === 0) grupos.push({ cliente: 'Sin Cliente', actividades: [] });
+  if (grupos.length === 0) grupos.push({ cliente: 'Sin Cliente', clienteReal: 'Sin Cliente', actividades: [] });
   for (const [indice, grupo] of grupos.entries()) {
     if (indice > 0) doc.addPage();
     const filas = agruparFilas(grupo.actividades);
-    dibujarCabecera(doc, logo, grupo.cliente, nombreColaborador, fechaDesde);
+    dibujarCabecera(doc, logo, grupo.cliente, grupo.clienteReal || grupo.cliente, nombreColaborador, fechaDesde);
     const columnas = ['N°', 'TIPO DE ACTIVIDAD', 'LÍDER DE PROYECTO', 'CODIGO REQUERIMIENTO / INCIDENTE', 'DESCRIPCION DE TRABAJOS REALIZADOS', 'TOTAL HORAS\nPOR ACTIVIDAD'].concat(fechas.map(dia)).concat(['TOTAL HORAS\nPOR ACT.']);
     const head: any[][] = [
       (columnas.slice(0, 6).map(content => ({ content, rowSpan: 3 })) as any[]).concat([{ content: 'DISTRIBUCIÓN DE TIEMPO DEL DÍA', colSpan: fechas.length }, { content: columnas[columnas.length - 1], rowSpan: 3 }]),
@@ -82,16 +85,16 @@ export async function crearReporteSeguimientoPdf(
         if ([0, 5, 6 + fechas.length].includes(data.column.index)) data.cell.styles.halign = 'center';
       },
     });
-    dibujarFirmasYLeyenda(doc, (doc as any).lastAutoTable.finalY, nombreColaborador, grupo.cliente, filas);
+    dibujarFirmasYLeyenda(doc, (doc as any).lastAutoTable.finalY, nombreColaborador, grupo.clienteReal || grupo.cliente, filas);
   }
   return doc.output('arraybuffer');
 }
 
-function dibujarCabecera(doc: jsPDF, logo: string | null, cliente: string, colaborador: string, desde: string): void {
+function dibujarCabecera(doc: jsPDF, logo: string | null, titulo: string, cliente: string, colaborador: string, desde: string): void {
   const width = doc.internal.pageSize.getWidth();
   doc.setFillColor(...AZUL); doc.rect(10, 10, width - 20, 22, 'F');
   if (logo) doc.addImage(logo, 'PNG', 12, 12, 28, 12);
-  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text('TIME REPORT - ' + cliente.toUpperCase(), width / 2, 21, { align: 'center' });
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text('TIME REPORT - ' + titulo.toUpperCase(), width / 2, 21, { align: 'center' });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.text(mes(desde) + ' ' + desde.slice(0, 4) + ' | Generado: ' + new Date().toLocaleDateString('es-EC'), width - 12, 28, { align: 'right' });
   doc.setTextColor(...AZUL); doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
   const etiquetaCliente = 'Cliente:';
@@ -121,7 +124,7 @@ function dibujarFirmasYLeyenda(doc: jsPDF, finalY: number, colaborador: string, 
 }
 
 interface FilaPdf { tipo: string; lider: string; req: string; desc: string; recurrente: boolean; horasPorDia: Record<string, number>; }
-function agruparPorCliente(actividades: ActividadSeguimientoPdf[]): Array<{ cliente: string; actividades: ActividadSeguimientoPdf[] }> { const grupos = new Map<string, ActividadSeguimientoPdf[]>(); actividades.forEach(a => { const cliente = a.clienteProyecto || 'Sin Cliente'; grupos.set(cliente, (grupos.get(cliente) || []).concat([a])); }); return Array.from(grupos.entries()).map(([cliente, items]) => ({ cliente, actividades: items })); }
+function agruparPorCliente(actividades: ActividadSeguimientoPdf[]): Array<{ cliente: string; clienteReal: string; actividades: ActividadSeguimientoPdf[] }> { const grupos = new Map<string, ActividadSeguimientoPdf[]>(); actividades.forEach(a => { const cliente = a.clienteProyecto || 'Sin Cliente'; grupos.set(cliente, (grupos.get(cliente) || []).concat([a])); }); return Array.from(grupos.entries()).map(([cliente, items]) => ({ cliente, clienteReal: cliente, actividades: items })); }
 function agruparFilas(actividades: ActividadSeguimientoPdf[]): FilaPdf[] { const mapa = new Map<string, FilaPdf>(); actividades.forEach(a => { const recurrente = !!(a.esRecurrente || a.recurrente); const clave = [a.tipoActividad || '', a.liderProyecto || '', a.codigoRequerimiento || '', a.descripcion || '', recurrente].join('|'); const fila = mapa.get(clave) || { tipo: a.tipoActividad || '', lider: a.liderProyecto || '', req: a.codigoRequerimiento || '', desc: a.descripcion || '', recurrente, horasPorDia: {} }; fila.horasPorDia[a.fecha] = (fila.horasPorDia[a.fecha] || 0) + Number(a.horas || 0); mapa.set(clave, fila); }); return Array.from(mapa.values()); }
 function fechasDelPeriodo(desde: string, hasta: string): Date[] { const fechas: Date[] = []; const actual = new Date(desde + 'T00:00:00'); const fin = new Date(hasta + 'T00:00:00'); while (actual <= fin) { fechas.push(new Date(actual)); actual.setDate(actual.getDate() + 1); } return fechas; }
 function fechaClave(fecha: Date): string { return fecha.getFullYear() + '-' + String(fecha.getMonth() + 1).padStart(2, '0') + '-' + String(fecha.getDate()).padStart(2, '0'); }
