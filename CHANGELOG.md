@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.5.0...v1.5.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* arreglando el modo light & dark v1 ([bb387f1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/bb387f15e2b1b8c28d7a78ed8098a12562681ea1))
+
 ## [1.5.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.2...v1.5.0) (2026-09-28)
 
 
