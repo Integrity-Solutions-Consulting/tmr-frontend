@@ -3,7 +3,7 @@ scss .tabla-shell {
   max-width: 100%;
   max-height: 560px;
   border: 1px solid var(--border-default);
-  border-radius: 10px 10px 0 0;
+  border-radius: 16px 16px 0 0;
   background: var(--bg-card);
 }
 
@@ -20,9 +20,12 @@ scss .tabla-shell {
   width: 100%;
   table-layout: fixed;
   background: var(--bg-card);
-  border-collapse: collapse;
+  
+  border-collapse: separate;
   border-spacing: 0;
-
+  border: 2px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
   th {
     height: 46px;
     padding: 11px 14px;

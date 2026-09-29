@@ -60,26 +60,29 @@
     }
   </div>
 
-  <section class="toolbar-section toolbar-section--row">
-    <div class="search-input-wrapper">
-      <span class="material-icons">search</span>
-      <input type="text" [formControl]="searchControl" placeholder="Buscar proyecto, cliente, codigo...">
-    </div>
-
-    <div class="date-controls">
-      <div class="date-field">
-        <label>DESDE</label>
-        <input type="date" [formControl]="fechaDesdeControl">
-      </div>
-      <div class="date-field">
-        <label>HASTA</label>
-        <input type="date" [formControl]="fechaHastaControl">
+  <section class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon" style="top: 10px;">search</span>
+        <input class="filter-input" type="text" placeholder="Buscar proyecto, cliente, codigo..."
+               [formControl]="searchControl" />
       </div>
     </div>
 
-    <button class="btn-secondary" (click)="descargarExcel()">
-      <span class="material-icons">file_download</span> 
-      <span>Descargar</span>
+    <div class="filter-group date-group">
+      <label class="filter-label">Fecha desde</label>
+      <input class="filter-input" type="date" [formControl]="fechaDesdeControl">
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Fecha hasta</label>
+      <input class="filter-input" type="date" [formControl]="fechaHastaControl">
+    </div>
+
+    <button class="btn-descargar enabled" (click)="descargarExcel()">
+      Descargar
+      <span class="material-symbols-outlined download-icon">file_download</span>
     </button>
   </section>
 

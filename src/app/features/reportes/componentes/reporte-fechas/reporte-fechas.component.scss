@@ -160,7 +160,9 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 8px;
+  padding: 16px 20px;
+  background-color: var(--bg-card);
+  border-radius: 12px;
 }
 
 .filter-group {

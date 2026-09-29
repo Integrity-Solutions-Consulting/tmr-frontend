@@ -7,9 +7,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 4px;
-  background: transparent;
+  padding: 16px 20px;
+  margin-top: 10px;
+  border-radius: 12px;
+  background-color: var(--bg-card);
   border: none;
+  
   font-family: 'Inter', sans-serif;
 
   &__info {

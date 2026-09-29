@@ -1228,8 +1228,9 @@ html[data-theme="dark"] {
   .confirm-modal,
   .success-modal {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-default) !important;
+    //border: 1px solid var(--border-default) !important;
     color: var(--text-main) !important;
+    border-radius: 12px;
 
     .modal__header h2,
     h1, h2, h3, h4 {

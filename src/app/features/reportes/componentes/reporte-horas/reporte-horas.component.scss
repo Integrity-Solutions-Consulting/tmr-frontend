@@ -55,7 +55,9 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 8px;
+  background-color: var(--bg-card);
+  padding: 16px 20px;
+  border-radius: 12px;
 }
 
 .filter-group {
@@ -100,7 +102,7 @@
   outline: none;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-main);
+  color: var(--text-muted);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -141,7 +143,7 @@ input.filter-input {
   -moz-appearance: none;
   padding-right: 40px;
   cursor: pointer;
-  color: var(--text-main);
+  color: var(--text-muted);
   background-color: var(--input-bg);
 }
 

@@ -95,141 +95,6 @@
   padding: 1.2rem;
   overflow: hidden;
   box-shadow: var(--elevation-card);
-} /* ============================================================ TOOLBAR ============================================================ */
-.toolbar-section {
-  background: transparent;
-  padding: 0 0 1.2rem;
-  border: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  .search-input-wrapper {
-    flex: 1;
-    min-width: 300px;
-    display: flex;
-    align-items: center;
-    background: var(--input-bg);
-    border: 1px solid var(--border-input);
-    border-radius: 8px;
-    padding: 0 1rem;
-    .material-icons {
-      color: var(--icon-color);
-    }
-    input {
-      width: 100%;
-      border: none;
-      background: transparent;
-      padding: 0.7rem;
-      outline: none;
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      &::placeholder {
-        color: var(--text-muted);
-        opacity: 1;
-      }
-    }
-  }
-} /* ============================================================ TOOLBAR EN FILA ============================================================ */
-.toolbar-section--row {
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  padding: 1.2rem;
-  .material-icons {
-    color: var(--icon-color);
-  } /* ---------------------------------------------------------- BUSCADOR ---------------------------------------------------------- */
-  .search-input-wrapper {
-    flex: 0 1 350px;
-    min-width: 250px;
-    background: var(--input-bg);
-    border: 1px solid var(--border-input);
-    border-radius: 8px;
-    padding: 0 1rem;
-    height: 44px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    input {
-      width: 100%;
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      height: 100%;
-      padding: 0;
-      background: transparent;
-      border: none;
-      outline: none;
-      &::placeholder {
-        color: var(--text-muted);
-        opacity: 1;
-      }
-    }
-  } /* ---------------------------------------------------------- CONTROLES DE FECHA ---------------------------------------------------------- */
-  .date-controls {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    background: var(--input-bg);
-    border: 1px solid var(--border-input);
-    border-radius: 8px;
-    padding: 0 1rem;
-    height: 44px;
-    box-sizing: border-box;
-    gap: 1.5rem;
-    .date-field {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      label {
-        color: var(--text-secondary);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.8rem;
-        font-weight: 700;
-        margin: 0;
-      }
-      input {
-        color: var(--text-main);
-        font-family: 'Inter', sans-serif;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 0.85rem;
-      }
-    }
-  } /* ---------------------------------------------------------- BOTÓN SECUNDARIO DE LA TOOLBAR ---------------------------------------------------------- */
-  .btn-secondary {
-    flex-shrink: 0;
-    margin-left: auto;
-    background: var(--bg-card);
-    border: 1px solid var(--border-input);
-    color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
-    border-radius: 8px;
-    padding: 0 1.2rem;
-    height: 44px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      border-color 0.2s ease,
-      color 0.2s ease;
-    .material-icons {
-      color: var(--icon-color);
-    }
-    &:hover {
-      background: var(--bg-hover);
-      border-color: var(--border-default);
-    }
-  }
 } /* ============================================================ FILTROS ============================================================ */
 .filters-group {
   display: flex;
@@ -797,3 +662,180 @@ app-paginacion {
     min-width: 60px;
   }
 }
+
+/* ============================================================ FILTERS CARD ============================================================ */
+.filters-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-end !important;
+    gap: 16px !important;
+    flex-wrap: wrap;
+    box-shadow: var(--elevation-card);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-input-wrapper {
+    position: relative !important;
+    width: 100%;
+
+     &:focus-within .filter-icon {
+        color: var(--primary-color) !important;
+    }
+
+    
+}
+
+.filter-input {
+    width: 100% !important;
+    padding: 10px 16px !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+
+    
+}
+
+.filter-input-wrapper .filter-input {
+    padding-left: 40px !important;
+}
+
+.filter-icon {
+    position: absolute !important;
+    left: 12px !important;
+    top: 12px !important;
+    color: var(--text-muted) !important;
+    transition: color 0.2s !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+/* Client select */
+.filter-select {
+    width: 100% !important;
+    padding: 10px 32px 10px 40px !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    cursor: pointer !important;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+
+    
+}
+
+.select-chevron {
+    position: absolute !important;
+    right: 12px !important;
+    top: 12px !important;
+    color: var(--text-muted) !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+/* Date groups */
+.date-group {
+    flex: none !important;
+    width: 160px !important;
+}
+
+.filter-label {
+    display: block !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    color: var(--text-muted) !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    margin-left: 4px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Descargar button */
+.btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-disabled);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+
+     .download-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.enabled {
+        background: var(--bg-card);
+        color: var(--primary-color);
+        border: 1px solid var(--border-soft);
+        cursor: pointer;
+
+        .download-icon {
+            color: var(--primary-color);
+        }
+
+        &:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+    }
+
+    &.loading {
+        color: var(--primary-color);
+        cursor: wait;
+        opacity: 0.8;
+    }
+
+    
+}
+
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.

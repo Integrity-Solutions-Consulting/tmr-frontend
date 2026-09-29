@@ -22,7 +22,7 @@ scss .descarga {
     font: inherit;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-subtle);
+    color: var(--text-muted);
 
     transition: all 0.18s ease;
 
@@ -71,7 +71,7 @@ scss .descarga {
 
     padding: 8px 14px 10px;
 
-    color: var(--text-subtle);
+    color: var(--text-muted);
 
     border-bottom: 1px solid var(--border-default);
 
@@ -92,7 +92,7 @@ scss .descarga {
     background: transparent;
     border: none;
 
-    color: var(--text-subtle);
+    color: var(--text-muted);
 
     cursor: pointer;
 
