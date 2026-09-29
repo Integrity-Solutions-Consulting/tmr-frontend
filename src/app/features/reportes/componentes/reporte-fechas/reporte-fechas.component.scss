@@ -33,7 +33,7 @@
   border: none;
   border-radius: 18px;
   box-shadow: none;
-  padding: 28px 28px 22px;
+  padding: 16px;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
@@ -160,8 +160,8 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-  padding: 16px 20px;
-  background-color: var(--bg-card);
+  padding: 12px 16px;
+    background-color: var(--bg-card);
   border-radius: 12px;
 }
 
@@ -207,7 +207,7 @@
   outline: none;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-main);
+  color: var(--text-muted);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -232,6 +232,15 @@
   }
 }
 
+.filter-input[type="date"] {
+  color: var(--text-muted) !important;
+}
+
+.filter-input::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
 .filter-input-wrapper .filter-input {
   padding-left: 40px;
 }
@@ -243,7 +252,8 @@
 .filter-icon {
   position: absolute;
   left: 12px;
-  top: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--text-muted);
   transition: color 0.2s;
 }
@@ -288,7 +298,7 @@
   border-collapse: collapse;
 
   th {
-    padding: 16px;
+    padding: 4px 16px;
     font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
@@ -298,7 +308,7 @@
   }
 
   td {
-    padding: 16px;
+    padding: 4px 16px;
     font-size: 14px;
     color: var(--text-secondary);
   }
@@ -586,3 +596,7 @@
     padding: 16px 10px;
   }
 }
+
+
+
+

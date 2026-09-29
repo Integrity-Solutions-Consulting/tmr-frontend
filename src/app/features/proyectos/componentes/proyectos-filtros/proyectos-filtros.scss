@@ -359,7 +359,7 @@
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: var(--text-muted) ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -378,7 +378,8 @@
 .filter-icon {
     position: absolute ;
     left: 12px ;
-    top: 12px ;
+    top: 50% ;
+    transform: translateY(-50%) ;
     color: var(--text-muted) ;
     transition: color 0.2s ;
     width: 18px ;
@@ -414,7 +415,8 @@
 .select-chevron {
     position: absolute ;
     right: 12px ;
-    top: 12px ;
+    top: 50% ;
+    transform: translateY(-50%) ;
     color: var(--text-muted) ;
     font-size: 18px ;
     width: 18px ;
@@ -535,11 +537,11 @@
   background: var(--bg-card);
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-body);
+  color: var(--text-muted);
 
   &:hover {
     background: var(--bg-hover);
-    color: var(--text-main);
+    color: var(--text-muted);
   }
 }
 
@@ -580,3 +582,4 @@
     border-radius: 6px;
   }
 }
+

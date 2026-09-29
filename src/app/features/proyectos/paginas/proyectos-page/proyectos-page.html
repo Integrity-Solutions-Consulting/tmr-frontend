@@ -1,19 +1,19 @@
-<section class="proyectos-page">
-  <div class="proyectos-page__header">
-    <div>
-      <h2>Proyectos</h2>
-    </div>
+<div class="proyectos-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Proyectos</h1>
   </div>
 
+  <!-- Barra de busqueda y botones -->
   <div class="filters-card">
     <app-proyectos-filtros
       style="display: contents;"
       (filtrosChange)="aplicarFiltros($event)">
     </app-proyectos-filtros>
 
-    <div class="search-spacer" style="flex: 1;"></div>
+    
 
-    <div class="acciones-derecha" style="display: flex; gap: 16px; align-items: flex-end;">
+    <div class="descarga-wrapper">
       <app-descarga-menu
         style="display: contents;"
         [opciones]="opcionesDescarga"
@@ -31,52 +31,27 @@
     </div>
   </div>
 
-  <div class="proyectos-page__content">
-    <app-tabla
-      [filtros]="filtros"
-      (verMas)="abrirModalDetalle($event)"
-      (editar)="abrirModalEditar($event)"
-      (inactivar)="solicitarCambiarEstadoProyecto($event)"
-    ></app-tabla>
-  </div>
-</section>
+  <!-- Tabla (La logica del wrapper estara dentro de app-tabla) -->
+  <app-tabla
+    [filtros]="filtros"
+    (verMas)="abrirModalDetalle($event)"
+    (editar)="abrirModalEditar($event)"
+    (inactivar)="solicitarCambiarEstadoProyecto($event)"
+  ></app-tabla>
+</div>
 
-<app-modal-base
-  [titulo]="proyectoSeleccionado ? 'Editar Proyecto' : 'Nuevo Proyecto'"
-  [visible]="modalCrearVisible"
-  (cerrar)="cerrarModalCrear()"
->
+<!-- Modales -->
+<app-modal-base [titulo]="proyectoSeleccionado ? 'Editar Proyecto' : 'Nuevo Proyecto'" [visible]="modalCrearVisible" (cerrar)="cerrarModalCrear()">
   @if (modalCrearVisible) {
-    <app-proyecto-form
-      [proyecto]="proyectoSeleccionado"
-      [guardando]="guardandoProyecto"
-      (guardarProyecto)="guardarProyecto($event)"
-    ></app-proyecto-form>
+    <app-proyecto-form [proyecto]="proyectoSeleccionado" [guardando]="guardandoProyecto" (guardarProyecto)="guardarProyecto($event)"></app-proyecto-form>
   }
 </app-modal-base>
 
-<app-confirm-dialog
-  [visible]="confirmCambioEstadoVisible"
-  [titulo]="confirmTitulo"
-  [mensaje]="confirmMensaje"
-  textoCancelar="Cancelar"
-  [textoConfirmar]="confirmTextoConfirmar"
-  (cancelar)="cancelarCambiarEstadoProyecto()"
-  (confirmar)="confirmarCambiarEstadoProyecto()"
-></app-confirm-dialog>
+<app-confirm-dialog [visible]="confirmCambioEstadoVisible" [titulo]="confirmTitulo" [mensaje]="confirmMensaje" textoCancelar="Cancelar" [textoConfirmar]="confirmTextoConfirmar" (cancelar)="cancelarCambiarEstadoProyecto()" (confirmar)="confirmarCambiarEstadoProyecto()"></app-confirm-dialog>
 
-<app-success-modal
-  [visible]="successCrearVisible"
-  mensaje="Proyecto creado correctamente"
-  (cerrar)="cerrarSuccessCrear()"
-></app-success-modal>
+<app-success-modal [visible]="successCrearVisible" mensaje="Proyecto creado correctamente" (cerrar)="cerrarSuccessCrear()"></app-success-modal>
 
-<app-modal-base
-  titulo="Detalle del Proyecto"
-  [visible]="modalDetalleVisible"
-  [wide]="true"
-  (cerrar)="cerrarModalDetalle()"
->
+<app-modal-base titulo="Detalle del Proyecto" [visible]="modalDetalleVisible" [wide]="true" (cerrar)="cerrarModalDetalle()">
   @if (proyectoDetalle) {
     <article class="proyecto-detalle">
       <header class="proyecto-detalle__header">
@@ -90,113 +65,47 @@
         </div>
 
         <div class="proyecto-detalle__metrics">
-          <div>
-            <span>Presupuesto</span>
-            <strong>${{ proyectoDetalle.presupuesto || 0 }}</strong>
-          </div>
-
-          <div>
-            <span>Horas</span>
-            <strong>{{ proyectoDetalle.horas || 0 }}</strong>
-          </div>
+          <div><span>Presupuesto</span><strong>${{ proyectoDetalle.presupuesto || 0 }}</strong></div>
+          <div><span>Horas</span><strong>{{ proyectoDetalle.horas || 0 }}</strong></div>
         </div>
       </header>
 
       <section class="proyecto-detalle__summary">
-        <div>
-          <span>Tipo de proyecto</span>
-          <strong>{{ proyectoDetalle.tipo || '-' }}</strong>
-        </div>
-
-        <div>
-          <span>Cliente</span>
-          <strong>{{ proyectoDetalle.cliente || 'Sin cliente' }}</strong>
-        </div>
-
-        <div>
-          <span>Rango de fechas</span>
-          <strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong>
-        </div>
-
-        <div>
-          <span>Observación</span>
-          <strong>{{ proyectoDetalle.observacion || '-' }}</strong>
-        </div>
-
-        <div>
-          <span>Fecha fin real</span>
-          <strong>{{ formatearFecha(proyectoDetalle.fechaFinReal) }}</strong>
-        </div>
-
+        <div><span>Tipo de proyecto</span><strong>{{ proyectoDetalle.tipo || '-' }}</strong></div>
+        <div><span>Cliente</span><strong>{{ proyectoDetalle.cliente || 'Sin cliente' }}</strong></div>
+        <div><span>Rango de fechas</span><strong>{{ formatearFecha(proyectoDetalle.fechaInicio) }} -> {{ formatearFecha(proyectoDetalle.fechaFin) }}</strong></div>
+        <div><span>Observacion</span><strong>{{ proyectoDetalle.observacion || '-' }}</strong></div>
+        <div><span>Fecha fin real</span><strong>{{ formatearFecha(proyectoDetalle.fechaFinReal) }}</strong></div>
         @if (proyectoDetalle.idEstadoProyecto === idEstadoEnEspera) {
-          <div>
-            <span>Fecha inicio espera</span>
-            <strong>{{ formatearFecha(proyectoDetalle.fechaInicioEspera) }}</strong>
-          </div>
-          <div>
-            <span>Fecha fin espera</span>
-            <strong>{{ formatearFecha(proyectoDetalle.fechaFinEspera) }}</strong>
-          </div>
+          <div><span>Fecha inicio espera</span><strong>{{ formatearFecha(proyectoDetalle.fechaInicioEspera) }}</strong></div>
+          <div><span>Fecha fin espera</span><strong>{{ formatearFecha(proyectoDetalle.fechaFinEspera) }}</strong></div>
         }
       </section>
 
       <section class="proyecto-detalle__leaders">
-        <h4>Líderes</h4>
-
+        <h4>Lideres</h4>
         @for (lider of proyectoDetalle.lideres || []; track lider.lider) {
         <div class="proyecto-detalle__leader-card">
           <div class="proyecto-detalle__leader-grid">
-            <div>
-              <span>Nombre</span>
-              <strong>{{ lider.lider || '-' }}</strong>
-            </div>
-
-            <div>
-              <span>Costo/hora</span>
-              <strong>${{ lider.costoHoraLider || 0 }}/hora</strong>
-            </div>
-
-            <div>
-              <span>Horas</span>
-              <strong>{{ lider.horasLider || 0 }}</strong>
-            </div>
+            <div><span>Nombre</span><strong>{{ lider.lider || '-' }}</strong></div>
+            <div><span>Costo/hora</span><strong>${{ lider.costoHoraLider || 0 }}/hora</strong></div>
+            <div><span>Horas</span><strong>{{ lider.horasLider || 0 }}</strong></div>
           </div>
-
           <div class="proyecto-detalle__resources">
             <mat-accordion>
               <mat-expansion-panel class="proyecto-detalle__resources-panel">
                 <mat-expansion-panel-header>
                   <mat-panel-title>Recursos asignados</mat-panel-title>
-                  <mat-panel-description>
-                    {{ (lider.recursos || []).length }} recurso{{ (lider.recursos || []).length === 1 ? '' : 's' }}
-                  </mat-panel-description>
+                  <mat-panel-description>{{ (lider.recursos || []).length }} recurso{{ (lider.recursos || []).length === 1 ? '' : 's' }}</mat-panel-description>
                 </mat-expansion-panel-header>
-
                 <div class="proyecto-detalle__table">
                   <table>
                     <thead>
-                      <tr>
-                        <th>Tipo</th>
-                        <th>Nombre</th>
-                        <th>Rol asignado</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                        <th>Costo/hora</th>
-                        <th>Horas</th>
-                      </tr>
+                      <tr><th>Tipo</th><th>Nombre</th><th>Rol asignado</th><th>Entrada</th><th>Salida</th><th>Costo/hora</th><th>Horas</th></tr>
                     </thead>
-
                     <tbody>
                       @for (recurso of lider.recursos || []; track recurso.nombre) {
-                        <tr>
-                          <td>{{ recurso.tipo }}</td>
-                          <td>{{ recurso.nombre }}</td>
-                          <td>{{ recurso.rol }}</td>
-                          <td>{{ formatearFecha(recurso.entrada) }}</td>
-                          <td>{{ formatearFecha(recurso.salida) }}</td>
-                          <td>${{ recurso.costoHora }}/hora</td>
-                          <td>{{ recurso.horas }}</td>
-                        </tr>
+                        <tr><td>{{ recurso.tipo }}</td><td>{{ recurso.nombre }}</td><td>{{ recurso.rol }}</td><td>{{ formatearFecha(recurso.entrada) }}</td><td>{{ formatearFecha(recurso.salida) }}</td><td>${{ recurso.costoHora }}/hora</td><td>{{ recurso.horas }}</td></tr>
                       }
                     </tbody>
                   </table>
@@ -210,3 +119,4 @@
     </article>
   }
 </app-modal-base>
+

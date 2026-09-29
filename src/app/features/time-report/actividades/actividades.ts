@@ -59,7 +59,7 @@ export class Actividades implements OnInit {
             data: { fecha: this.fechaSeleccionada },
             disableClose: true,
             autoFocus: false,
-            restoreFocus: false,
+            restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -76,7 +76,7 @@ export class Actividades implements OnInit {
                 data: { fecha },
                 disableClose: true,
                 autoFocus: false,
-                restoreFocus: false,
+                restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
                 panelClass: 'tmr-dialog-panel'
             });
         }
@@ -91,7 +91,7 @@ export class Actividades implements OnInit {
             data: { fecha },
             disableClose: true,
             autoFocus: false,
-            restoreFocus: false,
+            restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -105,7 +105,7 @@ export class Actividades implements OnInit {
             data: { actividad },
             disableClose: true,
             autoFocus: false,
-            restoreFocus: false,
+            restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
             panelClass: 'tmr-dialog-panel'
         });
     }
@@ -130,3 +130,5 @@ export class Actividades implements OnInit {
         });
     }
 }
+
+

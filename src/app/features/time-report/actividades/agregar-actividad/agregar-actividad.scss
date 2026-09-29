@@ -15,6 +15,7 @@
   box-sizing: border-box;
   max-height: 90vh;
   overflow: hidden;
+  border-radius: 12px;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   background-color: var(--bg-card);
   user-select: none;
@@ -94,7 +95,7 @@
   background: var(--bg-card);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  //transition: all 0.15s ease;
   flex-shrink: 0;
   margin-top: 2px;
 
@@ -187,7 +188,7 @@
   height: 14px;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s ease;
+ // transition: color 0.15s ease;
 
   &:hover {
     color: var(--primary-hover);
@@ -203,7 +204,7 @@
   border-radius: 10px;
   padding: 0 14px;
   background: var(--input-bg);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  //transition: border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
 
   &:focus-within {
@@ -331,7 +332,7 @@
   outline: none;
   appearance: none;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  //transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:focus {
     border-color: var(--primary-hover);
@@ -390,7 +391,7 @@
   border-radius: 5px;
   display: inline-block;
   position: relative;
-  transition: all 0.15s ease;
+  //transition: all 0.15s ease;
   flex-shrink: 0;
 
   &::after {
@@ -496,7 +497,7 @@
   font-family: inherit;
   cursor: pointer;
   border: none;
-  transition: all 0.15s ease;
+  //transition: all 0.15s ease;
 
   mat-icon,
   img {

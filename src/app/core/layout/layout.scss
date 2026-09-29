@@ -1,6 +1,6 @@
 // Variables de diseño responsive
-$breakpoint-sm: 640px; // móviles
-$breakpoint-md: 960px; // tablets
+$breakpoint-sm: 640px;
+$breakpoint-md: 960px;
 $navbar-height: 54px;
 $sidebar-width-desktop: 164px;
 
@@ -15,7 +15,8 @@ $sidebar-width-desktop: 164px;
     display: flex;
     flex: 1;
     margin-top: $navbar-height;
-    overflow: hidden; // evita scroll doble
+    overflow: hidden;
+
     @media (max-width: $breakpoint-sm) {
         flex-direction: column;
     }
@@ -26,6 +27,7 @@ $sidebar-width-desktop: 164px;
     height: 100%;
     flex-shrink: 0;
     transition: transform 0.3s ease;
+
     @media (max-width: $breakpoint-sm) {
         position: fixed;
         top: $navbar-height;
@@ -43,10 +45,11 @@ $sidebar-width-desktop: 164px;
 .content-area {
     flex: 1;
     padding: 24px;
-    background-color: #F5F5F5;
+    background-color: var(--bg-page);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+
     @media (max-width: $breakpoint-sm) {
         padding: 16px;
     }
