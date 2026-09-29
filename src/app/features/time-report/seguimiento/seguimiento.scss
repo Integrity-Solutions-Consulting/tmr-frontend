@@ -194,67 +194,6 @@
     font-family: 'Inter', sans-serif !important;
 }
 
-/* Period toggle */
-.periodo-group {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0 !important;
-    flex: none !important;
-    min-width: auto !important;
-}
-
-.periodo-label {
-    display: block !important;
-    font-size: 11px !important;
-    text-transform: uppercase !important;
-    font-weight: 700 !important;
-    color: var(--text-muted) !important;
-    letter-spacing: 0.05em !important;
-    font-family: 'Inter', sans-serif !important;
-    white-space: nowrap !important;
-    margin-bottom: 8px !important;
-    margin-left: 4px !important;
-}
-
-.toggle-group {
-    display: flex;
-    border: 1px solid var(--border-input);
-    border-radius: 12px;
-    overflow: hidden;
-    height: 38px;
-    box-sizing: border-box;
-}
-
-.toggle-btn {
-    padding: 8px 16px;
-    border: none;
-    background: var(--bg-card);
-    font-size: 13px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.15s;
-    height: 100%;
-    box-sizing: border-box;
-
-     &.active {
-        background: var(--primary-color);
-        color: var(--text-inverse);
-    }
-
-    
-}
-
-.check-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-}
-
 /* Descargar button */
 .btn-descargar {
     display: inline-flex;
@@ -308,67 +247,142 @@
     
 }
 
-.download-spinner {
-    width: 15px;
-    height: 15px;
-    border: 2px solid var(--border-soft);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: seguimiento-spin 0.75s linear infinite;
-}
-
-.download-feedback {
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+.download-progress-toast {
     position: fixed;
     top: 24px;
-    right: 24px;
-    z-index: 1000;
+    left: 50%;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 16px 18px 14px;
+    border-radius: 12px;
+    background: rgba(#163572, 0.94);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+    transform: translateX(-50%);
+    animation: seguimiento-toast-in 0.25s ease-out;
+
+    &.closing {
+        animation: seguimiento-toast-out 0.2s ease-in forwards;
+    }
+}
+
+.download-progress-header {
     display: flex;
     align-items: center;
+    gap: 12px;
+}
+
+.download-progress-icon {
+    font-size: 24px;
+    color: #ffffff;
+    animation: seguimiento-icon-pulse 1.4s ease-in-out infinite;
+}
+
+.download-progress-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.download-progress-body {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    max-width: min(420px, calc(100vw - 48px));
-    box-shadow: var(--elevation-card);
-    animation: seguimiento-feedback-in 0.2s ease-out;
-
-     &.info {
-        color: var(--status-info-text);
-        background: var(--status-info-bg-soft);
-    }
-
-    &.success {
-        color: var(--status-success-text);
-        background: var(--status-success-bg-soft);
-    }
-
-    &.error {
-        color: var(--status-danger-text);
-        background: var(--status-danger-bg-soft);
-    }
-
-    
 }
 
-@keyframes seguimiento-spin {
-    to {
-        transform: rotate(360deg);
+.download-progress-track {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+}
+
+.download-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: #ffffff;
+    transition: width 0.3s ease;
+
+    // sm - Barra indeterminada: un segmento que se desliza mientras el servidor genera el archivo.
+    &.indeterminate {
+        position: absolute;
+        width: 40%;
+        animation: seguimiento-progress-indeterminate 1.2s ease-in-out infinite;
     }
 }
 
-@keyframes seguimiento-feedback-in {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
+.download-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.download-progress-percent {
+    font-variant-numeric: tabular-nums;
+}
+
+.download-progress-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.download-progress-cancel {
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    background: transparent;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.14);
     }
 
-     to {
-        opacity: 1;
-        transform: translateY(0);
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
     }
+}
 
-    
+@keyframes seguimiento-toast-in {
+    from { opacity: 0; transform: translate(-50%, -12px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes seguimiento-toast-out {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, -12px); }
+}
+
+@keyframes seguimiento-progress-indeterminate {
+    from { left: -40%; }
+    to { left: 100%; }
+}
+
+@keyframes seguimiento-icon-pulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(2px); }
+}
+
+// sm - Respeta la preferencia de "reducir movimiento" del sistema operativo.
+@media (prefers-reduced-motion: reduce) {
+    .download-progress-toast,
+    .download-progress-icon,
+    .download-progress-fill.indeterminate {
+        animation: none;
+    }
 }
 
 /* ---- TABLE ---- */
@@ -388,7 +402,10 @@
 
 .seguimiento-table {
     width: 100%;
-    min-width: 1400px;
+    // sm - Antes 1400px fijo: obligaba a scroll horizontal incluso en pantallas de escritorio normales.
+    // Con columnas en % la tabla se reparte al 100% del contenedor; este min-width solo entra en juego
+    // (mostrando el scroll horizontal de .table-wrapper) cuando la ventana se achica de verdad.
+    min-width: 960px;
     table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
@@ -494,32 +511,50 @@
         }
     }
 
+    // sm - Anchos en % (en vez de px fijos) para que las columnas se repartan al 100% del contenedor
+    // y la tabla quepa en la ventana sin scroll horizontal en pantallas normales.
     .col-nombre {
-        width: 250px !important;
+        width: 16%;
         white-space: normal !important;
         word-wrap: break-word !important;
         overflow: visible !important;
         text-overflow: clip !important;
     }
 
+    .col-proyecto {
+        width: 14%;
+    }
+
+    .col-cliente {
+        width: 12%;
+    }
+
+    .col-lider {
+        width: 13%;
+    }
+
     .col-horas {
+        width: 9%;
         text-align: start;
     }
 
     .col-estado {
+        width: 10%;
         text-align: start;
     }
 
     .col-dias-reporte {
+        width: 9%;
         text-align: center;
     }
 
     .col-dias-completar {
+        width: 9%;
         text-align: center;
     }
 
     .col-acciones {
-        width: 60px;
+        width: 48px;
         text-align: center;
         padding: 14px 4px;
     }
@@ -617,89 +652,7 @@
 }
 
 /* ---- METRICS BAR ---- */
-.metrics-bar {
-    background: var(--bg-card);
-    border-radius: 10px;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    box-shadow: var(--elevation-card);
-    flex-wrap: wrap;
-}
-
-.metric-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.metric-icon-wrap {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-     mat-icon {
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
-    }
-
-    &.blue {
-        background: var(--primary-light);
-        color: var(--primary-color);
-    }
-
-    &.green {
-        background: var(--status-success-bg-soft);
-        color: var(--status-success-text);
-    }
-
-    &.purple {
-        background: var(--accent-purple-bg);
-        color: var(--accent-purple);
-    }
-
-    &.orange {
-        background: var(--status-warning-bg-soft);
-        color: var(--status-warning-text);
-    }
-
-    &.gray {
-        background: var(--bg-soft);
-        color: var(--text-secondary);
-    }
-
-    
-}
-
-.metric-texts {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.metric-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-main);
-    line-height: 1.2;
-}
-
-.metric-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-body);
-}
-
-.metric-desc {
-    font-size: 11px;
-    color: var(--text-disabled);
-}
+// sm - La barra de métricas (y sus estilos) se movió al componente compartido app-metricas-horas.
 
 /* Paginator & Footer */
 .tabla-footer {
@@ -819,8 +772,130 @@
     margin-right: 8px;
 }
 
-.metric-icon-img {
-    width: 22px;
-    height: 22px;
-    vertical-align: middle;
+:host-context(html[data-theme="dark"]) {
+  .seguimiento-card,
+  .report-wrapper,
+  .seguimiento-page {
+    //background-color: #27272a ;
+    //background: #27272a ;
+    //border: 1px solid #3f3f46 ;
+    color: #f4f4f5 ;
+    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
+  }
+
+  .filters-card {
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+  }
+
+  .table-scroll-container,
+  .table-wrapper {
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
+  }
+
+  .seguimiento-table {
+    background-color: #202124 ;
+
+    thead, thead th {
+      background-color: #202124 ;
+      border-bottom: 2px solid #3f3f46 ;
+      color: #a1a1aa ;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #3f3f46 !important;
+      &:hover {
+        background-color: #27272a !important;
+      }
+      &.selected-row {
+        background-color: #3f3f46 !important;
+      }
+    }
+
+    tbody td {
+      color: #ffffff ;
+    }
+  }
+
+  .tabla-footer {
+    background-color: #202124 ;
+    border: 1px solid #3f3f46 ;
+    color: #a1a1aa ;
+
+    ::ng-deep .mat-mdc-icon-button {
+      background-color: #27272a ;
+      border-color: #3f3f46 ;
+      color: #ffffff ;
+    }
+  }
+
+  .filter-input,
+  .filter-select {
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
+  }
+
+  .btn-reporte {
+    background-color: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
+  }
+
+      /* --- Solo textos e iconos de busqueda, cliente, fechas y descargar --- */
+  .filter-label,
+  .filter-input,
+  .filter-select,
+  .filter-input::placeholder,
+  .filter-select::placeholder,
+  .btn-descargar {
+    color: #cbd5e1 !important;
+  }
+
+  .btn-descargar .download-icon {
+    color: #cbd5e1 !important;
+  }
+
+
+
+  /* Filtro de color #cbd5e1 para iconos de busqueda, cliente y fechas */
+  .filter-icon-img,
+  .select-chevron-img,
+  .filter-icon,
+  .filter-input::-webkit-calendar-picker-indicator {
+    filter: brightness(0) saturate(100%) invert(91%) sepia(11%) saturate(547%) hue-rotate(176deg) brightness(96%) contrast(89%) !important;
+  }
+
+  /* --- Checkboxes de la tabla --- */
+  .seguimiento-table {
+    mat-checkbox {
+      --mdc-checkbox-unselected-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-unselected-hover-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-hover-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-focus-icon-color: #cbd5e1 !important;
+      --mdc-checkbox-selected-checkmark-color: #202124 !important;
+    }
+
+    ::ng-deep {
+      .mdc-checkbox__background {
+        border-color: #cbd5e1 !important;
+      }
+      .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
+      .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
+        background-color: #cbd5e1 !important;
+        border-color: #cbd5e1 !important;
+      }
+      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__checkmark {
+        color: #202124 !important;
+      }
+      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__mixedmark {
+        border-color: #202124 !important;
+      }
+    }
+  }
 }

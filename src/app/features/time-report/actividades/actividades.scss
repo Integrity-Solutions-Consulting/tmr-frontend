@@ -80,7 +80,10 @@
 }
 
 /* ---- METRICS BAR ---- */
-.metrics-bar {
+// sm - Las tarjetas ahora son el componente compartido app-metricas-horas (mismo diseño que Seguimiento).
+// Aquí solo quedan los estilos del botón "Generar Reporte" que se proyecta dentro de la barra.
+
+/*.metrics-bar {
     background: var(--bg-card);
     border-radius: 12px;
     box-shadow: var(--elevation-card);
@@ -163,7 +166,7 @@
     }
 
     
-}
+}*/
 
 .footer-spacer {
     flex: 1;
@@ -408,20 +411,15 @@
         }
     }
 
-    .metrics-bar {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        padding: 20px 16px;
+    // sm - En móvil el botón "Generar Reporte" ocupa todo el ancho debajo de las métricas.
+    .footer-spacer {
+        display: none;
+    }
 
-        .metric-divider {
-            display: none;
-        }
-
-        .footer-spacer {
-            display: none;
-        }
-
+    .btn-reporte {
+        width: 100%;
+        justify-content: center;
+        border-radius: 20px;
         .btn-reporte {
             grid-column: span 2;
             width: 100%;
