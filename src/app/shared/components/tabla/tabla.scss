@@ -1,458 +1,145 @@
-scss .tabla-shell {
-  overflow: auto;
-  max-width: 100%;
-  max-height: 560px;
-  border: 1px solid var(--border-default);
-  border-radius: 16px 16px 0 0;
-  background: var(--bg-card);
-}
-
-.tabla-shell::-webkit-scrollbar {
-  height: 8px;
-}
-
-.tabla-shell::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 999px;
-}
-
-.tabla {
-  width: 100%;
-  table-layout: fixed;
-  background: var(--bg-card);
-  
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 2px solid var(--border-default);
-  border-radius: 12px;
+.table-scroll-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
   overflow: hidden;
-  th {
-    height: 46px;
-    padding: 11px 14px;
-    text-align: left;
-    color: var(--text-subtle);
-    font-size: 14px;
-    font-weight: 600;
-    background: var(--bg-card);
-    border-bottom: 2px solid var(--border-default);
-    white-space: nowrap;
+  max-height: none;
+}
+
+.table-wrapper {
+  background: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 6px;
   }
 
-  td {
-    height: 54px;
-    padding: 13px 16px;
-    color: var(--text-subtle);
-    font-size: 14px;
-    font-weight: 400;
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-default);
+    border-radius: 10px;
+  }
+}
+
+.lideres-table {
+  width: 100%;
+  min-width: 1180px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-card);
+
+  th, td {
+    padding: 4px 16px;
+    text-align: left;
     border-bottom: 1px solid var(--border-default);
     white-space: nowrap;
-    vertical-align: middle;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  tr {
-    transition: background 0.12s;
+  th {
+    background-color: var(--bg-app);
+    color: var(--text-subtle);
+    font-weight: 500;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
 
-    &:hover {
-      background: var(--bg-hover);
-    }
+  td {
+    color: var(--text-muted);
+  }
+
+  tr:hover {
+    background-color: var(--bg-hover) !important;
   }
 
   tr:last-child td {
     border-bottom: none;
   }
-
-  ::ng-deep .mat-mdc-header-cell:first-child,
-  ::ng-deep .mat-mdc-cell:first-child {
-    padding-left: 18px;
-  }
-
-  ::ng-deep .mat-mdc-header-cell:last-child,
-  ::ng-deep .mat-mdc-cell:last-child {
-    padding-right: 12px;
-    text-align: center;
-  }
-
-  // ── FIX: columna Código un poco más ancha ─────────────────────────────
-
-  ::ng-deep .mat-column-codigo {
-    width: 110px;
-  }
-
-  // ── FIX: columna Nombre con ancho fijo y recorte reforzado ─────────────
-
-  ::ng-deep .mat-column-nombre {
-    width: 220px;
-    max-width: 220px;
-    overflow: hidden;
-  }
-
-  ::ng-deep .mat-column-cliente {
-    width: 140px;
-  }
-
-  ::ng-deep .mat-column-seguimiento {
-    width: 160px;
-  }
-
-  .seguimiento-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
-    color: var(--text-body);
-    background-color: var(--bg-app);
-    white-space: nowrap;
-  }
-
-  .seguimiento-badge::before {
-    content: '';
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    margin-right: 6px;
-  }
-
-  .seguimiento-activo {
-    background-color: var(--status-success-bg-soft);
-    border-color: var(--status-success-border);
-    color: var(--status-success-text);
-  }
-
-  .seguimiento-activo::before {
-    background-color: var(--status-success-bg-solid);
-  }
-
-  .seguimiento-progreso {
-    background-color: var(--status-info-bg-soft);
-    border-color: var(--status-info-border);
-    color: var(--status-info-text);
-  }
-
-  .seguimiento-progreso::before {
-    background-color: var(--status-info-bg-solid);
-  }
-
-  .seguimiento-completado {
-    background-color: var(--status-success-bg-soft);
-    border-color: var(--status-success-border);
-    color: var(--status-success-text);
-  }
-
-  .seguimiento-completado::before {
-    background-color: var(--status-success-bg-solid);
-  }
-
-  .seguimiento-cancelado {
-    background-color: var(--status-danger-bg-soft);
-    border-color: var(--status-danger-border);
-    color: var(--status-danger-text);
-  }
-
-  .seguimiento-cancelado::before {
-    background-color: var(--status-danger-bg-solid);
-  }
-
-  .seguimiento-espera {
-    background-color: var(--status-warning-bg-soft);
-    border-color: var(--status-warning-border);
-    color: var(--status-warning-text);
-  }
-
-  .seguimiento-espera::before {
-    background-color: var(--status-warning-bg-solid);
-  }
-
-  .seguimiento-aprobado {
-    background-color: var(--status-info-bg-soft);
-    border-color: var(--status-info-border);
-    color: var(--status-info-text);
-  }
-
-  .seguimiento-aprobado::before {
-    background-color: var(--status-info-bg-solid);
-  }
-
-  .seguimiento-planificacion {
-    background-color: var(--status-info-bg-soft);
-    border-color: var(--status-info-border);
-    color: var(--status-info-text);
-  }
-
-  .seguimiento-planificacion::before {
-    background-color: var(--status-info-bg-solid);
-  }
-
-  .seguimiento-desarrollo {
-    background-color: var(--status-info-bg-soft);
-    border-color: var(--status-info-border);
-    color: var(--status-info-text);
-  }
-
-  .seguimiento-desarrollo::before {
-    background-color: var(--status-info-bg-solid);
-  }
-
-  .seguimiento-aplazado {
-    background-color: var(--status-warning-bg-soft);
-    border-color: var(--status-warning-border);
-    color: var(--status-warning-text);
-  }
-
-  .seguimiento-aplazado::before {
-    background-color: var(--status-warning-bg-solid);
-  }
-
-  .seguimiento-inactivo {
-    background-color: var(--bg-soft);
-    border-color: var(--border-soft);
-    color: var(--text-muted);
-  }
-
-  .seguimiento-inactivo::before {
-    background-color: var(--text-muted);
-  }
-
-  ::ng-deep .mat-column-fechas {
-    width: 180px;
-  }
-
-  ::ng-deep .mat-column-lideres {
-    width: 200px;
-  }
-
-  ::ng-deep .mat-column-numeroRecursos {
-    width: 100px;
-    text-align: center;
-  }
-
-  ::ng-deep .mat-column-estado {
-    width: 150px;
-    padding-right: 18px;
-    overflow: visible;
-  }
-
-  ::ng-deep .mat-column-acciones {
-    width: 80px;
-    text-align: center;
-    vertical-align: middle;
-  }
 }
 
-.tabla__codigo {
-  color: var(--text-subtle);
-  font-weight: 400;
-  font-size: 14px;
+/* Modificadores Material */
+::ng-deep .mat-mdc-header-row,
+::ng-deep .mat-mdc-row {
+  min-width: 1180px;
 }
 
-.tabla__proyecto {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-
-  .tabla__proyecto-nombre {
-    display: block;
-    max-width: 100%;
-    color: var(--text-subtle);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .tabla__proyecto-cliente {
-    color: var(--text-subtle);
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+::ng-deep .lideres-table th.mat-mdc-header-cell,
+::ng-deep .lideres-table td.mat-mdc-cell {
+  border-bottom: 1px solid var(--border-default);
 }
 
-.tabla__cliente {
-  color: var(--text-subtle);
-  font-weight: 400;
-  font-size: 14px;
+::ng-deep .mat-column-codigo { width: 110px !important; }
+::ng-deep .mat-column-nombre { width: 220px !important; }
+::ng-deep .mat-column-cliente { width: 220px !important; }
+::ng-deep .mat-column-seguimiento { width: 150px !important; }
+::ng-deep .mat-column-fechas { width: 190px !important; }
+::ng-deep .mat-column-lideres { width: 200px !important; }
+::ng-deep .mat-column-numeroRecursos { width: 90px !important; text-align: center; }
+::ng-deep .mat-column-estado { width: 150px !important; overflow: visible !important; }
+::ng-deep .mat-column-acciones { width: 80px !important; text-align: center; overflow: visible !important; }
+
+/* Contenido celdas */
+.tabla__codigo { color: var(--text-muted); font-weight: 400; }
+.tabla__proyecto { display: flex; flex-direction: column; gap: 4px; }
+.tabla__proyecto-nombre { font-weight: 400; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabla__cliente { font-weight: 400; color: var(--text-muted); }
+
+.seguimiento-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 400; background: var(--bg-surface); border: 1px solid var(--border-default);
 }
+.seguimiento-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.seguimiento-activo { background: var(--status-success-bg-soft); color: var(--status-success-text); border-color: var(--status-success-border); }
+.seguimiento-activo::before { background: var(--status-success-bg-solid); }
+.seguimiento-planificacion { background: var(--status-info-bg-soft); color: var(--status-info-text); border-color: var(--status-info-border); }
+.seguimiento-planificacion::before { background: var(--status-info-bg-solid); }
+.seguimiento-desarrollo { background: var(--status-info-bg-soft); color: var(--status-info-text); border-color: var(--status-info-border); }
+.seguimiento-desarrollo::before { background: var(--status-info-bg-solid); }
+.seguimiento-aplazado { background: var(--status-warning-bg-soft); color: var(--status-warning-text); border-color: var(--status-warning-border); }
+.seguimiento-aplazado::before { background: var(--status-warning-bg-solid); }
+.seguimiento-inactivo { background: var(--bg-soft); color: var(--text-muted); }
 
-.tabla__lista {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
+.tabla__fecha { display: flex; flex-direction: column; gap: 4px; }
+.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--text-muted); }
+.fecha-sub { font-size: 11px; color: var(--text-muted); }
 
-.tabla__lista-item {
-  display: flex;
-  flex-direction: column;
-  color: var(--text-subtle);
-  font-weight: 400;
-  line-height: 1.05;
-  min-width: 0;
+.tabla__lideres { display: flex; flex-direction: column; gap: 4px; }
+.lider-item { display: flex; align-items: center; gap: 8px; }
+.lider-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+.lider-nombre { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+.lideres-extra { font-size: 11px; color: var(--primary-color); font-weight: 600; cursor: pointer; }
 
-  span {
-    color: var(--text-subtle);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.recursos-count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); font-size: 12px; font-weight: 600; padding: 0 6px; }
 
-  small {
-    color: var(--text-subtle);
-    font-size: 12px;
-    font-weight: 400;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.tabla__lista-ver-mas {
-  background: transparent;
-  border: none;
-  color: var(--primary-color);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.tabla__recursos {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  color: var(--text-subtle);
-  font-weight: 400;
-  font-size: 14px;
-
-  &::before {
-    content: '';
-    width: 14px;
-    height: 14px;
-    background: var(--text-muted);
-    mask:
-      radial-gradient(circle at 50% 28%, #000 0 2px, transparent 2.6px),
-      radial-gradient(circle at 30% 72%, #000 0 2px, transparent 2.6px),
-      radial-gradient(circle at 70% 72%, #000 0 2px, transparent 2.6px);
-  }
-}
-
-.tabla__acciones {
+/* Pagination */
+.pagination-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 32px;
-}
-
-.tabla-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 10px;
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  box-shadow: var(--elevation-card);
-
-  p {
-    margin: 0;
-    color: var(--text-subtle);
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  mat-paginator {
-    background: transparent;
-    color: var(--text-subtle);
-  }
-
-  ::ng-deep .mat-mdc-paginator-container {
-    min-height: 32px;
-    padding: 0;
-  }
-
-  ::ng-deep .mat-mdc-paginator-page-size {
-    display: none;
-  }
-
-  ::ng-deep .mat-mdc-paginator-range-label {
-    margin: 0 12px;
-    color: var(--text-subtle);
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  ::ng-deep .mat-mdc-icon-button {
-    width: 32px;
-    height: 32px;
-    padding: 4px;
-    border: 1px solid var(--border-default);
-    border-radius: 7px;
-    background: var(--bg-card);
-  }
-
-  ::ng-deep .mat-mdc-icon-button:hover {
-    background: var(--bg-hover);
-  }
-}
-
-@media (max-width: 1440px) {
-  .tabla-footer {
-    flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 1024px) {
-  .tabla-footer {
-    flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 768px) {
-  .tabla-footer {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-    overflow-x: auto;
-  }
-
-  .tabla-footer mat-paginator {
-    align-self: stretch;
-  }
-}
-
-@media (max-width: 480px) {
-  .tabla-footer {
-    padding: 10px;
-  }
-
-  .tabla-footer ::ng-deep .mat-mdc-paginator-range-label {
-    margin: 0 6px;
-  }
+  justify-content: flex-end;
+  padding: 10px 20px;
+  border-top: none;
+  margin-top: 8px;
+  flex-shrink: 0;
+  background-color: var(--bg-card);
+  border-radius: 12px;
 }
 

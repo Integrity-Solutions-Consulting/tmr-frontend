@@ -153,7 +153,7 @@
   overflow: auto;
   box-shadow: none;
   width: 100%;
-  max-height: calc(100vh - 420px);
+  max-height: none;
 }
 .table-wrapper {
   overflow-x: auto;
@@ -172,11 +172,12 @@
   thead {
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-default);
+    margin: 4px;
     position: sticky;
     top: 0;
     z-index: 2;
     th {
-      padding: 14px 10px;
+      padding: 4px 10px;
       text-align: left;
       font-weight: 500;
       color: var(--text-secondary);
@@ -202,7 +203,7 @@
       }
     }
     td {
-      padding: 14px 10px;
+      padding: 4px 10px;
       color: var(--text-secondary);
       font-weight: 400;
       vertical-align: middle;
@@ -716,6 +717,15 @@ app-paginacion {
     
 }
 
+.filter-input[type="date"] {
+    color: var(--text-muted) !important;
+}
+
+.filter-input::-webkit-calendar-picker-indicator {
+    opacity: 0.5 !important;
+    cursor: pointer;
+}
+
 .filter-input-wrapper .filter-input {
     padding-left: 40px !important;
 }
@@ -723,7 +733,8 @@ app-paginacion {
 .filter-icon {
     position: absolute !important;
     left: 12px !important;
-    top: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     color: var(--text-muted) !important;
     transition: color 0.2s !important;
     width: 18px !important;
@@ -839,3 +850,4 @@ app-paginacion {
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+

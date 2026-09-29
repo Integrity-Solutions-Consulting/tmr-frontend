@@ -304,7 +304,7 @@ scss .lideres-container {
   gap: 6px;
   align-items: stretch;
   overflow: hidden;
-  max-height: calc(100vh - 320px);
+  max-height: none;
 }
 
 .table-wrapper {
@@ -404,7 +404,7 @@ scss .lideres-container {
     z-index: 2;
 
     th {
-      padding: 11px 14px;
+      padding: 4px 14px;
       text-align: left;
       font-weight: 600;
       color: var(--text-subtle);
@@ -445,7 +445,7 @@ scss .lideres-container {
     }
 
     td {
-      padding: 13px 16px;
+      padding: 4px 16px;
       color: var(--text-subtle);
       font-weight: 400;
       vertical-align: middle;
@@ -757,7 +757,7 @@ scss .lideres-container {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-body);
+  color: var(--text-muted);
 
   &:hover {
     background: var(--bg-hover);
@@ -1058,7 +1058,7 @@ scss .lideres-container {
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: var(--text-muted) ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -1208,3 +1208,4 @@ scss .lideres-container {
         color: var(--text-inverse) ;
     }
 }
+

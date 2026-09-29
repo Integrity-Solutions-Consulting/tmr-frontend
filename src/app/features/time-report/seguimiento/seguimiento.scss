@@ -122,7 +122,10 @@
         box-shadow: 0 0 0 1px var(--primary-color) !important;
     }
 
-    
+}
+
+.filter-input[type="date"] {
+    color: var(--text-muted) !important;
 }
 
 .filter-input-wrapper .filter-input {
@@ -728,20 +731,29 @@
 .select-chevron-img {
     position: absolute !important;
     right: 12px !important;
-    top: 11px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     width: 18px !important;
     height: 18px !important;
     pointer-events: none !important;
+    opacity: 0.5 !important;
 }
 
 .filter-icon-img {
     position: absolute !important;
     left: 12px !important;
-    top: 11px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     width: 18px !important;
     height: 18px !important;
     pointer-events: none !important;
     color: var(--text-disabled) !important;
+    opacity: 0.5 !important;
+}
+
+.filter-input::-webkit-calendar-picker-indicator {
+    opacity: 0.5 !important;
+    cursor: pointer;
 }
 
 .download-icon {
@@ -868,6 +880,7 @@
   .filter-icon,
   .filter-input::-webkit-calendar-picker-indicator {
     filter: brightness(0) saturate(100%) invert(91%) sepia(11%) saturate(547%) hue-rotate(176deg) brightness(96%) contrast(89%) !important;
+    opacity: 1 !important;
   }
 
   /* --- Checkboxes de la tabla --- */

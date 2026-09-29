@@ -1,4 +1,4 @@
-scss:host {
+:host {
   display: block;
   width: 100%;
   min-width: 0;
@@ -11,7 +11,7 @@ scss:host {
   overflow: auto;
   box-shadow: none;
   width: 100%;
-  max-height: calc(100vh - 420px);
+  max-height: none;
   display: flex;
   flex-direction: column;
 }
@@ -39,7 +39,7 @@ scss:host {
     z-index: 2;
 
     th {
-      padding: 14px 10px;
+      padding: 10px 10px;
       text-align: left;
       font-weight: 500;
       color: var(--text-secondary);
@@ -53,8 +53,8 @@ scss:host {
 
   tbody {
     td {
-      padding: 14px 10px;
-      color: var(--text-secondary);
+      padding: 8px 10px;
+      color: var(--text-muted);
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
@@ -290,4 +290,5 @@ scss:host {
 .tabla-row {
   animation: fadeIn 0.3s ease-in;
 }
+
 

@@ -360,7 +360,7 @@ Tabla
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: 10px;
-  overflow: visible;
+  overflow-x: auto;
 }
 
 .tabla {
@@ -371,8 +371,6 @@ Tabla
   border-spacing: 0;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 thead tr {
@@ -814,7 +812,7 @@ Responsive
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: var(--text-muted) ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;

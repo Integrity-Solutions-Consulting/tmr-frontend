@@ -51,18 +51,18 @@
           alt="tipo"
         />
         <input
+          #tipoInput
           class="actividad-modal__input"
           type="text"
           placeholder="Seleccione un tipo"
           [matAutocomplete]="autoTipo"
           formControlName="tipoActividad"
-          readonly
           (click)="triggerTipo.openPanel()"
           #triggerTipo="matAutocompleteTrigger"
         />
         <mat-icon
           class="actividad-modal__input-icon"
-          (click)="triggerTipo.openPanel()"
+          (click)="$event.stopPropagation(); tipoInput.focus(); triggerTipo.openPanel()"
           style="cursor: pointer"
           >expand_more</mat-icon
         >
@@ -108,18 +108,18 @@
           alt="proyecto"
         />
         <input
+          #proyectoInput
           class="actividad-modal__input"
           type="text"
           placeholder="Seleccione un proyecto"
           [matAutocomplete]="autoProyecto"
           formControlName="proyectoId"
-          readonly
           (click)="triggerProyecto.openPanel()"
           #triggerProyecto="matAutocompleteTrigger"
         />
         <mat-icon
           class="actividad-modal__input-icon"
-          (click)="triggerProyecto.openPanel()"
+          (click)="$event.stopPropagation(); proyectoInput.focus(); triggerProyecto.openPanel()"
           style="cursor: pointer"
           >expand_more</mat-icon
         >
@@ -166,7 +166,7 @@
       >
         <input
           class="actividad-modal__input"
-          formControlName="codigoRequerimiento"
+          formControlName="codigoRequerimiento" readonly
           maxlength="50"
           placeholder="Ej. REQ-101"
           autocomplete="off"
@@ -506,3 +506,4 @@
   (confirmar)="confirmarGuardar()"
   (cancelar)="cancelarGuardar()"
 ></app-confirm-dialog>
+
