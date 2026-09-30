@@ -1,26 +1,6 @@
 @use 'sass:color';
 
 /* ============================================================
-   TABLA COMPARTIDA
-   ============================================================ */
-
-:host ::ng-deep {
-  .tabla {
-    thead th {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-    }
-
-    tbody td {
-      font-size: 14px;
-      color: var(--text-main);
-    }
-  }
-
-  .text-highlight {
-    color: var(--primary-color) !important;
     font-weight: 800 !important;
   }
 }

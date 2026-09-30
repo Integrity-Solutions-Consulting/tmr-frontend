@@ -1,6 +1,6 @@
 .proyectos-container {
   width: 100%;
-  max-width: 1280px;
+  //max-width: 1280px;
   margin: 0 auto;
   //background: var(--bg-card);
   //border: 1px solid var(--border-default);
@@ -31,20 +31,6 @@
   font-family: 'Inter', sans-serif;
 }
 
-.filters-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
 
 .acciones-derecha {
   display: flex;
@@ -53,9 +39,6 @@
   flex-wrap: wrap;
 }
 
-.search-spacer {
-  flex: 1;
-}
 
 .descarga-wrapper {
   position: relative;
@@ -66,57 +49,9 @@
   margin-left: auto;
 }
 
-.btn-descargar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  font-family: 'Inter', sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-  &.enabled {
-    background-color: var(--bg-card);
-    color: var(--text-main);
-    border: 1px solid var(--border-strong);
-    &:hover {
-      background-color: var(--bg-hover);
-      border-color: var(--text-main);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-    }
-  }
-
-  &.btn-agregar {
-    background-color: var(--primary-color) !important;
-    color: #ffffff !important;
-    border: 1px solid var(--primary-color) !important;
-    &:hover {
-      background-color: var(--primary-hover) !important;
-      border-color: var(--primary-hover) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(13, 110, 253, 0.25);
-    }
-  }
-}
 
 @media (max-width: 768px) {
-  .filters-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .search-spacer {
-    display: none;
-  }
+
   .descarga-wrapper {
     width: 100%;
     justify-content: flex-end;

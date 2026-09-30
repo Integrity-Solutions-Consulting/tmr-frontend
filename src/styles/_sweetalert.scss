@@ -120,8 +120,8 @@ html[data-theme="dark"] {
   }
 
   .swal2-popup.tmr-swal {
-    background: #27272a;
-    border: 1px solid #3f3f46;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   }
 

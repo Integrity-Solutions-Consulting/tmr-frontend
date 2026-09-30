@@ -75,6 +75,7 @@
         </div>
 
         <!-- Descargar -->
+        <div class="search-spacer"></div>
         <button class="btn-descargar" [class.enabled]="selection.hasValue()"
             [class.loading]="isDownloading" [disabled]="!selection.hasValue() || isDownloading"
             [matMenuTriggerFor]="descargaMenu" [attr.aria-busy]="isDownloading">
@@ -123,7 +124,7 @@
     <!-- ===== TABLE ===== -->
     <div class="table-scroll-container">
         <div class="table-wrapper">
-            <table class="seguimiento-table">
+            <table class="app-table seguimiento-table">
                 <thead>
                     <tr>
                         <th class="col-select">

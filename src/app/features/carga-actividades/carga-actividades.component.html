@@ -80,6 +80,7 @@
       <input class="filter-input" type="date" [formControl]="fechaHastaControl">
     </div>
 
+    <div class="search-spacer"></div>
     <button class="btn-descargar enabled" (click)="descargarExcel()">
       Descargar
       <span class="material-symbols-outlined download-icon">file_download</span>
@@ -89,7 +90,7 @@
 
     <div class="table-scroll-container">
       <div class="table-wrapper">
-        <table class="data-table">
+        <table class="app-table data-table">
           <thead>
             <tr>
               <th><input type="checkbox"></th>

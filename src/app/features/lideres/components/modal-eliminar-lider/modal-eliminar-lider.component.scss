@@ -40,7 +40,7 @@
 .modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-main);
   margin: 0;
   text-align: center;
 }
@@ -52,7 +52,7 @@
   margin: 0;
 
   strong {
-    color: #1a1a2e;
+    color: var(--text-main);
     font-weight: 600;
   }
 }
@@ -76,7 +76,7 @@
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #f5f5f5; }
+  &:hover { background: var(--bg-hover); }
 }
 
 .btn-eliminar {
@@ -91,7 +91,7 @@
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #162C56; }
+  &:hover { background: var(--primary-hover); }
 }
 
 .modal-form__error-banner {

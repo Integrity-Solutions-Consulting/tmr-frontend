@@ -73,56 +73,7 @@
 }
 
 /* ---- FILTERS ---- */
-.filters-card {
-    background: var(--bg-card);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: flex-end !important;
-    gap: 16px !important;
-    flex-wrap: wrap;
-    box-shadow: var(--elevation-card);
-}
 
-.filter-group {
-    display: flex;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-}
-
-.filter-input-wrapper {
-    position: relative !important;
-    width: 100%;
-
-     &:focus-within .filter-icon {
-        color: var(--primary-color) !important;
-    }
-
-    
-}
-
-.filter-input {
-    width: 100% !important;
-    padding: 10px 16px !important;
-    background-color: var(--input-bg) !important;
-    border: 1px solid var(--border-input) !important;
-    border-radius: 12px !important;
-    outline: none !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: var(--text-main) !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: all 0.2s !important;
-    box-sizing: border-box !important;
-
-     &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) !important;
-    }
-
-}
 
 .filter-input[type="date"] {
     color: var(--text-muted) !important;
@@ -144,29 +95,7 @@
 }
 
 /* Client select */
-.filter-select {
-    width: 100% !important;
-    padding: 10px 32px 10px 40px !important;
-    background-color: var(--input-bg) !important;
-    border: 1px solid var(--border-input) !important;
-    border-radius: 12px !important;
-    outline: none !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: var(--text-main) !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: all 0.2s !important;
-    box-sizing: border-box !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    cursor: pointer !important;
 
-     &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) !important;
-    }
-
-    
-}
 
 .select-chevron {
     position: absolute !important;
@@ -198,57 +127,7 @@
 }
 
 /* Descargar button */
-.btn-descargar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 40px;
-    padding: 0 16px;
-    border-radius: 12px;
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-disabled);
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    cursor: not-allowed;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
 
-     .download-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    &.enabled {
-        background: var(--bg-card);
-        color: var(--primary-color);
-        border: 1px solid var(--border-soft);
-        cursor: pointer;
-
-        .download-icon {
-            color: var(--primary-color);
-        }
-
-        &:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
-        }
-    }
-
-    &.loading {
-        color: var(--primary-color);
-        cursor: wait;
-        opacity: 0.8;
-    }
-
-    
-}
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
 .download-progress-toast {
@@ -784,131 +663,3 @@
     margin-right: 8px;
 }
 
-:host-context(html[data-theme="dark"]) {
-  .seguimiento-card,
-  .report-wrapper,
-  .seguimiento-page {
-    //background-color: #27272a ;
-    //background: #27272a ;
-    //border: 1px solid #3f3f46 ;
-    color: #f4f4f5 ;
-    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
-
-  .filters-card {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
-  }
-
-  .table-scroll-container,
-  .table-wrapper {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
-
-  .seguimiento-table {
-    background-color: #202124 ;
-
-    thead, thead th {
-      background-color: #202124 ;
-      border-bottom: 2px solid #3f3f46 ;
-      color: #a1a1aa ;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #3f3f46 !important;
-      &:hover {
-        background-color: #27272a !important;
-      }
-      &.selected-row {
-        background-color: #3f3f46 !important;
-      }
-    }
-
-    tbody td {
-      color: #ffffff ;
-    }
-  }
-
-  .tabla-footer {
-    background-color: #202124 ;
-    border: 1px solid #3f3f46 ;
-    color: #a1a1aa ;
-
-    ::ng-deep .mat-mdc-icon-button {
-      background-color: #27272a ;
-      border-color: #3f3f46 ;
-      color: #ffffff ;
-    }
-  }
-
-  .filter-input,
-  .filter-select {
-    background-color: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
-  }
-
-  .btn-reporte {
-    background-color: #202124 ;
-    border-color: #3f3f46 ;
-    color: #ffffff ;
-  }
-
-      /* --- Solo textos e iconos de busqueda, cliente, fechas y descargar --- */
-  .filter-label,
-  .filter-input,
-  .filter-select,
-  .filter-input::placeholder,
-  .filter-select::placeholder,
-  .btn-descargar {
-    color: #cbd5e1 !important;
-  }
-
-  .btn-descargar .download-icon {
-    color: #cbd5e1 !important;
-  }
-
-
-
-  /* Filtro de color #cbd5e1 para iconos de busqueda, cliente y fechas */
-  .filter-icon-img,
-  .select-chevron-img,
-  .filter-icon,
-  .filter-input::-webkit-calendar-picker-indicator {
-    filter: brightness(0) saturate(100%) invert(91%) sepia(11%) saturate(547%) hue-rotate(176deg) brightness(96%) contrast(89%) !important;
-    opacity: 1 !important;
-  }
-
-  /* --- Checkboxes de la tabla --- */
-  .seguimiento-table {
-    mat-checkbox {
-      --mdc-checkbox-unselected-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-unselected-hover-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-hover-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-focus-icon-color: #cbd5e1 !important;
-      --mdc-checkbox-selected-checkmark-color: #202124 !important;
-    }
-
-    ::ng-deep {
-      .mdc-checkbox__background {
-        border-color: #cbd5e1 !important;
-      }
-      .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
-      .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
-        background-color: #cbd5e1 !important;
-        border-color: #cbd5e1 !important;
-      }
-      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__checkmark {
-        color: #202124 !important;
-      }
-      .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__mixedmark {
-        border-color: #202124 !important;
-      }
-    }
-  }
-}

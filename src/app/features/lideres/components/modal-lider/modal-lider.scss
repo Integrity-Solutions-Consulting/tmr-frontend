@@ -1,8 +1,8 @@
 $primary: var(--primary-color);
-$primary-dark: #162C56;
+$primary-dark: var(--primary-hover);
 $white: var(--bg-card);
-$border: #E5E5E5;
-$text-dark: #1a1a2e;
+$border: var(--border-default);
+$text-dark: var(--text-main);
 $text-light: #7C7C7C;
 
 .modal-overlay {
@@ -106,7 +106,7 @@ $text-light: #7C7C7C;
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.18s;
-  &::placeholder { color: #737373; }
+  &::placeholder { color: var(--text-muted); }
   &:focus { border-color: $primary; }
 }
 
@@ -135,18 +135,18 @@ $text-light: #7C7C7C;
   transition: border-color 0.18s;
   user-select: none;
 
-  &:hover { border-color: #c0c0c0; }
+  &:hover { border-color: var(--border-hover); }
   &.open { border-color: $primary; }
 }
 
 .custom-select-value {
   color: var(--text-subtle);
-  &.placeholder { color: #737373; }
+  &.placeholder { color: var(--text-muted); }
 }
 .custom-select.disabled {
-  background: #f5f5f5;
+  background: var(--bg-hover);
   cursor: not-allowed;
-  color: #a0a0a0;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -179,17 +179,17 @@ $text-light: #7C7C7C;
     color: var(--text-subtle);
     cursor: pointer;
     border-radius: 6px;
-    &:hover { background: #d9d9d9; color: #737373; }
+    &:hover { background: var(--border-default); color: var(--text-muted); }
   }
 }
 
 .input-error .custom-select,
 .input-error .form-input {
-  border-color: #ef4444 !important;
+  border-color: var(--status-danger-text) !important;
 }
 
 .error-msg {
-  color: #ef4444;
+  color: var(--status-danger-text);
   font-size: 11px;
   margin-top: 3px;
 }
@@ -241,10 +241,10 @@ $text-light: #7C7C7C;
   border: none;
   outline: none;
   font-size: 13px;
-  color: #1a1a2e;
+  color: var(--text-main);
   width: 100%;
   background: transparent;
-  &::placeholder { color: #737373; }
+  &::placeholder { color: var(--text-muted); }
 }
 
 .dropdown-list {
@@ -262,7 +262,7 @@ $text-light: #7C7C7C;
     list-style: none;
     border-bottom: 1px solid #f0f0f0;
     &:last-child { border-bottom: none; }
-    &:hover { background: #f5f5f5; color: var(--primary-color); }
+    &:hover { background: var(--bg-hover); color: var(--primary-color); }
   }
 }
 
@@ -272,16 +272,16 @@ $text-light: #7C7C7C;
   font-style: italic;
   padding: 10px 14px;
   cursor: default;
-  &:hover { background: transparent !important; color: #737373 !important; }
+  &:hover { background: transparent !important; color: var(--text-muted) !important; }
 }
 .form-input:disabled {
-  background: #f5f5f5;
-  color: #a0a0a0;
+  background: var(--bg-hover);
+  color: var(--text-muted);
   cursor: not-allowed;
   border-color: var(--border-default);
 }
 .input-readonly {
-  background: #F5F5F5;
+  background: var(--bg-hover);
   color: var(--text-secondary);
   cursor: not-allowed;
 }

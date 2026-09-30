@@ -55,9 +55,10 @@
 
   th {
     background-color: var(--bg-app);
-    color: var(--text-subtle);
-    font-weight: 500;
-    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -77,25 +78,25 @@
 }
 
 /* Modificadores Material */
-::ng-deep .mat-mdc-header-row,
-::ng-deep .mat-mdc-row {
+:host ::ng-deep .mat-mdc-header-row,
+:host ::ng-deep .mat-mdc-row {
   min-width: 1180px;
 }
 
-::ng-deep .lideres-table th.mat-mdc-header-cell,
-::ng-deep .lideres-table td.mat-mdc-cell {
+:host ::ng-deep .lideres-table th.mat-mdc-header-cell,
+:host ::ng-deep .lideres-table td.mat-mdc-cell {
   border-bottom: 1px solid var(--border-default);
 }
 
-::ng-deep .mat-column-codigo { width: 110px !important; }
-::ng-deep .mat-column-nombre { width: 220px !important; }
-::ng-deep .mat-column-cliente { width: 220px !important; }
-::ng-deep .mat-column-seguimiento { width: 150px !important; }
-::ng-deep .mat-column-fechas { width: 190px !important; }
-::ng-deep .mat-column-lideres { width: 200px !important; }
-::ng-deep .mat-column-numeroRecursos { width: 90px !important; text-align: center; }
-::ng-deep .mat-column-estado { width: 150px !important; overflow: visible !important; }
-::ng-deep .mat-column-acciones { width: 80px !important; text-align: center; overflow: visible !important; }
+:host ::ng-deep .mat-column-codigo { width: 110px !important; }
+:host ::ng-deep .mat-column-nombre { width: 220px !important; }
+:host ::ng-deep .mat-column-cliente { width: 220px !important; }
+:host ::ng-deep .mat-column-seguimiento { width: 150px !important; }
+:host ::ng-deep .mat-column-fechas { width: 190px !important; }
+:host ::ng-deep .mat-column-lideres { width: 200px !important; }
+:host ::ng-deep .mat-column-numeroRecursos { width: 90px !important; text-align: center; }
+:host ::ng-deep .mat-column-estado { width: 150px !important; overflow: visible !important; }
+:host ::ng-deep .mat-column-acciones { width: 80px !important; text-align: center; overflow: visible !important; }
 
 /* Contenido celdas */
 .tabla__codigo { color: var(--text-muted); font-weight: 400; }
@@ -118,14 +119,16 @@
 .seguimiento-inactivo { background: var(--bg-soft); color: var(--text-muted); }
 
 .tabla__fecha { display: flex; flex-direction: column; gap: 4px; }
-.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 12px;
+    text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
 .fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--text-muted); }
 .fecha-sub { font-size: 11px; color: var(--text-muted); }
 
 .tabla__lideres { display: flex; flex-direction: column; gap: 4px; }
 .lider-item { display: flex; align-items: center; gap: 8px; }
 .lider-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-.lider-nombre { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+.lider-nombre { font-size: 12px;
+    text-transform: uppercase; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
 .lideres-extra { font-size: 11px; color: var(--primary-color); font-weight: 600; cursor: pointer; }
 
 .recursos-count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); font-size: 12px; font-weight: 600; padding: 0 6px; }
