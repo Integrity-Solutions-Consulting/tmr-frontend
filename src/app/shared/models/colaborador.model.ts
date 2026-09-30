@@ -1,8 +1,21 @@
 // src/app/shared/models/colaborador.model.ts
+// sm - Un proyecto del colaborador en el rango consultado, con sus horas propias (ver Colaborador.proyectos).
+export interface ProyectoResumen {
+  idProyecto: number;
+  nombre: string;
+  cliente: string;
+  liderTecnico: string;
+  horasRegistradas: number;
+}
+
 export interface Colaborador {
   id: string;
   nombre: string;
   proyecto: string;
+  // sm - Desglose por proyecto (Seguimiento): cada proyecto del colaborador en el rango con sus horas propias.
+  // Se usa para generar un archivo de reporte por proyecto al descargar y para el desglose del modal "Ver detalle".
+  // Vacío/undefined cuando el colaborador no tiene proyecto asignado ("Sin Proyecto").
+  proyectos?: ProyectoResumen[];
   cliente: string;
   liderTecnico: string;
   nroHoras: number;

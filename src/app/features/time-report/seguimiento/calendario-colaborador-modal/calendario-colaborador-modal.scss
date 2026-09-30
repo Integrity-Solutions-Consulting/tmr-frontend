@@ -74,6 +74,44 @@
     
 }
 
+.calcol-modal__proyectos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 28px 0;
+}
+
+.calcol-modal__proyectos-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.calcol-modal__proyectos-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.calcol-modal__proyecto-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--bg-hover);
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 500;
+
+    strong {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+}
+
 .calcol-modal__body {
     padding: 20px 28px 28px;
     overflow-y: auto;
