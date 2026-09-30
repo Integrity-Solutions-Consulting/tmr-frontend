@@ -1,21 +1,21 @@
-<div class="descargar">
+<div style="display: contents">
+  <div class="btn-descarga-wrap" style="position: relative;">
+    <button class="btn-descargar enabled" [class.loading]="disabled" (click)="toggle()" [disabled]="disabled" type="button">
+      Descargar
+      <span class="material-symbols-outlined download-icon">file_download</span>
+    </button>
 
-  <button class="descargar__btn" [class.descargar__btn--open]="abierto" (click)="toggle()" [disabled]="disabled" type="button">
-    <span>Descargar</span>
-    <img src="assets/iconos/download.svg" alt="descargar" width="16" height="16" />
-  </button>
-
-  @if (abierto) {
-    <div class="descargar__overlay" (click)="cerrar()"></div>
-    <div class="descargar__panel">
-      <p class="descargar__title">Seleccione el formato:</p>
-      <button class="descargar__option" (click)="onPDF()" type="button">
-        Descargar PDF
-      </button>
-      <button class="descargar__option" (click)="onExcel()" type="button">
-        Descargar Excel
-      </button>
-    </div>
-  }
-
+    @if (abierto) {
+      <div class="descargar__overlay" (click)="cerrar()"></div>
+      <div class="descargar__panel">
+        <p class="descargar__title">Seleccione el formato:</p>
+        <button class="descargar__option" (click)="onPDF()" type="button">
+          Descargar PDF
+        </button>
+        <button class="descargar__option" (click)="onExcel()" type="button">
+          Descargar Excel
+        </button>
+      </div>
+    }
+  </div>
 </div>

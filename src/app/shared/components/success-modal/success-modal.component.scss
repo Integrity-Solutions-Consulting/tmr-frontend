@@ -1,8 +1,9 @@
-// ── Backdrop / Overlay ─────────────────────────────────────────
+scss // ── Backdrop / Overlay ─────────────────────────────────────────
+
 .success-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,15 +12,16 @@
 }
 
 // ── Card ───────────────────────────────────────────────────────
+
 .success-modal-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 14px;
   padding: 40px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  box-shadow: 0 8px 32px rgba(22, 53, 114, 0.15);
+  box-shadow: var(--elevation-modal);
   min-width: 260px;
   max-width: 90vw;
   width: auto;
@@ -29,7 +31,7 @@
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 500;
-    color: #34C759;
+    color: var(--status-success-text);
     text-align: center;
     margin: 0;
     line-height: 1.4;
@@ -37,6 +39,7 @@
 }
 
 // ── Icon ───────────────────────────────────────────────────────
+
 .success-modal-icon {
   width: 72px;
   height: 72px;
@@ -51,6 +54,7 @@
 }
 
 // ── Responsive ─────────────────────────────────────────────────
+
 @media (max-width: 520px) {
   .success-modal-card {
     padding: 32px 36px;
@@ -64,29 +68,26 @@
 }
 
 // ── Animaciones ───────────────────────────────────────────────
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-:host-context(html[data-theme="dark"]) {
-  .success-modal-backdrop {
-    background: rgba(0, 0, 0, 0.65) ;
+  from {
+    transform: translateY(20px);
+    opacity: 0;
   }
 
-  .success-modal-card {
-    background-color: #27272a ;
-    background: #27272a ;
-    border: 1px solid #3f3f46 ;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) ;
-
-    p {
-      color: #4ade80 ;
-    }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
+

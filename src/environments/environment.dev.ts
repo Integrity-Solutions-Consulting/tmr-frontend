@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: '',
+  apiUrl: 'http://localhost:5091/api',
 };
+//no hagan nota
