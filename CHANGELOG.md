@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.5.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.2...v1.5.0) (2026-09-30)
+
+
+### Features
+
+* agregando un tour en la pagina de agregar actividades ([ae35859](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ae35859a2799cd89198f6f7c60b276a98845a697))
+* mejora de seguimiento ([16ae818](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/16ae818d796cb97211963e890cb43b4f9972efdd))
+
+
+### Bug Fixes
+
+* Actualizacion de Seguimiento y mètricas de Actividades ([632af9d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/632af9d9da78a0b728dac0810439cabc5ff7192c))
+* arreglando el modo oscuro ([1b449ea](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1b449ea3583acc40c8a4793c253f04d0d87146e8))
+* arreglando modo noche ([ed63ae3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ed63ae3c759872ffdc7194177e15e83aa930f109))
+* arreglando modo oscuro ([65769da](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/65769da9ec9a23bdb13dd2350b0a21501ab050bc))
+* arreglo de formato zip pdf v1 ([a268efb](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a268efb055df1f942eacd8d976e0ca9e19b76632))
+* arreglo de formato zip pdf v1 ([15dee42](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/15dee42c0b6ee5415d351a49c2d17e68fde988fd))
+* arreglo de formato zip pdf v2 ([e3f7cf1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e3f7cf124c68a3ed35ccd9ad6a16cfd23bbb5ec5))
+* arreglo de formato zip pdf v2 ([18ce7bb](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/18ce7bb143710ed0772de60fe4327e8c94c6b310))
+* arreglo de notificaciones nuesvas en seguimiento ([7601d23](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/7601d2373ff40276f35aa37357f01264b7d4875d))
+* env ([08400f0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/08400f080b645bf35a3f4390a98fc671fc2a7a9a))
+* mejora en el disño de las notas de los comentarios en el tour de registro de actividades ([d57c429](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d57c42960be3a58026d9d169ef62d6d4e7bc4bf8))
+* mejoras en tabla de seguimiento (selección, acciones y responsive) ([f0accb4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f0accb4e8b7ac1d5940293b012a90082223607f2))
+* zip con nuevas notificaciones remix v1 ([4124862](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/412486271421ae4b6b5628fb4512063913baeac8))
+* zip con nuevas notificaciones remix v2 ([56944a7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/56944a77ae9a63a3c200218ecc58c8b026cdcede))
+* zip con nuevas notificaciones remix v2 ([0e72ef9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0e72ef98cbd80aba4b6662632a5c342c48f618e0))
+* zip con nuevas notificaciones remix v3 ([5b791a0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5b791a0edea8d74d10e6989b70e94a0e3cc33378))
+* zip con nuevas notificaciones remix v3 ([df52ab0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/df52ab00fd7277b10020e6ed9bda03d12ff18e4e))
+* zip con nuevas notificaciones remix v4 ([f046f5e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f046f5ea5b14cfaf999cab71a07e792884d67cc0))
+* zip con nuevas notificaciones remix v4 ([13dc7db](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/13dc7db3df5e2aa48e38b5c983c2cd8f9dfebf9b))
+
 ## [1.4.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v1.4.1...v1.4.2) (2026-09-24)
 
 
