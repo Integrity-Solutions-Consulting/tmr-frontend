@@ -4,7 +4,7 @@
     <div class="modal-body">
         <div class="empleado-row">
             <span class="empleado-label">Empleado:</span>
-            <span class="empleado-value">Administrador Administrador</span>
+            <span class="empleado-value">{{ empleadoNombre }}</span>
         </div>
 
         <form [formGroup]="form" class="modal-form">
@@ -36,6 +36,14 @@
                     @for (m of meses; track m; let i = $index) {
                     <mat-option [value]="i">{{ m }}</mat-option>
                     }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Formato <span class="req">*</span></mat-label>
+                <mat-select formControlName="formato">
+                    <mat-option value="xlsx">Excel (.xlsx)</mat-option>
+                    <mat-option value="pdf">PDF</mat-option>
                 </mat-select>
             </mat-form-field>
         </form>

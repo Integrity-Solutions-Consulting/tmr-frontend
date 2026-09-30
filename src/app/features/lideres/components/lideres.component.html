@@ -104,15 +104,24 @@
     </div>
   </div>
   <!-- Barra de búsqueda y botones -->
-  <div class="search-bar">
-    <div class="search-input-wrapper">
-      <span class="material-icons search-icon">search</span>
-      <input type="text" class="search-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
-        (input)="aplicarFiltros()" />
+  <div class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
+          (input)="aplicarFiltros()" />
+      </div>
     </div>
-    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
-      <img src="assets/iconos/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
-      <span class="estado-texto">Estado</span>
+
+    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+      <label class="filter-label">Estado</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
+            <span>{{ estadoFiltro || 'Todos' }}</span>
+            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         </div>
+      </div>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-option"
           (click)="seleccionarEstado('Activo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
@@ -134,21 +143,22 @@
       </div>
     </div>
 
-    <div class="search-spacer"></div>
-    <div class="descarga-wrapper" (click)="$event.stopPropagation()">
-      <button class="btn btn-outline" (click)="abrirDescarga()">
+    <div class="search-spacer" style="flex: 1;"></div>
+
+    <div class="descarga-wrapper" (click)="$event.stopPropagation()" style="display: flex; gap: 16px; align-items: flex-end;">
+      <button class="btn-descargar enabled" (click)="abrirDescarga()">
         Descargar
-        <span class="material-symbols-outlined">file_download</span>
+        <span class="material-symbols-outlined download-icon">file_download</span>
       </button>
       <app-modal-descarga [mostrar]="mostrarDescarga" (cerrar)="cerrarDescarga()" (descargarPDF)="descargarPDF()"
         (descargarExcel)="descargarExcel()">
       </app-modal-descarga>
-    </div>
 
-    <button class="btn btn-primary" (click)="abrirFormulario()">
-      Agregar
-      <span class="material-icons">add</span>
-    </button>
+      <button class="btn-descargar btn-agregar" (click)="abrirFormulario()">
+        Agregar
+        <span class="material-icons download-icon">add</span>
+      </button>
+    </div>
   </div>
 
   <!-- Tabla -->

@@ -42,6 +42,26 @@
   }
 }
 
+// El check de una descarga exitosa debe comunicar éxito, no error.
+.swal2-icon.tmr-swal__icon--success {
+  border-color: #16a34a !important;
+  background: #ecfdf3;
+
+  .material-symbols-outlined { color: #16a34a; }
+}
+
+// Estado de carga: conserva el mismo popup de TMR y no usa el estilo blanco
+// predeterminado de SweetAlert2.
+.swal2-popup.tmr-swal--loading {
+  .swal2-loader {
+    width: 32px;
+    height: 32px;
+    margin: 20px auto 0;
+    border-width: 4px;
+    border-color: #3b82f6 transparent #3b82f6 transparent;
+  }
+}
+
 // sm - Título: 18px, negrita, color de texto principal.
 .swal2-title.tmr-swal__title {
   padding: 0;
@@ -113,6 +133,13 @@ html[data-theme="dark"] {
     .material-symbols-outlined { color: #f87171; }
   }
 
+  .swal2-icon.tmr-swal__icon--success {
+    border-color: #22c55e !important;
+    background: rgba(34, 197, 94, 0.12);
+
+    .material-symbols-outlined { color: #4ade80; }
+  }
+
   .swal2-title.tmr-swal__title { color: #f4f4f5; }
 
   .swal2-html-container.tmr-swal__text {
@@ -122,4 +149,8 @@ html[data-theme="dark"] {
   }
 
   .tmr-swal__btn-primary:hover { background: #122d63; }
+
+  .swal2-popup.tmr-swal--loading .swal2-loader {
+    border-color: #60a5fa transparent #60a5fa transparent;
+  }
 }

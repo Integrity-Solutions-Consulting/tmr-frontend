@@ -1,10 +1,10 @@
-.tabla-shell {
+scss .tabla-shell {
   overflow: auto;
   max-width: 100%;
   max-height: 560px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px 10px 0 0;
-  background: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: 16px 16px 0 0;
+  background: var(--bg-card);
 }
 
 .tabla-shell::-webkit-scrollbar {
@@ -12,36 +12,39 @@
 }
 
 .tabla-shell::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--border-default);
   border-radius: 999px;
 }
 
 .tabla {
   width: 100%;
   table-layout: fixed;
-  background: #ffffff;
-  border-collapse: collapse;
+  background: var(--bg-card);
+  
+  border-collapse: separate;
   border-spacing: 0;
-
+  border: 2px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
   th {
     height: 46px;
     padding: 11px 14px;
     text-align: left;
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 14px;
     font-weight: 600;
-    background: #ffffff;
-    border-bottom: 2px solid #e5e7eb;
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border-default);
     white-space: nowrap;
   }
 
   td {
     height: 54px;
     padding: 13px 16px;
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 14px;
     font-weight: 400;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-default);
     white-space: nowrap;
     vertical-align: middle;
     overflow: hidden;
@@ -52,7 +55,7 @@
     transition: background 0.12s;
 
     &:hover {
-      background: rgba(22, 53, 114, 0.04);
+      background: var(--bg-hover);
     }
   }
 
@@ -72,11 +75,13 @@
   }
 
   // ── FIX: columna Código un poco más ancha ─────────────────────────────
+
   ::ng-deep .mat-column-codigo {
     width: 110px;
   }
 
   // ── FIX: columna Nombre con ancho fijo y recorte reforzado ─────────────
+
   ::ng-deep .mat-column-nombre {
     width: 220px;
     max-width: 220px;
@@ -101,8 +106,8 @@
     font-size: 11px;
     font-weight: 600;
     line-height: 1;
-    color: #374151;
-    background-color: #f8fafc;
+    color: var(--text-body);
+    background-color: var(--bg-app);
     white-space: nowrap;
   }
 
@@ -112,35 +117,109 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #9ca3af;
+    background: var(--text-muted);
     margin-right: 6px;
   }
 
   .seguimiento-activo {
-    background-color: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #166534;
+    background-color: var(--status-success-bg-soft);
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
   }
 
-  .seguimiento-activo::before { background-color: #16a34a; }
-  .seguimiento-progreso { background-color: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
-  .seguimiento-progreso::before { background-color: #3b82f6; }
-  .seguimiento-completado { background-color: #ecfdf5; border-color: #bbf7d0; color: #15803d; }
-  .seguimiento-completado::before { background-color: #22c55e; }
-  .seguimiento-cancelado { background-color: #fef2f2; border-color: #fecaca; color: #b91c1c; }
-  .seguimiento-cancelado::before { background-color: #ef4444; }
-  .seguimiento-espera { background-color: #fff7ed; border-color: #ffedd5; color: #c2410c; }
-  .seguimiento-espera::before { background-color: #f97316; }
-  .seguimiento-aprobado { background-color: #f5f3ff; border-color: #ddd6fe; color: #7131ca; }
-  .seguimiento-aprobado::before { background-color: #8b5cf6; }
-  .seguimiento-planificacion { background-color: #ecfeff; border-color: #cffafe; color: #0f766e; }
-  .seguimiento-planificacion::before { background-color: #14b8a6; }
-  .seguimiento-desarrollo { background-color: #f0f9ff; border-color: #dbeafe; color: #134e4a; }
-  .seguimiento-desarrollo::before { background-color: #0284c7; }
-  .seguimiento-aplazado { background-color: #fff7cd; border-color: #fef3c7; color: #78350f; }
-  .seguimiento-aplazado::before { background-color: #f59e0b; }
-  .seguimiento-inactivo { background-color: #f3f4f6; border-color: #e5e7eb; color: #6b7280; }
-  .seguimiento-inactivo::before { background-color: #9ca3af; }
+  .seguimiento-activo::before {
+    background-color: var(--status-success-bg-solid);
+  }
+
+  .seguimiento-progreso {
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+  }
+
+  .seguimiento-progreso::before {
+    background-color: var(--status-info-bg-solid);
+  }
+
+  .seguimiento-completado {
+    background-color: var(--status-success-bg-soft);
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
+  }
+
+  .seguimiento-completado::before {
+    background-color: var(--status-success-bg-solid);
+  }
+
+  .seguimiento-cancelado {
+    background-color: var(--status-danger-bg-soft);
+    border-color: var(--status-danger-border);
+    color: var(--status-danger-text);
+  }
+
+  .seguimiento-cancelado::before {
+    background-color: var(--status-danger-bg-solid);
+  }
+
+  .seguimiento-espera {
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+  }
+
+  .seguimiento-espera::before {
+    background-color: var(--status-warning-bg-solid);
+  }
+
+  .seguimiento-aprobado {
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+  }
+
+  .seguimiento-aprobado::before {
+    background-color: var(--status-info-bg-solid);
+  }
+
+  .seguimiento-planificacion {
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+  }
+
+  .seguimiento-planificacion::before {
+    background-color: var(--status-info-bg-solid);
+  }
+
+  .seguimiento-desarrollo {
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+  }
+
+  .seguimiento-desarrollo::before {
+    background-color: var(--status-info-bg-solid);
+  }
+
+  .seguimiento-aplazado {
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+  }
+
+  .seguimiento-aplazado::before {
+    background-color: var(--status-warning-bg-solid);
+  }
+
+  .seguimiento-inactivo {
+    background-color: var(--bg-soft);
+    border-color: var(--border-soft);
+    color: var(--text-muted);
+  }
+
+  .seguimiento-inactivo::before {
+    background-color: var(--text-muted);
+  }
 
   ::ng-deep .mat-column-fechas {
     width: 180px;
@@ -169,7 +248,7 @@
 }
 
 .tabla__codigo {
-  color: #737373;
+  color: var(--text-subtle);
   font-weight: 400;
   font-size: 14px;
 }
@@ -183,7 +262,7 @@
   .tabla__proyecto-nombre {
     display: block;
     max-width: 100%;
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 14px;
     font-weight: 400;
     line-height: 1.2;
@@ -193,7 +272,7 @@
   }
 
   .tabla__proyecto-cliente {
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 13px;
     font-weight: 400;
     line-height: 1.2;
@@ -204,7 +283,7 @@
 }
 
 .tabla__cliente {
-  color: #737373;
+  color: var(--text-subtle);
   font-weight: 400;
   font-size: 14px;
 }
@@ -219,28 +298,13 @@
 .tabla__lista-item {
   display: flex;
   flex-direction: column;
-  color: #737373;
+  color: var(--text-subtle);
   font-weight: 400;
   line-height: 1.05;
   min-width: 0;
 
-
-.tabla__lista-ver-mas {
-  background: transparent;
-  border: none;
-  color: #2563eb;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
-}
-
-.tabla__lista-ver-mas:hover {
-  text-decoration: underline;
-}
   span {
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 14px;
     font-weight: 400;
     line-height: 1.1;
@@ -250,7 +314,7 @@
   }
 
   small {
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 12px;
     font-weight: 400;
     overflow: hidden;
@@ -259,12 +323,27 @@
   }
 }
 
+.tabla__lista-ver-mas {
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .tabla__recursos {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #737373;
+  color: var(--text-subtle);
   font-weight: 400;
   font-size: 14px;
 
@@ -272,7 +351,7 @@
     content: '';
     width: 14px;
     height: 14px;
-    background: #8e8e93;
+    background: var(--text-muted);
     mask:
       radial-gradient(circle at 50% 28%, #000 0 2px, transparent 2.6px),
       radial-gradient(circle at 30% 72%, #000 0 2px, transparent 2.6px),
@@ -294,22 +373,22 @@
   justify-content: space-between;
   gap: 16px;
   margin-top: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   padding: 12px 16px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: var(--bg-card);
+  box-shadow: var(--elevation-card);
 
   p {
     margin: 0;
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 12px;
     font-weight: 500;
   }
 
   mat-paginator {
     background: transparent;
-    color: #737373;
+    color: var(--text-subtle);
   }
 
   ::ng-deep .mat-mdc-paginator-container {
@@ -323,7 +402,7 @@
 
   ::ng-deep .mat-mdc-paginator-range-label {
     margin: 0 12px;
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 12px;
     font-weight: 500;
   }
@@ -332,13 +411,13 @@
     width: 32px;
     height: 32px;
     padding: 4px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-default);
     border-radius: 7px;
-    background: #ffffff;
+    background: var(--bg-card);
   }
 
   ::ng-deep .mat-mdc-icon-button:hover {
-    background: #f8fafc;
+    background: var(--bg-hover);
   }
 }
 
@@ -377,56 +456,3 @@
   }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .tabla-shell {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-  }
-
-  .tabla {
-    background-color: #202124 ;
-    background: #202124 ;
-
-    th {
-      background-color: #202124 ;
-      background: #202124 ;
-      border-bottom: 2px solid #3f3f46 ;
-      color: #a1a1aa ;
-    }
-
-    td {
-      border-bottom: 1px solid #3f3f46 ;
-      color: #ffffff ;
-    }
-
-    tr:hover {
-      background: rgba(255, 255, 255, 0.04) ;
-    }
-  }
-
-  .tabla-footer {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
-
-    p,
-    mat-paginator,
-    ::ng-deep .mat-mdc-paginator-range-label {
-      color: #a1a1aa ;
-    }
-
-    ::ng-deep .mat-mdc-icon-button {
-      background-color: #27272a ;
-      background: #27272a ;
-      border-color: #3f3f46 ;
-      color: #ffffff ;
-
-      &:hover {
-        background-color: #3f3f46 ;
-      }
-    }
-  }
-}
