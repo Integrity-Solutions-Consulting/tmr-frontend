@@ -1,0 +1,595 @@
+<div class="dashboard-ejecutivo">
+
+  <!-- ===== HEADER ===== -->
+  <app-header title="Dashboard" subtitle="Cumplimiento del registro de horas, asignaciones y ciclo de vida de proyectos">
+    <div class="header-acciones">
+      <button type="button" class="btn-secundario" (click)="mostrarParametros.set(!mostrarParametros())"
+        [class.activo]="mostrarParametros()">
+        <mat-icon>tune</mat-icon>
+        Parámetros
+      </button>
+      <button type="button" class="btn-primario" (click)="descargarTodo()" [disabled]="!datos() || cargando()">
+        <mat-icon>file_download</mat-icon>
+        Descargar
+      </button>
+    </div>
+  </app-header>
+
+  <!-- ===== FILTROS GLOBALES (RF 01): siempre visibles junto a la fecha de corte ===== -->
+  <div class="filtros-sticky">
+    <div class="filters-card">
+      <div class="filter-group filtro-corto">
+        <label class="filter-label" for="f-anio">Año</label>
+        <select id="f-anio" class="filter-input" [ngModel]="filtros().anio"
+          (ngModelChange)="actualizarFiltro('anio', +$event)">
+          @for (a of anios; track a) {
+            <option [ngValue]="a">{{ a }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group filtro-corto">
+        <label class="filter-label" for="f-mes">Mes</label>
+        <select id="f-mes" class="filter-input" [ngModel]="filtros().mes"
+          (ngModelChange)="actualizarFiltro('mes', +$event)">
+          @for (m of meses; track $index) {
+            <option [ngValue]="$index + 1" [disabled]="mesDeshabilitado($index + 1)">{{ m }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="f-cliente">Cliente</label>
+        <select id="f-cliente" class="filter-input" [ngModel]="filtros().idCliente ?? ''"
+          (ngModelChange)="actualizarFiltro('idCliente', aNumero($event))">
+          <option value="">Todos los clientes</option>
+          @for (c of opciones().clientes; track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="f-proyecto">Proyecto</label>
+        <select id="f-proyecto" class="filter-input" [ngModel]="filtros().idProyecto ?? ''"
+          (ngModelChange)="actualizarFiltro('idProyecto', aNumero($event))">
+          <option value="">Todos los proyectos</option>
+          @for (p of proyectosFiltro(); track p.id) {
+            <option [value]="p.id">{{ p.codigo ? p.codigo + ' · ' : '' }}{{ p.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="f-estado">Estado</label>
+        <select id="f-estado" class="filter-input" [ngModel]="filtros().idEstado ?? ''"
+          (ngModelChange)="actualizarFiltro('idEstado', aNumero($event))">
+          <option value="">Todos los estados</option>
+          @for (e of opciones().estados; track e.id) {
+            <option [value]="e.id">{{ e.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="f-colaborador">Colaborador</label>
+        <select id="f-colaborador" class="filter-input" [ngModel]="filtros().idEmpleado ?? ''"
+          (ngModelChange)="actualizarFiltro('idEmpleado', aNumero($event))">
+          <option value="">Todos los colaboradores</option>
+          @for (c of opciones().colaboradores; track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group filtro-corto">
+        <label class="filter-label" for="f-horizonte"
+          matTooltip="Días hacia adelante para 'Próximos a terminar' (RF 05)">Horizonte (días)</label>
+        <input id="f-horizonte" class="filter-input" type="number" min="1" max="365"
+          [ngModel]="filtros().horizonte" [ngModelOptions]="{ updateOn: 'blur' }"
+          (ngModelChange)="actualizarFiltro('horizonte', +$event)" />
+      </div>
+
+      <button type="button" class="btn-limpiar" (click)="limpiarFiltros()"
+        matTooltip="Restablece el periodo vigente y quita los demás filtros">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Trazabilidad (RF 16) -->
+    @if (datos(); as d) {
+      <div class="trazabilidad">
+        <span class="chip-corte">
+          <mat-icon>event</mat-icon>
+          Corte: <strong>{{ formatoFecha(d.periodo.fechaCorte) }}</strong>
+        </span>
+        <span>{{ meses[d.periodo.mes - 1] }} {{ d.periodo.anio }}</span>
+        <span class="sep-traza">·</span>
+        <span>Generado {{ formatoFechaHora(d.periodo.fechaGeneracion) }}</span>
+        <span class="sep-traza">·</span>
+        <span>Último registro de actividades {{ formatoFechaHora(d.periodo.ultimoRegistroActividad) }}</span>
+        @if (cargando()) {
+          <span class="actualizando"><mat-icon class="girando">sync</mat-icon> Actualizando…</span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ===== PARÁMETROS APLICADOS (RF 16) ===== -->
+  @if (mostrarParametros() && datos(); as d) {
+    <section class="panel-parametros">
+      <div class="parametros-grid">
+        <div><span class="param-label">Semáforo</span>
+          <span class="param-valor">
+            <i class="punto semaforo-verde"></i> Verde ≥ {{ d.parametros.umbralVerde }} %
+            <i class="punto semaforo-amarillo"></i> Amarillo ≥ {{ d.parametros.umbralAmarillo }} %
+            <i class="punto semaforo-rojo"></i> Rojo &lt; {{ d.parametros.umbralAmarillo }} %
+          </span>
+        </div>
+        <div><span class="param-label">Horas esperadas</span><span class="param-valor">{{ d.parametros.reglaJornada }}</span></div>
+        <div><span class="param-label">Vacaciones y permisos</span><span class="param-valor">{{ d.parametros.fuenteNovedades }}</span></div>
+        <div><span class="param-label">Reparto entre proyectos</span><span class="param-valor provisional">{{ d.parametros.reglaReparto }}</span></div>
+        <div><span class="param-label">Estados activos</span><span class="param-valor provisional">{{ d.parametros.estadosActivos }} (PROVISIONAL)</span></div>
+        <div><span class="param-label">Estados cerrados</span><span class="param-valor">{{ d.parametros.estadosCerrados }}</span></div>
+        <div><span class="param-label">Recurrencia</span><span class="param-valor provisional">{{ umbralRecurrencia() }} o más meses con atraso en la ventana (PROVISIONAL)</span></div>
+        <div><span class="param-label">Cierre de mes</span><span class="param-valor">{{ historico()?.reglaCierre ?? '—' }}</span></div>
+        <div><span class="param-label">Fuente</span><span class="param-valor">TMR: actividades diarias, asignaciones de proyectos, colaboradores y feriados</span></div>
+      </div>
+    </section>
+  }
+
+  @if (error()) {
+    <div class="alerta-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+      <button type="button" class="btn-secundario" (click)="cargar()">Reintentar</button>
+    </div>
+  }
+
+  @if (!datos() && cargando()) {
+    <div class="cargando-inicial">
+      <div class="spinner"></div>
+      <p>Calculando indicadores…</p>
+    </div>
+  }
+
+  @if (datos(); as d) {
+    <div class="contenido" [class.recargando]="cargando()">
+
+      <!-- ===== RESUMEN DE CUMPLIMIENTO ===== -->
+      <section class="resumen">
+        <div class="resumen-medidor">
+          <svg viewBox="0 0 100 100" class="medidor" aria-hidden="true">
+            <circle cx="50" cy="50" r="42" class="medidor-fondo" />
+            <circle cx="50" cy="50" r="42" class="medidor-arco" [ngClass]="'trazo-' + claseSemaforo(d.cumplimientoTotal.semaforo)"
+              [attr.stroke-dasharray]="medidor().dasharray" transform="rotate(-90 50 50)" />
+          </svg>
+          <div class="medidor-centro">
+            <span class="medidor-valor">{{ formatoPorcentaje(d.cumplimientoTotal.porcentaje) }}</span>
+            <span class="medidor-etiqueta">Cumplimiento</span>
+          </div>
+          <span class="badge-semaforo" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)">{{ d.cumplimientoTotal.semaforo }}</span>
+        </div>
+
+        <div class="resumen-cifras">
+          <div class="cifras">
+            <div class="cifra">
+              <span class="cifra-label">Horas esperadas</span>
+              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.esperadas) }}</span>
+            </div>
+            <div class="cifra">
+              <span class="cifra-label">Horas reportadas</span>
+              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.reportadas) }}</span>
+            </div>
+            <div class="cifra">
+              <span class="cifra-label">Horas pendientes</span>
+              <span class="cifra-valor pendiente">{{ formatoHoras(d.cumplimientoTotal.pendientes) }}</span>
+            </div>
+            <div class="cifra">
+              <span class="cifra-label">Colaboradores con pendientes</span>
+              <span class="cifra-valor">{{ colaboradoresConPendientes() }}</span>
+            </div>
+          </div>
+
+          <div class="barra-progreso" [matTooltip]="formatoHoras(d.cumplimientoTotal.reportadas) + ' de ' + formatoHoras(d.cumplimientoTotal.esperadas)">
+            <span class="barra-relleno" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)"
+              [style.width.%]="anchoBarra(d.cumplimientoTotal.porcentaje)"></span>
+          </div>
+
+          <div class="resumen-acciones">
+            <button type="button" class="btn-link" (click)="abrirTodoIncumplimiento()"
+              [disabled]="d.cumplimientoTotal.pendientes === 0">
+              Ver detalle de incumplimiento
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+            @if (totalFueraDeAsignacion() > 0) {
+              <button type="button" class="aviso-fuera" (click)="abrirFueraDeAsignacion()"
+                matTooltip="Horas registradas en proyectos donde la persona no está asignada. No suman al cumplimiento.">
+                <mat-icon>info</mat-icon>
+                {{ formatoHoras(totalFueraDeAsignacion()) }} registradas fuera de asignación
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== INDICADORES (6.1) ===== -->
+      <section class="grupo-kpi" aria-label="Indicadores de colaboradores">
+        <h3 class="grupo-titulo">Colaboradores</h3>
+        <div class="kpi-grid">
+          @for (t of tarjetasColaboradores(); track t.clave) {
+            <ng-container [ngTemplateOutlet]="tarjeta" [ngTemplateOutletContext]="{ $implicit: t }"></ng-container>
+          }
+        </div>
+      </section>
+
+      <section class="grupo-kpi" aria-label="Indicadores de proyectos">
+        <h3 class="grupo-titulo">Proyectos</h3>
+        <div class="kpi-grid">
+          @for (t of tarjetasProyectos(); track t.clave) {
+            <ng-container [ngTemplateOutlet]="tarjeta" [ngTemplateOutletContext]="{ $implicit: t }"></ng-container>
+          }
+        </div>
+      </section>
+
+      <ng-template #tarjeta let-t>
+        <button type="button" class="small-box" [ngClass]="'tono-' + t.tono"
+          [class.seleccionada]="esSeleccionado(t.clave)" (click)="abrirTarjeta(t.clave)"
+          [matTooltip]="t.definicion" matTooltipPosition="above">
+          <span class="small-box-cuerpo">
+            <span class="small-box-valor">{{ t.valor }}</span>
+            <span class="small-box-titulo">{{ t.titulo }}</span>
+          </span>
+          <mat-icon class="small-box-icono">{{ t.icono }}</mat-icon>
+          <span class="small-box-pie">Ver detalle <mat-icon>arrow_forward</mat-icon></span>
+        </button>
+      </ng-template>
+
+      <!-- ===== CUMPLIMIENTO POR CLIENTE + PORTAFOLIO ===== -->
+      <div class="dos-columnas">
+
+        <!-- Ranking de cumplimiento por cliente (7.1 / RF 12) -->
+        <section class="panel">
+          <header class="panel-header">
+            <div>
+              <h2>Cumplimiento por cliente</h2>
+              <p class="panel-subtitulo">De menor a mayor cumplimiento. Selecciona un cliente para ver quién tiene horas pendientes.</p>
+            </div>
+          </header>
+
+          @if (d.cumplimientoClientes.length === 0) {
+            <div class="vacio">
+              <mat-icon>inbox</mat-icon>
+              <p>No hay horas esperadas para la selección actual.</p>
+            </div>
+          } @else {
+            <div class="ranking">
+              @for (c of d.cumplimientoClientes; track c.idCliente) {
+                <button type="button" class="ranking-fila" [class.seleccionada]="esSeleccionado('cliente:' + c.idCliente)"
+                  (click)="abrirCliente(c.idCliente, c.cliente)"
+                  [matTooltip]="'Esperadas ' + formatoHoras(c.esperadas) + ' · Reportadas ' + formatoHoras(c.reportadas) + ' · Pendientes ' + formatoHoras(c.pendientes)">
+                  <span class="ranking-cabecera">
+                    <span class="ranking-nombre">
+                      <i class="punto" [ngClass]="claseSemaforo(c.semaforo)"></i>{{ c.cliente }}
+                    </span>
+                    <span class="ranking-pct" [ngClass]="'texto-' + claseSemaforo(c.semaforo)">{{ formatoPorcentaje(c.porcentaje) }}</span>
+                  </span>
+                  <span class="barra-fondo">
+                    <span class="barra-relleno" [ngClass]="claseSemaforo(c.semaforo)" [style.width.%]="anchoBarra(c.porcentaje)"></span>
+                  </span>
+                  <span class="ranking-meta">
+                    @if (c.pendientes > 0) {
+                      <span class="pendiente">{{ formatoHoras(c.pendientes) }} pendientes</span>
+                      <span class="sep">·</span>
+                      <span>{{ c.colaboradoresIncompletos }} de {{ c.colaboradores }} colaboradores incompletos</span>
+                    } @else {
+                      <span>{{ c.colaboradores }} colaboradores al día</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Estado ejecutivo del portafolio (7.3 / RF 11) -->
+        <section class="panel">
+          <header class="panel-header">
+            <div>
+              <h2>Estado del portafolio</h2>
+              <p class="panel-subtitulo">Proyectos vigentes a la fecha de corte. Selecciona un estado para ver sus proyectos.</p>
+            </div>
+          </header>
+
+          <div class="portafolio">
+            <div class="dona">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="42" class="dona-fondo" />
+                @for (s of portafolio().segmentos; track s.categoria) {
+                  @if (s.valor > 0) {
+                    <circle cx="50" cy="50" r="42" class="dona-segmento" [class.activo]="esSeleccionado(s.categoria)"
+                      [style.stroke]="s.color" [attr.stroke-dasharray]="s.dasharray" [attr.stroke-dashoffset]="s.dashoffset"
+                      transform="rotate(-90 50 50)" (click)="abrirPortafolio(s.categoria)" />
+                  }
+                }
+              </svg>
+              <div class="dona-centro">
+                <span class="dona-total">{{ portafolio().total }}</span>
+                <span class="dona-etiqueta">vigentes</span>
+              </div>
+            </div>
+
+            <div class="leyenda-portafolio">
+              @for (s of portafolio().segmentos; track s.categoria) {
+                <button type="button" class="leyenda-item" [class.seleccionada]="esSeleccionado(s.categoria)"
+                  (click)="abrirPortafolio(s.categoria)" [matTooltip]="definicionPortafolio(s.categoria)" matTooltipPosition="left">
+                  <i class="leyenda-color" [style.background]="s.color"></i>
+                  <span class="leyenda-titulo">{{ s.titulo }}</span>
+                  <span class="leyenda-valor">{{ s.valor }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="portafolio-periodo">
+            <button type="button" class="mini-stat" [class.seleccionada]="esSeleccionado('Nuevo')" (click)="abrirPortafolio('Nuevo')">
+              <mat-icon>fiber_new</mat-icon>
+              <span class="mini-stat-valor">{{ portafolio().nuevos }}</span>
+              <span class="mini-stat-titulo">Nuevos en el periodo</span>
+            </button>
+            <button type="button" class="mini-stat" [class.seleccionada]="esSeleccionado('Cerrado')" (click)="abrirPortafolio('Cerrado')">
+              <mat-icon>task_alt</mat-icon>
+              <span class="mini-stat-valor">{{ portafolio().cerrados }}</span>
+              <span class="mini-stat-titulo">Cerrados en el periodo</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== BRECHA Y RECURRENCIA / HISTÓRICO (pestañas) ===== -->
+      <section class="panel panel-pestanas">
+        <div class="pestanas" role="tablist">
+          <button type="button" role="tab" [attr.aria-selected]="pestana() === 'brecha'" [class.activa]="pestana() === 'brecha'"
+            (click)="pestana.set('brecha')">
+            <mat-icon>groups</mat-icon>
+            Brecha y recurrencia
+            @if (brechaColaboradores().length) { <span class="contador">{{ brechaColaboradores().length }}</span> }
+          </button>
+          <button type="button" role="tab" [attr.aria-selected]="pestana() === 'historico'" [class.activa]="pestana() === 'historico'"
+            (click)="pestana.set('historico')">
+            <mat-icon>insights</mat-icon>
+            Histórico de cumplimiento
+          </button>
+
+          <div class="controles-historico">
+            <!-- sm - Ventana: cuántos meses hacia atrás se revisan (RF 15 / CA 11 pide 6 y 12). -->
+            <span class="control-etiqueta">Revisar los últimos</span>
+            <div class="segmentado" role="group" aria-label="Meses hacia atrás que se revisan"
+              matTooltip="Cuántos meses hacia atrás se revisan para el histórico y para contar atrasos">
+              <button type="button" [class.activo]="mesesVentana() === 6" (click)="cambiarVentana(6)">6 meses</button>
+              <button type="button" [class.activo]="mesesVentana() === 12" (click)="cambiarVentana(12)">12 meses</button>
+            </div>
+            @if (pestana() === 'brecha') {
+              <!-- sm - Umbral de recurrencia (PROVISIONAL): de esos meses, cuántos con atraso marcan "Recurrente". -->
+              <label class="umbral"
+                matTooltip="PROVISIONAL: si el colaborador se atrasó en esta cantidad de meses (o más) dentro de los meses revisados, se marca como Recurrente">
+                Recurrente con
+                <input type="number" min="1" [max]="mesesVentana()" [ngModel]="umbralRecurrencia()"
+                  [ngModelOptions]="{ updateOn: 'blur' }" (ngModelChange)="cambiarUmbral($event)" />
+                o más meses con atraso
+              </label>
+            }
+          </div>
+        </div>
+
+        @if (pestana() === 'brecha') {
+          <!-- 7.2 Brecha y recurrencia por colaborador -->
+          @if (brechaColaboradores().length === 0) {
+            <div class="vacio">
+              <mat-icon>verified</mat-icon>
+              <p>Ningún colaborador tiene horas pendientes ni atrasos en la ventana seleccionada.</p>
+            </div>
+          } @else {
+            <div class="tabla-scroll">
+              <table class="tabla-brecha">
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th class="col-brecha">Horas pendientes del periodo</th>
+                    <th class="num">Cumplimiento</th>
+                    <th>Últimos {{ mesesVentana() }} meses</th>
+                    <th class="num">Meses con atraso</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of brechaVisible(); track c.idEmpleado) {
+                    <tr [class.seleccionada]="esSeleccionado('colaborador:' + c.idEmpleado)"
+                      (click)="abrirColaborador(c.idEmpleado, c.colaborador)" tabindex="0"
+                      (keydown.enter)="abrirColaborador(c.idEmpleado, c.colaborador)">
+                      <td>
+                        <span class="nombre-colaborador">{{ c.colaborador }}</span>
+                        @if (c.recurrente) {
+                          <span class="badge-recurrente">Recurrente</span>
+                        }
+                      </td>
+                      <td class="col-brecha">
+                        <span class="brecha-celda">
+                          <span class="brecha-barra">
+                            <span class="barra-relleno barra-corporativa" [style.width.%]="(c.pendientes / maximaBrecha()) * 100"></span>
+                          </span>
+                          <span class="brecha-valor">{{ formatoHoras(c.pendientes) }}</span>
+                        </span>
+                      </td>
+                      <td class="num">
+                        <i class="punto" [ngClass]="claseSemaforo(c.semaforo)"></i>
+                        {{ formatoPorcentaje(c.porcentaje) }}
+                      </td>
+                      <td>
+                        <span class="historial">
+                          @for (h of c.historial; track h.etiqueta) {
+                            <i class="celda-mes" [ngClass]="'estado-' + h.estado"
+                              [matTooltip]="h.etiqueta + ': ' + etiquetaEstado(h.estado) + (h.porcentaje !== null ? ' (' + formatoPorcentaje(h.porcentaje) + ')' : '')"></i>
+                          }
+                          @if (cargandoHistorico()) {
+                            <mat-icon class="girando mini">sync</mat-icon>
+                          }
+                        </span>
+                      </td>
+                      <td class="num">
+                        <strong [class.texto-semaforo-rojo]="c.recurrente">{{ c.mesesConAtraso }}</strong>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="pie-tabla">
+              <ng-container [ngTemplateOutlet]="leyendaEstados"></ng-container>
+              @if (brechaColaboradores().length > 8) {
+                <button type="button" class="btn-link" (click)="mostrarTodosColaboradores.set(!mostrarTodosColaboradores())">
+                  {{ mostrarTodosColaboradores() ? 'Ver menos' : 'Ver los ' + brechaColaboradores().length + ' colaboradores' }}
+                </button>
+              }
+            </div>
+          }
+        } @else {
+          <!-- RF 15 Histórico de cumplimiento -->
+          @if (historico(); as h) {
+            <p class="panel-subtitulo">Cumplimiento mensual con la clasificación al cierre de cada mes. Selecciona un mes para verlo en el dashboard.</p>
+            <div class="historico" [class.recargando]="cargandoHistorico()">
+              @for (m of h.meses; track m.anio + '-' + m.mes) {
+                <button type="button" class="historico-mes"
+                  [class.actual]="m.anio === d.periodo.anio && m.mes === d.periodo.mes"
+                  (click)="seleccionarMesHistorico(m.anio, m.mes)"
+                  [matTooltip]="'Cierre: ' + formatoFecha(m.fechaCierre) + ' (último día hábil) · Esperadas ' + formatoHoras(m.esperadas) + ' · Pendientes ' + formatoHoras(m.pendientes)">
+                  <span class="historico-pct" [ngClass]="'texto-' + claseSemaforo(m.semaforo)">{{ formatoPorcentaje(m.porcentaje) }}</span>
+                  <span class="historico-columna">
+                    <span class="historico-relleno" [ngClass]="claseSemaforo(m.semaforo)" [style.height.%]="anchoBarra(m.porcentaje)"></span>
+                  </span>
+                  <span class="historico-etiqueta">{{ etiquetaMes(m.anio, m.mes) }}</span>
+                  <span class="historico-conteos">
+                    @if (m.mesAbierto) {
+                      <span class="chip-mini abierto">Abierto</span>
+                    }
+                    @if (m.atrasosCarga) { <span class="conteo estado-AtrasoCarga" matTooltip="Atraso de carga">{{ m.atrasosCarga }}</span> }
+                    @if (m.regularizados) { <span class="conteo estado-Regularizado" matTooltip="Regularizados después del cierre">{{ m.regularizados }}</span> }
+                    @if (m.incumplidos) { <span class="conteo estado-Incumplido" matTooltip="Incumplimiento definitivo">{{ m.incumplidos }}</span> }
+                  </span>
+                </button>
+              }
+            </div>
+            <div class="pie-tabla">
+              <ng-container [ngTemplateOutlet]="leyendaEstados"></ng-container>
+            </div>
+          } @else if (cargandoHistorico()) {
+            <div class="cargando-inicial compacto"><div class="spinner"></div></div>
+          } @else {
+            <div class="vacio error"><mat-icon>history</mat-icon><p>No se pudo cargar el histórico.</p></div>
+          }
+        }
+      </section>
+
+      <ng-template #leyendaEstados>
+        <span class="leyenda">
+          <i class="celda-mes estado-Cumplido"></i> Cumplido
+          <i class="celda-mes estado-AtrasoCarga"></i> Atraso de carga
+          <i class="celda-mes estado-Regularizado"></i> Regularizado tras el cierre
+          <i class="celda-mes estado-Incumplido"></i> Incumplido
+          <i class="celda-mes estado-SinDatos"></i> Sin horas esperadas
+        </span>
+      </ng-template>
+    </div>
+  }
+
+  <!-- ===== PANEL DE DETALLE (drill-down + descarga del conjunto filtrado) ===== -->
+  <div class="drawer-overlay" [class.show]="!!detalle()" (click)="cerrarDetalle()"></div>
+  <aside class="drawer-panel" [class.show]="!!detalle()" aria-label="Detalle del indicador">
+    @if (detalle(); as det) {
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="drawer-subtitle">
+            {{ datos() ? meses[datos()!.periodo.mes - 1] + ' ' + datos()!.periodo.anio + ' · Corte ' + formatoFecha(datos()!.periodo.fechaCorte) : '' }}
+          </span>
+          <h2 class="drawer-title">{{ det.titulo }}</h2>
+          <p class="drawer-definicion">{{ det.definicion }}</p>
+        </div>
+        <div class="drawer-header-actions">
+          <button type="button" class="btn-primario compacto" (click)="descargarDetalle()" [disabled]="det.filas.length === 0"
+            matTooltip="Descargar a Excel exactamente lo que ves">
+            <mat-icon>file_download</mat-icon>
+            Excel
+          </button>
+          <button type="button" class="drawer-close-btn" (click)="cerrarDetalle()" aria-label="Cerrar"
+            matTooltip="Cerrar (los filtros se mantienen)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="drawer-body">
+        <div class="drawer-resumen">
+          <span><strong>{{ det.filas.length }}</strong> registros</span>
+          @if (det.totalesHoras) {
+            <span>Esperadas <strong>{{ formatoHoras(totalDetalle('esperadas')) }}</strong></span>
+            <span>Reportadas <strong>{{ formatoHoras(totalDetalle('reportadas')) }}</strong></span>
+            <span>Pendientes <strong class="pendiente">{{ formatoHoras(totalDetalle('pendientes')) }}</strong></span>
+          }
+        </div>
+
+        @if (det.filas.length === 0) {
+          <div class="vacio">
+            <mat-icon>check_circle</mat-icon>
+            <p>No hay registros para este indicador con los filtros actuales.</p>
+          </div>
+        } @else {
+          <div class="tabla-scroll">
+            <table class="tabla-detalle">
+              <thead>
+                <tr>
+                  @for (c of det.columnas; track c.clave) {
+                    <th [class.num]="c.tipo === 'horas' || c.tipo === 'porcentaje' || c.tipo === 'numero'">{{ c.titulo }}</th>
+                  }
+                  @if (det.conCorreo) { <th class="col-accion"></th> }
+                </tr>
+              </thead>
+              <tbody>
+                @for (f of det.filas; track $index) {
+                  <tr>
+                    @for (c of det.columnas; track c.clave) {
+                      <td [class.num]="c.tipo === 'horas' || c.tipo === 'porcentaje' || c.tipo === 'numero'">
+                        @if (c.tipo === 'semaforo') {
+                          <span class="badge-semaforo" [ngClass]="claseSemaforo(f[c.clave])">{{ f[c.clave] }}</span>
+                        } @else if (c.clave === 'pendientes') {
+                          <span [class.pendiente]="f[c.clave] > 0">{{ valorCelda(f, c) }}</span>
+                        } @else {
+                          {{ valorCelda(f, c) }}
+                        }
+                      </td>
+                    }
+                    @if (det.conCorreo) {
+                      <td class="col-accion">
+                        @if (f.pendientes > 0) {
+                          <button type="button" class="btn-icono" (click)="enviarCorreo(f)"
+                            [disabled]="enviandoCorreo[claveCorreo(f)]"
+                            [matTooltip]="resultadoCorreo[claveCorreo(f)] === 'ok' ? 'Correo enviado' : resultadoCorreo[claveCorreo(f)] === 'error' ? 'No se pudo enviar. Reintentar' : 'Enviar recordatorio por correo'"
+                            [class.ok]="resultadoCorreo[claveCorreo(f)] === 'ok'"
+                            [class.error]="resultadoCorreo[claveCorreo(f)] === 'error'">
+                            <mat-icon [class.girando]="enviandoCorreo[claveCorreo(f)]">
+                              {{ enviandoCorreo[claveCorreo(f)] ? 'sync' : resultadoCorreo[claveCorreo(f)] === 'ok' ? 'mark_email_read' : 'mail' }}
+                            </mat-icon>
+                          </button>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  </aside>
+
+</div>
