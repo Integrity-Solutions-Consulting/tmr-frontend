@@ -20,12 +20,12 @@
   .login-card {
     position: relative;
     z-index: 10;
-    background: white;
+    background: var(--bg-card);
     border-radius: 30px;
-    padding: 24px;               
+    padding: 24px;
     box-shadow: var(--elevation-card);
     width: 100%;
-    max-width: 380px;            
+    max-width: 380px;
     animation: slideUp 0.5s ease-out;
 
     .logo-container {
@@ -33,93 +33,106 @@
       justify-content: center;
       align-items: center;
       width: 100%;
-      margin-bottom: 20px;       
-      
+      margin-bottom: 20px;
+
       .logo {
-        height: 100px;      
+        height: 100px;
         width: auto;
         display: block;
       }
     }
 
     .title {
-      font-size: 20px;           
+      font-size: 20px;
       font-weight: 600;
-      color: #1a3a52;
+      color: var(--text-body);   /* antes #1a3a52 */
       text-align: center;
-      margin-bottom: 20px;      
+      margin-bottom: 20px;
       margin-top: 0;
     }
 
     .form {
       display: flex;
       flex-direction: column;
-      gap: 15px;                
+      gap: 15px;
+
       .form-group {
         display: flex;
         flex-direction: column;
-        gap: 4px;                
+        gap: 4px;
 
         .input-field {
-          padding: 8px 12px;     
-          border: 1px solid #ddd;
+          padding: 8px 12px;
+          border: 1px solid var(--border-input); /* antes #ddd */
           border-radius: 6px;
-          font-size: 13px;       
+          font-size: 13px;
           font-family: inherit;
+          background: var(--input-bg);
+          color: var(--text-main);
           transition: all 0.3s ease;
 
           &:focus {
             outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            border-color: var(--primary-color); /* antes #0066cc */
+            box-shadow: var(--focus-ring-primary); /* antes rgba(0,102,204,0.1) */
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--focus-color);
+            outline-offset: 2px;
           }
 
           &.error {
-            border-color: #dc3545;
+            border-color: var(--status-danger-border); /* antes #dc3545 */
 
             &:focus {
-              box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+              box-shadow: var(--validation-ring-danger); /* antes rgba(220,53,69,0.1) */
             }
           }
 
           &::placeholder {
-            color: #999;
+            color: var(--text-muted); /* antes #999 */
             font-size: 12px;
           }
         }
 
         .error-message {
-          font-size: 11px;       
-          color: #dc3545;
+          font-size: 11px;
+          color: var(--status-danger-text); /* antes #dc3545 */
           min-height: 14px;
         }
       }
 
       .global-error {
-        padding: 8px;            
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
+        padding: 8px;
+        background-color: var(--status-danger-bg-soft); /* antes #f8d7da */
+        border: 1px solid var(--status-danger-border);  /* antes #f5c6cb */
         border-radius: 6px;
-        color: #721c24;
-        font-size: 12px;        
+        color: var(--status-danger-text); /* antes #721c24 */
+        font-size: 12px;
         text-align: center;
       }
 
       .submit-button {
-        padding: 8px 16px;       
-        background-color: #0a2463;
-        color: white;
+        padding: 8px 16px;
+        background-color: var(--primary-fill); /* antes #0a2463 */
+        color: var(--text-inverse);
         border: none;
         border-radius: 6px;
-        font-size: 14px;        
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 6px;         
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        margin-top: 6px;
 
         &:hover:not(:disabled) {
-          background-color: #051838;
-          box-shadow: 0 4px 12px rgba(10, 36, 99, 0.3);
+          background-color: var(--primary-fill-hover); /* antes #051838 */
+          box-shadow: var(--focus-ring-primary);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--focus-color);
+          outline-offset: 2px;
         }
 
         &:active:not(:disabled) {
@@ -135,17 +148,23 @@
 
     .forgot-password {
       text-align: center;
-      margin-top: 14px;          
+      margin-top: 14px;
 
       a {
-        color: #0066cc;
+        color: var(--primary-color); /* antes #0066cc */
         text-decoration: none;
-        font-size: 12px;         
-        transition: color 0.3s ease;
+        font-size: 12px;
+        transition: color 0.2s ease;
 
         &:hover {
-          color: #0052a3;
+          color: var(--primary-hover); /* antes #0052a3 */
           text-decoration: underline;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--focus-color);
+          outline-offset: 2px;
+          border-radius: 2px;
         }
       }
     }

@@ -1,17 +1,10 @@
-$primary: var(--primary-color);
-$primary-dark: #162C56;
-$white: var(--bg-card);
-$border: #E5E5E5;
-$text-dark: #1a1a2e;
-$text-mid: #4a4a6a;
-$text-light: #737373;
-$activo: #26BF4D;
-$inactivo: #ef4444;
+// Variables SCSS eliminadas — todos los valores apuntan ahora directamente
+// a tokens CSS para garantizar que light y dark funcionen sin overrides extra.
 
 .detalle-overlay {
   position: fixed;
   inset: 0;
-  background: rgba($primary-dark, 0.45);
+  background: var(--overlay-bg); /* antes rgba($primary-dark, 0.45) */
   backdrop-filter: blur(3px);
   z-index: 1000;
   display: flex;
@@ -20,7 +13,7 @@ $inactivo: #ef4444;
 }
 
 .detalle-card {
-  background: $white;
+  background: var(--bg-card);
   border-radius: 16px;
   width: 560px;
   max-width: 95vw;
@@ -40,21 +33,27 @@ $inactivo: #ef4444;
   font-weight: 500;
   font-size: 16px;
   line-height: 100%;
-  color: $text-light;
+  color: var(--text-muted); /* antes $text-light: #737373 */
 }
 
 .detalle-close {
   background: none;
   border: none;
   cursor: pointer;
-  color: $text-light;
+  color: var(--text-muted); /* antes $text-light */
   display: flex;
   align-items: center;
   padding: 4px;
   border-radius: 6px;
 
   .material-icons { font-size: 20px; }
-  &:hover { background: $border; }
+
+  &:hover { background: var(--border-default); } /* antes $border: #E5E5E5 */
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
 }
 
 .detalle-nombre-row {
@@ -67,7 +66,7 @@ $inactivo: #ef4444;
 .detalle-nombre {
   font-size: 22px;
   font-weight: 700;
-  color: $primary;
+  color: var(--primary-color);
   margin: 0;
 }
 
@@ -85,9 +84,9 @@ $inactivo: #ef4444;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 400;
-  border: 1px solid #D4D4D4;
+  border: 1px solid var(--border-default); /* antes #D4D4D4 */
   background: var(--bg-card);
-  color: #404040;
+  color: var(--text-secondary);            /* antes #404040 */
 }
 
 .badge-circulo {
@@ -99,7 +98,7 @@ $inactivo: #ef4444;
 }
 
 .badge-activo {
-  .badge-circulo { background: #26BF4D; }
+  .badge-circulo { background: var(--status-success-bg-solid); } /* antes #26BF4D */
 }
 
 .badge-inactivo {
@@ -118,7 +117,7 @@ $inactivo: #ef4444;
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: $text-light;
+  color: var(--text-muted); /* antes $text-light */
   padding-left: -2;
 }
 
@@ -176,7 +175,7 @@ $inactivo: #ef4444;
 
 .detalle-toggle-arrow {
   font-size: 20px;
-  color: $primary;
+  color: var(--primary-color);
   transition: transform 0.2s ease;
   margin-left: 0;
 
@@ -188,7 +187,7 @@ $inactivo: #ef4444;
 .detalle-linea-azul {
   width: 3px;
   height: 16px;
-  background: $primary;
+  background: var(--primary-color);
   border-radius: 2px;
 }
 
@@ -211,7 +210,7 @@ $inactivo: #ef4444;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: $text-light;
+  color: var(--text-muted); /* antes $text-light */
 }
 
 .detalle-icon-sm {
@@ -223,12 +222,13 @@ $inactivo: #ef4444;
 // ← fix 1 y 2: color azul y alineación bajo el label
 .detalle-contacto-valor {
   font-size: 13px;
-  color: $text-dark;
+  color: var(--text-main); /* antes $text-dark: #1a1a2e */
 padding-left: 20px;
   margin-top: 2px;
 
-  &.azul { color: $primary; }
+  &.azul { color: var(--primary-color); }
 }
+
 .detalle-proyectos {
   padding-top: 4px;
 
@@ -325,28 +325,28 @@ padding-left: 20px;
     color: var(--status-info-text);
     border-color: var(--status-info-border);
     background: var(--status-info-bg-soft);
-    .detalle-proyectos__item-dot { background: #2563eb; }
+    .detalle-proyectos__item-dot { background: var(--status-info-bg-solid); } /* antes #2563eb */
   }
 
   .estado--completado {
     color: var(--status-success-text);
     border-color: var(--status-success-border);
     background: var(--status-success-bg-soft);
-    .detalle-proyectos__item-dot { background: #16a34a; }
+    .detalle-proyectos__item-dot { background: var(--status-success-bg-solid); } /* antes #16a34a */
   }
 
   .estado--pausa {
     color: var(--status-warning-text);
     border-color: var(--status-warning-border);
-    background: #fffbeb;
-    .detalle-proyectos__item-dot { background: #f59e0b; }
+    background: var(--status-warning-bg-soft); /* antes #fffbeb */
+    .detalle-proyectos__item-dot { background: var(--status-warning-bg-solid); } /* antes #f59e0b */
   }
 
   .estado--cancelado {
     color: var(--status-danger-text);
     border-color: var(--status-danger-border);
     background: var(--status-danger-bg-soft);
-    .detalle-proyectos__item-dot { background: #dc2626; }
+    .detalle-proyectos__item-dot { background: var(--status-danger-bg-solid); } /* antes #dc2626 */
   }
 
   .estado--inactivo {
@@ -356,39 +356,41 @@ padding-left: 20px;
     .detalle-proyectos__item-dot { background: var(--text-muted); }
   }
 
+  /* Estados extra mapeados a tokens semánticos existentes */
   .estado--aprobado {
-    color: #AF52DE;
-    border-color: #e9d5ff;
-    background: #faf5ff;
-    .detalle-proyectos__item-dot { background: #AF52DE; }
+    color: var(--status-purple-text);       /* antes #AF52DE */
+    border-color: var(--status-purple-border); /* antes #e9d5ff */
+    background: var(--status-purple-bg-soft);  /* antes #faf5ff */
+    .detalle-proyectos__item-dot { background: var(--status-purple-text); }
   }
 
   .estado--aplazado {
-    color: #FFD60A;
-    border-color: #fef08a;
-    background: #fefce8;
-    .detalle-proyectos__item-dot { background: #FFD60A; }
+    color: var(--status-warning-text);      /* antes #FFD60A — amarillo → warning es el más cercano */
+    border-color: var(--status-warning-border); /* antes #fef08a */
+    background: var(--status-warning-bg-soft);  /* antes #fefce8 */
+    .detalle-proyectos__item-dot { background: var(--status-warning-bg-solid); }
   }
 
   .estado--planificacion {
-    color: #00C7BE;
-    border-color: #a5f3fc;
-    background: #ecfeff;
-    .detalle-proyectos__item-dot { background: #00C7BE; }
+    color: var(--status-teal-text);         /* antes #00C7BE */
+    border-color: var(--status-teal-border); /* antes #a5f3fc */
+    background: var(--status-teal-bg-soft); /* antes #ecfeff */
+    .detalle-proyectos__item-dot { background: var(--status-teal-text); }
   }
 
   .estado--espera {
-    color: #FF8D28;
-    border-color: #fed7aa;
-    background: #fff7ed;
-    .detalle-proyectos__item-dot { background: #FF8D28; }
+    color: var(--status-warning-text);      /* antes #FF8D28 — naranja → warning */
+    border-color: var(--status-warning-border); /* antes #fed7aa */
+    background: var(--status-warning-bg-soft);  /* antes #fff7ed */
+    .detalle-proyectos__item-dot { background: var(--status-warning-bg-solid); }
   }
 
   .estado--activo {
     color: var(--status-success-text);
     border-color: var(--status-success-border);
     background: var(--status-success-bg-soft);
-    .detalle-proyectos__item-dot { background: #26BF4D; }
+    .detalle-proyectos__item-dot { background: var(--status-success-bg-solid); } /* antes #26BF4D */
   }
 }
+
 

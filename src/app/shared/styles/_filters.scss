@@ -83,7 +83,12 @@
   &:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: var(--focus-ring-primary); /* antes rgba(59,130,246,0.1) */
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
   }
 
   &::placeholder {
@@ -117,8 +122,8 @@
   gap: 8px;
   height: 40px;
   padding: 0 16px;
-  background: var(--primary-color);
-  color: #ffffff;
+  background: var(--primary-fill);   /* fondo de botón primario */
+  color: var(--text-inverse);        /* antes #ffffff */
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -128,7 +133,12 @@
   white-space: nowrap;
 
   &:hover {
-    background: var(--primary-hover);
+    background: var(--primary-fill-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
   }
 }
 

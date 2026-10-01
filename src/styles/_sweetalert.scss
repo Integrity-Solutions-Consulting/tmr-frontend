@@ -4,7 +4,7 @@
 
 // sm - Fondo oscurecido igual que .modal-overlay de la app.
 .swal2-container.tmr-swal-container.swal2-backdrop-show {
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--overlay-bg); /* antes rgba(0,0,0,0.4) — dark: rgba(0,0,0,0.65) */
 }
 
 // sm - Tarjeta: mismo tamaño, radio y sombra que .modal-card (modal de eliminar actividad).
@@ -13,21 +13,21 @@
   max-width: calc(100vw - 32px);
   padding: 32px 28px;
   border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: var(--bg-card);         /* antes #ffffff */
+  box-shadow: var(--elevation-modal); /* antes rgba(0,0,0,0.12) */
   font-family: 'Inter', sans-serif;
   gap: 0;
 }
 
-// sm - Icono: círculo celeste con borde azul y Material Symbol, como .modal-icon.
+// sm - Icono: círculo con borde de marca y Material Symbol, como .modal-icon.
 .swal2-icon.tmr-swal__icon {
   width: 64px;
   height: 64px;
   margin: 0 auto 16px;
-  border: 2px solid #163572 !important;
+  border: 2px solid var(--primary-color) !important; /* antes #163572 */
   border-radius: 50%;
-  background: #EEF3FB;
-  color: #163572 !important;
+  background: var(--primary-light);                  /* antes #EEF3FB */
+  color: var(--primary-color) !important;            /* antes #163572 */
 
   .swal2-icon-content {
     display: flex;
@@ -35,30 +35,30 @@
     justify-content: center;
   }
 
-  // sm - Icono del calendario con la "x" (event_busy) en rojo; el círculo y su borde se mantienen en azul.
+  // sm - Icono de eliminación (event_busy) en rojo semántico.
   .material-symbols-outlined {
     font-size: 32px;
-    color: #dc2626;
+    color: var(--status-danger-text); /* antes #dc2626 */
   }
 }
 
-// El check de una descarga exitosa debe comunicar éxito, no error.
+// El check de una descarga exitosa comunica éxito, no error.
 .swal2-icon.tmr-swal__icon--success {
-  border-color: #16a34a !important;
-  background: #ecfdf3;
+  border-color: var(--status-success-text) !important; /* antes #16a34a */
+  background: var(--status-success-bg-soft);           /* antes #ecfdf3 */
 
-  .material-symbols-outlined { color: #16a34a; }
+  .material-symbols-outlined { color: var(--status-success-text); } /* antes #16a34a */
 }
 
-// Estado de carga: conserva el mismo popup de TMR y no usa el estilo blanco
-// predeterminado de SweetAlert2.
+// Estado de carga.
 .swal2-popup.tmr-swal--loading {
   .swal2-loader {
     width: 32px;
     height: 32px;
     margin: 20px auto 0;
     border-width: 4px;
-    border-color: #3b82f6 transparent #3b82f6 transparent;
+    /* antes #3b82f6 — usa el token sólido del estado info */
+    border-color: var(--status-info-bg-solid) transparent var(--status-info-bg-solid) transparent;
   }
 }
 
@@ -68,19 +68,19 @@
   margin: 0 0 8px;
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-title); /* antes #1a1a2e */
 }
 
-// sm - Mensaje: 14px gris, con el nombre y las fechas resaltados.
+// sm - Mensaje: 14px gris, con nombre y fechas resaltados.
 .swal2-html-container.tmr-swal__text {
   margin: 0;
   padding: 0;
   font-size: 14px;
   line-height: 1.5;
-  color: #6b7280;
+  color: var(--text-muted); /* antes #6b7280 */
 
   strong {
-    color: #1a1a2e;
+    color: var(--text-main); /* antes #1a1a2e */
     font-weight: 600;
   }
 }
@@ -91,66 +91,34 @@
   padding: 0;
 }
 
-// sm - Botón primario: igual al botón principal de los modales (#163572, 40px de alto, radio 8px).
+// sm - Botón primario: igual al botón principal de los modales (40px de alto, radio 8px).
 .tmr-swal__btn-primary {
   flex: 1;
   height: 40px;
   border: none;
   border-radius: 8px;
-  background: #163572;
-  color: #ffffff;
+  background: var(--primary-fill);      /* antes #163572 */
+  color: var(--text-inverse);           /* antes #ffffff */
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
 
-  &:hover { background: #162C56; }
+  &:hover { background: var(--primary-fill-hover); } /* antes #162C56 */
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.3);
+    box-shadow: var(--focus-ring-primary); /* antes rgba(22,53,114,0.3) */
   }
 }
 
-// sm - Tema oscuro: mismos colores que usa la app para .modal-card en html[data-theme="dark"].
+// sm - Dark: los tokens --bg-card, --primary-*, --status-*, --text-* ya cambian
+// automáticamente. Solo se necesita el override del borde de la tarjeta,
+// que en light no existe y en dark sí.
 html[data-theme="dark"] {
-  .swal2-container.tmr-swal-container.swal2-backdrop-show {
-    background: rgba(0, 0, 0, 0.65);
-  }
-
   .swal2-popup.tmr-swal {
-    background: var(--bg-card);
     border: 1px solid var(--border-default);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  }
-
-  .swal2-icon.tmr-swal__icon {
-    background: rgba(59, 130, 246, 0.12);
-    border-color: #3b82f6 !important;
-
-    // sm - Rojo más claro para que el icono se lea bien sobre fondo oscuro.
-    .material-symbols-outlined { color: #f87171; }
-  }
-
-  .swal2-icon.tmr-swal__icon--success {
-    border-color: #22c55e !important;
-    background: rgba(34, 197, 94, 0.12);
-
-    .material-symbols-outlined { color: #4ade80; }
-  }
-
-  .swal2-title.tmr-swal__title { color: #f4f4f5; }
-
-  .swal2-html-container.tmr-swal__text {
-    color: #a1a1aa;
-
-    strong { color: #f4f4f5; }
-  }
-
-  .tmr-swal__btn-primary:hover { background: #122d63; }
-
-  .swal2-popup.tmr-swal--loading .swal2-loader {
-    border-color: #60a5fa transparent #60a5fa transparent;
   }
 }
+

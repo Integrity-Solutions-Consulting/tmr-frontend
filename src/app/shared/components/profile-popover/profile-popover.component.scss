@@ -22,7 +22,7 @@
   border: 1px solid var(--border-default);
   border-radius: 12px;
   background: var(--bg-card);
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--elevation-dropdown); /* antes rgba(15,23,42,0.12) */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -74,6 +74,12 @@
     transition: color 0.15s ease;
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: -2px;
+    border-radius: 8px;
+  }
+
   &:hover {
     background-color: var(--bg-soft) !important;
     color: var(--primary-color) !important;
@@ -92,10 +98,10 @@
 
     &:hover {
       background-color: var(--status-danger-bg-soft) !important;
-      color: #b91c1c !important;
+      color: var(--status-danger-text) !important; /* antes #b91c1c — en dark usa el token oscuro */
 
       .material-icons {
-        color: #b91c1c;
+        color: var(--status-danger-text); /* antes #b91c1c */
       }
     }
   }

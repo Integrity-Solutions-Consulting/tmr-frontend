@@ -38,14 +38,14 @@
     gap: 6px;
     font-size: 12px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-muted); /* antes #6b7280 */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 
     .material-symbols-outlined {
         font-size: 18px;
-        color: #163572;
+        color: var(--primary-color); /* antes #163572 */
     }
 
     &.visible {
@@ -70,13 +70,13 @@
 }
 
 .metrics-bar {
-    background: white;
+    background: var(--bg-card);        /* antes white */
     border-radius: 10px;
     padding: 16px 24px;
     display: flex;
     align-items: center;
     gap: 32px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--elevation-card); /* antes rgba(0,0,0,0.06) */
     flex-wrap: wrap;
 }
 
@@ -101,29 +101,30 @@
         height: 22px;
     }
 
+    /* Chips semánticos: bg-soft + text de cada estado */
     &.blue {
-        background: #EEF3FB;
-        color: #163572;
+        background: var(--primary-light);          /* antes #EEF3FB */
+        color: var(--primary-color);               /* antes #163572 */
     }
 
     &.green {
-        background: #DCFCE7;
-        color: #15803D;
+        background: var(--status-success-bg-soft); /* antes #DCFCE7 */
+        color: var(--status-success-text);         /* antes #15803D */
     }
 
     &.purple {
-        background: #EDE9FE;
-        color: #7C3AED;
+        background: var(--status-purple-bg-soft);  /* antes #EDE9FE */
+        color: var(--status-purple-text);          /* antes #7C3AED */
     }
 
     &.orange {
-        background: #FEF3C7;
-        color: #D97706;
+        background: var(--status-warning-bg-soft); /* antes #FEF3C7 */
+        color: var(--status-warning-text);         /* antes #D97706 */
     }
 
     &.gray {
-        background: #F3F4F6;
-        color: #6B7280;
+        background: var(--status-neutral-bg-soft); /* antes #F3F4F6 */
+        color: var(--status-neutral-text);         /* antes #6B7280 */
     }
 }
 
@@ -136,19 +137,19 @@
 .metric-value {
     font-size: 20px;
     font-weight: 700;
-    color: #1A1A2E;
+    color: var(--text-main);   /* antes #1A1A2E */
     line-height: 1.2;
 }
 
 .metric-name {
     font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-body);   /* antes #374151 */
 }
 
 .metric-desc {
     font-size: 11px;
-    color: #9CA3AF;
+    color: var(--text-muted);  /* antes #9CA3AF */
 }
 
 .metric-icon-img {
@@ -157,30 +158,16 @@
     vertical-align: middle;
 }
 
-// sm - Tema oscuro de los iconos de la barra (movido desde seguimiento.scss).
+// sm - En dark los tokens --status-*-bg-soft y --status-*-text ya tienen sus
+// valores oscuros definidos en html[data-theme="dark"], por lo que los chips
+// NO necesitan override. Solo se conservan los filtros SVG para <img>.
 :host-context(html[data-theme="dark"]) {
   .metric-icon-wrap {
-    &.blue, &.green, &.purple, &.orange, &.gray {
-      background-color: var(--phase6-bg-surface);
-    }
-    &.blue, &.purple {
-      color: var(--phase6-primary);
-    }
-    &.green {
-      color: #4ade80;
-    }
-    &.orange {
-      color: #fbbf24;
-    }
-    &.gray {
-      color: var(--phase6-text-muted);
-    }
-    
-    /* Filtros SVG para los iconos de metricas que usan <img> */
-    &.blue img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
-    &.green img { filter: brightness(0) saturate(100%) invert(77%) sepia(43%) saturate(583%) hue-rotate(85deg) brightness(97%) contrast(85%); }
+    /* Filtros SVG para los iconos que usan <img> */
+    &.blue img   { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
+    &.green img  { filter: brightness(0) saturate(100%) invert(77%) sepia(43%) saturate(583%) hue-rotate(85deg) brightness(97%) contrast(85%); }
     &.purple img { filter: brightness(0) saturate(100%) invert(67%) sepia(50%) saturate(1478%) hue-rotate(189deg) brightness(101%) contrast(97%); }
     &.orange img { filter: brightness(0) saturate(100%) invert(79%) sepia(35%) saturate(836%) hue-rotate(345deg) brightness(102%) contrast(98%); }
-    &.gray img { filter: brightness(0) saturate(100%) invert(67%) sepia(16%) saturate(232%) hue-rotate(174deg) brightness(90%) contrast(86%); }
+    &.gray img   { filter: brightness(0) saturate(100%) invert(67%) sepia(16%) saturate(232%) hue-rotate(174deg) brightness(90%) contrast(86%); }
   }
 }
