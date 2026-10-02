@@ -104,55 +104,55 @@ h3 {
 }
 
 .day-cell:hover {
-  background: rgba(22, 53, 114, 0.04);
+  background: var(--bg-hover); /* antes rgba(22, 53, 114, 0.04) */
   box-shadow: none;
 }
 
 .day-cell.muted {
-  background: #fbfcfe;
+  background: var(--bg-subtle); /* antes #fbfcfe */
 }
 
 .day-cell.muted .day-number {
-  color: #b1bac8;
+  color: var(--text-disabled); /* antes #b1bac8 */
 }
 
 .day-cell.today {
-  box-shadow: inset 0 0 0 1px rgba(22, 53, 114, 0.18);
-  background: #f9fcff;
+  box-shadow: inset 0 0 0 1px var(--primary-color); /* antes rgba(22, 53, 114, 0.18) */
+  background: var(--primary-light);                 /* antes #f9fcff */
 }
 
 .day-cell.has-holiday {
-  border-color: rgba(16, 42, 86, 0.08);
+  border-color: var(--border-soft); /* antes rgba(16, 42, 86, 0.08) */
 }
 
+/* Feriados Nacionales -> Success */
 .day-cell.day-nacional {
-  background: #f3fbf6;
-  box-shadow: inset 0 0 0 1px rgba(8, 116, 67, 0.08);
+  background: var(--status-success-bg-soft);
+  box-shadow: inset 0 0 0 1px var(--status-success-border);
 }
 
 .day-cell.day-nacional:hover {
-  background: #eef9f3;
-  box-shadow: inset 0 0 0 1px rgba(8, 116, 67, 0.15), 0 8px 18px rgba(8, 116, 67, 0.06);
+  box-shadow: inset 0 0 0 1px var(--status-success-text), var(--elevation-card);
 }
 
+/* Feriados Locales -> Info */
 .day-cell.day-local {
-  background: #f4f8ff;
-  box-shadow: inset 0 0 0 1px rgba(21, 94, 239, 0.08);
+  background: var(--status-info-bg-soft);
+  box-shadow: inset 0 0 0 1px var(--status-info-border);
 }
 
 .day-cell.day-local:hover {
-  background: #eef5ff;
-  box-shadow: inset 0 0 0 1px rgba(21, 94, 239, 0.15), 0 8px 18px rgba(21, 94, 239, 0.06);
+  box-shadow: inset 0 0 0 1px var(--status-info-text), var(--elevation-card);
 }
 
+/* Feriados Religiosos -> Warning */
 .day-cell.day-religioso {
-  background: #fff9f0;
-  box-shadow: inset 0 0 0 1px rgba(181, 71, 8, 0.08);
+  background: var(--status-warning-bg-soft);
+  box-shadow: inset 0 0 0 1px var(--status-warning-border);
 }
 
 .day-cell.day-religioso:hover {
-  background: #fff4e5;
-  box-shadow: inset 0 0 0 1px rgba(181, 71, 8, 0.14), 0 8px 18px rgba(181, 71, 8, 0.06);
+  box-shadow: inset 0 0 0 1px var(--status-warning-text), var(--elevation-card);
 }
 
 .day-number {
@@ -196,25 +196,25 @@ h3 {
 }
 
 .holiday-chip:hover {
-  box-shadow: 0 4px 10px rgba(16, 42, 86, 0.06);
+  box-shadow: var(--elevation-card); /* antes 0 4px 10px rgba(16, 42, 86, 0.06) */
 }
 
 .type-nacional {
-  color: #0a6f43;
-  border-color: #cbeedb;
-  background: #eaf8f1;
+  color: var(--status-success-text);
+  border-color: var(--status-success-border);
+  background: var(--bg-card); /* Fondo blanco para contrastar sobre la celda bg-soft */
 }
 
 .type-local {
-  color: #1551c8;
-  border-color: #d6e6ff;
-  background: #edf5ff;
+  color: var(--status-info-text);
+  border-color: var(--status-info-border);
+  background: var(--bg-card);
 }
 
 .type-religioso {
-  color: #9a4a08;
-  border-color: #f6dfbd;
-  background: #fff4e5;
+  color: var(--status-warning-text);
+  border-color: var(--status-warning-border);
+  background: var(--bg-card);
 }
 
 ::ng-deep .holiday-menu.mat-mdc-menu-panel {

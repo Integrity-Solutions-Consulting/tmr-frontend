@@ -1,7 +1,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--overlay-bg); /* antes rgba(0, 0, 0, 0.4) */
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -66,6 +66,11 @@
       color: var(--text-body);
       background: var(--bg-soft);
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
   }
 
   &__body {
@@ -110,12 +115,17 @@
     transition: all 0.15s;
     border: none;
 
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+
     &--save {
-      background: var(--primary-color);
+      background: var(--primary-fill); /* antes var(--primary-color) */
       color: var(--text-inverse);
 
       &:hover {
-        background: var(--primary-hover);
+        background: var(--primary-fill-hover); /* antes var(--primary-hover) */
       }
     }
   }
@@ -220,7 +230,7 @@
 
 .float-field__input--error,
 .float-select__input--error {
-  border-color: #dc2626;
+  border-color: var(--status-danger-border); /* antes #dc2626 */
 
   &:focus {
     box-shadow: var(--validation-ring-danger);

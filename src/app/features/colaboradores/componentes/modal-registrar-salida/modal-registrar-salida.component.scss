@@ -1,7 +1,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--overlay-backdrop);
+  background: var(--overlay-bg); /* antes var(--overlay-backdrop) que no existe */
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -66,6 +66,11 @@
       color: var(--text-body);
       background: var(--bg-soft);
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
   }
 
   &__body {
@@ -112,6 +117,11 @@
     transition: all 0.15s;
     border: none;
 
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
+    }
+
     &--cancel {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
@@ -123,11 +133,11 @@
     }
 
     &--save {
-      background: var(--primary-color);
+      background: var(--primary-fill); /* antes var(--primary-color) */
       color: var(--text-inverse);
 
       &:hover:not(:disabled) {
-        background: var(--primary-hover);
+        background: var(--primary-fill-hover); /* antes var(--primary-hover) */
       }
 
       &:disabled {
@@ -447,6 +457,11 @@
     &:hover {
       color: var(--text-body);
       background: var(--bg-soft);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 2px;
     }
 
     .material-icons {

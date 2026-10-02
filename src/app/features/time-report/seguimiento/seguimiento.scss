@@ -64,12 +64,15 @@
         background-color: var(--bg-app) !important;
     }
 
+    &:focus-visible {
+        outline: 2px solid var(--focus-color) !important;
+        outline-offset: 2px !important;
+    }
+
     &:disabled {
         opacity: 0.5 !important;
         cursor: not-allowed !important;
     }
-
-    
 }
 
 /* ---- FILTERS ---- */
@@ -141,10 +144,10 @@
     width: min(380px, calc(100vw - 32px));
     padding: 16px 18px 14px;
     border-radius: 12px;
-    background: rgba(#163572, 0.94);
+    background: var(--primary-fill); /* antes rgba(#163572, 0.94) */
     backdrop-filter: blur(6px);
-    color: #ffffff;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+    color: var(--text-inverse); /* antes #ffffff */
+    box-shadow: var(--elevation-dropdown); /* antes 0 12px 32px rgba(15, 23, 42, 0.28) */
     transform: translateX(-50%);
     animation: seguimiento-toast-in 0.25s ease-out;
 
@@ -161,7 +164,7 @@
 
 .download-progress-icon {
     font-size: 24px;
-    color: #ffffff;
+    color: var(--text-inverse); /* antes #ffffff */
     animation: seguimiento-icon-pulse 1.4s ease-in-out infinite;
 }
 
@@ -181,6 +184,7 @@
     position: relative;
     height: 4px;
     border-radius: 999px;
+    /* Transparencia blanca intencional sobre fondo primario */
     background: rgba(255, 255, 255, 0.25);
     overflow: hidden;
 }
@@ -188,7 +192,7 @@
 .download-progress-fill {
     height: 100%;
     border-radius: inherit;
-    background: #ffffff;
+    background: var(--text-inverse); /* antes #ffffff */
     transition: width 0.3s ease;
 
     // sm - Barra indeterminada: un segmento que se desliza mientras el servidor genera el archivo.
@@ -222,7 +226,7 @@
     border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 8px;
     background: transparent;
-    color: #ffffff;
+    color: var(--text-inverse); /* antes #ffffff */
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -230,6 +234,11 @@
 
     &:hover:not(:disabled) {
         background: rgba(255, 255, 255, 0.14);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--text-inverse);
+        outline-offset: 2px;
     }
 
     &:disabled {
