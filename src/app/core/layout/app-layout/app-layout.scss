@@ -1,7 +1,9 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f7fb;
+  // sm - Se restaura el fondo anterior al refactor de colores (#f5f7fb en modo claro) con --bg-layout.
+  // background: var(--bg-hover);
+  background: var(--bg-layout);
 }
 
 .layout__overlay {
@@ -29,7 +31,9 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #f5f7fb;
+  // sm - Se restaura el fondo anterior al refactor de colores (#f5f7fb en modo claro) con --bg-layout.
+  // background: var(--bg-hover);
+  background: var(--bg-layout);
 }
 
 .layout__content {

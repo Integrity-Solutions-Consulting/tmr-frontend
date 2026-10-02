@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #737373;
+  color: var(--text-subtle);
   transition: background 0.15s, color 0.15s;
 }
 
@@ -25,9 +25,9 @@
   line-height: 20px;
 }
 
-.action-menu__trigger:hover {
-  background: #f5f5f5;
-  color: #163572;
+.action-menu__trigger\:hover {
+  background: var(--bg-hover);
+  color: var(--primary-color);
 }
 
 .action-menu__item {
@@ -36,7 +36,7 @@
   line-height: normal !important;
   padding: 10px 14px !important;
   border-radius: 8px !important;
-  color: #424242 !important;
+  color: var(--text-main) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
@@ -51,7 +51,7 @@
   width: 20px;
   height: 20px;
   margin-right: 0;
-  color: #424242;
+  color: var(--text-main);
   font-size: 20px;
   line-height: 20px;
   vertical-align: middle;
@@ -59,41 +59,41 @@
 
 ::ng-deep .action-menu__item mat-icon,
 ::ng-deep .action-menu__item .mat-icon {
-  color: #424242 !important;
+  color: var(--text-main) !important;
 }
 
-.action-menu__item:hover {
-  background: #f3f4f6 !important;
-  color: #424242 !important;
+.action-menu__item\:hover {
+  background: var(--bg-soft) !important;
+  color: var(--text-main) !important;
 }
 
-.action-menu__item:disabled {
-  color: #b6b6b6 !important;
+.action-menu__item\:disabled {
+  color: var(--text-disabled) !important;
   cursor: not-allowed;
 }
 
-.action-menu__item:disabled mat-icon {
-  color: #b6b6b6;
+.action-menu__item\:disabled mat-icon {
+  color: var(--text-disabled);
 }
 
-.action-menu__item:disabled:hover {
+.action-menu__item\:disabled\:hover {
   background: transparent !important;
 }
 
 .action-menu__item--danger {
-  color: #424242 !important;
+  color: var(--text-main) !important;
 }
 
-.action-menu__item--danger:hover {
-  background: #f3f4f6 !important;
-  color: #424242 !important;
+.action-menu__item--danger\:hover {
+  background: var(--bg-soft) !important;
+  color: var(--text-main) !important;
 }
 
 :host ::ng-deep .action-menu__panel.mat-mdc-menu-panel {
   min-width: 140px !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  background: var(--bg-card) !important;
+  box-shadow: var(--elevation-card);
   overflow: visible;
 }
 
@@ -107,3 +107,4 @@
   gap: 10px !important;
   color: inherit !important;
 }
+

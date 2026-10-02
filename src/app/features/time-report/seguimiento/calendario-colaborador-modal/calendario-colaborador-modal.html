@@ -10,6 +10,17 @@
         </button>
     </div>
 
+    <!-- sm - Desglose de horas por proyecto del colaborador en el rango de Seguimiento (solo si tiene más de uno;
+         con un único proyecto ya coincide con "Nro de Horas" de la tabla, no aporta nada nuevo). -->
+    <div class="calcol-modal__proyectos" *ngIf="(data.colaborador.proyectos?.length ?? 0) > 1">
+        <span class="calcol-modal__proyectos-label">Horas por proyecto:</span>
+        <div class="calcol-modal__proyectos-list">
+            <span class="calcol-modal__proyecto-chip" *ngFor="let p of data.colaborador.proyectos">
+                {{ p.nombre }} <strong>{{ p.horasRegistradas | horasFormat }}</strong>
+            </span>
+        </div>
+    </div>
+
     <!-- sm - idEmpleadoOverride: carga las actividades de este colaborador (no las del usuario logueado). -->
     <!-- sm - soloLectura: bloquea agregar/editar actividades; la navegación entre meses sigue disponible. -->
     <div class="calcol-modal__body">

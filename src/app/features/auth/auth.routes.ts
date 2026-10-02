@@ -17,3 +17,4 @@ export const authRoutes: Routes = [
     component: ResetPasswordComponent,
   },
 ];
+//comentario xd

@@ -1,84 +1,93 @@
-<div class="filtros" (click)="cerrarDropdowns()">
+<div style="display: contents" (click)="cerrarDropdowns()">
 
-  <mat-form-field appearance="outline" class="filtros__search">
-    <span class="filtros__search-icon"></span>
-    <input
-      matInput
-      [(ngModel)]="busqueda"
-      (ngModelChange)="emitirFiltros()"
-      placeholder="Buscar proyecto, cliente, codigo...">
-  </mat-form-field>
-
-  <!-- Filtro Estado -->
-  <div class="filtros__dropdown-wrapper" [class.active]="estadosSeleccionados.length > 0" (click)="toggleEstadoDropdown($event)">
-    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    <span class="filtros__dropdown-label">{{ labelEstado }}</span>
-    @if (mostrarEstadoDropdown) {
-      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
-        @for (estado of estadosFiltro; track estado) {
-          <div class="filtros__dropdown-option" (click)="toggleEstado(estado, $event)">
-            <div class="filtros__checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
-              @if (estaEstadoSeleccionado(estado)) {
-                <span class="material-icons">check</span>
-              }
-            </div>
-            <span>{{ estado }}</span>
-          </div>
+    <!-- Búsqueda -->
+    <div class="filter-group" style="flex: 2; min-width: 300px;">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar proyecto, cliente, codigo..." [(ngModel)]="busqueda" (ngModelChange)="emitirFiltros()" autocomplete="off" />
+        @if (busqueda) {
+           <span class="material-icons select-chevron" (click)="busqueda=''; emitirFiltros()" style="cursor:pointer; pointer-events: auto;">close</span>
         }
-        <div class="filtros__dropdown-limpiar" (click)="limpiarEstados($event)">Limpiar filtro</div>
       </div>
-    }
-  </div>
+    </div>
 
-  <!-- Filtro Seguimiento -->
-  <div class="filtros__dropdown-wrapper" [class.active]="seguimientoSeleccionados.length > 0" (click)="toggleSeguimientoDropdown($event)">
-    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    <span class="filtros__dropdown-label">{{ labelSeguimiento }}</span>
-    @if (mostrarSeguimientoDropdown) {
-      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
-        @for (e of seguimientoOpciones; track e.id) {
-          <div class="filtros__dropdown-option" (click)="toggleSeguimiento(e.id, $event)">
-            <div class="filtros__checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
-              @if (estaSeguimientoSeleccionado(e.id)) {
-                <span class="material-icons">check</span>
-              }
-            </div>
-            <span>{{ e.nombre }}</span>
-          </div>
-        }
-        <div class="filtros__dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
+    <!-- Filtro Estado -->
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+      <label class="filter-label">Estado</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelEstado }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+         </div>
       </div>
-    }
-  </div>
+      @if (mostrarEstadoDropdown) {
+        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (estado of estadosFiltro; track estado) {
+              <div class="dropdown-opcion" (click)="toggleEstado(estado, $event)">
+                <div class="dropdown-checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
+                  @if (estaEstadoSeleccionado(estado)) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="opcion-label">{{ estado }}</span>
+              </div>
+            }
+          <div class="dropdown-limpiar" (click)="limpiarEstados($event)">Limpiar filtro</div>
+        </div>
+      }
+    </div>
 
-  <!-- Filtro Tipo -->
-  <div class="filtros__dropdown-wrapper" [class.active]="tiposSeleccionados.length > 0" (click)="toggleTipoDropdown($event)">
-    <svg class="filtros__dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    <span class="filtros__dropdown-label">{{ labelTipo }}</span>
-    @if (mostrarTipoDropdown) {
-      <div class="filtros__dropdown" (click)="$event.stopPropagation()">
-        @for (t of tipos; track t.id) {
-          <div class="filtros__dropdown-option" (click)="toggleTipo(t.nombre, $event)">
-            <div class="filtros__checkbox" [class.checked]="estaTipoSeleccionado(t.nombre)">
-              @if (estaTipoSeleccionado(t.nombre)) {
-                <span class="material-icons">check</span>
-              }
-            </div>
-            <span>{{ t.nombre }}</span>
-          </div>
-        }
-        <div class="filtros__dropdown-limpiar" (click)="limpiarTipos($event)">Limpiar filtro</div>
+    <!-- Filtro Seguimiento -->
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleSeguimientoDropdown($event)">
+      <label class="filter-label">Seguimiento</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelSeguimiento }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+         </div>
       </div>
-    }
-  </div>
+      @if (mostrarSeguimientoDropdown) {
+        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (e of seguimientoOpciones; track e.id) {
+              <div class="dropdown-opcion" (click)="toggleSeguimiento(e.id, $event)">
+                <div class="dropdown-checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
+                  @if (estaSeguimientoSeleccionado(e.id)) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="opcion-label">{{ e.nombre }}</span>
+              </div>
+            }
+          <div class="dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
+        </div>
+      }
+    </div>
+
+    <!-- Filtro Tipo -->
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleTipoDropdown($event)">
+      <label class="filter-label">Tipo</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelTipo }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+         </div>
+      </div>
+      @if (mostrarTipoDropdown) {
+        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (t of tipos; track t.id) {
+              <div class="dropdown-opcion" (click)="toggleTipo(t.nombre, $event)">
+                <div class="dropdown-checkbox" [class.checked]="estaTipoSeleccionado(t.nombre)">
+                  @if (estaTipoSeleccionado(t.nombre)) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="opcion-label">{{ t.nombre }}</span>
+              </div>
+            }
+          <div class="dropdown-limpiar" (click)="limpiarTipos($event)">Limpiar filtro</div>
+        </div>
+      }
+    </div>
 
 </div>

@@ -1,6 +1,11 @@
+@use 'sass:color';
+
 .filtros {
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(140px, 180px) minmax(140px, 180px) minmax(140px, 180px);
+  grid-template-columns: minmax(320px, 1fr) minmax(140px, 180px) minmax(140px, 180px) minmax(
+      140px,
+      180px
+    );
   gap: 12px;
   align-items: center;
   justify-items: stretch;
@@ -8,11 +13,17 @@
   max-width: 980px;
   margin: 0 auto;
 
-  ::ng-deep .mat-mdc-form-field { width: 100%; }
+  /* ==========================================================
+      Angular Material - Form Field
+      ========================================================== */
+
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
 
   ::ng-deep .mat-mdc-text-field-wrapper {
     height: 40px;
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 8px;
     box-shadow: none;
   }
@@ -28,36 +39,61 @@
     padding-bottom: 8px !important;
   }
 
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
 
   ::ng-deep .mat-mdc-input-element {
-    color: #737373;
+    color: var(--text-main);
     font-size: 13px;
     font-weight: 500;
   }
 
   ::ng-deep .mat-mdc-input-element::placeholder {
-    color: #9ca3af;
+    color: var(--text-muted) !important;
     font-size: 13px;
     font-weight: 400;
+    opacity: 1 !important;
   }
+  ::ng-deep .mat-mdc-input-element::-webkit-input-placeholder {
+    color: var(--text-muted) !important;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 1 !important;
+  }
+  ::ng-deep .mat-mdc-input-element::-moz-placeholder {
+    color: var(--text-muted) !important;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 1 !important;
+  }
+
+  /* ==========================================================
+      Outline
+      ========================================================== */
 
   ::ng-deep .mdc-notched-outline__leading,
   ::ng-deep .mdc-notched-outline__notch,
   ::ng-deep .mdc-notched-outline__trailing {
-    border-color: #e5e7eb !important;
+    border-color: var(--border-default) !important;
   }
+
+  /* ==========================================================
+      Estado Focus
+      ========================================================== */
 
   ::ng-deep .mdc-text-field--focused {
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-color: #163572 !important;
+      border-color: var(--primary-color) !important;
     }
   }
 }
 
-// ── Buscador ──────────────────────────────────────────────────────────────
+/* ============================================================
+    BUSCADOR
+    ============================================================ */
 
 .filtros__search {
   position: relative;
@@ -74,7 +110,7 @@
   z-index: 2;
   width: 13px;
   height: 13px;
-  border: 1.7px solid #737373;
+  border: 1.7px solid var(--text-muted);
   border-radius: 999px;
 
   &::after {
@@ -85,12 +121,14 @@
     width: 5px;
     height: 1.7px;
     border-radius: 999px;
-    background: #737373;
+    background: var(--text-main);
     transform: rotate(45deg);
   }
 }
 
-// ── Dropdown wrapper ──────────────────────────────────────────────────────
+/* ============================================================
+    DROPDOWN - WRAPPER
+    ============================================================ */
 
 .filtros__dropdown-wrapper {
   position: relative;
@@ -100,27 +138,37 @@
   gap: 6px;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--bg-card);
   cursor: pointer;
   user-select: none;
-  // color aquí controla el SVG vía currentColor
-  color: #737373;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+  /*
+    * Controla el SVG mediante currentColor.
+    */
+  color: var(--text-muted);
+
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
 
   &.active {
-    border-color: #163572;
-    background: #f0f4ff;
-    color: #163572;  // el SVG hereda este color automáticamente
+    border-color: var(--primary-color);
+    background: var(--bg-hover);
+    color: var(--primary-color);
 
     .filtros__dropdown-label {
-      color: #163572;
+      color: var(--primary-color);
     }
   }
 }
 
-// SVG hereda color del wrapper via currentColor — sin filter, sin fill manual
+/* ============================================================
+    ICONO DEL DROPDOWN
+    ============================================================ */
+
 .filtros__dropdown-icon {
   width: 15px;
   height: 15px;
@@ -128,9 +176,13 @@
   display: block;
 }
 
+/* ============================================================
+    LABEL DEL DROPDOWN
+    ============================================================ */
+
 .filtros__dropdown-label {
   font-size: 13px;
-  color: #737373;
+  color: var(--text-muted);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -139,20 +191,26 @@
   transition: color 0.15s;
 }
 
-// ── Dropdown panel ────────────────────────────────────────────────────────
+/* ============================================================
+    PANEL DEL DROPDOWN
+    ============================================================ */
 
 .filtros__dropdown {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: var(--elevation-card);
   min-width: 200px;
   z-index: 200;
   padding: 8px;
 }
+
+/* ============================================================
+    OPCIONES DEL DROPDOWN
+    ============================================================ */
 
 .filtros__dropdown-option {
   display: flex;
@@ -162,16 +220,22 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
-  color: #737373;
+  color: var(--text-muted);
 
-  &:hover { background: #f5f5f5; }
+  &:hover {
+    background: var(--bg-hover);
+  }
 }
+
+/* ============================================================
+    CHECKBOX
+    ============================================================ */
 
 .filtros__checkbox {
   width: 16px;
   height: 16px;
   min-width: 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-default);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -179,43 +243,343 @@
   flex-shrink: 0;
 
   &.checked {
-    background: #163572;
-    border-color: #163572;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
   }
 
   .material-icons {
     font-size: 12px;
-    color: #ffffff;
+    color: var(--text-inverse);
   }
 }
+
+/* ============================================================
+    LIMPIAR DROPDOWN
+    ============================================================ */
 
 .filtros__dropdown-limpiar {
   padding: 8px;
   font-size: 13px;
-  color: #737373;
+  color: var(--text-muted);
   cursor: pointer;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-default);
   margin-top: 4px;
   text-align: center;
 
-  &:hover { background: #f5f5f5; border-radius: 6px; }
+  &:hover {
+    background: var(--bg-hover);
+    border-radius: 6px;
+  }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────
+/* ============================================================
+    RESPONSIVE - DESKTOP
+    ============================================================ */
 
 @media (max-width: 1440px) {
-  .filtros { grid-template-columns: minmax(300px, 1fr) 132px 110px; }
+  .filtros {
+    grid-template-columns: minmax(300px, 1fr) 132px 110px;
+  }
 }
+
+/* ============================================================
+    RESPONSIVE - TABLET
+    ============================================================ */
 
 @media (max-width: 1024px) {
-  .filtros { grid-template-columns: minmax(280px, 1fr) 132px 110px; gap: 12px; }
+  .filtros {
+    grid-template-columns: minmax(280px, 1fr) 132px 110px;
+    gap: 12px;
+  }
 }
+
+/* ============================================================
+    RESPONSIVE - MOBILE
+    ============================================================ */
 
 @media (max-width: 768px) {
-  .filtros { grid-template-columns: 1fr 1fr; }
-  .filtros__search { grid-column: 1 / -1; }
+  .filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filtros__search {
+    grid-column: 1 / -1;
+  }
 }
 
+/* ============================================================
+    RESPONSIVE - MOBILE PEQUEÑO
+    ============================================================ */
+
 @media (max-width: 480px) {
-  .filtros { grid-template-columns: 1fr; gap: 10px; }
+  .filtros {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
+
+/* ============================================================ FILTERS CARD ============================================================ */
+.filters-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-end ;
+    gap: 16px ;
+    flex-wrap: wrap;
+    box-shadow: var(--elevation-card);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column ;
+    align-items: flex-start ;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-input-wrapper {
+    position: relative ;
+    width: 100%;
+
+     &:focus-within .filter-icon {
+        color: var(--primary-color) ;
+    }
+
+    
+}
+
+.filter-input {
+    width: 100% ;
+    padding: 10px 16px ;
+    background-color: var(--input-bg) ;
+    border: 1px solid var(--border-input) ;
+    border-radius: 12px ;
+    outline: none ;
+    font-size: 14px ;
+    font-weight: 500 ;
+    color: var(--text-muted) ;
+    font-family: 'Inter', sans-serif ;
+    transition: all 0.2s ;
+    box-sizing: border-box ;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) ;
+    }
+
+    
+}
+
+.filter-input-wrapper .filter-input {
+    padding-left: 40px ;
+}
+
+.filter-icon {
+    position: absolute ;
+    left: 12px ;
+    top: 50% ;
+    transform: translateY(-50%) ;
+    color: var(--text-muted) ;
+    transition: color 0.2s ;
+    width: 18px ;
+    height: 18px ;
+    pointer-events: none ;
+}
+
+/* Client select */
+.filter-select {
+    width: 100% ;
+    padding: 10px 32px 10px 40px ;
+    background-color: var(--input-bg) ;
+    border: 1px solid var(--border-input) ;
+    border-radius: 12px ;
+    outline: none ;
+    font-size: 14px ;
+    font-weight: 500 ;
+    color: var(--text-main) ;
+    font-family: 'Inter', sans-serif ;
+    transition: all 0.2s ;
+    box-sizing: border-box ;
+    appearance: none ;
+    -webkit-appearance: none ;
+    cursor: pointer ;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) ;
+    }
+
+    
+}
+
+.select-chevron {
+    position: absolute ;
+    right: 12px ;
+    top: 50% ;
+    transform: translateY(-50%) ;
+    color: var(--text-muted) ;
+    font-size: 18px ;
+    width: 18px ;
+    height: 18px ;
+    pointer-events: none ;
+}
+
+/* Date groups */
+.date-group {
+    flex: none ;
+    width: 160px ;
+}
+
+.filter-label {
+    display: block ;
+    font-size: 11px ;
+    text-transform: uppercase ;
+    font-weight: 700 ;
+    color: var(--text-muted) ;
+    letter-spacing: 0.05em ;
+    margin-bottom: 8px ;
+    margin-left: 4px ;
+    font-family: 'Inter', sans-serif ;
+}
+
+/* Descargar button */
+.btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-disabled);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+
+     .download-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.enabled {
+        background: var(--bg-card);
+        color: var(--primary-color);
+        border: 1px solid var(--border-soft);
+        cursor: pointer;
+
+        .download-icon {
+            color: var(--primary-color);
+        }
+
+        &:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+    }
+
+    &.loading {
+        color: var(--primary-color);
+        cursor: wait;
+        opacity: 0.8;
+    }
+
+    
+}
+
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+
+.btn-agregar {
+    background: var(--primary-color) ;
+    color: var(--text-inverse) ;
+    border-color: var(--primary-color) ;
+
+    &:hover {
+        background: var(--primary-hover) ;
+        border-color: var(--primary-hover) ;
+    }
+
+    .download-icon {
+        color: var(--text-inverse) ;
+    }
+}
+
+/* Dropdown Estado from Lideres (no !important) */
+.dropdown-estado {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  box-shadow: var(--elevation-dropdown);
+  min-width: 180px;
+  z-index: 100;
+  padding: 8px;
+}
+
+.dropdown-opcion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-muted);
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+  }
+}
+
+.dropdown-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-default);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-card);
+
+  &.checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .material-icons {
+    font-size: 12px;
+    color: var(--text-inverse);
+  }
+}
+
+.dropdown-limpiar {
+  padding: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-top: 1px solid var(--border-default);
+  margin-top: 4px;
+  text-align: center;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+    border-radius: 6px;
+  }
+}
+

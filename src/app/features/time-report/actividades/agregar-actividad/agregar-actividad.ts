@@ -57,6 +57,13 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     public esEdicion = false;
     public mostrarEliminar = false;
     public errorEliminar: string | null = null;
+
+    // sm - Error al guardar (ej. proyecto sin asignación o fecha fuera de la asignación). Antes la ventana se cerraba
+    // sin esperar la respuesta y el error quedaba oculto en la consola.
+    public errorGuardar: string | null = null;
+    public guardando = false;
+    // sm - En actividades recurrentes, si una parte de los días ya se guardó no se permite volver a guardar (duplicaría).
+    public guardadoParcial = false;
     public mostrarConfirmacionHoras = false;
 
     // Signals para llenar los dropdowns desde la base de datos
@@ -483,11 +490,24 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             fechaInicio: this.formatFecha(rawValue.fechaInicio),
             fechaFin: this.formatFecha(rawValue.fechaFin)
         };
+        this.errorGuardar = null;
+        this.guardando = true;
+        const alGuardar = () => {
+            this.guardando = false;
+            this.dialogRef.close();
+        };
         if (this.esEdicion) {
-            this.actividadesService.actualizarActividad(this.data.actividad.id, formValue);
+            this.actividadesService.actualizarActividad(this.data.actividad.id, formValue, alGuardar, (mensaje) => {
+                this.guardando = false;
+                this.errorGuardar = mensaje;
+            });
         } else {
-            this.actividadesService.agregarActividad(formValue);
+            this.actividadesService.agregarActividad(formValue, alGuardar, (mensaje, guardadas) => {
+                this.guardando = false;
+                this.errorGuardar = mensaje;
+                this.guardadoParcial = guardadas > 0;
+            });
         }
-        this.dialogRef.close();
+        // this.dialogRef.close(); // sm - ahora se cierra solo cuando el backend confirma que se guardó
     }
 }

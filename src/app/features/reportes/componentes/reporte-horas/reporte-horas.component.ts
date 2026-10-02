@@ -11,10 +11,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
   selector: 'app-reporte-horas',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
+  imports: [TarjetaResumenComponent, CommonModule, FormsModule, HeaderComponent, TablaComponent, MatIconModule, DescargarMenuComponent],
   templateUrl: './reporte-horas.component.html',
   styleUrl: './reporte-horas.component.scss'
 })

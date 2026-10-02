@@ -3,12 +3,12 @@
 // Botones Estándar
 .btn-export {
   padding: 8px 16px;
-  border: 1px solid $color-text-light;
+  border: 1px solid var(--border-default);
   border-radius: $radius-lg;
   font-size: 14px;
   font-weight: 700;
-  color: #475569;
-  background-color: white;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -16,7 +16,7 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background-color: $color-bg-light;
+    background-color: var(--bg-hover);
   }
   
   &:disabled {
@@ -29,8 +29,8 @@
 .filter-input {
   width: 100%;
   padding: 10px 16px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-input);
   border-radius: $radius-lg;
   outline: none;
   font-size: 14px;
@@ -39,7 +39,7 @@
   box-sizing: border-box;
 
   &:focus {
-    box-shadow: 0 0 0 1px $color-primary;
+    box-shadow: 0 0 0 1px var(--primary-color);
   }
 }
 
@@ -53,16 +53,16 @@
     padding: 16px;
     font-size: 13px;
     font-weight: 700;
-    color: $color-text-light;
+    color: var(--text-muted);
     text-transform: uppercase;
-    background-color: rgba($color-bg-light, 0.5);
-    border-bottom: 1px solid #f1f5f9;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-table);
   }
 
   td {
     padding: 16px;
     font-size: 14px;
-    color: #475569;
+    color: var(--text-main);
   }
 
   .text-center { text-align: center; }
@@ -71,10 +71,20 @@
 
 // Tarjetas de Métricas
 .metric-card {
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-card);
   border-radius: $radius-xl;
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+// sm - Contenedor de las tarjetas de resumen (app-tarjeta-resumen) en todas las pantallas: mismo ancho de tarjeta y
+// mismo espaciado en todo el sistema. Las tarjetas de una fila quedan con la misma altura.
+.tarjetas-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 14px;
+  flex-shrink: 0;
 }

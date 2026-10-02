@@ -2,9 +2,9 @@
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-default);
 }
 
 .tabla {
@@ -17,8 +17,8 @@
   overflow: hidden;
 
   &__head {
-    background: #ffffff;
-    border-bottom: 2px solid #e5e5e5;
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border-default);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -29,48 +29,75 @@
     text-align: left;
     font-size: 14px;
     font-weight: 600;
-    color: #737373;
+    color: var(--text-subtle);
     white-space: nowrap;
     user-select: none;
-    background: #ffffff;
+    background: var(--bg-card);
     line-height: 1.2;
 
-    &--center  { text-align: center; }
-    &--actions { width: 48px; padding: 0; }
+    &--center {
+      text-align: center;
+    }
+
+    &--actions {
+      width: 48px;
+      padding: 0;
+    }
   }
 
   &__row {
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--border-default);
     transition: background 0.12s;
 
-    &:last-child { border-bottom: none; }
-    &:hover { background: rgba(22, 53, 114, 0.04); }
-    &--skeleton { pointer-events: none; }
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--bg-hover);
+    }
+
+    &--skeleton {
+      pointer-events: none;
+    }
   }
 
   &__td {
     padding: 13px 16px;
     font-size: 14px;
-    color: #737373;
+    color: var(--text-subtle);
     font-weight: 400;
     vertical-align: middle;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    &--id      { font-weight: 400; }
-    &--nombre  { font-weight: 400; }
-    &--email   { font-size: 14px; }
-    &--center  { text-align: center; }
+    &--id {
+      font-weight: 400;
+    }
+
+    &--nombre {
+      font-weight: 400;
+    }
+
+    &--email {
+      font-size: 14px;
+    }
+
+    &--center {
+      text-align: center;
+    }
+
     &--actions {
       padding: 0 8px;
       text-align: right;
       position: relative;
     }
+
     &--empty {
       text-align: center;
       padding: 64px 24px;
-      color: #9ca3af;
+      color: var(--text-disabled);
     }
   }
 
@@ -78,12 +105,12 @@
     display: inline-block;
     font-size: 12px;
     font-weight: 500;
-    color: #737373;
+    color: var(--text-subtle);
   }
 
   &__empty-icon {
     font-size: 40px;
-    color: #d1d5db;
+    color: var(--border-default);
     display: block;
     margin: 0 auto 12px;
   }
@@ -91,13 +118,13 @@
   &__empty-text {
     font-size: 15px;
     font-weight: 600;
-    color: #737373;
+    color: var(--text-subtle);
     margin: 0 0 4px;
   }
 
   &__empty-sub {
     font-size: 13px;
-    color: #9ca3af;
+    color: var(--text-disabled);
     margin: 0;
   }
 
@@ -116,17 +143,19 @@
     align-items: center;
     transition: background 0.12s;
 
-    &:hover { background: #f3f4f6; }
+    &:hover {
+      background: var(--border-default);
+    }
   }
 
   // Posicionado con fixed desde el TS — escapa de cualquier overflow
   &__dropdown {
     position: fixed;
     min-width: 160px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    box-shadow: var(--elevation-card);
     z-index: 20000;
     overflow: hidden;
     animation: dropFade 0.12s ease forwards;
@@ -143,22 +172,30 @@
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-size: 12.5px;
-    color: #374151;
+    color: var(--text-body);
     text-align: left;
     transition: background 0.1s;
 
-    &:hover { background: #f5f5f5; }
+    &:hover {
+      background: var(--bg-hover);
+    }
 
     &--danger {
-      color: #dc2626;
-      &:hover { background: #fef2f2; }
+      color: var(--status-danger-text);
+
+      &:hover {
+        background: var(--status-danger-bg-soft);
+      }
     }
   }
 }
 
 .skeleton-line {
   height: 14px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg,
+      var(--bg-soft) 25%,
+      var(--bg-hover) 50%,
+      var(--bg-soft) 75%);
   background-size: 200% 100%;
   border-radius: 4px;
   animation: shimmer 1.5s infinite;
@@ -166,60 +203,24 @@
 }
 
 @keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes dropFade {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-:host-context(html[data-theme="dark"]) {
-  .tabla-wrapper {
-    background-color: #202124 ;
-    background: #202124 ;
-    border: 1px solid #3f3f46 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 
-  .tabla {
-    background-color: #202124 ;
-    background: #202124 ;
-
-    &__head {
-      background-color: #202124 ;
-      background: #202124 ;
-      border-bottom: 2px solid #3f3f46 ;
-    }
-
-    &__th {
-      background-color: #202124 ;
-      background: #202124 ;
-      color: #a1a1aa ;
-    }
-
-    &__row {
-      border-bottom: 1px solid #3f3f46 ;
-      &:hover {
-        background: rgba(255, 255, 255, 0.04) ;
-      }
-    }
-
-    &__td {
-      color: #ffffff ;
-    }
-
-    &__dropdown {
-      background-color: #27272a ;
-      background: #27272a ;
-      border-color: #3f3f46 ;
-    }
-
-    &__dropdown-item {
-      color: #ffffff ;
-      &:hover { background: #3f3f46 ; }
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

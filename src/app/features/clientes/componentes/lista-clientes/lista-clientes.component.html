@@ -36,97 +36,33 @@
   <h1 class="titulo-pagina">Clientes</h1>
 
   <!-- Cards resumen -->
-  <div class="cards-resumen" *ngIf="resumen$ | async as resumen">
-
-    <!-- Total clientes -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--total">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/totalClientes.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.total }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Total clientes</span>
-      </div>
-    </div>
-
-    <!-- Activos -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--activos">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/clienteActivos.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.totalActivos }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Activos</span>
-      </div>
-    </div>
-
-    <!-- Inactivos -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--inactivos">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/clienteInactivos.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.totalInactivos }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Inactivos</span>
-      </div>
-    </div>
-
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen" *ngIf="resumen$ | async as resumen">
+    <app-tarjeta-resumen titulo="Total clientes" icono="business" tono="destacado" [valor]="resumen.total" />
+    <app-tarjeta-resumen titulo="Activos" icono="domain_verification" tono="corporativo" [valor]="resumen.totalActivos" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="domain_disabled" tono="neutro" [valor]="resumen.totalInactivos" />
   </div>
 
   <!-- Barra filtros + acciones -->
-  <div class="barra-acciones" [formGroup]="filtrosForm">
+  <div class="filters-card" [formGroup]="filtrosForm">
 
-    <!-- Búsqueda -->
-    <div class="input-busqueda-wrap">
-      <img class="icono-busqueda" src="assets/iconos/buscar.svg" width="16" height="16" alt="buscar"/>
-      <input
-        formControlName="busqueda"
-        class="input-busqueda"
-        placeholder="Buscar por nombre, identificador..."/>
+    <div class="filter-group">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar por nombre, identificador..." formControlName="busqueda" />
+      </div>
     </div>
 
-    <!-- Filtro estado -->
-    <div
-      class="select-estado-wrap"
-      [class.activo]="dropdownEstadoAbierto || estadosSeleccionados.length > 0"
-      (click)="toggleDropdownEstado($event)">
-
-      <img src="assets/iconos/estado-btn.svg" width="16" height="16" alt="estado"/>
-      <span class="select-estado-texto">Estado</span>
-
+    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleDropdownEstado($event)">
+      <label class="filter-label">Estado</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
+            <span *ngIf="estadosSeleccionados.length === 0">Todos</span>
+            <span *ngIf="estadosSeleccionados.length > 0">{{ estadosSeleccionados.join(', ') }}</span>
+            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         </div>
+      </div>
       <div class="dropdown-estado" *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
 
         <!-- Opción Activo -->
@@ -169,13 +105,15 @@
       </div>
     </div>
 
-    <div class="acciones-derecha">
+    <div class="search-spacer" style="flex: 1;"></div>
+
+    <div class="acciones-derecha" style="display: flex; gap: 16px; align-items: flex-end;">
 
       <!-- Botón Descargar -->
-      <div class="btn-descarga-wrap">
-        <button class="btn-descargar" (click)="toggleDescarga($event)">
+      <div class="btn-descarga-wrap" style="position: relative;">
+        <button class="btn-descargar enabled" (click)="toggleDescarga($event)">
           Descargar
-          <img src="assets/iconos/download.svg" width="16" height="16" alt="descargar"/>
+          <span class="material-symbols-outlined download-icon">file_download</span>
         </button>
 
         <app-modal-descarga
@@ -186,9 +124,9 @@
       </div>
 
       <!-- Botón Agregar -->
-      <button class="btn-agregar" (click)="abrirCrear()">
+      <button class="btn-descargar btn-agregar" (click)="abrirCrear()">
         Agregar
-        <img src="assets/iconos/btn-agregar.svg" width="16" height="16" alt="agregar"/>
+        <span class="material-icons download-icon">add</span>
       </button>
 
     </div>

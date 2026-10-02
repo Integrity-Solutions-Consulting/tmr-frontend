@@ -3,76 +3,31 @@
     <h1 class="page-title">Días Festivos</h1>
   </div>
 
-  <div class="cards-row">
-    <article class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--total-feriados">
-            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="17" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-              <circle cx="12" cy="16" r="2" fill="currentColor" stroke="none"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ feriados().length }}</span>
-        </div>
-        <span class="card-label">Total feriados</span>
-      </div>
-    </article>
+  <!-- sm - Tarjetas con el estilo estándar del sistema (el mismo de Usuarios, Roles, Catálogos y Líderes). Solo el ícono
+       de cada tipo lleva su color, el mismo que usa el calendario: Nacional verde, Local azul, Religioso naranja. -->
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen">
+    <app-tarjeta-resumen titulo="Total feriados" icono="calendar_month" tono="destacado" [valor]="feriados().length" />
+    <app-tarjeta-resumen titulo="Activos" icono="check_circle" tono="corporativo" [valor]="activos()" />
+    <app-tarjeta-resumen titulo="Nacionales" icono="public" tono="exito" [valor]="nacionales()" />
+    <app-tarjeta-resumen titulo="Locales" icono="location_on" tono="cian" [valor]="locales()" />
+    <app-tarjeta-resumen titulo="Religiosos" icono="celebration" tono="advertencia" [valor]="religiosos()" />
+  </div>
 
-    <article class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--active">
-            <span class="material-icons">check_circle</span>
-          </div>
-          <span class="card-number">{{ activos() }}</span>
-        </div>
-        <span class="card-label">Activos</span>
-      </div>
-    </article>
-
-    <article class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--nacionales">
-            <span class="material-icons">public</span>
-          </div>
-          <span class="card-number">{{ nacionales() }}</span>
-        </div>
-        <span class="card-label">Nacionales</span>
-      </div>
-    </article>
-
-    <article class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--locales">
-            <span class="material-icons">location_on</span>
-          </div>
-          <span class="card-number">{{ locales() }}</span>
-        </div>
-        <span class="card-label">Locales</span>
-      </div>
-    </article>
-
-    <article class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--religiosos">
-            <span class="material-icons">celebration</span>
-          </div>
-          <span class="card-number">{{ religiosos() }}</span>
-        </div>
-        <span class="card-label">Religiosos</span>
-      </div>
-    </article>
-
-    <div class="add-button-container">
-      <app-boton label="Agregar" icon="add" (clicked)="openModal()" />
-    </div>
+  <!-- sm - Acciones a la derecha, con los botones estándar del sistema (btn-descargar / btn-agregar, como Usuarios). -->
+  <div class="acciones">
+    <!-- sm - Importar feriados de Ecuador del año indicado; luego se revisan/corrigen a mano los traslados por decreto. -->
+    <input type="number" class="importar-anio" min="2000" max="2100" aria-label="Año a importar"
+      title="Año a importar" [value]="anioImportar()" (change)="cambiarAnioImportar($any($event.target).value)" />
+    <button type="button" class="btn-descargar enabled" [class.loading]="importando()" [disabled]="importando()"
+      (click)="importarFeriados()" title="Carga los feriados nacionales de Ecuador del año. No duplica los ya registrados.">
+      {{ importando() ? 'Importando…' : 'Importar' }}
+      <span class="material-icons download-icon" [class.girando]="importando()">{{ importando() ? 'sync' : 'cloud_download' }}</span>
+    </button>
+    <button type="button" class="btn-descargar btn-agregar" (click)="openModal()">
+      Agregar
+      <span class="material-icons download-icon">add</span>
+    </button>
   </div>
 
   @if (eliminarError()) {
