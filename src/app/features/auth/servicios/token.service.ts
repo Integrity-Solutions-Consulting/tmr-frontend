@@ -11,27 +11,27 @@ export class TokenService {
   constructor(private userModulesService: UserModulesService) {}
 
   setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+    sessionStorage.setItem(this.TOKEN_KEY, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return sessionStorage.getItem(this.TOKEN_KEY);
   }
 
   removeToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
   }
 
   setUser(userJson: string): void {
-    localStorage.setItem(this.USER_KEY, userJson);
+    sessionStorage.setItem(this.USER_KEY, userJson);
   }
 
   getUser(): string | null {
-    return localStorage.getItem(this.USER_KEY);
+    return sessionStorage.getItem(this.USER_KEY);
   }
 
   removeUser(): void {
-    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
   }
 
   isTokenValid(): boolean {
@@ -150,8 +150,8 @@ export class TokenService {
   }
 
   clearToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
     this.removeModules();
   }
 }
