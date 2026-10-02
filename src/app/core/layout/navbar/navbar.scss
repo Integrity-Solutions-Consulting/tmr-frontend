@@ -1,3 +1,5 @@
+@use '../../../../styles/ui-patterns' as ui;
+
 :host {
   position: sticky;
   top: 0;
@@ -7,9 +9,8 @@
 
 .navbar {
   height: 64px;
-  background: #ffffff;
-  // El separador se integra con el lienzo neutral del modo claro.
-  border-bottom: 1px solid var(--bg-app, #f5f5f5);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default, #d6e4f0);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -28,7 +29,7 @@
 }
 
 .navbar__profile-text {
-  color: #163572;
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 700;
   line-height: 1;
@@ -36,18 +37,16 @@
 }
 
 .navbar__profile-btn {
+  @include ui.flex-center;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .navbar__profile-btn-icon {
   font-size: 28px;
-  color: #163572;
+  color: var(--primary-color);
   transition: opacity 0.15s ease;
 }
 
@@ -62,7 +61,7 @@
   background: transparent;
   border: none;
   font-size: 24px;
-  color: #163572;
+  color: var(--primary-color);
 }
 
 /* Responsivo - ≤1024px */
@@ -80,7 +79,7 @@
   .navbar__hamburger {
     display: block;
     font-size: 26px;
-    color: #163572;
+    color: var(--primary-color);
     z-index: 1001;
   }
 }
@@ -100,27 +99,13 @@
 }
 
 .navbar__bell-btn {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  @include ui.icon-button;
   position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #f1f5f9;
-  }
 }
 
 .navbar__bell-icon {
   font-size: 24px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: color 0.2s ease;
 
   &--active {
@@ -137,7 +122,7 @@
   height: 8px;
   background-color: #ef4444;
   border-radius: 50%;
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--bg-card);
 }
 
 .navbar__bell-dropdown {
@@ -145,10 +130,7 @@
   top: 42px;
   right: 0;
   width: 290px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  @include ui.surface-card(true);
   z-index: 1000;
   overflow: hidden;
   animation: slideDown 0.2s ease;
@@ -158,9 +140,9 @@
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 700;
-  color: #1e293b;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-card);
+  background-color: var(--bg-soft);
   user-select: none;
 }
 
@@ -176,7 +158,7 @@
   transition: background-color 0.15s ease;
 
   &:hover {
-    background-color: #f8fafc;
+    background-color: var(--bg-hover);
   }
 }
 
@@ -197,12 +179,12 @@
 .navbar__bell-item-title {
   font-size: 13px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .navbar__bell-item-desc {
   font-size: 11.5px;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.4;
   
   strong {
@@ -211,10 +193,8 @@
 }
 
 .navbar__bell-empty {
-  display: flex;
+  @include ui.flex-center;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 28px 16px;
   text-align: center;
   gap: 6px;
@@ -231,7 +211,7 @@
 .navbar__bell-empty-text {
   font-size: 12.5px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 @keyframes ring {

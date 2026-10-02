@@ -38,7 +38,7 @@ export class AuthService {
    * Endpoint público — nunca lanza 401 aunque el RT esté expirado.
    */
   logoutWithRefreshToken(): Observable<void> {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = sessionStorage.getItem('refreshToken');
     return this.http.post<void>(`${this.API_URL}/logout-rt`, { refreshToken });
   }
 
@@ -47,7 +47,7 @@ export class AuthService {
    * Retorna los nuevos AT, RT y expiración
    */
   refreshTokenRequest(): Observable<AuthResponse> {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = sessionStorage.getItem('refreshToken');
     if (!refreshToken) {
       return throwError(() => new Error('No refresh token found'));
     }
@@ -68,8 +68,8 @@ export class AuthService {
       : response.user;
 
     this.tokenService.setToken(response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('tokenExpiresAt', new Date(response.expiresAt).getTime().toString());
+    sessionStorage.setItem('refreshToken', response.refreshToken);
+    sessionStorage.setItem('tokenExpiresAt', new Date(response.expiresAt).getTime().toString());
     this.tokenService.setUser(JSON.stringify(user));
   }
 
@@ -106,7 +106,7 @@ export class AuthService {
   refreshToken(): Observable<{ token: string }> {
     return this.http.post<{ token: string }>(
       `${this.API_URL}/refresh-token`,
-      { RefreshToken: localStorage.getItem('refreshToken') }
+      { RefreshToken: sessionStorage.getItem('refreshToken') }
     );
   }
 
@@ -138,11 +138,11 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
-    const token = localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('accessToken');
     if (!token) {
       return null;
     }
-    const userJson = localStorage.getItem('currentUser');
+    const userJson = sessionStorage.getItem('currentUser');
     return userJson ? JSON.parse(userJson) : null;
   }
 
