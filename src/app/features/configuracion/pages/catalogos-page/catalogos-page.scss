@@ -1,4 +1,4 @@
-scss // ── Layout side-by-side ───────────────────────────────────────────────────
+// ── Layout side-by-side ───────────────────────────────────────────────────
 
 .catalogos-layout {
   display: flex;
@@ -142,98 +142,6 @@ scss // ── Layout side-by-side ───────────────
   margin: 0;
   line-height: 1.1;
   font-family: 'Inter', sans-serif;
-}
-
-// ── Cards resumen ──────────────────────────────────────────────────────────
-
-.cards-row {
-  display: flex;
-  gap: 16px;
-  justify-content: flex-start;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.summary-card {
-  width: 204px;
-  height: 84px;
-  flex: 0 0 204px;
-  background: var(--bg-card);
-  border-radius: 15px;
-  border: 1px solid var(--border-default);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--elevation-card);
-  transition: box-shadow 0.2s;
-  box-sizing: border-box;
-
-  &:hover {
-    box-shadow: var(--elevation-dropdown);
-  }
-}
-
-.card-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.card-top-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-icon {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 8px;
-  background: var(--bg-soft);
-  color: var(--primary-color);
-  align-self: center;
-
-  &--total-items {
-    background: var(--status-danger-bg-soft);
-    color: var(--status-danger-text);
-  }
-
-  &--active {
-    background: var(--status-success-bg-soft);
-    color: var(--status-success-text);
-  }
-
-  &--inactive {
-    background: var(--bg-soft);
-    color: var(--text-secondary);
-  }
-}
-
-.card-number {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--primary-color);
-  line-height: 1.1;
-}
-
-.card-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 0;
-}
-
-.card-svg {
-  width: 20px;
-  height: 20px;
-  color: inherit;
-  stroke: currentColor;
 }
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────

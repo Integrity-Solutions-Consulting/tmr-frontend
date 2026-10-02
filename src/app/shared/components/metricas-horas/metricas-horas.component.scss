@@ -158,13 +158,14 @@
 }
 
 // sm - Tema oscuro de los iconos de la barra (movido desde seguimiento.scss).
+// sm - Los tokens --phase6-* no existían (el estilo oscuro no se aplicaba); se usan los tokens globales equivalentes.
 :host-context(html[data-theme="dark"]) {
   .metric-icon-wrap {
     &.blue, &.green, &.purple, &.orange, &.gray {
-      background-color: var(--phase6-bg-surface);
+      background-color: var(--bg-surface);
     }
     &.blue, &.purple {
-      color: var(--phase6-primary);
+      color: var(--accent-cian);
     }
     &.green {
       color: #4ade80;
@@ -173,7 +174,7 @@
       color: #fbbf24;
     }
     &.gray {
-      color: var(--phase6-text-muted);
+      color: var(--text-muted);
     }
     
     /* Filtros SVG para los iconos de metricas que usan <img> */

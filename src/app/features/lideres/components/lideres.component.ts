@@ -19,6 +19,7 @@ import {
   ActionMenuItem,
 } from '../../../shared/components/action-menu/action-menu.component';
 
+import { TarjetaResumenComponent } from '../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 export interface ProyectoAsignado {
   id?: number;
   codigo: string;
@@ -42,7 +43,7 @@ export interface Lider {
 @Component({
   selector: 'app-lideres',
   standalone: true,
-  imports: [
+  imports: [TarjetaResumenComponent, 
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

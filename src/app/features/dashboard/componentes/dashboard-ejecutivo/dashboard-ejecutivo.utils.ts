@@ -1,4 +1,5 @@
 // sm - Utilidades del Dashboard ejecutivo.
+import { EstadoHistorico, Semaforo } from '../../modelos/dashboard-ejecutivo.model';
 
 export const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -42,4 +43,27 @@ export function formatoHoras(valor: number | null | undefined): string {
 export function formatoPorcentaje(valor: number | null | undefined): string {
   if (valor === null || valor === undefined) return '—';
   return `${Number(valor).toLocaleString('es-EC', { maximumFractionDigits: 2 })} %`;
+}
+
+// sm - Apoyo para las vistas (dashboard y bloque brecha-historico).
+export function claseSemaforo(semaforo: Semaforo | string): string {
+  return `semaforo-${String(semaforo).toLowerCase()}`;
+}
+
+export function etiquetaEstado(estado: EstadoHistorico | 'SinDatos'): string {
+  return {
+    Cumplido: 'Cumplido',
+    AtrasoCarga: 'Atraso de carga (mes abierto)',
+    Incumplido: 'Incumplimiento definitivo',
+    Regularizado: 'Regularizado después del cierre',
+    SinDatos: 'Sin horas esperadas',
+  }[estado];
+}
+
+export function etiquetaMes(anio: number, mes: number): string {
+  return `${MESES_CORTOS[mes - 1]} ${String(anio).slice(2)}`;
+}
+
+export function anchoBarra(porcentaje: number): number {
+  return Math.max(0, Math.min(100, porcentaje));
 }

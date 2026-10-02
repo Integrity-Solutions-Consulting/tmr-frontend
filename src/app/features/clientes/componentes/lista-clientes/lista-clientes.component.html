@@ -36,74 +36,11 @@
   <h1 class="titulo-pagina">Clientes</h1>
 
   <!-- Cards resumen -->
-  <div class="cards-resumen" *ngIf="resumen$ | async as resumen">
-
-    <!-- Total clientes -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--total">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/totalClientes.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.total }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Total clientes</span>
-      </div>
-    </div>
-
-    <!-- Activos -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--activos">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/clienteActivos.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.totalActivos }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Activos</span>
-      </div>
-    </div>
-
-    <!-- Inactivos -->
-    <div class="card-resumen">
-      <div class="card-resumen-body">
-        <div class="card-resumen-top">
-          <div class="card-resumen-icono card-resumen-icono--inactivos">
-            <img
-              src="assets/iconos/Iconos-Sidebar%26Cards/Clientes/clienteInactivos.svg"
-              alt=""
-              width="22"
-              height="22"
-            />
-          </div>
-
-          <span class="card-resumen-numero">
-            {{ resumen.totalInactivos }}
-          </span>
-        </div>
-
-        <span class="card-resumen-label">Inactivos</span>
-      </div>
-    </div>
-
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen" *ngIf="resumen$ | async as resumen">
+    <app-tarjeta-resumen titulo="Total clientes" icono="business" tono="destacado" [valor]="resumen.total" />
+    <app-tarjeta-resumen titulo="Activos" icono="domain_verification" tono="corporativo" [valor]="resumen.totalActivos" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="domain_disabled" tono="neutro" [valor]="resumen.totalInactivos" />
   </div>
 
   <!-- Barra filtros + acciones -->

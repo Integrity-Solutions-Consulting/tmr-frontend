@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
 import { DashboardEjecutivoService } from '../../servicios/dashboard-ejecutivo.service';
@@ -23,11 +23,17 @@ import {
 import {
   MESES,
   MESES_CORTOS,
+  anchoBarra,
+  claseSemaforo,
+  etiquetaEstado,
+  etiquetaMes,
   formatoFecha,
   formatoFechaHora,
   formatoHoras,
   formatoPorcentaje,
 } from './dashboard-ejecutivo.utils';
+import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/brecha-historico.component';
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
 type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
@@ -75,24 +81,12 @@ interface SegmentoPortafolio {
 // sm - Circunferencia de los círculos SVG (r = 42): medidor de cumplimiento y dona del portafolio.
 const CIRCUNFERENCIA = 2 * Math.PI * 42;
 
-// sm - Fila de "Brecha y recurrencia por colaborador" (sección 7.2).
-interface BrechaColaborador {
-  idEmpleado: number;
-  colaborador: string;
-  esperadas: number;
-  reportadas: number;
-  pendientes: number;
-  porcentaje: number;
-  semaforo: Semaforo;
-  mesesConAtraso: number;
-  recurrente: boolean;
-  historial: { etiqueta: string; estado: EstadoHistorico | 'SinDatos'; porcentaje: number | null }[];
-}
+// sm - BrechaColaborador (fila de "Brecha y recurrencia") ahora vive en brecha-historico.component.ts.
 
 @Component({
   selector: 'app-dashboard-ejecutivo',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, HeaderComponent, BrechaHistoricoComponent, TarjetaResumenComponent],
   templateUrl: './dashboard-ejecutivo.component.html',
   styleUrls: ['./dashboard-ejecutivo.component.scss'],
 })
@@ -121,7 +115,6 @@ export class DashboardEjecutivoComponent implements OnInit {
 
   mesesVentana = signal<6 | 12>(6);
   umbralRecurrencia = signal(3);
-  mostrarTodosColaboradores = signal(false);
   mostrarParametros = signal(false);
 
   detalle = signal<DetalleAbierto | null>(null);
@@ -141,7 +134,6 @@ export class DashboardEjecutivoComponent implements OnInit {
     const d = this.datos();
     if (!d) return [];
     const t = d.tarjetas;
-    const horizonte = d.parametros.horizonteDias;
     // sm - Las alertas en cero se muestran en gris para que el color solo llame la atención cuando hay algo que gestionar.
     const alerta = (valor: number, tono: TarjetaIndicador['tono']) => (valor > 0 ? tono : 'neutro');
     return [
@@ -171,26 +163,8 @@ export class DashboardEjecutivoComponent implements OnInit {
         icono: 'rocket_launch', tono: 'destacado',
         definicion: `Proyectos en estado ${d.parametros.estadosActivos} y vigentes a la fecha de corte. Excluye cerrados, cancelados, suspendidos y vencidos.`,
       },
-      {
-        clave: 'Vencido', grupo: 'proyectos', titulo: 'Proyectos vencidos', valor: t.proyectosVencidos, icono: 'event_busy',
-        tono: alerta(t.proyectosVencidos, 'peligro'),
-        definicion: `Proyectos no cerrados (${d.parametros.estadosCerrados}) con fecha de término anterior a la fecha de corte.`,
-      },
-      {
-        clave: 'Proximo', grupo: 'proyectos', titulo: `Próximos a terminar (${horizonte} d)`, valor: t.proyectosProximos,
-        icono: 'schedule', tono: alerta(t.proyectosProximos, 'cian'),
-        definicion: `Proyectos no cerrados cuya fecha de término está entre la fecha de corte y los siguientes ${horizonte} días.`,
-      },
-      {
-        clave: 'Nuevo', grupo: 'proyectos', titulo: 'Proyectos nuevos', valor: t.proyectosNuevos, icono: 'fiber_new',
-        tono: alerta(t.proyectosNuevos, 'corporativo'),
-        definicion: 'Proyectos cuya fecha de inicio (real o planeada) está dentro del mes seleccionado.',
-      },
-      {
-        clave: 'Cerrado', grupo: 'proyectos', titulo: 'Proyectos cerrados', valor: t.proyectosCerrados, icono: 'task_alt',
-        tono: alerta(t.proyectosCerrados, 'corporativo'),
-        definicion: 'Proyectos Completados o Cancelados con fecha efectiva de cierre (fecha fin real) dentro del mes.',
-      },
+      // sm - Vencidos, Próximos a terminar, Nuevos y Cerrados ya no son tarjetas: se repetían con el gráfico
+      // "Estado del portafolio", que muestra esos mismos valores y abre el mismo detalle (pedido de la usuaria 2026-10-02).
       {
         clave: 'desvinculados', grupo: 'proyectos', titulo: 'Con colaboradores desvinculados', valor: t.proyectosConDesvinculados,
         icono: 'report', tono: alerta(t.proyectosConDesvinculados, 'peligro'),
@@ -244,7 +218,6 @@ export class DashboardEjecutivoComponent implements OnInit {
     redondear((this.datos()?.fueraDeAsignacion ?? []).reduce((s, r) => s + r.horas, 0)),
   );
 
-  pestana = signal<'brecha' | 'historico'>('brecha');
 
   colaboradoresConPendientes = computed(
     () => new Set((this.datos()?.cumplimientoDetalle ?? []).filter((f) => f.pendientes > 0).map((f) => f.idEmpleado)).size,
@@ -264,13 +237,24 @@ export class DashboardEjecutivoComponent implements OnInit {
       if (!item) {
         item = {
           idEmpleado: fila.idEmpleado, colaborador: fila.colaborador, esperadas: 0, reportadas: 0, pendientes: 0,
-          porcentaje: 100, semaforo: 'Verde', mesesConAtraso: 0, recurrente: false, historial: [],
+          porcentaje: 100, semaforo: 'Verde', ocasionesConAtraso: 0, detalleAtrasos: '', recurrente: false, historial: [],
         };
         porEmpleado.set(fila.idEmpleado, item);
       }
       item.esperadas += fila.esperadas;
       item.reportadas += fila.reportadas;
       item.pendientes += fila.pendientes;
+    }
+
+    // sm - Colaboradores con atrasos en la ventana pero sin horas esperadas en el periodo (ej. su asignación terminó
+    // el mes anterior). Antes no aparecían en la tabla aunque fueran recurrentes; se agregan sin brecha actual.
+    for (const h of historicoPorEmpleado.values()) {
+      if (h.ocasionesConAtraso === 0 || porEmpleado.has(h.idEmpleado)) continue;
+      porEmpleado.set(h.idEmpleado, {
+        idEmpleado: h.idEmpleado, colaborador: h.colaborador, esperadas: 0, reportadas: 0, pendientes: 0,
+        porcentaje: 100, semaforo: 'Verde', ocasionesConAtraso: 0, detalleAtrasos: '', recurrente: false, historial: [],
+        sinHorasPeriodo: true,
+      });
     }
 
     const lista = [...porEmpleado.values()].map((item) => {
@@ -285,8 +269,13 @@ export class DashboardEjecutivoComponent implements OnInit {
         pendientes: redondear(item.pendientes),
         porcentaje,
         semaforo: semaforoDe(porcentaje),
-        mesesConAtraso: h?.mesesConAtraso ?? 0,
-        recurrente: h?.recurrente ?? false,
+        ocasionesConAtraso: h?.ocasionesConAtraso ?? 0,
+        detalleAtrasos: (h?.cortes ?? [])
+          .filter((c) => c.conAtraso)
+          .map((c) => `${c.quincena === 1 ? '1-15' : '16-fin'} ${MESES_CORTOS[c.mes - 1]} ${c.anio}: ${c.diasIncompletos} días incompletos`)
+          .join(' · '),
+        // sm - El umbral se aplica aquí (no en el backend): cambiarlo es instantáneo, sin recalcular el histórico.
+        recurrente: (h?.ocasionesConAtraso ?? 0) >= this.umbralRecurrencia(),
         historial: mesesHistorico.map((m) => {
           const estadoMes = h?.meses.find((x) => x.anio === m.anio && x.mes === m.mes);
           return {
@@ -300,15 +289,10 @@ export class DashboardEjecutivoComponent implements OnInit {
 
     // sm - Prioridad de seguimiento: recurrentes primero, luego mayor brecha actual.
     return lista
-      .filter((c) => c.pendientes > 0 || c.mesesConAtraso > 0)
+      .filter((c) => c.pendientes > 0 || c.ocasionesConAtraso > 0)
       .sort((a, b) => Number(b.recurrente) - Number(a.recurrente) || b.pendientes - a.pendientes);
   });
 
-  brechaVisible = computed(() =>
-    this.mostrarTodosColaboradores() ? this.brechaColaboradores() : this.brechaColaboradores().slice(0, 8),
-  );
-
-  maximaBrecha = computed(() => Math.max(1, ...this.brechaColaboradores().map((c) => c.pendientes)));
 
   hayFiltrosOpcionales = computed(() => {
     const f = this.filtros();
@@ -326,10 +310,16 @@ export class DashboardEjecutivoComponent implements OnInit {
   // =====================================================================
   // Carga
   // =====================================================================
+  // sm - Petición en curso del dashboard y del histórico. Cada carga cancela la anterior: tardan varios segundos y,
+  // si el usuario cambiaba dos filtros seguidos, la respuesta vieja podía llegar al final y mostrar datos de otro filtro.
+  private subDashboard?: Subscription;
+  private subHistorico?: Subscription;
+
   cargar(): void {
     this.cargando.set(true);
     this.error.set(null);
-    this.servicio
+    this.subDashboard?.unsubscribe();
+    this.subDashboard = this.servicio
       .getDashboard(this.filtros())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -348,13 +338,15 @@ export class DashboardEjecutivoComponent implements OnInit {
 
   cargarHistorico(): void {
     this.cargandoHistorico.set(true);
-    this.servicio
+    this.subHistorico?.unsubscribe();
+    this.subHistorico = this.servicio
       .getHistorico(this.filtros(), this.mesesVentana(), this.umbralRecurrencia())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (h) => {
           this.historico.set(h);
-          this.umbralRecurrencia.set(h.umbralRecurrencia);
+          // this.umbralRecurrencia.set(h.umbralRecurrencia); // sm - el umbral ya se ajusta en pantalla; si se
+          // tomara de la respuesta, un cambio hecho mientras cargaba volvería al valor anterior.
           this.cargandoHistorico.set(false);
         },
         error: () => {
@@ -411,14 +403,17 @@ export class DashboardEjecutivoComponent implements OnInit {
   cambiarVentana(meses: 6 | 12): void {
     if (this.mesesVentana() === meses) return;
     this.mesesVentana.set(meses);
+    // sm - Con menos meses hay menos cortes posibles (2 por mes): el umbral no puede superarlos.
+    this.umbralRecurrencia.set(Math.min(meses * 2, this.umbralRecurrencia()));
     this.cargarHistorico();
   }
 
   cambiarUmbral(valor: string): void {
     const n = Math.round(Number(valor));
     if (!Number.isFinite(n)) return;
-    this.umbralRecurrencia.set(Math.min(this.mesesVentana(), Math.max(1, n)));
-    this.cargarHistorico();
+    // sm - Umbral en ocasiones (cortes): hay dos cortes por mes en la ventana.
+    this.umbralRecurrencia.set(Math.min(this.mesesVentana() * 2, Math.max(1, n)));
+    // this.cargarHistorico(); // sm - ya no hace falta: "recurrente" se recalcula en pantalla con el nuevo umbral.
   }
 
   // sm - Seleccionar un mes del histórico lo convierte en el periodo del dashboard.
@@ -552,19 +547,31 @@ export class DashboardEjecutivoComponent implements OnInit {
     this.abrirDetalle({
       clave: seleccion,
       titulo: titulos[seleccion],
-      definicion: this.tarjetas().find((t) => t.clave === seleccion)?.definicion
-        ?? `Proyectos en estado ${d.parametros.estadosActivos}, vigentes a la fecha de corte, que no están vencidos ni próximos a terminar.`,
+      definicion: this.definicionPortafolio(seleccion),
       columnas,
       filas,
     });
   }
 
   // sm - Tooltip con la definición de cada segmento de la dona (6.3).
+  // sm - Las definiciones viven aquí desde que se quitaron las tarjetas repetidas de Vencidos, Próximos, Nuevos y Cerrados.
   definicionPortafolio(seleccion: SeleccionPortafolio): string {
-    if (seleccion === 'EnProgreso') {
-      return 'Proyectos activos que no están próximos a terminar ni vencidos.';
+    const p = this.datos()?.parametros;
+    if (!p) return '';
+    switch (seleccion) {
+      case 'EnProgreso':
+        return `Proyectos en estado ${p.estadosActivos}, vigentes a la fecha de corte, que no están vencidos ni próximos a terminar.`;
+      case 'Vencido':
+        return `Proyectos no cerrados (${p.estadosCerrados}) con fecha de término anterior a la fecha de corte.`;
+      case 'Proximo':
+        return `Proyectos no cerrados cuya fecha de término está entre la fecha de corte y los siguientes ${p.horizonteDias} días.`;
+      case 'Nuevo':
+        return 'Proyectos cuya fecha de inicio (real o planeada) está dentro del mes seleccionado.';
+      case 'Cerrado':
+        return 'Proyectos Completados o Cancelados con fecha efectiva de cierre (fecha fin real) dentro del mes.';
+      default:
+        return this.tarjetas().find((t) => t.clave === seleccion)?.definicion ?? '';
     }
-    return this.tarjetas().find((t) => t.clave === seleccion)?.definicion ?? '';
   }
 
   // sm - RF 13 / CA 05: al elegir un cliente se muestran solo sus colaboradores incompletos.
@@ -848,6 +855,10 @@ export class DashboardEjecutivoComponent implements OnInit {
         ['Horas esperadas', d.parametros.reglaJornada],
         ['Reparto entre proyectos', d.parametros.reglaReparto],
         ['Vacaciones y permisos', d.parametros.fuenteNovedades],
+        // sm - RF 16: también la regla de recurrencia y de cierre de mes que se aplicaron.
+        ['Recurrencia', `${this.umbralRecurrencia()} o más ocasiones con atraso en los últimos ${this.mesesVentana()} meses. ` +
+          (this.historico()?.reglaRecurrencia ?? '')],
+        ['Cierre de mes', this.historico()?.reglaCierre ?? '—'],
         ['Fuente', 'TMR: actividades diarias, asignaciones de proyectos, colaboradores y feriados'],
       ],
     };
@@ -869,26 +880,21 @@ export class DashboardEjecutivoComponent implements OnInit {
   // =====================================================================
   // Apoyo para la vista
   // =====================================================================
+  // sm - Las funciones de apoyo se movieron a dashboard-ejecutivo.utils.ts (las comparte brecha-historico).
   claseSemaforo(semaforo: Semaforo | string): string {
-    return `semaforo-${String(semaforo).toLowerCase()}`;
+    return claseSemaforo(semaforo);
   }
 
   etiquetaEstado(estado: EstadoHistorico | 'SinDatos'): string {
-    return {
-      Cumplido: 'Cumplido',
-      AtrasoCarga: 'Atraso de carga (mes abierto)',
-      Incumplido: 'Incumplimiento definitivo',
-      Regularizado: 'Regularizado después del cierre',
-      SinDatos: 'Sin horas esperadas',
-    }[estado];
+    return etiquetaEstado(estado);
   }
 
   etiquetaMes(anio: number, mes: number): string {
-    return `${MESES_CORTOS[mes - 1]} ${String(anio).slice(2)}`;
+    return etiquetaMes(anio, mes);
   }
 
   anchoBarra(porcentaje: number): number {
-    return Math.max(0, Math.min(100, porcentaje));
+    return anchoBarra(porcentaje);
   }
 }
 

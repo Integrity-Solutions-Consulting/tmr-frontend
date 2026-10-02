@@ -10,11 +10,12 @@ import { CatalogosFormModal, CatalogoModalData } from '../../components/catalogo
 import { CatalogoMaster, CatalogoDetalle } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 type FiltroEstadoCatalogo = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-catalogos-page',
-  imports: [
+  imports: [TarjetaResumenComponent, 
     CommonModule,
     MatIconModule,
     ActionMenuComponent,

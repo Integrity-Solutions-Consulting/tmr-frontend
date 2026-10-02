@@ -204,17 +204,31 @@ export interface HistoricoEstadoMes {
   estado: EstadoHistorico;
 }
 
+// sm - Corte de quincena (15 o fin de mes): días hábiles incompletos a la fecha del corte.
+export interface HistoricoCorte {
+  anio: number;
+  mes: number;
+  quincena: 1 | 2;
+  fechaCorte: string;
+  diasIncompletos: number;
+  conAtraso: boolean;
+}
+
+// sm - Recurrencia confirmada: se cuentan ocasiones (cortes) con atraso, ya no meses.
 export interface HistoricoColaborador {
   idEmpleado: number;
   colaborador: string;
   meses: HistoricoEstadoMes[];
-  mesesConAtraso: number;
+  cortes: HistoricoCorte[];
+  ocasionesConAtraso: number;
   recurrente: boolean;
 }
 
 export interface DashboardHistorico {
   mesesVentana: number;
   umbralRecurrencia: number;
+  maxDiasIncompletosPorCorte: number;
+  reglaRecurrencia: string;
   reglaCierre: string;
   meses: HistoricoMes[];
   colaboradores: HistoricoColaborador[];

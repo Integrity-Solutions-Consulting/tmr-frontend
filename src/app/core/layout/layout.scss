@@ -45,7 +45,7 @@ $sidebar-width-desktop: 164px;
 .content-area {
     flex: 1;
     padding: 24px;
-    background-color: var(--bg-page);
+    background-color: var(--bg-app); // sm - --bg-page no existía (fondo transparente); el token del fondo es --bg-app
     overflow-y: auto;
     display: flex;
     flex-direction: column;

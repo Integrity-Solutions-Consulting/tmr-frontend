@@ -1,3 +1,5 @@
+@use 'dashboard-comun' as comun;
+
 // sm - Dashboard ejecutivo con disposición "resumen arriba" (inspirada en AdminLTE: small-box de color, medidor y
 // gráficos en dos columnas). Usa los tokens globales de styles.scss para que funcione igual en tema claro y oscuro.
 
@@ -16,12 +18,6 @@
   flex-direction: column;
   gap: 18px;
   min-width: 0;
-}
-
-mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
 }
 
 // =====================================================================
@@ -81,34 +77,6 @@ mat-icon {
   }
 }
 
-.btn-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--accent-cian);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 4px 0;
-  font-family: inherit;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-
-  &:hover:not(:disabled) {
-    text-decoration: underline;
-  }
-
-  &:disabled {
-    color: var(--text-disabled);
-    cursor: default;
-  }
-}
 
 .btn-icono {
   display: inline-flex;
@@ -292,9 +260,6 @@ mat-icon {
   color: var(--text-body);
   line-height: 1.45;
 
-  &.provisional {
-    color: var(--accent-cian);
-  }
 
   .punto {
     margin-left: 6px;
@@ -329,38 +294,6 @@ mat-icon {
   font-size: 12.5px;
 }
 
-.cargando-inicial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 60px 0;
-  color: var(--text-secondary);
-
-  &.compacto {
-    padding: 24px 0;
-  }
-}
-
-.spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid var(--border-default);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: girar 0.9s linear infinite;
-}
-
-.girando {
-  animation: girar 1s linear infinite;
-}
-
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .contenido {
   display: flex;
   flex-direction: column;
@@ -370,69 +303,6 @@ mat-icon {
   &.recargando {
     opacity: 0.6;
   }
-}
-
-.vacio {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 28px 12px;
-  color: var(--text-muted);
-  text-align: center;
-
-  mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: var(--status-success-text);
-  }
-
-  &.error mat-icon {
-    color: var(--text-muted);
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-  }
-}
-
-// =====================================================================
-// Semáforo
-// =====================================================================
-.semaforo-verde {
-  background: var(--status-success-bg-solid);
-}
-
-.semaforo-amarillo {
-  background: var(--status-warning-bg-solid);
-}
-
-.semaforo-rojo {
-  background: var(--status-danger-bg-solid);
-}
-
-.texto-semaforo-verde {
-  color: var(--status-success-text);
-}
-
-.texto-semaforo-amarillo {
-  color: var(--status-warning-text);
-}
-
-.texto-semaforo-rojo {
-  color: var(--status-danger-text);
-}
-
-.punto {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-  flex-shrink: 0;
 }
 
 .pendiente {
@@ -455,13 +325,6 @@ mat-icon {
   border-radius: 999px;
   background: var(--bg-surface);
   overflow: hidden;
-}
-
-.barra-relleno {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.4s ease;
 }
 
 // =====================================================================
@@ -640,10 +503,22 @@ mat-icon {
 // =====================================================================
 // Indicadores (small-box estilo AdminLTE)
 // =====================================================================
+// sm - Los dos grupos de tarjetas (3 + 3) comparten una fila; en pantallas angostas se apilan.
+.fila-kpi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .grupo-kpi {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .grupo-titulo {
@@ -657,165 +532,14 @@ mat-icon {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  // sm - Todas las tarjetas de la fila con la misma altura aunque un título ocupe más líneas.
+  grid-auto-rows: 1fr;
+  flex: 1;
   gap: 14px;
 }
 
-// sm - Tarjetas con la paleta corporativa: blancas con acento de color a la izquierda. Solo "destacado" es sólida
-// (azul marino) y el rojo se reserva para vencidos y desvinculados.
-.small-box {
-  --acento: var(--primary-color);
-  --caja-fondo: var(--bg-card);
-  --caja-texto: var(--text-main);
-  --icono-color: var(--primary-color);
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 118px;
-  padding: 0;
-  border: 1px solid var(--border-default);
-  border-left: 4px solid var(--acento);
-  border-radius: 12px;
-  background: var(--caja-fondo);
-  color: var(--caja-texto);
-  overflow: hidden;
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  box-shadow: var(--elevation-card);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--elevation-dropdown);
-
-    .small-box-icono {
-      transform: scale(1.08);
-    }
-  }
-
-  &.seleccionada {
-    outline: 2px solid var(--acento);
-    outline-offset: 2px;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--accent-cian);
-    outline-offset: 2px;
-  }
-
-  .small-box-valor {
-    color: var(--acento);
-  }
-
-  .small-box-titulo {
-    color: var(--text-secondary);
-  }
-
-  .small-box-icono {
-    color: var(--icono-color);
-    opacity: 0.14;
-  }
-
-  .small-box-pie {
-    background: var(--bg-soft);
-    color: var(--primary-color);
-  }
-
-  &.tono-corporativo { --acento: var(--primary-color); }
-  &.tono-cian { --acento: var(--accent-cian); --icono-color: var(--accent-cian); }
-  &.tono-peligro { --acento: var(--status-danger-bg-solid); --icono-color: var(--status-danger-bg-solid); }
-  &.tono-neutro {
-    --acento: var(--accent-silver);
-    --icono-color: var(--accent-silver);
-
-    .small-box-valor {
-      color: var(--text-secondary);
-    }
-
-    .small-box-pie {
-      color: var(--text-secondary);
-    }
-  }
-
-  // sm - Estilo AdminLTE sólido, en azul marino corporativo.
-  &.tono-destacado {
-    --acento: var(--primary-color);
-    --caja-fondo: var(--primary-color);
-    border-color: var(--primary-color);
-
-    .small-box-valor,
-    .small-box-titulo {
-      color: #fff;
-    }
-
-    .small-box-icono {
-      color: #fff;
-      opacity: 0.2;
-    }
-
-    .small-box-pie {
-      background: rgba(0, 0, 0, 0.15);
-      color: #fff;
-    }
-  }
-}
-
-.small-box-cuerpo {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px 10px;
-  flex: 1;
-  padding-right: 64px;
-}
-
-.small-box-valor {
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.small-box-titulo {
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.3;
-  opacity: 0.95;
-}
-
-.small-box-icono {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 54px;
-  width: 54px;
-  height: 54px;
-  color: rgba(255, 255, 255, 0.28);
-  transition: transform 0.25s ease;
-}
-
-.small-box-pie {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 5px 0;
-  font-size: 11.5px;
-  font-weight: 600;
-  background: rgba(0, 0, 0, 0.1);
-
-  mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-  }
-}
+// sm - El estilo de la tarjeta (antes .small-box) se movió al componente compartido app-tarjeta-resumen.
 
 // =====================================================================
 // Paneles
@@ -824,27 +548,34 @@ mat-icon {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 18px;
-  align-items: start;
+  // sm - Ambos paneles con la misma altura (antes "start" dejaba un hueco bajo el más corto).
+  align-items: stretch;
 
   @media (max-width: 1100px) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-  box-shadow: var(--elevation-card);
-  padding: 18px 20px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+// sm - El ranking no impone su altura: la marca el panel del portafolio y la lista de clientes ocupa el resto con
+// su propio scroll (height 0 + flex 1). En una sola columna vuelve a su altura natural con tope.
+.panel-ranking .ranking {
+  flex: 1 1 0;
+  height: 0;
+  min-height: 260px;
+  max-height: none;
 
-  @media (max-width: 600px) {
-    padding: 16px 14px;
+  @media (max-width: 1100px) {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    max-height: 440px;
   }
+}
+
+// sm - Si el panel del portafolio queda más alto que su contenido, la dona se centra y los indicadores del periodo
+// quedan al fondo.
+.panel-portafolio .portafolio {
+  flex: 1;
 }
 
 .panel-header {
@@ -862,13 +593,6 @@ mat-icon {
     font-weight: 700;
     color: var(--text-main);
   }
-}
-
-.panel-subtitulo {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  color: var(--text-muted);
-  line-height: 1.4;
 }
 
 // ── Ranking por cliente ──
@@ -1108,367 +832,8 @@ mat-icon {
   color: var(--text-secondary);
 }
 
-// =====================================================================
-// Pestañas: brecha y recurrencia / histórico
-// =====================================================================
-.pestanas {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border-default);
-  margin: -4px 0 0;
-
-  > button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    margin-bottom: -1px;
-    border: none;
-    border-bottom: 3px solid transparent;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 13.5px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-
-    &:hover {
-      color: var(--text-main);
-    }
-
-    &.activa {
-      color: var(--primary-color);
-      border-bottom-color: var(--primary-color);
-    }
-  }
-
-  .contador {
-    min-width: 20px;
-    padding: 1px 6px;
-    border-radius: 999px;
-    background: var(--primary-light);
-    color: var(--primary-color);
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    box-sizing: border-box;
-  }
-}
-
-.controles-historico {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-left: auto;
-  padding: 6px 0;
-}
-
-.control-etiqueta {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  margin-right: -6px;
-}
-
-.segmentado {
-  display: inline-flex;
-  border: 1px solid var(--border-input);
-  border-radius: 10px;
-  overflow: hidden;
-
-  button {
-    padding: 6px 12px;
-    background: var(--bg-card);
-    border: none;
-    color: var(--text-secondary);
-    font-size: 12.5px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-
-    & + button {
-      border-left: 1px solid var(--border-input);
-    }
-
-    &.activo {
-      background: var(--primary-color);
-      color: var(--text-inverse);
-    }
-  }
-}
-
-.umbral {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--text-secondary);
-
-  input {
-    width: 52px;
-    padding: 6px 8px;
-    border: 1px solid var(--border-input);
-    border-radius: 8px;
-    background: var(--input-bg);
-    color: var(--text-main);
-    font-family: inherit;
-    font-size: 13px;
-  }
-}
-
-.tabla-scroll {
-  overflow-x: auto;
-  min-width: 0;
-}
-
-.tabla-brecha,
 .tabla-detalle {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-
-  th {
-    text-align: left;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 700;
-    color: var(--text-muted);
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border-table);
-    white-space: nowrap;
-    background: var(--bg-soft);
-  }
-
-  td {
-    padding: 10px;
-    border-bottom: 1px solid var(--border-table);
-    color: var(--text-body);
-    vertical-align: middle;
-  }
-
-  .num {
-    text-align: right;
-    white-space: nowrap;
-  }
-}
-
-.tabla-brecha {
-  tbody tr {
-    cursor: pointer;
-    transition: background 0.15s;
-
-    &:hover {
-      background: var(--bg-hover);
-    }
-
-    &.seleccionada {
-      background: var(--primary-light);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--primary-color);
-      outline-offset: -2px;
-    }
-  }
-
-  .col-brecha {
-    min-width: 200px;
-  }
-}
-
-.nombre-colaborador {
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.badge-recurrente {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  background: var(--primary-color);
-  color: #fff;
-  border: 1px solid var(--primary-color);
-}
-
-.brecha-celda {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brecha-barra {
-  flex: 1;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--bg-surface);
-  overflow: hidden;
-}
-
-.barra-corporativa {
-  background: var(--primary-color);
-}
-
-.brecha-valor {
-  width: 64px;
-  text-align: right;
-  font-weight: 600;
-  color: var(--primary-color);
-  flex-shrink: 0;
-}
-
-.historial {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.celda-mes {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  vertical-align: middle;
-}
-
-.estado-Cumplido { background: var(--status-success-bg-solid); }
-.estado-AtrasoCarga { background: var(--accent-cian); }
-.estado-Regularizado { background: var(--status-warning-bg-solid); }
-.estado-Incumplido { background: var(--status-danger-bg-solid); }
-.estado-SinDatos { background: var(--bg-surface); border: 1px solid var(--border-default); box-sizing: border-box; }
-
-.mini {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-  color: var(--text-muted);
-}
-
-.pie-tabla {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.leyenda {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 6px;
-  font-size: 11.5px;
-  color: var(--text-muted);
-
-  .celda-mes {
-    width: 10px;
-    height: 10px;
-    margin-left: 8px;
-
-    &:first-child {
-      margin-left: 0;
-    }
-  }
-}
-
-// ── Histórico ──
-.historico {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(64px, 1fr);
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  transition: opacity 0.2s;
-
-  &.recargando {
-    opacity: 0.6;
-  }
-}
-
-.historico-mes {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 4px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: transparent;
-  cursor: pointer;
-  font-family: inherit;
-
-  &:hover {
-    background: var(--bg-hover);
-  }
-
-  &.actual {
-    border-color: var(--primary-color);
-    background: var(--primary-light);
-  }
-}
-
-.historico-pct {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.historico-columna {
-  display: flex;
-  align-items: flex-end;
-  width: 32px;
-  height: 140px;
-  border-radius: 6px;
-  background: var(--bg-surface);
-  overflow: hidden;
-}
-
-.historico-relleno {
-  display: block;
-  width: 100%;
-  border-radius: 6px 6px 0 0;
-  transition: height 0.4s ease;
-}
-
-.historico-etiqueta {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-body);
-}
-
-.historico-conteos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 3px;
-  min-height: 18px;
-}
-
-.conteo {
-  min-width: 18px;
-  padding: 1px 5px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #fff;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.chip-mini.abierto {
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  background: var(--primary-light);
-  color: var(--accent-cian);
+  @include comun.tabla-base;
 }
 
 // =====================================================================
@@ -1621,7 +986,4 @@ mat-icon {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
-  .small-box-valor {
-    font-size: 26px;
-  }
 }

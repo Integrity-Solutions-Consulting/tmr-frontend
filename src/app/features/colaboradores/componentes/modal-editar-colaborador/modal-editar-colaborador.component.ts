@@ -62,6 +62,15 @@ export class ModalEditarColaboradorComponent implements OnInit {
   reemplazoSeleccionado: Colaborador | null = null;
   busquedaActual = '';
 
+  // sm - Historial de contrato: tipo con el que se abrió el modal. Si se cambia, se pide desde qué fecha rige el nuevo
+  // (la jornada esperada depende del tipo: 8 h o 6 h pasante, y el histórico debe usar el que tenía cada día).
+  tipoContratoOriginal: number | null = null;
+
+  get cambioTipoContrato(): boolean {
+    const actual = this.form?.get('idTipoContrato')?.value;
+    return this.tipoContratoOriginal !== null && actual !== null && Number(actual) !== this.tipoContratoOriginal;
+  }
+
   ngOnInit(): void {
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────
@@ -116,6 +125,21 @@ export class ModalEditarColaboradorComponent implements OnInit {
       // CAMPO REEMPLAZO
       // ================================================================
       idEmpleadoReemplazo: [null],
+
+      // sm - Fecha desde la que rige el nuevo tipo de contrato (solo se pide si el tipo cambia).
+      fechaCambioContrato: [null],
+    });
+
+    this.form.get('idTipoContrato')?.valueChanges.subscribe(() => {
+      const ctrl = this.form.get('fechaCambioContrato');
+      if (this.cambioTipoContrato) {
+        ctrl?.setValidators(Validators.required);
+        if (!ctrl?.value) ctrl?.setValue(this.normalizarFechaInput(new Date()));
+      } else {
+        ctrl?.clearValidators();
+        ctrl?.setValue(null);
+      }
+      ctrl?.updateValueAndValidity({ emitEvent: false });
     });
 
     this.configurarValidacionesDinamicas();
@@ -230,6 +254,7 @@ export class ModalEditarColaboradorComponent implements OnInit {
       // ================================================================
       idEmpleadoReemplazo: idReemplazo,
     }, { emitEvent: false });
+    this.tipoContratoOriginal = idTipoContrato != null ? Number(idTipoContrato) : null;
 
     this.aplicarReglasTipoPersona(this.form.get('tipoPersona')?.value);
     this.form.get('identificacion')?.updateValueAndValidity({ emitEvent: false });
@@ -673,6 +698,9 @@ export class ModalEditarColaboradorComponent implements OnInit {
       // CAMPO REEMPLAZO
       // ================================================================
       idEmpleadoReemplazo: this.reemplazoSeleccionado ? Number(this.reemplazoSeleccionado.id) : null,
+
+      // sm - Solo si cambió el tipo de contrato: desde cuándo rige el nuevo.
+      fechaCambioContrato: this.cambioTipoContrato ? this.normalizarFechaInput(v.fechaCambioContrato) || null : null,
     };
 
     this.guardar.emit(request);

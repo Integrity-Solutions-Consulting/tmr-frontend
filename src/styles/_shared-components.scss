@@ -78,3 +78,13 @@
   align-items: center;
   gap: 16px;
 }
+
+// sm - Contenedor de las tarjetas de resumen (app-tarjeta-resumen) en todas las pantallas: mismo ancho de tarjeta y
+// mismo espaciado en todo el sistema. Las tarjetas de una fila quedan con la misma altura.
+.tarjetas-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 14px;
+  flex-shrink: 0;
+}

@@ -465,6 +465,14 @@
     }
   </div>
 
+  <!-- sm - Motivo por el que no se guardó (lo envía el backend). -->
+  @if (errorGuardar) {
+    <div class="actividad-modal__error-guardar" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorGuardar }}</span>
+    </div>
+  }
+
   <!-- Footer -->
   <div class="actividad-modal__footer">
     @if (esEdicion) {
@@ -480,11 +488,11 @@
     <button
       class="actividad-modal__btn actividad-modal__btn--save"
       type="submit"
-      [disabled]="form.invalid"
+      [disabled]="form.invalid || guardando || guardadoParcial"
       (click)="guardar()"
       data-tour="guardar"
     >
-      Guardar
+      {{ guardando ? 'Guardando…' : 'Guardar' }}
     </button>
   </div>
 </form>

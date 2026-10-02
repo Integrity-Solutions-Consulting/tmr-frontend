@@ -87,7 +87,7 @@
   &.enabled {
     background-color: var(--bg-card);
     color: var(--text-main);
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border-input); // sm - --border-strong no existía (el borde no se dibujaba)
     &:hover {
       background-color: var(--bg-hover);
       border-color: var(--text-main);
