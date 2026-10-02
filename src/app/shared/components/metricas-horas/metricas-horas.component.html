@@ -22,8 +22,8 @@
             @for (valor of [enBlanco ? '—' : (horasRegistradas | horasFormat)]; track valor) {
                 <span class="metric-value">{{ valor }}</span>
             }
-            <span class="metric-name">Horas registradas</span>
-            <span class="metric-desc">Total del periodo</span>
+            <span class="metric-name">{{ tituloHorasRegistradas }}</span>
+            <span class="metric-desc">{{ descripcionHorasRegistradas }}</span>
         </div>
     </div>
 

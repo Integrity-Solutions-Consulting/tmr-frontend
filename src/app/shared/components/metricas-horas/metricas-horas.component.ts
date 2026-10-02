@@ -17,6 +17,8 @@ export class MetricasHorasComponent {
     @Input() horasPorRegistrar = 0;
     @Input() horasRegistradas = 0;
     @Input() promedioPorDia = 0;
+    @Input() tituloHorasRegistradas = 'Horas registradas';
+    @Input() descripcionHorasRegistradas = 'Total del periodo';
     @Input() enBlanco = false;
     @Input() textoAyuda = '';
 }

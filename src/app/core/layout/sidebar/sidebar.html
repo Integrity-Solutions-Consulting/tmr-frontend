@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
 
   <!-- Logo -->
   <div class="sidebar__logo">
@@ -6,24 +6,24 @@
   </div>
 
   <!-- ══ Dashboard ══ -->
-  <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Dashboard')">
+  <a routerLink="/dashboard" routerLinkActive="active" class="sidebar__link" title="Dashboard" *ngIf="hasModule('Dashboard')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Dashboard/dashboard.svg')"></span>
     <span>Dashboard</span>
   </a>
 
   <!-- ══ Proyectos ══ -->
-  <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Proyectos')">
+  <a routerLink="/proyectos" routerLinkActive="active" class="sidebar__link" title="Proyectos" *ngIf="hasModule('Proyectos')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg')"></span>
     <span>Proyectos</span>
   </a>
 
   <!-- ══ Time Report ══ -->
   <div class="sidebar__group" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
-    <a class="sidebar__link sidebar__link--parent" (click)="trOpen = !trOpen">
+    <button type="button" class="sidebar__link sidebar__link--parent" title="Time Report" (click)="toggleGroup('timeReport')" [attr.aria-expanded]="trOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
       <span>Time Report</span>
       <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
-    </a>
+    </button>
     <div class="sidebar__submenu" [class.sidebar__submenu--visible]="trOpen">
       <a routerLink="/time-report/actividades" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Actividades')">
         <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/actividades.svg')"></span>
@@ -37,18 +37,18 @@
   </div>
 
   <!-- ══ Carga Actividades ══ -->
-  <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Actividades')">
+  <a routerLink="/carga-actividades" routerLinkActive="active" class="sidebar__link" title="Carga de actividades" *ngIf="hasModule('Actividades')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/CargaDeActividades/carga-actividades.svg')"></span>
     <span>Carga Actividades</span>
   </a>
 
   <!-- ══ Reportes ══ -->
   <div class="sidebar__group" [class.sidebar__group--open]="repOpen" *ngIf="hasModule('Reportes')">
-    <a class="sidebar__link sidebar__link--parent" (click)="repOpen = !repOpen">
+    <button type="button" class="sidebar__link sidebar__link--parent" title="Reportes" (click)="toggleGroup('reportes')" [attr.aria-expanded]="repOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/reportes.svg')"></span>
       <span>Reportes</span>
       <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
-    </a>
+    </button>
     <div class="sidebar__submenu" [class.sidebar__submenu--visible]="repOpen">
       <a routerLink="/reportes/horas" routerLinkActive="active" class="sidebar__sublink">
         <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/horas.svg')"></span>
@@ -62,19 +62,19 @@
   </div>
 
   <!-- ══ Líderes ══ -->
-  <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Lideres')">
+  <a routerLink="/lideres" routerLinkActive="active" class="sidebar__link" title="Líderes" *ngIf="hasModule('Lideres')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Lideres/lideres.svg')"></span>
     <span>Líderes</span>
   </a>
 
   <!-- ══ Colaboradores ══ -->
-  <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Colaboradores')">
+  <a routerLink="/colaboradores" routerLinkActive="active" class="sidebar__link" title="Colaboradores" *ngIf="hasModule('Colaboradores')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg')"></span>
     <span>Colaboradores</span>
   </a>
 
   <!-- ══ Clientes ══ -->
-  <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link" *ngIf="hasModule('Clientes')">
+  <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link" title="Clientes" *ngIf="hasModule('Clientes')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg')"></span>
     <span>Clientes</span>
   </a>
@@ -84,11 +84,11 @@
 
   <!-- ══ Configuración ══ -->
   <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
-    <a class="sidebar__link sidebar__link--parent" (click)="cfgOpen = !cfgOpen">
+    <button type="button" class="sidebar__link sidebar__link--parent" title="Configuración" (click)="toggleGroup('configuracion')" [attr.aria-expanded]="cfgOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/configuracion.svg')"></span>
       <span>Configuración</span>
       <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
-    </a>
+    </button>
     <div class="sidebar__submenu" [class.sidebar__submenu--visible]="cfgOpen">
       <a routerLink="/configuracion/usuarios" routerLinkActive="active" class="sidebar__sublink">
         <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/usuarios.svg')"></span>
@@ -108,5 +108,15 @@
       </a>
     </div>
   </div>
+
+  <button
+    type="button"
+    class="sidebar__toggle"
+    (click)="toggleCollapsed()"
+    [attr.aria-label]="collapsed ? 'Expandir menú lateral' : 'Contraer menú lateral'"
+    [attr.title]="collapsed ? 'Expandir menú lateral' : 'Contraer menú lateral'"
+  >
+    <span class="material-symbols-outlined">{{ collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}</span>
+  </button>
 
 </aside>

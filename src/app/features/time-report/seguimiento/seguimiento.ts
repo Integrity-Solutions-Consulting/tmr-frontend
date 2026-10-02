@@ -31,7 +31,7 @@ import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
-import Swal from 'sweetalert2';
+import { PopupService } from '../../../shared/services/popup.service';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
 class SinActividadesError extends Error {
@@ -88,6 +88,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
     private dialog = inject(MatDialog);
+    private popup = inject(PopupService);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -186,6 +187,12 @@ export class SeguimientoComponent implements AfterViewInit {
             this.sortAsc = true;
         }
         this.aplicarOrdenamiento();
+        this.irAPrimeraPagina();
+    }
+
+    public direccionOrden(campo: keyof Colaborador): 'ascending' | 'descending' | 'none' {
+        if (this.sortField !== campo) return 'none';
+        return this.sortAsc ? 'ascending' : 'descending';
     }
 
     private aplicarOrdenamiento() {
@@ -617,23 +624,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // igual que los modales de la app: tarjeta blanca, icono en círculo azul, título oscuro, texto gris y botón primario
     // #163572 (con soporte de tema oscuro).
     private mostrarPopup(icono: string, titulo: string, html: string): void {
-        void Swal.fire({
-            icon: 'info',
-            iconHtml: `<span class="material-symbols-outlined">${icono}</span>`,
-            title: titulo,
-            html,
-            confirmButtonText: 'Entendido',
-            buttonsStyling: false,
-            customClass: {
-                container: 'tmr-swal-container',
-                popup: 'tmr-swal',
-                icon: 'tmr-swal__icon',
-                title: 'tmr-swal__title',
-                htmlContainer: 'tmr-swal__text',
-                actions: 'tmr-swal__actions',
-                confirmButton: 'tmr-swal__btn-primary',
-            },
-        });
+        void this.popup.show(icono, titulo, html, icono === 'download_done');
     }
 
     private rangoPopup(rango: RangoDescarga): string {

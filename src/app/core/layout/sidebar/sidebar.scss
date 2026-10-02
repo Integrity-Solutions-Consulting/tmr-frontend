@@ -1,26 +1,96 @@
+:host {
+  display: block;
+}
+
+@media (min-width: 1025px) {
+  :host {
+    flex: 0 0 220px;
+    width: 220px;
+    transition: flex-basis 0.22s ease, width 0.22s ease;
+  }
+
+  :host.sidebar-host--collapsed {
+    flex-basis: 68px;
+    width: 68px;
+  }
+}
+
 .sidebar {
   position: sticky;
   top: 0;
-  width: 220px;
-  min-width: 220px;
+  width: 100%;
+  min-width: 0;
   min-height: 100vh;
-  background: var(--bg-card);
+  background: #ffffff;
+  // Sidebar y barra superior forman una sola superficie, sin una raya vertical
+  // que delate el cambio de ancho al contraerlo.
+  border-right: 0;
   padding: 22px 14px 24px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+  transition: padding 0.22s ease;
 
-  @media (min-width: 1025px) {
-    &::after {
-      content: '';
-      position: absolute;
-      top: 64px;
-      right: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: var(--border-soft);
+  &--collapsed {
+    padding-right: 8px;
+    padding-left: 8px;
+
+    .sidebar__logo {
+      height: 62px;
+      margin-bottom: 14px;
     }
+
+    .sidebar__logo-img {
+      width: 40px;
+    }
+
+    .sidebar__link,
+    .sidebar__sublink {
+      justify-content: center;
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .sidebar__link > span:nth-of-type(2),
+    .sidebar__sublink > span:nth-of-type(2),
+    .sidebar__chevron,
+    .sidebar__submenu {
+      display: none;
+    }
+
+    .sidebar__divider {
+      margin-right: 0;
+      margin-left: 0;
+    }
+  }
+
+}
+
+.sidebar__toggle {
+  margin-top: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+
+  &:hover {
+    color: #163572;
+    background: #f0f1f3;
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
   }
 }
 
@@ -92,9 +162,14 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);               // Color base (gris)
+  color: #64748b;               // Color base (gris)
   text-decoration: none;
   cursor: pointer;
+  border: 0;
+  width: 100%;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
   transition: background 0.16s ease, color 0.16s ease;
   user-select: none;
   line-height: 1;               // Evita espacio extra en el texto
@@ -107,13 +182,13 @@
   }
 
   &:hover {
-    background: var(--bg-hover);
-    color: var(--primary-color);             // Azul en hover
+    background: #f5f7fb;
+    color: #163572;             // Azul en hover
   }
 
   &.active {
     background: #eef4ff;
-    color: var(--primary-color);             // Azul en activo
+    color: #163572;             // Azul en activo
     font-weight: 600;
   }
 }
@@ -153,7 +228,7 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #64748b;
   text-decoration: none;
   cursor: pointer;
   transition: background 0.14s, color 0.14s;
@@ -168,13 +243,13 @@
   }
 
   &:hover {
-    background: var(--bg-hover);
-    color: var(--primary-color);
+    background: #f5f7fb;
+    color: #163572;
   }
 
   &.active {
     background: #eef4ff;
-    color: var(--primary-color);
+    color: #163572;
     font-weight: 700;
   }
 }
@@ -199,8 +274,12 @@
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--elevation-card);
-    border-right: 1px solid var(--border-default);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    border-right: 0;
+  }
+
+  .sidebar__toggle {
+    display: none;
   }
 
   :host-context(body.sidebar-open) .sidebar {
