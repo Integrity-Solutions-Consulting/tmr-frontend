@@ -1,7 +1,7 @@
 <div style="display: contents" (click)="cerrarDropdowns()">
 
     <!-- Búsqueda -->
-    <div class="filter-group" style="flex: 1; min-width: 180px; max-width: 250px;">
+    <div class="filter-group" style="flex: 2; min-width: 300px;">
       <label class="filter-label">Búsqueda</label>
       <div class="filter-input-wrapper">
         <span class="material-symbols-outlined filter-icon">search</span>
@@ -13,12 +13,12 @@
     </div>
 
     <!-- Filtro Estado -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 120px; max-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
       <label class="filter-label">Estado</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ labelEstado }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelEstado }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
       @if (mostrarEstadoDropdown) {
@@ -39,12 +39,12 @@
     </div>
 
     <!-- Filtro Seguimiento -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 120px; max-width: 140px; cursor: pointer;" (click)="toggleSeguimientoDropdown($event)">
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleSeguimientoDropdown($event)">
       <label class="filter-label">Seguimiento</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ labelSeguimiento }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelSeguimiento }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
       @if (mostrarSeguimientoDropdown) {
@@ -65,12 +65,12 @@
     </div>
 
     <!-- Filtro Tipo -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 120px; max-width: 140px; cursor: pointer;" (click)="toggleTipoDropdown($event)">
+    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleTipoDropdown($event)">
       <label class="filter-label">Tipo</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ labelTipo }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelTipo }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
       @if (mostrarTipoDropdown) {

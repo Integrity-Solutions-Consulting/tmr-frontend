@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
   selector: 'app-cards-metricas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [TarjetaResumenComponent, CommonModule],
   templateUrl: './cards-metricas.component.html',
   styleUrl: './cards-metricas.component.scss',
 })

@@ -26,10 +26,11 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
   selector: 'app-lista-clientes',
   standalone: true,
-  imports: [
+  imports: [TarjetaResumenComponent, 
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

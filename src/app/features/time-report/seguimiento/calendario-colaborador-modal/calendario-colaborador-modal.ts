@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Calendario } from '../../actividades/calendario/calendario';
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { Colaborador } from '../../../../shared/models/colaborador.model';
+import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
 
 export interface CalendarioColaboradorModalData {
     colaborador: Colaborador;
@@ -24,7 +25,8 @@ export interface CalendarioColaboradorModalData {
         CommonModule,
         MatDialogModule,
         MatIconModule,
-        Calendario
+        Calendario,
+        HorasFormatPipe
     ],
     templateUrl: './calendario-colaborador-modal.html',
     styleUrl: './calendario-colaborador-modal.scss'

@@ -28,112 +28,6 @@ Título
 }
 
 /* ─────────────────────────────────────────────────────────────
-Cards resumen clientes
-───────────────────────────────────────────────────────────── */
-
-.cards-resumen {
-  display: flex;
-  gap: 20px;
-  margin: 24px 0 24px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.card-resumen {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 220px;
-  min-height: 82px;
-  padding: 18px 26px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-  box-shadow: var(--elevation-card);
-  cursor: default;
-  flex-shrink: 0;
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--elevation-dropdown);
-  }
-}
-
-.card-resumen-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.card-resumen-top {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-
-.card-resumen-icono {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  img {
-    width: 22px;
-    height: 22px;
-    display: block;
-    object-fit: contain;
-  }
-
-  &--total {
-    background: var(--accent-purple-bg);
-  }
-
-  &--activos {
-    background: var(--status-success-bg-soft);
-
-     img {
-      width: 28px;
-      height: 28px;
-    }
-
-    
-  }
-
-  &--inactivos {
-    background: var(--bg-soft);
-
-     img {
-      width: 28px;
-      height: 28px;
-    }
-
-    
-  }
-}
-
-.card-resumen-numero {
-  font-family: 'Inter', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--primary-color);
-  line-height: 1;
-}
-
-.card-resumen-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-/* ─────────────────────────────────────────────────────────────
 Barra de acciones
 ───────────────────────────────────────────────────────────── */
 
@@ -360,7 +254,7 @@ Tabla
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: 10px;
-  overflow: visible;
+  overflow-x: auto;
 }
 
 .tabla {
@@ -371,8 +265,6 @@ Tabla
   border-spacing: 0;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 thead tr {
@@ -678,15 +570,6 @@ Responsive
     margin-bottom: 16px;
   }
 
-  .cards-resumen {
-    flex-wrap: wrap;
-  }
-
-  .card-resumen {
-    min-width: 180px;
-    width: auto;
-  }
-
   .barra-acciones {
     flex-wrap: wrap;
     gap: 8px;
@@ -724,20 +607,6 @@ Responsive
 
   .titulo-pagina {
     font-size: 24px;
-  }
-
-  .card-resumen {
-    width: 100%;
-    min-width: 100%;
-    padding: 16px 18px;
-  }
-
-  .card-resumen-numero {
-    font-size: 20px;
-  }
-
-  .card-resumen-label {
-    font-size: 12px;
   }
 
   .barra-acciones {
@@ -814,7 +683,7 @@ Responsive
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: var(--text-muted) ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -963,4 +832,9 @@ Responsive
     .download-icon {
         color: var(--text-inverse) ;
     }
+}
+
+// sm - Espacio de la fila de tarjetas (app-tarjeta-resumen), el mismo que tenía la fila anterior.
+.tarjetas-resumen {
+  margin: 24px 0;
 }

@@ -1,4 +1,4 @@
-scss .lideres-container {
+.lideres-container {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -94,72 +94,11 @@ scss .lideres-container {
   }
 }
 
-.cards-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-  justify-content: flex-start;
-  flex-shrink: 0;
-}
-
-.summary-card {
-  width: 204px;
-  height: 84px;
-  flex: 0 0 204px;
-  background: var(--bg-card);
-  border-radius: 15px;
-  border: 1px solid var(--border-default);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--elevation-card);
-  transition: box-shadow 0.2s;
-  box-sizing: border-box;
-
-  &:hover {
-    box-shadow: var(--elevation-dropdown);
-  }
-}
-
-.card-icon {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: transparent;
-  align-self: center;
-
-  &--external {
-    background: transparent;
-  }
-
-  &--inactive {
-    background: transparent;
-  }
-}
-
 .card-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-}
-
-.card-number {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--primary-color);
-  line-height: 1.1;
-}
-
-.card-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 0;
 }
 
 .card-filter-btn {
@@ -304,7 +243,7 @@ scss .lideres-container {
   gap: 6px;
   align-items: stretch;
   overflow: hidden;
-  max-height: calc(100vh - 320px);
+  max-height: none;
 }
 
 .table-wrapper {
@@ -404,7 +343,7 @@ scss .lideres-container {
     z-index: 2;
 
     th {
-      padding: 11px 14px;
+      padding: 4px 14px;
       text-align: left;
       font-weight: 600;
       color: var(--text-subtle);
@@ -445,7 +384,7 @@ scss .lideres-container {
     }
 
     td {
-      padding: 13px 16px;
+      padding: 4px 16px;
       color: var(--text-subtle);
       font-weight: 400;
       vertical-align: middle;
@@ -605,19 +544,6 @@ scss .lideres-container {
   }
 }
 
-.card-svg {
-  width: 22px;
-  height: 22px;
-}
-
-.card-svg-arrow {
-  width: 11px;
-  height: 11px;
-  position: absolute;
-  top: 12px;
-  right: 4px;
-}
-
 .card-body {
   display: flex;
   flex-direction: column;
@@ -631,18 +557,11 @@ scss .lideres-container {
   gap: 10px;
 }
 
-.card-top-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .filter-svg {
   width: 10px;
   height: 10px;
   color: var(--text-muted);
 }
-
 
 /* ============================================================
    MAT MENU
@@ -757,7 +676,7 @@ scss .lideres-container {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-body);
+  color: var(--text-muted);
 
   &:hover {
     background: var(--bg-hover);
@@ -809,7 +728,6 @@ scss .lideres-container {
   }
 }
 
-
 /* ============================================================
    RESPONSIVE
    ============================================================ */
@@ -824,15 +742,6 @@ scss .lideres-container {
   .lideres-container {
     border-radius: 14px;
     padding: 20px 14px 18px;
-  }
-
-  .cards-row {
-    flex-wrap: wrap;
-  }
-
-  .summary-card {
-    width: 100%;
-    flex: 1 1 100%;
   }
 
   .page-title {
@@ -863,52 +772,6 @@ scss .lideres-container {
     padding: 16px 10px;
   }
 }
-
-
-/* ============================================================
-   COLORES POR TIPO DE CARD
-   ============================================================ */
-
-.card-icon--internal {
-  background: var(--bg-soft);
-  border-radius: 8px;
-  position: relative;
-
-  svg {
-    stroke: var(--primary-color);
-  }
-}
-
-.card-icon--external {
-  background: var(--primary-light);
-  border-radius: 8px;
-  position: relative;
-
-  svg {
-    stroke: var(--primary-color);
-  }
-}
-
-.card-icon--active {
-  background: var(--status-success-bg-soft);
-  border-radius: 8px;
-  position: relative;
-
-  svg {
-    stroke: var(--status-success-text);
-  }
-}
-
-.card-icon--inactive {
-  background: var(--bg-soft);
-  border-radius: 8px;
-  position: relative;
-
-  svg {
-    stroke: var(--text-muted);
-  }
-}
-
 
 /* ============================================================
    CHIPS Y DESPLIEGUE DE CLIENTES
@@ -1058,7 +921,7 @@ scss .lideres-container {
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: var(--text-muted) ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -1207,4 +1070,10 @@ scss .lideres-container {
     .download-icon {
         color: var(--text-inverse) ;
     }
+}
+
+
+// sm - Espacio de la fila de tarjetas (app-tarjeta-resumen), el mismo que tenía la fila anterior.
+.tarjetas-resumen {
+  margin-bottom: 20px;
 }

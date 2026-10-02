@@ -26,9 +26,16 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         canActivate: [roleGuard],
+        // sm - Se reemplaza el dashboard anterior por el Dashboard ejecutivo (Requerimiento_Funcional_Dashboard_Time_Report):
+        // tenía el gráfico general de horas reportadas (se elimina), contaba proyectos activos sin mirar el estado
+        // y solo filtraba por mes/trimestre/año. Los componentes anteriores se conservan sin uso.
+        // loadComponent: () =>
+        //   import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
+        //     m => m.DashboardPageComponent
+        //   ),
         loadComponent: () =>
-          import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
-            m => m.DashboardPageComponent
+          import('./features/dashboard/componentes/dashboard-ejecutivo/dashboard-ejecutivo.component').then(
+            m => m.DashboardEjecutivoComponent
           ),
       },
 

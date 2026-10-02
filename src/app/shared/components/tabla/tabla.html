@@ -1,5 +1,5 @@
-<div class="tabla-shell">
-  <table mat-table [dataSource]="dataSource" class="tabla">
+<div class="table-scroll-container"><div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" class="lideres-table">
 
     <ng-container matColumnDef="codigo">
       <th mat-header-cell *matHeaderCellDef>Codigo</th>
@@ -95,10 +95,9 @@
     <tr mat-header-row *matHeaderRowDef="columnas"></tr>
     <tr mat-row *matRowDef="let row; columns: columnas"></tr>
 
-  </table>
-</div>
+  </table></div></div>
 
-<div class="tabla-footer">
+<div class="pagination-bar">
   <app-paginacion
     [paginaActual]="paginaActual()"
     [totalPaginas]="totalPaginas()"

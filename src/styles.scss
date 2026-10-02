@@ -191,12 +191,18 @@ body {
      ========================================================================== */
 
   /* Fondos (Backgrounds) */
-  --bg-app: #F5F7FC;
+  // sm - Se restaura el fondo de página del modo claro que había antes del refactor de colores (commit b796683, 28/09):
+  // body #f8fafc en lugar de #F5F7FC. El modo oscuro no cambia.
+  // --bg-app: #F5F7FC;
+  --bg-app: #f8fafc;
   --bg-card: #ffffff;
   --bg-surface: #EBF2F9;
   --bg-hover: #E3EDF7;
   --bg-soft: #EEF4FA;
   --bg-subtle: #F5F7FC;
+  // sm - Fondo del contenedor principal (app-layout). Antes del 28/09 era #f5f7fb; con el refactor pasó a usar
+  // --bg-hover (#E3EDF7, azulado). Se separa en su propia variable para restaurarlo sin cambiar los hovers.
+  --bg-layout: #f5f7fb;
 
   /* Bordes (Borders) */
   --border-default: #D6E4F0;
@@ -216,7 +222,7 @@ body {
   --text-inverse: #ffffff;
 
   /* Interacciones / Botones (Buttons/Primary) */
-  --primary-color: #1565C0;
+  --primary-color: #163572;
   --primary-hover: #0D47A1;
   --primary-light: rgba(21, 101, 192, .08);
   --icon-color: var(--text-secondary);
@@ -260,6 +266,12 @@ body {
   --elevation-dropdown: 0 4px 12px rgba(15, 23, 42, 0.12);
   --elevation-dropdown-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
   --elevation-modal: 0 20px 60px rgba(0, 0, 0, 0.18);
+  // sm - Fondo oscuro detrás de los modales. Lo usaban 10 modales (Clientes, Colaboradores, modal-base, success-modal)
+  // pero no estaba definido, así que el fondo quedaba transparente.
+  --overlay-backdrop: rgba(15, 23, 42, 0.45);
+  // sm - Morado de acento (insignia "purple" de Actividades): se usaba sin estar definido.
+  --accent-purple: #7c3aed;
+  --accent-purple-bg: #f3e8ff;
   --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
   --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, 0.2);
   --validation-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.08);
@@ -645,6 +657,9 @@ html[data-theme="dark"] {
   --elevation-dropdown: 0 4px 12px rgba(0, 0, 0, 0.4);
   --elevation-dropdown-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
   --elevation-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --overlay-backdrop: rgba(0, 0, 0, 0.6); // sm - fondo de modales en tema oscuro
+  --accent-purple: #c4b5fd;
+  --accent-purple-bg: rgba(124, 58, 237, 0.18);
   --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .2);
   --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, 0.2);
   --validation-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.08);
@@ -658,6 +673,8 @@ html[data-theme="dark"] {
   --bg-hover: #252525;
   --bg-soft: #1A1A1A;
   --bg-subtle: #141414;
+  // sm - Mismo valor que --bg-hover en oscuro: el modo oscuro se ve igual que antes.
+  --bg-layout: #252525;
 
   /* Bordes (Borders) */
     --border-default: #2A2A2A;
@@ -677,7 +694,7 @@ html[data-theme="dark"] {
   --text-inverse: #ffffff;
 
   /* Interacciones / Botones (Buttons/Primary) */
-  --primary-color: #1565C0;
+  --primary-color: #163572;
   --primary-hover: #0097D6;
   --primary-light: rgba(21, 101, 192, .15);
   --icon-color: #A0B4C4;

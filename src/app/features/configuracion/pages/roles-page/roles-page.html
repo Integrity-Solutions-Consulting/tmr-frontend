@@ -6,54 +6,11 @@
   </div>
 
   <!-- Cards resumen -->
-  <div class="cards-row">
-
-    <!-- Total roles -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--total-roles">
-            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ totalRoles() }}</span>
-        </div>
-        <span class="card-label">Total roles</span>
-      </div>
-    </div>
-
-    <!-- Activos -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--active">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-              <polyline points="15 19 17 21 21 16"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ rolesActivos() }}</span>
-        </div>
-        <span class="card-label">Activos</span>
-      </div>
-    </div>
-
-    <!-- Inactivos -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--inactive">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ rolesInactivos() }}</span>
-        </div>
-        <span class="card-label">Inactivos</span>
-      </div>
-    </div>
-
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen">
+    <app-tarjeta-resumen titulo="Total roles" icono="admin_panel_settings" tono="destacado" [valor]="totalRoles()" />
+    <app-tarjeta-resumen titulo="Activos" icono="verified_user" tono="corporativo" [valor]="rolesActivos()" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="remove_moderator" tono="neutro" [valor]="rolesInactivos()" />
   </div>
 
   <!-- Barra de búsqueda -->

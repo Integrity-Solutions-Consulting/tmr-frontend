@@ -1,0 +1,335 @@
+@use '../dashboard-comun' as comun;
+
+// sm - Bloque "Brecha y recurrencia / Histórico de cumplimiento" del Dashboard ejecutivo (sección 7.2 y RF 15).
+:host {
+  display: block;
+  min-width: 0;
+}
+
+// =====================================================================
+// Pestañas: brecha y recurrencia / histórico
+// =====================================================================
+.pestanas {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-default);
+  margin: -4px 0 0;
+
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    margin-bottom: -1px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-main);
+    }
+
+    &.activa {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+  }
+
+  .contador {
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+.controles-historico {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  padding: 6px 0;
+}
+
+.control-etiqueta {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-right: -6px;
+}
+
+.segmentado {
+  display: inline-flex;
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  overflow: hidden;
+
+  button {
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+
+    & + button {
+      border-left: 1px solid var(--border-input);
+    }
+
+    &.activo {
+      background: var(--primary-color);
+      color: var(--text-inverse);
+    }
+  }
+}
+
+.umbral {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+
+  input {
+    width: 52px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 13px;
+  }
+}
+
+.tabla-brecha {
+  @include comun.tabla-base;
+
+  tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--bg-hover);
+    }
+
+    &.seleccionada {
+      background: var(--primary-light);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: -2px;
+    }
+  }
+
+  .col-brecha {
+    min-width: 200px;
+  }
+}
+
+.nombre-colaborador {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.badge-recurrente {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--primary-color);
+  color: #fff;
+  border: 1px solid var(--primary-color);
+}
+
+.brecha-celda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brecha-barra {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.barra-corporativa {
+  background: var(--primary-color);
+}
+
+.brecha-valor {
+  width: 64px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.historial {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.celda-mes {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.estado-Cumplido { background: var(--status-success-bg-solid); }
+.estado-AtrasoCarga { background: var(--accent-cian); }
+.estado-Regularizado { background: var(--status-warning-bg-solid); }
+.estado-Incumplido { background: var(--status-danger-bg-solid); }
+.estado-SinDatos { background: var(--bg-surface); border: 1px solid var(--border-default); box-sizing: border-box; }
+
+.mini {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.pie-tabla {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.leyenda {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+
+  .celda-mes {
+    width: 10px;
+    height: 10px;
+    margin-left: 8px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+// ── Histórico ──
+.historico {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(64px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  transition: opacity 0.2s;
+
+  &.recargando {
+    opacity: 0.6;
+  }
+}
+
+.historico-mes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    background: var(--bg-hover);
+  }
+
+  &.actual {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+  }
+}
+
+.historico-pct {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.historico-columna {
+  display: flex;
+  align-items: flex-end;
+  width: 32px;
+  height: 140px;
+  border-radius: 6px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.historico-relleno {
+  display: block;
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.4s ease;
+}
+
+.historico-etiqueta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.historico-conteos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  min-height: 18px;
+}
+
+.conteo {
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.chip-mini.abierto {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--accent-cian);
+}

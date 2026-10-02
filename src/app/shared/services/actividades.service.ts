@@ -109,7 +109,15 @@ export class ActividadesService {
     return this._actividades().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
   }
 
-  agregarActividad(data: any, callback?: () => void): void {
+  // sm - Mensaje del backend para mostrarlo en pantalla (ej. "No está asignado a este proyecto...").
+  private mensajeError(err: any, porDefecto: string): string {
+    const e = err?.error;
+    if (typeof e === 'string' && e.trim()) return e;
+    return e?.mensaje ?? e?.Mensaje ?? e?.detail ?? e?.message ?? e?.title ?? porDefecto;
+  }
+
+  // sm - errorCallback: se llama con el mensaje si el backend rechaza el registro, para que la ventana lo muestre.
+  agregarActividad(data: any, callback?: () => void, errorCallback?: (mensaje: string, guardadas: number) => void): void {
     // sm - Solo se registran actividades a nombre del empleado de la sesión (el backend también lo valida).
     const idEmpleado = this.empleadoObjetivo();
     if (!idEmpleado) {
@@ -154,19 +162,41 @@ export class ActividadesService {
       }
 
       if (requests.length > 0) {
+        // sm - Se espera a que terminen todos los días: si alguno falla se informa cuántos sí se guardaron y por qué
+        // fallaron los demás (antes el error solo quedaba en la consola).
         let completed = 0;
+        let guardadas = 0;
+        let primerError: string | null = null;
+        const alTerminar = () => {
+          if (completed < requests.length) return;
+          this.cargarResumen(this.currentAnio(), this.currentMes());
+          const actDate = parseLocal(data.fechaInicio);
+          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          if (primerError === null) {
+            if (callback) callback();
+          } else if (errorCallback) {
+            const fallidas = requests.length - guardadas;
+            errorCallback(
+              guardadas > 0
+                ? `Se guardaron ${guardadas} de ${requests.length} días. ${fallidas} no se guardaron: ${primerError}`
+                : primerError,
+              guardadas,
+            );
+          }
+        };
         requests.forEach(req => {
           req.subscribe({
             next: () => {
               completed++;
-              if (completed === requests.length) {
-                this.cargarResumen(this.currentAnio(), this.currentMes());
-                const actDate = parseLocal(data.fechaInicio);
-                this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
-                if (callback) callback();
-              }
+              guardadas++;
+              alTerminar();
             },
-            error: (err: any) => console.error('Error al crear actividad recurrente', err)
+            error: (err: any) => {
+              console.error('Error al crear actividad recurrente', err);
+              completed++;
+              primerError ??= this.mensajeError(err, 'No se pudo guardar la actividad.');
+              alTerminar();
+            }
           });
         });
       } else {
@@ -192,12 +222,15 @@ export class ActividadesService {
           this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
           if (callback) callback();
         },
-        error: (err) => console.error('Error al crear actividad', err)
+        error: (err) => {
+          console.error('Error al crear actividad', err);
+          if (errorCallback) errorCallback(this.mensajeError(err, 'No se pudo guardar la actividad. Intente de nuevo.'), 0);
+        }
       });
     }
   }
 
-  actualizarActividad(id: number | string, data: any, callback?: () => void): void {
+  actualizarActividad(id: number | string, data: any, callback?: () => void, errorCallback?: (mensaje: string) => void): void {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
@@ -220,7 +253,10 @@ export class ActividadesService {
 
         if (callback) callback();
       },
-      error: (err) => console.error('Error al actualizar actividad', err)
+      error: (err) => {
+        console.error('Error al actualizar actividad', err);
+        if (errorCallback) errorCallback(this.mensajeError(err, 'No se pudo actualizar la actividad. Intente de nuevo.'));
+      }
     });
   }
 
