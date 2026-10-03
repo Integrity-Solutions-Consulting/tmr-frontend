@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ProyectosService } from '../../servicios/proyectos.service';
-import { LookupOption } from '../../modelos/proyecto.model';
+import { ID_SEGUIMIENTO_INHABILITADO, LookupOption } from '../../modelos/proyecto.model';
 
 export interface FiltrosProyecto {
   busqueda: string;
@@ -38,10 +38,9 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
   mostrarSeguimientoDropdown = false;
   mostrarTipoDropdown = false;
 
-  dropdownTop = 0;
-  dropdownLeft = 0;
-
   private scrollHandler = () => this.cerrarDropdowns();
+
+  readonly idSeguimientoInhabilitado = ID_SEGUIMIENTO_INHABILITADO;
 
   get seguimientoOpciones(): LookupOption[] {
     return this.estados.filter(e => !this.estadosFiltro.includes(e.nombre));
@@ -61,8 +60,11 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
 
   get labelSeguimiento(): string {
     if (!this.seguimientoSeleccionados.length) return 'Seguimiento';
-    if (this.seguimientoSeleccionados.length === 1)
-      return this.estados.find(e => e.id === this.seguimientoSeleccionados[0])?.nombre ?? 'Seguimiento';
+    if (this.seguimientoSeleccionados.length === 1) {
+      const id = this.seguimientoSeleccionados[0];
+      if (id === this.idSeguimientoInhabilitado) return 'Inhabilitado';
+      return this.estados.find(e => e.id === id)?.nombre ?? 'Seguimiento';
+    }
     return `${this.seguimientoSeleccionados.length} seguimiento`;
   }
 
@@ -86,19 +88,11 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
     this.cerrarDropdowns();
   }
 
-  private calcularPosicion(event: Event): void {
-    const el = event.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    this.dropdownTop = rect.bottom + 6;
-    this.dropdownLeft = rect.left;
-  }
-
   toggleEstadoDropdown(event: Event): void {
     event.stopPropagation();
     const abriendo = !this.mostrarEstadoDropdown;
     this.cerrarDropdowns();
     if (abriendo) {
-      this.calcularPosicion(event);
       this.mostrarEstadoDropdown = true;
     }
   }
@@ -108,7 +102,6 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
     const abriendo = !this.mostrarSeguimientoDropdown;
     this.cerrarDropdowns();
     if (abriendo) {
-      this.calcularPosicion(event);
       this.mostrarSeguimientoDropdown = true;
     }
   }
@@ -118,7 +111,6 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
     const abriendo = !this.mostrarTipoDropdown;
     this.cerrarDropdowns();
     if (abriendo) {
-      this.calcularPosicion(event);
       this.mostrarTipoDropdown = true;
     }
   }

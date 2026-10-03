@@ -21,19 +21,19 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 })
 export class ReporteFechasComponent {
   columnasTabla: ColumnDefinition[] = [
-    { header: 'Cliente', property: 'cliente', type: 'text' },
-    { header: 'Líder', property: 'lider', type: 'text' },
-    { header: 'Recurso', property: 'recurso', type: 'text' },
-    { header: 'Cargo', property: 'cargo', type: 'text' },
-    { header: 'Inicio', property: 'fechaInicio', type: 'fecha', dateFormat: 'dd/MM/yyyy' },
-    { header: 'Fin', property: 'fechaFin', type: 'fecha', dateFormat: 'dd/MM/yyyy' }
+    { header: 'Cliente', property: 'cliente', type: 'text', sortable: true },
+    { header: 'Líder', property: 'lider', type: 'text', sortable: true },
+    { header: 'Recurso', property: 'recurso', type: 'text', sortable: true },
+    { header: 'Cargo', property: 'cargo', type: 'text', sortable: true },
+    { header: 'Inicio', property: 'fechaInicio', type: 'fecha', dateFormat: 'dd/MM/yyyy', sortable: true },
+    { header: 'Fin', property: 'fechaFin', type: 'fecha', dateFormat: 'dd/MM/yyyy', sortable: true }
   ];
 
   Math = Math;
   busquedaCliente = signal('');
   busquedaLider = signal('');
   fechaInicio = signal('');
-  fechaFin = signal('');
+  fechaFin = signal(this.fechaHoyInputDate());
   forzarMostrar = signal(false);
 
   paginaActual = signal(1);
@@ -135,17 +135,15 @@ export class ReporteFechasComponent {
     this.busquedaCliente.set('');
     this.busquedaLider.set('');
     this.fechaInicio.set('');
-    this.fechaFin.set('');
+    this.fechaFin.set(this.fechaHoyInputDate());
     this.paginaActual.set(1);
   }
 
-  limpiarFiltros() {
-    this.busquedaCliente.set('');
-    this.busquedaLider.set('');
-    this.fechaInicio.set('');
-    this.fechaFin.set('');
-    this.forzarMostrar.set(false);
-    this.paginaActual.set(1);
+  private fechaHoyInputDate(): string {
+    const hoy = new Date();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    return `${hoy.getFullYear()}-${mes}-${dia}`;
   }
 
   async exportarExcel() {

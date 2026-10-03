@@ -4,10 +4,13 @@
   min-width: 0;
 }
 
+// sm - Mismo recuadro que Seguimiento: fondo blanco, borde y esquinas SUPERIORES redondeadas (las inferiores
+// las pone .pagination-wrapper, pegada justo debajo, sin espacio entre ambas). Colores exactos (no tokens
+// var(--...) que podían resolver a un tono distinto).
 .tabla-wrapper {
-  background: var(--bg-card);
-  border: 1px solid var(--bg-surface);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
   overflow: auto;
   box-shadow: none;
   width: 100%;
@@ -32,36 +35,65 @@
   font-family: 'Inter', sans-serif;
 
   thead {
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-default);
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     position: sticky;
     top: 0;
     z-index: 2;
 
     th {
-      padding: 10px 10px;
+      padding: 14px 10px;
       text-align: left;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: #6b7280;
       font-size: 13px;
-      white-space: nowrap;
-      background: var(--bg-card);
+      white-space: normal;
+      background: #ffffff;
       user-select: none;
       box-sizing: border-box;
+
+      .th-inner {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .th-label {
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: normal;
+        line-height: 1.25;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      &.sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          color: #163572;
+
+          .sort-icon {
+            color: currentColor;
+          }
+        }
+      }
     }
   }
 
   tbody {
     td {
-      padding: 8px 10px;
-      color: var(--text-muted);
+      padding: 14px 10px;
+      color: #4b5563;
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       box-sizing: border-box;
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid #f3f4f6;
     }
   }
 }
@@ -81,11 +113,11 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--bg-subtle);
+    background: #f9fafb;
   }
 
   &.selected-row {
-    background: var(--bg-soft);
+    background: #f3f4f6;
   }
 
   &:last-child td {
@@ -113,6 +145,15 @@
   &.text-right {
     text-align: right;
   }
+}
+
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .tabla-empty-row {
@@ -220,13 +261,15 @@
 
 /* Paginación */
 
+// sm - Pegada justo debajo de .tabla-wrapper (sin margen ni borde superior) para que, junto con sus esquinas
+// inferiores redondeadas, formen un único recuadro continuo, igual que el pie de tabla de Seguimiento.
 .pagination-wrapper {
   display: block;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
   padding: 9px 12px 9px 16px;
-  margin-top: 12px;
 }
 
 /* Estados de tabla adicionales */

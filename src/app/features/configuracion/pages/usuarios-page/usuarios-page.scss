@@ -1,37 +1,11 @@
-// ── Contenedor principal — tarjeta blanca (igual que Proyectos) ─────────────
+// ── Contenedor principal — ancho completo, sin tarjeta (igual que Seguimiento) ──
 
 .page {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 18px;
-  box-shadow: var(--elevation-card);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-// ── Header ─────────────────────────────────────────────────────────────────
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: clamp(28px, 3vw, 34px);
-  font-weight: 800;
-  color: var(--primary-color);
-  margin: 0;
-  line-height: 1.1;
-  font-family: 'Inter', sans-serif;
+  gap: 16px;
 }
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────
@@ -335,26 +309,28 @@
   }
 }
 
+// sm - Mismas dimensiones que la tabla de Seguimiento (table-layout:fixed, columnas en %, padding 14px 10px,
+// texto 13px); se mantienen los tokens de color propios (var(--...)) para no perder el tema oscuro.
 .usuarios-table {
   width: 100%;
-  min-width: 900px;
+  min-width: 960px;
   table-layout: fixed;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 
   thead {
     background: var(--bg-card);
-    border-bottom: 2px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
     position: sticky;
     top: 0;
     z-index: 2;
 
     th {
-      padding: 11px 14px;
+      padding: 14px 10px;
       text-align: left;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--text-subtle);
-      font-size: 14px;
+      font-size: 13px;
       white-space: nowrap;
       background: var(--bg-card);
     }
@@ -375,37 +351,38 @@
     }
 
     td {
-      padding: 13px 16px;
+      padding: 14px 10px;
       color: var(--text-subtle);
       font-weight: 400;
-      font-size: 14px;
+      font-size: 13px;
       vertical-align: middle;
       white-space: nowrap;
     }
   }
 
+  // Usuario, Nombre, Correo, Roles, Estado, Acciones
   th:nth-child(1) {
-    width: 18%;
+    width: 17%;
   }
 
   th:nth-child(2) {
-    width: 22%;
+    width: 21%;
   }
 
   th:nth-child(3) {
-    width: 26%;
+    width: 25%;
   }
 
   th:nth-child(4) {
-    width: 22%;
+    width: 21%;
   }
 
   th:nth-child(5) {
-    width: 12%;
+    width: 11%;
   }
 
   th:last-child {
-    width: 56px;
+    width: 5%;
   }
 
   tbody td:nth-child(1),
@@ -493,8 +470,6 @@
   position: sticky;
   right: 0;
   z-index: 1;
-  width: 56px;
-  min-width: 56px;
   padding: 8px 10px;
   text-align: center;
   white-space: nowrap;
@@ -517,28 +492,7 @@
 
 // ── Responsive ─────────────────────────────────────────────────────────────
 
-@media (max-width: 1024px) {
-  .page {
-    padding: 24px 22px 20px;
-  }
-}
-
 @media (max-width: 768px) {
-  .page {
-    border-radius: 14px;
-    padding: 20px 14px 18px;
-  }
-
-  .page-title {
-    font-size: 28px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .search-bar {
     flex-direction: column;
     align-items: stretch;
@@ -567,12 +521,6 @@
   .usuarios-actions app-descarga-menu,
   .page-create {
     width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .page {
-    padding: 16px 10px;
   }
 }
 

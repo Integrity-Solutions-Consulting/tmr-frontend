@@ -3,11 +3,6 @@
   <!-- ===== HEADER ===== -->
   <app-header title="Dashboard" subtitle="Cumplimiento del registro de horas, asignaciones y ciclo de vida de proyectos">
     <div class="header-acciones">
-      <button type="button" class="btn-secundario" (click)="mostrarParametros.set(!mostrarParametros())"
-        [class.activo]="mostrarParametros()">
-        <mat-icon>tune</mat-icon>
-        Parámetros
-      </button>
       <button type="button" class="btn-primario" (click)="descargarTodo()" [disabled]="!datos() || cargando()">
         <mat-icon>file_download</mat-icon>
         Descargar
@@ -40,24 +35,30 @@
 
       <div class="filter-group">
         <label class="filter-label" for="f-cliente">Cliente</label>
-        <select id="f-cliente" class="filter-input" [ngModel]="filtros().idCliente ?? ''"
-          (ngModelChange)="actualizarFiltro('idCliente', aNumero($event))">
-          <option value="">Todos los clientes</option>
-          @for (c of opciones().clientes; track c.id) {
-            <option [value]="c.id">{{ c.nombre }}</option>
+        <input id="f-cliente" type="text" class="filter-input" placeholder="Todos los clientes"
+          [ngModel]="clienteTexto()" (ngModelChange)="onClienteTextoChange($event)"
+          [matAutocomplete]="autoCliente" autocomplete="off" />
+        <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event)"
+          (closed)="onClientePanelCerrado()">
+          <mat-option [value]="null">Todos los clientes</mat-option>
+          @for (c of clientesFiltrados(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
           }
-        </select>
+        </mat-autocomplete>
       </div>
 
       <div class="filter-group">
         <label class="filter-label" for="f-proyecto">Proyecto</label>
-        <select id="f-proyecto" class="filter-input" [ngModel]="filtros().idProyecto ?? ''"
-          (ngModelChange)="actualizarFiltro('idProyecto', aNumero($event))">
-          <option value="">Todos los proyectos</option>
-          @for (p of proyectosFiltro(); track p.id) {
-            <option [value]="p.id">{{ p.codigo ? p.codigo + ' · ' : '' }}{{ p.nombre }}</option>
+        <input id="f-proyecto" type="text" class="filter-input" placeholder="Todos los proyectos"
+          [ngModel]="proyectoTexto()" (ngModelChange)="onProyectoTextoChange($event)"
+          [matAutocomplete]="autoProyecto" autocomplete="off" />
+        <mat-autocomplete #autoProyecto="matAutocomplete" (optionSelected)="seleccionarProyecto($event)"
+          (closed)="onProyectoPanelCerrado()">
+          <mat-option [value]="null">Todos los proyectos</mat-option>
+          @for (p of proyectosFiltrados(); track p.id) {
+            <mat-option [value]="p.id">{{ p.codigo ? p.codigo + ' · ' : '' }}{{ p.nombre }}</mat-option>
           }
-        </select>
+        </mat-autocomplete>
       </div>
 
       <div class="filter-group">
@@ -115,29 +116,6 @@
       </div>
     }
   </div>
-
-  <!-- ===== PARÁMETROS APLICADOS (RF 16) ===== -->
-  @if (mostrarParametros() && datos(); as d) {
-    <section class="panel-parametros">
-      <div class="parametros-grid">
-        <div><span class="param-label">Semáforo</span>
-          <span class="param-valor">
-            <i class="punto semaforo-verde"></i> Verde ≥ {{ d.parametros.umbralVerde }} %
-            <i class="punto semaforo-amarillo"></i> Amarillo ≥ {{ d.parametros.umbralAmarillo }} %
-            <i class="punto semaforo-rojo"></i> Rojo &lt; {{ d.parametros.umbralAmarillo }} %
-          </span>
-        </div>
-        <div><span class="param-label">Horas esperadas</span><span class="param-valor">{{ d.parametros.reglaJornada }}</span></div>
-        <div><span class="param-label">Vacaciones y permisos</span><span class="param-valor">{{ d.parametros.fuenteNovedades }}</span></div>
-        <div><span class="param-label">Reparto entre proyectos</span><span class="param-valor">{{ d.parametros.reglaReparto }}</span></div>
-        <div><span class="param-label">Estados activos</span><span class="param-valor">{{ d.parametros.estadosActivos }}</span></div>
-        <div><span class="param-label">Estados cerrados</span><span class="param-valor">{{ d.parametros.estadosCerrados }}</span></div>
-        <div><span class="param-label">Recurrencia</span><span class="param-valor">{{ umbralRecurrencia() }} o más ocasiones con atraso en la ventana. {{ historico()?.reglaRecurrencia ?? '' }}</span></div>
-        <div><span class="param-label">Cierre de mes</span><span class="param-valor">{{ historico()?.reglaCierre ?? '—' }}</span></div>
-        <div><span class="param-label">Fuente</span><span class="param-valor">TMR: actividades diarias, asignaciones de proyectos, colaboradores y feriados</span></div>
-      </div>
-    </section>
-  }
 
   @if (error()) {
     <div class="alerta-error">

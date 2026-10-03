@@ -43,6 +43,11 @@ export class Calendario {
     // agregar/editar actividades (la navegación entre meses sigue funcionando igual).
     @Input() idEmpleadoOverride?: number;
     @Input() soloLectura = false;
+    // sm - Cuando el modal se abre desde una fila de Seguimiento (colaborador+proyecto puntual), limita las métricas
+    // del resumen (horas por registrar/promedio) a ESE proyecto, igual que exige esa fila (ver ActividadesService).
+    // No filtra las actividades que se ven en las celdas del calendario: ahí se deja el día completo del colaborador
+    // (incluye otros proyectos y novedades sin proyecto) para no ocultar contexto en una vista de solo lectura.
+    @Input() idProyectoOverride?: number;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -56,7 +61,7 @@ export class Calendario {
             const y = fecha.getFullYear();
             const m = fecha.getMonth() + 1;
             this.actividadesService.cargarCalendario(y, m, this.idEmpleadoOverride);
-            this.actividadesService.cargarResumen(y, m, this.idEmpleadoOverride);
+            this.actividadesService.cargarResumen(y, m, this.idEmpleadoOverride, this.idProyectoOverride);
         });
     }
 

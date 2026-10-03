@@ -59,6 +59,17 @@
                 <span class="opcion-label">{{ e.nombre }}</span>
               </div>
             }
+            <!-- sm - "Inhabilitado" no es un estado real del catálogo: es lo que muestra la tabla para los
+                 proyectos Inactivo (ver Tabla.obtenerSeguimiento). Se agrega acá para poder filtrar por lo
+                 mismo que se ve en la columna. -->
+            <div class="dropdown-opcion" (click)="toggleSeguimiento(idSeguimientoInhabilitado, $event)">
+              <div class="dropdown-checkbox" [class.checked]="estaSeguimientoSeleccionado(idSeguimientoInhabilitado)">
+                @if (estaSeguimientoSeleccionado(idSeguimientoInhabilitado)) {
+                  <span class="material-icons">check</span>
+                }
+              </div>
+              <span class="opcion-label">Inhabilitado</span>
+            </div>
           <div class="dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
         </div>
       }

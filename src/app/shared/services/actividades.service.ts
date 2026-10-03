@@ -42,8 +42,9 @@ export class ActividadesService {
   public readonly promedioPorDia = this._promedioPorDia.asReadonly();
 
   // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
-  // en vez de siempre usar al usuario logueado.
-  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number): void {
+  // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
+  // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
+  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number): void {
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
     if (!empId) {
       // sm - Sin empleado no hay horas que mostrar: las métricas quedan en 0.
@@ -55,6 +56,9 @@ export class ActividadesService {
     let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
     if (anio && mes) {
       url += `&anio=${anio}&mes=${mes}`;
+    }
+    if (idProyecto) {
+      url += `&idProyecto=${idProyecto}`;
     }
     this.http.get<ResumenHorasDto>(url).subscribe({
       next: (res) => {

@@ -1,10 +1,8 @@
 <div class="lideres-container" (click)="cerrarDropdowns()">
 
   <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">Líderes</h1>
-  </div>
-  <!-- Cards -->
+  <app-header title="Líderes" subtitle="Gestión de líderes técnicos y de proyecto"></app-header>
+
   <!-- Cards -->
   <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
   <div class="tarjetas-resumen">
@@ -87,13 +85,27 @@
         </colgroup>
         <thead>
           <tr>
-            <th>Código</th>
-            <th>Tipo</th>
-            <th>Nombre</th>
-            <th>Cliente</th>
-            <th>Correo electrónico</th>
-            <th>Teléfono</th>
-            <th>Estado</th>
+            <th class="sortable" (click)="ordenar('codigo')" [attr.aria-sort]="direccionOrden('codigo')">
+              <span class="th-inner"><span class="th-label">Código</span><mat-icon class="sort-icon">{{ sortField === 'codigo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('tipo')" [attr.aria-sort]="direccionOrden('tipo')">
+              <span class="th-inner"><span class="th-label">Tipo</span><mat-icon class="sort-icon">{{ sortField === 'tipo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('nombre')" [attr.aria-sort]="direccionOrden('nombre')">
+              <span class="th-inner"><span class="th-label">Nombre</span><mat-icon class="sort-icon">{{ sortField === 'nombre' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('cliente')" [attr.aria-sort]="direccionOrden('cliente')">
+              <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField === 'cliente' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('correo')" [attr.aria-sort]="direccionOrden('correo')">
+              <span class="th-inner"><span class="th-label">Correo electrónico</span><mat-icon class="sort-icon">{{ sortField === 'correo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('telefono')" [attr.aria-sort]="direccionOrden('telefono')">
+              <span class="th-inner"><span class="th-label">Teléfono</span><mat-icon class="sort-icon">{{ sortField === 'telefono' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+              <span class="th-inner"><span class="th-label">Estado</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
             <th class="th-actions">Acciones</th>
           </tr>
         </thead>

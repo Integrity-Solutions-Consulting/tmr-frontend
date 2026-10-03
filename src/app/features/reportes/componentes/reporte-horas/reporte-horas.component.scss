@@ -4,21 +4,9 @@
    TABLA COMPARTIDA
    ============================================================ */
 
+// sm - Se quita el override de thead/tbody: app-tabla (tabla-colega) ya trae el mismo diseño de Seguimiento
+// por sí sola; este ::ng-deep lo pisaba con otro tamaño/color.
 :host ::ng-deep {
-  .tabla {
-    thead th {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-    }
-
-    tbody td {
-      font-size: 14px;
-      color: var(--text-main);
-    }
-  }
-
   .text-highlight {
     color: var(--primary-color) !important;
     font-weight: 800 !important;
@@ -50,14 +38,17 @@
    FILTROS
    ============================================================ */
 
+// sm - Mismo diseño que la barra de filtros de Seguimiento: colores exactos (no tokens var(--...) que podían
+// resolver a un tono distinto), sin borde (solo una sombra suave).
 .filters-container {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-  background-color: var(--bg-card);
-  padding: 12px 16px;
-    border-radius: 12px;
+  background-color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .filter-group {
@@ -75,7 +66,7 @@
   font-size: 11px;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #94a3b8;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
   margin-left: 4px;
@@ -89,40 +80,40 @@
   position: relative;
 
   &:focus-within .filter-icon {
-    color: var(--primary-color);
+    color: #163572;
   }
 }
 
 .filter-input {
   width: 100%;
   padding: 10px 16px;
-  background-color: var(--input-bg);
-  border: 1px solid var(--border-input);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   outline: none;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #1e293b;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
   box-sizing: border-box;
 
   &:focus {
-    border-color: var(--primary-color);
-    box-shadow: var(--focus-ring-primary);
+    border-color: #163572;
+    box-shadow: 0 0 0 1px #163572;
   }
 
   &::placeholder {
-    color: var(--text-muted) !important;
+    color: #94a3b8 !important;
     opacity: 1 !important;
   }
   &::-webkit-input-placeholder {
-    color: var(--text-muted) !important;
+    color: #94a3b8 !important;
     opacity: 1 !important;
   }
   &::-moz-placeholder {
-    color: var(--text-muted) !important;
+    color: #94a3b8 !important;
     opacity: 1 !important;
   }
 }
@@ -143,8 +134,8 @@ input.filter-input {
   -moz-appearance: none;
   padding-right: 40px;
   cursor: pointer;
-  color: var(--text-muted);
-  background-color: var(--input-bg);
+  color: #1e293b;
+  background-color: #ffffff;
 }
 
 /* ============================================================
@@ -156,7 +147,7 @@ input.filter-input {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted);
+  color: #94a3b8;
   transition: color 0.2s;
 }
 
@@ -165,7 +156,7 @@ input.filter-input {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted);
+  color: #94a3b8;
   pointer-events: none;
 }
 

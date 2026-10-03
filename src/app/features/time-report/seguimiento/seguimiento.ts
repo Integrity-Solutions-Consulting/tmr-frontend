@@ -705,10 +705,10 @@ export class SeguimientoComponent implements AfterViewInit {
     // proyecto: ver itemsParaDescarga). Se puede cancelar desde el toast de descarga.
     private obtenerActividadesColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<DatosSeguimientoPdf> {
         const params: Record<string, string> = { fechaDesde: rango.desde, fechaHasta: rango.hasta };
-        // sm - Solo se filtra por proyecto cuando el colaborador tiene más de uno: con uno solo no hace falta
-        // desambiguar, y filtrar igual dejaría fuera actividades de una asignación ya inactiva o reasignada a
-        // mitad del rango (que sí se veían en la descarga antes de separar los reportes por proyecto).
-        if (proyecto && (col.proyectos?.length ?? 0) > 1) params['idProyecto'] = String(proyecto.idProyecto);
+        // sm - Ahora cada fila de Seguimiento es un colaborador+proyecto puntual (ya no una fila por colaborador
+        // con todos sus proyectos mezclados), así que siempre se filtra por el proyecto de la fila para no mezclar
+        // horas de otro proyecto del mismo colaborador en el reporte.
+        if (proyecto) params['idProyecto'] = String(proyecto.idProyecto);
         return this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
             `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`,
             { params },

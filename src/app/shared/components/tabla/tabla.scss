@@ -1,145 +1,301 @@
+// sm - Copia literal (mismos colores exactos, no tokens var(--...) que podían resolver a un tono distinto)
+// del diseño de la tabla de Seguimiento: recuadro blanco con esquinas superiores redondeadas, encabezado
+// blanco pegajoso con texto gris (#6b7280), filas con texto gris oscuro (#4b5563) y separador muy suave
+// (#f3f4f6), hover gris clarito (#f9fafb). El tema oscuro se cubre aparte, abajo, igual que en Seguimiento.
 .table-scroll-container {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  gap: 6px;
-  align-items: stretch;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
   overflow: hidden;
-  max-height: none;
+  box-shadow: none;
+  width: 100%;
 }
 
 .table-wrapper {
-  background: var(--bg-card);
-  border-radius: 10px;
-  border: 1px solid var(--border-default);
-  overflow: auto;
-  flex: 1;
-  min-height: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--border-default);
-    border-radius: 10px;
-  }
+  overflow-x: auto;
+  width: 100%;
 }
 
 .lideres-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 960px;
   table-layout: fixed;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 14px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--bg-card);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
 
-  th, td {
-    padding: 4px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-default);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  th {
-    background-color: var(--bg-app);
-    color: var(--text-subtle);
-    font-weight: 500;
-    font-size: 13px;
+  thead {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     position: sticky;
     top: 0;
     z-index: 10;
   }
 
+  th {
+    padding: 14px 10px;
+    text-align: left;
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 13px;
+    white-space: normal;
+    background: #ffffff;
+    user-select: none;
+    box-sizing: border-box;
+
+    // sm - Mismo patrón que Seguimiento: envuelve el texto del encabezado y el ícono de orden para que el
+    // texto se vea completo (se parte en 2 líneas si no entra) y el ícono nunca se achique ni se solape.
+    .th-inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .th-label {
+      white-space: normal;
+      // sm - No se parte una palabra suelta por la mitad (ej. "Recursos" → "Recurs"/"os"): solo se parte en
+      // espacios; si no entra completa, queda en su propia línea.
+      word-break: normal;
+      overflow-wrap: normal;
+      line-height: 1.25;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        color: #163572;
+
+        .sort-icon {
+          color: currentColor;
+        }
+      }
+    }
+  }
+
   td {
-    color: var(--text-muted);
+    padding: 14px 10px;
+    color: #4b5563;
+    font-weight: 400;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 
-  tr:hover {
-    background-color: var(--bg-hover) !important;
+  // sm - Esta tabla no tiene columna de selección (checkbox) como Seguimiento, así que "Código" queda pegado
+  // al borde izquierdo del recuadro; se le da un poco más de espacio a la primera columna (encabezado y celdas)
+  // para separarla, sin agregar selección.
+  th:first-child,
+  td:first-child {
+    padding-left: 20px;
   }
 
-  tr:last-child td {
-    border-bottom: none;
+  tr {
+    transition: background 0.12s;
   }
+
+  tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: #f9fafb !important;
+    }
+  }
+}
+
+// sm - Ícono de orden (flechas) de los encabezados ordenables: mismo tamaño y color que Seguimiento.
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 /* Modificadores Material */
 ::ng-deep .mat-mdc-header-row,
 ::ng-deep .mat-mdc-row {
-  min-width: 1180px;
+  min-width: 960px;
 }
 
-::ng-deep .lideres-table th.mat-mdc-header-cell,
+::ng-deep .lideres-table th.mat-mdc-header-cell {
+  border-bottom: 1px solid #e5e7eb;
+}
+
 ::ng-deep .lideres-table td.mat-mdc-cell {
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid #f3f4f6;
 }
 
-::ng-deep .mat-column-codigo { width: 110px !important; }
-::ng-deep .mat-column-nombre { width: 220px !important; }
-::ng-deep .mat-column-cliente { width: 220px !important; }
-::ng-deep .mat-column-seguimiento { width: 150px !important; }
-::ng-deep .mat-column-fechas { width: 190px !important; }
-::ng-deep .mat-column-lideres { width: 200px !important; }
-::ng-deep .mat-column-numeroRecursos { width: 90px !important; text-align: center; }
-::ng-deep .mat-column-estado { width: 150px !important; overflow: visible !important; }
-::ng-deep .mat-column-acciones { width: 80px !important; text-align: center; overflow: visible !important; }
+// sm - Mismo criterio de ancho que Seguimiento: columnas en % (no px) sobre el 100% de la tabla.
+::ng-deep .mat-column-codigo { width: 9% !important; }
+::ng-deep .mat-column-nombre { width: 15% !important; }
+::ng-deep .mat-column-cliente { width: 18% !important; }
+::ng-deep .mat-column-seguimiento { width: 12% !important; }
+::ng-deep .mat-column-fechas { width: 15% !important; }
+::ng-deep .mat-column-lideres { width: 16% !important; }
+::ng-deep .mat-column-numeroRecursos { width: 9% !important; text-align: center; }
+::ng-deep .mat-column-estado { width: 11% !important; overflow: visible !important; }
+::ng-deep .mat-column-acciones { width: 6% !important; text-align: center; overflow: visible !important; }
 
-/* Contenido celdas */
-.tabla__codigo { color: var(--text-muted); font-weight: 400; }
+/* Contenido celdas: mismo gris que el texto de celda de Seguimiento (#4b5563) */
+.tabla__codigo { color: #4b5563; font-weight: 400; }
 .tabla__proyecto { display: flex; flex-direction: column; gap: 4px; }
-.tabla__proyecto-nombre { font-weight: 400; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tabla__cliente { font-weight: 400; color: var(--text-muted); }
+.tabla__proyecto-nombre { font-weight: 400; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabla__cliente { font-weight: 400; color: #4b5563; }
 
+// sm - Mismo diseño que el badge de Seguimiento (pastilla blanca con borde gris y un punto de color según el
+// estado, no toda la pastilla teñida), con los mismos colores exactos de texto/fondo/borde.
 .seguimiento-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 400; background: var(--bg-surface); border: 1px solid var(--border-default);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #4b5563;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  min-width: 90px;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
-.seguimiento-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
-.seguimiento-activo { background: var(--status-success-bg-soft); color: var(--status-success-text); border-color: var(--status-success-border); }
-.seguimiento-activo::before { background: var(--status-success-bg-solid); }
-.seguimiento-planificacion { background: var(--status-info-bg-soft); color: var(--status-info-text); border-color: var(--status-info-border); }
-.seguimiento-planificacion::before { background: var(--status-info-bg-solid); }
-.seguimiento-desarrollo { background: var(--status-info-bg-soft); color: var(--status-info-text); border-color: var(--status-info-border); }
-.seguimiento-desarrollo::before { background: var(--status-info-bg-solid); }
-.seguimiento-aplazado { background: var(--status-warning-bg-soft); color: var(--status-warning-text); border-color: var(--status-warning-border); }
-.seguimiento-aplazado::before { background: var(--status-warning-bg-solid); }
-.seguimiento-inactivo { background: var(--bg-soft); color: var(--text-muted); }
+.seguimiento-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: #9ca3af; }
+
+.seguimiento-activo::before,
+.seguimiento-aprobado::before,
+.seguimiento-completado::before { background: #22c55e; }
+
+.seguimiento-planificacion::before,
+.seguimiento-desarrollo::before,
+.seguimiento-progreso::before { background: #3b82f6; }
+
+.seguimiento-aplazado::before,
+.seguimiento-espera::before { background: #f97316; }
+
+.seguimiento-cancelado::before { background: #ef4444; }
+
+.seguimiento-inactivo::before { background: #9ca3af; }
 
 .tabla__fecha { display: flex; flex-direction: column; gap: 4px; }
-.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-muted); }
-.fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--text-muted); }
-.fecha-sub { font-size: 11px; color: var(--text-muted); }
+.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #4b5563; }
+.fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: #4b5563; }
+.fecha-sub { font-size: 11px; color: #9ca3af; }
 
-.tabla__lideres { display: flex; flex-direction: column; gap: 4px; }
-.lider-item { display: flex; align-items: center; gap: 8px; }
-.lider-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-.lider-nombre { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
-.lideres-extra { font-size: 11px; color: var(--primary-color); font-weight: 600; cursor: pointer; }
+// sm - Columna "Líderes": se corrigen los nombres de clase (no coincidían con las del HTML, así que esta
+// columna no tenía ningún estilo propio). Cada líder en su línea, con su detalle (recursos) en chip chico
+// y un "+N más" que abre el detalle cuando hay más de los que se muestran.
+.tabla__lista { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.tabla__lista-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  font-size: 13px;
+  color: #4b5563;
 
-.recursos-count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); font-size: 12px; font-weight: 600; padding: 0 6px; }
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.tabla__lista-ver-mas {
+  font-size: 11px;
+  color: #163572;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// sm - Columnas "Recursos" y "Observación": tampoco tenían estilo propio.
+.tabla__recursos { font-weight: 400; color: #4b5563; }
+.tabla__observacion { color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+// sm - Columna de acciones: centra el botón de menú en su celda (igual que col-acciones en Seguimiento).
+.tabla__acciones { display: flex; align-items: center; justify-content: center; }
 
 /* Pagination */
+// sm - Pegada justo debajo de table-scroll-container (sin margen ni borde superior) para que, junto con sus
+// esquinas inferiores redondeadas, formen un único recuadro continuo, igual que el tabla-footer de Seguimiento.
 .pagination-bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 10px 20px;
-  border-top: none;
-  margin-top: 8px;
+  padding: 9px 12px 9px 16px;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  background: #ffffff;
   flex-shrink: 0;
-  background-color: var(--bg-card);
-  border-radius: 12px;
 }
 
+// sm - Tema oscuro: mismos colores exactos que usa Seguimiento para su propia tabla en modo oscuro
+// (seguimiento.scss, bloque :host-context(html[data-theme="dark"])).
+:host-context(html[data-theme="dark"]) {
+  .table-scroll-container,
+  .table-wrapper {
+    background-color: #202124;
+    background: #202124;
+    border: 1px solid #3f3f46;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .lideres-table {
+    background-color: #202124;
+
+    thead, thead th {
+      background-color: #202124;
+      border-bottom: 2px solid #3f3f46;
+      color: #a1a1aa;
+    }
+
+    th.sortable:hover {
+      color: #60a5fa;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #3f3f46 !important;
+
+      &:hover {
+        background-color: #27272a !important;
+      }
+    }
+
+    td {
+      color: #ffffff;
+    }
+  }
+
+  .tabla__codigo,
+  .tabla__proyecto-nombre,
+  .tabla__cliente,
+  .tabla__recursos,
+  .tabla__observacion,
+  .tabla__lista-item,
+  .fecha-rango,
+  .fecha-rango mat-icon {
+    color: #ffffff;
+  }
+
+  .pagination-bar {
+    background-color: #202124;
+    border: 1px solid #3f3f46;
+    color: #a1a1aa;
+  }
+}

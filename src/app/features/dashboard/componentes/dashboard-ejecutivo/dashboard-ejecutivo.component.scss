@@ -69,8 +69,7 @@
   color: var(--text-body);
   border: 1px solid var(--border-input);
 
-  &:hover:not(:disabled),
-  &.activo {
+  &:hover:not(:disabled) {
     border-color: var(--primary-color);
     color: var(--primary-color);
     background: var(--primary-light);
@@ -225,47 +224,8 @@
 }
 
 // =====================================================================
-// Parámetros, avisos y estados generales
+// Avisos y estados generales
 // =====================================================================
-.panel-parametros {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: var(--elevation-card);
-}
-
-.parametros-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px 24px;
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-}
-
-.param-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
-.param-valor {
-  font-size: 13px;
-  color: var(--text-body);
-  line-height: 1.45;
-
-
-  .punto {
-    margin-left: 6px;
-  }
-}
-
 .alerta-error {
   display: flex;
   align-items: center;

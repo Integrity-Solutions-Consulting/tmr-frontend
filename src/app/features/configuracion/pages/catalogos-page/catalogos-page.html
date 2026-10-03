@@ -23,9 +23,10 @@
   <section class="page catalogos-content">
 
     <!-- Header -->
-    <div class="page-header">
-      <h1 class="page-title">Catálogo: {{ selectedMaster()?.descripcion || selectedMaster()?.codigo || 'Cargando...' }}</h1>
-    </div>
+    <app-header
+      [title]="'Catálogo: ' + (selectedMaster()?.descripcion || selectedMaster()?.codigo || 'Cargando...')"
+      subtitle="Administración de catálogos del sistema">
+    </app-header>
 
     <!-- Cards Summary -->
     <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
