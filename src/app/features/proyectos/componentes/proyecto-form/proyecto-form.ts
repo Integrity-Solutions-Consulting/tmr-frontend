@@ -80,8 +80,11 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   todosLosCargos: CargoLookup[] = [];
   estadoOptions: string[] = ['Activo', 'Inactivo'];
 
+  // sm - Se excluyen "Activo" e "Inactivo": esos los maneja el campo Estado (y activar/inactivar desde la
+  // lista), no la lista de seguimiento. Antes solo se excluía "Activo", así que "Inactivo" aparecía como una
+  // opción más de seguimiento (inconsistente con proyectos-filtros.ts, que sí excluye ambos).
   get seguimientoOpciones(): LookupOption[] {
-    return this.estados.filter(e => e.nombre !== 'Activo');
+    return this.estados.filter(e => e.nombre !== 'Activo' && e.nombre !== 'Inactivo');
   }
 
   // cargosFiltrados[liderIndex][recursoIndex]
@@ -100,14 +103,22 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     horas: ['', [this.numeroValido(false), Validators.min(0)]],
     numeroRecursos: [0],
     estado: ['Activo'],
-    idEstadoProyecto: this.fb.control<number | null>(null),
+    idEstadoProyecto: this.fb.control<number | null>(null, Validators.required),
     observacion: [''],
     fechaInicioReal: [null as string | null, [this.fechaValida()]],
     fechaFinReal: [null as string | null, [this.fechaValida()]],
     fechaInicioEspera: [null as string | null, [this.fechaValida()]],
     fechaFinEspera: [null as string | null, [this.fechaValida()]],
     lideres: this.fb.array([this.crearLider()])
-  }, { validators: this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor') });
+  }, {
+    validators: [
+      this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor'),
+      // sm - El par planeado ya validaba que el fin no sea menor al inicio; los pares real/espera no tenían
+      // esa misma validación cruzada (se podía guardar, por ejemplo, una fecha fin real anterior a la de inicio).
+      this.rangoFechasValido('fechaInicioReal', 'fechaFinReal', 'fechaFinRealMenor'),
+      this.rangoFechasValido('fechaInicioEspera', 'fechaFinEspera', 'fechaFinEsperaMenor'),
+    ],
+  });
 
   // ── Getters ──────────────────────────────────────────────────────────────
 
@@ -354,9 +365,9 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       idEmpleado: [null],
       tipo: ['Interno', Validators.required],
       nombre: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.empleadosDisponibles)]],
-      departamento: [null],
+      departamento: [null, Validators.required],
       rol: ['', Validators.required],
-      entrada: this.fb.control<string | null>('', [this.fechaValida()]),
+      entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
       salida: this.fb.control<string | null>('', [this.fechaValida()]),
       costoHora: ['', [this.numeroValido(true)]],
       horas: ['', [this.numeroValido(false), Validators.min(0)]]
@@ -563,6 +574,20 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return Boolean(
       this.formulario.hasError('fechaFinMenor') &&
       (this.formulario.controls.fechaFin.touched || this.intentoGuardar)
+    );
+  }
+
+  fechaFinRealInvalida(): boolean {
+    return Boolean(
+      this.formulario.hasError('fechaFinRealMenor') &&
+      (this.formulario.controls.fechaFinReal.touched || this.intentoGuardar)
+    );
+  }
+
+  fechaFinEsperaInvalida(): boolean {
+    return Boolean(
+      this.formulario.hasError('fechaFinEsperaMenor') &&
+      (this.formulario.controls.fechaFinEspera.touched || this.intentoGuardar)
     );
   }
 

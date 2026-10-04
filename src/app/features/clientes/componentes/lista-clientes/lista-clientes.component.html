@@ -33,7 +33,7 @@
 <div class="clientes-container" (click)="cerrarMenu()">
 
   <!-- Título -->
-  <h1 class="titulo-pagina">Clientes</h1>
+  <app-header title="Clientes" subtitle="Gestión de clientes y su información de contacto"></app-header>
 
   <!-- Cards resumen -->
   <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
@@ -137,12 +137,24 @@
     <table class="tabla">
       <thead>
         <tr>
-          <th>Tipo</th>
-          <th>Identificador</th>
-          <th>Nombre Comercial</th>
-          <th>Correo electrónico</th>
-          <th>Teléfono</th>
-          <th>Estado</th>
+          <th class="sortable" (click)="ordenar('tipoId')" [attr.aria-sort]="direccionOrden('tipoId')">
+            <span class="th-inner"><span class="th-label">Tipo</span><mat-icon class="sort-icon">{{ sortField === 'tipoId' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
+          <th class="sortable" (click)="ordenar('identificador')" [attr.aria-sort]="direccionOrden('identificador')">
+            <span class="th-inner"><span class="th-label">Identificador</span><mat-icon class="sort-icon">{{ sortField === 'identificador' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
+          <th class="sortable" (click)="ordenar('nombreComercial')" [attr.aria-sort]="direccionOrden('nombreComercial')">
+            <span class="th-inner"><span class="th-label">Nombre Comercial</span><mat-icon class="sort-icon">{{ sortField === 'nombreComercial' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
+          <th class="sortable" (click)="ordenar('correoElectronico')" [attr.aria-sort]="direccionOrden('correoElectronico')">
+            <span class="th-inner"><span class="th-label">Correo electrónico</span><mat-icon class="sort-icon">{{ sortField === 'correoElectronico' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
+          <th class="sortable" (click)="ordenar('telefono')" [attr.aria-sort]="direccionOrden('telefono')">
+            <span class="th-inner"><span class="th-label">Teléfono</span><mat-icon class="sort-icon">{{ sortField === 'telefono' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
+          <th class="sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+            <span class="th-inner"><span class="th-label">Estado</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+          </th>
           <th></th>
         </tr>
       </thead>
@@ -163,7 +175,7 @@
         </tr>
 
         <!-- Filas -->
-        <tr *ngFor="let cliente of clientes$ | async" class="fila">
+        <tr *ngFor="let cliente of clientesOrdenados$ | async" class="fila">
           <td>{{ cliente.tipoId }}</td>
           <td>{{ cliente.identificador }}</td>
           <td class="td-nombre">{{ cliente.nombreComercial }}</td>

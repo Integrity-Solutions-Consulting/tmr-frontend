@@ -1,27 +1,16 @@
 
+// sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
+// pone el layout global, no cada página).
 .colabs-page {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   min-height: 0;
 
   &__wrapper {
-    //background: var(--bg-card);
-    //border-radius: 18px;
-    //border: 1px solid var(--border-default);
-    //box-shadow: var(--elevation-card);
-    padding: 8px 24px 16px 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-  }
-
-  &__title {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--primary-color);
-    padding-top: 18px;
-    line-height: 1.2;
+    gap: 16px;
   }
 
   &__metricas {
@@ -82,6 +71,17 @@
     overflow: visible;
     width: 100%;
   }
+}
+
+// sm - Pie de tabla pegado al recuadro superior (igual que en Carga de Actividades): colores exactos
+// y esquinas inferiores redondeadas, sin borde superior.
+app-paginacion {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 9px 12px 9px 16px;
 }
 
 // ── Confirm modal — FUERA de .colabs-page ─────────────
@@ -210,127 +210,18 @@
 
 /* ============================================================ FILTERS CARD ============================================================ */
 .filters-card {
-    background: var(--bg-card);
+    background: #ffffff;
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
     align-items: flex-end ;
     gap: 16px ;
     flex-wrap: wrap;
-    box-shadow: var(--elevation-card);
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column ;
-    align-items: flex-start ;
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-}
-
-.filter-input-wrapper {
-    position: relative ;
-    width: 100%;
-
-     &:focus-within .filter-icon {
-        color: var(--primary-color) ;
-    }
-
-    
-}
-
-.filter-input {
-    width: 100% ;
-    padding: 10px 16px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
-    border-radius: 12px ;
-    outline: none ;
-    font-size: 14px ;
-    font-weight: 500 ;
-    color: var(--text-main) ;
-    font-family: 'Inter', sans-serif ;
-    transition: all 0.2s ;
-    box-sizing: border-box ;
-
-     &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
-    }
-
-    
-}
-
-.filter-input-wrapper .filter-input {
-    padding-left: 40px ;
-}
-
-.filter-icon {
-    position: absolute ;
-    left: 12px ;
-    top: 12px ;
-    color: var(--text-muted) ;
-    transition: color 0.2s ;
-    width: 18px ;
-    height: 18px ;
-    pointer-events: none ;
-}
-
-/* Client select */
-.filter-select {
-    width: 100% ;
-    padding: 10px 32px 10px 40px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
-    border-radius: 12px ;
-    outline: none ;
-    font-size: 14px ;
-    font-weight: 500 ;
-    color: var(--text-main) ;
-    font-family: 'Inter', sans-serif ;
-    transition: all 0.2s ;
-    box-sizing: border-box ;
-    appearance: none ;
-    -webkit-appearance: none ;
-    cursor: pointer ;
-
-     &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
-    }
-
-    
-}
-
-.select-chevron {
-    position: absolute ;
-    right: 12px ;
-    top: 12px ;
-    color: var(--text-muted) ;
-    font-size: 18px ;
-    width: 18px ;
-    height: 18px ;
-    pointer-events: none ;
-}
-
-/* Date groups */
-.date-group {
-    flex: none ;
-    width: 160px ;
-}
-
-.filter-label {
-    display: block ;
-    font-size: 11px ;
-    text-transform: uppercase ;
-    font-weight: 700 ;
-    color: var(--text-muted) ;
-    letter-spacing: 0.05em ;
-    margin-bottom: 8px ;
-    margin-left: 4px ;
-    font-family: 'Inter', sans-serif ;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* Descargar button */
+// sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
 .btn-descargar {
     display: inline-flex;
     align-items: center;
@@ -339,9 +230,9 @@
     height: 40px;
     padding: 0 16px;
     border-radius: 12px;
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-disabled);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #9ca3af;
     font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
@@ -359,18 +250,18 @@
     }
 
     &.enabled {
-        background: var(--bg-card);
-        color: var(--primary-color);
-        border: 1px solid var(--border-soft);
+        background: #ffffff;
+        color: #163572;
+        border: 1px solid #cbd5e1;
         cursor: pointer;
 
         .download-icon {
-            color: var(--primary-color);
+            color: #163572;
         }
 
         &:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
+            background: rgba(22, 53, 114, 0.06);
+            border-color: #163572;
         }
     }
 
@@ -380,7 +271,7 @@
         opacity: 0.8;
     }
 
-    
+
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
@@ -398,75 +289,4 @@
     .download-icon {
         color: var(--text-inverse) ;
     }
-}
-
-/* Dropdown Estado from Lideres (no !important) */
-.dropdown-estado {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  box-shadow: var(--elevation-dropdown);
-  min-width: 180px;
-  z-index: 100;
-  padding: 8px;
-}
-
-.dropdown-opcion {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  margin-bottom: 6px;
-  background: var(--bg-card);
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text-body);
-
-  &:hover {
-    background: var(--bg-hover);
-    color: var(--text-main);
-  }
-}
-
-.dropdown-checkbox {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--border-default);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: var(--bg-card);
-
-  &.checked {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-
-  .material-icons {
-    font-size: 12px;
-    color: var(--text-inverse);
-  }
-}
-
-.dropdown-limpiar {
-  padding: 8px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-top: 1px solid var(--border-default);
-  margin-top: 4px;
-  text-align: center;
-
-  &:hover {
-    background: var(--bg-hover);
-    color: var(--primary-color);
-    border-radius: 6px;
-  }
 }

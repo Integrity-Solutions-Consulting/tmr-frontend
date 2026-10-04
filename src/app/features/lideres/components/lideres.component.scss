@@ -1,34 +1,11 @@
+// sm - Contenedor a ancho completo, sin tarjeta/borde/tope de ancho: mismo criterio que Seguimiento
+// (el padding de la página lo pone el layout global, no cada página).
 .lideres-container {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 18px;
-  box-shadow: var(--elevation-card);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
-  font-family: 'Inter', 'Roboto', sans-serif;
+  font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 0;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: clamp(28px, 3vw, 34px);
-  font-weight: 800;
-  color: var(--primary-color);
-  margin: 0;
-  line-height: 1.1;
-  font-family: 'Inter', sans-serif;
+  gap: 16px;
 }
 
 .header-actions {
@@ -247,9 +224,9 @@
 }
 
 .table-wrapper {
-  background: var(--bg-card);
-  border-radius: 10px;
-  border: 1px solid var(--border-default);
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid #e2e8f0;
   overflow: auto;
   flex: 1;
   min-height: 0;
@@ -293,99 +270,116 @@
   }
 }
 
+// sm - Mismas dimensiones que la tabla de Seguimiento (ancho 100% con table-layout:fixed, columnas en %,
+// padding 14px 10px y texto 13px); se mantienen los tokens de color propios (var(--...)) para no perder el tema oscuro.
 .lideres-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 960px;
   table-layout: fixed;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 14px;
+  font-size: 13px;
   border-radius: 10px;
   overflow: hidden;
 
   .col-codigo {
-    width: 90px;
+    width: 8%;
   }
 
   .col-tipo {
-    width: 110px;
+    width: 9%;
   }
 
   .col-nombre {
-    width: 180px;
+    width: 15%;
   }
 
   .col-cliente {
-    width: 205px;
+    width: 17%;
   }
 
   .col-correo {
-    width: 235px;
+    width: 20%;
   }
 
   .col-telefono {
-    width: 150px;
+    width: 13%;
   }
 
   .col-estado {
-    width: 125px;
+    width: 11%;
   }
 
   .col-acciones {
-    width: 85px;
+    width: 7%;
   }
 
   thead {
-    background: var(--bg-card);
-    border-bottom: 2px solid var(--border-default);
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     position: sticky;
     top: 0;
     z-index: 2;
 
     th {
-      padding: 4px 14px;
+      padding: 14px 10px;
       text-align: left;
-      font-weight: 600;
-      color: var(--text-subtle);
-      font-size: 14px;
-      white-space: nowrap;
-      background: var(--bg-card);
-    }
+      font-weight: 500;
+      color: #6b7280;
+      font-size: 13px;
+      white-space: normal;
+      background: #ffffff;
+      user-select: none;
+      box-sizing: border-box;
 
-    tr:first-child th:first-child {
-      border-top-left-radius: 10px;
-    }
+      .th-inner {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+      }
 
-    tr:first-child th:last-child {
-      border-top-right-radius: 10px;
+      .th-label {
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: normal;
+        line-height: 1.25;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      &.sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          color: #163572;
+
+          .sort-icon {
+            color: currentColor;
+          }
+        }
+      }
     }
   }
 
   tbody {
     tr {
-      border-bottom: 1px solid var(--border-default);
+      border-bottom: 1px solid #f3f4f6;
       transition: background 0.12s;
 
       &:last-child {
         border-bottom: none;
       }
 
-      &:last-child td:first-child {
-        border-bottom-left-radius: 10px;
-      }
-
-      &:last-child td:last-child {
-        border-bottom-right-radius: 10px;
-      }
-
       &:hover {
-        background: var(--bg-hover);
+        background: #f9fafb;
       }
     }
 
     td {
-      padding: 4px 16px;
-      color: var(--text-subtle);
+      padding: 14px 10px;
+      color: #4b5563;
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
@@ -393,6 +387,15 @@
       text-overflow: ellipsis;
     }
   }
+}
+
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .badge {
@@ -474,12 +477,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  border-top: none;
-  margin-top: 8px;
+  padding: 9px 12px 9px 16px;
   flex-shrink: 0;
-  background-color: var(--bg-card);
-  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  margin-top: 0;
 }
 
 .pagination-right {
@@ -732,28 +736,7 @@
    RESPONSIVE
    ============================================================ */
 
-@media (max-width: 1024px) {
-  .lideres-container {
-    padding: 24px 22px 20px;
-  }
-}
-
 @media (max-width: 768px) {
-  .lideres-container {
-    border-radius: 14px;
-    padding: 20px 14px 18px;
-  }
-
-  .page-title {
-    font-size: 28px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .search-bar {
     flex-direction: column;
   }
@@ -764,12 +747,6 @@
 
   .form-row {
     flex-direction: column;
-  }
-}
-
-@media (max-width: 480px) {
-  .lideres-container {
-    padding: 16px 10px;
   }
 }
 
@@ -881,7 +858,7 @@
 }
 
 .filters-card {
-    background: var(--bg-card);
+    background: #ffffff;
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
@@ -889,7 +866,7 @@
     gap: 16px ;
     margin-bottom: 18px;
     flex-wrap: wrap;
-    box-shadow: var(--elevation-card);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .filter-group {
@@ -906,31 +883,31 @@
     width: 100%;
 
      &:focus-within .filter-icon {
-        color: var(--primary-color) ;
+        color: #163572 ;
     }
 
-    
+
 }
 
 .filter-input {
     width: 100% ;
     padding: 10px 16px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
+    background-color: #ffffff ;
+    border: 1px solid #e2e8f0 ;
     border-radius: 12px ;
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-muted) ;
+    color: #1e293b ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
 
      &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
+        box-shadow: 0 0 0 1px #163572 ;
     }
 
-    
+
 }
 
 .filter-input-wrapper .filter-input {
@@ -941,7 +918,7 @@
     position: absolute ;
     left: 12px ;
     top: 12px ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     transition: color 0.2s ;
     width: 18px ;
     height: 18px ;
@@ -952,13 +929,13 @@
 .filter-select {
     width: 100% ;
     padding: 10px 32px 10px 40px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
+    background-color: #ffffff ;
+    border: 1px solid #e2e8f0 ;
     border-radius: 12px ;
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: #1e293b ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -967,17 +944,17 @@
     cursor: pointer ;
 
      &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
+        box-shadow: 0 0 0 1px #163572 ;
     }
 
-    
+
 }
 
 .select-chevron {
     position: absolute ;
     right: 12px ;
     top: 12px ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     font-size: 18px ;
     width: 18px ;
     height: 18px ;
@@ -995,7 +972,7 @@
     font-size: 11px ;
     text-transform: uppercase ;
     font-weight: 700 ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     letter-spacing: 0.05em ;
     margin-bottom: 8px ;
     margin-left: 4px ;
@@ -1003,6 +980,7 @@
 }
 
 /* Descargar button */
+// sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
 .btn-descargar {
     display: inline-flex;
     align-items: center;
@@ -1011,9 +989,9 @@
     height: 40px;
     padding: 0 16px;
     border-radius: 12px;
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-disabled);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #9ca3af;
     font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
@@ -1031,18 +1009,18 @@
     }
 
     &.enabled {
-        background: var(--bg-card);
-        color: var(--primary-color);
-        border: 1px solid var(--border-soft);
+        background: #ffffff;
+        color: #163572;
+        border: 1px solid #cbd5e1;
         cursor: pointer;
 
         .download-icon {
-            color: var(--primary-color);
+            color: #163572;
         }
 
         &:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
+            background: rgba(22, 53, 114, 0.06);
+            border-color: #163572;
         }
     }
 
@@ -1052,7 +1030,7 @@
         opacity: 0.8;
     }
 
-    
+
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
@@ -1076,4 +1054,11 @@
 // sm - Espacio de la fila de tarjetas (app-tarjeta-resumen), el mismo que tenía la fila anterior.
 .tarjetas-resumen {
   margin-bottom: 20px;
+}
+
+// sm - Tema oscuro: mismo color exacto que usa Seguimiento para sus labels de filtro en modo oscuro.
+:host-context(html[data-theme="dark"]) {
+  .filter-label {
+    color: #cbd5e1;
+  }
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Subscription, forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
@@ -86,7 +87,7 @@ const CIRCUNFERENCIA = 2 * Math.PI * 42;
 @Component({
   selector: 'app-dashboard-ejecutivo',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, HeaderComponent, BrechaHistoricoComponent, TarjetaResumenComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, MatAutocompleteModule, HeaderComponent, BrechaHistoricoComponent, TarjetaResumenComponent],
   templateUrl: './dashboard-ejecutivo.component.html',
   styleUrls: ['./dashboard-ejecutivo.component.scss'],
 })
@@ -115,7 +116,12 @@ export class DashboardEjecutivoComponent implements OnInit {
 
   mesesVentana = signal<6 | 12>(6);
   umbralRecurrencia = signal(3);
-  mostrarParametros = signal(false);
+
+  // sm - Cliente y Proyecto ahora se escriben en vez de elegirse de una lista larga: el texto del input se guarda
+  // aparte del filtro aplicado (igual que el filtro de cliente de Seguimiento) y filtra las opciones del
+  // autocompletado; el filtro real (idCliente/idProyecto) solo cambia al elegir una opción.
+  clienteTexto = signal('');
+  proyectoTexto = signal('');
 
   detalle = signal<DetalleAbierto | null>(null);
   enviandoCorreo: Record<string, boolean> = {};
@@ -128,6 +134,21 @@ export class DashboardEjecutivoComponent implements OnInit {
     return this.opciones().proyectos.filter(
       (p) => (!f.idCliente || p.idCliente === f.idCliente) && (!f.idEstado || p.idEstado === f.idEstado),
     );
+  });
+
+  // sm - Opciones del autocompletado de Cliente/Proyecto: se filtran con el texto escrito (no con el filtro
+  // aplicado), para que mientras se escribe se vean las coincidencias antes de elegir una.
+  clientesFiltrados = computed(() => {
+    const q = this.clienteTexto().toLowerCase().trim();
+    if (!q) return this.opciones().clientes;
+    return this.opciones().clientes.filter((c) => c.nombre.toLowerCase().includes(q));
+  });
+
+  proyectosFiltrados = computed(() => {
+    const q = this.proyectoTexto().toLowerCase().trim();
+    const base = this.proyectosFiltro();
+    if (!q) return base;
+    return base.filter((p) => `${p.codigo ?? ''} ${p.nombre}`.toLowerCase().includes(q));
   });
 
   tarjetas = computed<TarjetaIndicador[]>(() => {
@@ -370,7 +391,7 @@ export class DashboardEjecutivoComponent implements OnInit {
     if (siguiente.anio === this.hoy.getFullYear() && siguiente.mes > this.hoy.getMonth() + 1) {
       siguiente.mes = this.hoy.getMonth() + 1;
     }
-    // sm - Si el proyecto elegido ya no pertenece al cliente/estado elegido, se limpia.
+    // sm - Si el proyecto elegido ya no pertenece al cliente/estado elegido, se limpia (y su texto también).
     if (clave === 'idCliente' || clave === 'idEstado') {
       const proyecto = this.opciones().proyectos.find((p) => p.id === siguiente.idProyecto);
       if (
@@ -379,6 +400,7 @@ export class DashboardEjecutivoComponent implements OnInit {
           (siguiente.idEstado && proyecto.idEstado !== siguiente.idEstado))
       ) {
         siguiente.idProyecto = null;
+        this.proyectoTexto.set('');
       }
     }
     if (clave === 'horizonte') {
@@ -393,9 +415,58 @@ export class DashboardEjecutivoComponent implements OnInit {
     return valor ? Number(valor) : null;
   }
 
+  // sm - Cliente: mientras se escribe solo se filtran las opciones del autocompletado (clientesFiltrados);
+  // el filtro real cambia solo al elegir una opción o al borrar el campo (vuelve a "todos los clientes").
+  onClienteTextoChange(valor: string): void {
+    this.clienteTexto.set(valor);
+    if (!valor.trim() && this.filtros().idCliente != null) {
+      this.actualizarFiltro('idCliente', null);
+    }
+  }
+
+  seleccionarCliente(event: MatAutocompleteSelectedEvent): void {
+    const id = event.option.value as number | null;
+    const nombre = id == null ? '' : (this.opciones().clientes.find((c) => c.id === id)?.nombre ?? '');
+    this.clienteTexto.set(nombre);
+    this.actualizarFiltro('idCliente', id);
+  }
+
+  // sm - Al cerrar el autocompletado sin elegir una opción, el campo vuelve a mostrar el cliente realmente aplicado.
+  onClientePanelCerrado(): void {
+    const id = this.filtros().idCliente;
+    this.clienteTexto.set(id == null ? '' : (this.opciones().clientes.find((c) => c.id === id)?.nombre ?? ''));
+  }
+
+  private etiquetaProyecto(p: { codigo: string; nombre: string }): string {
+    return p.codigo ? `${p.codigo} · ${p.nombre}` : p.nombre;
+  }
+
+  // sm - Mismo criterio que Cliente: el texto solo filtra el autocompletado hasta que se elige una opción.
+  onProyectoTextoChange(valor: string): void {
+    this.proyectoTexto.set(valor);
+    if (!valor.trim() && this.filtros().idProyecto != null) {
+      this.actualizarFiltro('idProyecto', null);
+    }
+  }
+
+  seleccionarProyecto(event: MatAutocompleteSelectedEvent): void {
+    const id = event.option.value as number | null;
+    const proyecto = id == null ? null : this.opciones().proyectos.find((p) => p.id === id);
+    this.proyectoTexto.set(proyecto ? this.etiquetaProyecto(proyecto) : '');
+    this.actualizarFiltro('idProyecto', id);
+  }
+
+  onProyectoPanelCerrado(): void {
+    const id = this.filtros().idProyecto;
+    const proyecto = id == null ? null : this.opciones().proyectos.find((p) => p.id === id);
+    this.proyectoTexto.set(proyecto ? this.etiquetaProyecto(proyecto) : '');
+  }
+
   // sm - Limpiar filtros restablece el periodo vigente (RF 01).
   limpiarFiltros(): void {
     this.filtros.set(this.filtrosIniciales());
+    this.clienteTexto.set('');
+    this.proyectoTexto.set('');
     this.cerrarDetalle();
     this.cargar();
   }

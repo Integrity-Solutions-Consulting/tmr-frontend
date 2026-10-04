@@ -1,7 +1,13 @@
 <div class="proyectos-container">
   <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">Proyectos</h1>
+  <app-header title="Proyectos" subtitle="Gestión y seguimiento de los proyectos de la organización"></app-header>
+
+  <!-- Cards resumen -->
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen">
+    <app-tarjeta-resumen titulo="Total proyectos" icono="work" tono="destacado" [valor]="totalProyectos" />
+    <app-tarjeta-resumen titulo="Activos" icono="rocket_launch" tono="corporativo" [valor]="proyectosActivos" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="pause_circle" tono="neutro" [valor]="proyectosInactivos" />
   </div>
 
   <!-- Barra de busqueda y botones -->

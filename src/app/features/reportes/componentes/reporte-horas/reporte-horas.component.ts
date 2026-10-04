@@ -21,12 +21,12 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 })
 export class ReporteHorasComponent {
   columnasTabla: ColumnDefinition[] = [
-    { header: 'Cliente', property: 'cliente', type: 'text' },
-    { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado' },
-    { header: 'Mes', property: 'mes', type: 'text' },
-    { header: 'Año', property: 'anio', type: 'text' },
-    { header: 'Recursos', property: 'recursos', type: 'text' },
-    { header: 'Horas', property: 'horas', type: 'text' }
+    { header: 'Cliente', property: 'cliente', type: 'text', sortable: true },
+    { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado', sortable: true },
+    { header: 'Mes', property: 'mes', type: 'text', sortable: true },
+    { header: 'Año', property: 'anio', type: 'text', sortable: true },
+    { header: 'Recursos', property: 'recursos', type: 'text', sortable: true },
+    { header: 'Horas', property: 'horas', type: 'text', sortable: true }
   ];
 
   Math = Math;

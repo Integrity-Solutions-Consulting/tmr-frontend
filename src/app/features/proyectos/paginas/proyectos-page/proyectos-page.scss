@@ -1,46 +1,24 @@
+// sm - Contenedor a ancho completo, sin tarjeta/borde/tope de ancho: mismo criterio que Seguimiento
+// (el padding de la página lo pone el layout global, no cada página).
 .proyectos-container {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  //background: var(--bg-card);
-  //border: 1px solid var(--border-default);
-  //border-radius: 18px;
-  //box-shadow: var(--elevation-card);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 16px;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: clamp(28px, 3vw, 34px);
-  font-weight: 800;
-  color: var(--primary-color);
-  margin: 0;
-  line-height: 1.1;
-  font-family: 'Inter', sans-serif;
-}
-
+// sm - Mismo diseño que la barra de filtros de Seguimiento: sin borde (solo una sombra suave), padding
+// 16px 20px, y sin margen propio (el espaciado entre header/filtros/tabla ya lo da el gap del contenedor).
 .filters-card {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
   background: var(--bg-card);
-  border: 1px solid var(--border-default);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 16px 20px;
+  box-shadow: var(--elevation-card);
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
@@ -124,9 +102,6 @@
 }
 
 @media (max-width: 480px) {
-  .proyectos-container {
-    padding: 16px 10px;
-  }
   .descarga-wrapper {
     flex-direction: column;
     align-items: stretch;

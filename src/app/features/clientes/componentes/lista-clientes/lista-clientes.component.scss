@@ -1,30 +1,11 @@
+// sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
+// pone el layout global, no cada página).
 .clientes-container {
-  //background: var(--bg-card);
-  //border-radius: 18px;
-  //border: 1px solid var(--border-default);
-  //box-shadow: var(--elevation-card);
-  padding: 28px 28px 22px;
   font-family: 'Inter', sans-serif;
-  margin: 16px 0;
   display: flex;
   flex-direction: column;
+  gap: 16px;
   min-height: 550px;
-}
-
-/* ─────────────────────────────────────────────────────────────
-Título
-───────────────────────────────────────────────────────────── */
-
-.titulo-pagina {
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--primary-color);
-  line-height: 40px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: normal;
-  margin: 0 0 20px 0;
-  width: 149px;
-  height: 40px;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -198,52 +179,6 @@ Barra de acciones
   position: relative;
 }
 
-.btn-descargar {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 14px;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  background: var(--bg-card);
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-body);
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.15s;
-  white-space: nowrap;
-
-  &:hover {
-    background: var(--bg-soft);
-    border-color: var(--border-soft);
-    color: var(--text-body);
-  }
-}
-
-.btn-agregar {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 14px;
-  background: var(--primary-color);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-
-  &:hover {
-    background: var(--primary-hover);
-  }
-}
-
 /* ─────────────────────────────────────────────────────────────
 Tabla
 ───────────────────────────────────────────────────────────── */
@@ -251,40 +186,91 @@ Tabla
 .tabla-wrap {
   position: relative;
   z-index: 1;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
   overflow-x: auto;
 }
 
+// sm - Mismas dimensiones que la tabla de Seguimiento (table-layout:fixed, columnas en %, padding 14px 10px,
+// texto 13px); se mantienen los tokens de color propios (var(--...)) para no perder el tema oscuro.
 .tabla {
   width: 100%;
-  min-width: 1180px;
+  min-width: 960px;
   table-layout: fixed;
   border-collapse: collapse;
   border-spacing: 0;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
+
+  // Tipo, Identificador, Nombre Comercial, Correo, Teléfono, Estado, Acciones
+  th:nth-child(1), td:nth-child(1) { width: 9%; }
+  th:nth-child(2), td:nth-child(2) { width: 12%; }
+  th:nth-child(3), td:nth-child(3) { width: 20%; }
+  th:nth-child(4), td:nth-child(4) { width: 23%; }
+  th:nth-child(5), td:nth-child(5) { width: 13%; }
+  th:nth-child(6), td:nth-child(6) { width: 13%; }
+  th:nth-child(7), td:nth-child(7) { width: 10%; }
 }
 
 thead tr {
-  background: var(--bg-card);
-  border-bottom: 2px solid var(--border-default);
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 th {
-  padding: 16px 20px;
+  padding: 14px 10px;
   text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-subtle);
-  white-space: nowrap;
-  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: normal;
+  background: #ffffff;
   line-height: 1.2;
+  box-sizing: border-box;
+  user-select: none;
+
+  .th-inner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .th-label {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    line-height: 1.25;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: #163572;
+
+      .sort-icon {
+        color: currentColor;
+      }
+    }
+  }
+}
+
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 tbody tr {
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid #f3f4f6;
   transition: background 0.12s;
 
   &:last-child {
@@ -292,14 +278,14 @@ tbody tr {
   }
 
   &:hover {
-    background: var(--bg-hover);
+    background: #f9fafb;
   }
 }
 
 td {
-  padding: 13px 16px;
-  font-size: 14px;
-  color: var(--text-subtle);
+  padding: 14px 10px;
+  font-size: 13px;
+  color: #4b5563;
   font-weight: 400;
   vertical-align: middle;
   white-space: nowrap;
@@ -309,17 +295,17 @@ td {
 
 .td-codigo {
   font-weight: 400;
-  color: var(--text-subtle);
+  color: #4b5563;
 }
 
 .td-nombre {
   font-weight: 400;
-  color: var(--text-subtle);
+  color: #4b5563;
 }
 
 .td-email {
-  color: var(--text-subtle);
-  font-size: 14px;
+  color: #4b5563;
+  font-size: 13px;
 }
 
 .td-cargando {
@@ -392,7 +378,6 @@ Menú tres puntos
 
 .td-acciones {
   position: relative;
-  width: 48px;
   overflow: visible;
   text-align: right;
 }
@@ -559,17 +544,6 @@ Responsive
 }
 
 @media (max-width: 768px) {
-  .clientes-container {
-    padding: 20px 16px;
-  }
-
-  .titulo-pagina {
-    font-size: 28px;
-    width: auto;
-    height: auto;
-    margin-bottom: 16px;
-  }
-
   .barra-acciones {
     flex-wrap: wrap;
     gap: 8px;
@@ -601,14 +575,6 @@ Responsive
 }
 
 @media (max-width: 480px) {
-  .clientes-container {
-    padding: 16px 12px;
-  }
-
-  .titulo-pagina {
-    font-size: 24px;
-  }
-
   .barra-acciones {
     flex-direction: column;
     align-items: stretch;
@@ -643,14 +609,14 @@ Responsive
 }
 /* ============================================================ FILTERS CARD ============================================================ */
 .filters-card {
-    background: var(--bg-card);
+    background: #ffffff;
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
     align-items: flex-end ;
     gap: 16px ;
     flex-wrap: wrap;
-    box-shadow: var(--elevation-card);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     margin-bottom: 18px;
 }
 
@@ -668,31 +634,31 @@ Responsive
     width: 100%;
 
      &:focus-within .filter-icon {
-        color: var(--primary-color) ;
+        color: #163572 ;
     }
 
-    
+
 }
 
 .filter-input {
     width: 100% ;
     padding: 10px 16px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
+    background-color: #ffffff ;
+    border: 1px solid #e2e8f0 ;
     border-radius: 12px ;
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-muted) ;
+    color: #1e293b ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
 
      &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
+        box-shadow: 0 0 0 1px #163572 ;
     }
 
-    
+
 }
 
 .filter-input-wrapper .filter-input {
@@ -703,7 +669,7 @@ Responsive
     position: absolute ;
     left: 12px ;
     top: 12px ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     transition: color 0.2s ;
     width: 18px ;
     height: 18px ;
@@ -714,13 +680,13 @@ Responsive
 .filter-select {
     width: 100% ;
     padding: 10px 32px 10px 40px ;
-    background-color: var(--input-bg) ;
-    border: 1px solid var(--border-input) ;
+    background-color: #ffffff ;
+    border: 1px solid #e2e8f0 ;
     border-radius: 12px ;
     outline: none ;
     font-size: 14px ;
     font-weight: 500 ;
-    color: var(--text-main) ;
+    color: #1e293b ;
     font-family: 'Inter', sans-serif ;
     transition: all 0.2s ;
     box-sizing: border-box ;
@@ -729,17 +695,17 @@ Responsive
     cursor: pointer ;
 
      &:focus {
-        box-shadow: 0 0 0 1px var(--primary-color) ;
+        box-shadow: 0 0 0 1px #163572 ;
     }
 
-    
+
 }
 
 .select-chevron {
     position: absolute ;
     right: 12px ;
     top: 12px ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     font-size: 18px ;
     width: 18px ;
     height: 18px ;
@@ -757,7 +723,7 @@ Responsive
     font-size: 11px ;
     text-transform: uppercase ;
     font-weight: 700 ;
-    color: var(--text-muted) ;
+    color: #94a3b8 ;
     letter-spacing: 0.05em ;
     margin-bottom: 8px ;
     margin-left: 4px ;
@@ -765,6 +731,7 @@ Responsive
 }
 
 /* Descargar button */
+// sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
 .btn-descargar {
     display: inline-flex;
     align-items: center;
@@ -773,9 +740,9 @@ Responsive
     height: 40px;
     padding: 0 16px;
     border-radius: 12px;
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-disabled);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #9ca3af;
     font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
@@ -793,18 +760,18 @@ Responsive
     }
 
     &.enabled {
-        background: var(--bg-card);
-        color: var(--primary-color);
-        border: 1px solid var(--border-soft);
+        background: #ffffff;
+        color: #163572;
+        border: 1px solid #cbd5e1;
         cursor: pointer;
 
         .download-icon {
-            color: var(--primary-color);
+            color: #163572;
         }
 
         &:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
+            background: rgba(22, 53, 114, 0.06);
+            border-color: #163572;
         }
     }
 
@@ -814,7 +781,7 @@ Responsive
         opacity: 0.8;
     }
 
-    
+
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
@@ -837,4 +804,22 @@ Responsive
 // sm - Espacio de la fila de tarjetas (app-tarjeta-resumen), el mismo que tenía la fila anterior.
 .tarjetas-resumen {
   margin: 24px 0;
+}
+
+// sm - Pie de tabla pegado al recuadro superior (igual que en Carga de Actividades): colores exactos
+// y esquinas inferiores redondeadas, sin borde superior.
+app-paginacion {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 9px 12px 9px 16px;
+}
+
+// sm - Tema oscuro: mismo color exacto que usa Seguimiento para sus labels de filtro en modo oscuro.
+:host-context(html[data-theme="dark"]) {
+  .filter-label {
+    color: #cbd5e1;
+  }
 }

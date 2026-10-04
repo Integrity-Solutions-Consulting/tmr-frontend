@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Calendario } from '../../actividades/calendario/calendario';
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { Colaborador } from '../../../../shared/models/colaborador.model';
-import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
 
 export interface CalendarioColaboradorModalData {
     colaborador: Colaborador;
@@ -25,8 +24,7 @@ export interface CalendarioColaboradorModalData {
         CommonModule,
         MatDialogModule,
         MatIconModule,
-        Calendario,
-        HorasFormatPipe
+        Calendario
     ],
     templateUrl: './calendario-colaborador-modal.html',
     styleUrl: './calendario-colaborador-modal.scss'
@@ -39,6 +37,12 @@ export class CalendarioColaboradorModal {
     // sm - Colaborador.id llega como string (así lo define el modelo de Seguimiento); Calendario espera un number.
     get idEmpleado(): number {
         return Number(this.data.colaborador.id);
+    }
+
+    // sm - Cada fila de Seguimiento es un colaborador+proyecto puntual (proyectos tiene como mucho 1 elemento: el
+    // de esa fila). undefined cuando la fila es "Sin Proyecto": el calendario muestra el total del colaborador.
+    get idProyecto(): number | undefined {
+        return this.data.colaborador.proyectos?.[0]?.idProyecto;
     }
 
     cerrar(): void {

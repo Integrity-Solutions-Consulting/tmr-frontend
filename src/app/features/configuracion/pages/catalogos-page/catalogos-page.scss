@@ -12,12 +12,12 @@ $inactivo:      #ef4444;
 $hover-row:     rgba(#163572, 0.04);
 
 // ── Layout side-by-side ───────────────────────────────────────────────────
+// sm - Sin tope de ancho: mismo criterio que Seguimiento (el padding de la página lo pone el layout
+// global, no cada página).
 .catalogos-layout {
   display: flex;
   gap: 24px;
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
   min-height: 500px;
   box-sizing: border-box;
 }
@@ -122,35 +122,14 @@ $hover-row:     rgba(#163572, 0.04);
   flex: 1;
 }
 
+// sm - Sin tarjeta/borde/padding propio: mismo criterio que Seguimiento (el panel con borde es solo
+// la tabla — ver .panel —, no toda la página).
 .page {
   width: 100%;
-  background: $white;
-  border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-// ── Header ─────────────────────────────────────────────────────────────────
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: clamp(24px, 2.5vw, 30px);
-  font-weight: 800;
-  color: $primary;
-  margin: 0;
-  line-height: 1.1;
-  font-family: 'Inter', sans-serif;
+  gap: 16px;
 }
 
 // ── Cards resumen ──────────────────────────────────────────────────────────
@@ -516,7 +495,7 @@ $hover-row:     rgba(#163572, 0.04);
   table-layout: fixed;
 
   th, td {
-    padding: 14px 20px;
+    padding: 14px 10px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     box-sizing: border-box;
@@ -680,19 +659,6 @@ $hover-row:     rgba(#163572, 0.04);
 
   .sidebar-empty {
     color: #a1a1aa ;
-  }
-
-  /* Contenido Principal */
-  .page {
-    background-color: #27272a ;
-    background: #27272a ;
-    border-color: #3f3f46 ;
-    color: #f4f4f5 ;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
-  }
-
-  .page-title {
-    color: #3b82f6 ;
   }
 
   /* Cards resumen superiores */
