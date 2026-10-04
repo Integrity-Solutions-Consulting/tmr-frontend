@@ -77,6 +77,28 @@
             }
           </div>
 
+          <!-- sm - Si cambia el tipo de contrato: desde cuándo rige (se guarda en el historial de contratos). -->
+          @if (cambioTipoContrato) {
+            <div class="form-field">
+              <div class="float-field">
+                <input
+                  class="float-field__input float-field__input--date"
+                  type="date"
+                  formControlName="fechaCambioContrato"
+                  placeholder=" "
+                  [class.float-field__input--error]="campoInvalido('fechaCambioContrato')" />
+
+                <label class="float-field__label float-field__label--always">
+                  Nuevo contrato rige desde <span class="req">*</span>
+                </label>
+              </div>
+
+              @if (campoInvalido('fechaCambioContrato')) {
+                <span class="form-field__error">Campo requerido</span>
+              }
+            </div>
+          }
+
         </div>
       </div>
 

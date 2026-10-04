@@ -1,120 +1,73 @@
 <section class="page" (click)="cerrarExpandido(); cerrarDropdowns()">
 
   <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">Roles</h1>
-  </div>
+  <app-header title="Roles" subtitle="Administración de roles y permisos"></app-header>
 
   <!-- Cards resumen -->
-  <div class="cards-row">
-
-    <!-- Total roles -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--total-roles">
-            <svg class="card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ totalRoles() }}</span>
-        </div>
-        <span class="card-label">Total roles</span>
-      </div>
-    </div>
-
-    <!-- Activos -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--active">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-              <polyline points="15 19 17 21 21 16"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ rolesActivos() }}</span>
-        </div>
-        <span class="card-label">Activos</span>
-      </div>
-    </div>
-
-    <!-- Inactivos -->
-    <div class="summary-card">
-      <div class="card-left">
-        <div class="card-top-row">
-          <div class="card-icon card-icon--inactive">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-            </svg>
-          </div>
-          <span class="card-number">{{ rolesInactivos() }}</span>
-        </div>
-        <span class="card-label">Inactivos</span>
-      </div>
-    </div>
-
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen">
+    <app-tarjeta-resumen titulo="Total roles" icono="admin_panel_settings" tono="destacado" [valor]="totalRoles()" />
+    <app-tarjeta-resumen titulo="Activos" icono="verified_user" tono="corporativo" [valor]="rolesActivos()" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="remove_moderator" tono="neutro" [valor]="rolesInactivos()" />
   </div>
 
   <!-- Barra de búsqueda -->
-  <div class="search-bar">
-    <div class="search-input-wrapper">
-      <img src="assets/iconos/buscar.svg" alt="buscar" class="search-icon" width="16" height="16" />
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Buscar por nombre de rol, descripción o módulo..."
-        [value]="query()"
-        (input)="setQuery($any($event.target).value)"
-        autocomplete="off"
-      />
-      @if (query()) {
-        <button class="search-clear" (click)="setQuery('')" type="button">
-          <span class="material-icons">close</span>
-        </button>
-      }
-    </div>
-
-    <div class="estado-filter">
-      <button class="estado-filter-btn" (click)="toggleEstadoDropdown($event)" type="button">
-        <img src="assets/iconos/estado-btn.svg" alt="estado" class="estado-filter-icon" width="16" height="16" />
-        <span>{{ labelEstado() }}</span>
-      </button>
-
-      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="estado-dropdown-list">
-          <button class="estado-dropdown-item" (click)="seleccionarEstado('Activo'); $event.stopPropagation()" type="button">
-            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Activo'">
-              <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
-            </div>
-            <span class="estado-dropdown-label">Activos</span>
-          </button>
-          <button class="estado-dropdown-item" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()" type="button">
-            <div class="estado-dropdown-checkbox" [class.estado-dropdown-checkbox--active]="filtroEstado() === 'Inactivo'">
-              <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
-            </div>
-            <span class="estado-dropdown-label">Inactivos</span>
-          </button>
-        </div>
-        <button class="estado-dropdown-clear" (click)="seleccionarEstado(''); $event.stopPropagation()" type="button">
-          Limpiar filtro
-        </button>
+  <div class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Buscar por nombre de rol, descripción o módulo..."
+          [value]="query()"
+          (input)="setQuery($any($event.target).value)"
+          autocomplete="off"
+        />
+        @if (query()) {
+          <span class="material-icons select-chevron" (click)="setQuery('')" style="cursor:pointer; pointer-events: auto;">close</span>
+        }
       </div>
     </div>
 
-    <div class="search-spacer"></div>
+    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+      <label class="filter-label">Estado</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
+            <span>{{ labelEstado() }}</span>
+            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         </div>
+      </div>
+      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-opcion" (click)="seleccionarEstado('Activo'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Activo'">
+            <span class="material-icons" *ngIf="filtroEstado() === 'Activo'">check</span>
+          </div>
+          <span class="opcion-label">Activos</span>
+        </div>
+        <div class="dropdown-opcion" (click)="seleccionarEstado('Inactivo'); $event.stopPropagation()">
+          <div class="dropdown-checkbox" [class.checked]="filtroEstado() === 'Inactivo'">
+            <span class="material-icons" *ngIf="filtroEstado() === 'Inactivo'">check</span>
+          </div>
+          <span class="opcion-label">Inactivos</span>
+        </div>
+        <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">
+          Limpiar filtro
+        </div>
+      </div>
+    </div>
 
-    <div class="usuarios-actions">
+    <div class="search-spacer" style="flex: 1;"></div>
+
+    <div class="usuarios-actions" style="display: flex; gap: 16px; align-items: flex-end;">
       <button
-        mat-flat-button
         type="button"
-        class="page-create"
+        class="btn-descargar btn-agregar"
         (click)="openModal()"
       >
-        <span class="page-create-content">
-          Crear
-          <img src="assets/iconos/btn-agregar.svg" alt="">
-        </span>
+        Crear
+        <span class="material-icons download-icon">add</span>
       </button>
     </div>
   </div>

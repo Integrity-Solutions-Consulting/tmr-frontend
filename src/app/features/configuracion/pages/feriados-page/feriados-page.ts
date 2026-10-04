@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Boton } from '../../../../shared/components/boton/boton';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
 import { FeriadosCalendar } from '../../components/feriados-calendar/feriados-calendar';
@@ -8,9 +7,10 @@ import { FeriadosFormModal, FeriadoModalData } from '../../components/feriados-f
 import { Feriado } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
   selector: 'app-feriados-page',
-  imports: [Boton, FeriadosCalendar, ConfirmDialogComponent, SuccessModalComponent],
+  imports: [TarjetaResumenComponent, FeriadosCalendar, ConfirmDialogComponent, SuccessModalComponent],
   templateUrl: './feriados-page.html',
   styleUrl: './feriados-page.scss',
 })
@@ -34,6 +34,40 @@ export class FeriadosPage {
   readonly locales       = computed(() => this.feriados().filter((f) => f.tipo === 'Local').length);
   readonly religiosos    = computed(() => this.feriados().filter((f) => String(f.tipo) === 'Religioso').length);
   readonly activos       = computed(() => this.feriados().filter((f) => f.activo).length);
+
+  // sm - Importación automática de feriados de Ecuador por año (el registro manual sigue igual para corregir traslados).
+  readonly anioImportar = signal(new Date().getFullYear());
+  readonly importando = signal(false);
+
+  importarFeriados(): void {
+    const anio = this.anioImportar();
+    if (!Number.isInteger(anio) || anio < 2000 || anio > 2100) {
+      this.eliminarError.set('Ingrese un año válido para importar.');
+      return;
+    }
+    this.eliminarError.set(null);
+    this.importando.set(true);
+    this.configuracionService.importarFeriados(anio).subscribe({
+      next: (r) => {
+        this.importando.set(false);
+        this.mostrarExito(
+          r.creados.length > 0
+            ? `Se importaron ${r.creados.length} feriados de ${anio}` +
+              (r.omitidos.length ? ` (${r.omitidos.length} ya existían)` : '') +
+              '. Revise si alguno fue trasladado por decreto.'
+            : `No había feriados nuevos para ${anio}: los ${r.omitidos.length} ya estaban registrados.`,
+        );
+      },
+      error: (err) => {
+        this.importando.set(false);
+        this.eliminarError.set(this.extractDeleteError(err, 'No se pudieron importar los feriados. Intente nuevamente.'));
+      },
+    });
+  }
+
+  cambiarAnioImportar(valor: string): void {
+    this.anioImportar.set(Math.trunc(Number(valor)));
+  }
 
   openModal(feriado?: Feriado, mode: 'create' | 'edit' | 'view' = 'create', fecha?: string): void {
     const data: FeriadoModalData = {
@@ -109,7 +143,7 @@ export class FeriadosPage {
     setTimeout(() => this.exitoVisible.set(false), 3000);
   }
 
-  private extractDeleteError(err: unknown): string {
+  private extractDeleteError(err: unknown, porDefecto = 'No se pudo eliminar el feriado. Intente nuevamente.'): string {
     const error = (err as { error?: unknown })?.error;
 
     if (typeof error === 'string') {
@@ -121,6 +155,6 @@ export class FeriadosPage {
       ?? body?.mensaje
       ?? body?.error
       ?? body?.title
-      ?? 'No se pudo eliminar el feriado. Intente nuevamente.';
+      ?? porDefecto;
   }
 }

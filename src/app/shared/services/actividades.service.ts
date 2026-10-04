@@ -42,8 +42,9 @@ export class ActividadesService {
   public readonly promedioPorDia = this._promedioPorDia.asReadonly();
 
   // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
-  // en vez de siempre usar al usuario logueado.
-  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number): void {
+  // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
+  // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
+  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number): void {
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
     if (!empId) {
       // sm - Sin empleado no hay horas que mostrar: las métricas quedan en 0.
@@ -55,6 +56,9 @@ export class ActividadesService {
     let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
     if (anio && mes) {
       url += `&anio=${anio}&mes=${mes}`;
+    }
+    if (idProyecto) {
+      url += `&idProyecto=${idProyecto}`;
     }
     this.http.get<ResumenHorasDto>(url).subscribe({
       next: (res) => {
@@ -109,7 +113,15 @@ export class ActividadesService {
     return this._actividades().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
   }
 
-  agregarActividad(data: any, callback?: () => void): void {
+  // sm - Mensaje del backend para mostrarlo en pantalla (ej. "No está asignado a este proyecto...").
+  private mensajeError(err: any, porDefecto: string): string {
+    const e = err?.error;
+    if (typeof e === 'string' && e.trim()) return e;
+    return e?.mensaje ?? e?.Mensaje ?? e?.detail ?? e?.message ?? e?.title ?? porDefecto;
+  }
+
+  // sm - errorCallback: se llama con el mensaje si el backend rechaza el registro, para que la ventana lo muestre.
+  agregarActividad(data: any, callback?: () => void, errorCallback?: (mensaje: string, guardadas: number) => void): void {
     // sm - Solo se registran actividades a nombre del empleado de la sesión (el backend también lo valida).
     const idEmpleado = this.empleadoObjetivo();
     if (!idEmpleado) {
@@ -154,19 +166,41 @@ export class ActividadesService {
       }
 
       if (requests.length > 0) {
+        // sm - Se espera a que terminen todos los días: si alguno falla se informa cuántos sí se guardaron y por qué
+        // fallaron los demás (antes el error solo quedaba en la consola).
         let completed = 0;
+        let guardadas = 0;
+        let primerError: string | null = null;
+        const alTerminar = () => {
+          if (completed < requests.length) return;
+          this.cargarResumen(this.currentAnio(), this.currentMes());
+          const actDate = parseLocal(data.fechaInicio);
+          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          if (primerError === null) {
+            if (callback) callback();
+          } else if (errorCallback) {
+            const fallidas = requests.length - guardadas;
+            errorCallback(
+              guardadas > 0
+                ? `Se guardaron ${guardadas} de ${requests.length} días. ${fallidas} no se guardaron: ${primerError}`
+                : primerError,
+              guardadas,
+            );
+          }
+        };
         requests.forEach(req => {
           req.subscribe({
             next: () => {
               completed++;
-              if (completed === requests.length) {
-                this.cargarResumen(this.currentAnio(), this.currentMes());
-                const actDate = parseLocal(data.fechaInicio);
-                this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
-                if (callback) callback();
-              }
+              guardadas++;
+              alTerminar();
             },
-            error: (err: any) => console.error('Error al crear actividad recurrente', err)
+            error: (err: any) => {
+              console.error('Error al crear actividad recurrente', err);
+              completed++;
+              primerError ??= this.mensajeError(err, 'No se pudo guardar la actividad.');
+              alTerminar();
+            }
           });
         });
       } else {
@@ -192,12 +226,15 @@ export class ActividadesService {
           this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
           if (callback) callback();
         },
-        error: (err) => console.error('Error al crear actividad', err)
+        error: (err) => {
+          console.error('Error al crear actividad', err);
+          if (errorCallback) errorCallback(this.mensajeError(err, 'No se pudo guardar la actividad. Intente de nuevo.'), 0);
+        }
       });
     }
   }
 
-  actualizarActividad(id: number | string, data: any, callback?: () => void): void {
+  actualizarActividad(id: number | string, data: any, callback?: () => void, errorCallback?: (mensaje: string) => void): void {
     const user = this.authService.getCurrentUser();
     if (!user) return;
 
@@ -220,7 +257,10 @@ export class ActividadesService {
 
         if (callback) callback();
       },
-      error: (err) => console.error('Error al actualizar actividad', err)
+      error: (err) => {
+        console.error('Error al actualizar actividad', err);
+        if (errorCallback) errorCallback(this.mensajeError(err, 'No se pudo actualizar la actividad. Intente de nuevo.'));
+      }
     });
   }
 

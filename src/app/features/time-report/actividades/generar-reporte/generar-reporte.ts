@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import JSZip from 'jszip';
-import Swal from 'sweetalert2';
+import { PopupService } from '../../../../shared/services/popup.service';
 import { AuthService } from '../../../auth/servicios/auth.service';
 import { environment } from '../../../../../environments/environment';
 import { DatosSeguimientoPdf, crearReporteSeguimientoPdf } from '../../../../shared/utils/seguimiento-pdf.utils';
@@ -28,6 +28,7 @@ export class GenerarReporte implements OnInit {
     private dialogRef = inject(MatDialogRef<GenerarReporte>);
     private http = inject(HttpClient);
     private authService = inject(AuthService);
+    private popup = inject(PopupService);
 
     public clientes = signal<{ id: number; nombre: string }[]>([]);
     public proyectos: ProyectoAsignado[] = [];
@@ -68,19 +69,7 @@ export class GenerarReporte implements OnInit {
         // El modal solo configura la descarga. Se cierra antes de consultar o generar
         // para que los avisos de resultado no queden detrás de MatDialog.
         this.dialogRef.close();
-        Swal.fire({
-            title: 'Preparando reporte',
-            html: 'Se están preparando los archivos seleccionados.',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            customClass: {
-                container: 'tmr-swal-container',
-                popup: 'tmr-swal tmr-swal--loading',
-                title: 'tmr-swal__title',
-                htmlContainer: 'tmr-swal__text',
-            },
-            didOpen: () => Swal.showLoading(),
-        });
+        this.popup.loading('Preparando reporte', 'Se están preparando los archivos seleccionados.');
         try {
             const respuesta = await lastValueFrom(this.http.get<DatosSeguimientoPdf>(
                 environment.apiUrl + '/time-report/actividades/mi-reporte',
@@ -95,14 +84,14 @@ export class GenerarReporte implements OnInit {
             const actividades = (datos.actividades || []).filter(activity => values.clienteId === 'all' || this.normalizar(activity.clienteProyecto) === this.normalizar(cliente?.nombre));
             const reportes = this.agruparPorProyecto(actividades);
             if (reportes.length === 0) {
-                await Swal.close();
+                this.popup.close();
                 this.dialogRef.close();
                 this.mostrarPopup('event_busy', 'Sin actividades', 'No hay actividades registradas para el periodo seleccionado.');
                 return;
             }
             if (reportes.length === 1) {
                 const contenido = await this.generarArchivo(user.name || 'Colaborador', reportes[0], datos.feriados || [], desde, hasta, values.formato);
-                await Swal.close();
+                this.popup.close();
                 this.guardarArchivo(new Blob([contenido], { type: values.formato === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), this.nombreArchivo(user.name || 'Colaborador', reportes[0].nombre, values.formato));
                 this.dialogRef.close();
                 this.mostrarPopup('download_done', 'Reporte generado', 'El reporte se descargó correctamente.');
@@ -121,13 +110,13 @@ export class GenerarReporte implements OnInit {
                 zip.file('Reporte_' + colaborador + '_' + nombre + '.' + values.formato, contenido);
             }
             const contenidoZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-            await Swal.close();
+            this.popup.close();
             const colaborador = this.limpiarNombre(user.name || 'Colaborador') || 'Colaborador';
             this.guardarArchivo(contenidoZip, 'Seguimiento_' + colaborador + '_' + (values.formato === 'pdf' ? 'PDF' : 'Excel') + '_' + desde + '_a_' + hasta + '.zip');
             this.dialogRef.close();
             this.mostrarPopup('download_done', 'Reportes generados', 'Se descargaron ' + reportes.length + ' reportes en un archivo ZIP.');
         } catch {
-            await Swal.close();
+            this.popup.close();
             this.mostrarPopup('error', 'No se pudo generar', 'No se pudieron preparar los reportes. Intenta nuevamente.');
         }
     }
@@ -162,22 +151,6 @@ export class GenerarReporte implements OnInit {
     }
     private guardarArchivo(blob: Blob, nombre: string): void { const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = nombre; document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     private mostrarPopup(icono: string, titulo: string, html: string): void {
-        void Swal.fire({
-            icon: 'info',
-            iconHtml: `<span class="material-symbols-outlined">${icono}</span>`,
-            title: titulo,
-            html,
-            confirmButtonText: 'Entendido',
-            buttonsStyling: false,
-            customClass: {
-                container: 'tmr-swal-container',
-                popup: 'tmr-swal',
-                icon: 'tmr-swal__icon ' + (icono === 'download_done' ? 'tmr-swal__icon--success' : ''),
-                title: 'tmr-swal__title',
-                htmlContainer: 'tmr-swal__text',
-                actions: 'tmr-swal__actions',
-                confirmButton: 'tmr-swal__btn-primary',
-            },
-        });
+        void this.popup.show(icono, titulo, html, icono === 'download_done');
     }
 }

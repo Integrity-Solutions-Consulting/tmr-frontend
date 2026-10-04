@@ -132,18 +132,30 @@
                                 [indeterminate]="selection.hasValue() && !isAllSelected()">
                             </mat-checkbox>
                         </th>
-                        <th class="col-nombre" (click)="ordenar('nombre')">
-                            Colaborador
+                        <th class="col-nombre sortable" (click)="ordenar('nombre')" [attr.aria-sort]="direccionOrden('nombre')">
+                            <span class="th-inner"><span class="th-label">Colaborador</span><mat-icon class="sort-icon">{{ sortField === 'nombre' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
                         </th>
-                        <th class="col-proyecto">Proyecto</th>
-                        <th class="col-cliente">Cliente</th>
-                        <th class="col-lider">Líder Técnico</th>
-                        <th class="col-horas" (click)="ordenar('nroHoras')">
-                            Nro de Horas
+                        <th class="col-proyecto sortable" (click)="ordenar('proyecto')" [attr.aria-sort]="direccionOrden('proyecto')">
+                            <span class="th-inner"><span class="th-label">Proyecto</span><mat-icon class="sort-icon">{{ sortField === 'proyecto' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
                         </th>
-                        <th class="col-estado">Seguimiento</th>
-                        <th class="col-dias-reporte">Días con Reporte</th>
-                        <th class="col-dias-completar">Días a Completar</th>
+                        <th class="col-cliente sortable" (click)="ordenar('cliente')" [attr.aria-sort]="direccionOrden('cliente')">
+                            <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField === 'cliente' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-lider sortable" (click)="ordenar('liderTecnico')" [attr.aria-sort]="direccionOrden('liderTecnico')">
+                            <span class="th-inner"><span class="th-label">Líder Técnico</span><mat-icon class="sort-icon">{{ sortField === 'liderTecnico' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-horas sortable" (click)="ordenar('nroHoras')" [attr.aria-sort]="direccionOrden('nroHoras')">
+                            <span class="th-inner"><span class="th-label">Nro de Horas</span><mat-icon class="sort-icon">{{ sortField === 'nroHoras' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-estado sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+                            <span class="th-inner"><span class="th-label">Seguimiento</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-dias-reporte sortable" (click)="ordenar('diasConReporte')" [attr.aria-sort]="direccionOrden('diasConReporte')">
+                            <span class="th-inner"><span class="th-label">Días con Reporte</span><mat-icon class="sort-icon">{{ sortField === 'diasConReporte' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-dias-completar sortable" (click)="ordenar('diasACompletar')" [attr.aria-sort]="direccionOrden('diasACompletar')">
+                            <span class="th-inner"><span class="th-label">Días a Completar</span><mat-icon class="sort-icon">{{ sortField === 'diasACompletar' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
                         <th class="col-acciones"></th>
                     </tr>
                 </thead>

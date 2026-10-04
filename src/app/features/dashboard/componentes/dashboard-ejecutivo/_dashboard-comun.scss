@@ -1,0 +1,200 @@
+// sm - Estilos compartidos entre el Dashboard ejecutivo y su bloque "Brecha y recurrencia / Histórico"
+// (brecha-historico). Se separaron para que cada hoja de estilos quede bajo el presupuesto de 20 kB de Angular
+// sin cambiar el aspecto: ambos componentes usan exactamente las mismas reglas.
+
+mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--accent-cian);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  font-family: inherit;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+}
+
+.cargando-inicial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: var(--text-secondary);
+
+  &.compacto {
+    padding: 24px 0;
+  }
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: girar 0.9s linear infinite;
+}
+
+.girando {
+  animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 12px;
+  color: var(--text-muted);
+  text-align: center;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--status-success-text);
+  }
+
+  &.error mat-icon {
+    color: var(--text-muted);
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+// =====================================================================
+// Semáforo
+// =====================================================================
+.semaforo-verde {
+  background: var(--status-success-bg-solid);
+}
+
+.semaforo-amarillo {
+  background: var(--status-warning-bg-solid);
+}
+
+.semaforo-rojo {
+  background: var(--status-danger-bg-solid);
+}
+
+.texto-semaforo-verde {
+  color: var(--status-success-text);
+}
+
+.texto-semaforo-amarillo {
+  color: var(--status-warning-text);
+}
+
+.texto-semaforo-rojo {
+  color: var(--status-danger-text);
+}
+
+.punto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.barra-relleno {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: var(--elevation-card);
+  padding: 18px 20px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  @media (max-width: 600px) {
+    padding: 16px 14px;
+  }
+}
+
+.panel-subtitulo {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+// sm - Base de las tablas (brecha por colaborador y detalle del panel lateral).
+@mixin tabla-base {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-table);
+    white-space: nowrap;
+    background: var(--bg-soft);
+  }
+
+  td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-table);
+    color: var(--text-body);
+    vertical-align: middle;
+  }
+
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+}

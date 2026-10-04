@@ -1,0 +1,16 @@
+<div class="tarjeta" [class]="'tarjeta tono-' + tono()"
+  [class.clicable]="!!accion()" [class.seleccionada]="seleccionada()"
+  [attr.role]="accion() ? 'button' : null" [attr.tabindex]="accion() ? 0 : null"
+  [matTooltip]="definicion() ?? ''" [matTooltipDisabled]="!definicion()" matTooltipPosition="above"
+  (click)="clic()" (keydown.enter)="clic()">
+  <span class="tarjeta-cuerpo">
+    <span class="tarjeta-valor">{{ valor() }}</span>
+    <span class="tarjeta-titulo">{{ titulo() }}</span>
+  </span>
+  @if (icono()) {
+    <mat-icon class="tarjeta-icono" aria-hidden="true">{{ icono() }}</mat-icon>
+  }
+  @if (accion()) {
+    <span class="tarjeta-pie">{{ accion() }} <mat-icon>arrow_forward</mat-icon></span>
+  }
+</div>

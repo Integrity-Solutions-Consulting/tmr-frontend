@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, forkJoin, of, switchMap } from 'rxjs';
+import { Subject, BehaviorSubject, combineLatest, takeUntil, debounceTime, distinctUntilChanged, forkJoin, of, switchMap, map } from 'rxjs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
@@ -26,10 +26,16 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { MatIconModule } from '@angular/material/icon';
+
+type CampoOrdenableCliente = 'tipoId' | 'identificador' | 'nombreComercial' | 'correoElectronico' | 'telefono' | 'estado';
 @Component({
   selector: 'app-lista-clientes',
   standalone: true,
-  imports: [
+  imports: [TarjetaResumenComponent,
+    HeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -40,6 +46,7 @@ import {
     NotificacionComponent,
     PaginacionComponent,
     ActionMenuComponent,
+    MatIconModule,
   ],
   templateUrl: './lista-clientes.component.html',
   styleUrls: ['./lista-clientes.component.scss'],
@@ -61,6 +68,12 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   modalDetalle$ = this.store.select(selectModalDetalleAbierto);
   paginacion$   = this.store.select(selectPaginacionInfo);
   resumen$      = this.store.select(selectResumenClientes);
+
+  // ── Orden de columnas ──────────────────────────────────────
+  private sortState$ = new BehaviorSubject<{ campo: CampoOrdenableCliente | null; asc: boolean }>({ campo: null, asc: true });
+  clientesOrdenados$ = combineLatest([this.clientes$, this.sortState$]).pipe(
+    map(([clientes, sort]) => this.ordenarClientes(clientes, sort))
+  );
 
   // ── Formulario filtros ────────────────────────────────────
   filtrosForm!: FormGroup;
@@ -229,6 +242,43 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     this.filtrosForm.get('estado')!.setValue('todos');
     this.estadoSeleccionado    = 'todos';
     this.dropdownEstadoAbierto = false;
+  }
+
+  // ── Orden de columnas ──────────────────────────────────────
+  ordenar(campo: CampoOrdenableCliente): void {
+    const actual = this.sortState$.value;
+    if (actual.campo === campo) {
+      this.sortState$.next({ campo, asc: !actual.asc });
+    } else {
+      this.sortState$.next({ campo, asc: true });
+    }
+  }
+
+  direccionOrden(campo: CampoOrdenableCliente): 'ascending' | 'descending' | 'none' {
+    const actual = this.sortState$.value;
+    if (actual.campo !== campo) return 'none';
+    return actual.asc ? 'ascending' : 'descending';
+  }
+
+  get sortField(): CampoOrdenableCliente | null {
+    return this.sortState$.value.campo;
+  }
+
+  get sortAsc(): boolean {
+    return this.sortState$.value.asc;
+  }
+
+  private ordenarClientes(clientes: Cliente[] | null, sort: { campo: CampoOrdenableCliente | null; asc: boolean }): Cliente[] {
+    const lista = clientes ?? [];
+    if (!sort.campo) return lista;
+    const campo = sort.campo;
+    const factor = sort.asc ? 1 : -1;
+
+    return [...lista].sort((a, b) => {
+      const valorA = String((a as any)[campo] ?? '').toLowerCase();
+      const valorB = String((b as any)[campo] ?? '').toLowerCase();
+      return valorA.localeCompare(valorB, 'es', { numeric: true }) * factor;
+    });
   }
 
   // ── Acciones tabla ────────────────────────────────────────

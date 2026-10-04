@@ -419,7 +419,9 @@ $text-muted: #9CA3AF;
             font-weight: 500;
             color: #6b7280;
             font-size: 13px;
-            white-space: nowrap;
+            // sm - El encabezado ya no trunca: el texto se ve completo, partiéndose en más de una línea
+            // si no entra en una (ver .th-label). El alto de la fila crece solo para acomodarlo.
+            white-space: normal;
             background: #ffffff;
             user-select: none;
             box-sizing: border-box;
@@ -431,6 +433,27 @@ $text-muted: #9CA3AF;
                 &:hover {
                     color: #111827;
                 }
+            }
+
+            // sm - Envuelve el texto del encabezado y el ícono de orden: el texto se ve completo (puede ocupar
+            // 2 líneas) y el ícono queda fijo al lado, sin achicarse ni solaparse.
+            .th-inner {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                min-width: 0;
+            }
+
+            .th-label {
+                white-space: normal;
+                // sm - Se quita word-break: break-word: partía palabras sueltas por la mitad en columnas angostas
+                // (ej. "Recursos" → "Recurs"/"os"). Ahora solo se parte en espacios; si una palabra no entra,
+                // se deja completa en su propia línea.
+                word-break: normal;
+                overflow-wrap: normal;
+                line-height: 1.25;
+                flex: 1 1 auto;
+                min-width: 0;
             }
         }
     }
@@ -508,7 +531,12 @@ $text-muted: #9CA3AF;
     // sm - Anchos en % (en vez de px fijos) para que las columnas se repartan al 100% del contenedor
     // y la tabla quepa en la ventana sin scroll horizontal en pantallas normales.
     .col-nombre {
-        width: 16%;
+        width: 14%;
+    }
+
+    // sm - Solo la celda de datos (no el encabezado, que ahora trunca con "…" vía .th-label) deja crecer el
+    // nombre en varias líneas en vez de truncarlo.
+    td.col-nombre {
         white-space: normal !important;
         word-wrap: break-word !important;
         overflow: visible !important;
@@ -516,15 +544,15 @@ $text-muted: #9CA3AF;
     }
 
     .col-proyecto {
-        width: 14%;
+        width: 13%;
     }
 
     .col-cliente {
-        width: 12%;
+        width: 11%;
     }
 
     .col-lider {
-        width: 13%;
+        width: 12%;
     }
 
     .col-horas {
@@ -537,13 +565,16 @@ $text-muted: #9CA3AF;
         text-align: start;
     }
 
+    // sm - Las dos columnas de "Días" tienen el encabezado más largo ("Días con Reporte" / "Días a Completar")
+    // más el ícono de orden: se les da algo más de ancho (a costa de nombre/proyecto/cliente/líder, que truncan
+    // mejor) para que el texto y el ícono no se amontonen.
     .col-dias-reporte {
-        width: 9%;
+        width: 11%;
         text-align: center;
     }
 
     .col-dias-completar {
-        width: 9%;
+        width: 12%;
         text-align: center;
     }
 
@@ -630,9 +661,23 @@ $text-muted: #9CA3AF;
 }
 
 .sort-icon {
-    font-size: 11px;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
     margin-left: 4px;
     color: #9ca3af;
+    vertical-align: middle;
+}
+
+.seguimiento-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        color: #163572;
+
+        .sort-icon { color: currentColor; }
+    }
 }
 
 .center {

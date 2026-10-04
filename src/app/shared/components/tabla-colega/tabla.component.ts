@@ -14,11 +14,12 @@ import { CommonModule } from '@angular/common';
 import { ColumnDefinition, TableConfig, TableEmptyState } from './tabla.types';
 import { PaginacionComponent } from '../paginacion/paginacion.component';
 import { BadgeEstadoComponent } from '../badge-estado/badge-estado.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-tabla',
   standalone: true,
-  imports: [CommonModule, PaginacionComponent, BadgeEstadoComponent],
+  imports: [CommonModule, PaginacionComponent, BadgeEstadoComponent, MatIconModule],
   templateUrl: './tabla.component.html',
   styleUrl: './tabla.component.scss',
 })
@@ -96,11 +97,67 @@ export class TablaComponent<T = any> implements OnInit {
    */
   @ContentChild('rowTemplate') rowTemplate?: TemplateRef<{ $implicit: T; index: number }>;
 
+  /**
+   * Estado de orden (ordena solo las filas visibles de datosPaginados,
+   * ya que en consumidores con paginación en servidor es lo único disponible en el cliente)
+   */
+  sortField: string | null = null;
+  sortAsc = true;
+
   ngOnInit(): void {
     // Validar entrada
     if (!this.columnas || this.columnas.length === 0) {
       console.warn('TablaComponent: No se proporcionaron columnas');
     }
+  }
+
+  /**
+   * Alternar orden por columna
+   */
+  ordenar(property: string): void {
+    if (this.sortField === property) {
+      this.sortAsc = !this.sortAsc;
+    } else {
+      this.sortField = property;
+      this.sortAsc = true;
+    }
+  }
+
+  /**
+   * Dirección de orden para accesibilidad (aria-sort)
+   */
+  direccionOrden(property: string): 'ascending' | 'descending' | 'none' {
+    if (this.sortField !== property) return 'none';
+    return this.sortAsc ? 'ascending' : 'descending';
+  }
+
+  /**
+   * Filas a renderizar, ordenadas si corresponde
+   */
+  get datosPaginadosOrdenados(): T[] {
+    if (!this.sortField) return this.datosPaginados;
+
+    const campo = this.sortField;
+    const factor = this.sortAsc ? 1 : -1;
+
+    return [...this.datosPaginados].sort((a, b) => {
+      const valorA = this.getValue(a, campo);
+      const valorB = this.getValue(b, campo);
+
+      if (valorA == null && valorB == null) return 0;
+      if (valorA == null) return -1 * factor;
+      if (valorB == null) return 1 * factor;
+
+      if (valorA instanceof Date || valorB instanceof Date) {
+        return (new Date(valorA).getTime() - new Date(valorB).getTime()) * factor;
+      }
+
+      if (typeof valorA === 'number' && typeof valorB === 'number') {
+        return (valorA - valorB) * factor;
+      }
+
+      return String(valorA).localeCompare(String(valorB), 'es', { numeric: true }) * factor;
+    });
   }
 
   /**

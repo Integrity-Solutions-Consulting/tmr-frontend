@@ -17,7 +17,9 @@
     <app-metricas-horas
         [horasPorRegistrar]="actividadesService.horasPorRegistrar()"
         [horasRegistradas]="actividadesService.horasRegistradas()"
-        [promedioPorDia]="actividadesService.promedioPorDia()">
+        [promedioPorDia]="actividadesService.promedioPorDia()"
+        tituloHorasRegistradas="Horas registradas hoy"
+        descripcionHorasRegistradas="Total del día de hoy">
         <div class="footer-spacer"></div>
 
         <button mat-stroked-button class="btn-reporte" (click)="abrirGenerarReporte()">

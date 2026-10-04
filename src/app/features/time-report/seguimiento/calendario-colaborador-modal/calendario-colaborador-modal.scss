@@ -1,6 +1,4 @@
-// sm - Estilos calcados del header de agregar-actividad.scss para mantener el mismo look de modal en toda la app.
-$primary-blue: #163572;
-$text-muted: #64748b;
+@use "sass:color";
 
 :host {
     --modal-width: 100%;
@@ -16,7 +14,7 @@ $text-muted: #64748b;
     max-height: 90vh;
     overflow: hidden;
     font-family: 'Inter', 'Segoe UI', sans-serif;
-    background-color: #ffffff;
+    background-color: var(--bg-card);
 }
 
 .calcol-modal__header {
@@ -25,7 +23,7 @@ $text-muted: #64748b;
     justify-content: space-between;
     gap: 12px;
     padding: 24px 28px 16px;
-    border-bottom: 1px solid #e8edf5;
+    border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
     box-sizing: border-box;
 }
@@ -40,14 +38,14 @@ $text-muted: #64748b;
     margin: 0;
     font-size: 22px;
     font-weight: 800;
-    color: $primary-blue;
+    color: var(--primary-color);
     line-height: 1.2;
 }
 
 .calcol-modal__subtitle {
     margin: 0;
     font-size: 12px;
-    color: $text-muted;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
@@ -57,21 +55,25 @@ $text-muted: #64748b;
     justify-content: center;
     width: 44px;
     height: 44px;
-    border: none;
-    background: transparent;
-    color: #0f172a;
+    border: 1.5px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text-main);
     cursor: pointer;
     flex-shrink: 0;
 
-    img {
+     img {
         width: 18px;
         height: 18px;
     }
 
     &:hover {
-        opacity: 0.7;
+        background: var(--bg-hover);
     }
+
+    
 }
+
 
 .calcol-modal__body {
     padding: 20px 28px 28px;

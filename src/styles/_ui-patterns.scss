@@ -1,0 +1,67 @@
+// Patrones visuales compartidos. Usan tokens CSS para conservar el tema activo.
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin surface-card($shadow: false, $radius: 8px) {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: $radius;
+
+  @if $shadow {
+    box-shadow: var(--elevation-card);
+  }
+}
+
+@mixin icon-button($size: 34px, $radius: 50%) {
+  @include flex-center;
+  width: $size;
+  height: $size;
+  padding: 0;
+  border: 0;
+  border-radius: $radius;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+
+  &:hover {
+    color: var(--primary-color);
+    background: var(--bg-hover);
+  }
+}
+
+@mixin navigation-link($height, $gap, $padding, $radius, $font-size, $active-weight) {
+  display: flex;
+  align-items: center;
+  min-height: $height;
+  gap: $gap;
+  padding: $padding;
+  width: 100%;
+  border: 0;
+  border-radius: $radius;
+  color: var(--text-secondary);
+  background: transparent;
+  font-family: inherit;
+  font-size: $font-size;
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
+
+  &:hover {
+    color: var(--primary-color);
+    background: var(--bg-hover);
+  }
+
+  &.active {
+    color: var(--primary-color);
+    background: var(--primary-light);
+    font-weight: $active-weight;
+  }
+}

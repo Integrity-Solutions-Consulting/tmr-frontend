@@ -39,6 +39,12 @@ export class CalendarioColaboradorModal {
         return Number(this.data.colaborador.id);
     }
 
+    // sm - Cada fila de Seguimiento es un colaborador+proyecto puntual (proyectos tiene como mucho 1 elemento: el
+    // de esa fila). undefined cuando la fila es "Sin Proyecto": el calendario muestra el total del colaborador.
+    get idProyecto(): number | undefined {
+        return this.data.colaborador.proyectos?.[0]?.idProyecto;
+    }
+
     cerrar(): void {
         this.dialogRef.close();
     }

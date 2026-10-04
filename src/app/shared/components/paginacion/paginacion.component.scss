@@ -7,14 +7,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 4px;
-  background: transparent;
+  padding: 10px 15px;
+  border-radius: 12px;
+  background-color: var(--bg-card);
   border: none;
+  
   font-family: 'Inter', sans-serif;
 
   &__info {
     font-size: 12px;
-    color: #737373;
+    color: var(--text-subtle);
     
   }
 
@@ -26,7 +28,7 @@
 
   &__pagina-info {
   font-size: 12px;
-  color: #737373;
+  color: var(--text-subtle);
   margin-right: 10px;
   white-space: nowrap;
 }
@@ -38,10 +40,10 @@
     min-width: 28px;
     height: 28px;
     padding: 0 5px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-default);
     border-radius: 5px;
     background: transparent;
-    color: #737373;
+    color: var(--text-subtle);
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 500;
@@ -52,8 +54,8 @@
 
     &:hover:not(:disabled):not(.paginacion__btn--activo) {
       background: #f5f5f5;
-      border-color: #d1d5db;
-      color: #163572;
+      border-color: var(--border-soft);
+      color: var(--primary-color);
     }
 
     &:disabled {
@@ -62,9 +64,9 @@
     }
 
     &--activo {
-      background: #163572;
-      border-color: #163572;
-      color: #ffffff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: var(--text-inverse);
       cursor: default;
     }
 
@@ -81,36 +83,6 @@
     height: 28px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #737373;
-  }
-}
-:host-context(html[data-theme="dark"]) {
-  .paginacion {
-    background-color: transparent; border: none;
-    padding: 8px 4px;
-    
-    &__info,
-    &__pagina-info,
-    &__dots {
-      color: #a1a1aa;
-    }
-
-    &__btn {
-      background: #27272a;
-      border-color: #3f3f46;
-      color: #ffffff;
-
-      &:hover:not(:disabled):not(.paginacion__btn--activo) {
-        background: #3f3f46;
-        border-color: #52525b;
-        color: #ffffff;
-      }
-
-      &--activo {
-        background: #163572;
-        border-color: #163572;
-        color: #ffffff;
-      }
-    }
+    color: var(--text-subtle);
   }
 }

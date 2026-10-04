@@ -1,0 +1,155 @@
+<section class="panel panel-pestanas">
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [attr.aria-selected]="pestana() === 'brecha'" [class.activa]="pestana() === 'brecha'"
+      (click)="pestana.set('brecha')">
+      <mat-icon>groups</mat-icon>
+      Brecha y recurrencia
+      @if (colaboradores().length) { <span class="contador">{{ colaboradores().length }}</span> }
+    </button>
+    <button type="button" role="tab" [attr.aria-selected]="pestana() === 'historico'" [class.activa]="pestana() === 'historico'"
+      (click)="pestana.set('historico')">
+      <mat-icon>insights</mat-icon>
+      Histórico de cumplimiento
+    </button>
+
+    <div class="controles-historico">
+      <!-- sm - Ventana: cuántos meses hacia atrás se revisan (RF 15 / CA 11 pide 6 y 12). -->
+      <span class="control-etiqueta">Revisar los últimos</span>
+      <div class="segmentado" role="group" aria-label="Meses hacia atrás que se revisan"
+        matTooltip="Cuántos meses hacia atrás se revisan para el histórico y para contar atrasos">
+        <button type="button" [class.activo]="mesesVentana() === 6" (click)="cambiarVentana.emit(6)">6 meses</button>
+        <button type="button" [class.activo]="mesesVentana() === 12" (click)="cambiarVentana.emit(12)">12 meses</button>
+      </div>
+      @if (pestana() === 'brecha') {
+        <!-- sm - Umbral de recurrencia (confirmado): ocasiones (cortes del 15 y fin de mes) con atraso. -->
+        <label class="umbral"
+          [matTooltip]="'Cada corte (15 y fin de mes) con más de ' + (historico()?.maxDiasIncompletosPorCorte ?? 2) + ' días hábiles incompletos cuenta como una ocasión. Con esta cantidad de ocasiones (o más) en los meses revisados, se marca como Recurrente'">
+          Recurrente con
+          <input type="number" min="1" [max]="mesesVentana() * 2" [ngModel]="umbralRecurrencia()"
+            [ngModelOptions]="{ updateOn: 'blur' }" (ngModelChange)="cambiarUmbral.emit($event)" />
+          o más ocasiones con atraso
+        </label>
+      }
+    </div>
+  </div>
+
+  @if (pestana() === 'brecha') {
+    <!-- 7.2 Brecha y recurrencia por colaborador -->
+    @if (colaboradores().length === 0) {
+      <div class="vacio">
+        <mat-icon>verified</mat-icon>
+        <p>Ningún colaborador tiene horas pendientes ni atrasos en la ventana seleccionada.</p>
+      </div>
+    } @else {
+      <div class="tabla-scroll">
+        <table class="tabla-brecha">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th class="col-brecha">Horas pendientes del periodo</th>
+              <th class="num">Cumplimiento</th>
+              <th>Últimos {{ mesesVentana() }} meses</th>
+              <th class="num">Ocasiones con atraso</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of brechaVisible(); track c.idEmpleado) {
+              <tr [class.seleccionada]="seleccion() === 'colaborador:' + c.idEmpleado"
+                (click)="abrirColaborador.emit({ idEmpleado: c.idEmpleado, colaborador: c.colaborador })" tabindex="0"
+                (keydown.enter)="abrirColaborador.emit({ idEmpleado: c.idEmpleado, colaborador: c.colaborador })">
+                <td>
+                  <span class="nombre-colaborador">{{ c.colaborador }}</span>
+                  @if (c.recurrente) {
+                    <span class="badge-recurrente">Recurrente</span>
+                  }
+                </td>
+                <td class="col-brecha">
+                  <span class="brecha-celda">
+                    <span class="brecha-barra">
+                      <span class="barra-relleno barra-corporativa" [style.width.%]="(c.pendientes / maximaBrecha()) * 100"></span>
+                    </span>
+                    <span class="brecha-valor">{{ formatoHoras(c.pendientes) }}</span>
+                  </span>
+                </td>
+                <td class="num">
+                  @if (c.sinHorasPeriodo) {
+                    <span matTooltip="Sin horas esperadas en el periodo elegido">—</span>
+                  } @else {
+                    <i class="punto" [ngClass]="claseSemaforo(c.semaforo)"></i>
+                    {{ formatoPorcentaje(c.porcentaje) }}
+                  }
+                </td>
+                <td>
+                  <span class="historial">
+                    @for (h of c.historial; track h.etiqueta) {
+                      <i class="celda-mes" [ngClass]="'estado-' + h.estado"
+                        [matTooltip]="h.etiqueta + ': ' + etiquetaEstado(h.estado) + (h.porcentaje !== null ? ' (' + formatoPorcentaje(h.porcentaje) + ')' : '')"></i>
+                    }
+                    @if (cargandoHistorico()) {
+                      <mat-icon class="girando mini">sync</mat-icon>
+                    }
+                  </span>
+                </td>
+                <td class="num">
+                  <strong [class.texto-semaforo-rojo]="c.recurrente" [matTooltip]="c.detalleAtrasos">{{ c.ocasionesConAtraso }}</strong>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pie-tabla">
+        <ng-container [ngTemplateOutlet]="leyendaEstados"></ng-container>
+        @if (colaboradores().length > 8) {
+          <button type="button" class="btn-link" (click)="mostrarTodos.set(!mostrarTodos())">
+            {{ mostrarTodos() ? 'Ver menos' : 'Ver los ' + colaboradores().length + ' colaboradores' }}
+          </button>
+        }
+      </div>
+    }
+  } @else {
+    <!-- RF 15 Histórico de cumplimiento -->
+    @if (historico(); as h) {
+      <p class="panel-subtitulo">Cumplimiento mensual con la clasificación al cierre de cada mes. Selecciona un mes para verlo en el dashboard.</p>
+      <div class="historico" [class.recargando]="cargandoHistorico()">
+        @for (m of h.meses; track m.anio + '-' + m.mes) {
+          <button type="button" class="historico-mes"
+            [class.actual]="m.anio === periodo()?.anio && m.mes === periodo()?.mes"
+            (click)="seleccionarMes.emit({ anio: m.anio, mes: m.mes })"
+            [matTooltip]="'Cierre: ' + formatoFecha(m.fechaCierre) + ' (último día hábil) · Esperadas ' + formatoHoras(m.esperadas) + ' · Pendientes ' + formatoHoras(m.pendientes)">
+            <span class="historico-pct" [ngClass]="'texto-' + claseSemaforo(m.semaforo)">{{ formatoPorcentaje(m.porcentaje) }}</span>
+            <span class="historico-columna">
+              <span class="historico-relleno" [ngClass]="claseSemaforo(m.semaforo)" [style.height.%]="anchoBarra(m.porcentaje)"></span>
+            </span>
+            <span class="historico-etiqueta">{{ etiquetaMes(m.anio, m.mes) }}</span>
+            <span class="historico-conteos">
+              @if (m.mesAbierto) {
+                <span class="chip-mini abierto">Abierto</span>
+              }
+              @if (m.atrasosCarga) { <span class="conteo estado-AtrasoCarga" matTooltip="Atraso de carga">{{ m.atrasosCarga }}</span> }
+              @if (m.regularizados) { <span class="conteo estado-Regularizado" matTooltip="Regularizados después del cierre">{{ m.regularizados }}</span> }
+              @if (m.incumplidos) { <span class="conteo estado-Incumplido" matTooltip="Incumplimiento definitivo">{{ m.incumplidos }}</span> }
+            </span>
+          </button>
+        }
+      </div>
+      <div class="pie-tabla">
+        <ng-container [ngTemplateOutlet]="leyendaEstados"></ng-container>
+      </div>
+    } @else if (cargandoHistorico()) {
+      <div class="cargando-inicial compacto"><div class="spinner"></div></div>
+    } @else {
+      <div class="vacio error"><mat-icon>history</mat-icon><p>No se pudo cargar el histórico.</p></div>
+    }
+  }
+</section>
+
+<ng-template #leyendaEstados>
+  <span class="leyenda">
+    <i class="celda-mes estado-Cumplido"></i> Cumplido
+    <i class="celda-mes estado-AtrasoCarga"></i> Atraso de carga
+    <i class="celda-mes estado-Regularizado"></i> Regularizado tras el cierre
+    <i class="celda-mes estado-Incumplido"></i> Incumplido
+    <i class="celda-mes estado-SinDatos"></i> Sin horas esperadas
+  </span>
+</ng-template>

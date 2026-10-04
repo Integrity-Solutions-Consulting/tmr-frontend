@@ -100,6 +100,23 @@ export class AppComponent implements OnInit, OnDestroy {
   onFocus(): void {
     this.userActivity.recordActivity('focus');
   }
+
+  /** LocalStorage se comparte entre pestañas: replica el tema sin recargar. */
+  @HostListener('window:storage', ['$event'])
+  onStorageChange(event: StorageEvent): void {
+    if (event.storageArea !== localStorage) return;
+
+    if (event.key === 'tmr_theme_preference') {
+      this.themeService.syncTheme(event.newValue as 'light' | 'dark' | 'system' | null);
+      return;
+    }
+
+    // Un cierre de sesión en otra pestaña no debe dejar esta vista operando
+    // con un estado en memoria ya inválido.
+    if (event.key === 'accessToken' && !event.newValue) {
+      this.handleTokenExpired();
+    }
+  }
   // ========================================
 
   ngOnInit(): void {
@@ -156,6 +173,8 @@ export class AppComponent implements OnInit, OnDestroy {
    * Muestra modal 1 minuto antes de expiración del token
    */
   private showExpirationModal(): void {
+    // Evita apilar advertencias si llegan eventos repetidos desde el monitor.
+    if (this.currentDialogRef) return;
     console.log('🔔 Mostrando modal de expiración de sesión...');
     this.currentDialogRef = this.dialog.open(SessionExpirationModalComponent, {
       disableClose: true,

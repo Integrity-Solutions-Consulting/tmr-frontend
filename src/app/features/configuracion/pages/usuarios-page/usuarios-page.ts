@@ -19,11 +19,13 @@ import { UsuariosFormModal } from '../../components/usuarios-form-modal/usuarios
 import { Rol, Usuario } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios-page',
-  imports: [CommonModule, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent, BadgeEstadoComponent],
+  imports: [TarjetaResumenComponent, HeaderComponent, CommonModule, ActionMenuComponent, DescargaMenuComponent, PaginacionComponent, SuccessModalComponent, BadgeEstadoComponent],
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })

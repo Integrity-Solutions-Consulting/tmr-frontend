@@ -1,8 +1,22 @@
 // src/app/shared/models/colaborador.model.ts
+// sm - Un proyecto del colaborador en el rango consultado, con sus horas propias (ver Colaborador.proyectos).
+export interface ProyectoResumen {
+  idProyecto: number;
+  nombre: string;
+  cliente: string;
+  liderTecnico: string;
+  horasRegistradas: number;
+}
+
 export interface Colaborador {
   id: string;
   nombre: string;
+  // sm - Seguimiento: cada fila es un colaborador+proyecto puntual, así que "proyecto"/"cliente"/"liderTecnico"
+  // son siempre de UN solo proyecto (un colaborador con 2 proyectos activos aparece en 2 filas separadas).
   proyecto: string;
+  // sm - El mismo proyecto de esta fila, como lista de un solo elemento (se usa para descargar el reporte de
+  // ese proyecto). Vacío/undefined cuando la fila es "Sin Proyecto".
+  proyectos?: ProyectoResumen[];
   cliente: string;
   liderTecnico: string;
   nroHoras: number;

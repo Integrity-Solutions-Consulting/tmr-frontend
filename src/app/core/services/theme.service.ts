@@ -50,6 +50,15 @@ export class ThemeService implements OnDestroy {
     this.applyTheme(mode);
   }
 
+  /** Sincroniza la preferencia al cambiarla desde otra pestaña. */
+  syncTheme(mode: ThemeMode | null): void {
+    const validMode: ThemeMode = mode && ['light', 'dark', 'system'].includes(mode)
+      ? mode
+      : 'system';
+    this.selectedTheme.set(validMode);
+    this.applyTheme(validMode);
+  }
+
   private applyTheme(mode: ThemeMode): void {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       return;

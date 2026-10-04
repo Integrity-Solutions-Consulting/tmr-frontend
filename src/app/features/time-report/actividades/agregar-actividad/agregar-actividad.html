@@ -51,18 +51,18 @@
           alt="tipo"
         />
         <input
+          #tipoInput
           class="actividad-modal__input"
           type="text"
           placeholder="Seleccione un tipo"
           [matAutocomplete]="autoTipo"
           formControlName="tipoActividad"
-          readonly
           (click)="triggerTipo.openPanel()"
           #triggerTipo="matAutocompleteTrigger"
         />
         <mat-icon
           class="actividad-modal__input-icon"
-          (click)="triggerTipo.openPanel()"
+          (click)="$event.stopPropagation(); tipoInput.focus(); triggerTipo.openPanel()"
           style="cursor: pointer"
           >expand_more</mat-icon
         >
@@ -108,18 +108,18 @@
           alt="proyecto"
         />
         <input
+          #proyectoInput
           class="actividad-modal__input"
           type="text"
           placeholder="Seleccione un proyecto"
           [matAutocomplete]="autoProyecto"
           formControlName="proyectoId"
-          readonly
           (click)="triggerProyecto.openPanel()"
           #triggerProyecto="matAutocompleteTrigger"
         />
         <mat-icon
           class="actividad-modal__input-icon"
-          (click)="triggerProyecto.openPanel()"
+          (click)="$event.stopPropagation(); proyectoInput.focus(); triggerProyecto.openPanel()"
           style="cursor: pointer"
           >expand_more</mat-icon
         >
@@ -166,7 +166,7 @@
       >
         <input
           class="actividad-modal__input"
-          formControlName="codigoRequerimiento"
+          formControlName="codigoRequerimiento" readonly
           maxlength="50"
           placeholder="Ej. REQ-101"
           autocomplete="off"
@@ -465,6 +465,14 @@
     }
   </div>
 
+  <!-- sm - Motivo por el que no se guardó (lo envía el backend). -->
+  @if (errorGuardar) {
+    <div class="actividad-modal__error-guardar" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorGuardar }}</span>
+    </div>
+  }
+
   <!-- Footer -->
   <div class="actividad-modal__footer">
     @if (esEdicion) {
@@ -480,11 +488,11 @@
     <button
       class="actividad-modal__btn actividad-modal__btn--save"
       type="submit"
-      [disabled]="form.invalid"
+      [disabled]="form.invalid || guardando || guardadoParcial"
       (click)="guardar()"
       data-tour="guardar"
     >
-      Guardar
+      {{ guardando ? 'Guardando…' : 'Guardar' }}
     </button>
   </div>
 </form>
@@ -506,3 +514,4 @@
   (confirmar)="confirmarGuardar()"
   (cancelar)="cancelarGuardar()"
 ></app-confirm-dialog>
+

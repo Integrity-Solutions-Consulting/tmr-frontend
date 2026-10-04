@@ -9,50 +9,12 @@
   </app-header>
 
   @if (mostrarDatos() && datosFiltrados().length > 0) {
-    <div class="metricas-grid">
-      <!-- Asignaciones -->
-      <div class="metrica-card">
-        <div class="metrica-icon asignaciones">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/asignacion.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ datosFiltrados().length }}</div>
-          <div class="metrica-label">Asignaciones</div>
-        </div>
-      </div>
-  
-      <!-- Líderes -->
-      <div class="metrica-card">
-        <div class="metrica-icon lideres">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Lideres/lideres.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ lideresUnicos() }}</div>
-          <div class="metrica-label">Líderes</div>
-        </div>
-      </div>
-  
-      <!-- Recursos -->
-      <div class="metrica-card">
-        <div class="metrica-icon colaboradores">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ recursosUnicos() }}</div>
-          <div class="metrica-label">Recursos</div>
-        </div>
-      </div>
-  
-      <!-- Clientes -->
-      <div class="metrica-card">
-        <div class="metrica-icon clientes">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ clientesUnicos() }}</div>
-          <div class="metrica-label">Clientes</div>
-        </div>
-      </div>
+    <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+    <div class="tarjetas-resumen">
+      <app-tarjeta-resumen titulo="Asignaciones" icono="assignment" tono="destacado" [valor]="datosFiltrados().length" />
+      <app-tarjeta-resumen titulo="Líderes" icono="supervisor_account" tono="corporativo" [valor]="lideresUnicos()" />
+      <app-tarjeta-resumen titulo="Recursos" icono="groups" tono="corporativo" [valor]="recursosUnicos()" />
+      <app-tarjeta-resumen titulo="Clientes" icono="business" tono="cian" [valor]="clientesUnicos()" />
     </div>
   }
 
@@ -96,13 +58,6 @@
       <input type="date" [ngModel]="fechaFin()" (ngModelChange)="onFiltroChange('fechaFin', $event)"
         class="filter-input">
     </div>
-
-    <button (click)="limpiarFiltros()" class="btn-clear" title="Limpiar filtros">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2">
-        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" />
-      </svg>
-    </button>
   </div>
 
   @if (!mostrarDatos()) {

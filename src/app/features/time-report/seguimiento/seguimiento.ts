@@ -18,7 +18,7 @@ import { DatosSeguimientoPdf, crearReporteSeguimientoPdf } from '../../../shared
 import { environment } from '../../../../environments/environment';
 
 import { SeguimientoService } from '../../../shared/services/seguimiento.service';
-import { Colaborador } from '../../../shared/models/colaborador.model';
+import { Colaborador, ProyectoResumen } from '../../../shared/models/colaborador.model';
 import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { PaginacionComponent } from '../../../shared/components/paginacion/paginacion.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
@@ -31,7 +31,7 @@ import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
-import Swal from 'sweetalert2';
+import { PopupService } from '../../../shared/services/popup.service';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
 class SinActividadesError extends Error {
@@ -44,6 +44,13 @@ class SinActividadesError extends Error {
 interface RangoDescarga {
     desde: string;
     hasta: string;
+}
+
+// sm - Un archivo a generar: un colaborador y, si tiene proyectos, el proyecto al que se limita ese archivo
+// (una persona con 2 proyectos genera 2 items, uno por proyecto). Sin proyectos, un solo item sin filtrar.
+interface ItemDescarga {
+    colaborador: Colaborador;
+    proyecto?: ProyectoResumen;
 }
 
 // sm - Error propio para identificar que el usuario canceló la descarga desde el toast de progreso.
@@ -81,6 +88,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private seguimientoService = inject(SeguimientoService);
     private http = inject(HttpClient);
     private dialog = inject(MatDialog);
+    private popup = inject(PopupService);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -179,6 +187,12 @@ export class SeguimientoComponent implements AfterViewInit {
             this.sortAsc = true;
         }
         this.aplicarOrdenamiento();
+        this.irAPrimeraPagina();
+    }
+
+    public direccionOrden(campo: keyof Colaborador): 'ascending' | 'descending' | 'none' {
+        if (this.sortField !== campo) return 'none';
+        return this.sortAsc ? 'ascending' : 'descending';
     }
 
     private aplicarOrdenamiento() {
@@ -209,7 +223,15 @@ export class SeguimientoComponent implements AfterViewInit {
                 nombre: this.toTitleCase(c.nombre),
                 proyecto: this.toTitleCase(c.proyecto),
                 cliente: this.toTitleCase(c.cliente),
-                liderTecnico: this.toTitleCase(c.liderTecnico)
+                liderTecnico: this.toTitleCase(c.liderTecnico),
+                // sm - El desglose por proyecto (chips del modal "Ver detalle") debe verse igual de prolijo
+                // que las columnas de la tabla; sin esto quedaba con el casing crudo que manda el backend.
+                proyectos: c.proyectos?.map(p => ({
+                    ...p,
+                    nombre: this.toTitleCase(p.nombre),
+                    cliente: this.toTitleCase(p.cliente),
+                    liderTecnico: this.toTitleCase(p.liderTecnico)
+                }))
             }));
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
@@ -349,36 +371,76 @@ export class SeguimientoComponent implements AfterViewInit {
             : this.dataSource.filteredData.forEach(row => this.selection.select(row));
     }
 
+    // sm - Expande los colaboradores seleccionados a un item por archivo a generar: si un colaborador tiene varios
+    // proyectos, se genera un archivo por proyecto (en vez de uno solo mezclando todo).
+    private itemsParaDescarga(colaboradores: Colaborador[]): ItemDescarga[] {
+        const items: ItemDescarga[] = [];
+        for (const colaborador of colaboradores) {
+            const proyectos = colaborador.proyectos && colaborador.proyectos.length > 0 ? colaborador.proyectos : [undefined];
+            for (const proyecto of proyectos) items.push({ colaborador, proyecto });
+        }
+        return items;
+    }
+
     public async descargarSeleccionados(formato: 'xlsx' | 'pdf') {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
+        // sm - Un colaborador con varios proyectos genera un archivo por proyecto, así que el total de archivos
+        // puede ser mayor que la cantidad de filas seleccionadas.
+        const items = this.itemsParaDescarga(seleccionados);
         // sm - El rango se fija al iniciar: si el usuario cambia las fechas durante la descarga,
         // todos los reportes (y los pop ups) siguen usando el mismo rango.
         const rango: RangoDescarga = { desde: this.fechaDesde, hasta: this.fechaHasta };
         this.isDownloading = true;
         // sm - En lugar del mensaje "Preparando...", se muestra el toast animado con barra de progreso.
-        this.iniciarProgresoDescarga(formato, seleccionados.length);
+        this.iniciarProgresoDescarga(formato, items.length);
 
         try {
-            if (seleccionados.length === 1) {
+            if (items.length === 1) {
                 if (formato === 'xlsx') {
-                    await this.descargarDetalle(seleccionados[0], rango);
+                    await this.descargarDetalle(items[0].colaborador, rango, false, items[0].proyecto);
                 } else {
-                    await this.descargarPdfDetalle(seleccionados[0], rango);
+                    await this.descargarPdfDetalle(items[0].colaborador, rango, items[0].proyecto);
                 }
                 await this.finalizarProgresoDescarga();
                 return;
             }
 
-            // sm - Descarga múltiple: el ZIP solo lleva los colaboradores con actividades en el rango.
-            const incluidos = await this.descargarReportesZip(seleccionados, formato, rango);
-            const sinActividades = seleccionados.length - incluidos;
+            if (seleccionados.length === 1) {
+                // sm - Un solo colaborador con varios proyectos: se descargan sus archivos directo, sin ZIP
+                // (un ZIP con un solo colaborador adentro no aporta nada, y evita que al seleccionar varios
+                // colaboradores se termine armando un ZIP con otros ZIPs adentro; ese caso sí usa un único
+                // ZIP plano con todos los archivos, ver descargarReportesZip).
+                const incluidos = await this.descargarReportesDirecto(items, formato, rango);
+                const sinActividades = items.length - incluidos;
+                if (incluidos === 0) {
+                    this.cerrarProgresoDescarga();
+                    this.mostrarPopup('event_busy', 'Sin actividades',
+                        `<strong>${this.escaparHtml(seleccionados[0].nombre)}</strong> no tiene actividades registradas en ninguno de sus `
+                        + `<strong>${items.length}</strong> proyectos entre ${this.rangoPopup(rango)}. No se generó ningún archivo.`);
+                    return;
+                }
+                await this.finalizarProgresoDescarga();
+                if (sinActividades > 0) {
+                    const uno = sinActividades === 1;
+                    this.mostrarPopup('rule', 'Descarga parcial',
+                        `Se descargaron <strong>${incluidos} de ${items.length}</strong> reportes de `
+                        + `<strong>${this.escaparHtml(seleccionados[0].nombre)}</strong>. <strong>${sinActividades}</strong> `
+                        + `${uno ? 'proyecto no tiene' : 'proyectos no tienen'} actividades entre ${this.rangoPopup(rango)}.`);
+                }
+                return;
+            }
+
+            // sm - Varios colaboradores seleccionados: un único ZIP plano con todos los reportes (cada colaborador
+            // aporta un archivo por proyecto), sin anidar un ZIP dentro de otro.
+            const incluidos = await this.descargarReportesZip(items, formato, rango);
+            const sinActividades = items.length - incluidos;
             if (incluidos === 0) {
                 // sm - Todos los seleccionados están vacíos: no se descarga ningún ZIP.
                 this.cerrarProgresoDescarga();
                 this.mostrarPopup('event_busy', 'Sin actividades',
-                    `Ninguno de los <strong>${seleccionados.length}</strong> colaboradores seleccionados tiene actividades registradas entre `
+                    `Ninguno de los <strong>${items.length}</strong> reportes seleccionados tiene actividades registradas entre `
                     + `${this.rangoPopup(rango)}. No se generó ningún archivo.`);
                 return;
             }
@@ -388,8 +450,8 @@ export class SeguimientoComponent implements AfterViewInit {
                 // sm - Mezcla de vacíos y llenos: se informa solo el conteo de lo descargado y lo omitido.
                 const uno = sinActividades === 1;
                 this.mostrarPopup('rule', 'Descarga parcial',
-                    `Se descargaron <strong>${incluidos} de ${seleccionados.length}</strong> reportes. `
-                    + `<strong>${sinActividades}</strong> ${uno ? 'colaborador no tiene' : 'colaboradores no tienen'} `
+                    `Se descargaron <strong>${incluidos} de ${items.length}</strong> reportes. `
+                    + `<strong>${sinActividades}</strong> ${uno ? 'reporte no tiene' : 'reportes no tienen'} `
                     + `actividades entre ${this.rangoPopup(rango)} y no se ${uno ? 'incluyó' : 'incluyeron'} en el ZIP.`);
             }
         } catch (error) {
@@ -412,14 +474,14 @@ export class SeguimientoComponent implements AfterViewInit {
         }
     }
 
-    // sm - Muestra el toast de descarga. La descarga múltiple avanza por colaborador (progreso real);
+    // sm - Muestra el toast de descarga. La descarga múltiple avanza por archivo/reporte (progreso real);
     // el Excel individual no reporta avance, así que usa barra indeterminada.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
         this.descargaCancelada = false;
         this.progresoDescarga = {
             visible: true,
             cerrando: false,
-            titulo: `Descargando ${formato === 'pdf' ? 'PDF' : 'Excel'}${cantidad > 1 ? ` de ${cantidad} colaboradores` : ''}`,
+            titulo: `Descargando ${formato === 'pdf' ? 'PDF' : 'Excel'}${cantidad > 1 ? ` (${cantidad} reportes)` : ''}`,
             detalle: cantidad > 1 ? `0 de ${cantidad} reportes generados` : 'Generando reporte...',
             progreso: 0,
             indeterminado: cantidad === 1 && formato === 'xlsx',
@@ -471,30 +533,60 @@ export class SeguimientoComponent implements AfterViewInit {
         }
     }
 
-    // sm - Arma un único ZIP (PDF o Excel) solo con los colaboradores que tienen actividades en el rango.
+    // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
+    // con varios proyectos, para no armar un ZIP con un único colaborador adentro. Devuelve cuántos se descargaron;
+    // los que no tengan actividades en el rango se omiten.
+    private async descargarReportesDirecto(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
+        let incluidos = 0;
+        for (const [indice, item] of items.entries()) {
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            const nombreBase = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
+            if (formato === 'pdf') {
+                const contenido = await this.generarPdfColaborador(item.colaborador, rango, item.proyecto);
+                if (contenido) {
+                    this.guardarArchivo(new Blob([contenido], { type: 'application/pdf' }), `${nombreBase}.pdf`);
+                    incluidos++;
+                }
+            } else {
+                const contenido = await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
+                if (contenido) {
+                    this.guardarArchivo(
+                        new Blob([contenido], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+                        `${nombreBase}.xlsx`,
+                    );
+                    incluidos++;
+                }
+            }
+            this.actualizarProgresoDescarga(((indice + 1) / items.length) * 100, `${indice + 1} de ${items.length} reportes generados`);
+        }
+        return incluidos;
+    }
+
+    // sm - Arma un único ZIP (PDF o Excel) solo con los reportes que tienen actividades en el rango. Un colaborador
+    // con varios proyectos aporta un item por proyecto (ver itemsParaDescarga), cada uno con su propio archivo.
     // Devuelve cuántos reportes se incluyeron; si es 0 no se descarga nada.
-    private async descargarReportesZip(colaboradores: Colaborador[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
+    private async descargarReportesZip(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         const zip = new JSZip();
         const nombresUsados = new Set<string>();
         let incluidos = 0;
-        for (const [indice, colaborador] of colaboradores.entries()) {
+        for (const [indice, item] of items.entries()) {
             if (this.descargaCancelada) throw new DescargaCanceladaError();
             const contenido = formato === 'pdf'
-                ? await this.generarPdfColaborador(colaborador, rango)
-                : await this.descargarDetalle(colaborador, rango, true);
+                ? await this.generarPdfColaborador(item.colaborador, rango, item.proyecto)
+                : await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
             if (contenido) {
-                // sm - Colaboradores homónimos no se sobrescriben dentro del ZIP: se les agrega un sufijo.
-                const base = this.nombreArchivo(colaborador.nombre);
+                // sm - Nombres repetidos (homónimos, o el mismo proyecto por alguna razón) no se sobrescriben: se les agrega un sufijo.
+                const base = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
                 let nombre = base;
                 for (let sufijo = 2; nombresUsados.has(nombre.toLowerCase()); sufijo++) nombre = `${base}_${sufijo}`;
                 nombresUsados.add(nombre.toLowerCase());
                 zip.file(`${nombre}.${formato}`, contenido);
                 incluidos++;
             }
-            // sm - El 90% de la barra se reparte entre colaboradores y el 10% restante queda para comprimir el ZIP.
+            // sm - El 90% de la barra se reparte entre reportes y el 10% restante queda para comprimir el ZIP.
             this.actualizarProgresoDescarga(
-                ((indice + 1) / colaboradores.length) * 90,
-                `${indice + 1} de ${colaboradores.length} reportes generados`,
+                ((indice + 1) / items.length) * 90,
+                `${indice + 1} de ${items.length} reportes generados`,
             );
         }
         if (incluidos === 0) return 0;
@@ -519,33 +611,20 @@ export class SeguimientoComponent implements AfterViewInit {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // sm - Nombre de archivo (sin extensión) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez".
-    private nombreArchivo(nombre: string): string {
-        const limpio = nombre.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().replace(/\s+/g, '_').slice(0, 100);
-        return `Reporte_${limpio || 'colaborador'}`;
+    // sm - Nombre de archivo (sin extensión) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez_Proyecto".
+    // Se agrega el proyecto porque una misma persona puede generar varios archivos (uno por proyecto).
+    private nombreArchivo(nombre: string, proyecto?: string): string {
+        const limpiar = (texto: string) => texto.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().replace(/\s+/g, '_').slice(0, 100);
+        const nombreLimpio = limpiar(nombre) || 'colaborador';
+        const proyectoLimpio = proyecto ? limpiar(proyecto) : '';
+        return proyectoLimpio ? `Reporte_${nombreLimpio}_${proyectoLimpio}` : `Reporte_${nombreLimpio}`;
     }
 
     // sm - Pop up base de las descargas de Seguimiento. Usa las clases "tmr-swal" (styles/_sweetalert.scss) para verse
     // igual que los modales de la app: tarjeta blanca, icono en círculo azul, título oscuro, texto gris y botón primario
     // #163572 (con soporte de tema oscuro).
     private mostrarPopup(icono: string, titulo: string, html: string): void {
-        void Swal.fire({
-            icon: 'info',
-            iconHtml: `<span class="material-symbols-outlined">${icono}</span>`,
-            title: titulo,
-            html,
-            confirmButtonText: 'Entendido',
-            buttonsStyling: false,
-            customClass: {
-                container: 'tmr-swal-container',
-                popup: 'tmr-swal',
-                icon: 'tmr-swal__icon',
-                title: 'tmr-swal__title',
-                htmlContainer: 'tmr-swal__text',
-                actions: 'tmr-swal__actions',
-                confirmButton: 'tmr-swal__btn-primary',
-            },
-        });
+        void this.popup.show(icono, titulo, html, icono === 'download_done');
     }
 
     private rangoPopup(rango: RangoDescarga): string {
@@ -622,40 +701,47 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Actividades y feriados de un colaborador en el rango (misma consulta para el reporte Excel y el PDF).
-    // Se puede cancelar desde el toast de descarga.
-    private obtenerActividadesColaborador(col: Colaborador, rango: RangoDescarga): Promise<DatosSeguimientoPdf> {
+    // Con proyecto, filtra el reporte a solo ese proyecto (una persona con varios proyectos genera un archivo por
+    // proyecto: ver itemsParaDescarga). Se puede cancelar desde el toast de descarga.
+    private obtenerActividadesColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<DatosSeguimientoPdf> {
+        const params: Record<string, string> = { fechaDesde: rango.desde, fechaHasta: rango.hasta };
+        // sm - Ahora cada fila de Seguimiento es un colaborador+proyecto puntual (ya no una fila por colaborador
+        // con todos sus proyectos mezclados), así que siempre se filtra por el proyecto de la fila para no mezclar
+        // horas de otro proyecto del mismo colaborador en el reporte.
+        if (proyecto) params['idProyecto'] = String(proyecto.idProyecto);
         return this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
             `${environment.apiUrl}/time-report/seguimiento/colaborador/${col.id}/actividades`,
-            { params: { fechaDesde: rango.desde, fechaHasta: rango.hasta } },
+            { params },
         ));
     }
 
-    // sm - Genera el PDF de un colaborador; devuelve undefined si no tiene actividades en el rango.
-    private async generarPdfColaborador(col: Colaborador, rango: RangoDescarga): Promise<ArrayBuffer | undefined> {
-        const respuesta = await this.obtenerActividadesColaborador(col, rango);
+    // sm - Genera el PDF de un colaborador (o de uno de sus proyectos); devuelve undefined si no tiene actividades en el rango.
+    private async generarPdfColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<ArrayBuffer | undefined> {
+        const respuesta = await this.obtenerActividadesColaborador(col, rango, proyecto);
         if (!respuesta.actividades || respuesta.actividades.length === 0) return undefined;
         const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta);
         if (this.descargaCancelada) throw new DescargaCanceladaError();
         return contenido;
     }
 
-    private async descargarPdfDetalle(col: Colaborador, rango: RangoDescarga): Promise<void> {
-        const contenido = await this.generarPdfColaborador(col, rango);
-        if (!contenido) throw new SinActividadesError(col.nombre);
-        this.guardarArchivo(new Blob([contenido], { type: 'application/pdf' }), `${this.nombreArchivo(col.nombre)}.pdf`);
+    private async descargarPdfDetalle(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<void> {
+        const contenido = await this.generarPdfColaborador(col, rango, proyecto);
+        if (!contenido) throw new SinActividadesError(proyecto ? `${col.nombre} (${proyecto.nombre})` : col.nombre);
+        this.guardarArchivo(new Blob([contenido], { type: 'application/pdf' }), `${this.nombreArchivo(col.nombre, proyecto?.nombre)}.pdf`);
     }
 
-    // sm - Genera el Excel de un colaborador. Con devolverBuffer devuelve el contenido (para el ZIP) o undefined si no
-    // tiene actividades; sin él lo descarga directamente o lanza SinActividadesError para mostrar el pop up.
-    private async descargarDetalle(col: Colaborador, rango: RangoDescarga, devolverBuffer = false) {
-        const res = await this.obtenerActividadesColaborador(col, rango);
+    // sm - Genera el Excel de un colaborador (o de uno de sus proyectos). Con devolverBuffer devuelve el contenido
+    // (para el ZIP) o undefined si no tiene actividades; sin él lo descarga directamente o lanza SinActividadesError
+    // para mostrar el pop up.
+    private async descargarDetalle(col: Colaborador, rango: RangoDescarga, devolverBuffer = false, proyecto?: ProyectoResumen) {
+        const res = await this.obtenerActividadesColaborador(col, rango, proyecto);
 
         const rawActividades: any[] = res.actividades || [];
         const feriados = res.feriados || [];
 
         if (rawActividades.length === 0) {
             if (devolverBuffer) return undefined;
-            throw new SinActividadesError(col.nombre);
+            throw new SinActividadesError(proyecto ? `${col.nombre} (${proyecto.nombre})` : col.nombre);
         }
 
         // Agrupación de actividades por Cliente
@@ -989,7 +1075,7 @@ export class SeguimientoComponent implements AfterViewInit {
         if (devolverBuffer) return buffer;
         this.guardarArchivo(
             new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-            `${this.nombreArchivo(col.nombre)}.xlsx`,
+            `${this.nombreArchivo(col.nombre, proyecto?.nombre)}.xlsx`,
         );
         return undefined;
     }

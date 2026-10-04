@@ -22,12 +22,14 @@ import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/mod
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
 import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';  // ← NUEVO
 import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-colaboradores-page',
   standalone: true,
   imports: [
     CommonModule,
+    HeaderComponent,
     CardsMetricasComponent,
     FiltrosColaboradoresComponent,
     DescargarMenuComponent,

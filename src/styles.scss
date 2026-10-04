@@ -224,7 +224,7 @@ html {
 
 body {
   color-scheme: light;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   color: #111827;
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -238,6 +238,63 @@ body {
   --borde:      #e5e7eb;
   --texto:      #111827;
   --texto-gris: #737373;
+
+  /* Tokens originales del modo claro. Los estilos oscuros solo se activan
+     bajo html[data-theme="dark"], por lo que una pestaña en claro siempre
+     vuelve a esta paleta. */
+  --bg-app: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-surface: #f8f8f8;
+  --bg-hover: #f0f1f3;
+  --text-main: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #737373;
+  --border-color: #e5e7eb;
+  --primary-color: #163572;
+  --primary-text: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #e5e7eb;
+  /* Paleta compartida con origin/sm-Desarrollo. Se conserva --bg-app gris actual. */
+  --bg-soft: #eef4fa;
+  --bg-subtle: #f5f7fc;
+  --border-default: #d6e4f0;
+  --border-soft: #c2d4e5;
+  --border-card: var(--border-default);
+  --border-table: #d6e4f0;
+  --border-input: #b8cce0;
+  --text-body: #1e3a5f;
+  --text-subtle: #4a6278;
+  --text-disabled: #a0b4c0;
+  --text-title: #1e3a5f;
+  --text-inverse: #ffffff;
+  --primary-hover: #0d47a1;
+  --primary-light: rgba(21, 101, 192, .08);
+  --icon-color: var(--text-secondary);
+  --accent-cian: #0097d6;
+  --accent-silver: #8fa3b1;
+  --status-danger-text: #dc2626;
+  --status-danger-bg-solid: #ef4444;
+  --status-danger-bg-soft: #fef2f2;
+  --status-danger-border: #fecaca;
+  --status-success-text: #15803d;
+  --status-success-bg-solid: #22c55e;
+  --status-success-bg-soft: #f0fdf4;
+  --status-success-border: #bbf7d0;
+  --status-info-text: #1d4ed8;
+  --status-info-bg-solid: #3b82f6;
+  --status-info-bg-soft: #eff6ff;
+  --status-info-border: #bfdbfe;
+  --status-warning-text: #d97706;
+  --status-warning-bg-solid: #f59e0b;
+  --status-warning-bg-soft: #fef3c7;
+  --status-warning-border: #fde68a;
+  --elevation-card: 0 8px 24px rgba(17, 24, 39, .05);
+  --elevation-dropdown: 0 4px 12px rgba(15, 23, 42, .12);
+  --overlay-backdrop: rgba(15, 23, 42, .45);
+  --accent-purple: #7c3aed;
+  --accent-purple-bg: #f3e8ff;
+  --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
+  --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, .2);
 }
 
 * {
@@ -616,24 +673,32 @@ html[data-theme="dark"] {
   --texto: #f4f4f5;
   --texto-gris: #a1a1aa;
 
-  --bg-app: var(--phase6-bg-app);
-  --bg-card: var(--phase6-bg-card);
-  --bg-surface: var(--phase6-bg-surface);
-  --bg-hover: var(--phase6-bg-hover);
+  --bg-app: #0a0a0a;
+  --bg-card: #141414;
+  --bg-surface: #1c1c1c;
+  --bg-hover: #252525;
+  --bg-soft: #1a1a1a;
+  --bg-subtle: #141414;
 
-  --text-main: var(--phase6-text);
-  --text-secondary: var(--phase6-text-secondary);
-  --text-muted: var(--phase6-text-muted);
+  --text-main: #f0f4f8;
+  --text-body: #d8e4ee;
+  --text-secondary: #a0b4c4;
+  --text-muted: #6b8599;
+  --text-title: #3b82f6;
 
-  --border-color: var(--phase6-border);
+  --border-color: #2a2a2a;
+  --border-default: #2a2a2a;
+  --border-soft: #333333;
+  --border-card: var(--border-default);
+  --border-table: var(--border-default);
 
-  --primary-color: #3b82f6;
+  --primary-color: #163572;
   --primary-text: #ffffff;
 
   --icon-color: #d4d4d8;
 
-  --input-bg: var(--phase6-bg-surface);
-  --input-border: var(--phase6-border);
+  --input-bg: #1c1c1c;
+  --input-border: #333333;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 
@@ -783,10 +848,10 @@ html[data-theme="dark"] {
   /* â”€â”€ Sidebar lateral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar {
     background-color: var(--bg-card) !important;
-    border-right: 1px solid var(--border-color) !important;
+    border-right: 0 !important;
 
     .sidebar__logo {
-      border-bottom: 1px solid var(--border-color) !important;
+      border-bottom: 0 !important;
     }
 
     .sidebar__link {
@@ -1488,6 +1553,10 @@ html[data-theme="dark"] {
       color: #ffffff !important;
     }
 
+    .proyecto-form__date-control {
+      color-scheme: dark;
+    }
+
     .proyecto-form__date-label {
       background-color: var(--bg-card) !important;
       color: var(--text-secondary) !important;
@@ -1538,6 +1607,27 @@ html[data-theme="dark"] {
 
     .mat-datepicker-toggle {
       color: var(--icon-color) !important;
+    }
+
+    // Controles internos de Angular Material que no heredan el color del formulario.
+    // Sin estas reglas, títulos de recursos, búsquedas y flechas quedan casi negros.
+    .proyecto-form__resource {
+      .mat-expansion-panel-header,
+      .mat-expansion-panel-header-title,
+      .mat-expansion-indicator::after {
+        color: var(--text-main) !important;
+      }
+
+      mat-icon,
+      .mat-icon,
+      .mat-mdc-form-field-icon-prefix,
+      .mat-mdc-select-arrow {
+        color: var(--primary-color) !important;
+      }
+
+      .proyecto-form__remove {
+        color: #f87171 !important;
+      }
     }
   }
 
@@ -1976,17 +2066,17 @@ html[data-theme="dark"] {
   /*  FASE 6: TIME REPORT, CARGA DE ACTIVIDADES, REPORTES Y DASHBOARD  */
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-  --phase6-bg-app: #18181b;
-  --phase6-bg-panel: #182235;
-  --phase6-bg-card: #27272A;
-  --phase6-bg-surface: #202124;
-  --phase6-bg-hover: #334155;
-  --phase6-border: #3f3f46;
-  --phase6-text: #f8fafc;
-  --phase6-text-secondary: #cbd5e1;
-  --phase6-text-muted: #94a3b8;
-  --phase6-primary: #60a5fa;
-  --phase6-primary-hover: #93c5fd;
+  --phase6-bg-app: #0a0a0a;
+  --phase6-bg-panel: #141414;
+  --phase6-bg-card: #141414;
+  --phase6-bg-surface: #1c1c1c;
+  --phase6-bg-hover: #252525;
+  --phase6-border: #2a2a2a;
+  --phase6-text: #f0f4f8;
+  --phase6-text-secondary: #a0b4c4;
+  --phase6-text-muted: #6b8599;
+  --phase6-primary: #163572;
+  --phase6-primary-hover: #0097d6;
 
   /* â”€â”€ 1. Actividades y Calendario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .actividades-page,
@@ -3067,4 +3157,206 @@ app-carga-actividades .table-card {
 html[data-theme="dark"] app-carga-actividades,
 html[data-theme="dark"] app-carga-actividades-component {
   background-color: #18181b !important;
+}
+
+/* Contraste consistente para controles reutilizados en todas las pantallas oscuras.
+   Algunos componentes antiguos traen colores del tema claro encapsulados. */
+html[data-theme="dark"] {
+  .mat-mdc-dialog-surface,
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .cdk-overlay-pane .mat-mdc-autocomplete-panel {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .mat-mdc-dialog-surface {
+    h1, h2, h3, h4, h5, h6, label, p, span, strong {
+      color: var(--text-main);
+    }
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper,
+    .mdc-text-field {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+    }
+
+    input,
+    textarea,
+    .mat-mdc-input-element,
+    .mat-mdc-select-value,
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      color: var(--text-main) !important;
+    }
+
+    mat-icon,
+    .mat-icon,
+    .mat-mdc-form-field-icon-suffix {
+      color: var(--icon-color) !important;
+    }
+
+    // Los iconos de búsqueda/ayuda sí funcionan como affordance interactiva.
+    .mat-mdc-form-field-icon-prefix {
+      color: var(--primary-color) !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: var(--text-secondary) !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted) !important;
+      opacity: 1;
+    }
+  }
+
+  .mat-mdc-menu-item,
+  .mat-mdc-option {
+    color: var(--text-main) !important;
+
+    mat-icon,
+    .mat-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    &:hover,
+    &.mdc-list-item--selected {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  button mat-icon,
+  button .material-symbols-outlined {
+    color: inherit;
+  }
+
+  .mat-datepicker-toggle,
+  .mat-mdc-icon-button {
+    color: var(--primary-color) !important;
+  }
+}
+
+/* Layout estable: los nombres largos no deben empujar logos, acciones ni títulos. */
+.header-container,
+.navbar,
+.sidebar__logo,
+.sidebar__link,
+.sidebar__sublink {
+  min-width: 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+}
+
+.header-container .header-info,
+.header-container .header-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.header-container .header-title,
+.header-container .header-subtitle {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-container .header-title {
+  white-space: nowrap;
+}
+
+.header-container .header-subtitle {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.header-container .header-actions,
+.header-container .header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar__user {
+  min-width: 0;
+}
+
+.navbar__profile-text {
+  max-width: min(28vw, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar__logo-img {
+  max-width: 100%;
+  max-height: 72px;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-container .header-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .header-container .header-actions,
+  .header-container .header-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+/* Barras de desplazamiento discretas en el tema oscuro, incluido el documento.
+   El scrollbar de la ventana pertenece a html/body, por lo que no basta con
+   seleccionar sus descendientes. */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] * {
+  scrollbar-color: rgba(148, 163, 184, 0.48) #18181b;
+  scrollbar-width: thin;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar,
+html[data-theme="dark"] body::-webkit-scrollbar,
+html[data-theme="dark"] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-track,
+html[data-theme="dark"] body::-webkit-scrollbar-track,
+html[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: #18181b;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-thumb,
+html[data-theme="dark"] body::-webkit-scrollbar-thumb,
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] body::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.65);
+  background-clip: padding-box;
 }
