@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #737373;
+  color: var(--text-secondary);
   transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
 }
 
@@ -28,13 +28,13 @@
 }
 
 .action-menu__trigger:hover {
-  background: #f5f5f5;
-  border-color: #e5e7eb;
-  color: #163572;
+  background: var(--bg-hover);
+  border-color: var(--border-default);
+  color: var(--primary-color);
 }
 
 .action-menu__trigger:focus-visible {
-  outline: 2px solid #60a5fa;
+  outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
@@ -44,7 +44,7 @@
   line-height: normal !important;
   padding: 10px 14px !important;
   border-radius: 8px !important;
-  color: #424242 !important;
+  color: var(--text-main) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
@@ -59,7 +59,7 @@
   width: 20px;
   height: 20px;
   margin-right: 0;
-  color: #424242;
+  color: var(--text-main);
   font-size: 20px;
   line-height: 20px;
   vertical-align: middle;
@@ -67,21 +67,21 @@
 
 ::ng-deep .action-menu__item mat-icon,
 ::ng-deep .action-menu__item .mat-icon {
-  color: #424242 !important;
+  color: var(--text-main) !important;
 }
 
 .action-menu__item:hover {
-  background: #f3f4f6 !important;
-  color: #424242 !important;
+  background: var(--bg-hover) !important;
+  color: var(--text-main) !important;
 }
 
 .action-menu__item:disabled {
-  color: #b6b6b6 !important;
+  color: var(--text-disabled) !important;
   cursor: not-allowed;
 }
 
 .action-menu__item:disabled mat-icon {
-  color: #b6b6b6;
+  color: var(--text-disabled);
 }
 
 .action-menu__item:disabled:hover {
@@ -92,50 +92,51 @@
 // iconos y texto gris oscuro con poco contraste.
 :host-context(html[data-theme="dark"]) {
   .action-menu__trigger {
-    color: #cbd5e1;
+    color: var(--text-secondary);
 
     &:hover {
-      background: #27272a;
-      border-color: #52525b;
-      color: #93c5fd;
+      background: var(--bg-hover);
+      border-color: var(--border-default);
+      color: var(--primary-color);
     }
 
     &:focus-visible {
-      outline-color: #60a5fa;
+      outline-color: var(--primary-color);
     }
   }
 
   ::ng-deep .action-menu__panel.mat-mdc-menu-panel {
-    background: #27272a !important;
-    border: 1px solid #3f3f46 !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-default) !important;
   }
 
   ::ng-deep .action-menu__panel .action-menu__item,
   ::ng-deep .action-menu__panel .action-menu__item mat-icon,
   ::ng-deep .action-menu__panel .action-menu__item .mat-icon {
-    color: #e4e4e7 !important;
+    color: var(--text-main) !important;
   }
 
   ::ng-deep .action-menu__panel .action-menu__item:hover {
-    background: #3f3f46 !important;
-    color: #ffffff !important;
+    background: var(--bg-hover) !important;
+    color: var(--text-main) !important;
   }
 }
 
 .action-menu__item--danger {
-  color: #424242 !important;
+  color: var(--status-danger-text) !important;
 }
 
 .action-menu__item--danger:hover {
-  background: #f3f4f6 !important;
-  color: #424242 !important;
+  background: var(--status-danger-bg-soft) !important;
+  color: var(--status-danger-text) !important;
 }
 
 :host ::ng-deep .action-menu__panel.mat-mdc-menu-panel {
   min-width: 140px !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-default) !important;
+  box-shadow: var(--elevation-dropdown) !important;
   overflow: visible;
 }
 

@@ -40,6 +40,7 @@ import {
   CargoLookup
 } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
+import { PopupService } from '../../../../shared/services/popup.service';
 
 @Component({
   selector: 'app-proyecto-form',
@@ -65,6 +66,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private fb = inject(FormBuilder);
   private proyectosService = inject(ProyectosService);
+  private popup = inject(PopupService);
   private elementRef = inject(ElementRef<HTMLElement>);
 
   intentoGuardar = false;
@@ -603,6 +605,10 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
+      this.expandirSeccionesInvalidas();
+      const mensaje = this.obtenerMensajeValidacion();
+      void this.popup.show('warning', 'Revisa la información', mensaje);
+      setTimeout(() => this.enfocarPrimerCampoInvalido(), 0);
       return;
     }
 
@@ -662,6 +668,55 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.guardarProyecto.emit(proyecto);
+  }
+
+  private expandirSeccionesInvalidas(): void {
+    this.lideres.controls.forEach((lider, li) => {
+      const recursos = lider.get('recursos') as FormArray<FormGroup>;
+      recursos.controls.forEach((recurso, ri) => {
+        if (recurso.invalid) this.setRecursoPanelExpanded(li, ri, true);
+      });
+    });
+  }
+
+  private enfocarPrimerCampoInvalido(): void {
+    const host = this.elementRef.nativeElement as HTMLElement;
+    const campo = host.querySelector<HTMLElement>(
+      '.ng-invalid input, input.ng-invalid, .ng-invalid textarea, textarea.ng-invalid, .ng-invalid mat-select, mat-select.ng-invalid'
+    );
+    campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    campo?.focus();
+  }
+
+  private obtenerMensajeValidacion(): string {
+    if (this.formulario.hasError('fechaFinMenor')) {
+      return 'La fecha de fin del proyecto no puede ser anterior a la fecha de inicio.';
+    }
+    if (this.formulario.hasError('fechaFinRealMenor')) {
+      return 'La fecha de fin real no puede ser anterior a la fecha de inicio real.';
+    }
+    if (this.formulario.hasError('fechaFinEsperaMenor')) {
+      return 'La fecha de fin de espera no puede ser anterior a la fecha de inicio de espera.';
+    }
+
+    for (let li = 0; li < this.lideres.length; li++) {
+      const lider = this.lideres.at(li);
+      if (lider.get('lider')?.invalid) {
+        return `Selecciona un líder válido en la asignación ${li + 1}.`;
+      }
+      const recursos = lider.get('recursos') as FormArray<FormGroup>;
+      for (let ri = 0; ri < recursos.length; ri++) {
+        const recurso = recursos.at(ri);
+        if (recurso.hasError('salidaMenor')) {
+          return `La fecha de salida del recurso ${ri + 1} no puede ser anterior a su entrada.`;
+        }
+        if (recurso.invalid) {
+          return `Completa correctamente los campos obligatorios del recurso ${ri + 1} de la asignación ${li + 1}.`;
+        }
+      }
+    }
+
+    return 'No se pudo guardar porque faltan campos obligatorios o existen valores inválidos. Revisa los campos señalados.';
   }
 
   // ── Helpers de teclado ────────────────────────────────────────────────────

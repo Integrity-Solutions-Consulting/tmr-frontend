@@ -1,10 +1,10 @@
-// sm - Copia literal (mismos colores exactos, no tokens var(--...) que podían resolver a un tono distinto)
-// del diseño de la tabla de Seguimiento: recuadro blanco con esquinas superiores redondeadas, encabezado
-// blanco pegajoso con texto gris (#6b7280), filas con texto gris oscuro (#4b5563) y separador muy suave
-// (#f3f4f6), hover gris clarito (#f9fafb). El tema oscuro se cubre aparte, abajo, igual que en Seguimiento.
+@use '../../../../styles/table-theme' as table-theme;
+
+// La tabla compartida usa tokens semánticos; encabezados, filas y controles
+// cambian juntos al alternar el tema, sin reglas oscuras duplicadas.
 .table-scroll-container {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--pattern-table-bg);
+  border: 1px solid var(--pattern-border-color);
   border-radius: 12px 12px 0 0;
   overflow: hidden;
   box-shadow: none;
@@ -26,8 +26,8 @@
   font-family: 'Inter', sans-serif;
 
   thead {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--pattern-table-header-bg);
+    border-bottom: 1px solid var(--pattern-border-color);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -37,10 +37,10 @@
     padding: 14px 10px;
     text-align: left;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 13px;
     white-space: normal;
-    background: #ffffff;
+    background: var(--pattern-table-header-bg);
     user-select: none;
     box-sizing: border-box;
 
@@ -69,7 +69,7 @@
       user-select: none;
 
       &:hover {
-        color: #163572;
+        color: var(--primary-color);
 
         .sort-icon {
           color: currentColor;
@@ -80,7 +80,7 @@
 
   td {
     padding: 14px 10px;
-    color: #4b5563;
+    color: var(--text-main);
     font-weight: 400;
     vertical-align: middle;
     white-space: nowrap;
@@ -102,14 +102,14 @@
   }
 
   tbody tr {
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--pattern-border-color);
 
     &:last-child {
       border-bottom: none;
     }
 
     &:hover {
-      background: #f9fafb !important;
+      background: var(--pattern-table-row-hover);
     }
   }
 }
@@ -119,7 +119,7 @@
   width: 16px;
   height: 16px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
 }
@@ -131,11 +131,11 @@
 }
 
 ::ng-deep .lideres-table th.mat-mdc-header-cell {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--pattern-border-color);
 }
 
 ::ng-deep .lideres-table td.mat-mdc-cell {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--pattern-border-color);
 }
 
 // sm - Mismo criterio de ancho que Seguimiento: columnas en % (no px) sobre el 100% de la tabla.
@@ -149,11 +149,11 @@
 ::ng-deep .mat-column-estado { width: 11% !important; overflow: visible !important; }
 ::ng-deep .mat-column-acciones { width: 6% !important; text-align: center; overflow: visible !important; }
 
-/* Contenido celdas: mismo gris que el texto de celda de Seguimiento (#4b5563) */
-.tabla__codigo { color: #4b5563; font-weight: 400; }
+/* Contenido de celdas */
+.tabla__codigo { color: var(--text-main); font-weight: 400; }
 .tabla__proyecto { display: flex; flex-direction: column; gap: 4px; }
-.tabla__proyecto-nombre { font-weight: 400; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tabla__cliente { font-weight: 400; color: #4b5563; }
+.tabla__proyecto-nombre { font-weight: 400; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabla__cliente { font-weight: 400; color: var(--text-main); }
 
 // sm - Mismo diseño que el badge de Seguimiento (pastilla blanca con borde gris y un punto de color según el
 // estado, no toda la pastilla teñida), con los mismos colores exactos de texto/fondo/borde.
@@ -165,34 +165,34 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 400;
-  color: #4b5563;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  color: var(--text-secondary);
+  background: var(--pattern-panel-bg);
+  border: 1px solid var(--pattern-border-color);
   min-width: 90px;
   box-sizing: border-box;
   white-space: nowrap;
 }
-.seguimiento-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: #9ca3af; }
+.seguimiento-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--text-muted); }
 
 .seguimiento-activo::before,
 .seguimiento-aprobado::before,
-.seguimiento-completado::before { background: #22c55e; }
+.seguimiento-completado::before { background: var(--status-success-bg-solid); }
 
 .seguimiento-planificacion::before,
 .seguimiento-desarrollo::before,
-.seguimiento-progreso::before { background: #3b82f6; }
+.seguimiento-progreso::before { background: var(--status-info-bg-solid); }
 
 .seguimiento-aplazado::before,
-.seguimiento-espera::before { background: #f97316; }
+.seguimiento-espera::before { background: var(--status-warning-bg-solid); }
 
-.seguimiento-cancelado::before { background: #ef4444; }
+.seguimiento-cancelado::before { background: var(--status-danger-bg-solid); }
 
-.seguimiento-inactivo::before { background: #9ca3af; }
+.seguimiento-inactivo::before { background: var(--text-muted); }
 
 .tabla__fecha { display: flex; flex-direction: column; gap: 4px; }
-.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #4b5563; }
-.fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: #4b5563; }
-.fecha-sub { font-size: 11px; color: #9ca3af; }
+.fecha-rango { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-main); }
+.fecha-rango mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--text-secondary); }
+.fecha-sub { font-size: 11px; color: var(--text-muted); }
 
 // sm - Columna "Líderes": se corrigen los nombres de clase (no coincidían con las del HTML, así que esta
 // columna no tenía ningún estilo propio). Cada líder en su línea, con su detalle (recursos) en chip chico
@@ -204,7 +204,7 @@
   gap: 6px;
   max-width: 100%;
   font-size: 13px;
-  color: #4b5563;
+  color: var(--text-main);
 
   span {
     white-space: nowrap;
@@ -214,7 +214,7 @@
 }
 .tabla__lista-ver-mas {
   font-size: 11px;
-  color: #163572;
+  color: var(--primary-color);
   font-weight: 600;
   cursor: pointer;
 
@@ -224,8 +224,8 @@
 }
 
 // sm - Columnas "Recursos" y "Observación": tampoco tenían estilo propio.
-.tabla__recursos { font-weight: 400; color: #4b5563; }
-.tabla__observacion { color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabla__recursos { font-weight: 400; color: var(--text-main); }
+.tabla__observacion { color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 // sm - Columna de acciones: centra el botón de menú en su celda (igual que col-acciones en Seguimiento).
 .tabla__acciones { display: flex; align-items: center; justify-content: center; }
@@ -238,64 +238,14 @@
   align-items: center;
   justify-content: flex-end;
   padding: 9px 12px 9px 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--pattern-border-color);
   border-top: 0;
   border-radius: 0 0 12px 12px;
-  background: #ffffff;
+  background: var(--pattern-panel-bg);
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
-// sm - Tema oscuro: mismos colores exactos que usa Seguimiento para su propia tabla en modo oscuro
-// (seguimiento.scss, bloque :host-context(html[data-theme="dark"])).
-:host-context(html[data-theme="dark"]) {
-  .table-scroll-container,
-  .table-wrapper {
-    background-color: #202124;
-    background: #202124;
-    border: 1px solid #3f3f46;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-
-  .lideres-table {
-    background-color: #202124;
-
-    thead, thead th {
-      background-color: #202124;
-      border-bottom: 2px solid #3f3f46;
-      color: #a1a1aa;
-    }
-
-    th.sortable:hover {
-      color: #60a5fa;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #3f3f46 !important;
-
-      &:hover {
-        background-color: #27272a !important;
-      }
-    }
-
-    td {
-      color: #ffffff;
-    }
-  }
-
-  .tabla__codigo,
-  .tabla__proyecto-nombre,
-  .tabla__cliente,
-  .tabla__recursos,
-  .tabla__observacion,
-  .tabla__lista-item,
-  .fecha-rango,
-  .fecha-rango mat-icon {
-    color: #ffffff;
-  }
-
-  .pagination-bar {
-    background-color: #202124;
-    border: 1px solid #3f3f46;
-    color: #a1a1aa;
-  }
-}
+.table-scroll-container { @include table-theme.table-shell; }
+.lideres-table { @include table-theme.data-table; }
+.pagination-bar { @include table-theme.table-pagination; }

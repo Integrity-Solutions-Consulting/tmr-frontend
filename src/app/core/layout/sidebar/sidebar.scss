@@ -153,6 +153,15 @@
 
 }
 
+:host-context(html[data-theme='dark']) .sidebar__link.active {
+  color: var(--accent-cian) !important;
+}
+
+:host-context(html[data-theme='dark']) .sidebar__sublink.active {
+  color: var(--accent-cian) !important;
+  background: var(--primary-light) !important;
+}
+
 /* ── Grupo colapsable ── */
 .sidebar__group {
   display: flex;

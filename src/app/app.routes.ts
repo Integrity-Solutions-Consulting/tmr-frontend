@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { authRoutes } from './features/auth/auth.routes';
 import { AppLayout } from './core/layout/app-layout/app-layout';
-import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -40,7 +39,14 @@ export const routes: Routes = [
       },
 
       // Proyectos
-      { path: 'proyectos', component: ProyectosPage, canActivate: [roleGuard] },
+      {
+        path: 'proyectos',
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/proyectos/paginas/proyectos-page/proyectos-page').then(
+            m => m.ProyectosPage
+          ),
+      },
 
       // Colaboradores
       {

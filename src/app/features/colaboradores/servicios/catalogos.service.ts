@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 // Lo que devuelve el backend para cada opción de dropdown.
@@ -51,21 +51,31 @@ export class CatalogosService {
   private readonly httpOptions = {
     withCredentials: true
   };
+  private readonly cache = new Map<string, { expiresAt: number; request$: Observable<unknown> }>();
+  private readonly cacheTtlMs = 5 * 60 * 1000;
+
+  private getCached<T>(key: string, factory: () => Observable<T>): Observable<T> {
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && cached.expiresAt > now) return cached.request$ as Observable<T>;
+
+    const request$ = factory().pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    this.cache.set(key, { expiresAt: now + this.cacheTtlMs, request$ });
+    return request$;
+  }
 
   // ── Catálogos genéricos para dropdowns ──
   // Códigos posibles: GEN, DEP, MDT, CAT, EMP, TCT
   getCatalogo(codigo: string): Observable<CatalogoItem[]> {
-    return this.http.get<CatalogoItem[]>(
-      `${this.apiUrl}/catalogos/${codigo}`,
-      this.httpOptions
+    return this.getCached(`catalogo:${codigo}`, () =>
+      this.http.get<CatalogoItem[]>(`${this.apiUrl}/catalogos/${codigo}`, this.httpOptions)
     );
   }
 
   // ── Cargos filtrados por departamento ──
   getCargosPorDepartamento(idDepartamento: number): Observable<CargoItem[]> {
-    return this.http.get<CargoItem[]>(
-      `${this.apiUrl}/cargos?idDepartamento=${idDepartamento}`,
-      this.httpOptions
+    return this.getCached(`cargos:${idDepartamento}`, () =>
+      this.http.get<CargoItem[]>(`${this.apiUrl}/cargos?idDepartamento=${idDepartamento}`, this.httpOptions)
     );
   }
 
@@ -73,17 +83,15 @@ export class CatalogosService {
   // ── Empleados para el ComboBox de recursos del proyecto ──
   // Debe leer de la tabla administracion.tbl_administracion_empleado.
   getEmpleados(): Observable<EmpleadoItem[]> {
-    return this.http.get<EmpleadoItem[]>(
-      `${this.administracionApiUrl}/empleados`,
-      this.httpOptions
+    return this.getCached('empleados', () =>
+      this.http.get<EmpleadoItem[]>(`${this.administracionApiUrl}/empleados`, this.httpOptions)
     );
   }
 
   // ── Cargos desde la tabla administracion.tbl_administracion_cargo.
   getCargos(): Observable<CargoItem[]> {
-    return this.http.get<CargoItem[]>(
-      `${this.administracionApiUrl}/cargos`,
-      this.httpOptions
+    return this.getCached('cargos', () =>
+      this.http.get<CargoItem[]>(`${this.administracionApiUrl}/cargos`, this.httpOptions)
     );
   }
 }

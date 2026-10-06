@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
 import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
@@ -156,17 +156,13 @@ export class LideresComponent implements OnInit {
   }
 
   obtenerLideresDelBackend(): void {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (lideres) => {
-        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
-          next: (proyectos) => {
-            this.procesarLideres(lideres, proyectos);
-          },
-          error: () => {
-            this.procesarLideres(lideres, []);
-          }
-        });
-      },
+    forkJoin({
+      lideres: this.http.get<any[]>(this.apiUrl),
+      proyectos: this.http.get<any[]>(`${environment.apiUrl}/proyectos`).pipe(
+        catchError(() => of([] as any[]))
+      )
+    }).subscribe({
+      next: ({ lideres, proyectos }) => this.procesarLideres(lideres, proyectos),
       error: (err) => {
         console.error('❌ Error al traer líderes:', err);
       }

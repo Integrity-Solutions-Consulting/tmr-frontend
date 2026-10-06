@@ -51,10 +51,31 @@
     font-weight: 600;
     box-shadow: none !important;
 
+    &:disabled {
+      cursor: wait;
+      opacity: .72;
+    }
+
     &:hover {
       background: var(--primary-hover) !important;
     }
   }
+}
+
+.proyecto-form__saving-spinner {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: -3px;
+  animation: proyecto-form-spin .7s linear infinite;
+}
+
+@keyframes proyecto-form-spin {
+  to { transform: rotate(360deg); }
 }
 
 .proyecto-form__subtitle {

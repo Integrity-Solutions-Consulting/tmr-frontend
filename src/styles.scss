@@ -24,49 +24,49 @@ mat-dialog-container,
 /* Resaltar el campo activo con borde azul para que sea
    identificable mientras la burbuja flota a la derecha */
 .shepherd-enabled.shepherd-target {
-  outline: 2px solid #163572 !important;
+  outline: 2px solid var(--primary-color) !important;
   outline-offset: 3px !important;
   border-radius: 8px !important;
-  box-shadow: 0 0 0 5px rgba(22, 53, 114, 0.12) !important;
+  box-shadow: var(--focus-ring-primary) !important;
   transition: outline 0.15s ease, box-shadow 0.15s ease !important;
   position: relative !important;
   z-index: 2 !important;
 }
 
-/* El popover con el diseño del proyecto: fondo blanco, borde, sombra */
+/* El popover conserva el tema activo mediante los tokens globales. */
 .shepherd-element.actividad-tour-step {
   z-index: 1000 !important;
   max-width: 280px !important;
   min-width: 240px !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--elevation-dropdown) !important;
   font-family: 'Inter', sans-serif !important;
   pointer-events: auto !important;
   margin-left: 10px !important;
-  border: 2px solid #163572 !important;
-  background: #ffffff !important;
+  border: 2px solid var(--primary-color) !important;
+  background: var(--pattern-panel-bg) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-content {
   border-radius: 12px !important;
   overflow: hidden !important;
-  background: #ffffff !important;
+  background: var(--pattern-panel-bg) !important;
   border: none !important;
 }
 
 /* Header: linea de acento azul a la izquierda, sin fondo de color */
 .shepherd-element.actividad-tour-step .shepherd-header {
-  background: #ffffff !important;
+  background: var(--pattern-panel-bg) !important;
   padding: 16px 16px 10px !important;
   display: flex !important;
   align-items: flex-start !important;
   justify-content: space-between !important;
-  border-bottom: 1px solid #E5E7EB !important;
+  border-bottom: 1px solid var(--pattern-border-color) !important;
   gap: 8px !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-title {
-  color: #163572 !important;
+  color: var(--text-title) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   margin: 0 !important;
@@ -74,7 +74,7 @@ mat-dialog-container,
 }
 
 .shepherd-element.actividad-tour-step .shepherd-cancel-icon {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   font-size: 16px !important;
   background: transparent !important;
   border: none !important;
@@ -86,15 +86,15 @@ mat-dialog-container,
 }
 
 .shepherd-element.actividad-tour-step .shepherd-cancel-icon:hover {
-  color: #163572 !important;
+  color: var(--primary-hover) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-text {
   padding: 12px 16px !important;
   font-size: 12px !important;
-  color: #5F6B7A !important;
+  color: var(--text-secondary) !important;
   line-height: 1.6 !important;
-  background: #ffffff !important;
+  background: var(--pattern-panel-bg) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-footer {
@@ -102,8 +102,8 @@ mat-dialog-container,
   display: flex !important;
   justify-content: flex-end !important;
   gap: 8px !important;
-  border-top: 1px solid #f1f5f9 !important;
-  background: #ffffff !important;
+  border-top: 1px solid var(--pattern-border-color) !important;
+  background: var(--pattern-panel-bg) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-button {
@@ -119,101 +119,49 @@ mat-dialog-container,
 
 /* boton primario que es igual que .actividad-modal__btn--save */
 .shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary) {
-  background: #163572 !important;
-  color: #ffffff !important;
+  background: var(--primary-color) !important;
+  color: var(--primary-text) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary):hover {
-  background: #0e244d !important;
+  background: var(--primary-hover) !important;
 }
 
 /* boton secundario del borde, fondo blanco, texto oscuro */
 .shepherd-element.actividad-tour-step .shepherd-button-secondary {
-  background: #ffffff !important;
-  color: #334155 !important;
-  border: 1.5px solid #E5E7EB !important;
+  background: var(--pattern-control-bg) !important;
+  color: var(--pattern-control-color) !important;
+  border: 1.5px solid var(--pattern-border-color) !important;
 }
 
 .shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
-  background: #f8fafc !important;
-  border-color: #163572 !important;
-  color: #163572 !important;
+  background: var(--pattern-table-header-bg) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
 }
 
 /* La flecha apunta al campo */
 .shepherd-element.actividad-tour-step .shepherd-arrow::before {
-  background: #ffffff !important;
-  border: 1.5px solid #E5E7EB !important;
+  background: var(--pattern-panel-bg) !important;
+  border: 1.5px solid var(--pattern-border-color) !important;
 }
 
-/* Modo oscuro del SHEPHERD.JS  */
-html[data-theme="dark"] .shepherd-element.actividad-tour-step {
-  background: #27272a !important;
-  border-color: #3f3f46 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+/* Shepherd se renderiza fuera del árbol encapsulado; estos selectores globales
+   usan los mismos tokens en ambos temas y evitan estilos claros residuales. */
+.shepherd-element.actividad-tour-step {
+  --shepherd-theme-primary: var(--primary-color);
 }
 
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-content {
-  background: #27272a !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-header {
-  background: #27272a !important;
-  border-bottom-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-title {
-  color: #60a5fa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-cancel-icon {
-  color: #71717a !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-cancel-icon:hover {
-  color: #e4e4e7 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-text {
-  background: #27272a !important;
-  color: #a1a1aa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-footer {
-  background: #27272a !important;
-  border-top-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary) {
-  background: #163572 !important;
-  color: #ffffff !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary {
-  background: #18181b !important;
-  color: #a1a1aa !important;
-  border-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
-  border-color: #60a5fa !important;
-  color: #60a5fa !important;
-}
-
-html[data-theme="dark"] .shepherd-element.actividad-tour-step .shepherd-arrow::before {
-  background: #27272a !important;
-  border-color: #3f3f46 !important;
-}
-
-html[data-theme="dark"] .shepherd-enabled.shepherd-target {
-  outline-color: #60a5fa !important;
-  box-shadow: 0 0 0 5px rgba(96, 165, 250, 0.18) !important;
+.shepherd-enabled.shepherd-target {
+  outline-color: var(--primary-color) !important;
+  box-shadow: var(--focus-ring-primary) !important;
 }
 
 html {
   height: 100%;
   @include mat.theme((
     color: (
+      theme-type: light,
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
@@ -222,10 +170,19 @@ html {
   ));
 }
 
+html[data-theme="dark"] {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+  ));
+}
+
 body {
-  color-scheme: light;
-  background-color: #f5f5f5;
-  color: #111827;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   font-family: 'Inter', sans-serif;
   margin: 0;
   height: 100%;
@@ -288,14 +245,30 @@ body {
   --status-warning-bg-solid: #f59e0b;
   --status-warning-bg-soft: #fef3c7;
   --status-warning-border: #fde68a;
+  --status-success: var(--status-success-bg-solid);
+  --status-warning: var(--status-warning-bg-solid);
+  --status-error: var(--status-danger-bg-solid);
   --elevation-card: 0 8px 24px rgba(17, 24, 39, .05);
   --elevation-dropdown: 0 4px 12px rgba(15, 23, 42, .12);
+  --elevation-modal: 0 20px 60px rgba(15, 23, 42, .18);
   --overlay-backdrop: rgba(15, 23, 42, .45);
   --accent-purple: #7c3aed;
   --accent-purple-bg: #f3e8ff;
   --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
   --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, .2);
+
+  /* Tokens semánticos compartidos por tablas, paneles y controles. */
+  --pattern-panel-bg: #ffffff;
+  --pattern-table-bg: #ffffff;
+  --pattern-table-header-bg: #f8f8f8;
+  --pattern-table-row-hover: #f0f1f3;
+  --pattern-control-bg: #ffffff;
+  --pattern-control-color: #1a1a2e;
+  --pattern-border-color: #d6e4f0;
+
 }
+
+html[data-theme="light"] { color-scheme: light; }
 
 * {
   box-sizing: border-box;
@@ -308,8 +281,6 @@ body {
 
 
 /* Estilos globales de TMR Frontend - Estructura Refactorizada */
-@import url('@angular/material/prebuilt-themes/indigo-pink.css');
-
 html,
 body {
   height: 100%;
@@ -318,8 +289,8 @@ body {
 }
 
 body {
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -568,9 +539,8 @@ body {
 /* BODY */
 
 body {
-  color-scheme: light;
-  background-color: #f5f5f5;
-  color: var(--mat-sys-on-surface);
+  background-color: var(--bg-app);
+  color: var(--text-main);
 
   font-family: 'Inter', 'Roboto', sans-serif;
   font-size: 14px;
@@ -701,6 +671,33 @@ html[data-theme="dark"] {
   --input-border: #333333;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
+
+  --pattern-panel-bg: var(--bg-card);
+  --pattern-table-bg: var(--bg-card);
+  --pattern-table-header-bg: var(--bg-surface);
+  --pattern-table-row-hover: var(--bg-hover);
+  --pattern-control-bg: var(--input-bg);
+  --pattern-control-color: var(--text-main);
+  --pattern-border-color: var(--border-default);
+
+  /* Estados sobre superficies oscuras: mismos significados, contraste legible. */
+  --status-success-text: #4ade80;
+  --status-success-bg-soft: rgba(34, 197, 94, .14);
+  --status-success-border: #166534;
+  --status-info-text: #60a5fa;
+  --status-info-bg-soft: rgba(59, 130, 246, .14);
+  --status-info-border: #1d4ed8;
+  --status-warning-text: #fbbf24;
+  --status-warning-bg-soft: rgba(245, 158, 11, .14);
+  --status-warning-border: #92400e;
+  --status-danger-text: #f87171;
+  --status-danger-bg-soft: rgba(239, 68, 68, .14);
+  --status-danger-border: #991b1b;
+  --elevation-card: 0 8px 24px rgba(0, 0, 0, .28);
+  --elevation-dropdown: 0 12px 30px rgba(0, 0, 0, .42);
+  --elevation-modal: 0 20px 60px rgba(0, 0, 0, .6);
+  --overlay-backdrop: rgba(0, 0, 0, .65);
+  --focus-ring-primary: 0 0 0 3px rgba(59, 130, 246, .22);
 
   /* â”€â”€ Layout principal, app container & fondos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   html,
@@ -3359,4 +3356,226 @@ html[data-theme="dark"] body::-webkit-scrollbar-thumb:hover,
 html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
   background: rgba(96, 165, 250, 0.65);
   background-clip: padding-box;
+}
+
+/* Ajustes de contraste exclusivos del dashboard ejecutivo. Reutilizan los
+   acentos existentes sin modificar la paleta global del tema oscuro. */
+html[data-theme="dark"] {
+  app-dashboard-ejecutivo app-header .header-title,
+  app-dashboard-ejecutivo .chip-corte,
+  app-dashboard-ejecutivo .aviso-fuera,
+  app-sidebar .sidebar__link.active {
+    color: var(--accent-cian) !important;
+  }
+
+  app-dashboard-ejecutivo .chip-corte {
+    background: var(--primary-light);
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-corporativo {
+    --acento: var(--accent-cian);
+    --icono-color: var(--accent-cian);
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-corporativo .tarjeta-icono {
+    color: var(--accent-cian) !important;
+    opacity: .28;
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-peligro .tarjeta-icono {
+    color: var(--status-danger-bg-solid) !important;
+    opacity: .28;
+  }
+}
+
+/* Patrones reutilizados por pantallas con estilos encapsulados antiguos.
+   !important se limita a estas superficies para que sus fondos literales no
+   ganen al token activo del tema; los componentes nuevos usan los tokens base. */
+html[data-theme] .filters-container,
+html[data-theme] .filters-card,
+html[data-theme] .filter-panel,
+html[data-theme] .table-scroll-container,
+html[data-theme] .pagination-bar {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--elevation-card) !important;
+}
+
+html[data-theme] .filters-container .filter-input,
+html[data-theme] .filters-container .filter-select,
+html[data-theme] .filters-card .filter-input,
+html[data-theme] .filters-card .filter-select,
+html[data-theme] .filter-panel input,
+html[data-theme] .filter-panel select {
+  background: var(--pattern-control-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--pattern-control-color) !important;
+}
+
+/* Contrato visual único de tablas. Estas reglas globales son intencionales:
+   Angular encapsula los SCSS de cada pantalla y varios estilos antiguos tienen
+   más especificidad; los tokens deben prevalecer en cualquier tabla/paginador. */
+html[data-theme] .table-scroll-container,
+html[data-theme] .table-wrapper,
+html[data-theme] .pagination-bar,
+html[data-theme] .paginacion {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme] table,
+html[data-theme] .mat-mdc-table {
+  background: var(--pattern-table-bg) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme] table thead,
+html[data-theme] table thead tr,
+html[data-theme] table thead th,
+html[data-theme] table th,
+html[data-theme] .mat-mdc-header-row,
+html[data-theme] .mat-mdc-header-cell {
+  background: var(--pattern-table-header-bg) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table tbody tr,
+html[data-theme] .mat-mdc-row {
+  background: var(--pattern-table-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table tbody tr:hover,
+html[data-theme] .mat-mdc-row:hover {
+  background: var(--pattern-table-row-hover) !important;
+}
+
+html[data-theme] table tbody td,
+html[data-theme] .mat-mdc-cell {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] .paginacion__btn:hover:not(:disabled):not(.paginacion__btn--activo) {
+  background: var(--pattern-table-row-hover) !important;
+}
+
+html[data-theme] .empty-state {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+}
+
+/* Encabezados de todas las tablas, incluidas las tablas nativas y Material.
+   Varias pantallas heredadas los declaran en blanco dentro de su componente. */
+html[data-theme] table thead,
+html[data-theme] table thead tr,
+html[data-theme] table thead th,
+html[data-theme] table th,
+html[data-theme] .mat-mdc-header-row,
+html[data-theme] .mat-mdc-header-cell,
+html[data-theme] [role="rowgroup"] [role="columnheader"] {
+  background-color: var(--pattern-table-header-bg) !important;
+  background: var(--pattern-table-header-bg) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table thead .sort-icon,
+html[data-theme] table thead mat-icon,
+html[data-theme] .mat-mdc-header-cell mat-icon {
+  color: var(--text-muted);
+}
+
+/* Badge de estado único para tablas, tarjetas y modales. Las clases locales
+   (.status-pill, .estado-badge y .badge-estado) conservan su semántica, pero
+   comparten exactamente la misma geometría y paleta. */
+html[data-theme] .status-badge,
+html[data-theme] .status-pill,
+html[data-theme] .estado-badge,
+html[data-theme] .badge-estado {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  gap: 7px !important;
+  min-height: 32px;
+  padding: 6px 14px !important;
+  border: 1px solid var(--status-success-border) !important;
+  border-radius: 999px !important;
+  background: var(--status-success-bg-soft) !important;
+  color: var(--status-success-text) !important;
+  font: 500 13px/1 'Inter', sans-serif !important;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+html[data-theme] .status-badge .status-dot,
+html[data-theme] .estado-badge .estado-dot,
+html[data-theme] .badge-estado .badge-circulo,
+html[data-theme] .status-pill::before {
+  content: '';
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px;
+  border-radius: 50%;
+  background: var(--status-success-bg-solid) !important;
+  display: inline-block;
+}
+
+html[data-theme] .status-badge.inactive,
+html[data-theme] .status-pill.status-pill--inactive,
+html[data-theme] .estado-badge.inactivo,
+html[data-theme] .badge-estado.badge-inactivo {
+  border-color: var(--border-soft) !important;
+  background: var(--bg-soft) !important;
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme] .status-badge.inactive .status-dot,
+html[data-theme] .estado-badge.inactivo .estado-dot,
+html[data-theme] .badge-estado.badge-inactivo .badge-circulo,
+html[data-theme] .status-pill.status-pill--inactive::before {
+  background: var(--text-muted) !important;
+}
+
+html[data-theme] .status-badge.progress,
+html[data-theme] .status-badge.approved,
+html[data-theme] .status-badge.planning,
+html[data-theme] .status-badge.development {
+  border-color: var(--status-info-border) !important;
+  background: var(--status-info-bg-soft) !important;
+  color: var(--status-info-text) !important;
+}
+
+html[data-theme] .status-badge.progress .status-dot,
+html[data-theme] .status-badge.approved .status-dot,
+html[data-theme] .status-badge.planning .status-dot,
+html[data-theme] .status-badge.development .status-dot {
+  background: var(--status-info-bg-solid) !important;
+}
+
+html[data-theme] .status-badge.waiting,
+html[data-theme] .status-badge.delayed {
+  border-color: var(--status-warning-border) !important;
+  background: var(--status-warning-bg-soft) !important;
+  color: var(--status-warning-text) !important;
+}
+
+html[data-theme] .status-badge.waiting .status-dot,
+html[data-theme] .status-badge.delayed .status-dot {
+  background: var(--status-warning-bg-solid) !important;
+}
+
+html[data-theme] .status-badge.cancelled {
+  border-color: var(--status-danger-border) !important;
+  background: var(--status-danger-bg-soft) !important;
+  color: var(--status-danger-text) !important;
+}
+
+html[data-theme] .status-badge.cancelled .status-dot {
+  background: var(--status-danger-bg-solid) !important;
 }

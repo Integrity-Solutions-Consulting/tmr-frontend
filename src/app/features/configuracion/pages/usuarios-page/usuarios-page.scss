@@ -1,5 +1,7 @@
 // ── Contenedor principal — ancho completo, sin tarjeta (igual que Seguimiento) ──
 
+@use '../../../../../styles/table-theme' as table-theme;
+
 .page {
   width: 100%;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -817,3 +819,6 @@
         border-color: var(--primary-color) !important;
     }
 }
+
+.table-wrapper { @include table-theme.table-shell; }
+.usuarios-table { @include table-theme.data-table; }

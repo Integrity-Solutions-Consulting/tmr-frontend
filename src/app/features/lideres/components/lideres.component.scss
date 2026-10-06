@@ -1,3 +1,5 @@
+@use '../../../../styles/table-theme' as table-theme;
+
 // sm - Contenedor a ancho completo, sin tarjeta/borde/tope de ancho: mismo criterio que Seguimiento
 // (el padding de la página lo pone el layout global, no cada página).
 .lideres-container {
@@ -224,9 +226,9 @@
 }
 
 .table-wrapper {
-  background: #ffffff;
+  background: var(--pattern-table-bg);
   border-radius: 12px 12px 0 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--pattern-border-color);
   overflow: auto;
   flex: 1;
   min-height: 0;
@@ -315,8 +317,8 @@
   }
 
   thead {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--pattern-table-header-bg);
+    border-bottom: 1px solid var(--pattern-border-color);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -325,10 +327,10 @@
       padding: 14px 10px;
       text-align: left;
       font-weight: 500;
-      color: #6b7280;
+      color: var(--text-secondary);
       font-size: 13px;
       white-space: normal;
-      background: #ffffff;
+      background: var(--pattern-table-header-bg);
       user-select: none;
       box-sizing: border-box;
 
@@ -353,7 +355,7 @@
         user-select: none;
 
         &:hover {
-          color: #163572;
+          color: var(--primary-color);
 
           .sort-icon {
             color: currentColor;
@@ -365,7 +367,7 @@
 
   tbody {
     tr {
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--pattern-border-color);
       transition: background 0.12s;
 
       &:last-child {
@@ -373,13 +375,13 @@
       }
 
       &:hover {
-        background: #f9fafb;
+        background: var(--pattern-table-row-hover);
       }
     }
 
     td {
       padding: 14px 10px;
-      color: #4b5563;
+      color: var(--text-main);
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
@@ -393,7 +395,7 @@
   width: 16px;
   height: 16px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
 }
@@ -479,8 +481,9 @@
   justify-content: space-between;
   padding: 9px 12px 9px 16px;
   flex-shrink: 0;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--pattern-panel-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--pattern-border-color);
   border-top: 0;
   border-radius: 0 0 12px 12px;
   margin-top: 0;
@@ -1062,3 +1065,7 @@
     color: #cbd5e1;
   }
 }
+
+.table-wrapper { @include table-theme.table-shell; }
+.lideres-table { @include table-theme.data-table; }
+.pagination-bar { @include table-theme.table-pagination; }

@@ -1,3 +1,5 @@
+@use '../../../../../../styles/table-theme' as table-theme;
+
 :host {
   display: block;
   width: 100%;
@@ -416,4 +418,7 @@
     font-size: 0.95rem;
   }
 }
+
+.donut-table-wrapper { @include table-theme.table-shell; }
+.donut-table { @include table-theme.data-table; }
 

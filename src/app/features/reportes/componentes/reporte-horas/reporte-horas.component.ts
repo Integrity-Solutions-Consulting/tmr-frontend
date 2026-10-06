@@ -49,7 +49,7 @@ export class ReporteHorasComponent {
   datos = signal<ReporteHoras[]>([]);
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       const cliente = this.busquedaCliente();
       const mes = this.mesSeleccionado();
       const anio = this.anioSeleccionado();
@@ -69,23 +69,31 @@ export class ReporteHorasComponent {
         anio: anio || undefined
       };
 
-      this.reportesService.getReporteHoras(filtros, page, pageSize).subscribe({
-        next: (res) => {
-          this.datos.set(res.data || []);
-          this.totalItems.set(res.total || 0);
+      let request: { unsubscribe(): void } | undefined;
+      const timer = window.setTimeout(() => {
+        request = this.reportesService.getReporteHoras(filtros, page, pageSize).subscribe({
+          next: (res) => {
+            this.datos.set(res.data || []);
+            this.totalItems.set(res.total || 0);
 
-          if (res.anioMinimo && res.anioMaximo) {
-            const min = res.anioMinimo;
-            const max = res.anioMaximo;
-            const nuevosAnios = Array.from({ length: max - min + 1 }, (_, i) => (min + i).toString());
-            if (this.anios.join(',') !== nuevosAnios.join(',')) {
-              this.anios = nuevosAnios;
+            if (res.anioMinimo && res.anioMaximo) {
+              const min = res.anioMinimo;
+              const max = res.anioMaximo;
+              const nuevosAnios = Array.from({ length: max - min + 1 }, (_, i) => (min + i).toString());
+              if (this.anios.join(',') !== nuevosAnios.join(',')) {
+                this.anios = nuevosAnios;
+              }
             }
+          },
+          error: (err) => {
+            console.error('Error al cargar reporte de horas:', err);
           }
-        },
-        error: (err) => {
-          console.error('Error al cargar reporte de horas:', err);
-        }
+        });
+      }, 250);
+
+      onCleanup(() => {
+        window.clearTimeout(timer);
+        request?.unsubscribe();
       });
     });
   }

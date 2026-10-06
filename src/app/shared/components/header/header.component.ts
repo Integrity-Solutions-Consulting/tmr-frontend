@@ -37,6 +37,9 @@ import { CommonModule } from '@angular/common';
         line-height: 1;
         margin: 0;
       }
+      :host-context(html[data-theme='dark']) .header-title {
+        color: var(--accent-cian) !important;
+      }
       .header-subtitle {
         color: #7c7c7c;
         font-size: 13px;
