@@ -1,4 +1,6 @@
 // ── Variables ──────────────────────────────────────────────────────────────
+@use '../../../../../styles/table-theme' as table-theme;
+
 $primary:       #163572;
 $primary-dark:  #162C56;
 $secondary:     #F5F5F5;
@@ -791,28 +793,28 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   .roles-table {
-    background-color: #202124 ;
+    background-color: var(--pattern-table-bg) ;
 
     thead {
-      background-color: #202124 ;
-      border-bottom-color: #3f3f46 ;
+      background-color: var(--pattern-table-header-bg) ;
+      border-bottom-color: var(--pattern-border-color) ;
 
       th {
-        background-color: #202124 ;
-        color: #a1a1aa ;
+        background-color: var(--pattern-table-header-bg) ;
+        color: var(--text-secondary) ;
       }
     }
 
     tbody {
       tr {
-        border-bottom-color: #3f3f46 ;
+        border-bottom-color: var(--pattern-border-color) ;
         &:hover {
-          background-color: rgba(255, 255, 255, 0.03) ;
+          background-color: var(--pattern-table-row-hover) ;
         }
       }
 
       td {
-        color: #e4e4e7 ;
+        color: var(--text-main) ;
       }
     }
   }
@@ -844,3 +846,6 @@ $hover-row:     rgba(#163572, 0.04);
     background-color: transparent ;
   }
 }
+
+.table-wrapper { @include table-theme.table-shell; }
+.roles-table { @include table-theme.data-table; }

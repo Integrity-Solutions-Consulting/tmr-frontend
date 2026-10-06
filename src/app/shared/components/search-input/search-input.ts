@@ -21,10 +21,11 @@ import { FormsModule } from '@angular/forms';
     </div>
   `,
   styles: [`
-    .search-input { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0 14px; height: 40px; min-width: 220px; }
-    .search-input__icon { color: #94a3b8; flex-shrink: 0; }
-    .search-input__field { border: none; outline: none; font-size: 14px; color: #475569; background: transparent; width: 100%; }
-    .search-input__field::placeholder { color: #cbd5e1; }
+    .search-input { display: flex; align-items: center; gap: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 0 14px; height: 40px; min-width: 220px; color: var(--text-main); transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease; }
+    .search-input:focus-within { border-color: var(--primary-color); box-shadow: var(--focus-ring-primary); }
+    .search-input__icon { color: var(--icon-color); flex-shrink: 0; }
+    .search-input__field { border: none; outline: none; font: inherit; font-size: 14px; color: var(--text-main); background: transparent; width: 100%; }
+    .search-input__field::placeholder { color: var(--text-muted); opacity: 1; }
   `]
 })
 export class SearchInput {

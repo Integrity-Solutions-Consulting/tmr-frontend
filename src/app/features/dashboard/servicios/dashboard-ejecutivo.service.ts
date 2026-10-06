@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   DashboardEjecutivo,
@@ -16,9 +16,13 @@ import {
 export class DashboardEjecutivoService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/dashboard`;
+  private filtrosCache$?: Observable<DashboardFiltrosOpciones>;
 
   getFiltros(): Observable<DashboardFiltrosOpciones> {
-    return this.http.get<DashboardFiltrosOpciones>(`${this.apiUrl}/ejecutivo/filtros`);
+    this.filtrosCache$ ??= this.http
+      .get<DashboardFiltrosOpciones>(`${this.apiUrl}/ejecutivo/filtros`)
+      .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    return this.filtrosCache$;
   }
 
   getDashboard(filtros: DashboardFiltros): Observable<DashboardEjecutivo> {

@@ -1,3 +1,5 @@
+@use '../../../../../styles/table-theme' as table-theme;
+
 // sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
 // pone el layout global, no cada página).
 .clientes-container {
@@ -186,8 +188,8 @@ Tabla
 .tabla-wrap {
   position: relative;
   z-index: 1;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--pattern-table-bg);
+  border: 1px solid var(--pattern-border-color);
   border-radius: 12px 12px 0 0;
   overflow-x: auto;
 }
@@ -214,8 +216,8 @@ Tabla
 }
 
 thead tr {
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--pattern-table-header-bg);
+  border-bottom: 1px solid var(--pattern-border-color);
 }
 
 th {
@@ -223,9 +225,9 @@ th {
   text-align: left;
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   white-space: normal;
-  background: #ffffff;
+  background: var(--pattern-table-header-bg);
   line-height: 1.2;
   box-sizing: border-box;
   user-select: none;
@@ -251,7 +253,7 @@ th {
     user-select: none;
 
     &:hover {
-      color: #163572;
+      color: var(--primary-color);
 
       .sort-icon {
         color: currentColor;
@@ -264,13 +266,13 @@ th {
   width: 16px;
   height: 16px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
 }
 
 tbody tr {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--pattern-border-color);
   transition: background 0.12s;
 
   &:last-child {
@@ -278,14 +280,14 @@ tbody tr {
   }
 
   &:hover {
-    background: #f9fafb;
+    background: var(--pattern-table-row-hover);
   }
 }
 
 td {
   padding: 14px 10px;
   font-size: 13px;
-  color: #4b5563;
+  color: var(--text-main);
   font-weight: 400;
   vertical-align: middle;
   white-space: nowrap;
@@ -295,16 +297,16 @@ td {
 
 .td-codigo {
   font-weight: 400;
-  color: #4b5563;
+  color: var(--text-main);
 }
 
 .td-nombre {
   font-weight: 400;
-  color: #4b5563;
+  color: var(--text-main);
 }
 
 .td-email {
-  color: #4b5563;
+  color: var(--text-main);
   font-size: 13px;
 }
 
@@ -816,6 +818,10 @@ app-paginacion {
   border-radius: 0 0 12px 12px;
   padding: 9px 12px 9px 16px;
 }
+
+.tabla-wrap { @include table-theme.table-shell; }
+.tabla { @include table-theme.data-table; }
+app-paginacion { @include table-theme.table-pagination; }
 
 // sm - Tema oscuro: mismo color exacto que usa Seguimiento para sus labels de filtro en modo oscuro.
 :host-context(html[data-theme="dark"]) {

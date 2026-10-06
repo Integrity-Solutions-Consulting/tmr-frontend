@@ -129,6 +129,19 @@
   transition: transform 0.25s ease;
 }
 
+:host-context(html[data-theme='dark']) .tarjeta.tono-corporativo {
+  --acento: var(--accent-cian);
+  --icono-color: var(--accent-cian);
+
+  .tarjeta-icono {
+    opacity: .28;
+  }
+}
+
+:host-context(html[data-theme='dark']) .tarjeta.tono-peligro .tarjeta-icono {
+  opacity: .28;
+}
+
 .tarjeta-pie {
   position: relative;
   z-index: 1;

@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use '../../../styles/table-theme' as table-theme;
 
 .dashboard-container {
   padding: 2rem;
@@ -138,8 +139,8 @@
 } /* ============================================================ TABLE SCROLL ============================================================ */
 // sm - Mismos colores exactos que Seguimiento (no tokens var(--...) que podían resolver a un tono distinto).
 .table-scroll-container {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--pattern-table-bg);
+  border: 1px solid var(--pattern-border-color);
   border-radius: 12px 12px 0 0;
   overflow: auto;
   box-shadow: none;
@@ -151,9 +152,7 @@
   width: 100%;
   min-height: 0;
 } /* ============================================================ TABLA ============================================================ */
-// sm - Mismo estilo y dimensiones que la tabla de Seguimiento: table-layout:fixed, encabezado blanco pegajoso
-// con texto gris (#6b7280), filas con texto gris oscuro (#4b5563) y separador suave (#f3f4f6), hover gris
-// clarito (#f9fafb). Colores exactos (no tokens var(--...) que podían resolver a un tono distinto).
+// La tabla comparte la paleta de superficies y estados del tema activo.
 .data-table {
   width: 100%;
   min-width: 960px;
@@ -164,8 +163,8 @@
   font-family:
     'Inter', sans-serif; /* ---------------------------------------------------------- HEADER ---------------------------------------------------------- */
   thead {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--pattern-table-header-bg);
+    border-bottom: 1px solid var(--pattern-border-color);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -173,10 +172,10 @@
       padding: 14px 10px;
       text-align: left;
       font-weight: 500;
-      color: #6b7280;
+      color: var(--text-secondary);
       font-size: 13px;
       white-space: normal;
-      background: #ffffff;
+      background: var(--pattern-table-header-bg);
       user-select: none;
       box-sizing: border-box;
 
@@ -203,7 +202,7 @@
         user-select: none;
 
         &:hover {
-          color: #163572;
+          color: var(--primary-color);
 
           .sort-icon {
             color: currentColor;
@@ -214,22 +213,22 @@
   } /* ---------------------------------------------------------- BODY ---------------------------------------------------------- */
   tbody {
     tr {
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--pattern-border-color);
       transition: background 0.12s ease;
       cursor: pointer;
       &:last-child {
         border-bottom: none;
       }
       &:hover {
-        background: #f9fafb;
+        background: var(--pattern-table-row-hover);
       }
       &.selected-row {
-        background: #f3f4f6;
+        background: var(--pattern-table-row-hover);
       }
     }
     td {
       padding: 14px 10px;
-      color: #4b5563;
+      color: var(--text-main);
       font-weight: 400;
       vertical-align: middle;
       white-space: nowrap;
@@ -333,7 +332,7 @@
   width: 16px;
   height: 16px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
 } /* ============================================================ PAGINACIÓN - COMPONENTE ============================================================ */
@@ -475,8 +474,8 @@
 // sm - Mismo recuadro que el pie de tabla de Seguimiento: mismo borde/radio/padding, colores exactos.
 app-paginacion {
   display: block;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--pattern-panel-bg);
+  border: 1px solid var(--pattern-border-color);
   border-top: 0;
   border-radius: 0 0 12px 12px;
   padding: 9px 12px 9px 16px;
@@ -921,4 +920,8 @@ app-paginacion {
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+
+.table-scroll-container { @include table-theme.table-shell; }
+.data-table { @include table-theme.data-table; }
+.pagination-bar { @include table-theme.table-pagination; }
 

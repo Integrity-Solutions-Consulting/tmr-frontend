@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, shareReplay } from 'rxjs';
 import { Proyecto, ProyectoLookups, LookupOption } from '../modelos/proyecto.model';
 import { environment } from '../../../../environments/environment';
 
@@ -10,6 +10,8 @@ import { environment } from '../../../../environments/environment';
 export class ProyectosService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/proyectos`;
+  private lookupsCache?: { expiresAt: number; request$: Observable<ProyectoLookups> };
+  private readonly lookupsTtlMs = 5 * 60 * 1000;
 
   private construirPayload(proyecto: Proyecto): any {
     const fmt = (f: any) => this.formatearFechaCreacion(f);
@@ -40,6 +42,7 @@ export class ProyectosService {
       Presupuesto: proyecto.presupuesto ?? null,
       Horas: proyecto.horas ?? null,
       Observacion: proyecto.observacion ?? null,
+      FechaInicioReal: fmt(proyecto.fechaInicioReal),
       FechaFinReal: fmt(proyecto.fechaFinReal),
       FechaInicioEspera: fmt(proyecto.fechaInicioEspera),
       FechaFinEspera: fmt(proyecto.fechaFinEspera),
@@ -73,7 +76,16 @@ export class ProyectosService {
   }
 
   obtenerLookups(): Observable<ProyectoLookups> {
-    return this.http.get<ProyectoLookups>(`${this.apiUrl}/lookups`);
+    const now = Date.now();
+    if (!this.lookupsCache || this.lookupsCache.expiresAt <= now) {
+      this.lookupsCache = {
+        expiresAt: now + this.lookupsTtlMs,
+        request$: this.http.get<ProyectoLookups>(`${this.apiUrl}/lookups`).pipe(
+          shareReplay({ bufferSize: 1, refCount: false })
+        )
+      };
+    }
+    return this.lookupsCache.request$;
   }
 
   obtenerClientes(): Observable<LookupOption[]> {

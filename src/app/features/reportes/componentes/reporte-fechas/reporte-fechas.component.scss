@@ -40,9 +40,10 @@
   align-items: flex-end;
   gap: 16px;
   padding: 16px 20px;
-  background-color: #ffffff;
+  background-color: var(--pattern-panel-bg);
+  border: 1px solid var(--pattern-border-color);
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--elevation-card);
 }
 
 .filter-group {
@@ -60,7 +61,7 @@
   font-size: 11px;
   text-transform: uppercase;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-muted);
   letter-spacing: 0.05em;
   margin-bottom: 8px;
   margin-left: 4px;
@@ -74,46 +75,46 @@
   position: relative;
 
   &:focus-within .filter-icon {
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
 .filter-input {
   width: 100%;
   padding: 10px 16px;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--pattern-control-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
   outline: none;
   font-size: 14px;
   font-weight: 500;
-  color: #1e293b;
+  color: var(--pattern-control-color);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
   box-sizing: border-box;
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 1px #163572;
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 
   &::placeholder {
-    color: #94a3b8 !important;
+    color: var(--text-muted) !important;
     opacity: 1 !important;
   }
   &::-webkit-input-placeholder {
-    color: #94a3b8 !important;
+    color: var(--text-muted) !important;
     opacity: 1 !important;
   }
   &::-moz-placeholder {
-    color: #94a3b8 !important;
+    color: var(--text-muted) !important;
     opacity: 1 !important;
   }
 }
 
 .filter-input[type="date"] {
-  color: #1e293b !important;
+  color: var(--pattern-control-color) !important;
 }
 
 .filter-input::-webkit-calendar-picker-indicator {
@@ -134,7 +135,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--text-secondary);
   transition: color 0.2s;
 }
 
@@ -220,6 +221,9 @@
 .empty-state {
   padding: 96px;
   text-align: center;
+  border: 1px solid var(--pattern-border-color);
+  border-radius: 12px;
+  background: var(--pattern-panel-bg);
 }
 
 .empty-content {

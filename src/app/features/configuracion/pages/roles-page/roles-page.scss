@@ -1,5 +1,7 @@
 // ── Layout general — ancho completo, sin tarjeta (igual que Seguimiento) ───
 
+@use '../../../../../styles/table-theme' as table-theme;
+
 .page {
   width: 100%;
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -7,6 +9,7 @@
   flex-direction: column;
   gap: 16px;
 }
+
 
 // ── Barra de búsqueda ──────────────────────────────────────────────────────
 
@@ -505,6 +508,38 @@
   border-color: var(--border-soft);
 }
 
+/* En oscuro, los nombres y chips no usan el azul institucional profundo como
+   texto: sobre superficies oscuras pierde contraste. Se conserva la misma
+   jerarquía del tema claro usando los acentos ya definidos en la paleta. */
+:host-context(html[data-theme="dark"]) {
+  .roles-table .role-name {
+    color: var(--accent-cian);
+  }
+
+  .roles-table .module-chip {
+    color: var(--accent-cian);
+    background: var(--bg-soft);
+    border-color: var(--border-soft);
+  }
+
+  .roles-table .module-chip--more {
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border-color: var(--border-soft);
+  }
+
+  .roles-table .module-chip--more-active {
+    color: var(--accent-cian);
+    background: var(--primary-light);
+    border-color: var(--accent-cian);
+  }
+
+  .roles-table .module-expand-list {
+    background: var(--bg-surface);
+    border-color: var(--border-soft);
+  }
+}
+
 @keyframes expandIn {
   from {
     opacity: 0;
@@ -572,6 +607,9 @@
   text-align: center !important;
   font-style: italic;
 }
+
+.table-wrapper { @include table-theme.table-shell; }
+.roles-table { @include table-theme.data-table; }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
 

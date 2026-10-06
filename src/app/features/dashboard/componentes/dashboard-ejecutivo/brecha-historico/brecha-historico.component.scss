@@ -1,3 +1,4 @@
+@use '../../../../../../styles/table-theme' as table-theme;
 @use '../dashboard-comun' as comun;
 
 // sm - Bloque "Brecha y recurrencia / Histórico de cumplimiento" del Dashboard ejecutivo (sección 7.2 y RF 15).
@@ -333,3 +334,5 @@
   background: var(--primary-light);
   color: var(--accent-cian);
 }
+
+.tabla-brecha { @include table-theme.data-table; }

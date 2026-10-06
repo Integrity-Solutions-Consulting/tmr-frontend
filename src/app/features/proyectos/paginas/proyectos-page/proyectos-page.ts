@@ -1,4 +1,5 @@
 import { Component, inject, OnDestroy } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Store } from '@ngrx/store';
@@ -183,9 +184,9 @@ export class ProyectosPage implements OnDestroy {
     // sm - Antes esto solo hacía console.error: el usuario no se enteraba de nada si fallaba (el modal
     // quedaba abierto, pero sin ningún aviso). Se recicla el mismo popup (PopupService) que usa Seguimiento
     // para que el estilo sea igual en toda la app.
-    const handleError = (mensaje: string) => (error: any): void => {
-      console.error(mensaje, error);
-      void this.popup.show('error', 'No se pudo guardar', `${mensaje}. Intenta nuevamente.`);
+    const handleError = (error: unknown): void => {
+      const feedback = this.obtenerFeedbackGuardado(error);
+      void this.popup.show('error', feedback.titulo, feedback.mensaje);
     };
 
     if (this.proyectoSeleccionado) {
@@ -197,11 +198,12 @@ export class ProyectosPage implements OnDestroy {
           if (response.status === 200 || response.status === 204) {
             this.store.dispatch(cargarProyectos());
             this.cerrarModalCrear();
+            void this.popup.show('check_circle', 'Proyecto actualizado', 'Los cambios se guardaron correctamente.', true);
           } else {
-            handleError('No se pudo actualizar el proyecto')(response);
+            handleError(response);
           }
         },
-        error: handleError('No se pudo actualizar el proyecto')
+        error: handleError
       });
     } else {
       this.proyectosService.crearProyecto(proyecto).pipe(
@@ -213,12 +215,79 @@ export class ProyectosPage implements OnDestroy {
             this.cerrarModalCrear();
             this.mostrarSuccessCrear();
           } else {
-            handleError('No se pudo crear el proyecto')(response);
+            handleError(response);
           }
         },
-        error: handleError('No se pudo crear el proyecto')
+        error: handleError
       });
     }
+  }
+
+  private obtenerFeedbackGuardado(error: unknown): { titulo: string; mensaje: string } {
+    if (!(error instanceof HttpErrorResponse)) {
+      return {
+        titulo: 'No se pudo guardar',
+        mensaje: 'Ocurrió un problema inesperado. Revisa los datos e intenta nuevamente.'
+      };
+    }
+
+    if (error.status === 0) {
+      return {
+        titulo: 'Sin conexión con el servidor',
+        mensaje: 'No se pudo completar la operación. Verifica tu conexión e intenta nuevamente.'
+      };
+    }
+
+    if (error.status === 400 || error.status === 422) {
+      return {
+        titulo: 'Información inválida',
+        mensaje: this.obtenerMensajeBackend(error) ?? 'No se pudo guardar porque existen datos inválidos o incompletos.'
+      };
+    }
+
+    if (error.status === 401) {
+      return {
+        titulo: 'Sesión no válida',
+        mensaje: 'Tu sesión expiró o ya no es válida. Inicia sesión nuevamente.'
+      };
+    }
+
+    if (error.status === 403) {
+      return {
+        titulo: 'Acción no permitida',
+        mensaje: 'No tienes permisos para editar este proyecto.'
+      };
+    }
+
+    if (error.status === 404) {
+      return {
+        titulo: 'Proyecto no encontrado',
+        mensaje: 'El proyecto que intentas editar ya no existe o fue eliminado.'
+      };
+    }
+
+    if (error.status === 409) {
+      return {
+        titulo: 'No se pudo aplicar el cambio',
+        mensaje: this.obtenerMensajeBackend(error) ?? 'Los datos entran en conflicto con información existente.'
+      };
+    }
+
+    return {
+      titulo: 'No se pudo guardar',
+      mensaje: 'Ocurrió un problema al comunicarse con el servidor. Intenta nuevamente.'
+    };
+  }
+
+  private obtenerMensajeBackend(error: HttpErrorResponse): string | null {
+    const contenido = error.error;
+    const mensaje = typeof contenido === 'string'
+      ? contenido
+      : contenido?.message ?? contenido?.mensaje ?? contenido?.title;
+
+    if (typeof mensaje !== 'string') return null;
+    const limpio = mensaje.replace(/<[^>]*>/g, '').trim();
+    return limpio && limpio.length <= 240 ? limpio : null;
   }
 
   private mostrarSuccessCrear(): void {

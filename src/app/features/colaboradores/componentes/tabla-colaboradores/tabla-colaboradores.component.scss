@@ -1,10 +1,12 @@
+@use '../../../../../styles/table-theme' as table-theme;
+
 .tabla-wrapper {
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
-  background: #ffffff;
+  background: var(--pattern-table-bg);
   border-radius: 12px 12px 0 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--pattern-border-color);
 }
 
 // sm - Mismas dimensiones que la tabla de Seguimiento (table-layout:fixed, columnas en %, padding 14px 10px,
@@ -31,8 +33,8 @@
   th:nth-child(8), td:nth-child(8) { width: 7%; }
 
   &__head {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--pattern-table-header-bg);
+    border-bottom: 1px solid var(--pattern-border-color);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -43,10 +45,10 @@
     text-align: left;
     font-size: 13px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     white-space: normal;
     user-select: none;
-    background: #ffffff;
+    background: var(--pattern-table-header-bg);
     line-height: 1.2;
     box-sizing: border-box;
 
@@ -71,7 +73,7 @@
       user-select: none;
 
       &:hover {
-        color: #163572;
+        color: var(--primary-color);
 
         .sort-icon {
           color: currentColor;
@@ -89,7 +91,7 @@
   }
 
   &__row {
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--pattern-border-color);
     transition: background 0.12s;
 
     &:last-child {
@@ -97,7 +99,7 @@
     }
 
     &:hover {
-      background: #f9fafb;
+      background: var(--pattern-table-row-hover);
     }
 
     &--skeleton {
@@ -108,7 +110,7 @@
   &__td {
     padding: 14px 10px;
     font-size: 13px;
-    color: #4b5563;
+    color: var(--text-main);
     font-weight: 400;
     vertical-align: middle;
     white-space: nowrap;
@@ -237,7 +239,7 @@
   width: 16px;
   height: 16px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
 }
@@ -275,4 +277,7 @@
     transform: translateY(0);
   }
 }
+
+.tabla-wrapper { @include table-theme.table-shell; }
+.tabla { @include table-theme.data-table; }
 
