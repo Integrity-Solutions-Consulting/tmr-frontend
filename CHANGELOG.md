@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.0...v3.0.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* Último acto de amor, correcion de pops en proeyctos y optimisación de flujo de peteciones al back, pretty boy, dirty boy ([a74b72a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a74b72a0effb99b05743e71a6c97832e85247e91))
+
 ## [3.0.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v2.0.0...v3.0.0) (2026-10-04)
 
 
