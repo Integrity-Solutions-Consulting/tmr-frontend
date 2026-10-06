@@ -1,3 +1,5 @@
+@use '../../../../../styles/table-theme' as table-theme;
+
 // sm - Contenedor a ancho completo, sin tarjeta/borde/tope de ancho: mismo criterio que Seguimiento
 // (el padding de la página lo pone el layout global, no cada página).
 .proyectos-container {
@@ -161,3 +163,4 @@
 .proyecto-detalle__table th, .proyecto-detalle__table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-default); font-size: 13px; }
 .proyecto-detalle__table th { background: var(--bg-surface); color: var(--text-subtle); font-weight: 600; }
 .proyecto-detalle__table tr:last-child td { border-bottom: none; }
+.proyecto-detalle__table table { @include table-theme.data-table; }

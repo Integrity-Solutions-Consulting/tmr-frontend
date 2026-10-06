@@ -696,7 +696,8 @@ export class SeguimientoComponent implements AfterViewInit {
             data: { colaborador: col },
             width: '900px',
             maxHeight: '90vh',
-            panelClass: 'tmr-dialog-panel'
+            panelClass: 'tmr-dialog-panel',
+            disableClose: true
         });
     }
 

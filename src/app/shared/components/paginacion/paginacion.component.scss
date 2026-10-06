@@ -53,7 +53,7 @@
     .material-icons { font-size: 14px; }
 
     &:hover:not(:disabled):not(.paginacion__btn--activo) {
-      background: #f5f5f5;
+      background: var(--pattern-table-row-hover);
       border-color: var(--border-soft);
       color: var(--primary-color);
     }

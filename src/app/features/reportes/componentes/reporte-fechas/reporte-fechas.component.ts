@@ -44,7 +44,7 @@ export class ReporteFechasComponent {
   datos = signal<ReporteFechas[]>([]);
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       // Signals we depend on
       const cliente = this.busquedaCliente();
       const lider = this.busquedaLider();
@@ -67,14 +67,22 @@ export class ReporteFechasComponent {
         fechaFin: fFin ? fFin + 'T23:59:59' : undefined
       };
 
-      this.reportesService.getReporteFechas(filtros, page, pageSize).subscribe({
-        next: (res) => {
-          this.datos.set(res.data || []);
-          this.totalItems.set(res.total || 0);
-        },
-        error: (err) => {
-          console.error('Error al cargar reporte de fechas:', err);
-        }
+      let request: { unsubscribe(): void } | undefined;
+      const timer = window.setTimeout(() => {
+        request = this.reportesService.getReporteFechas(filtros, page, pageSize).subscribe({
+          next: (res) => {
+            this.datos.set(res.data || []);
+            this.totalItems.set(res.total || 0);
+          },
+          error: (err) => {
+            console.error('Error al cargar reporte de fechas:', err);
+          }
+        });
+      }, 250);
+
+      onCleanup(() => {
+        window.clearTimeout(timer);
+        request?.unsubscribe();
       });
     });
   }

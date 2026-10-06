@@ -1,3 +1,4 @@
+@use '../../../../../styles/table-theme' as table-theme;
 @use 'dashboard-comun' as comun;
 
 // sm - Dashboard ejecutivo con disposición "resumen arriba" (inspirada en AdminLTE: small-box de color, medidor y
@@ -947,3 +948,4 @@
   }
 
 }
+.tabla-detalle { @include table-theme.data-table; }

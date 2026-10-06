@@ -402,7 +402,8 @@
 
   <!-- ── Acciones ──────────────────────────────────────────────────────── -->
   <div class="proyecto-form__actions">
-    <button mat-flat-button type="submit" [disabled]="guardando">
+    <button mat-flat-button type="submit" [disabled]="guardando" [attr.aria-busy]="guardando">
+      <span *ngIf="guardando" class="proyecto-form__saving-spinner" aria-hidden="true"></span>
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>
