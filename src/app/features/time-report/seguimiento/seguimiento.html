@@ -190,6 +190,10 @@
                                 title="Ver detalle" aria-label="Ver detalle">
                                 <mat-icon>visibility</mat-icon>
                             </button>
+                            <button class="action-btn" type="button" (click)="notificarColaborador(el)"
+                                title="Notificar Colaborador" aria-label="Notificar colaborador">
+                                <mat-icon>notifications_active</mat-icon>
+                            </button>
                         </td>
                     </tr>
                     <tr *ngIf="totalRegistros === 0">
