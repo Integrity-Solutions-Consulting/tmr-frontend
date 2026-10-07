@@ -1,3 +1,4 @@
+@use '../../../../../styles/ui-patterns' as ui;
 @use "sass:color";
 
 /* ── Contenedor principal ──────────────────────────────────────── */
@@ -24,14 +25,7 @@
 
 /* ── Header ───────────────────────────────────────────────────── */
 .actividad-modal__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 24px var(--modal-padding-x) 16px;
-  border-bottom: 1px solid var(--border-default);
-  flex-shrink: 0;
-  box-sizing: border-box;
+  @include ui.modal-header;
 }
 
 .actividad-modal__header-text {
@@ -62,18 +56,11 @@
 }
 
 .actividad-modal__title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-title);
-  line-height: 1.2;
+  @include ui.modal-title;
 }
 
 .actividad-modal__subtitle {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
+  @include ui.modal-subtitle;
 }
 
 .actividad-modal__header-actions {
@@ -85,46 +72,7 @@
 
 .actividad-modal__help,
 .actividad-modal__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1.5px solid var(--border-soft);
-  border-radius: 12px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  cursor: pointer;
-  //transition: all 0.15s ease;
-  flex-shrink: 0;
-  margin-top: 2px;
-
-  mat-icon,
-  img {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover {
-    background: var(--bg-hover);
-    border-color: var(--primary-hover);
-    color: var(--primary-hover);
-  }
-}
-
-.actividad-modal__help {
-  color: var(--text-secondary);
-
-  &:hover {
-    background: var(--status-info-bg-soft);
-    border-color: var(--primary-hover);
-    color: var(--primary-hover);
-  }
-}
-
-.actividad-modal__close {
-  color: var(--text-secondary);
+  @include ui.modal-close;
 }
 
 /* ── Body ─────────────────────────────────────────────────────── */
@@ -236,9 +184,14 @@
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: var(--text-muted);
+  color: var(--text-main);
   flex-shrink: 0;
   margin-top: 2px;
+}
+
+// Los SVG en <img> no heredan color: se fuerzan a negro igual que los mat-icon.
+img.actividad-modal__input-icon {
+  filter: brightness(0);
 }
 
 .actividad-modal__input {
@@ -565,7 +518,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--text-muted);
+    color: var(--text-main);
 
      .mat-mdc-icon-button,
     button.mat-mdc-icon-button {

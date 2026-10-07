@@ -13,74 +13,142 @@
   <!-- ===== FILTROS GLOBALES (RF 01): siempre visibles junto a la fecha de corte ===== -->
   <div class="filtros-sticky">
     <div class="filters-card">
-      <div class="filter-group filtro-corto">
-        <label class="filter-label" for="f-anio">Año</label>
-        <select id="f-anio" class="filter-input" [ngModel]="filtros().anio"
-          (ngModelChange)="actualizarFiltro('anio', +$event)">
-          @for (a of anios; track a) {
-            <option [ngValue]="a">{{ a }}</option>
-          }
-        </select>
+      <div class="filter-group filter-group--desplegable filtro-corto" (click)="toggleFiltro('anio', $event)">
+        <label class="filter-label">Año</label>
+        <div class="filter-input-wrapper">
+          <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'anio'">
+            <span class="filter-trigger-texto">{{ etiquetaFiltro('anio') }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+          </div>
+        </div>
+        @if (filtroAbierto() === 'anio') {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (a of anios; track a) {
+            <div class="dropdown-opcion" (click)="elegirFiltro('anio', a, $event)">
+              <div class="dropdown-checkbox" [class.checked]="filtros().anio === a">
+                @if (filtros().anio === a) {
+                  <span class="material-icons">check</span>
+                }
+              </div>
+              <span class="opcion-label">{{ a }}</span>
+            </div>
+            }
+          </div>
+        }
       </div>
 
-      <div class="filter-group filtro-corto">
-        <label class="filter-label" for="f-mes">Mes</label>
-        <select id="f-mes" class="filter-input" [ngModel]="filtros().mes"
-          (ngModelChange)="actualizarFiltro('mes', +$event)">
-          @for (m of meses; track $index) {
-            <option [ngValue]="$index + 1" [disabled]="mesDeshabilitado($index + 1)">{{ m }}</option>
-          }
-        </select>
+      <div class="filter-group filter-group--desplegable filtro-corto" (click)="toggleFiltro('mes', $event)">
+        <label class="filter-label">Mes</label>
+        <div class="filter-input-wrapper">
+          <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'mes'">
+            <span class="filter-trigger-texto">{{ etiquetaFiltro('mes') }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+          </div>
+        </div>
+        @if (filtroAbierto() === 'mes') {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (m of meses; track $index) {
+            <div class="dropdown-opcion" [class.dropdown-opcion--deshabilitada]="mesDeshabilitado($index + 1)" (click)="!mesDeshabilitado($index + 1) && elegirFiltro('mes', $index + 1, $event)">
+              <div class="dropdown-checkbox" [class.checked]="filtros().mes === $index + 1">
+                @if (filtros().mes === $index + 1) {
+                  <span class="material-icons">check</span>
+                }
+              </div>
+              <span class="opcion-label">{{ m }}</span>
+            </div>
+            }
+          </div>
+        }
       </div>
 
       <div class="filter-group">
         <label class="filter-label" for="f-cliente">Cliente</label>
-        <input id="f-cliente" type="text" class="filter-input" placeholder="Todos los clientes"
-          [ngModel]="clienteTexto()" (ngModelChange)="onClienteTextoChange($event)"
-          [matAutocomplete]="autoCliente" autocomplete="off" />
-        <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event)"
-          (closed)="onClientePanelCerrado()">
-          <mat-option [value]="null">Todos los clientes</mat-option>
-          @for (c of clientesFiltrados(); track c.id) {
-            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+        <div class="filter-input-wrapper">
+          <span class="material-symbols-outlined filter-icon">search</span>
+          <input id="f-cliente" type="text" class="filter-input" placeholder="Todos los clientes"
+            [ngModel]="clienteTexto()" (ngModelChange)="onClienteTextoChange($event)"
+            [matAutocomplete]="autoCliente" autocomplete="off" />
+          <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event)"
+            (closed)="onClientePanelCerrado()">
+            <mat-option [value]="null">Todos los clientes</mat-option>
+            @for (c of clientesFiltrados(); track c.id) {
+              <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (clienteTexto()) {
+            <button type="button" class="filter-clear" (click)="onClienteTextoChange('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
           }
-        </mat-autocomplete>
+        </div>
       </div>
 
       <div class="filter-group">
         <label class="filter-label" for="f-proyecto">Proyecto</label>
-        <input id="f-proyecto" type="text" class="filter-input" placeholder="Todos los proyectos"
-          [ngModel]="proyectoTexto()" (ngModelChange)="onProyectoTextoChange($event)"
-          [matAutocomplete]="autoProyecto" autocomplete="off" />
-        <mat-autocomplete #autoProyecto="matAutocomplete" (optionSelected)="seleccionarProyecto($event)"
-          (closed)="onProyectoPanelCerrado()">
-          <mat-option [value]="null">Todos los proyectos</mat-option>
-          @for (p of proyectosFiltrados(); track p.id) {
-            <mat-option [value]="p.id">{{ p.codigo ? p.codigo + ' · ' : '' }}{{ p.nombre }}</mat-option>
+        <div class="filter-input-wrapper">
+          <span class="material-symbols-outlined filter-icon">search</span>
+          <input id="f-proyecto" type="text" class="filter-input" placeholder="Todos los proyectos"
+            [ngModel]="proyectoTexto()" (ngModelChange)="onProyectoTextoChange($event)"
+            [matAutocomplete]="autoProyecto" autocomplete="off" />
+          <mat-autocomplete #autoProyecto="matAutocomplete" (optionSelected)="seleccionarProyecto($event)"
+            (closed)="onProyectoPanelCerrado()">
+            <mat-option [value]="null">Todos los proyectos</mat-option>
+            @for (p of proyectosFiltrados(); track p.id) {
+              <mat-option [value]="p.id">{{ p.codigo ? p.codigo + ' · ' : '' }}{{ p.nombre }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (proyectoTexto()) {
+            <button type="button" class="filter-clear" (click)="onProyectoTextoChange('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
           }
-        </mat-autocomplete>
+        </div>
       </div>
 
-      <div class="filter-group">
-        <label class="filter-label" for="f-estado">Estado</label>
-        <select id="f-estado" class="filter-input" [ngModel]="filtros().idEstado ?? ''"
-          (ngModelChange)="actualizarFiltro('idEstado', aNumero($event))">
-          <option value="">Todos los estados</option>
-          @for (e of opciones().estados; track e.id) {
-            <option [value]="e.id">{{ e.nombre }}</option>
-          }
-        </select>
+      <div class="filter-group filter-group--desplegable" (click)="toggleFiltro('estado', $event)">
+        <label class="filter-label">Estado</label>
+        <div class="filter-input-wrapper">
+          <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'estado'">
+            <span class="filter-trigger-texto">{{ etiquetaFiltro('estado') }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+          </div>
+        </div>
+        @if (filtroAbierto() === 'estado') {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (e of opciones().estados; track e.id) {
+            <div class="dropdown-opcion" (click)="elegirFiltro('idEstado', e.id, $event)">
+              <div class="dropdown-checkbox" [class.checked]="filtros().idEstado === e.id">
+                @if (filtros().idEstado === e.id) {
+                  <span class="material-icons">check</span>
+                }
+              </div>
+              <span class="opcion-label">{{ e.nombre }}</span>
+            </div>
+            }
+            <div class="dropdown-limpiar" (click)="elegirFiltro('idEstado', null, $event)">Limpiar filtro</div>
+          </div>
+        }
       </div>
 
-      <div class="filter-group">
-        <label class="filter-label" for="f-colaborador">Colaborador</label>
-        <select id="f-colaborador" class="filter-input" [ngModel]="filtros().idEmpleado ?? ''"
-          (ngModelChange)="actualizarFiltro('idEmpleado', aNumero($event))">
-          <option value="">Todos los colaboradores</option>
-          @for (c of opciones().colaboradores; track c.id) {
-            <option [value]="c.id">{{ c.nombre }}</option>
-          }
-        </select>
+      <div class="filter-group filter-group--desplegable" (click)="toggleFiltro('colaborador', $event)">
+        <label class="filter-label">Colaborador</label>
+        <div class="filter-input-wrapper">
+          <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'colaborador'">
+            <span class="filter-trigger-texto">{{ etiquetaFiltro('colaborador') }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
+          </div>
+        </div>
+        @if (filtroAbierto() === 'colaborador') {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (c of opciones().colaboradores; track c.id) {
+            <div class="dropdown-opcion" (click)="elegirFiltro('idEmpleado', c.id, $event)">
+              <div class="dropdown-checkbox" [class.checked]="filtros().idEmpleado === c.id">
+                @if (filtros().idEmpleado === c.id) {
+                  <span class="material-icons">check</span>
+                }
+              </div>
+              <span class="opcion-label">{{ c.nombre }}</span>
+            </div>
+            }
+            <div class="dropdown-limpiar" (click)="elegirFiltro('idEmpleado', null, $event)">Limpiar filtro</div>
+          </div>
+        }
       </div>
 
       <div class="filter-group filtro-corto">
@@ -105,8 +173,6 @@
           <mat-icon>event</mat-icon>
           Corte: <strong>{{ formatoFecha(d.periodo.fechaCorte) }}</strong>
         </span>
-        <span>{{ meses[d.periodo.mes - 1] }} {{ d.periodo.anio }}</span>
-        <span class="sep-traza">·</span>
         <span>Generado {{ formatoFechaHora(d.periodo.fechaGeneracion) }}</span>
         <span class="sep-traza">·</span>
         <span>Último registro de actividades {{ formatoFechaHora(d.periodo.ultimoRegistroActividad) }}</span>

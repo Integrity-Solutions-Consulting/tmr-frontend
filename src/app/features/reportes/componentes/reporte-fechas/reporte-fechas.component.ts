@@ -123,6 +123,14 @@ export class ReporteFechasComponent {
     }
   }
 
+  // X de los buscadores: mismo efecto que borrar el texto a mano.
+  limpiarBusqueda(campo: 'cliente' | 'lider') {
+    if (campo === 'cliente') this.busquedaCliente.set('');
+    if (campo === 'lider') this.busquedaLider.set('');
+    this.paginaActual.set(1);
+    this.forzarMostrar.set(false);
+  }
+
   onFiltroChange(campo: string, valor: string) {
     if (campo === 'fechaInicio') this.fechaInicio.set(valor);
     if (campo === 'fechaFin') this.fechaFin.set(valor);

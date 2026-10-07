@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, inject, effect } from '@angular/core';
+import { Component, signal, computed, OnInit, inject, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';
@@ -151,12 +151,60 @@ export class ReporteHorasComponent {
     this.paginaActual.set(1);
   }
 
-  limpiarFiltros() {
+  // Desplegables de Mes y Año con "Limpiar filtro", igual que los filtros de Proyectos.
+  mesAbierto = signal(false);
+  anioAbierto = signal(false);
+  etiquetaMes = computed(() => this.esSinFiltro(this.mesSeleccionado()) ? 'Todos los meses' : this.mesSeleccionado());
+  etiquetaAnio = computed(() => this.esSinFiltro(this.anioSeleccionado()) ? 'Todos los años' : this.anioSeleccionado());
+
+  private esSinFiltro(valor: string): boolean {
+    return !valor || valor === 'ALL';
+  }
+
+  @HostListener('document:click')
+  cerrarDropdowns() {
+    this.mesAbierto.set(false);
+    this.anioAbierto.set(false);
+  }
+
+  toggleMes(event: Event) {
+    event.stopPropagation();
+    const abrir = !this.mesAbierto();
+    this.cerrarDropdowns();
+    this.mesAbierto.set(abrir);
+  }
+
+  toggleAnio(event: Event) {
+    event.stopPropagation();
+    const abrir = !this.anioAbierto();
+    this.cerrarDropdowns();
+    this.anioAbierto.set(abrir);
+  }
+
+  seleccionarMes(mes: string, event: Event) {
+    event.stopPropagation();
+    this.onMesChange(mes);
+    this.cerrarDropdowns();
+  }
+
+  seleccionarAnio(anio: string, event: Event) {
+    event.stopPropagation();
+    this.onAnioChange(anio);
+    this.cerrarDropdowns();
+  }
+
+  limpiarMes(event: Event) {
+    this.seleccionarMes('ALL', event);
+  }
+
+  limpiarAnio(event: Event) {
+    this.seleccionarAnio('ALL', event);
+  }
+
+  limpiarCliente() {
     this.busquedaCliente.set('');
-    this.mesSeleccionado.set('');
-    this.anioSeleccionado.set('');
-    this.forzarMostrar.set(false);
     this.paginaActual.set(1);
+    this.forzarMostrar.set(false);
   }
 
   onItemsPorPaginaChange(val: any) {

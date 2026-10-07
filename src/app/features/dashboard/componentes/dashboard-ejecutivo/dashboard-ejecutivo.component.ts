@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -409,6 +409,35 @@ export class DashboardEjecutivoComponent implements OnInit {
     }
     this.filtros.set(siguiente);
     this.cargar();
+  }
+
+  // ── Desplegables de filtros (mismo diseño que Proyectos) ──
+  readonly filtroAbierto = signal<'anio' | 'mes' | 'estado' | 'colaborador' | null>(null);
+
+  toggleFiltro(nombre: 'anio' | 'mes' | 'estado' | 'colaborador', event: Event): void {
+    event.stopPropagation();
+    this.filtroAbierto.set(this.filtroAbierto() === nombre ? null : nombre);
+  }
+
+  @HostListener('document:click')
+  cerrarFiltros(): void {
+    this.filtroAbierto.set(null);
+  }
+
+  elegirFiltro<K extends keyof DashboardFiltros>(clave: K, valor: DashboardFiltros[K], event: Event): void {
+    event.stopPropagation();
+    this.filtroAbierto.set(null);
+    this.actualizarFiltro(clave, valor);
+  }
+
+  etiquetaFiltro(nombre: 'anio' | 'mes' | 'estado' | 'colaborador'): string {
+    const f = this.filtros();
+    if (nombre === 'anio') return String(f.anio);
+    if (nombre === 'mes') return this.meses[f.mes - 1] ?? '';
+    if (nombre === 'estado') {
+      return this.opciones().estados.find((e) => e.id === f.idEstado)?.nombre ?? 'Todos los estados';
+    }
+    return this.opciones().colaboradores.find((c) => c.id === f.idEmpleado)?.nombre ?? 'Todos los colaboradores';
   }
 
   aNumero(valor: string): number | null {

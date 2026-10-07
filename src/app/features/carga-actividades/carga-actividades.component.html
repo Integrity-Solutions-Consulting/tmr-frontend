@@ -66,6 +66,9 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input class="filter-input" type="text" placeholder="Buscar proyecto, cliente, codigo..."
                [formControl]="searchControl" />
+        @if (searchControl.value) {
+          <button type="button" class="filter-clear" (click)="searchControl.setValue('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 

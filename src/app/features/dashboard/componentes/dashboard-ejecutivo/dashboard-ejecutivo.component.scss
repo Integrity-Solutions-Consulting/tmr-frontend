@@ -1,5 +1,6 @@
 @use '../../../../../styles/table-theme' as table-theme;
 @use 'dashboard-comun' as comun;
+@use '../../../../../styles/filtros' as filtros;
 
 // sm - Dashboard ejecutivo con disposición "resumen arriba" (inspirada en AdminLTE: small-box de color, medidor y
 // gráficos en dos columnas). Usa los tokens globales de styles.scss para que funcione igual en tema claro y oscuro.
@@ -77,7 +78,6 @@
   }
 }
 
-
 .btn-icono {
   display: inline-flex;
   align-items: center;
@@ -117,60 +117,6 @@
   gap: 8px;
   padding: 4px 0;
   background: var(--bg-app);
-}
-
-.filters-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  flex-wrap: wrap;
-  box-shadow: var(--elevation-card);
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 170px;
-  min-width: 150px;
-
-  &.filtro-corto {
-    flex: 0 1 110px;
-    min-width: 100px;
-  }
-}
-
-.filter-label {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  margin: 0 0 6px 4px;
-}
-
-.filter-input {
-  width: 100%;
-  padding: 9px 12px;
-  background-color: var(--input-bg);
-  border: 1px solid var(--border-input);
-  border-radius: 12px;
-  outline: none;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-main);
-  font-family: 'Inter', sans-serif;
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-
-  &:focus {
-    border-color: var(--primary-color);
-    box-shadow: var(--focus-ring-primary);
-  }
 }
 
 .btn-limpiar {
@@ -949,3 +895,18 @@
 
 }
 .tabla-detalle { @include table-theme.data-table; }
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;
+
+// Solo anchos: el Dashboard tiene 7 filtros y la barra es fija arriba, así que conserva sus columnas compactas.
+.filters-card .filter-group {
+  flex: 1 1 170px;
+  min-width: 150px;
+  max-width: none;
+
+  &.filtro-corto {
+    flex: 0 1 120px;
+    min-width: 110px;
+  }
+}

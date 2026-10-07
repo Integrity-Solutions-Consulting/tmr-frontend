@@ -1,3 +1,4 @@
+@use '../../../../styles/ui-patterns' as ui;
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -40,62 +41,19 @@
 }
 
 .modal__header {
-  position: relative;
-  min-height: 62px;
-
-  padding: 28px 32px 10px;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  border-bottom: 0;
-
+  @include ui.modal-header;
+  
   h2 {
-    margin: 0;
-
-    color: var(--primary-color);
-
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1.1;
-    padding-right: 48px;
+    @include ui.modal-title;
   }
 }
 
 .modal__cerrar {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 32px;
-  height: 32px;
-
-  border: none;
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: var(--text-disabled);
-
-  font-size: 18px;
-  line-height: 1;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-
-  transition: all 0.16s ease;
-
-  &:hover {
-    background: var(--bg-soft);
-    color: var(--text-body);
-  }
+  @include ui.modal-close;
 }
 
 .modal__body {
-  padding: 0 32px 28px;
+  padding: 20px 32px 28px;
   overflow: auto;
 }
 
@@ -113,15 +71,11 @@
   }
 
   .modal__header {
-    padding: 24px 20px 10px;
-
-    h2 {
-      font-size: 24px;
-    }
+    padding: 18px 20px 12px;
   }
 
   .modal__body {
-    padding: 0 20px 24px;
+    padding: 16px 20px 24px;
   }
 
   .modal--wide .modal__body {
@@ -140,16 +94,11 @@
   }
 
   .modal__header {
-    min-height: 56px;
-    padding: 20px 16px 8px;
-
-    h2 {
-      font-size: 22px;
-    }
+    padding: 16px 16px 12px;
   }
 
   .modal__body {
-    padding: 0 16px 18px;
+    padding: 16px 16px 18px;
   }
 
   .modal--wide .modal__body {

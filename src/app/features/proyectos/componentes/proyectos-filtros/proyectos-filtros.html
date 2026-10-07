@@ -7,17 +7,17 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" class="filter-input" placeholder="Buscar proyecto, cliente, codigo..." [(ngModel)]="busqueda" (ngModelChange)="emitirFiltros()" autocomplete="off" />
         @if (busqueda) {
-           <span class="material-icons select-chevron" (click)="busqueda=''; emitirFiltros()" style="cursor:pointer; pointer-events: auto;">close</span>
+           <button type="button" class="filter-clear" (click)="busqueda=''; emitirFiltros()" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
         }
       </div>
     </div>
 
     <!-- Filtro Estado -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleEstadoDropdown($event)">
       <label class="filter-label">Estado</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelEstado }}</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ labelEstado }}</span>
             <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
@@ -39,11 +39,11 @@
     </div>
 
     <!-- Filtro Seguimiento -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleSeguimientoDropdown($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleSeguimientoDropdown($event)">
       <label class="filter-label">Seguimiento</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelSeguimiento }}</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ labelSeguimiento }}</span>
             <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
@@ -76,11 +76,11 @@
     </div>
 
     <!-- Filtro Tipo -->
-    <div class="filter-group date-group" style="flex: 1; min-width: 140px; max-width: 200px; cursor: pointer;" (click)="toggleTipoDropdown($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleTipoDropdown($event)">
       <label class="filter-label">Tipo</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 32px; height: 42px;">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;">{{ labelTipo }}</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ labelTipo }}</span>
             <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>

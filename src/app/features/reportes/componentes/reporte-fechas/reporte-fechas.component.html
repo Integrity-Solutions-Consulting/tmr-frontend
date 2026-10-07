@@ -18,43 +18,39 @@
     </div>
   }
 
-  <div class="filters-container">
+  <div class="filters-card">
     <div class="filter-group">
       <label class="filter-label">Cliente</label>
       <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" [value]="busquedaCliente()" (input)="onInputSanitized('cliente', $event)"
           placeholder="Buscar cliente..." class="filter-input">
-        <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
+        @if (busquedaCliente()) {
+          <button type="button" class="filter-clear" (click)="limpiarBusqueda('cliente')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
     <div class="filter-group">
       <label class="filter-label">Líder</label>
       <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" [value]="busquedaLider()" (input)="onInputSanitized('lider', $event)"
           placeholder="Buscar líder..." class="filter-input">
-        <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="9" cy="7" r="4" />
-          <path d="M10 14H6a4 4 0 0 0-4 4v2" />
-          <path d="M12 21h10" />
-          <path d="m18 15 4 4-4 4" />
-        </svg>
+        @if (busquedaLider()) {
+          <button type="button" class="filter-clear" (click)="limpiarBusqueda('lider')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
     <div class="filter-group date-group">
-      <label class="filter-label">Inicio</label>
+      <label class="filter-label">Fecha desde</label>
       <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="onFiltroChange('fechaInicio', $event)"
         class="filter-input">
     </div>
 
     <div class="filter-group date-group">
-      <label class="filter-label">Fin</label>
+      <label class="filter-label">Fecha hasta</label>
       <input type="date" [ngModel]="fechaFin()" (ngModelChange)="onFiltroChange('fechaFin', $event)"
         class="filter-input">
     </div>

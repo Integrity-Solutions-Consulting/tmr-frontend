@@ -7,18 +7,18 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" class="filter-input" placeholder="Buscar por nombres, identificación..." formControlName="busqueda" autocomplete="off" />
         @if (form.get('busqueda')?.value) {
-           <span class="material-icons select-chevron" (click)="form.get('busqueda')?.setValue('')" style="cursor:pointer; pointer-events: auto;">close</span>
+           <button type="button" class="filter-clear" (click)="form.get('busqueda')?.setValue('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
         }
       </div>
     </div>
 
     <!-- Estado dropdown -->
-    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstado($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleEstado($event)">
       <label class="filter-label">Estado</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ estadoSeleccionado }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ estadoSeleccionado }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
 

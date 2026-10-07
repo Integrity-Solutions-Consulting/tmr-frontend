@@ -1,4 +1,5 @@
 @use '../../../../../styles/table-theme' as table-theme;
+@use '../../../../../styles/filtros' as filtros;
 
 // sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
 // pone el layout global, no cada página).
@@ -97,77 +98,6 @@ Barra de acciones
   font-weight: 500;
   color: var(--text-body);
   white-space: nowrap;
-}
-
-.dropdown-estado {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  box-shadow: var(--elevation-dropdown);
-  z-index: 300;
-  width: 143px;
-  overflow: hidden;
-  animation: fadeIn 0.15s ease;
-}
-
-.dropdown-opcion {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover {
-    background: var(--bg-hover);
-    color: var(--primary-color);
-  }
-}
-
-.checkbox {
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--border-soft);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  &.checked {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-}
-
-.opcion-label {
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  color: var(--text-subtle);
-  flex: 1;
-}
-
-.dropdown-limpiar {
-  padding: 10px 12px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  color: var(--text-subtle);
-  cursor: pointer;
-  border-top: 1px solid var(--border-default);
-  text-align: center;
-
-  &:hover {
-    background: var(--bg-hover);
-    color: var(--primary-color);
-  }
 }
 
 .acciones-derecha {
@@ -610,127 +540,6 @@ Responsive
   }
 }
 /* ============================================================ FILTERS CARD ============================================================ */
-.filters-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: flex-end ;
-    gap: 16px ;
-    flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    margin-bottom: 18px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column ;
-    align-items: flex-start ;
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-}
-
-.filter-input-wrapper {
-    position: relative ;
-    width: 100%;
-
-     &:focus-within .filter-icon {
-        color: #163572 ;
-    }
-
-
-}
-
-.filter-input {
-    width: 100% ;
-    padding: 10px 16px ;
-    background-color: #ffffff ;
-    border: 1px solid #e2e8f0 ;
-    border-radius: 12px ;
-    outline: none ;
-    font-size: 14px ;
-    font-weight: 500 ;
-    color: #1e293b ;
-    font-family: 'Inter', sans-serif ;
-    transition: all 0.2s ;
-    box-sizing: border-box ;
-
-     &:focus {
-        box-shadow: 0 0 0 1px #163572 ;
-    }
-
-
-}
-
-.filter-input-wrapper .filter-input {
-    padding-left: 40px ;
-}
-
-.filter-icon {
-    position: absolute ;
-    left: 12px ;
-    top: 12px ;
-    color: #94a3b8 ;
-    transition: color 0.2s ;
-    width: 18px ;
-    height: 18px ;
-    pointer-events: none ;
-}
-
-/* Client select */
-.filter-select {
-    width: 100% ;
-    padding: 10px 32px 10px 40px ;
-    background-color: #ffffff ;
-    border: 1px solid #e2e8f0 ;
-    border-radius: 12px ;
-    outline: none ;
-    font-size: 14px ;
-    font-weight: 500 ;
-    color: #1e293b ;
-    font-family: 'Inter', sans-serif ;
-    transition: all 0.2s ;
-    box-sizing: border-box ;
-    appearance: none ;
-    -webkit-appearance: none ;
-    cursor: pointer ;
-
-     &:focus {
-        box-shadow: 0 0 0 1px #163572 ;
-    }
-
-
-}
-
-.select-chevron {
-    position: absolute ;
-    right: 12px ;
-    top: 12px ;
-    color: #94a3b8 ;
-    font-size: 18px ;
-    width: 18px ;
-    height: 18px ;
-    pointer-events: none ;
-}
-
-/* Date groups */
-.date-group {
-    flex: none ;
-    width: 160px ;
-}
-
-.filter-label {
-    display: block ;
-    font-size: 11px ;
-    text-transform: uppercase ;
-    font-weight: 700 ;
-    color: #94a3b8 ;
-    letter-spacing: 0.05em ;
-    margin-bottom: 8px ;
-    margin-left: 4px ;
-    font-family: 'Inter', sans-serif ;
-}
 
 /* Descargar button */
 // sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
@@ -783,7 +592,6 @@ Responsive
         opacity: 0.8;
     }
 
-
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
@@ -829,3 +637,6 @@ app-paginacion { @include table-theme.table-pagination; }
     color: #cbd5e1;
   }
 }
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;

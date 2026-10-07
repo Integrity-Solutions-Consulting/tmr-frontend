@@ -1,0 +1,295 @@
+// ── Barra de filtros estándar ──
+// Diseño único para todas las pantallas, tomado de los filtros de Proyectos.
+// Uso: al final del .scss del componente que pinta la barra → `@include filtros.estandar;`
+//
+// Estructura esperada en el HTML:
+//   .filters-card
+//     .filter-group                         (agregar .date-group para fechas / desplegables cortos)
+//       label.filter-label
+//       .filter-input-wrapper
+//         .filter-icon  +  input.filter-input  +  button.filter-clear (X para borrar el texto)
+//       ── o para un desplegable ──
+//       .filter-input-wrapper
+//         .filter-input.filter-trigger > .filter-trigger-texto + .select-chevron
+//       .dropdown-estado > .dropdown-opcion(.dropdown-checkbox + .opcion-label)* + .dropdown-limpiar
+
+@mixin estandar {
+  .filters-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+    background: var(--bg-card);
+    border: 0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--elevation-card);
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .date-group {
+    flex: none;
+    width: 160px;
+    min-width: 140px;
+  }
+
+  // Grupo que contiene un desplegable (Estado, Tipo, Mes...)
+  .filter-group--desplegable {
+    flex: 1;
+    width: auto;
+    min-width: 140px;
+    max-width: 200px;
+    cursor: pointer;
+  }
+
+  .filter-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    margin-left: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .filter-input-wrapper {
+    position: relative;
+    width: 100%;
+
+    &:focus-within .filter-icon {
+      color: var(--primary-color);
+    }
+  }
+
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 16px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-input);
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    box-sizing: border-box;
+
+    &:focus {
+      box-shadow: 0 0 0 1px var(--primary-color);
+    }
+
+    &::placeholder {
+      color: var(--text-muted);
+      opacity: 1;
+    }
+  }
+
+  .filter-input::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  .filter-input-wrapper .filter-input {
+    padding-left: 40px;
+  }
+
+  .filter-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: color 0.2s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  // Desplegable propio (reemplaza a los <select> nativos)
+  .filter-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 42px;
+    padding-right: 32px;
+    cursor: pointer;
+    text-align: left;
+    user-select: none;
+  }
+
+  .filter-trigger-texto {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 8px;
+  }
+
+  .select-chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  // X para borrar el texto de un buscador
+  .filter-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 1;
+
+    .material-icons {
+      font-size: 18px;
+    }
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .filter-input-wrapper:has(.filter-clear) .filter-input {
+    padding-right: 36px;
+  }
+
+  .dropdown-estado {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    box-shadow: var(--elevation-dropdown);
+    min-width: max(180px, 100%);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  .dropdown-opcion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: var(--bg-card);
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-muted);
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--text-muted);
+    }
+
+    &.dropdown-opcion--deshabilitada {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  .opcion-label {
+    flex: 1;
+  }
+
+  .opcion-contador {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .dropdown-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-default);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    box-sizing: border-box;
+
+    &.checked {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .material-icons {
+      font-size: 12px;
+      color: var(--text-inverse);
+    }
+  }
+
+  .dropdown-limpiar {
+    padding: 8px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-top: 1px solid var(--border-default);
+    margin-top: 4px;
+    text-align: center;
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--primary-color);
+      border-radius: 6px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .filters-card {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-group,
+    .date-group {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  :host-context(html[data-theme='dark']) {
+    .filter-label {
+      color: #cbd5e1;
+    }
+  }
+}

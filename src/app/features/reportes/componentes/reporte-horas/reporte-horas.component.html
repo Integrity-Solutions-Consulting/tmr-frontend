@@ -18,60 +18,68 @@
     </div>
   }
 
-  <div class="filters-container">
+  <div class="filters-card">
     <div class="filter-group">
       <label class="filter-label">Cliente</label>
       <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" [value]="busquedaCliente()" (input)="onInputSanitized('cliente', $event)"
           placeholder="Ej: Banco Guayaquil..." class="filter-input">
-        <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
+        @if (busquedaCliente()) {
+          <button type="button" class="filter-clear" (click)="limpiarCliente()" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
-    <div class="filter-group select-group">
+    <div class="filter-group filter-group--desplegable">
       <label class="filter-label">Mes</label>
       <div class="filter-input-wrapper">
-        <select [ngModel]="mesSeleccionado()" (ngModelChange)="onMesChange($event)"
-          class="filter-input filter-select">
-          <option value="ALL">Todos los meses</option>
-          @for (mes of meses; track mes) {
-          <option [value]="mes">{{ mes }}</option>
-          }
-        </select>
-        <svg class="filter-icon-right" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        <div class="filter-input filter-trigger" (click)="toggleMes($event)" [attr.aria-expanded]="mesAbierto()">
+          <span class="filter-trigger-texto">{{ etiquetaMes() }}</span>
+          <span class="material-symbols-outlined select-chevron">expand_more</span>
+        </div>
+        @if (mesAbierto()) {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (mes of meses; track mes) {
+              <div class="dropdown-opcion" (click)="seleccionarMes(mes, $event)">
+                <div class="dropdown-checkbox" [class.checked]="mesSeleccionado() === mes">
+                  @if (mesSeleccionado() === mes) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="opcion-label">{{ mes }}</span>
+              </div>
+            }
+            <div class="dropdown-limpiar" (click)="limpiarMes($event)">Limpiar filtro</div>
+          </div>
+        }
       </div>
     </div>
 
-    <div class="filter-group select-group">
+    <div class="filter-group filter-group--desplegable">
       <label class="filter-label">Año</label>
       <div class="filter-input-wrapper">
-        <select [ngModel]="anioSeleccionado()" (ngModelChange)="onAnioChange($event)"
-          class="filter-input filter-select">
-          <option value="ALL">Todos los años</option>
-          @for (anio of anios; track anio) {
-          <option [value]="anio">{{ anio }}</option>
-          }
-        </select>
-        <svg class="filter-icon-right" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        <div class="filter-input filter-trigger" (click)="toggleAnio($event)" [attr.aria-expanded]="anioAbierto()">
+          <span class="filter-trigger-texto">{{ etiquetaAnio() }}</span>
+          <span class="material-symbols-outlined select-chevron">expand_more</span>
+        </div>
+        @if (anioAbierto()) {
+          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+            @for (anio of anios; track anio) {
+              <div class="dropdown-opcion" (click)="seleccionarAnio(anio, $event)">
+                <div class="dropdown-checkbox" [class.checked]="anioSeleccionado() === anio">
+                  @if (anioSeleccionado() === anio) {
+                    <span class="material-icons">check</span>
+                  }
+                </div>
+                <span class="opcion-label">{{ anio }}</span>
+              </div>
+            }
+            <div class="dropdown-limpiar" (click)="limpiarAnio($event)">Limpiar filtro</div>
+          </div>
+        }
       </div>
     </div>
-
-    <button (click)="limpiarFiltros()" class="btn-clear" title="Limpiar filtros">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2">
-        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" />
-      </svg>
-    </button>
   </div>
 
   @if (!mostrarDatos()) {
@@ -96,4 +104,4 @@
     </app-tabla>
   }
 
-</div>
+</div>

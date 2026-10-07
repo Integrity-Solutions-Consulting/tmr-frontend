@@ -18,7 +18,7 @@
   </a>
 
   <!-- ══ Time Report ══ -->
-  <div class="sidebar__group" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
     <button type="button" class="sidebar__link sidebar__link--parent" title="Time Report" (click)="toggleGroup('timeReport')" [attr.aria-expanded]="trOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
       <span>Time Report</span>
@@ -43,7 +43,7 @@
   </a>
 
   <!-- ══ Reportes ══ -->
-  <div class="sidebar__group" [class.sidebar__group--open]="repOpen" *ngIf="hasModule('Reportes')">
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="repOpen" *ngIf="hasModule('Reportes')">
     <button type="button" class="sidebar__link sidebar__link--parent" title="Reportes" (click)="toggleGroup('reportes')" [attr.aria-expanded]="repOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/reportes.svg')"></span>
       <span>Reportes</span>
@@ -83,7 +83,7 @@
   <div class="sidebar__divider" *ngIf="hasModule('Configuracion')"></div>
 
   <!-- ══ Configuración ══ -->
-  <div class="sidebar__group" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="cfgOpen" *ngIf="hasModule('Configuracion')">
     <button type="button" class="sidebar__link sidebar__link--parent" title="Configuración" (click)="toggleGroup('configuracion')" [attr.aria-expanded]="cfgOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Configuracion/configuracion.svg')"></span>
       <span>Configuración</span>
