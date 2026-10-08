@@ -10,6 +10,7 @@ import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tab
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { ajustarFinRango, fechaLocalInputHoy } from '../../../../shared/utils/date-range.utils';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
@@ -34,6 +35,7 @@ export class ReporteFechasComponent {
   busquedaLider = signal('');
   fechaInicio = signal('');
   fechaFin = signal(this.fechaHoyInputDate());
+  readonly fechaMaxima = fechaLocalInputHoy();
   forzarMostrar = signal(false);
 
   paginaActual = signal(1);
@@ -131,9 +133,11 @@ export class ReporteFechasComponent {
     this.forzarMostrar.set(false);
   }
 
-  onFiltroChange(campo: string, valor: string) {
+  onFiltroChange(campo: 'fechaInicio' | 'fechaFin', valor: string) {
     if (campo === 'fechaInicio') this.fechaInicio.set(valor);
     if (campo === 'fechaFin') this.fechaFin.set(valor);
+    const finAjustado = ajustarFinRango(this.fechaInicio(), this.fechaFin());
+    if (finAjustado !== this.fechaFin()) this.fechaFin.set(finAjustado);
     this.paginaActual.set(1);
   }
 
@@ -156,10 +160,7 @@ export class ReporteFechasComponent {
   }
 
   private fechaHoyInputDate(): string {
-    const hoy = new Date();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    return `${hoy.getFullYear()}-${mes}-${dia}`;
+    return fechaLocalInputHoy();
   }
 
   async exportarExcel() {

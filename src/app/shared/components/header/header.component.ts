@@ -32,16 +32,13 @@ import { CommonModule } from '@angular/common';
       .header-title {
         font-size: 28px;
         font-weight: 800;
-        color: #163572;
+        color: var(--primary-color);
         letter-spacing: -0.025em;
         line-height: 1;
         margin: 0;
       }
-      :host-context(html[data-theme='dark']) .header-title {
-        color: var(--accent-cian) !important;
-      }
       .header-subtitle {
-        color: #7c7c7c;
+        color: var(--text-secondary);
         font-size: 13px;
         margin-top: 8px;
         margin-bottom: 0;

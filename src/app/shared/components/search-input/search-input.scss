@@ -1,0 +1,10 @@
+:host { display: block; min-width: 0; }
+.search-input { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; color: var(--text-main); background: var(--input-bg); border: 1px solid var(--input-border); border-radius: var(--radius-md, 10px); transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease; }
+.search-input:focus-within { border-color: var(--primary-color); box-shadow: var(--focus-ring-primary); }
+.search-input__icon { width: 16px; height: 16px; color: var(--icon-color); flex: 0 0 auto; }
+.search-input__field { width: 100%; min-width: 0; padding: 0; border: 0; outline: 0; color: var(--text-main); background: transparent; font: inherit; font-size: 14px; }
+.search-input__field::-webkit-search-cancel-button { display: none; }
+.search-input__field::placeholder { color: var(--text-muted); opacity: 1; }
+.search-input__clear { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; color: var(--text-secondary); background: transparent; cursor: pointer; }
+.search-input__clear:hover, .search-input__clear:focus-visible { color: var(--primary-color); background: var(--bg-hover); outline: 0; }
+.search-input__clear .material-icons { font-size: 18px; }

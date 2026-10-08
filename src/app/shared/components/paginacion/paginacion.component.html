@@ -1,7 +1,11 @@
 <div class="paginacion">
 
   <span class="paginacion__info">
-    Mostrando registros del {{ registroInicio }} al {{ registroFin }}
+    @if (total > 0) {
+      Mostrando {{ etiquetaRegistros }} del {{ registroInicio }} al {{ registroFin }} de {{ total }}
+    } @else {
+      No hay {{ etiquetaRegistros }} para mostrar
+    }
   </span>
 
   <div class="paginacion__controles">
@@ -12,12 +16,14 @@
     </span>
 
     <button class="paginacion__btn"
+      aria-label="Primera página" title="Primera página"
       [class.paginacion__btn--disabled]="paginaActual === 1"
       (click)="primera()" [disabled]="paginaActual === 1">
       <span class="material-icons">keyboard_double_arrow_left</span>
     </button>
 
     <button class="paginacion__btn"
+      aria-label="Página anterior" title="Página anterior"
       [class.paginacion__btn--disabled]="paginaActual === 1"
       (click)="anterior()" [disabled]="paginaActual === 1">
       <span class="material-icons">chevron_left</span>
@@ -29,6 +35,8 @@
       } @else {
         <button class="paginacion__btn paginacion__btn--numero"
           [class.paginacion__btn--activo]="pagina === paginaActual"
+          [attr.aria-label]="'Ir a la página ' + pagina"
+          [attr.aria-current]="pagina === paginaActual ? 'page' : null"
           (click)="irA(pagina)">
           {{ pagina }}
         </button>
@@ -36,12 +44,14 @@
     }
 
     <button class="paginacion__btn"
+      aria-label="Página siguiente" title="Página siguiente"
       [class.paginacion__btn--disabled]="paginaActual === totalPaginas"
       (click)="siguiente()" [disabled]="paginaActual === totalPaginas">
       <span class="material-icons">chevron_right</span>
     </button>
 
     <button class="paginacion__btn"
+      aria-label="Última página" title="Última página"
       [class.paginacion__btn--disabled]="paginaActual === totalPaginas"
       (click)="ultima()" [disabled]="paginaActual === totalPaginas">
       <span class="material-icons">keyboard_double_arrow_right</span>

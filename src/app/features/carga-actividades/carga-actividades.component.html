@@ -74,12 +74,12 @@
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
-      <input class="filter-input" type="date" [formControl]="fechaDesdeControl">
+      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha hasta</label>
-      <input class="filter-input" type="date" [formControl]="fechaHastaControl">
+      <input class="filter-input" type="date" [formControl]="fechaHastaControl" [min]="fechaDesdeControl.value" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <button class="btn-descargar enabled" (click)="descargarExcel()">
