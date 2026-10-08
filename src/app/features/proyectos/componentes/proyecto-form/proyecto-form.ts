@@ -643,7 +643,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     const proyecto: Proyecto = {
       id: this.proyecto?.id ?? 0,
       codigo: this.proyecto?.codigo ?? valor.codigo,
-      nombre: this.proyecto?.nombre ?? valor.nombre,
+      nombre: valor.nombre,
       cliente: this.proyecto?.cliente ?? valor.cliente,
       idCliente: valor.idCliente ?? this.obtenerIdClientePorNombre(valor.cliente) ?? this.proyecto?.idCliente ?? null,
       tipo: valor.tipo,

@@ -23,7 +23,7 @@
       </div>
       @if (mostrarEstadoDropdown) {
         <div class="dropdown-estado" (click)="$event.stopPropagation()">
-            @for (estado of estadosFiltro; track estado) {
+            @for (estado of estadosDisponibles; track estado) {
               <div class="dropdown-opcion" (click)="toggleEstado(estado, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
                   @if (estaEstadoSeleccionado(estado)) {
@@ -49,7 +49,7 @@
       </div>
       @if (mostrarSeguimientoDropdown) {
         <div class="dropdown-estado" (click)="$event.stopPropagation()">
-            @for (e of seguimientoOpciones; track e.id) {
+            @for (e of seguimientoOpcionesDisponibles; track e.id) {
               <div class="dropdown-opcion" (click)="toggleSeguimiento(e.id, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
                   @if (estaSeguimientoSeleccionado(e.id)) {
@@ -61,7 +61,9 @@
             }
             <!-- sm - "Inhabilitado" no es un estado real del catálogo: es lo que muestra la tabla para los
                  proyectos Inactivo (ver Tabla.obtenerSeguimiento). Se agrega acá para poder filtrar por lo
-                 mismo que se ve en la columna. -->
+                 mismo que se ve en la columna. Solo se ofrece si hay algún proyecto inactivo entre los que
+                 coinciden con los demás filtros (o ya está seleccionado). -->
+            @if (mostrarInhabilitado) {
             <div class="dropdown-opcion" (click)="toggleSeguimiento(idSeguimientoInhabilitado, $event)">
               <div class="dropdown-checkbox" [class.checked]="estaSeguimientoSeleccionado(idSeguimientoInhabilitado)">
                 @if (estaSeguimientoSeleccionado(idSeguimientoInhabilitado)) {
@@ -70,6 +72,7 @@
               </div>
               <span class="opcion-label">Inhabilitado</span>
             </div>
+            }
           <div class="dropdown-limpiar" (click)="limpiarSeguimientos($event)">Limpiar filtro</div>
         </div>
       }
@@ -86,7 +89,7 @@
       </div>
       @if (mostrarTipoDropdown) {
         <div class="dropdown-estado" (click)="$event.stopPropagation()">
-            @for (t of tipos; track t.id) {
+            @for (t of tiposDisponibles; track t.id) {
               <div class="dropdown-opcion" (click)="toggleTipo(t.nombre, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaTipoSeleccionado(t.nombre)">
                   @if (estaTipoSeleccionado(t.nombre)) {

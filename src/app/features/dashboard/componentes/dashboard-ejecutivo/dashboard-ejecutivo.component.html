@@ -13,7 +13,7 @@
   <!-- ===== FILTROS GLOBALES (RF 01): siempre visibles junto a la fecha de corte ===== -->
   <div class="filtros-sticky">
     <div class="filters-card">
-      <div class="filter-group filter-group--desplegable filtro-corto" (click)="toggleFiltro('anio', $event)">
+      <div class="filter-group filter-group--desplegable filtro-anio" (click)="toggleFiltro('anio', $event)">
         <label class="filter-label">Año</label>
         <div class="filter-input-wrapper">
           <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'anio'">
@@ -37,7 +37,7 @@
         }
       </div>
 
-      <div class="filter-group filter-group--desplegable filtro-corto" (click)="toggleFiltro('mes', $event)">
+      <div class="filter-group filter-group--desplegable filtro-mes" (click)="toggleFiltro('mes', $event)">
         <label class="filter-label">Mes</label>
         <div class="filter-input-wrapper">
           <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'mes'">
@@ -151,7 +151,7 @@
         }
       </div>
 
-      <div class="filter-group filtro-corto">
+      <div class="filter-group filtro-horizonte">
         <label class="filter-label" for="f-horizonte"
           matTooltip="Días hacia adelante para 'Próximos a terminar' (RF 05)">Horizonte (días)</label>
         <input id="f-horizonte" class="filter-input" type="number" min="1" max="365"

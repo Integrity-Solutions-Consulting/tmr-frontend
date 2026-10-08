@@ -44,8 +44,7 @@
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Nombre del Proyecto</mat-label>
-        <input matInput formControlName="nombre" [readonly]="!!proyecto">
-        @if (proyecto) { <mat-hint>El nombre no se puede modificar al editar</mat-hint> }
+        <input matInput formControlName="nombre">
         <mat-error *ngIf="campoInvalido('nombre')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 

@@ -899,14 +899,37 @@
 // Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
 @include filtros.estandar;
 
-// Solo anchos: el Dashboard tiene 7 filtros y la barra es fija arriba, así que conserva sus columnas compactas.
+// Solo anchos: el Dashboard tiene 7 filtros y la barra es fija arriba. Los anchos se ajustan para que
+// los 7 filtros y el botón Limpiar quepan en una sola fila (sin que Limpiar caiga a una segunda línea),
+// dejando a Mes el ancho suficiente para leerse completo (ej. "Septiembre") y a Año/Horizonte solo lo
+// que necesitan, ya que su contenido es corto.
 .filters-card .filter-group {
-  flex: 1 1 170px;
-  min-width: 150px;
+  flex: 1 1 140px;
+  min-width: 125px;
   max-width: none;
 
-  &.filtro-corto {
-    flex: 0 1 120px;
-    min-width: 110px;
+  &.filtro-anio {
+    flex: 0 1 95px;
+    min-width: 85px;
   }
+
+  &.filtro-mes {
+    flex: 0 1 140px;
+    min-width: 130px;
+  }
+
+  &.filtro-horizonte {
+    flex: 0 1 95px;
+    min-width: 85px;
+  }
+}
+
+// Año, Mes, Estado y Colaborador son desplegables (sin ícono de búsqueda a la izquierda): el padding-left
+// de 40px del mixin está pensado para el ícono de Cliente/Proyecto y aquí solo desperdicia espacio.
+.filters-card .filter-input-wrapper .filter-input.filter-trigger {
+  padding-left: 16px;
+}
+
+.btn-limpiar {
+  flex-shrink: 0;
 }
