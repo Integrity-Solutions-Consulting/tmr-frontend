@@ -15,11 +15,12 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { SearchInput } from '../../../../shared/components/search-input/search-input';
 type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [TarjetaResumenComponent, HeaderComponent, CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
+  imports: [TarjetaResumenComponent, HeaderComponent, SearchInput, CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })

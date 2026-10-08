@@ -15,20 +15,12 @@
   <div class="filters-card">
     <div class="filter-group">
       <label class="filter-label">Búsqueda</label>
-      <div class="filter-input-wrapper">
-        <span class="material-symbols-outlined filter-icon">search</span>
-        <input
-          type="text"
-          class="filter-input"
-          placeholder="Buscar por nombre de rol, descripción o módulo..."
-          [value]="query()"
-          (input)="setQuery($any($event.target).value)"
-          autocomplete="off"
-        />
-        @if (query()) {
-          <button type="button" class="filter-clear" (click)="setQuery('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
-        }
-      </div>
+      <app-search-input
+        ariaLabel="Buscar roles"
+        placeholder="Buscar por nombre de rol, descripción o módulo..."
+        [value]="query()"
+        (valueChange)="setQuery($event)"
+      />
     </div>
 
     <div class="filter-group filter-group--desplegable" (click)="toggleEstadoDropdown($event)">

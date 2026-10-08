@@ -32,6 +32,7 @@ import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
+import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
 class SinActividadesError extends Error {
@@ -138,6 +139,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     })();
+    public readonly fechaMaxima = fechaLocalInputHoy();
 
     // Paginación (Estado Local para Rango)
     public pageIndex = 0;
