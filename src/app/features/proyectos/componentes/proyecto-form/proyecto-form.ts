@@ -78,6 +78,9 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   estados: LookupOption[] = [];
   tipos: LookupOption[] = [];
   empleadosDisponibles: LookupOption[] = [];
+  // sm - RF: asignación de proveedores. Un recurso "Externo" se elige de este catálogo (tbl_inventario_proveedor)
+  // en vez de empleadosDisponibles.
+  proveedoresDisponibles: LookupOption[] = [];
   departamentos: LookupOption[] = [];
   todosLosCargos: CargoLookup[] = [];
   estadoOptions: string[] = ['Activo', 'Inactivo'];
@@ -203,6 +206,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
         this.clientesOpciones = lookups.clientes;
         this.lideresOpciones = lookups.lideres;
         this.empleadosDisponibles = lookups.empleados;
+        this.proveedoresDisponibles = lookups.proveedores;
         this.todosLosCargos = lookups.cargos;
         this.departamentos = lookups.departamentos;
         this.estados = lookups.estados;
@@ -299,6 +303,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
             const idDep = r.departamento ?? r.idDepartamento ?? cargoEncontrado?.idDepartamento ?? null;
             rg.patchValue({
               idEmpleado: r.idEmpleado ?? null,
+              idProveedor: r.idProveedor ?? null,
               tipo: r.tipo,
               nombre: r.nombre,
               departamento: idDep,
@@ -365,11 +370,14 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   crearRecurso(): FormGroup {
     return this.fb.group({
       idEmpleado: [null],
+      idProveedor: [null as number | null],
       tipo: ['Interno', Validators.required],
-      nombre: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.empleadosDisponibles)]],
+      nombre: ['', [Validators.required, this.valorRecursoDebeCoincidirConLookup()]],
       departamento: [null, Validators.required],
       rol: ['', Validators.required],
-      entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
+      // sm - Antes era obligatoria: registros antiguos sin fecha de entrada del recurso no se podían guardar
+      // (ni siquiera editando otros campos) porque este control bloqueaba el formulario entero.
+      entrada: this.fb.control<string | null>('', [this.fechaValida()]),
       salida: this.fb.control<string | null>('', [this.fechaValida()]),
       costoHora: ['', [this.numeroValido(true)]],
       horas: ['', [this.numeroValido(false), Validators.min(0)]]
@@ -411,19 +419,14 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     this.actualizarNumeroRecursos();
   }
 
+  // sm - Antes, al quedar un solo recurso, "Eliminar" solo lo reseteaba (vacío) en vez de quitarlo: un proyecto
+  // no podía quedar sin recursos porque ese recurso vacío seguía siendo obligatorio para el formulario. Ahora
+  // siempre se quita, permitiendo guardar el proyecto sin ningún recurso asignado.
   eliminarRecursoDelLider(li: number, ri: number): void {
     const arr = this.getRecursosDelLider(li);
-    if (arr.length === 1) {
-      arr.at(0).reset({
-        idEmpleado: null, tipo: 'Interno', nombre: '',
-        departamento: null, rol: '', entrada: '', salida: '', costoHora: '', horas: ''
-      });
-      this.sincronizarEstadoRecursos(li);
-    } else {
-      arr.removeAt(ri);
-      this.cargosFiltrados[li]?.splice(ri, 1);
-      this.sincronizarEstadoRecursos(li);
-    }
+    arr.removeAt(ri);
+    this.cargosFiltrados[li]?.splice(ri, 1);
+    this.sincronizarEstadoRecursos(li);
     this.actualizarNumeroRecursos();
   }
 
@@ -468,9 +471,26 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     this.lideres.at(li).get('lider')?.updateValueAndValidity();
   }
 
+  // sm - RF: asignación de proveedores. "Interno" se resuelve contra empleadosDisponibles (idEmpleado);
+  // "Externo" contra proveedoresDisponibles (idProveedor). Las dos columnas de id se mantienen excluyentes.
+  esRecursoExterno(li: number, ri: number): boolean {
+    return this.getRecursosDelLider(li).at(ri).get('tipo')?.value === 'Externo';
+  }
+
+  // sm - Cambiar el tipo invalida la selección anterior (un empleado no es un proveedor válido y viceversa).
+  onTipoRecursoChange(li: number, ri: number): void {
+    const recurso = this.getRecursosDelLider(li).at(ri);
+    recurso.get('idEmpleado')?.setValue(null, { emitEvent: false });
+    recurso.get('idProveedor')?.setValue(null, { emitEvent: false });
+    recurso.get('nombre')?.setValue('', { emitEvent: false });
+    recurso.get('nombre')?.updateValueAndValidity();
+  }
+
   onRecursoInput(li: number, ri: number): void {
-    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(null, { emitEvent: false });
-    this.getRecursosDelLider(li).at(ri).get('nombre')?.updateValueAndValidity();
+    const recurso = this.getRecursosDelLider(li).at(ri);
+    recurso.get('idEmpleado')?.setValue(null, { emitEvent: false });
+    recurso.get('idProveedor')?.setValue(null, { emitEvent: false });
+    recurso.get('nombre')?.updateValueAndValidity();
   }
 
   onRecursoFocus(li: number, ri: number, event: FocusEvent): void {
@@ -481,10 +501,18 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onEmpleadoChange(li: number, ri: number, nombreEmpleado: string): void {
-    const emp = this.empleadosDisponibles.find(e => e.nombre === nombreEmpleado);
-    this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.setValue(emp?.id ?? null, { emitEvent: false });
-    this.getRecursosDelLider(li).at(ri).get('nombre')?.updateValueAndValidity();
+  onEmpleadoChange(li: number, ri: number, nombreSeleccionado: string): void {
+    const recurso = this.getRecursosDelLider(li).at(ri);
+    if (this.esRecursoExterno(li, ri)) {
+      const proveedor = this.proveedoresDisponibles.find(p => p.nombre === nombreSeleccionado);
+      recurso.get('idProveedor')?.setValue(proveedor?.id ?? null, { emitEvent: false });
+      recurso.get('idEmpleado')?.setValue(null, { emitEvent: false });
+    } else {
+      const emp = this.empleadosDisponibles.find(e => e.nombre === nombreSeleccionado);
+      recurso.get('idEmpleado')?.setValue(emp?.id ?? null, { emitEvent: false });
+      recurso.get('idProveedor')?.setValue(null, { emitEvent: false });
+    }
+    recurso.get('nombre')?.updateValueAndValidity();
   }
 
   onDepartamentoChange(li: number, ri: number, idDep: number): void {
@@ -521,13 +549,16 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getRecursosFiltrados(li: number, ri: number): LookupOption[] {
-    const valor = String(this.getRecursosDelLider(li).at(ri).get('nombre')?.value ?? '').trim();
-    const idActual = this.getRecursosDelLider(li).at(ri).get('idEmpleado')?.value;
+    const recurso = this.getRecursosDelLider(li).at(ri);
+    const esExterno = this.esRecursoExterno(li, ri);
+    const opciones = esExterno ? this.proveedoresDisponibles : this.empleadosDisponibles;
+    const valor = String(recurso.get('nombre')?.value ?? '').trim();
+    const idActual = recurso.get(esExterno ? 'idProveedor' : 'idEmpleado')?.value;
     const yaSeleccionado = idActual != null ||
-      this.empleadosDisponibles.some(e => e.nombre === valor);
-    if (!valor || yaSeleccionado) return this.empleadosDisponibles;
-    return this.empleadosDisponibles.filter(e =>
-      e.nombre.toLowerCase().includes(valor.toLowerCase())
+      opciones.some(o => o.nombre === valor);
+    if (!valor || yaSeleccionado) return opciones;
+    return opciones.filter(o =>
+      o.nombre.toLowerCase().includes(valor.toLowerCase())
     );
   }
 
@@ -623,7 +654,8 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
         costoHoraLider: this.normalizarNumero(l.costoHoraLider),
         horasLider: this.normalizarNumero(l.horasLider),
         recursos: (l.recursos ?? []).map((r: any) => ({
-          idEmpleado: r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre),
+          idEmpleado: r.tipo === 'Externo' ? null : (r.idEmpleado ?? this.obtenerIdEmpleadoPorNombre(r.nombre)),
+          idProveedor: r.tipo === 'Externo' ? (r.idProveedor ?? this.obtenerIdProveedorPorNombre(r.nombre)) : null,
           idDepartamento: r.departamento ?? null,
           tipo: r.tipo,
           nombre: r.nombre,
@@ -644,7 +676,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       id: this.proyecto?.id ?? 0,
       codigo: this.proyecto?.codigo ?? valor.codigo,
       nombre: valor.nombre,
-      cliente: this.proyecto?.cliente ?? valor.cliente,
+      cliente: valor.cliente,
       idCliente: valor.idCliente ?? this.obtenerIdClientePorNombre(valor.cliente) ?? this.proyecto?.idCliente ?? null,
       tipo: valor.tipo,
       fechaInicio: this.normalizarFecha(valor.fechaInicio),
@@ -780,6 +812,27 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
+  // sm - RF: asignación de proveedores. El campo "nombre" de un recurso se valida contra empleadosDisponibles
+  // o proveedoresDisponibles según el "tipo" elegido en la misma fila (Interno/Externo), a diferencia de
+  // valorDebeCoincidirConLookup (cliente/líder/recurso interno) que siempre usa el mismo catálogo.
+  private valorRecursoDebeCoincidirConLookup(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = String(control.value ?? '').trim();
+      if (!valor) return null;
+
+      const esExterno = control.parent?.get('tipo')?.value === 'Externo';
+      const opciones = esExterno ? this.proveedoresDisponibles : this.empleadosDisponibles;
+      if (!opciones.length) return null;
+
+      if (opciones.some(opcion => opcion.nombre === valor)) return null;
+
+      const idControl = control.parent?.get(esExterno ? 'idProveedor' : 'idEmpleado');
+      if (idControl && idControl.value != null) return null;
+
+      return { opcionInvalida: true };
+    };
+  }
+
   private obtenerControlIdRelacionado(parent: AbstractControl, controlName: string): AbstractControl | null {
     if (controlName === 'cliente') return parent.get('idCliente');
     if (controlName === 'lider') return parent.get('idLider');
@@ -801,6 +854,10 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private obtenerIdEmpleadoPorNombre(nombre?: string | null): number | null {
     return this.empleadosDisponibles.find(e => e.nombre === nombre)?.id ?? null;
+  }
+
+  private obtenerIdProveedorPorNombre(nombre?: string | null): number | null {
+    return this.proveedoresDisponibles.find(p => p.nombre === nombre)?.id ?? null;
   }
 
   private parseFechaString(valor: string): Date | null {

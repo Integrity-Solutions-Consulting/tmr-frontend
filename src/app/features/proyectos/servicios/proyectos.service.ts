@@ -53,6 +53,7 @@ export class ProyectosService {
         LiderHoras: l.horasLider ?? null,
         Recursos: (l.recursos ?? []).map(r => ({
           IdEmpleado: r.idEmpleado ?? null,
+          IdProveedor: r.idProveedor ?? null,
           Tipo: r.tipo,
           Nombre: r.nombre,
           Rol: r.rol,
