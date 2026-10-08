@@ -35,7 +35,9 @@ export class ModalDetalleColaboradorComponent {
   }
 
   get totalProyectos(): number {
-    return this.colaborador?.proyectosAsignados?.length ?? this.colaborador?.numProyectos ?? 0;
+    // sm - Solo cuentan los proyectos con estado de asignación Activo (la lista muestra también los inactivos).
+    return this.colaborador?.proyectosAsignados?.filter(p => p.estadoAsignacion !== false).length
+      ?? this.colaborador?.numProyectos ?? 0;
   }
 
   toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos' | 'salida' | 'reemplazo'): void {

@@ -29,6 +29,8 @@ export interface ProyectoAsignado {
   nombre: string;
   cliente: string;
   estado: EstadoProyecto;
+  // sm - Estado de asignación del colaborador en el proyecto (true = Activo, false = Inactivo).
+  estadoAsignacion: boolean;
 }
 
 export interface Colaborador {

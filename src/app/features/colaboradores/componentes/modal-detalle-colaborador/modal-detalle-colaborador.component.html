@@ -250,7 +250,11 @@
                 </div>
               </div>
 
-              <app-badge-estado [estado]="proy.estado || 'Sin seguimiento'"></app-badge-estado>
+              <div class="detalle-proyectos__item-estados">
+                <app-badge-estado [estado]="proy.estado || 'Sin seguimiento'"></app-badge-estado>
+                <app-badge-estado [estado]="proy.estadoAsignacion === false ? 'Inactivo' : 'Activo'"
+                  [attr.title]="'Estado de asignación'"></app-badge-estado>
+              </div>
 
             </div>
           }

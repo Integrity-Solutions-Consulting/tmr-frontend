@@ -322,6 +322,11 @@ export class ProyectosPage implements OnDestroy {
     this.confirmCambioEstadoVisible = true;
   }
 
+  // sm - Recursos con estado de asignación Activo (el backend ya marca Inactivo si la salida pasó).
+  contarRecursosActivos(recursos: RecursoProyecto[] | undefined): number {
+    return (recursos ?? []).filter(r => r.estadoAsignacion !== false).length;
+  }
+
   abrirModalDetalle(proyecto: Proyecto): void {
     this.proyectosService.obtenerProyecto(proyecto.id).subscribe({
       next: (proyectoCompleto) => { this.proyectoDetalle = proyectoCompleto; this.modalDetalleVisible = true; },

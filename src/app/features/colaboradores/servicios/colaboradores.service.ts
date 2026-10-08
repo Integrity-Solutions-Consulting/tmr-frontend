@@ -232,8 +232,11 @@ export class ColaboradoresService {
         nombre: p.nombre ?? p.Nombre ?? '',
         cliente: p.cliente ?? p.Cliente ?? '',
         estado: (p.estado ?? p.Estado ?? '') as any,
+        estadoAsignacion: p.estadoAsignacion ?? p.EstadoAsignacion ?? true,
       })),
-      numProyectos: (api.proyectos ?? api.Proyectos ?? []).length,
+      // sm - Solo cuentan los proyectos con estado de asignación Activo.
+      numProyectos: (api.proyectos ?? api.Proyectos ?? [])
+        .filter((p: any) => (p.estadoAsignacion ?? p.EstadoAsignacion ?? true) !== false).length,
 
       // ================================================================
       // NUEVOS CAMPOS PARA SALIDA DE COLABORADORES

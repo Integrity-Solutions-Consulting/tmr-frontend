@@ -336,6 +336,16 @@
                           </mat-select>
                           <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'rol')">Obligatorio</mat-error>
                         </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-estado">
+                          <mat-label>Estado de asignación</mat-label>
+                          <mat-select yPosition="below" formControlName="estadoAsignacion"
+                            (selectionChange)="onEstadoAsignacionChange(li, ri)">
+                            <mat-option value="Activo">Activo</mat-option>
+                            <mat-option value="Inactivo">Inactivo</mat-option>
+                          </mat-select>
+                        </mat-form-field>
                       </div>
 
                       <div class="proyecto-form__resource-bottom">
@@ -353,6 +363,9 @@
                           <input #salidaInput class="proyecto-form__date-control" type="date"
                             autocomplete="off" formControlName="salida">
                           <label class="proyecto-form__date-label">Salida</label>
+                          <div class="proyecto-form__date-error" *ngIf="recursoSalidaRequerida(li, ri)">
+                            Obligatoria si el recurso está Inactivo
+                          </div>
                           <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
                             La salida no puede ser menor que la entrada
                           </div>

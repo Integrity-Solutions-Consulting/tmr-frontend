@@ -17,6 +17,9 @@ export interface RecursoProyecto {
   salida?: string | null;
   costoHora: number;
   horas: number;
+  // sm - Estado de asignación del recurso (true = Activo, false = Inactivo). El backend lo devuelve Inactivo
+  // también cuando la fecha de salida ya pasó.
+  estadoAsignacion?: boolean;
 }
 
 export interface LiderProyecto {

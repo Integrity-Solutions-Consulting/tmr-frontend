@@ -563,7 +563,7 @@
 }
 
 .proyecto-form__resource-middle {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) 200px;
 }
 
 .proyecto-form__resource-bottom {
@@ -575,6 +575,7 @@
 .proyecto-form__resource-nombre,
 .proyecto-form__resource-departamento,
 .proyecto-form__resource-rol,
+.proyecto-form__resource-estado,
 .proyecto-form__resource-fecha,
 .proyecto-form__resource-costo,
 .proyecto-form__resource-horas {
@@ -721,6 +722,10 @@
   .proyecto-form__remove {
     grid-column: 2;
     grid-row: 1;
+  }
+
+  .proyecto-form__resource-middle {
+    grid-template-columns: 1fr;
   }
 
   .proyecto-form__resource-bottom {

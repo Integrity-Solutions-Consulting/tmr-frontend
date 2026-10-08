@@ -533,8 +533,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         next: colaboradores => {
           const activosCount = colaboradores.filter(c => c.estado === 'Activo').length;
           const inactivosCount = colaboradores.filter(c => c.estado === 'Inactivo').length;
-          const noAsignadosCount = colaboradores.filter(c => (!c.proyectosAsignados || c.proyectosAsignados.length === 0) && c.estado === 'Activo').length;
-          const asignadosCount = colaboradores.filter(c => c.proyectosAsignados && c.proyectosAsignados.length > 0 && c.estado === 'Activo').length;
+          // sm - Asignado = al menos un proyecto con estado de asignación Activo.
+          const noAsignadosCount = colaboradores.filter(c => c.numProyectos === 0 && c.estado === 'Activo').length;
+          const asignadosCount = colaboradores.filter(c => c.numProyectos > 0 && c.estado === 'Activo').length;
 
 
           void exportarReporteExcelMultihoja(
@@ -637,7 +638,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   private formatearProyectosColaborador(colaborador: Colaborador): string {
     const proyectos = colaborador.proyectosAsignados ?? [];
     if (!proyectos.length) return '-';
-    return proyectos.map(p => `${p.nombre} - ${p.cliente} - ${p.estado}`).join('; ');
+    return proyectos
+      .map(p => `${p.nombre} - ${p.cliente} - ${p.estado}${p.estadoAsignacion === false ? ' (Asignación inactiva)' : ''}`)
+      .join('; ');
   }
   // ── Toast ────────────────────────────────────────────────
   private obtenerColaboradoresParaExportar() {
