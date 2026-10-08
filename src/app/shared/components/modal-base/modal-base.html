@@ -8,8 +8,8 @@
       <header class="modal__header">
         <h2>{{ titulo }}</h2>
 
-        <button type="button" class="modal__cerrar" (click)="cerrar.emit()">
-          ×
+        <button type="button" class="modal__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
+          <span class="material-icons" aria-hidden="true">close</span>
         </button>
       </header>
 

@@ -7,6 +7,7 @@ export const ID_SEGUIMIENTO_INHABILITADO = -99;
 export interface RecursoProyecto {
   id?: number;
   idEmpleado?: number | null;
+  idProveedor?: number | null;
   idDepartamento?: number | null;
   tipo: string;
   nombre: string;
@@ -79,4 +80,5 @@ export interface ProyectoLookups {
   estados: LookupOption[];
   tipos: LookupOption[];
   departamentos: LookupOption[];
+  proveedores: LookupOption[];
 }

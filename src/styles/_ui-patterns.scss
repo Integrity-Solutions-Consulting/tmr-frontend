@@ -65,3 +65,64 @@
     font-weight: $active-weight;
   }
 }
+
+// ── Encabezado estándar de modales de crear/editar ──
+// Un solo diseño para todos los módulos: título, subtítulo y botón cerrar.
+@mixin modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+@mixin modal-title {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--primary-color);
+  text-align: left;
+}
+
+@mixin modal-subtitle {
+  margin: 4px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+@mixin modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+
+  mat-icon,
+  .material-icons {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+  }
+
+  &:hover {
+    background: transparent;
+    color: var(--primary-color);
+  }
+}

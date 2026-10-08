@@ -36,9 +36,12 @@
             <label class="filter-label">Búsqueda</label>
             <div class="filter-input-wrapper">
                 <!-- sm - Búsqueda solo por colaborador y proyecto, local (no recarga desde el servidor). -->
+                <span class="material-symbols-outlined filter-icon">search</span>
                 <input class="filter-input" type="text" placeholder="Buscar colaborador o proyecto..."
                     [(ngModel)]="busqueda" (input)="aplicarBusqueda()" />
-                <img class="filter-icon-img" src="assets/iconos/buscar.svg" alt="buscar" />
+                @if (busqueda) {
+                    <button type="button" class="filter-clear" (click)="busqueda = ''; aplicarBusqueda()" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+                }
             </div>
         </div>
 
@@ -49,8 +52,10 @@
                 <input class="filter-input" type="text" placeholder="Todos los clientes"
                     [(ngModel)]="clienteSeleccionado" (input)="onClienteInput($event)"
                     [matAutocomplete]="autoCliente" />
-                <img class="filter-icon-img" src="assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg"
-                    alt="cliente" />
+                <span class="material-symbols-outlined filter-icon">search</span>
+                @if (clienteSeleccionado) {
+                    <button type="button" class="filter-clear" (click)="seleccionarCliente('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+                }
                 <!-- sm - La tabla se filtra por cliente solo al elegir una opción (no con cada letra escrita). -->
                 <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event.option.value)"
                     (closed)="onClientePanelCerrado()">

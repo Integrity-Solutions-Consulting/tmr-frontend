@@ -1,3 +1,4 @@
+@use '../../../../../styles/filtros' as filtros;
 
 // sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
 // pone el layout global, no cada página).
@@ -207,18 +208,7 @@ app-paginacion {
   }
 }
 
-
 /* ============================================================ FILTERS CARD ============================================================ */
-.filters-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: flex-end ;
-    gap: 16px ;
-    flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
 
 /* Descargar button */
 // sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
@@ -271,7 +261,6 @@ app-paginacion {
         opacity: 0.8;
     }
 
-
 }
 
 // sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
@@ -290,3 +279,6 @@ app-paginacion {
         color: var(--text-inverse) ;
     }
 }
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;

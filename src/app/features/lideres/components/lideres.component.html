@@ -19,33 +19,36 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" class="filter-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
           (input)="aplicarFiltros()" />
+        @if (busqueda) {
+          <button type="button" class="filter-clear" (click)="busqueda = ''; aplicarFiltros()" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
-    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleEstadoDropdown($event)">
       <label class="filter-label">Estado</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ estadoFiltro || 'Todos' }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ estadoFiltro || 'Todos' }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
-      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-option"
+      <div class="dropdown-estado" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-opcion"
           (click)="seleccionarEstado('Activo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
           </div>
-          <span>Activo</span>
-          <span class="dropdown-count">{{ totalActivos }}</span>
+          <span class="opcion-label">Activo</span>
+          <span class="opcion-contador">{{ totalActivos }}</span>
         </div>
-        <div class="dropdown-option"
+        <div class="dropdown-opcion"
           (click)="seleccionarEstado('Inactivo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Inactivo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Inactivo'">check</span>
           </div>
-          <span>Inactivo</span>
-          <span class="dropdown-count">{{ totalInactivos }}</span>
+          <span class="opcion-label">Inactivo</span>
+          <span class="opcion-contador">{{ totalInactivos }}</span>
         </div>
         <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>

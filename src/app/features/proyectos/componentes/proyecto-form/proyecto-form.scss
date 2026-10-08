@@ -559,7 +559,7 @@
 }
 
 .proyecto-form__resource-top {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+  grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr) 36px;
 }
 
 .proyecto-form__resource-middle {
@@ -571,6 +571,7 @@
     minmax(0, 1fr) minmax(0, 1fr) 150px 150px;
 }
 
+.proyecto-form__resource-tipo,
 .proyecto-form__resource-nombre,
 .proyecto-form__resource-departamento,
 .proyecto-form__resource-rol,
@@ -659,13 +660,14 @@
 
   .proyecto-form__resource-top {
     grid-template-columns:
-      minmax(0, 1fr) minmax(0, 1fr) 36px;
+      110px minmax(0, 1fr) minmax(0, 1fr) 36px;
   }
 
   .proyecto-form__resource-bottom {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .proyecto-form__resource-tipo,
   .proyecto-form__resource-nombre,
   .proyecto-form__resource-departamento,
   .proyecto-form__resource-rol,
@@ -711,6 +713,7 @@
       minmax(0, 1fr) 36px;
   }
 
+  .proyecto-form__resource-tipo,
   .proyecto-form__resource-departamento {
     grid-column: 1 / -1;
   }

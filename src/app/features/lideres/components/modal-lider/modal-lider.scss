@@ -1,3 +1,4 @@
+@use '../../../../../styles/ui-patterns' as ui;
 $primary: var(--primary-color);
 $primary-dark: #162C56;
 $white: var(--bg-card);
@@ -29,34 +30,15 @@ $text-light: #7C7C7C;
 }
 
 .modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 46px 33px 16px;
+  @include ui.modal-header;
 }
 
 .modal-title {
-  font-size: 30px;
-  font-weight: 800;
-  color: $primary;
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  text-align: left;
-  line-height: 36px;
-  white-space: nowrap;
+  @include ui.modal-title;
 }
 
 .modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: $text-light;
-  display: flex;
-  align-items: center;
-  padding: 4px;
-  border-radius: 6px;
-  .material-icons { font-size: 20px; }
-  &:hover { background: $border; }
+  @include ui.modal-close;
 }
 
 .modal-body {

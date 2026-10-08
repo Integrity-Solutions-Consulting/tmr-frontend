@@ -26,26 +26,23 @@
         <input
           matInput
           formControlName="cliente"
-          [readonly]="!!proyecto"
           [matAutocomplete]="clienteAuto"
           matAutocompletePosition="below"
           autocomplete="off"
-          (input)="!proyecto && onClienteInput()"
-          (focus)="!proyecto && onClienteFocus($event)"
+          (input)="onClienteInput()"
+          (focus)="onClienteFocus($event)"
         >
         <mat-autocomplete #clienteAuto="matAutocomplete" (optionSelected)="onClienteChange($event.option.value)">
           <mat-option *ngFor="let c of getClientesFiltrados()" [value]="c.nombre">
             {{ c.nombre }}
           </mat-option>
         </mat-autocomplete>
-        @if (proyecto) { <mat-hint>El cliente no se puede modificar al editar</mat-hint> }
         <mat-error *ngIf="campoInvalido('cliente')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Nombre del Proyecto</mat-label>
-        <input matInput formControlName="nombre" [readonly]="!!proyecto">
-        @if (proyecto) { <mat-hint>El nombre no se puede modificar al editar</mat-hint> }
+        <input matInput formControlName="nombre">
         <mat-error *ngIf="campoInvalido('nombre')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
@@ -281,8 +278,17 @@
                       <div class="proyecto-form__resource-top">
 
                         <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-tipo">
+                          <mat-label>Tipo</mat-label>
+                          <mat-select yPosition="below" formControlName="tipo" (selectionChange)="onTipoRecursoChange(li, ri)">
+                            <mat-option value="Interno">Interno</mat-option>
+                            <mat-option value="Externo">Proveedor</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
                           class="proyecto-form__resource-nombre">
-                          <mat-label>Seleccionar recurso</mat-label>
+                          <mat-label>{{ esRecursoExterno(li, ri) ? 'Seleccionar proveedor' : 'Seleccionar recurso' }}</mat-label>
                           <mat-icon matPrefix>search</mat-icon>
                           <input
                             matInput
@@ -336,14 +342,10 @@
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                           <input #entradaInput class="proyecto-form__date-control" type="date"
                             autocomplete="off" formControlName="entrada">
-                          <label class="proyecto-form__date-label">Entrada <span>*</span></label>
+                          <label class="proyecto-form__date-label">Entrada</label>
                           <div class="proyecto-form__date-error"
                             *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
                             Fecha inválida
-                          </div>
-                          <div class="proyecto-form__date-error"
-                            *ngIf="!entradaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'entrada')">
-                            Este campo es obligatorio
                           </div>
                         </div>
 
