@@ -1,0 +1,169 @@
+// sm - Diseño del Dashboard ejecutivo (small-box): tarjeta blanca con acento de color a la izquierda, número grande,
+// título e ícono grande de fondo. "destacado" es sólida en azul marino. Funciona en tema claro y oscuro con los tokens
+// globales de styles.scss.
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.tarjeta {
+  --acento: var(--primary-color);
+  --caja-fondo: var(--bg-card);
+  --caja-texto: var(--text-main);
+  --icono-color: var(--primary-color);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 96px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-default);
+  border-left: 4px solid var(--acento);
+  border-radius: 12px;
+  background: var(--caja-fondo);
+  color: var(--caja-texto);
+  overflow: hidden;
+  text-align: left;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  box-shadow: var(--elevation-card);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  // sm - Solo las tarjetas que abren un detalle se elevan al pasar el mouse.
+  &.clicable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--elevation-dropdown);
+
+      .tarjeta-icono {
+        transform: scale(1.08);
+      }
+    }
+  }
+
+  &.seleccionada {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-cian);
+    outline-offset: 2px;
+  }
+
+  &.tono-corporativo { --acento: var(--primary-color); }
+  &.tono-cian { --acento: var(--accent-cian); --icono-color: var(--accent-cian); }
+  &.tono-peligro { --acento: var(--status-danger-bg-solid); --icono-color: var(--status-danger-bg-solid); }
+  &.tono-exito { --acento: var(--status-success-text); --icono-color: var(--status-success-text); }
+  &.tono-advertencia { --acento: var(--status-warning-text); --icono-color: var(--status-warning-text); }
+
+  &.tono-neutro {
+    --acento: var(--accent-silver);
+    --icono-color: var(--accent-silver);
+
+    .tarjeta-valor,
+    .tarjeta-pie {
+      color: var(--text-secondary);
+    }
+  }
+
+  // sm - Estilo AdminLTE sólido, en azul marino corporativo.
+  &.tono-destacado {
+    --caja-fondo: var(--primary-color);
+    border-color: var(--primary-color);
+
+    .tarjeta-valor,
+    .tarjeta-titulo {
+      color: #fff;
+    }
+
+    .tarjeta-icono {
+      color: #fff;
+      opacity: 0.2;
+    }
+
+    .tarjeta-pie {
+      background: rgba(0, 0, 0, 0.15);
+      color: #fff;
+    }
+  }
+}
+
+.tarjeta-cuerpo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  padding: 14px 64px 10px 16px;
+}
+
+.tarjeta-valor {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--acento);
+}
+
+.tarjeta-titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.tarjeta-icono {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 54px;
+  width: 54px;
+  height: 54px;
+  color: var(--icono-color);
+  opacity: 0.14;
+  transition: transform 0.25s ease;
+}
+
+:host-context(html[data-theme='dark']) .tarjeta.tono-corporativo {
+  --acento: var(--accent-cian);
+  --icono-color: var(--accent-cian);
+
+  .tarjeta-icono {
+    opacity: .28;
+  }
+}
+
+:host-context(html[data-theme='dark']) .tarjeta.tono-peligro .tarjeta-icono {
+  opacity: .28;
+}
+
+.tarjeta-pie {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--bg-soft);
+  color: var(--primary-color);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tarjeta-valor {
+    font-size: 26px;
+  }
+}

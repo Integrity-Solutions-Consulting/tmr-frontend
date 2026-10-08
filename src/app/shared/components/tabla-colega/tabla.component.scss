@@ -1,48 +1,99 @@
+@use '../../../../styles/table-theme' as table-theme;
+
 :host {
   display: block;
   width: 100%;
   min-width: 0;
 }
 
+// El contenedor consume los tokens compartidos para conservar el mismo tema.
 .tabla-wrapper {
+  background: var(--pattern-table-bg);
+  border: 1px solid var(--pattern-border-color);
+  border-radius: 12px 12px 0 0;
+  overflow: auto;
+  box-shadow: none;
+  width: 100%;
+  max-height: none;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  min-width: 0;
 }
 
 .table-container {
   overflow-x: auto;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  background-color: #ffffff;
+  width: 100%;
+  min-height: 0;
 }
 
 .tabla {
   width: 100%;
-  text-align: left;
+  min-width: 1000px;
+  table-layout: auto;
   border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
 
   thead {
-    background-color: rgba(248, 250, 252, 0.5);
+    background: var(--pattern-table-header-bg);
+    border-bottom: 1px solid var(--pattern-border-color);
+    position: sticky;
+    top: 0;
+    z-index: 2;
 
     th {
-      padding: 16px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #737373;
-      text-transform: uppercase;
-      border-bottom: 1px solid #f1f5f9;
+      padding: 14px 10px;
       text-align: left;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 13px;
+      white-space: normal;
+      background: var(--pattern-table-header-bg);
+      user-select: none;
+      box-sizing: border-box;
+
+      .th-inner {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .th-label {
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: normal;
+        line-height: 1.25;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      &.sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          color: var(--primary-color);
+
+          .sort-icon {
+            color: currentColor;
+          }
+        }
+      }
     }
   }
 
   tbody {
     td {
-      padding: 16px;
-      font-size: 14px;
-      color: #475569;
-      border-bottom: 1px solid #f8fafc;
+      padding: 14px 10px;
+      color: var(--text-main);
+      font-weight: 400;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
+      border-bottom: 1px solid var(--pattern-border-color);
     }
   }
 }
@@ -58,11 +109,15 @@
 }
 
 .tabla-row {
-  transition: background-color 0.2s;
+  transition: background-color 0.12s;
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(248, 250, 252, 0.5);
+    background: var(--pattern-table-row-hover);
+  }
+
+  &.selected-row {
+    background: var(--pattern-table-row-hover);
   }
 
   &:last-child td {
@@ -80,7 +135,7 @@
   }
 
   &.text-dark {
-    color: #334155;
+    color: var(--text-body);
   }
 
   &.text-center {
@@ -90,6 +145,15 @@
   &.text-right {
     text-align: right;
   }
+}
+
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: var(--text-muted);
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .tabla-empty-row {
@@ -111,13 +175,13 @@
   h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin: 0;
     margin-top: 16px;
   }
 
   p {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 14px;
     margin-top: 4px;
     margin-bottom: 0;
@@ -127,8 +191,8 @@
 .empty-icon {
   width: 64px;
   height: 64px;
-  background-color: #f8fafc;
-  color: #cbd5e1;
+  background-color: var(--bg-app);
+  color: var(--text-disabled);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -138,7 +202,7 @@
 .btn-empty-action {
   margin-top: 24px;
   padding: 8px 16px;
-  color: #163572;
+  color: var(--primary-color);
   font-weight: 700;
   font-size: 14px;
   background: none;
@@ -152,29 +216,31 @@
 }
 
 /* Badges y componentes en línea */
+
 .badge-inline {
   font-size: 12px;
-  color: #64748b;
-  background-color: #f8fafc;
+  color: var(--text-secondary);
+  background-color: var(--bg-app);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-default);
   display: inline-block;
   white-space: nowrap;
 }
 
 .badge-estado {
   font-size: 12px;
-  color: #64748b;
-  background-color: #f8fafc;
+  color: var(--text-secondary);
+  background-color: var(--bg-app);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-default);
   display: inline-block;
   white-space: nowrap;
 }
 
 /* Action menu */
+
 .action-menu-cell {
   display: flex;
   justify-content: center;
@@ -184,29 +250,37 @@
 
 .action-menu-placeholder {
   font-size: 16px;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: color 0.2s;
 
   &:hover {
-    color: #163572;
+    color: var(--primary-color);
   }
 }
 
 /* Paginación */
+
+// sm - Pegada justo debajo de .tabla-wrapper (sin margen ni borde superior) para que, junto con sus esquinas
+// inferiores redondeadas, formen un único recuadro continuo, igual que el pie de tabla de Seguimiento.
 .pagination-wrapper {
-  padding-top: 32px;
-  display: flex;
-  justify-content: flex-end;
+  display: block;
+  background: var(--pattern-panel-bg);
+  border: 1px solid var(--pattern-border-color);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 9px 12px 9px 16px;
 }
 
 /* Estados de tabla adicionales */
+
 .tabla-loading {
   opacity: 0.6;
   pointer-events: none;
 }
 
 /* Responsive */
+
 @media (max-width: 768px) {
   .table-container {
     font-size: 12px;
@@ -245,10 +319,12 @@
 }
 
 /* Animaciones */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -257,3 +333,9 @@
 .tabla-row {
   animation: fadeIn 0.3s ease-in;
 }
+
+.tabla-wrapper { @include table-theme.table-shell; }
+.tabla { @include table-theme.data-table; }
+.pagination-wrapper { @include table-theme.table-pagination; }
+
+

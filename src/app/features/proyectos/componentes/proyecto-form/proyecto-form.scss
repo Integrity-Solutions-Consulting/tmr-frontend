@@ -1,3 +1,10 @@
+@use "sass:color";
+
+
+/* ============================================================
+   FORMULARIO
+   ============================================================ */
+
 .proyecto-form {
   display: flex;
   flex-direction: column;
@@ -5,14 +12,19 @@
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
+
+/* ============================================================
+   SECCIONES
+   ============================================================ */
+
 .proyecto-form__section {
   padding: 0;
-  background: #ffffff;
+  background: var(--bg-card);
 
   h3 {
     margin: 0 0 20px;
     padding-left: 0;
-    color: #163572;
+    color: var(--primary-color);
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
@@ -33,25 +45,51 @@
     width: 140px;
     height: 36px;
     border-radius: 10px;
-    background: #163572 !important;
-    color: #ffffff !important;
+    background: var(--primary-color) !important;
+    color: var(--text-inverse) !important;
     font-size: 13px;
     font-weight: 600;
     box-shadow: none !important;
 
+    &:disabled {
+      cursor: wait;
+      opacity: .72;
+    }
+
     &:hover {
-      background: #162056 !important;
+      background: var(--primary-hover) !important;
     }
   }
 }
 
+.proyecto-form__saving-spinner {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: -3px;
+  animation: proyecto-form-spin .7s linear infinite;
+}
+
+@keyframes proyecto-form-spin {
+  to { transform: rotate(360deg); }
+}
+
 .proyecto-form__subtitle {
   margin: 0 0 14px;
-  color: #163572;
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
 }
+
+
+/* ============================================================
+   CAMPOS
+   ============================================================ */
 
 .proyecto-form__field,
 .proyecto-form__leader .mat-mdc-form-field,
@@ -59,7 +97,11 @@
   width: 100%;
 }
 
-// ── FIX: campo de Observación sin flecha de redimensionar ─────────────────
+
+/* ============================================================
+   OBSERVACIÓN
+   ============================================================ */
+
 .proyecto-form__observacion {
   textarea {
     resize: none;
@@ -67,6 +109,11 @@
     overflow-y: auto;
   }
 }
+
+
+/* ============================================================
+   BUSCADOR
+   ============================================================ */
 
 .proyecto-form__search-wrapper {
   width: 100%;
@@ -81,21 +128,33 @@
   height: 38px;
   padding: 0 12px;
   box-sizing: border-box;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   outline: none;
-  background: #ffffff;
-  color: #374151;
+  background: var(--bg-card);
+  color: var(--text-body);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   line-height: 38px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
   }
 }
+
+
+/* ============================================================
+   FECHA
+   ============================================================ */
 
 .proyecto-form__date-field {
   position: relative;
@@ -109,19 +168,21 @@
   height: 42px;
   padding: 0 12px;
   box-sizing: border-box;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   outline: none;
-  background: #ffffff;
-  color: #374151;
+  background: var(--bg-card);
+  color: var(--text-body);
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
   line-height: 42px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 
   &:focus {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 }
 
@@ -131,24 +192,29 @@
   left: 12px;
   padding: 0 4px;
   transform: translateY(-50%);
-  background: #ffffff;
-  color: #737373;
+  background: var(--bg-card);
+  color: var(--text-subtle);
   font-size: 11px;
   line-height: 1;
   pointer-events: none;
 
   span {
-    color: #ef4444;
+    color: var(--status-danger-text);
   }
 }
 
 .proyecto-form__date-error {
   margin-top: 4px;
-  color: #dc2626;
+  color: var(--status-danger-text);
   font-size: 11.5px;
   font-weight: 500;
   line-height: 15px;
 }
+
+
+/* ============================================================
+   ANGULAR MATERIAL
+   ============================================================ */
 
 :host ::ng-deep .proyecto-form {
   .mat-mdc-form-field {
@@ -162,11 +228,13 @@
     height: 42px;
     min-height: 42px;
     padding-bottom: 0;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card);
     border-radius: 12px;
     box-shadow: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
 
   .mat-mdc-form-field-flex {
@@ -184,7 +252,7 @@
 
   .mat-mdc-input-element,
   .mat-mdc-select-value {
-    color: #374151;
+    color: var(--text-body);
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
@@ -192,7 +260,7 @@
   }
 
   .mat-mdc-floating-label {
-    color: #9ca3af;
+    color: var(--text-disabled);
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 400;
@@ -200,21 +268,21 @@
 
   .mdc-floating-label--float-above {
     font-size: 11px !important;
-    color: #737373 !important;
-    background: #ffffff !important;
+    color: var(--text-subtle) !important;
+    background: var(--bg-card) !important;
     padding: 0 4px !important;
     z-index: 2 !important;
   }
 
   .mat-mdc-form-field-error {
     margin-top: 4px;
-    color: #dc2626;
+    color: var(--status-danger-text);
     font-size: 11.5px;
     font-weight: 500;
   }
 
   .mat-mdc-form-field-hint {
-    color: #d1d5db !important;
+    color: var(--text-disabled) !important;
   }
 
   .mat-mdc-form-field-subscript-wrapper {
@@ -226,7 +294,7 @@
   .mat-mdc-icon-button.mat-mdc-button-base {
     width: 36px;
     height: 36px;
-    color: #737373;
+    color: var(--text-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,16 +320,20 @@
   }
 
   .mat-mdc-text-field-wrapper.mdc-text-field--focused {
-    border-color: #163572;
-    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring-primary);
   }
 
   .mat-mdc-text-field-wrapper.mdc-text-field--invalid {
-    border-color: #dc2626;
+    border-color: var(--status-danger-border);
   }
 }
 
-// ── FIX OBSERVACIÓN: selectores directos, no dependen de mdc-text-field--textarea ──
+
+/* ============================================================
+   OBSERVACIÓN - ANGULAR MATERIAL
+   ============================================================ */
+
 :host ::ng-deep .proyecto-form__observacion {
   &.mat-mdc-form-field {
     height: auto;
@@ -304,7 +376,10 @@
   }
 }
 
-// ── Grid info general ────────────────────────────────────────────────────────
+
+/* ============================================================
+   GRID DE INFORMACIÓN
+   ============================================================ */
 
 .proyecto-form__grid {
   display: grid;
@@ -319,12 +394,12 @@
   gap: 4px;
   min-height: 72px;
   padding: 14px 16px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--border-soft);
   border-radius: 12px;
-  background: #f8fafc;
+  background: var(--bg-app);
 
   span {
-    color: #737373;
+    color: var(--text-subtle);
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
@@ -332,28 +407,31 @@
   }
 
   strong {
-    color: #163572;
+    color: var(--primary-color);
     font-size: 14px;
     font-weight: 600;
     line-height: 1.2;
   }
 
   small {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 11px;
     line-height: 1.2;
   }
 }
 
-// ── Bloque líder ─────────────────────────────────────────────────────────────
+
+/* ============================================================
+   BLOQUE DE LÍDER
+   ============================================================ */
 
 .proyecto-form__leader-block {
   width: min(100%, 827px);
   padding: 20px;
   margin-bottom: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--bg-card);
   box-sizing: border-box;
 
   &:last-child {
@@ -369,7 +447,7 @@
 
   h4 {
     margin: 0;
-    color: #163572;
+    color: var(--primary-color);
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -380,7 +458,7 @@
     width: 32px !important;
     height: 32px !important;
     border-radius: 8px !important;
-    color: #ef4444 !important;
+    color: var(--status-danger-text) !important;
     background: transparent !important;
     display: flex !important;
     align-items: center;
@@ -388,12 +466,15 @@
     font-size: 18px;
 
     &:hover {
-      background: #fee2e2 !important;
+      background: var(--status-danger-bg-soft) !important;
     }
   }
 }
 
-// ── Campos del líder ─────────────────────────────────────────────────────────
+
+/* ============================================================
+   CAMPOS DEL LÍDER
+   ============================================================ */
 
 .proyecto-form__leader {
   display: grid;
@@ -406,13 +487,16 @@
   margin-bottom: 20px;
   padding: 16px;
 
-  background: #f8fafc;
-  border: 1px solid #e8edf5;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   box-sizing: border-box;
 }
 
-// ── Cabecera de recursos ──────────────────────────────────────────────────────
+
+/* ============================================================
+   CABECERA DE RECURSOS
+   ============================================================ */
 
 .proyecto-form__resources-header {
   display: flex;
@@ -427,18 +511,21 @@
   width: 160px;
   height: 36px;
   border-radius: 10px;
-  background: #163572 !important;
-  color: #ffffff !important;
+  background: var(--primary-color) !important;
+  color: var(--text-inverse) !important;
   font-size: 13px;
   font-weight: 600;
   box-shadow: none !important;
 
   &:hover {
-    background: #162056 !important;
+    background: var(--primary-hover) !important;
   }
 }
 
-// ── Lista de recursos ─────────────────────────────────────────────────────────
+
+/* ============================================================
+   RECURSOS
+   ============================================================ */
 
 .proyecto-form__resources {
   display: flex;
@@ -451,9 +538,9 @@
   width: 100%;
   min-height: 127px;
   padding: 16px;
-  border: 1px solid #e8edf5;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: #f8fafc;
+  background: var(--bg-app);
   box-sizing: border-box;
 }
 
@@ -480,7 +567,8 @@
 }
 
 .proyecto-form__resource-bottom {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 150px 150px;
+  grid-template-columns:
+    minmax(0, 1fr) minmax(0, 1fr) 150px 150px;
 }
 
 .proyecto-form__resource-nombre,
@@ -497,7 +585,8 @@
   width: 150px;
 }
 
-.proyecto-form__field :is(.mat-mdc-icon-button, .mat-datepicker-toggle) {
+.proyecto-form__field :is(.mat-mdc-icon-button,
+  .mat-datepicker-toggle) {
   align-self: center;
 }
 
@@ -506,18 +595,21 @@
   height: 40px !important;
   margin-top: 0;
   border-radius: 8px !important;
-  color: #ef4444 !important;
+  color: var(--status-danger-text) !important;
   background: transparent !important;
   display: flex !important;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    background: #fee2e2 !important;
+    background: var(--status-danger-bg-soft) !important;
   }
 }
 
-// ── Acciones ──────────────────────────────────────────────────────────────────
+
+/* ============================================================
+   ACCIONES
+   ============================================================ */
 
 .proyecto-form__actions {
   display: flex;
@@ -528,19 +620,22 @@
     width: 173px;
     height: 40px;
     border-radius: 10px;
-    background: #163572 !important;
-    color: #ffffff !important;
+    background: var(--primary-color) !important;
+    color: var(--text-inverse) !important;
     font-size: 14px;
     font-weight: 600;
     box-shadow: none !important;
 
     &:hover {
-      background: #162056 !important;
+      background: var(--primary-hover) !important;
     }
   }
 }
 
-// ── Responsive -────────────────────────────────────────────────────────────────
+
+/* ============================================================
+   RESPONSIVE - TABLET
+   ============================================================ */
 
 @media (max-width: 1024px) {
   .proyecto-form__grid {
@@ -563,7 +658,8 @@
   }
 
   .proyecto-form__resource-top {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+    grid-template-columns:
+      minmax(0, 1fr) minmax(0, 1fr) 36px;
   }
 
   .proyecto-form__resource-bottom {
@@ -578,6 +674,11 @@
     width: 100%;
   }
 }
+
+
+/* ============================================================
+   RESPONSIVE - MOBILE
+   ============================================================ */
 
 @media (max-width: 768px) {
   .proyecto-form {
@@ -606,7 +707,8 @@
   }
 
   .proyecto-form__resource-top {
-    grid-template-columns: minmax(0, 1fr) 36px;
+    grid-template-columns:
+      minmax(0, 1fr) 36px;
   }
 
   .proyecto-form__resource-departamento {
@@ -636,6 +738,11 @@
   }
 }
 
+
+/* ============================================================
+   RESPONSIVE - MOBILE PEQUEÑO
+   ============================================================ */
+
 @media (max-width: 480px) {
   .proyecto-form {
     gap: 16px;
@@ -661,3 +768,4 @@
     margin-top: 16px;
   }
 }
+

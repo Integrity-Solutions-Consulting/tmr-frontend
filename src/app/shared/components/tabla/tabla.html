@@ -1,15 +1,21 @@
-<div class="tabla-shell">
-  <table mat-table [dataSource]="dataSource" class="tabla">
+<div class="table-scroll-container"><div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" class="lideres-table">
 
     <ng-container matColumnDef="codigo">
-      <th mat-header-cell *matHeaderCellDef>Codigo</th>
+      <th mat-header-cell *matHeaderCellDef class="sortable" (click)="ordenar('codigo')"
+        [attr.aria-sort]="direccionOrden('codigo')">
+        <span class="th-inner"><span class="th-label">Codigo</span><mat-icon class="sort-icon">{{ sortField() === 'codigo' ? (sortAsc() ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <span class="tabla__codigo">{{ proyecto.codigo }}</span>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="nombre">
-      <th mat-header-cell *matHeaderCellDef>Nombre del proyecto</th>
+      <th mat-header-cell *matHeaderCellDef class="sortable" (click)="ordenar('nombre')"
+        [attr.aria-sort]="direccionOrden('nombre')">
+        <span class="th-inner"><span class="th-label">Nombre del proyecto</span><mat-icon class="sort-icon">{{ sortField() === 'nombre' ? (sortAsc() ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <div class="tabla__proyecto">
           <span class="tabla__proyecto-nombre">{{ proyecto.nombre }}</span>
@@ -18,14 +24,19 @@
     </ng-container>
 
     <ng-container matColumnDef="cliente">
-      <th mat-header-cell *matHeaderCellDef>Cliente</th>
+      <th mat-header-cell *matHeaderCellDef class="sortable" (click)="ordenar('cliente')"
+        [attr.aria-sort]="direccionOrden('cliente')">
+        <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField() === 'cliente' ? (sortAsc() ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <span class="tabla__cliente">{{ proyecto.cliente || 'Sin cliente' }}</span>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="seguimiento">
-      <th mat-header-cell *matHeaderCellDef>Seguimiento</th>
+      <th mat-header-cell *matHeaderCellDef>
+        <span class="th-inner"><span class="th-label">Seguimiento</span></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <span class="seguimiento-badge" [class]="'seguimiento-badge ' + obtenerSeguimientoClase(proyecto)">
           {{ obtenerSeguimiento(proyecto) }}
@@ -34,25 +45,29 @@
     </ng-container>
 
     <ng-container matColumnDef="fechas">
-      <th mat-header-cell *matHeaderCellDef>Fechas de inicio/finalización</th>
+      <th mat-header-cell *matHeaderCellDef class="sortable" (click)="ordenar('fechaInicio')"
+        [attr.aria-sort]="direccionOrden('fechaInicio')">
+        <span class="th-inner"><span class="th-label">Fechas de inicio/finalización</span><mat-icon class="sort-icon">{{ sortField() === 'fechaInicio' ? (sortAsc() ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         {{ formatearFecha(proyecto.fechaInicio) }} - {{ formatearFecha(proyecto.fechaFin) }}
       </td>
     </ng-container>
 
     <ng-container matColumnDef="lideres">
-      <th mat-header-cell *matHeaderCellDef>Líderes</th>
+      <th mat-header-cell *matHeaderCellDef>
+        <span class="th-inner"><span class="th-label">Líderes</span></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <div class="tabla__lista">
           @if (obtenerLideresVisibles(proyecto).length) {
             @for (lider of obtenerLideresVisibles(proyecto); track lider.nombre) {
               <span class="tabla__lista-item">
                 <span>{{ lider.nombre }}</span>
-                <small>{{ lider.detalle }}</small>
               </span>
             }
             @if (obtenerLideresOcultos(proyecto) > 0) {
-              <span class="tabla_ _lista-ver-mas" (click)="verMas.emit(proyecto)">
+              <span class="tabla__lista-ver-mas" (click)="verMas.emit(proyecto)">
                 +{{ obtenerLideresOcultos(proyecto) }} más
               </span>
             }
@@ -64,7 +79,10 @@
     </ng-container>
 
     <ng-container matColumnDef="numeroRecursos">
-      <th mat-header-cell *matHeaderCellDef>Recursos</th>
+      <th mat-header-cell *matHeaderCellDef class="sortable" (click)="ordenar('numeroRecursos')"
+        [attr.aria-sort]="direccionOrden('numeroRecursos')">
+        <span class="th-inner"><span class="th-label">Recursos</span><mat-icon class="sort-icon">{{ sortField() === 'numeroRecursos' ? (sortAsc() ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+      </th>
       <td mat-cell *matCellDef="let proyecto">
         <span class="tabla__recursos">{{ proyecto.numeroRecursos ?? '-' }}</span>
       </td>
@@ -95,10 +113,9 @@
     <tr mat-header-row *matHeaderRowDef="columnas"></tr>
     <tr mat-row *matRowDef="let row; columns: columnas"></tr>
 
-  </table>
-</div>
+  </table></div></div>
 
-<div class="tabla-footer">
+<div class="pagination-bar">
   <app-paginacion
     [paginaActual]="paginaActual()"
     [totalPaginas]="totalPaginas()"

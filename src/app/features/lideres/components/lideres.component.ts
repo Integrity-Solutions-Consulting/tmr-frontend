@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { ModalLider } from './modal-lider/modal-lider';
 import { environment } from '../../../../environments/environment';
 import { ModalDetalleLider } from './modal-detalle-lider/modal-detalle-lider';
@@ -19,6 +19,9 @@ import {
   ActionMenuItem,
 } from '../../../shared/components/action-menu/action-menu.component';
 
+import { TarjetaResumenComponent } from '../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { MatIconModule } from '@angular/material/icon';
 export interface ProyectoAsignado {
   id?: number;
   codigo: string;
@@ -42,7 +45,8 @@ export interface Lider {
 @Component({
   selector: 'app-lideres',
   standalone: true,
-  imports: [
+  imports: [TarjetaResumenComponent,
+    HeaderComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -52,7 +56,8 @@ export interface Lider {
     SuccessModalComponent,
     ModalEliminarLiderComponent,
     BadgeEstadoComponent,
-    ActionMenuComponent
+    ActionMenuComponent,
+    MatIconModule
   ],
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
@@ -87,6 +92,10 @@ export class LideresComponent implements OnInit {
   guardandoLider = false;
   mostrarEstadoDropdown = false;
   errorFormulario: string | null = null;
+
+  // ── Orden de columnas ──────────────────────────────────
+  sortField: keyof Lider | null = null;
+  sortAsc = true;
 
   // ── Control de expansión de clientes ──────────────────────
   liderExpandidoId: string | number | null = null;
@@ -147,17 +156,13 @@ export class LideresComponent implements OnInit {
   }
 
   obtenerLideresDelBackend(): void {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (lideres) => {
-        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
-          next: (proyectos) => {
-            this.procesarLideres(lideres, proyectos);
-          },
-          error: () => {
-            this.procesarLideres(lideres, []);
-          }
-        });
-      },
+    forkJoin({
+      lideres: this.http.get<any[]>(this.apiUrl),
+      proyectos: this.http.get<any[]>(`${environment.apiUrl}/proyectos`).pipe(
+        catchError(() => of([] as any[]))
+      )
+    }).subscribe({
+      next: ({ lideres, proyectos }) => this.procesarLideres(lideres, proyectos),
       error: (err) => {
         console.error('❌ Error al traer líderes:', err);
       }
@@ -298,8 +303,36 @@ export class LideresComponent implements OnInit {
   }
 
   actualizarPaginados(): void {
+    const ordenados = this.ordenarLideres(this.lideresFiltrados);
     const inicio = (this.paginaActual - 1) * this.porPagina;
-    this.lideresPaginados = this.lideresFiltrados.slice(inicio, inicio + this.porPagina);
+    this.lideresPaginados = ordenados.slice(inicio, inicio + this.porPagina);
+  }
+
+  ordenar(campo: keyof Lider): void {
+    if (this.sortField === campo) {
+      this.sortAsc = !this.sortAsc;
+    } else {
+      this.sortField = campo;
+      this.sortAsc = true;
+    }
+    this.actualizarPaginados();
+  }
+
+  direccionOrden(campo: keyof Lider): 'ascending' | 'descending' | 'none' {
+    if (this.sortField !== campo) return 'none';
+    return this.sortAsc ? 'ascending' : 'descending';
+  }
+
+  private ordenarLideres(lista: Lider[]): Lider[] {
+    if (!this.sortField) return lista;
+    const campo = this.sortField;
+    const factor = this.sortAsc ? 1 : -1;
+
+    return [...lista].sort((a, b) => {
+      const valorA = String(a[campo] ?? '').toLowerCase();
+      const valorB = String(b[campo] ?? '').toLowerCase();
+      return valorA.localeCompare(valorB, 'es', { numeric: true }) * factor;
+    });
   }
 
   irPagina(p: number): void {

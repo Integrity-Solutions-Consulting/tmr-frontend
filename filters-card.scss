@@ -1,0 +1,175 @@
+.filters-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-end !important;
+    gap: 16px !important;
+    flex-wrap: wrap;
+    box-shadow: var(--elevation-card);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-input-wrapper {
+    position: relative !important;
+    width: 100%;
+
+     &:focus-within .filter-icon {
+        color: var(--primary-color) !important;
+    }
+
+    
+}
+
+.filter-input {
+    width: 100% !important;
+    padding: 10px 16px !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+
+    
+}
+
+.filter-input-wrapper .filter-input {
+    padding-left: 40px !important;
+}
+
+.filter-icon {
+    position: absolute !important;
+    left: 12px !important;
+    top: 12px !important;
+    color: var(--text-muted) !important;
+    transition: color 0.2s !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+/* Client select */
+.filter-select {
+    width: 100% !important;
+    padding: 10px 32px 10px 40px !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    cursor: pointer !important;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+
+    
+}
+
+.select-chevron {
+    position: absolute !important;
+    right: 12px !important;
+    top: 12px !important;
+    color: var(--text-muted) !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    pointer-events: none !important;
+}
+
+/* Date groups */
+.date-group {
+    flex: none !important;
+    width: 160px !important;
+}
+
+.filter-label {
+    display: block !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    color: var(--text-muted) !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    margin-left: 4px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Descargar button */
+.btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-disabled);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+
+     .download-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.enabled {
+        background: var(--bg-card);
+        color: var(--primary-color);
+        border: 1px solid var(--border-soft);
+        cursor: pointer;
+
+        .download-icon {
+            color: var(--primary-color);
+        }
+
+        &:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+    }
+
+    &.loading {
+        color: var(--primary-color);
+        cursor: wait;
+        opacity: 0.8;
+    }
+
+    
+}
+
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.

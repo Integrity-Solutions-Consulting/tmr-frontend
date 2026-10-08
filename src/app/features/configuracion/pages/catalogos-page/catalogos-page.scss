@@ -1,4 +1,6 @@
 // ── Variables ──────────────────────────────────────────────────────────────
+@use '../../../../../styles/table-theme' as table-theme;
+
 $primary:       #163572;
 $primary-dark:  #162C56;
 $secondary:     #F5F5F5;
@@ -12,12 +14,12 @@ $inactivo:      #ef4444;
 $hover-row:     rgba(#163572, 0.04);
 
 // ── Layout side-by-side ───────────────────────────────────────────────────
+// sm - Sin tope de ancho: mismo criterio que Seguimiento (el padding de la página lo pone el layout
+// global, no cada página).
 .catalogos-layout {
   display: flex;
   gap: 24px;
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
   min-height: 500px;
   box-sizing: border-box;
 }
@@ -84,7 +86,7 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   &:hover {
-    background: #f3f4f6;
+    background: #f4f4f5;
 
     .sidebar-item-icon {
       color: $primary;
@@ -95,8 +97,10 @@ $hover-row:     rgba(#163572, 0.04);
   }
 
   &--active {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    // Conserva la jerarquía de selección sin crear una segunda superficie
+    // celeste en el modo claro.
+    background: #f4f6f8;
+    border: 1px solid #c9d8eb;
 
     .sidebar-item-icon {
       color: $primary;
@@ -120,35 +124,14 @@ $hover-row:     rgba(#163572, 0.04);
   flex: 1;
 }
 
+// sm - Sin tarjeta/borde/padding propio: mismo criterio que Seguimiento (el panel con borde es solo
+// la tabla — ver .panel —, no toda la página).
 .page {
   width: 100%;
-  background: $white;
-  border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
   font-family: 'Inter', 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-// ── Header ─────────────────────────────────────────────────────────────────
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: clamp(24px, 2.5vw, 30px);
-  font-weight: 800;
-  color: $primary;
-  margin: 0;
-  line-height: 1.1;
-  font-family: 'Inter', sans-serif;
+  gap: 16px;
 }
 
 // ── Cards resumen ──────────────────────────────────────────────────────────
@@ -484,8 +467,10 @@ $hover-row:     rgba(#163572, 0.04);
 
 .table-scroll-container {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   border-radius: 16px;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+  scrollbar-width: thin;
 
   &::-webkit-scrollbar {
     height: 6px;
@@ -494,24 +479,25 @@ $hover-row:     rgba(#163572, 0.04);
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
+    background: rgba(148, 163, 184, 0.35);
     border-radius: 3px;
   }
 }
 
 .table-wrapper {
   width: 100%;
-  min-width: 700px;
+  min-width: 0;
 }
 
 .roles-table {
   width: 100%;
+  min-width: 0;
   border-collapse: collapse;
   text-align: left;
   table-layout: fixed;
 
   th, td {
-    padding: 14px 20px;
+    padding: 14px 10px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     box-sizing: border-box;
@@ -562,6 +548,17 @@ $hover-row:     rgba(#163572, 0.04);
   }
 }
 
+@media (max-width: 760px) {
+  .table-scroll-container {
+    overflow-x: auto;
+  }
+
+  .table-wrapper,
+  .roles-table {
+    min-width: 680px;
+  }
+}
+
 // ── Status Pill ───────────────────────────────────────────────────────────
 .status-pill {
   display: inline-flex;
@@ -596,7 +593,10 @@ $hover-row:     rgba(#163572, 0.04);
 
 .actions-cell {
   position: relative;
-  text-align: right;
+  width: 56px;
+  padding-right: 12px !important;
+  padding-left: 12px !important;
+  text-align: center;
   overflow: visible !important;
 }
 
@@ -625,236 +625,227 @@ $hover-row:     rgba(#163572, 0.04);
 :host-context(html[data-theme="dark"]) {
   /* Sidebar de Catálogos Maestros */
   .catalogos-sidebar {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    background-color: #27272a ;
+    background: #27272a ;
+    border-color: #3f3f46 ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) ;
   }
 
   .sidebar-title {
-    color: #3b82f6 !important;
+    color: #3b82f6 ;
   }
 
   .sidebar-item {
-    &-icon { color: #a1a1aa !important; }
-    &-text { color: #e4e4e7 !important; }
+    &-icon { color: #a1a1aa ; }
+    &-text { color: #e4e4e7 ; }
 
     &:hover {
-      background-color: #3f3f46 !important;
+      background-color: #3f3f46 ;
 
       .sidebar-item-icon,
       .sidebar-item-text {
-        color: #ffffff !important;
+        color: #ffffff ;
       }
     }
 
     &--active {
-      background-color: rgba(59, 130, 246, 0.2) !important;
-      border-color: #3b82f6 !important;
+      background-color: rgba(59, 130, 246, 0.2) ;
+      border-color: #3b82f6 ;
 
       .sidebar-item-icon,
       .sidebar-item-text {
-        color: #60a5fa !important;
+        color: #60a5fa ;
       }
     }
   }
 
   .sidebar-empty {
-    color: #a1a1aa !important;
-  }
-
-  /* Contenido Principal */
-  .page {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  }
-
-  .page-title {
-    color: #3b82f6 !important;
+    color: #a1a1aa ;
   }
 
   /* Cards resumen superiores */
   .summary-card {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border: 1px solid #3f3f46 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border: 1px solid #3f3f46 ;
+    border-radius: 12px ;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) ;
 
     &:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) ;
     }
   }
 
   .card-number {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   .card-label {
-    color: #a1a1aa !important;
+    color: #a1a1aa ;
   }
 
   .card-icon {
     &--total-items {
-      background: rgba(239, 68, 68, 0.15) !important;
-      color: #f87171 !important;
+      background: rgba(239, 68, 68, 0.15) ;
+      color: #f87171 ;
     }
 
     &--active {
-      background: rgba(34, 197, 94, 0.15) !important;
-      color: #4ade80 !important;
+      background: rgba(34, 197, 94, 0.15) ;
+      color: #4ade80 ;
     }
 
     &--inactive {
-      background: rgba(161, 161, 170, 0.15) !important;
-      color: #a1a1aa !important;
+      background: rgba(161, 161, 170, 0.15) ;
+      color: #a1a1aa ;
     }
   }
 
   /* Buscador y Filtro Estado */
   .search-input-wrapper {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
   }
 
   .search-icon {
-    filter: brightness(0) invert(1) !important;
+    filter: brightness(0) invert(1) ;
   }
 
   .search-input {
-    color: #ffffff !important;
-    background: transparent !important;
+    color: #ffffff ;
+    background: transparent ;
 
     &::placeholder {
-      color: #cbd5e1 !important;
+      color: #cbd5e1 ;
     }
   }
 
   .estado-filter-btn {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
+    color: #ffffff ;
 
     span {
-      color: #ffffff !important;
+      color: #ffffff ;
     }
 
     img, .estado-filter-icon {
-      filter: brightness(0) invert(1) !important;
+      filter: brightness(0) invert(1) ;
     }
 
     &:hover {
-      background-color: #27272a !important;
+      background-color: #27272a ;
     }
   }
 
   .estado-dropdown {
-    background-color: #27272a !important;
-    border-color: #3f3f46 !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    background-color: #27272a ;
+    border-color: #3f3f46 ;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) ;
   }
 
   .estado-dropdown-item {
-    color: #f4f4f5 !important;
-    &:hover { background-color: #3f3f46 !important; }
+    color: #f4f4f5 ;
+    &:hover { background-color: #3f3f46 ; }
   }
 
   .estado-dropdown-label {
-    color: #f4f4f5 !important;
+    color: #f4f4f5 ;
   }
 
   .estado-dropdown-checkbox {
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background: #202124 ;
+    border-color: #3f3f46 ;
 
     &--active {
-      background: #163572 !important;
-      border-color: #163572 !important;
+      background: #163572 ;
+      border-color: #163572 ;
     }
   }
 
   .estado-dropdown-clear {
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #a1a1aa !important;
-    border-top-color: #3f3f46 !important;
+    background: transparent ;
+    background-color: transparent ;
+    color: #a1a1aa ;
+    border-top-color: #3f3f46 ;
 
     &:hover {
-      background-color: #3f3f46 !important;
-      background: #3f3f46 !important;
-      color: #3b82f6 !important;
+      background-color: #3f3f46 ;
+      background: #3f3f46 ;
+      color: #3b82f6 ;
     }
   }
 
   .page-create {
-    background-color: #163572 !important;
-    color: #ffffff !important;
-    &:hover:not(:disabled) { background-color: #122d63 !important; }
+    background-color: #163572 ;
+    color: #ffffff ;
+    &:hover:not(:disabled) { background-color: #122d63 ; }
   }
 
   /* Tabla de Catálogos */
   .panel {
-    background-color: #202124 !important;
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
+    background-color: #202124 ;
+    background: #202124 ;
+    border-color: #3f3f46 ;
   }
 
   .roles-table {
-    background-color: #202124 !important;
+    background-color: var(--pattern-table-bg) ;
 
     thead {
-      background-color: #202124 !important;
-      border-bottom-color: #3f3f46 !important;
+      background-color: var(--pattern-table-header-bg) ;
+      border-bottom-color: var(--pattern-border-color) ;
 
       th {
-        background-color: #202124 !important;
-        color: #a1a1aa !important;
+        background-color: var(--pattern-table-header-bg) ;
+        color: var(--text-secondary) ;
       }
     }
 
     tbody {
       tr {
-        border-bottom-color: #3f3f46 !important;
+        border-bottom-color: var(--pattern-border-color) ;
         &:hover {
-          background-color: rgba(255, 255, 255, 0.03) !important;
+          background-color: var(--pattern-table-row-hover) ;
         }
       }
 
       td {
-        color: #e4e4e7 !important;
+        color: var(--text-main) ;
       }
     }
   }
 
   .role-name {
-    color: #ffffff !important;
+    color: #ffffff ;
   }
 
   .status-pill {
-    background-color: rgba(34, 197, 94, 0.2) !important;
-    color: #4ade80 !important;
+    background-color: rgba(34, 197, 94, 0.2) ;
+    color: #4ade80 ;
 
     &::before {
-      background-color: #4ade80 !important;
+      background-color: #4ade80 ;
     }
 
     &--inactive {
-      background-color: rgba(161, 161, 170, 0.2) !important;
-      color: #a1a1aa !important;
+      background-color: rgba(161, 161, 170, 0.2) ;
+      color: #a1a1aa ;
 
       &::before {
-        background-color: #a1a1aa !important;
+        background-color: #a1a1aa ;
       }
     }
   }
 
   .actions-cell {
-    background-color: #202124 !important;
+    // Mantiene el mismo fondo de la fila; evita la franja oscura de acciones.
+    background-color: transparent ;
   }
 }
+
+.table-wrapper { @include table-theme.table-shell; }
+.roles-table { @include table-theme.data-table; }

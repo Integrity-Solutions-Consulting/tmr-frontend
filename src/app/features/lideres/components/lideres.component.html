@@ -1,118 +1,35 @@
 <div class="lideres-container" (click)="cerrarDropdowns()">
 
   <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">Líderes</h1>
-  </div>
+  <app-header title="Líderes" subtitle="Gestión de líderes técnicos y de proyecto"></app-header>
+
   <!-- Cards -->
-  <!-- Cards -->
-  <div class="cards-row">
-    <!-- Internos -->
-    <div class="summary-card">
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-icon card-icon--internal">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#163572"
-              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="5" r="3.5" />
-              <path d="M5 18a6 6 0 0 1 14 0" />
-              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
-              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
-            </svg>
-            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="#163572" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="17" y1="7" x2="7" y2="17" />
-              <polyline points="17 17 7 17 7 7" />
-            </svg>
-          </div>
-          <span class="card-number">{{ totalInternos }}</span>
-        </div>
-        <span class="card-label">Internos</span>
-      </div>
-    </div>
-
-    <!-- Externos -->
-    <div class="summary-card">
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-icon card-icon--external">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#A855F7"
-              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="5" r="3.5" />
-              <path d="M5 18a6 6 0 0 1 14 0" />
-              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
-              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
-            </svg>
-            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="#A855F7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7" />
-              <polyline points="7 7 17 7 17 17" />
-            </svg>
-          </div>
-          <span class="card-number">{{ totalExternos }}</span>
-        </div>
-        <span class="card-label">Externos</span>
-      </div>
-    </div>
-
-    <!-- Activos -->
-    <!-- Activos -->
-    <div class="summary-card">
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-icon card-icon--active">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#34c759"
-              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="5" r="3.5" />
-              <path d="M5 18a6 6 0 0 1 14 0" />
-              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
-              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
-            </svg>
-            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="7 12.5 10.5 16 17 8" />
-            </svg>
-          </div>
-          <span class="card-number">{{ totalActivos }}</span>
-        </div>
-        <span class="card-label">Activos</span>
-      </div>
-    </div>
-
-    <!-- Inactivos -->
-    <div class="summary-card">
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-icon card-icon--inactive">
-            <svg class="card-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6B7280"
-              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="5" r="3.5" />
-              <path d="M5 18a6 6 0 0 1 14 0" />
-              <polygon points="10.5,11 13.5,11 12.5,12.5 11.5,12.5" fill="none" />
-              <path d="M11.5 12.5 L12 18 L12.5 12.5" stroke-width="1.3" fill="none" />
-            </svg>
-            <svg class="card-svg-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="#6B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="7" x2="17" y2="17" />
-              <line x1="17" y1="7" x2="7" y2="17" />
-            </svg>
-          </div>
-          <span class="card-number">{{ totalInactivos }}</span>
-        </div>
-        <span class="card-label">Inactivos</span>
-      </div>
-    </div>
+  <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+  <div class="tarjetas-resumen">
+    <app-tarjeta-resumen titulo="Internos" icono="badge" tono="corporativo" [valor]="totalInternos" />
+    <app-tarjeta-resumen titulo="Externos" icono="handshake" tono="cian" [valor]="totalExternos" />
+    <app-tarjeta-resumen titulo="Activos" icono="how_to_reg" tono="corporativo" [valor]="totalActivos" />
+    <app-tarjeta-resumen titulo="Inactivos" icono="person_off" tono="neutro" [valor]="totalInactivos" />
   </div>
   <!-- Barra de búsqueda y botones -->
-  <div class="search-bar">
-    <div class="search-input-wrapper">
-      <span class="material-icons search-icon">search</span>
-      <input type="text" class="search-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
-        (input)="aplicarFiltros()" />
+  <div class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Búsqueda</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
+          (input)="aplicarFiltros()" />
+      </div>
     </div>
-    <div class="estado-filter-wrapper" (click)="toggleEstadoDropdown($event)">
-      <img src="assets/iconos/circle-plus-svgrepo-com.svg" class="estado-icon-img" />
-      <span class="estado-texto">Estado</span>
+
+    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+      <label class="filter-label">Estado</label>
+      <div class="filter-input-wrapper">
+         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
+            <span>{{ estadoFiltro || 'Todos' }}</span>
+            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         </div>
+      </div>
       <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-option"
           (click)="seleccionarEstado('Activo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
@@ -134,21 +51,22 @@
       </div>
     </div>
 
-    <div class="search-spacer"></div>
-    <div class="descarga-wrapper" (click)="$event.stopPropagation()">
-      <button class="btn btn-outline" (click)="abrirDescarga()">
+    <div class="search-spacer" style="flex: 1;"></div>
+
+    <div class="descarga-wrapper" (click)="$event.stopPropagation()" style="display: flex; gap: 16px; align-items: flex-end;">
+      <button class="btn-descargar enabled" (click)="abrirDescarga()">
         Descargar
-        <span class="material-symbols-outlined">file_download</span>
+        <span class="material-symbols-outlined download-icon">file_download</span>
       </button>
       <app-modal-descarga [mostrar]="mostrarDescarga" (cerrar)="cerrarDescarga()" (descargarPDF)="descargarPDF()"
         (descargarExcel)="descargarExcel()">
       </app-modal-descarga>
-    </div>
 
-    <button class="btn btn-primary" (click)="abrirFormulario()">
-      Agregar
-      <span class="material-icons">add</span>
-    </button>
+      <button class="btn-descargar btn-agregar" (click)="abrirFormulario()">
+        Agregar
+        <span class="material-icons download-icon">add</span>
+      </button>
+    </div>
   </div>
 
   <!-- Tabla -->
@@ -167,13 +85,27 @@
         </colgroup>
         <thead>
           <tr>
-            <th>Código</th>
-            <th>Tipo</th>
-            <th>Nombre</th>
-            <th>Cliente</th>
-            <th>Correo electrónico</th>
-            <th>Teléfono</th>
-            <th>Estado</th>
+            <th class="sortable" (click)="ordenar('codigo')" [attr.aria-sort]="direccionOrden('codigo')">
+              <span class="th-inner"><span class="th-label">Código</span><mat-icon class="sort-icon">{{ sortField === 'codigo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('tipo')" [attr.aria-sort]="direccionOrden('tipo')">
+              <span class="th-inner"><span class="th-label">Tipo</span><mat-icon class="sort-icon">{{ sortField === 'tipo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('nombre')" [attr.aria-sort]="direccionOrden('nombre')">
+              <span class="th-inner"><span class="th-label">Nombre</span><mat-icon class="sort-icon">{{ sortField === 'nombre' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('cliente')" [attr.aria-sort]="direccionOrden('cliente')">
+              <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField === 'cliente' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('correo')" [attr.aria-sort]="direccionOrden('correo')">
+              <span class="th-inner"><span class="th-label">Correo electrónico</span><mat-icon class="sort-icon">{{ sortField === 'correo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('telefono')" [attr.aria-sort]="direccionOrden('telefono')">
+              <span class="th-inner"><span class="th-label">Teléfono</span><mat-icon class="sort-icon">{{ sortField === 'telefono' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
+            <th class="sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+              <span class="th-inner"><span class="th-label">Estado</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            </th>
             <th class="th-actions">Acciones</th>
           </tr>
         </thead>

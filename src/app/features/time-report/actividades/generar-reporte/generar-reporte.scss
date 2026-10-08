@@ -1,11 +1,5 @@
 @use "sass:color";
 
-$primary-blue: #163572;
-$text-dark: #1A1A2E;
-$text-gray: #6B7280;
-$label-color: #374151;
-$error-red: #EF4444;
-
 .modal-wrap {
     display: flex;
     flex-direction: column;
@@ -18,7 +12,7 @@ $error-red: #EF4444;
     margin: 0;
     font-size: 22px;
     font-weight: 600;
-    color: $text-dark;
+    color: var(--text-title);
 }
 
 .modal-body {
@@ -34,11 +28,11 @@ $error-red: #EF4444;
 
     .empleado-label {
         font-weight: 600;
-        color: $label-color;
+        color: var(--text-body);
     }
 
     .empleado-value {
-        color: $text-gray;
+        color: var(--text-secondary);
     }
 }
 
@@ -53,7 +47,7 @@ $error-red: #EF4444;
 }
 
 .req {
-    color: $error-red;
+    color: var(--status-danger-text);
 }
 
 .modal-footer {
@@ -64,18 +58,18 @@ $error-red: #EF4444;
 }
 
 .btn-cancelar {
-    color: $primary-blue;
+    color: var(--primary-color);
     font-size: 14px;
     font-weight: 500;
 
     &:hover {
-        background-color: rgba($primary-blue, 0.04);
+        background-color: var(--primary-light);
     }
 }
 
 .btn-generar {
-    background-color: $primary-blue;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--text-inverse);
     border-radius: 24px;
     padding: 0 32px;
     height: 40px;
@@ -84,11 +78,11 @@ $error-red: #EF4444;
     transition: background-color 0.2s ease;
 
     &:hover:not(:disabled) {
-        background-color: color.adjust($primary-blue, $lightness: -5%);
+        background-color: var(--primary-hover);
     }
 
     &:disabled {
-        background-color: #e0e0e0;
-        color: #a0a0a0;
+        background-color: var(--bg-hover);
+        color: var(--text-disabled);
     }
 }

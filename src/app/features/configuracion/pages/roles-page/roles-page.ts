@@ -13,11 +13,13 @@ import { RolesFormModal, RolModalData } from '../../components/roles-form-modal/
 import { Modulo, Rol } from '../../models/configuracion.models';
 import { ConfiguracionService } from '../../services/configuracion.service';
 
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
   selector: 'app-roles-page',
-  imports: [CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
+  imports: [TarjetaResumenComponent, HeaderComponent, CommonModule, MatIconModule, ActionMenuComponent, PaginacionComponent, SuccessModalComponent],
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })

@@ -6,22 +6,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpClient } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
+import JSZip from 'jszip';
+import { PopupService } from '../../../../shared/services/popup.service';
 import { AuthService } from '../../../auth/servicios/auth.service';
 import { environment } from '../../../../../environments/environment';
-import * as ExcelJS from 'exceljs';
-import { estandarizarCabeceraExcelExistente } from '../../../../shared/utils/reporte-export.utils';
+import { DatosSeguimientoPdf, crearReporteSeguimientoPdf } from '../../../../shared/utils/seguimiento-pdf.utils';
+import { crearReporteSeguimientoExcel } from '../../../../shared/utils/seguimiento-excel.utils';
+
+interface ProyectoAsignado { id: number; nombre: string; codigo?: string; }
 
 @Component({
     selector: 'app-generar-reporte',
     standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatButtonModule
-    ],
+    imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatSelectModule, MatButtonModule],
     templateUrl: './generar-reporte.html',
     styleUrls: ['./generar-reporte.scss']
 })
@@ -30,209 +28,129 @@ export class GenerarReporte implements OnInit {
     private dialogRef = inject(MatDialogRef<GenerarReporte>);
     private http = inject(HttpClient);
     private authService = inject(AuthService);
+    private popup = inject(PopupService);
 
-    public clientes = signal<{id: number, nombre: string}[]>([]);
-    public proyectos: any[] = [];
-
-    public meses = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-
+    public clientes = signal<{ id: number; nombre: string }[]>([]);
+    public proyectos: ProyectoAsignado[] = [];
+    public empleadoNombre = 'Colaborador';
+    public meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     public form: FormGroup = this.fb.group({
         clienteId: ['all'],
-        anio: [2026, Validators.required],
-        mes: [4, Validators.required]
+        anio: [new Date().getFullYear(), Validators.required],
+        mes: [new Date().getMonth(), Validators.required],
+        formato: ['xlsx', Validators.required],
     });
 
-    ngOnInit() {
-        this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
-            next: (res) => {
-                if (res && res.clientes) {
-                    this.clientes.set(res.clientes);
-                }
-            },
-            error: (err) => console.error('Error al cargar lookups de clientes', err)
+    ngOnInit(): void {
+        this.empleadoNombre = this.authService.getCurrentUser()?.name || 'Colaborador';
+        this.http.get<any>(environment.apiUrl + '/proyectos/lookups').subscribe({
+            next: response => this.clientes.set(response?.clientes || []),
+            error: () => this.clientes.set([]),
         });
-
-        this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
-            next: (res) => {
-                this.proyectos = res || [];
-            },
-            error: (err) => console.error('Error al cargar proyectos', err)
+        this.http.get<ProyectoAsignado[]>(environment.apiUrl + '/time-report/actividades/proyectos-disponibles').subscribe({
+            next: response => this.proyectos = response || [],
+            error: () => this.proyectos = [],
         });
     }
 
-    cancelar() {
-        this.dialogRef.close();
-    }
+    cancelar(): void { this.dialogRef.close(); }
 
-    generar() {
+    async generar(): Promise<void> {
         if (this.form.invalid) return;
-
-        const { mes, anio, clienteId } = this.form.value;
         const user = this.authService.getCurrentUser();
-        if (!user) return;
-
-        this.http.get<any[]>(`${environment.apiUrl}/carga-actividades`).subscribe({
-            next: async (actividades) => {
-                const mesFiltrado = mes + 1; // formulario es 0-indexed, la BD es 1-indexed
-
-                const filteredData = (actividades || [])
-                    .filter(a => {
-                        const fecha = new Date(a.fechaactividad + 'T00:00:00');
-                        const matchesUser = Number(a.idempleado) === Number(user.idEmpleado ?? user.id);
-                        const matchesAnio = fecha.getFullYear() === anio;
-                        const matchesMes = (fecha.getMonth() + 1) === mesFiltrado;
-
-                        let matchesCliente = true;
-                        if (clienteId !== 'all') {
-                            const proy = this.proyectos.find(p => p.id === a.idproyecto);
-                            matchesCliente = proy && Number(proy.idCliente) === Number(clienteId);
-                        }
-
-                        return matchesUser && matchesAnio && matchesMes && matchesCliente;
-                    });
-
-                if (filteredData.length === 0) {
-                    console.warn("No hay actividades para el periodo seleccionado.");
-                    this.dialogRef.close();
-                    return;
-                }
-
-                const workbook = new ExcelJS.Workbook();
-                const worksheet = workbook.addWorksheet('Reporte Actividades');
-
-                const headerFill: ExcelJS.Fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FF163572' }
-                };
-                const headerFont: Partial<ExcelJS.Font> = {
-                    name: 'Arial',
-                    size: 11,
-                    bold: true,
-                    color: { argb: 'FFFFFFFF' }
-                };
-
-                // Título
-                worksheet.mergeCells('A1:I1');
-                const titleCell = worksheet.getCell('A1');
-                titleCell.value = `Reporte de Actividades - ${user.name || 'Colaborador'}`;
-                titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF163572' } };
-                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
-                worksheet.getRow(1).height = 30;
-
-                // Subtítulo
-                worksheet.mergeCells('A2:I2');
-                const subtitleCell = worksheet.getCell('A2');
-                subtitleCell.value = `Periodo: ${this.meses[mes]} ${anio}`;
-                subtitleCell.font = { name: 'Arial', size: 10, italic: true };
-                worksheet.getRow(2).height = 20;
-
-                worksheet.addRow([]);
-
-                // Cabeceras
-                const headers = [
-                    'Fecha', 'Colaborador', 'Proyecto', 'Cliente', 'Código Requerimiento', 'Horas', 'Descripción', 'Notas', 'Es Billable'
-                ];
-                const headerRow = worksheet.addRow(headers);
-                headerRow.height = 24;
-                headerRow.eachCell((cell) => {
-                    cell.fill = headerFill;
-                    cell.font = headerFont;
-                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
-                    cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'medium' },
-                        right: { style: 'thin' }
-                    };
-                });
-
-                let totalHoras = 0;
-                filteredData.forEach(a => {
-                    const proy = this.proyectos.find(p => p.id === a.idproyecto);
-                    const row = worksheet.addRow([
-                        a.fechaactividad,
-                        user.name || 'Usuario',
-                        proy ? proy.nombre : 'Sin Proyecto',
-                        proy ? proy.cliente : 'Sin Cliente',
-                        a.codigorequerimiento || '',
-                        Number(a.cantidadhoras),
-                        a.descripcionactividad || '',
-                        a.notas || '',
-                        a.esbillable ? 'Sí' : 'No'
-                    ]);
-                    row.height = 20;
-                    totalHoras += Number(a.cantidadhoras);
-
-                    row.getCell(1).alignment = { horizontal: 'center' };
-                    row.getCell(5).alignment = { horizontal: 'center' };
-                    row.getCell(6).alignment = { horizontal: 'right' };
-                    row.getCell(9).alignment = { horizontal: 'center' };
-
-                    row.eachCell((cell) => {
-                        cell.border = {
-                            top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                            left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                            bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
-                            right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
-                        };
-                    });
-                });
-
-                const totalRow = worksheet.addRow([
-                    'TOTAL HORAS', '', '', '', '', totalHoras, '', '', ''
-                ]);
-                worksheet.mergeCells(`A${totalRow.number}:E${totalRow.number}`);
-                totalRow.height = 22;
-                totalRow.getCell(1).font = { bold: true };
-                totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
-                totalRow.getCell(6).font = { bold: true };
-                totalRow.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
-
-                totalRow.eachCell((cell, colNum) => {
-                    if (colNum <= 6) {
-                        cell.border = {
-                            top: { style: 'medium' },
-                            bottom: { style: 'double' }
-                        };
-                    }
-                });
-
-                worksheet.columns.forEach((column, i) => {
-                    if (i === 0) column.width = 12;
-                    else if (i === 1) column.width = 25;
-                    else if (i === 2) column.width = 25;
-                    else if (i === 3) column.width = 25;
-                    else if (i === 4) column.width = 18;
-                    else if (i === 5) column.width = 10;
-                    else if (i === 6) column.width = 35;
-                    else if (i === 7) column.width = 25;
-                    else if (i === 8) column.width = 12;
-                });
-
-                await estandarizarCabeceraExcelExistente(
-                    workbook,
-                    worksheet,
-                    `Reporte de Actividades - ${user.name || 'Colaborador'}`,
-                    9,
-                    `Periodo: ${this.meses[mes]} ${anio}`,
-                );
-                const buffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const fileName = `Reporte_${this.meses[mes]}_${anio}.xlsx`;
-                a.download = fileName;
-                a.click();
-                window.URL.revokeObjectURL(url);
-
+        if (!user?.idEmpleado) {
+            this.dialogRef.close();
+            this.mostrarPopup('person_off', 'Perfil incompleto', 'No se encontró un colaborador asociado al usuario actual.');
+            return;
+        }
+        const values = this.form.value as { mes: number; anio: number; clienteId: number | string; formato: 'xlsx' | 'pdf' };
+        const desde = String(values.anio) + '-' + String(Number(values.mes) + 1).padStart(2, '0') + '-01';
+        const hasta = this.ultimoDia(values.anio, Number(values.mes) + 1);
+        // El modal solo configura la descarga. Se cierra antes de consultar o generar
+        // para que los avisos de resultado no queden detrás de MatDialog.
+        this.dialogRef.close();
+        this.popup.loading('Preparando reporte', 'Se están preparando los archivos seleccionados.');
+        try {
+            const respuesta = await lastValueFrom(this.http.get<DatosSeguimientoPdf>(
+                environment.apiUrl + '/time-report/actividades/mi-reporte',
+                { params: { fechaDesde: desde, fechaHasta: hasta } },
+            ));
+            // Admite ambas convenciones de serialización del backend sin romper el flujo.
+            const datos = {
+                actividades: respuesta.actividades ?? (respuesta as any).Actividades ?? [],
+                feriados: respuesta.feriados ?? (respuesta as any).Feriados ?? [],
+            };
+            const cliente = this.clientes().find(item => Number(item.id) === Number(values.clienteId));
+            const actividades = (datos.actividades || []).filter(activity => values.clienteId === 'all' || this.normalizar(activity.clienteProyecto) === this.normalizar(cliente?.nombre));
+            const reportes = this.agruparPorProyecto(actividades);
+            if (reportes.length === 0) {
+                this.popup.close();
                 this.dialogRef.close();
-            },
-            error: (err) => console.error('Error al generar el reporte', err)
+                this.mostrarPopup('event_busy', 'Sin actividades', 'No hay actividades registradas para el periodo seleccionado.');
+                return;
+            }
+            if (reportes.length === 1) {
+                const contenido = await this.generarArchivo(user.name || 'Colaborador', reportes[0], datos.feriados || [], desde, hasta, values.formato);
+                this.popup.close();
+                this.guardarArchivo(new Blob([contenido], { type: values.formato === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), this.nombreArchivo(user.name || 'Colaborador', reportes[0].nombre, values.formato));
+                this.dialogRef.close();
+                this.mostrarPopup('download_done', 'Reporte generado', 'El reporte se descargó correctamente.');
+                return;
+            }
+            const zip = new JSZip();
+            const usados = new Set<string>();
+            for (const reporte of reportes) {
+                const contenido = await this.generarArchivo(user.name || 'Colaborador', reporte, datos.feriados || [], desde, hasta, values.formato);
+                const base = this.limpiarNombre(reporte.nombre) || 'proyecto';
+                let nombre = base;
+                let sufijo = 2;
+                while (usados.has(nombre.toLowerCase())) nombre = base + '_' + sufijo++;
+                usados.add(nombre.toLowerCase());
+                const colaborador = this.limpiarNombre(user.name || 'Colaborador') || 'Colaborador';
+                zip.file('Reporte_' + colaborador + '_' + nombre + '.' + values.formato, contenido);
+            }
+            const contenidoZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            this.popup.close();
+            const colaborador = this.limpiarNombre(user.name || 'Colaborador') || 'Colaborador';
+            this.guardarArchivo(contenidoZip, 'Seguimiento_' + colaborador + '_' + (values.formato === 'pdf' ? 'PDF' : 'Excel') + '_' + desde + '_a_' + hasta + '.zip');
+            this.dialogRef.close();
+            this.mostrarPopup('download_done', 'Reportes generados', 'Se descargaron ' + reportes.length + ' reportes en un archivo ZIP.');
+        } catch {
+            this.popup.close();
+            this.mostrarPopup('error', 'No se pudo generar', 'No se pudieron preparar los reportes. Intenta nuevamente.');
+        }
+    }
+
+    private async generarArchivo(nombre: string, reporte: { nombre: string; actividades: any[] }, feriados: string[], desde: string, hasta: string, formato: 'xlsx' | 'pdf'): Promise<ArrayBuffer> {
+        const datos: DatosSeguimientoPdf = { actividades: reporte.actividades, feriados };
+        return formato === 'pdf'
+            ? crearReporteSeguimientoPdf(nombre, desde, hasta, datos, reporte.nombre)
+            : crearReporteSeguimientoExcel(nombre, desde, hasta, datos, reporte.nombre);
+    }
+
+    private agruparPorProyecto(actividades: any[]): Array<{ nombre: string; actividades: any[] }> {
+        const grupos = new Map<number | string, { nombre: string; actividades: any[] }>();
+        actividades.forEach(activity => {
+            const id = activity.idProyecto ?? activity.idproyecto ?? activity.IdProyecto ?? activity.proyecto ?? 'sin-proyecto';
+            const proyecto = this.proyectos.find(item => Number(item.id) === Number(id));
+            const nombre = proyecto?.nombre || activity.proyecto || 'Sin Proyecto';
+            const actual: { nombre: string; actividades: any[] } = grupos.get(id) || { nombre, actividades: [] };
+            actual.actividades.push(activity);
+            grupos.set(id, actual);
         });
+        return Array.from(grupos.values());
+    }
+
+    private ultimoDia(anio: number, mes: number): string { return String(anio) + '-' + String(mes).padStart(2, '0') + '-' + String(new Date(anio, mes, 0).getDate()).padStart(2, '0'); }
+    private normalizar(value: unknown): string { return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+    private limpiarNombre(value: string): string { return value.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().replace(/\s+/g, '_').slice(0, 100); }
+    private nombreArchivo(colaborador: string, proyecto: string, formato: 'xlsx' | 'pdf'): string {
+        const nombreColaborador = this.limpiarNombre(colaborador) || 'Colaborador';
+        const nombreProyecto = this.limpiarNombre(proyecto) || 'proyecto';
+        return 'Reporte_' + nombreColaborador + '_' + nombreProyecto + '.' + formato;
+    }
+    private guardarArchivo(blob: Blob, nombre: string): void { const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = nombre; document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    private mostrarPopup(icono: string, titulo: string, html: string): void {
+        void this.popup.show(icono, titulo, html, icono === 'download_done');
     }
 }

@@ -1,7 +1,7 @@
 <div class="colabs-page">
   <div class="colabs-page__wrapper">
 
-    <h1 class="colabs-page__title">Colaboradores</h1>
+    <app-header title="Colaboradores" subtitle="Gestión del personal y sus asignaciones"></app-header>
 
     <div class="colabs-page__metricas">
       <app-cards-metricas
@@ -13,20 +13,23 @@
       />
     </div>
 
-    <div class="colabs-page__toolbar">
-      <div class="colabs-page__toolbar-left">
-        <app-filtros-colaboradores
-          (filtrosCambian)="onFiltrosCambian($event)"
-        />
-      </div>
-      <div class="colabs-page__toolbar-right">
+    <div class="filters-card">
+      <app-filtros-colaboradores
+        style="display: contents;"
+        (filtrosCambian)="onFiltrosCambian($event)"
+      />
+      
+      <div class="search-spacer" style="flex: 1;"></div>
+      
+      <div class="acciones-derecha" style="display: flex; gap: 16px; align-items: flex-end;">
         <app-descargar-menu
+          style="display: contents;"
           (descargarPDF)="onDescargarPDF()"
           (descargarExcel)="onDescargarExcel()"
         />
-        <button class="colabs-page__btn-agregar" (click)="abrirCrear()" type="button">
+        <button class="btn-descargar btn-agregar" (click)="abrirCrear()" type="button">
           Agregar
-          <img src="assets/iconos/btn-agregar.svg" alt="agregar" width="16" height="16" />
+          <span class="material-icons download-icon">add</span>
         </button>
       </div>
     </div>

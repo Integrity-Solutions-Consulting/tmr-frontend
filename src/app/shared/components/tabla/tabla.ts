@@ -11,6 +11,7 @@ import {
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
 
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -21,10 +22,13 @@ import {
   ActionMenuComponent,
   ActionMenuItem
 } from '../action-menu/action-menu.component';
-import { Proyecto, LookupOption } from '../../../features/proyectos/modelos/proyecto.model';
+import { ID_SEGUIMIENTO_INHABILITADO, Proyecto, LookupOption } from '../../../features/proyectos/modelos/proyecto.model';
 import { ProyectosService } from '../../../features/proyectos/servicios/proyectos.service';
 import { FiltrosProyecto } from '../../../features/proyectos/componentes/proyectos-filtros/proyectos-filtros';
 import { selectProyectos } from '../../../features/proyectos/store/proyectos.selectors';
+
+// sm - Columnas por las que se puede ordenar la tabla (igual mecánica que Seguimiento).
+type CampoOrdenable = 'codigo' | 'nombre' | 'cliente' | 'fechaInicio' | 'numeroRecursos';
 
 @Component({
   selector: 'app-tabla',
@@ -32,6 +36,7 @@ import { selectProyectos } from '../../../features/proyectos/store/proyectos.sel
   imports: [
     MatTableModule,
     MatButtonModule,
+    MatIconModule,
     PaginacionComponent,
     ActionMenuComponent
   ],
@@ -101,9 +106,15 @@ export class Tabla {
           !filtros.tipos.length ||
           filtros.tipos.includes(proyecto.tipo ?? '');
 
-        const coincideSeguimiento =
-          !(filtros.seguimiento && filtros.seguimiento.length) ||
-          (filtros.seguimiento ?? []).includes(proyecto.idEstadoProyecto ?? -1);
+        // sm - "Inhabilitado" (ver obtenerSeguimiento) no es un idEstadoProyecto real: es lo que se muestra
+        // para cualquier proyecto Inactivo, sea cual sea su seguimiento real. Por eso un proyecto Inactivo solo
+        // coincide con el filtro "Inhabilitado" (nunca con su idEstadoProyecto real, que la tabla ya no muestra).
+        const seguimientoSeleccionado = filtros.seguimiento ?? [];
+        const coincideSeguimiento = !seguimientoSeleccionado.length || (
+          this.normalizarEstadoProyecto(proyecto) === 'Inactivo'
+            ? seguimientoSeleccionado.includes(ID_SEGUIMIENTO_INHABILITADO)
+            : seguimientoSeleccionado.includes(proyecto.idEstadoProyecto ?? -1)
+        );
 
         return coincideBusqueda && coincideEstado && coincideTipo && coincideSeguimiento;
       })
@@ -117,13 +128,53 @@ export class Tabla {
 
   filtrosAplicados = signal<string>('');
 
+  // sm - Orden manual por columna (igual que Seguimiento): clic en el encabezado ordena por ese campo,
+  // un segundo clic invierte el sentido. Sin columna elegida se mantiene el orden por defecto
+  // (activos primero) que ya aplica proyectosFiltrados.
+  sortField = signal<CampoOrdenable | ''>('');
+  sortAsc = signal(true);
+
+  ordenar(campo: CampoOrdenable): void {
+    if (this.sortField() === campo) {
+      this.sortAsc.update((v) => !v);
+    } else {
+      this.sortField.set(campo);
+      this.sortAsc.set(true);
+    }
+  }
+
+  direccionOrden(campo: string): 'ascending' | 'descending' | 'none' {
+    if (this.sortField() !== campo) return 'none';
+    return this.sortAsc() ? 'ascending' : 'descending';
+  }
+
+  proyectosOrdenados = computed(() => {
+    const campo = this.sortField();
+    const base = this.proyectosFiltrados();
+    if (!campo) return base;
+
+    const asc = this.sortAsc();
+    return [...base].sort((a, b) => {
+      const valA = a[campo];
+      const valB = b[campo];
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return asc ? valA - valB : valB - valA;
+      }
+
+      const strA = String(valA ?? '').toLowerCase();
+      const strB = String(valB ?? '').toLowerCase();
+      return asc ? strA.localeCompare(strB) : strB.localeCompare(strA);
+    });
+  });
+
   totalPaginas = computed(() => {
     const total = this.proyectosFiltrados().length;
     return Math.ceil(total / this.porPagina) || 1;
   });
 
   proyectosEnPagina = computed(() => {
-    const proyectos = this.proyectosFiltrados();
+    const proyectos = this.proyectosOrdenados();
     const inicio = (this.paginaActual() - 1) * this.porPagina;
     return proyectos.slice(inicio, inicio + this.porPagina);
   });
@@ -254,23 +305,17 @@ export class Tabla {
     return String(fecha);
   }
 
-  obtenerLideres(proyecto: Proyecto): { nombre: string; detalle: string }[] {
+  // sm - Se quita "detalle" (cantidad de recursos por líder): ya hay una columna propia de Recursos, mostrarlo
+  // también aquí era redundante.
+  obtenerLideres(proyecto: Proyecto): { nombre: string }[] {
     if (proyecto.lideres?.length) {
-      return proyecto.lideres.map((lider) => ({
-        nombre: lider.lider || '-',
-        detalle: `${lider.recursos?.length ?? 0} recurso${(lider.recursos?.length ?? 0) === 1 ? '' : 's'}`
-      }));
+      return proyecto.lideres.map((lider) => ({ nombre: lider.lider || '-' }));
     }
 
-    return proyecto.lider
-      ? [{
-          nombre: proyecto.lider,
-          detalle: `${proyecto.recursos?.length ?? 0} recurso${(proyecto.recursos?.length ?? 0) === 1 ? '' : 's'}`
-        }]
-      : [];
+    return proyecto.lider ? [{ nombre: proyecto.lider }] : [];
   }
 
-  obtenerLideresVisibles(proyecto: Proyecto, maxVisible = 2): { nombre: string; detalle: string }[] {
+  obtenerLideresVisibles(proyecto: Proyecto, maxVisible = 2): { nombre: string }[] {
     return this.obtenerLideres(proyecto).slice(0, maxVisible);
   }
 

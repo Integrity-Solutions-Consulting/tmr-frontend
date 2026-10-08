@@ -1,27 +1,16 @@
+
+// sm - Sin padding/tope de ancho propio: mismo criterio que Seguimiento (el padding de la página lo
+// pone el layout global, no cada página).
 .colabs-page {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   min-height: 0;
 
   &__wrapper {
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  padding: 8px 24px 16px 24px; 
-  display: flex;
-  flex-direction: column;
-  gap:12px;
-}
-
-  &__title {
-    //font-family: 'Inter', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    color: #163572;
-    padding-top: 18px;
-    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   &__metricas {
@@ -59,8 +48,8 @@
     gap: 6px;
     height: 32px;
     padding: 0 14px;
-    background: #163572;
-    color: #ffffff;
+    background: var(--primary-color);
+    color: var(--text-inverse);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -70,7 +59,9 @@
     transition: background 0.15s;
     white-space: nowrap;
 
-    &:hover { background: #122d63; }
+    &:hover {
+      background: var(--primary-hover);
+    }
   }
 
   &__table-container {
@@ -82,12 +73,24 @@
   }
 }
 
+// sm - Pie de tabla pegado al recuadro superior (igual que en Carga de Actividades): colores exactos
+// y esquinas inferiores redondeadas, sin borde superior.
+app-paginacion {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  padding: 9px 12px 9px 16px;
+}
+
 // ── Confirm modal — FUERA de .colabs-page ─────────────
+
 .confirm-overlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(0,0,0,0.35);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,9 +99,9 @@
 
 .confirm-card {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+  box-shadow: var(--elevation-card);
   padding: 36px 32px 28px;
   display: flex;
   flex-direction: column;
@@ -112,31 +115,36 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    border: 3px solid #163572;
+    border: 3px solid var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #163572;
+    color: var(--primary-color);
     margin-bottom: 4px;
   }
 
-  &__icon { font-size: 32px; }
+  &__icon {
+    font-size: 32px;
+  }
 
   &__title {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-main);
     margin: 0;
   }
 
   &__mensaje {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin: 0;
     line-height: 1.5;
-    strong { color: #374151; }
+
+    strong {
+      color: var(--text-body);
+    }
   }
 
   &__actions {
@@ -158,54 +166,127 @@
     transition: all 0.15s;
 
     &--cancel {
-      background: #f3f4f6;
-      color: #374151;
-      &:hover { background: #e5e7eb; }
+      background: var(--bg-soft);
+      color: var(--text-body);
+
+      &:hover {
+        background: var(--border-soft);
+      }
     }
 
     &--confirm {
-      background: #163572;
-      color: #ffffff;
-      &:hover { background: #122d63; }
+      background: var(--primary-color);
+      color: var(--text-inverse);
+
+      &:hover {
+        background: var(--primary-hover);
+      }
     }
   }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-:host-context(html[data-theme="dark"]) {
-  .colabs-page__wrapper {
-    background-color: #27272a !important;
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  }
 
-  .colabs-page__title {
-    color: #3b82f6 !important;
-  }
+/* ============================================================ FILTERS CARD ============================================================ */
+.filters-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-end ;
+    gap: 16px ;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
 
-  .colabs-page__btn-agregar {
-    background: #163572 !important;
-    color: #ffffff !important;
-    &:hover { background: #122d63 !important; }
-  }
+/* Descargar button */
+// sm - Mismos colores exactos que el botón "Descargar" de Seguimiento.
+.btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
 
-  .confirm-card {
-    background-color: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
+     .download-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-    &__title { color: #3b82f6 !important; }
-    &__mensaje { color: #a1a1aa !important; }
-  }
+    &.enabled {
+        background: #ffffff;
+        color: #163572;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+
+        .download-icon {
+            color: #163572;
+        }
+
+        &:hover {
+            background: rgba(22, 53, 114, 0.06);
+            border-color: #163572;
+        }
+    }
+
+    &.loading {
+        color: var(--primary-color);
+        cursor: wait;
+        opacity: 0.8;
+    }
+
+
+}
+
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+
+.btn-agregar {
+    background: var(--primary-color) ;
+    color: var(--text-inverse) ;
+    border-color: var(--primary-color) ;
+
+    &:hover {
+        background: var(--primary-hover) ;
+        border-color: var(--primary-hover) ;
+    }
+
+    .download-icon {
+        color: var(--text-inverse) ;
+    }
 }

@@ -40,6 +40,7 @@ import {
   CargoLookup
 } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
+import { PopupService } from '../../../../shared/services/popup.service';
 
 @Component({
   selector: 'app-proyecto-form',
@@ -65,6 +66,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private fb = inject(FormBuilder);
   private proyectosService = inject(ProyectosService);
+  private popup = inject(PopupService);
   private elementRef = inject(ElementRef<HTMLElement>);
 
   intentoGuardar = false;
@@ -80,8 +82,11 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   todosLosCargos: CargoLookup[] = [];
   estadoOptions: string[] = ['Activo', 'Inactivo'];
 
+  // sm - Se excluyen "Activo" e "Inactivo": esos los maneja el campo Estado (y activar/inactivar desde la
+  // lista), no la lista de seguimiento. Antes solo se excluía "Activo", así que "Inactivo" aparecía como una
+  // opción más de seguimiento (inconsistente con proyectos-filtros.ts, que sí excluye ambos).
   get seguimientoOpciones(): LookupOption[] {
-    return this.estados.filter(e => e.nombre !== 'Activo');
+    return this.estados.filter(e => e.nombre !== 'Activo' && e.nombre !== 'Inactivo');
   }
 
   // cargosFiltrados[liderIndex][recursoIndex]
@@ -100,14 +105,22 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     horas: ['', [this.numeroValido(false), Validators.min(0)]],
     numeroRecursos: [0],
     estado: ['Activo'],
-    idEstadoProyecto: this.fb.control<number | null>(null),
+    idEstadoProyecto: this.fb.control<number | null>(null, Validators.required),
     observacion: [''],
     fechaInicioReal: [null as string | null, [this.fechaValida()]],
     fechaFinReal: [null as string | null, [this.fechaValida()]],
     fechaInicioEspera: [null as string | null, [this.fechaValida()]],
     fechaFinEspera: [null as string | null, [this.fechaValida()]],
     lideres: this.fb.array([this.crearLider()])
-  }, { validators: this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor') });
+  }, {
+    validators: [
+      this.rangoFechasValido('fechaInicio', 'fechaFin', 'fechaFinMenor'),
+      // sm - El par planeado ya validaba que el fin no sea menor al inicio; los pares real/espera no tenían
+      // esa misma validación cruzada (se podía guardar, por ejemplo, una fecha fin real anterior a la de inicio).
+      this.rangoFechasValido('fechaInicioReal', 'fechaFinReal', 'fechaFinRealMenor'),
+      this.rangoFechasValido('fechaInicioEspera', 'fechaFinEspera', 'fechaFinEsperaMenor'),
+    ],
+  });
 
   // ── Getters ──────────────────────────────────────────────────────────────
 
@@ -354,9 +367,9 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       idEmpleado: [null],
       tipo: ['Interno', Validators.required],
       nombre: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.empleadosDisponibles)]],
-      departamento: [null],
+      departamento: [null, Validators.required],
       rol: ['', Validators.required],
-      entrada: this.fb.control<string | null>('', [this.fechaValida()]),
+      entrada: this.fb.control<string | null>('', [Validators.required, this.fechaValida()]),
       salida: this.fb.control<string | null>('', [this.fechaValida()]),
       costoHora: ['', [this.numeroValido(true)]],
       horas: ['', [this.numeroValido(false), Validators.min(0)]]
@@ -566,6 +579,20 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
+  fechaFinRealInvalida(): boolean {
+    return Boolean(
+      this.formulario.hasError('fechaFinRealMenor') &&
+      (this.formulario.controls.fechaFinReal.touched || this.intentoGuardar)
+    );
+  }
+
+  fechaFinEsperaInvalida(): boolean {
+    return Boolean(
+      this.formulario.hasError('fechaFinEsperaMenor') &&
+      (this.formulario.controls.fechaFinEspera.touched || this.intentoGuardar)
+    );
+  }
+
   // ── Guardar ───────────────────────────────────────────────────────────────
 
   guardar(): void {
@@ -578,6 +605,10 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
+      this.expandirSeccionesInvalidas();
+      const mensaje = this.obtenerMensajeValidacion();
+      void this.popup.show('warning', 'Revisa la información', mensaje);
+      setTimeout(() => this.enfocarPrimerCampoInvalido(), 0);
       return;
     }
 
@@ -637,6 +668,55 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.guardarProyecto.emit(proyecto);
+  }
+
+  private expandirSeccionesInvalidas(): void {
+    this.lideres.controls.forEach((lider, li) => {
+      const recursos = lider.get('recursos') as FormArray<FormGroup>;
+      recursos.controls.forEach((recurso, ri) => {
+        if (recurso.invalid) this.setRecursoPanelExpanded(li, ri, true);
+      });
+    });
+  }
+
+  private enfocarPrimerCampoInvalido(): void {
+    const host = this.elementRef.nativeElement as HTMLElement;
+    const campo = host.querySelector<HTMLElement>(
+      '.ng-invalid input, input.ng-invalid, .ng-invalid textarea, textarea.ng-invalid, .ng-invalid mat-select, mat-select.ng-invalid'
+    );
+    campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    campo?.focus();
+  }
+
+  private obtenerMensajeValidacion(): string {
+    if (this.formulario.hasError('fechaFinMenor')) {
+      return 'La fecha de fin del proyecto no puede ser anterior a la fecha de inicio.';
+    }
+    if (this.formulario.hasError('fechaFinRealMenor')) {
+      return 'La fecha de fin real no puede ser anterior a la fecha de inicio real.';
+    }
+    if (this.formulario.hasError('fechaFinEsperaMenor')) {
+      return 'La fecha de fin de espera no puede ser anterior a la fecha de inicio de espera.';
+    }
+
+    for (let li = 0; li < this.lideres.length; li++) {
+      const lider = this.lideres.at(li);
+      if (lider.get('lider')?.invalid) {
+        return `Selecciona un líder válido en la asignación ${li + 1}.`;
+      }
+      const recursos = lider.get('recursos') as FormArray<FormGroup>;
+      for (let ri = 0; ri < recursos.length; ri++) {
+        const recurso = recursos.at(ri);
+        if (recurso.hasError('salidaMenor')) {
+          return `La fecha de salida del recurso ${ri + 1} no puede ser anterior a su entrada.`;
+        }
+        if (recurso.invalid) {
+          return `Completa correctamente los campos obligatorios del recurso ${ri + 1} de la asignación ${li + 1}.`;
+        }
+      }
+    }
+
+    return 'No se pudo guardar porque faltan campos obligatorios o existen valores inválidos. Revisa los campos señalados.';
   }
 
   // ── Helpers de teclado ────────────────────────────────────────────────────

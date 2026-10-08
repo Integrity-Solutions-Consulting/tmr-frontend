@@ -116,10 +116,9 @@
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Seguimiento</mat-label>
         <mat-select yPosition="below" formControlName="idEstadoProyecto">
-          <mat-option [value]="null">Sin seguimiento</mat-option>
           <mat-option *ngFor="let e of seguimientoOpciones" [value]="e.id">{{ e.nombre }}</mat-option>
         </mat-select>
-        <mat-hint>Opcional</mat-hint>
+        <mat-error *ngIf="campoInvalido('idEstadoProyecto')">Este campo es obligatorio</mat-error>
       </mat-form-field>
     </div>
 
@@ -146,8 +145,11 @@
           <input class="proyecto-form__date-control" type="date"
                  formControlName="fechaFinReal">
           <label class="proyecto-form__date-label">Fecha fin real</label>
+          <div class="proyecto-form__date-error" *ngIf="fechaFinRealInvalida()">
+            La fecha fin real no puede ser menor que la fecha de inicio real
+          </div>
           <div class="proyecto-form__date-error"
-               *ngIf="campoInvalido('fechaFinReal') && formulario.controls['fechaFinReal'].hasError('fechaInvalida')">
+               *ngIf="!fechaFinRealInvalida() && campoInvalido('fechaFinReal') && formulario.controls['fechaFinReal'].hasError('fechaInvalida')">
             Fecha inválida
           </div>
         </div>
@@ -169,8 +171,11 @@
         <input class="proyecto-form__date-control" type="date"
                formControlName="fechaFinEspera">
         <label class="proyecto-form__date-label">Fecha fin espera</label>
+        <div class="proyecto-form__date-error" *ngIf="fechaFinEsperaInvalida()">
+          La fecha fin espera no puede ser menor que la fecha de inicio espera
+        </div>
         <div class="proyecto-form__date-error"
-             *ngIf="campoInvalido('fechaFinEspera') && formulario.controls['fechaFinEspera'].hasError('fechaInvalida')">
+             *ngIf="!fechaFinEsperaInvalida() && campoInvalido('fechaFinEspera') && formulario.controls['fechaFinEspera'].hasError('fechaInvalida')">
           Fecha inválida
         </div>
       </div>
@@ -301,11 +306,11 @@
                           <mat-label>Departamento</mat-label>
                           <mat-select yPosition="below" formControlName="departamento"
                             (selectionChange)="onDepartamentoChange(li, ri, $event.value)">
-                            <mat-option [value]="null">— Todos —</mat-option>
                             <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
                               {{ dep.nombre }}
                             </mat-option>
                           </mat-select>
+                          <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'departamento')">Obligatorio</mat-error>
                         </mat-form-field>
 
                         <button mat-icon-button type="button" class="proyecto-form__remove"
@@ -331,10 +336,14 @@
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                           <input #entradaInput class="proyecto-form__date-control" type="date"
                             autocomplete="off" formControlName="entrada">
-                          <label class="proyecto-form__date-label">Entrada</label>
+                          <label class="proyecto-form__date-label">Entrada <span>*</span></label>
                           <div class="proyecto-form__date-error"
                             *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
                             Fecha inválida
+                          </div>
+                          <div class="proyecto-form__date-error"
+                            *ngIf="!entradaInput.validity.badInput && !getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') && recursoLiderCampoInvalido(li, ri, 'entrada')">
+                            Este campo es obligatorio
                           </div>
                         </div>
 
@@ -393,7 +402,8 @@
 
   <!-- ── Acciones ──────────────────────────────────────────────────────── -->
   <div class="proyecto-form__actions">
-    <button mat-flat-button type="submit" [disabled]="guardando">
+    <button mat-flat-button type="submit" [disabled]="guardando" [attr.aria-busy]="guardando">
+      <span *ngIf="guardando" class="proyecto-form__saving-spinner" aria-hidden="true"></span>
       {{ guardando ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>

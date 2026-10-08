@@ -312,6 +312,14 @@ export class ConfiguracionService {
     );
   }
 
+  // sm - Importa los feriados de Ecuador del año (fuente pública). El backend omite los que ya existen.
+  importarFeriados(anio: number): Observable<{ anio: number; creados: string[]; omitidos: string[] }> {
+    return this.http
+      .post<{ anio: number; creados: string[]; omitidos: string[] }>(
+        `${environment.apiUrl}/configuracion/dias-festivos/importar/${anio}`, {})
+      .pipe(tap(() => this.loadFeriados()));
+  }
+
   deleteFeriado(id: number): Observable<unknown> {
     return this.http
       .delete(`${environment.apiUrl}/configuracion/dias-festivos/${id}`)

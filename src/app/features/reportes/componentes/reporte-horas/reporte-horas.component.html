@@ -10,45 +10,17 @@
 
   <!-- Tarjetas de Métricas -->
   @if (mostrarDatos() && datos().length > 0) {
-    <div class="metricas-grid">
-      <!-- Tarjeta 1: Clientes Únicos -->
-      <div class="metrica-card">
-        <div class="metrica-icon clientes">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ clientesUnicos() }}</div>
-          <div class="metrica-label">Clientes Únicos</div>
-        </div>
-      </div>
-  
-      <!-- Tarjeta 2: Recursos Asignados -->
-      <div class="metrica-card">
-        <div class="metrica-icon colaboradores">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ totalRecursos() | number: '1.0-0' }}</div>
-          <div class="metrica-label">Recursos Asignados</div>
-        </div>
-      </div>
-  
-      <!-- Tarjeta 3: Horas Reportadas -->
-      <div class="metrica-card">
-        <div class="metrica-icon horas">
-          <span class="metrica-icon-svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
-        </div>
-        <div class="metrica-content">
-          <div class="metrica-valor">{{ totalHoras() | number: '1.0-0' }} h</div>
-          <div class="metrica-label">Horas Reportadas</div>
-        </div>
-      </div>
+    <!-- sm - Tarjetas de resumen con el diseño único del sistema (app-tarjeta-resumen, mismo del Dashboard). -->
+    <div class="tarjetas-resumen">
+      <app-tarjeta-resumen titulo="Clientes únicos" icono="business" tono="corporativo" [valor]="clientesUnicos()" />
+      <app-tarjeta-resumen titulo="Recursos asignados" icono="groups" tono="corporativo" [valor]="(totalRecursos() | number: '1.0-0')" />
+      <app-tarjeta-resumen titulo="Horas reportadas" icono="schedule" tono="destacado" [valor]="(totalHoras() | number: '1.0-0') + ' h'" />
     </div>
   }
 
   <div class="filters-container">
     <div class="filter-group">
-      <label class="filter-label">Buscar Cliente</label>
+      <label class="filter-label">Cliente</label>
       <div class="filter-input-wrapper">
         <input type="text" [value]="busquedaCliente()" (input)="onInputSanitized('cliente', $event)"
           placeholder="Ej: Banco Guayaquil..." class="filter-input">
@@ -103,7 +75,7 @@
   </div>
 
   @if (!mostrarDatos()) {
-    <div class="empty-state border border-[#E5E5E5] rounded-[12px] bg-white">
+    <div class="empty-state">
       <div class="empty-content">
         <div class="empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"

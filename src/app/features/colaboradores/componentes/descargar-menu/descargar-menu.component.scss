@@ -1,56 +1,58 @@
 .descargar {
   position: relative;
- 
+
   &__btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     height: 32px;
     padding: 0 14px;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
     border-radius: 8px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-body);
     transition: all 0.15s;
     white-space: nowrap;
- 
-    svg {
+
+     svg {
       flex-shrink: 0;
-      color: #374151;
+      color: var(--text-body);
       transition: color 0.15s;
     }
- 
+
     &:hover {
-      background: #f3f4f6;
-      border-color: #d1d5db;
-      color: #374151;
+      background: var(--bg-soft);
+      border-color: var(--border-soft);
+      color: var(--text-body);
     }
- 
+
     &--open {
-      background: #f3f4f6;
-      border-color: #d1d5db;
+      background: var(--bg-soft);
+      border-color: var(--border-soft);
     }
+
+    
   }
- 
+
   &__overlay {
     position: fixed;
     inset: 0;
     z-index: 99;
   }
- 
+
   &__panel {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
     width: 180px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
     border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: var(--elevation-card);
     padding: 10px;
     z-index: 100;
     animation: fadeDown 0.15s ease;
@@ -58,15 +60,15 @@
     flex-direction: column;
     gap: 6px;
   }
- 
+
   &__title {
     font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin: 0 0 2px 0;
   }
- 
+
   &__option {
     display: flex;
     align-items: center;
@@ -79,53 +81,288 @@
     font-family: 'Inter', sans-serif;
     font-size: 11.5px;
     font-weight: 600;
-    color: #ffffff;
-    background: #163572;
+    color: var(--text-inverse);
+    background: var(--primary-color);
     transition: background 0.15s;
- 
-    &:hover {
-      background: #122d63;
+
+     &:hover {
+      background: var(--primary-hover);
     }
+
+    
   }
 }
- 
+
 @keyframes fadeDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ============================================================ FILTERS CARD ============================================================ */
+.filters-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-end ;
+    gap: 16px ;
+    flex-wrap: wrap;
+    box-shadow: var(--elevation-card);
 }
 
-:host-context(html[data-theme="dark"]) {
-  .descargar__btn {
-    background: #202124 !important;
-    border-color: #3f3f46 !important;
-    color: #ffffff !important;
+.filter-group {
+    display: flex;
+    flex-direction: column ;
+    align-items: flex-start ;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
 
-    img, svg {
-      filter: brightness(0) invert(1) !important;
+.filter-input-wrapper {
+    position: relative ;
+    width: 100%;
+
+     &:focus-within .filter-icon {
+        color: var(--primary-color) ;
     }
 
-    &:hover, &--open {
-      background: #27272a !important;
+    
+}
+
+.filter-input {
+    width: 100% ;
+    padding: 10px 16px ;
+    background-color: var(--input-bg) ;
+    border: 1px solid var(--border-input) ;
+    border-radius: 12px ;
+    outline: none ;
+    font-size: 14px ;
+    font-weight: 500 ;
+    color: var(--text-main) ;
+    font-family: 'Inter', sans-serif ;
+    transition: all 0.2s ;
+    box-sizing: border-box ;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) ;
     }
-  }
 
-  .descargar__panel {
-    background: #27272a !important;
-    border-color: #3f3f46 !important;
-    color: #f4f4f5 !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
-  }
+    
+}
 
-  .descargar__title {
-    color: #a1a1aa !important;
-  }
+.filter-input-wrapper .filter-input {
+    padding-left: 40px ;
+}
 
-  .descargar__option {
-    background: #163572 !important;
-    color: #ffffff !important;
+.filter-icon {
+    position: absolute ;
+    left: 12px ;
+    top: 12px ;
+    color: var(--text-muted) ;
+    transition: color 0.2s ;
+    width: 18px ;
+    height: 18px ;
+    pointer-events: none ;
+}
+
+/* Client select */
+.filter-select {
+    width: 100% ;
+    padding: 10px 32px 10px 40px ;
+    background-color: var(--input-bg) ;
+    border: 1px solid var(--border-input) ;
+    border-radius: 12px ;
+    outline: none ;
+    font-size: 14px ;
+    font-weight: 500 ;
+    color: var(--text-main) ;
+    font-family: 'Inter', sans-serif ;
+    transition: all 0.2s ;
+    box-sizing: border-box ;
+    appearance: none ;
+    -webkit-appearance: none ;
+    cursor: pointer ;
+
+     &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color) ;
+    }
+
+    
+}
+
+.select-chevron {
+    position: absolute ;
+    right: 12px ;
+    top: 12px ;
+    color: var(--text-muted) ;
+    font-size: 18px ;
+    width: 18px ;
+    height: 18px ;
+    pointer-events: none ;
+}
+
+/* Date groups */
+.date-group {
+    flex: none ;
+    width: 160px ;
+}
+
+.filter-label {
+    display: block ;
+    font-size: 11px ;
+    text-transform: uppercase ;
+    font-weight: 700 ;
+    color: var(--text-muted) ;
+    letter-spacing: 0.05em ;
+    margin-bottom: 8px ;
+    margin-left: 4px ;
+    font-family: 'Inter', sans-serif ;
+}
+
+/* Descargar button */
+.btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-disabled);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+
+     .download-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &.enabled {
+        background: var(--bg-card);
+        color: var(--primary-color);
+        border: 1px solid var(--border-soft);
+        cursor: pointer;
+
+        .download-icon {
+            color: var(--primary-color);
+        }
+
+        &:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+    }
+
+    &.loading {
+        color: var(--primary-color);
+        cursor: wait;
+        opacity: 0.8;
+    }
+
+    
+}
+
+// sm - Toast de progreso de descarga: tarjeta flotante centrada arriba con el azul institucional, barra de avance y botón Cancelar.
+
+.btn-agregar {
+    background: var(--primary-color) ;
+    color: var(--text-inverse) ;
+    border-color: var(--primary-color) ;
 
     &:hover {
-      background: #122d63 !important;
+        background: var(--primary-hover) ;
+        border-color: var(--primary-hover) ;
     }
+
+    .download-icon {
+        color: var(--text-inverse) ;
+    }
+}
+
+/* Dropdown Estado from Lideres (no !important) */
+.dropdown-estado {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  box-shadow: var(--elevation-dropdown);
+  min-width: 180px;
+  z-index: 100;
+  padding: 8px;
+}
+
+.dropdown-opcion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-body);
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+  }
+}
+
+.dropdown-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-default);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-card);
+
+  &.checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .material-icons {
+    font-size: 12px;
+    color: var(--text-inverse);
+  }
+}
+
+.dropdown-limpiar {
+  padding: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-top: 1px solid var(--border-default);
+  margin-top: 4px;
+  text-align: center;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+    border-radius: 6px;
   }
 }

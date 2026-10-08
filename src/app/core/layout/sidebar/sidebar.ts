@@ -9,7 +9,10 @@ import { ThemeService } from '../../services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.html',
-  styleUrl: './sidebar.scss'
+  styleUrl: './sidebar.scss',
+  host: {
+    '[class.sidebar-host--collapsed]': 'collapsed'
+  }
 })
 export class Sidebar {
   private readonly tokenService = inject(TokenService);
@@ -25,6 +28,36 @@ export class Sidebar {
   trOpen  = false;   // Time Report
   repOpen = false;   // Reportes
   cfgOpen = false;   // Configuración
+
+  collapsed = false;
+
+  toggleCollapsed(): void {
+    this.collapsed = !this.collapsed;
+  }
+
+  /**
+   * Los grupos no pierden sus destinos cuando el menú está reducido: el primer
+   * clic recupera el ancho normal y muestra las opciones correspondientes.
+   */
+  toggleGroup(group: 'timeReport' | 'reportes' | 'configuracion'): void {
+    const wasCollapsed = this.collapsed;
+
+    if (wasCollapsed) {
+      this.collapsed = false;
+    }
+
+    if (group === 'timeReport') {
+      this.trOpen = wasCollapsed || !this.trOpen;
+      return;
+    }
+
+    if (group === 'reportes') {
+      this.repOpen = wasCollapsed || !this.repOpen;
+      return;
+    }
+
+    this.cfgOpen = wasCollapsed || !this.cfgOpen;
+  }
 
   get isAdmin(): boolean {
     return this.tokenService.isAdmin();

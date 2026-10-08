@@ -1,24 +1,26 @@
+
+
 .status-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 26px;
   padding: 4px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--bg-card);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  color: #6b7280;
+  color: var(--text-secondary);
 
   .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #8e8e93;
+    background-color: var(--text-muted);
     flex-shrink: 0;
   }
 
@@ -27,79 +29,113 @@
   }
 
   &.active {
-    background-color: #ecfdf5;
-    border-color: #bbf7d0;
-    color: #166534;
-    .status-dot { background-color: #22c55e; }
+    background-color: var(--status-success-bg-soft);
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
+
+    .status-dot {
+      background-color: var(--status-success-bg-solid);
+    }
   }
 
   &.progress {
-    background-color: #eff6ff;
-    border-color: #bfdbfe;
-    color: #1d4ed8;
-    .status-dot { background-color: #3b82f6; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.completed {
-    background-color: #ecfdf5;
-    border-color: #bbf7d0;
-    color: #15803d;
-    .status-dot { background-color: #22c55e; }
+    background-color: var(--status-success-bg-soft);
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
+
+    .status-dot {
+      background-color: var(--status-success-bg-solid);
+    }
   }
 
   &.cancelled {
-    background-color: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
-    .status-dot { background-color: #ef4444; }
+    background-color: var(--status-danger-bg-soft);
+    border-color: var(--status-danger-border);
+    color: var(--status-danger-text);
+
+    .status-dot {
+      background-color: var(--status-danger-bg-solid);
+    }
   }
 
   &.waiting {
-    background-color: #fff7ed;
-    border-color: #fed7aa;
-    color: #c2410c;
-    .status-dot { background-color: #ff8d28; }
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+
+    .status-dot {
+      background-color: var(--status-warning-bg-solid);
+    }
   }
 
   &.inactive {
-    background-color: #f3f4f6;
-    border-color: #e5e7eb;
-    color: #8e8e93;
-    .status-dot { background-color: #8e8e93; }
+    background-color: var(--bg-soft);
+    border-color: var(--border-default);
+    color: var(--text-muted);
+
+    .status-dot {
+      background-color: var(--text-muted);
+    }
   }
 
   &.approved {
-    background-color: #f5f3ff;
-    border-color: #e9d5ff;
-    color: #7131ca;
-    .status-dot { background-color: #af52de; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.planning {
-    background-color: #ecfeff;
-    border-color: #a5f3fc;
-    color: #0f766e;
-    .status-dot { background-color: #00a6a0; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.delayed {
-    background-color: #fff7cd;
-    border-color: #fef08a;
-    color: #78350f;
-    .status-dot { background-color: #d6a800; }
+    background-color: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+
+    .status-dot {
+      background-color: var(--status-warning-bg-solid);
+    }
   }
 
   &.development {
-    background-color: #f0f9ff;
-    border-color: #dbeafe;
-    color: #134e4a;
-    .status-dot { background-color: #0284c7; }
+    background-color: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+
+    .status-dot {
+      background-color: var(--status-info-bg-solid);
+    }
   }
 
   &.sin-seguimiento {
-    background-color: #f9fafb;
-    border-color: #e5e7eb;
-    color: #6b7280;
-    .status-dot { background-color: #9ca3af; }
+    background-color: var(--bg-subtle);
+    border-color: var(--border-default);
+    color: var(--text-secondary);
+
+    .status-dot {
+      background-color: var(--text-muted);
+    }
   }
 }
+

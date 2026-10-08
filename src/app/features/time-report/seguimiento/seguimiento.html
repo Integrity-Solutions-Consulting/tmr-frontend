@@ -18,66 +18,15 @@
     </app-header>
 
     <!-- ===== METRICS BAR ===== -->
-    <div class="metrics-bar">
-        <div class="metric-item">
-            <div class="metric-icon-wrap blue">
-                <img class="metric-icon-img blue-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="horas" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.horasPendientes | horasFormat }}</span>
-                <span class="metric-name">Horas por registrar</span>
-                <span class="metric-desc">Pendientes por completar</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap green">
-                <img class="metric-icon-img green-icon" src="assets/iconos/circle-check.svg" alt="registradas" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.horasRegistradas | horasFormat }}</span>
-                <span class="metric-name">Horas registradas</span>
-                <span class="metric-desc">Total del periodo</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap purple">
-                <img class="metric-icon-img purple-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg" alt="promedio" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.promedioPorDia | horasFormat }}</span>
-                <span class="metric-name">Promedio por día</span>
-                <span class="metric-desc">Horas registradas</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap orange">
-                <img class="metric-icon-img orange-icon"
-                    src="assets/iconos/Iconos-Sidebar&Cards/Colaboradores/colaboradores.svg" alt="colaboradores" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.colaboradoresActivos }}</span>
-                <span class="metric-name">Colaboradores activos</span>
-                <span class="metric-desc">Con reporte en el periodo</span>
-            </div>
-        </div>
-
-        <div class="metric-item">
-            <div class="metric-icon-wrap gray">
-                <img class="metric-icon-img gray-icon" src="assets/iconos/Iconos-Sidebar&Cards/Proyectos/proyectos.svg"
-                    alt="proyectos" />
-            </div>
-            <div class="metric-texts">
-                <span class="metric-value">{{ metricas.proyectosUnicos }}</span>
-                <span class="metric-name">Proyectos</span>
-                <span class="metric-desc">Con actividades</span>
-            </div>
-        </div>
-    </div>
+    <!-- sm - Barra de métricas compartida con Actividades (app-metricas-horas). Siempre visible; queda "en blanco"
+         (con guion y atenuada) si no hay colaboradores seleccionados o si están seleccionados todos. -->
+    <app-metricas-horas
+        [horasPorRegistrar]="metricas.horasPendientes"
+        [horasRegistradas]="metricas.horasRegistradas"
+        [promedioPorDia]="metricas.promedioPorDia"
+        [enBlanco]="metricasEnBlanco"
+        textoAyuda="Selecciona uno o varios colaboradores para ver sus métricas">
+    </app-metricas-horas>
 
     <!-- ===== FILTER BAR ===== -->
     <div class="filters-card">
@@ -86,8 +35,9 @@
         <div class="filter-group">
             <label class="filter-label">Búsqueda</label>
             <div class="filter-input-wrapper">
-                <input class="filter-input" type="text" placeholder="Buscar colaborador, proyecto, cliente..."
-                    [(ngModel)]="busqueda" (input)="aplicarFiltros()" />
+                <!-- sm - Búsqueda solo por colaborador y proyecto, local (no recarga desde el servidor). -->
+                <input class="filter-input" type="text" placeholder="Buscar colaborador o proyecto..."
+                    [(ngModel)]="busqueda" (input)="aplicarBusqueda()" />
                 <img class="filter-icon-img" src="assets/iconos/buscar.svg" alt="buscar" />
             </div>
         </div>
@@ -97,11 +47,13 @@
             <label class="filter-label">Cliente</label>
             <div class="filter-input-wrapper">
                 <input class="filter-input" type="text" placeholder="Todos los clientes"
-                    [(ngModel)]="clienteSeleccionado" (input)="filtrarClientes($event); aplicarFiltros()"
+                    [(ngModel)]="clienteSeleccionado" (input)="onClienteInput($event)"
                     [matAutocomplete]="autoCliente" />
                 <img class="filter-icon-img" src="assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg"
                     alt="cliente" />
-                <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="aplicarFiltros()">
+                <!-- sm - La tabla se filtra por cliente solo al elegir una opción (no con cada letra escrita). -->
+                <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="seleccionarCliente($event.option.value)"
+                    (closed)="onClientePanelCerrado()">
                     <mat-option value="">Todos los clientes</mat-option>
                     @for (c of clientesFiltrados(); track c.id) {
                     <mat-option [value]="c.nombre">{{ c.nombre }}</mat-option>
@@ -126,7 +78,6 @@
         <button class="btn-descargar" [class.enabled]="selection.hasValue()"
             [class.loading]="isDownloading" [disabled]="!selection.hasValue() || isDownloading"
             [matMenuTriggerFor]="descargaMenu" [attr.aria-busy]="isDownloading">
-            <span *ngIf="isDownloading" class="download-spinner" aria-hidden="true"></span>
             {{ isDownloading ? 'Preparando...' : 'Descargar' }}{{ !isDownloading && selection.selected.length > 1 ? ' (' + selection.selected.length + ')' : '' }}
             <span *ngIf="!isDownloading" class="material-symbols-outlined download-icon">file_download</span>
         </button>
@@ -142,11 +93,32 @@
         </mat-menu>
     </div>
 
-    <div *ngIf="downloadMessage" class="download-feedback" [class.success]="downloadMessageType === 'success'"
-        [class.error]="downloadMessageType === 'error'" [class.info]="downloadMessageType === 'info'" role="status">
-        <span class="material-symbols-outlined">{{ downloadMessageType === 'success' ? 'check_circle' : downloadMessageType === 'error' ? 'error' : 'hourglass_top' }}</span>
-        <span>{{ downloadMessage }}</span>
-    </div>
+    <!-- sm - Toast animado de descarga de seleccionados: reemplaza el mensaje "Preparando..." con título, barra de progreso y botón Cancelar. -->
+    <section *ngIf="progresoDescarga.visible" class="download-progress-toast" [class.closing]="progresoDescarga.cerrando"
+        role="status" aria-live="polite">
+        <div class="download-progress-header">
+            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">cloud_download</span>
+            <span class="download-progress-title">{{ progresoDescarga.titulo }}</span>
+        </div>
+        <div class="download-progress-body">
+            <div class="download-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                [attr.aria-valuenow]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"
+                [attr.aria-label]="progresoDescarga.titulo">
+                <div class="download-progress-fill" [class.indeterminate]="progresoDescarga.indeterminado"
+                    [style.width.%]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"></div>
+            </div>
+            <div class="download-progress-labels">
+                <span>{{ progresoDescarga.detalle }}</span>
+                <span *ngIf="!progresoDescarga.indeterminado" class="download-progress-percent">{{ progresoDescarga.progreso }}%</span>
+            </div>
+        </div>
+        <div class="download-progress-actions">
+            <button type="button" class="download-progress-cancel" (click)="cancelarDescarga()"
+                [disabled]="progresoDescarga.progreso >= 100 || progresoDescarga.detalle === 'Cancelando...'">
+                Cancelar
+            </button>
+        </div>
+    </section>
 
     <!-- ===== TABLE ===== -->
     <div class="table-scroll-container">
@@ -160,18 +132,30 @@
                                 [indeterminate]="selection.hasValue() && !isAllSelected()">
                             </mat-checkbox>
                         </th>
-                        <th class="col-nombre" (click)="ordenar('nombre')">
-                            Colaborador
+                        <th class="col-nombre sortable" (click)="ordenar('nombre')" [attr.aria-sort]="direccionOrden('nombre')">
+                            <span class="th-inner"><span class="th-label">Colaborador</span><mat-icon class="sort-icon">{{ sortField === 'nombre' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
                         </th>
-                        <th class="col-proyecto">Proyecto</th>
-                        <th class="col-cliente">Cliente</th>
-                        <th class="col-lider">Líder Técnico</th>
-                        <th class="col-horas" (click)="ordenar('nroHoras')">
-                            Nro de Horas
+                        <th class="col-proyecto sortable" (click)="ordenar('proyecto')" [attr.aria-sort]="direccionOrden('proyecto')">
+                            <span class="th-inner"><span class="th-label">Proyecto</span><mat-icon class="sort-icon">{{ sortField === 'proyecto' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
                         </th>
-                        <th class="col-estado">Seguimiento</th>
-                        <th class="col-dias-reporte">Días con Reporte</th>
-                        <th class="col-dias-completar">Días a Completar</th>
+                        <th class="col-cliente sortable" (click)="ordenar('cliente')" [attr.aria-sort]="direccionOrden('cliente')">
+                            <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField === 'cliente' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-lider sortable" (click)="ordenar('liderTecnico')" [attr.aria-sort]="direccionOrden('liderTecnico')">
+                            <span class="th-inner"><span class="th-label">Líder Técnico</span><mat-icon class="sort-icon">{{ sortField === 'liderTecnico' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-horas sortable" (click)="ordenar('nroHoras')" [attr.aria-sort]="direccionOrden('nroHoras')">
+                            <span class="th-inner"><span class="th-label">Nro de Horas</span><mat-icon class="sort-icon">{{ sortField === 'nroHoras' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-estado sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+                            <span class="th-inner"><span class="th-label">Seguimiento</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-dias-reporte sortable" (click)="ordenar('diasConReporte')" [attr.aria-sort]="direccionOrden('diasConReporte')">
+                            <span class="th-inner"><span class="th-label">Días con Reporte</span><mat-icon class="sort-icon">{{ sortField === 'diasConReporte' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
+                        <th class="col-dias-completar sortable" (click)="ordenar('diasACompletar')" [attr.aria-sort]="direccionOrden('diasACompletar')">
+                            <span class="th-inner"><span class="th-label">Días a Completar</span><mat-icon class="sort-icon">{{ sortField === 'diasACompletar' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+                        </th>
                         <th class="col-acciones"></th>
                     </tr>
                 </thead>
@@ -189,29 +173,23 @@
                         <td class="col-lider" [title]="el.liderTecnico">{{ el.liderTecnico }}</td>
                         <td class="col-horas">{{ el.nroHoras | horasFormat }}</td>
                         <td class="col-estado">
-                            <span class="badge" [ngClass]="{
+                            <!-- sm - Estado automático; "-" cuando el periodo no tiene días laborables (se muestra sin badge). -->
+                            <span *ngIf="el.estado !== '-'; else sinEstado" class="badge" [ngClass]="{
                                 'badge--completado': el.estado === 'Completo',
                                 'badge--en-progreso': el.estado === 'En progreso',
                                 'badge--pendiente': el.estado === 'Pendiente'
                             }">
                                 {{ el.estado }}
                             </span>
+                            <ng-template #sinEstado>-</ng-template>
                         </td>
                         <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>
                         <td class="col-dias-completar center">{{ el.diasACompletar }}</td>
                         <td class="col-acciones" (click)="$event.stopPropagation()">
-                            <button class="action-btn" [matMenuTriggerFor]="rowMenu">
-                                <mat-icon>more_vert</mat-icon>
+                            <button class="action-btn" type="button" (click)="verCalendarioColaborador(el)"
+                                title="Ver detalle" aria-label="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
                             </button>
-                            <mat-menu #rowMenu="matMenu">
-                                <!-- sm - Nueva opción: abre el calendario del colaborador en un modal de solo lectura -->
-                                <button mat-menu-item (click)="verCalendarioColaborador(el)">
-                                    <mat-icon>calendar_month</mat-icon> Ver detalle
-                                </button>
-                                <button mat-menu-item (click)="descargarDetalle(el)">
-                                    <mat-icon>download</mat-icon> Descargar detalle
-                                </button>
-                            </mat-menu>
                         </td>
                     </tr>
                     <tr *ngIf="totalRegistros === 0">

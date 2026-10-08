@@ -28,6 +28,9 @@ export interface ColumnDefinition {
 
   /** Ancho de la columna (opcional) */
   width?: string;
+
+  /** Si la columna permite ordenar al hacer clic en el header */
+  sortable?: boolean;
 }
 
 export interface TableEmptyState {

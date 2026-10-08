@@ -1,3 +1,9 @@
+// sm - "Inhabilitado" (proyecto Inactivo) no es un estado real del catálogo de seguimiento: la tabla lo arma
+// al vuelo (ver Tabla.obtenerSeguimiento) y reemplaza cualquier seguimiento real que tuviera el proyecto. Se
+// usa este id "sentinela" (ningún estado real del catálogo lo usa) para poder filtrar por él en el filtro de
+// Seguimiento, igual que se ve en la tabla.
+export const ID_SEGUIMIENTO_INHABILITADO = -99;
+
 export interface RecursoProyecto {
   id?: number;
   idEmpleado?: number | null;

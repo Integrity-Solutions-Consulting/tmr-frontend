@@ -15,9 +15,10 @@ export interface ActividadDiaDto {
   totalHoras: number;
 }
 
+// sm - Métricas del mes del calendario con la misma regla que Seguimiento
+// (antes: horasPorRegistrar, horasRegistradas de hoy, horasSemana y horasMes).
 export interface ResumenHorasDto {
   horasPorRegistrar: number;
   horasRegistradas: number;
-  horasSemana: number;
-  horasMes: number;
+  promedioPorDia: number;
 }

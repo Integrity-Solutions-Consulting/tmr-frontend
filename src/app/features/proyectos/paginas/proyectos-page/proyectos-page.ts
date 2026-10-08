@@ -1,13 +1,17 @@
 import { Component, inject, OnDestroy } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { finalize, map, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { agregarCabeceraExcel, obtenerLogoReporte } from '../../../../shared/utils/reporte-export.utils';
 
 import { Tabla } from '../../../../shared/components/tabla/tabla';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { selectProyectos } from '../../store/proyectos.selectors';
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { BadgeEstado } from '../../../../shared/components/badge-estado/badge-estado';
@@ -25,6 +29,7 @@ import {
 
 import { CargoLookup, LiderProyecto, Proyecto, RecursoProyecto } from '../../modelos/proyecto.model';
 import { ProyectosService } from '../../servicios/proyectos.service';
+import { PopupService } from '../../../../shared/services/popup.service';
 
 import {
   cargarProyectos
@@ -45,6 +50,8 @@ const COLOR_SEPARADOR = 'FFE2E8F0';
   imports: [
     MatButtonModule,
     MatExpansionModule,
+    HeaderComponent,
+    TarjetaResumenComponent,
     Tabla,
     ModalBase,
     BadgeEstado,
@@ -60,6 +67,27 @@ const COLOR_SEPARADOR = 'FFE2E8F0';
 export class ProyectosPage implements OnDestroy {
   private store = inject(Store);
   private proyectosService = inject(ProyectosService);
+  private popup = inject(PopupService);
+
+  // sm - Tarjetas de resumen (igual que Clientes/Colaboradores/Líderes): totales sobre TODOS los proyectos
+  // cargados en el store, no sobre la página/filtro visible en la tabla.
+  private proyectosSignal = toSignal(this.store.select(selectProyectos), { initialValue: [] as Proyecto[] });
+
+  private esProyectoActivo(p: Proyecto): boolean {
+    return typeof p.activo === 'boolean' ? p.activo : (p.estado ?? '').trim().toLowerCase() === 'activo';
+  }
+
+  get totalProyectos(): number {
+    return this.proyectosSignal().length;
+  }
+
+  get proyectosActivos(): number {
+    return this.proyectosSignal().filter((p) => this.esProyectoActivo(p)).length;
+  }
+
+  get proyectosInactivos(): number {
+    return this.totalProyectos - this.proyectosActivos;
+  }
 
   seguimientoMap: Record<number, string> = {};
   departamentoMap: Record<number, string> = {};
@@ -153,8 +181,12 @@ export class ProyectosPage implements OnDestroy {
       this.guardandoProyecto = false;
     };
 
-    const handleError = (error: any): void => {
-      console.error('Error al guardar proyecto:', error);
+    // sm - Antes esto solo hacía console.error: el usuario no se enteraba de nada si fallaba (el modal
+    // quedaba abierto, pero sin ningún aviso). Se recicla el mismo popup (PopupService) que usa Seguimiento
+    // para que el estilo sea igual en toda la app.
+    const handleError = (error: unknown): void => {
+      const feedback = this.obtenerFeedbackGuardado(error);
+      void this.popup.show('error', feedback.titulo, feedback.mensaje);
     };
 
     if (this.proyectoSeleccionado) {
@@ -166,8 +198,9 @@ export class ProyectosPage implements OnDestroy {
           if (response.status === 200 || response.status === 204) {
             this.store.dispatch(cargarProyectos());
             this.cerrarModalCrear();
+            void this.popup.show('check_circle', 'Proyecto actualizado', 'Los cambios se guardaron correctamente.', true);
           } else {
-            console.error('Respuesta inesperada al actualizar proyecto:', response);
+            handleError(response);
           }
         },
         error: handleError
@@ -182,12 +215,79 @@ export class ProyectosPage implements OnDestroy {
             this.cerrarModalCrear();
             this.mostrarSuccessCrear();
           } else {
-            console.error('Respuesta inesperada al crear proyecto:', response);
+            handleError(response);
           }
         },
         error: handleError
       });
     }
+  }
+
+  private obtenerFeedbackGuardado(error: unknown): { titulo: string; mensaje: string } {
+    if (!(error instanceof HttpErrorResponse)) {
+      return {
+        titulo: 'No se pudo guardar',
+        mensaje: 'Ocurrió un problema inesperado. Revisa los datos e intenta nuevamente.'
+      };
+    }
+
+    if (error.status === 0) {
+      return {
+        titulo: 'Sin conexión con el servidor',
+        mensaje: 'No se pudo completar la operación. Verifica tu conexión e intenta nuevamente.'
+      };
+    }
+
+    if (error.status === 400 || error.status === 422) {
+      return {
+        titulo: 'Información inválida',
+        mensaje: this.obtenerMensajeBackend(error) ?? 'No se pudo guardar porque existen datos inválidos o incompletos.'
+      };
+    }
+
+    if (error.status === 401) {
+      return {
+        titulo: 'Sesión no válida',
+        mensaje: 'Tu sesión expiró o ya no es válida. Inicia sesión nuevamente.'
+      };
+    }
+
+    if (error.status === 403) {
+      return {
+        titulo: 'Acción no permitida',
+        mensaje: 'No tienes permisos para editar este proyecto.'
+      };
+    }
+
+    if (error.status === 404) {
+      return {
+        titulo: 'Proyecto no encontrado',
+        mensaje: 'El proyecto que intentas editar ya no existe o fue eliminado.'
+      };
+    }
+
+    if (error.status === 409) {
+      return {
+        titulo: 'No se pudo aplicar el cambio',
+        mensaje: this.obtenerMensajeBackend(error) ?? 'Los datos entran en conflicto con información existente.'
+      };
+    }
+
+    return {
+      titulo: 'No se pudo guardar',
+      mensaje: 'Ocurrió un problema al comunicarse con el servidor. Intenta nuevamente.'
+    };
+  }
+
+  private obtenerMensajeBackend(error: HttpErrorResponse): string | null {
+    const contenido = error.error;
+    const mensaje = typeof contenido === 'string'
+      ? contenido
+      : contenido?.message ?? contenido?.mensaje ?? contenido?.title;
+
+    if (typeof mensaje !== 'string') return null;
+    const limpio = mensaje.replace(/<[^>]*>/g, '').trim();
+    return limpio && limpio.length <= 240 ? limpio : null;
   }
 
   private mostrarSuccessCrear(): void {
@@ -204,7 +304,10 @@ export class ProyectosPage implements OnDestroy {
   abrirModalEditar(proyecto: Proyecto): void {
     this.proyectosService.obtenerProyecto(proyecto.id).subscribe({
       next: (proyectoCompleto) => { this.proyectoSeleccionado = proyectoCompleto; this.modalCrearVisible = true; },
-      error: (error) => console.error('Error al obtener proyecto:', error)
+      error: (error) => {
+        console.error('Error al obtener proyecto:', error);
+        void this.popup.show('error', 'No se pudo abrir el proyecto', 'Intenta nuevamente.');
+      }
     });
   }
 
@@ -222,7 +325,10 @@ export class ProyectosPage implements OnDestroy {
   abrirModalDetalle(proyecto: Proyecto): void {
     this.proyectosService.obtenerProyecto(proyecto.id).subscribe({
       next: (proyectoCompleto) => { this.proyectoDetalle = proyectoCompleto; this.modalDetalleVisible = true; },
-      error: (error) => console.error('Error al obtener detalle del proyecto:', error)
+      error: (error) => {
+        console.error('Error al obtener detalle del proyecto:', error);
+        void this.popup.show('error', 'No se pudo abrir el detalle', 'Intenta nuevamente.');
+      }
     });
   }
 
@@ -249,20 +355,27 @@ export class ProyectosPage implements OnDestroy {
       estado: nuevoEstado
     };
 
+    // sm - El diálogo se cerraba de inmediato al confirmar, sin esperar la respuesta: si la petición fallaba,
+    // el usuario veía el diálogo cerrarse como si hubiera funcionado y solo quedaba un console.error. Ahora
+    // se cierra recién cuando se conoce el resultado, y si falla se avisa con el mismo popup de Seguimiento.
     this.proyectosService.actualizarProyecto(proyectoActualizado.id, proyectoActualizado).pipe(
       take(1)
     ).subscribe({
       next: (response) => {
+        this.cancelarCambiarEstadoProyecto();
         if (response.status === 200 || response.status === 204) {
           this.store.dispatch(cargarProyectos());
         } else {
           console.error('Respuesta inesperada al cambiar estado del proyecto:', response);
+          void this.popup.show('error', 'No se pudo cambiar el estado', 'Intenta nuevamente.');
         }
       },
-      error: (error) => console.error('Error al cambiar estado del proyecto:', error)
+      error: (error) => {
+        this.cancelarCambiarEstadoProyecto();
+        console.error('Error al cambiar estado del proyecto:', error);
+        void this.popup.show('error', 'No se pudo cambiar el estado', 'Intenta nuevamente.');
+      }
     });
-
-    this.cancelarCambiarEstadoProyecto();
   }
 
   aplicarFiltros(filtros: FiltrosProyecto): void {

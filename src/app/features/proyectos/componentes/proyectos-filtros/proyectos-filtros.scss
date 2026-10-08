@@ -1,221 +1,194 @@
-.filtros {
-  display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(140px, 180px) minmax(140px, 180px) minmax(140px, 180px);
-  gap: 12px;
-  align-items: center;
-  justify-items: stretch;
-  width: min(100%, 980px);
-  max-width: 980px;
-  margin: 0 auto;
+// sm - Mismo diseño que la barra de filtros de Seguimiento (.filter-group/.filter-input-wrapper/.filter-input
+// de seguimiento.scss): sin tarjeta propia (la pone proyectos-page.scss), input blanco con borde suave y texto
+// del color principal (no atenuado, que se veía como si estuviera deshabilitado).
+// sm - Se quita el bloque ".filtros"/".filtros__*" (grid + Angular Material form-field): no se usa en esta
+// plantilla (el HTML no tiene ningún elemento con esas clases), era CSS muerto de una versión anterior.
 
-  ::ng-deep .mat-mdc-form-field { width: 100%; }
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
 
-  ::ng-deep .mat-mdc-text-field-wrapper {
-    height: 40px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: none;
-  }
+.filter-input-wrapper {
+    position: relative;
+    width: 100%;
 
-  ::ng-deep .mat-mdc-form-field-flex {
-    height: 40px;
-    align-items: center;
-  }
+    &:focus-within .filter-icon {
+        color: var(--primary-color);
+    }
+}
 
-  ::ng-deep .mat-mdc-form-field-infix {
-    min-height: 40px;
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
-  }
-
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-
-  ::ng-deep .mat-mdc-input-element {
-    color: #737373;
-    font-size: 13px;
+.filter-input {
+    width: 100%;
+    padding: 10px 16px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-input);
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
     font-weight: 500;
-  }
+    // sm - Gris medio (no el texto principal, que se veía negro): mismo tono que usan Líderes/Clientes y el
+    // resto de filtros de la app para el texto escrito/seleccionado.
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    box-sizing: border-box;
 
-  ::ng-deep .mat-mdc-input-element::placeholder {
-    color: #9ca3af;
-    font-size: 13px;
-    font-weight: 400;
-  }
-
-  ::ng-deep .mdc-notched-outline__leading,
-  ::ng-deep .mdc-notched-outline__notch,
-  ::ng-deep .mdc-notched-outline__trailing {
-    border-color: #e5e7eb !important;
-  }
-
-  ::ng-deep .mdc-text-field--focused {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: #163572 !important;
+    &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color);
     }
-  }
 }
 
-// ── Buscador ──────────────────────────────────────────────────────────────
-
-.filtros__search {
-  position: relative;
-
-  ::ng-deep .mat-mdc-form-field-infix {
-    padding-left: 36px !important;
-  }
+.filter-input-wrapper .filter-input {
+    padding-left: 40px;
 }
 
-.filtros__search-icon {
-  position: absolute;
-  left: 14px;
-  top: 13px;
-  z-index: 2;
-  width: 13px;
-  height: 13px;
-  border: 1.7px solid #737373;
-  border-radius: 999px;
-
-  &::after {
-    content: '';
+.filter-icon {
     position: absolute;
-    right: -4px;
-    bottom: -3px;
-    width: 5px;
-    height: 1.7px;
-    border-radius: 999px;
-    background: #737373;
-    transform: rotate(45deg);
-  }
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    transition: color 0.2s;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
 }
 
-// ── Dropdown wrapper ──────────────────────────────────────────────────────
+/* Client select */
+.filter-select {
+    width: 100%;
+    padding: 10px 32px 10px 40px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-input);
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
 
-.filtros__dropdown-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #ffffff;
-  cursor: pointer;
-  user-select: none;
-  // color aquí controla el SVG vía currentColor
-  color: #737373;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-
-  &.active {
-    border-color: #163572;
-    background: #f0f4ff;
-    color: #163572;  // el SVG hereda este color automáticamente
-
-    .filtros__dropdown-label {
-      color: #163572;
+    &:focus {
+        box-shadow: 0 0 0 1px var(--primary-color);
     }
-  }
 }
 
-// SVG hereda color del wrapper via currentColor — sin filter, sin fill manual
-.filtros__dropdown-icon {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  display: block;
+.select-chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
 }
 
-.filtros__dropdown-label {
-  font-size: 13px;
-  color: #737373;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 80px;
-  transition: color 0.15s;
+/* Date groups */
+.date-group {
+    flex: none;
+    width: 160px;
 }
 
-// ── Dropdown panel ────────────────────────────────────────────────────────
+.filter-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    // sm - Mismo gris exacto que el label de los filtros de Seguimiento (#94a3b8, distinto de var(--text-muted)
+    // que es #737373: se veía de un gris diferente).
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    margin-left: 4px;
+    font-family: 'Inter', sans-serif;
+}
 
-.filtros__dropdown {
+/* Dropdown Estado/Seguimiento/Tipo */
+.dropdown-estado {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
-  min-width: 200px;
-  z-index: 200;
+  box-shadow: var(--elevation-dropdown);
+  min-width: 180px;
+  z-index: 100;
   padding: 8px;
 }
 
-.filtros__dropdown-option {
+.dropdown-opcion {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
   border-radius: 6px;
+  margin-bottom: 6px;
+  background: var(--bg-card);
   cursor: pointer;
-  font-size: 13px;
-  color: #737373;
+  font-size: 14px;
+  color: var(--text-muted);
 
-  &:hover { background: #f5f5f5; }
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+  }
 }
 
-.filtros__checkbox {
+.dropdown-checkbox {
   width: 16px;
   height: 16px;
-  min-width: 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-default);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: var(--bg-card);
 
   &.checked {
-    background: #163572;
-    border-color: #163572;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
   }
 
   .material-icons {
     font-size: 12px;
-    color: #ffffff;
+    color: var(--text-inverse);
   }
 }
 
-.filtros__dropdown-limpiar {
+.dropdown-limpiar {
   padding: 8px;
   font-size: 13px;
-  color: #737373;
+  color: var(--text-secondary);
   cursor: pointer;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-default);
   margin-top: 4px;
   text-align: center;
 
-  &:hover { background: #f5f5f5; border-radius: 6px; }
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+    border-radius: 6px;
+  }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────
-
-@media (max-width: 1440px) {
-  .filtros { grid-template-columns: minmax(300px, 1fr) 132px 110px; }
-}
-
-@media (max-width: 1024px) {
-  .filtros { grid-template-columns: minmax(280px, 1fr) 132px 110px; gap: 12px; }
-}
-
-@media (max-width: 768px) {
-  .filtros { grid-template-columns: 1fr 1fr; }
-  .filtros__search { grid-column: 1 / -1; }
-}
-
-@media (max-width: 480px) {
-  .filtros { grid-template-columns: 1fr; gap: 10px; }
+// sm - Tema oscuro: mismo color exacto que usa Seguimiento para sus labels de filtro en modo oscuro
+// (seguimiento.scss, bloque :host-context(html[data-theme="dark"])), ya que #94a3b8 de arriba se definió fijo.
+:host-context(html[data-theme="dark"]) {
+  .filter-label {
+    color: #cbd5e1;
+  }
 }

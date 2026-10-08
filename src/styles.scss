@@ -1,14 +1,167 @@
-@use '@angular/material' as mat;
+﻿@use '@angular/material' as mat;
 @use 'styles/variables' as *;
 @use 'styles/shared-components';
-
+// sm - Estilos de los pop ups de SweetAlert2 con el diseño de los modales de TMR.
+@use 'styles/sweetalert';
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================= */
+/*  SHEPHERD.JS Estilos del tour de registro de actividades     */
+/* ============================================================= */
+
+/* Permitir que la burbuja salga fuera del area del modal */
+.cdk-overlay-pane:has(.actividad-modal) {
+  overflow: visible !important;
+}
+
+mat-dialog-container,
+.mat-mdc-dialog-surface,
+.mdc-dialog__surface {
+  overflow: visible !important;
+}
+
+/* Resaltar el campo activo con borde azul para que sea
+   identificable mientras la burbuja flota a la derecha */
+.shepherd-enabled.shepherd-target {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 3px !important;
+  border-radius: 8px !important;
+  box-shadow: var(--focus-ring-primary) !important;
+  transition: outline 0.15s ease, box-shadow 0.15s ease !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* El popover conserva el tema activo mediante los tokens globales. */
+.shepherd-element.actividad-tour-step {
+  z-index: 1000 !important;
+  max-width: 280px !important;
+  min-width: 240px !important;
+  border-radius: 12px !important;
+  box-shadow: var(--elevation-dropdown) !important;
+  font-family: 'Inter', sans-serif !important;
+  pointer-events: auto !important;
+  margin-left: 10px !important;
+  border: 2px solid var(--primary-color) !important;
+  background: var(--pattern-panel-bg) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-content {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: var(--pattern-panel-bg) !important;
+  border: none !important;
+}
+
+/* Header: linea de acento azul a la izquierda, sin fondo de color */
+.shepherd-element.actividad-tour-step .shepherd-header {
+  background: var(--pattern-panel-bg) !important;
+  padding: 16px 16px 10px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid var(--pattern-border-color) !important;
+  gap: 8px !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-title {
+  color: var(--text-title) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-cancel-icon {
+  color: var(--text-muted) !important;
+  font-size: 16px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  margin-top: 1px !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-cancel-icon:hover {
+  color: var(--primary-hover) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-text {
+  padding: 12px 16px !important;
+  font-size: 12px !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.6 !important;
+  background: var(--pattern-panel-bg) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-footer {
+  padding: 10px 16px 14px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  border-top: 1px solid var(--pattern-border-color) !important;
+  background: var(--pattern-panel-bg) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button {
+  padding: 7px 16px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+  pointer-events: auto !important;
+}
+
+/* boton primario que es igual que .actividad-modal__btn--save */
+.shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary) {
+  background: var(--primary-color) !important;
+  color: var(--primary-text) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button:not(.shepherd-button-secondary):hover {
+  background: var(--primary-hover) !important;
+}
+
+/* boton secundario del borde, fondo blanco, texto oscuro */
+.shepherd-element.actividad-tour-step .shepherd-button-secondary {
+  background: var(--pattern-control-bg) !important;
+  color: var(--pattern-control-color) !important;
+  border: 1.5px solid var(--pattern-border-color) !important;
+}
+
+.shepherd-element.actividad-tour-step .shepherd-button-secondary:hover {
+  background: var(--pattern-table-header-bg) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+/* La flecha apunta al campo */
+.shepherd-element.actividad-tour-step .shepherd-arrow::before {
+  background: var(--pattern-panel-bg) !important;
+  border: 1.5px solid var(--pattern-border-color) !important;
+}
+
+/* Shepherd se renderiza fuera del árbol encapsulado; estos selectores globales
+   usan los mismos tokens en ambos temas y evitan estilos claros residuales. */
+.shepherd-element.actividad-tour-step {
+  --shepherd-theme-primary: var(--primary-color);
+}
+
+.shepherd-enabled.shepherd-target {
+  outline-color: var(--primary-color) !important;
+  box-shadow: var(--focus-ring-primary) !important;
+}
 
 html {
   height: 100%;
   @include mat.theme((
     color: (
+      theme-type: light,
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
@@ -17,10 +170,19 @@ html {
   ));
 }
 
+html[data-theme="dark"] {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+  ));
+}
+
 body {
-  color-scheme: light;
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   font-family: 'Inter', sans-serif;
   margin: 0;
   height: 100%;
@@ -33,7 +195,80 @@ body {
   --borde:      #e5e7eb;
   --texto:      #111827;
   --texto-gris: #737373;
+
+  /* Tokens originales del modo claro. Los estilos oscuros solo se activan
+     bajo html[data-theme="dark"], por lo que una pestaña en claro siempre
+     vuelve a esta paleta. */
+  --bg-app: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-surface: #f8f8f8;
+  --bg-hover: #f0f1f3;
+  --text-main: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #737373;
+  --border-color: #e5e7eb;
+  --primary-color: #163572;
+  --primary-text: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #e5e7eb;
+  /* Paleta compartida con origin/sm-Desarrollo. Se conserva --bg-app gris actual. */
+  --bg-soft: #eef4fa;
+  --bg-subtle: #f5f7fc;
+  --border-default: #d6e4f0;
+  --border-soft: #c2d4e5;
+  --border-card: var(--border-default);
+  --border-table: #d6e4f0;
+  --border-input: #b8cce0;
+  --text-body: #1e3a5f;
+  --text-subtle: #4a6278;
+  --text-disabled: #a0b4c0;
+  --text-title: #1e3a5f;
+  --text-inverse: #ffffff;
+  --primary-hover: #0d47a1;
+  --primary-light: rgba(21, 101, 192, .08);
+  --icon-color: var(--text-secondary);
+  --accent-cian: #0097d6;
+  --accent-silver: #8fa3b1;
+  --status-danger-text: #dc2626;
+  --status-danger-bg-solid: #ef4444;
+  --status-danger-bg-soft: #fef2f2;
+  --status-danger-border: #fecaca;
+  --status-success-text: #15803d;
+  --status-success-bg-solid: #22c55e;
+  --status-success-bg-soft: #f0fdf4;
+  --status-success-border: #bbf7d0;
+  --status-info-text: #1d4ed8;
+  --status-info-bg-solid: #3b82f6;
+  --status-info-bg-soft: #eff6ff;
+  --status-info-border: #bfdbfe;
+  --status-warning-text: #d97706;
+  --status-warning-bg-solid: #f59e0b;
+  --status-warning-bg-soft: #fef3c7;
+  --status-warning-border: #fde68a;
+  --status-success: var(--status-success-bg-solid);
+  --status-warning: var(--status-warning-bg-solid);
+  --status-error: var(--status-danger-bg-solid);
+  --elevation-card: 0 8px 24px rgba(17, 24, 39, .05);
+  --elevation-dropdown: 0 4px 12px rgba(15, 23, 42, .12);
+  --elevation-modal: 0 20px 60px rgba(15, 23, 42, .18);
+  --overlay-backdrop: rgba(15, 23, 42, .45);
+  --accent-purple: #7c3aed;
+  --accent-purple-bg: #f3e8ff;
+  --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
+  --focus-ring-info: 0 0 0 3px rgba(59, 130, 246, .2);
+
+  /* Tokens semánticos compartidos por tablas, paneles y controles. */
+  --pattern-panel-bg: #ffffff;
+  --pattern-table-bg: #ffffff;
+  --pattern-table-header-bg: #f8f8f8;
+  --pattern-table-row-hover: #f0f1f3;
+  --pattern-control-bg: #ffffff;
+  --pattern-control-color: #1a1a2e;
+  --pattern-border-color: #d6e4f0;
+
 }
+
+html[data-theme="light"] { color-scheme: light; }
 
 * {
   box-sizing: border-box;
@@ -43,9 +278,9 @@ body {
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
-/* Estilos globales de TMR Frontend - Estructura Refactorizada */
-@import url('@angular/material/prebuilt-themes/indigo-pink.css');
 
+
+/* Estilos globales de TMR Frontend - Estructura Refactorizada */
 html,
 body {
   height: 100%;
@@ -54,8 +289,8 @@ body {
 }
 
 body {
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -304,9 +539,8 @@ body {
 /* BODY */
 
 body {
-  color-scheme: light;
-  background-color: #f5f5f5;
-  color: var(--mat-sys-on-surface);
+  background-color: var(--bg-app);
+  color: var(--text-main);
 
   font-family: 'Inter', 'Roboto', sans-serif;
   font-size: 14px;
@@ -320,7 +554,7 @@ body {
 .animate-spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* ── MatDialog panel override ─────────────────────────────────── */
+/* â”€â”€ MatDialog panel override â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tmr-dialog-panel .mat-mdc-dialog-container {
   padding: 0 !important;
   border-radius: 16px;
@@ -335,7 +569,7 @@ body {
 
 
 /* ============================================================= */
-/*  RESPONSIVE NAVBAR – HAMBURGUESA (PRUEBA) */
+/*  RESPONSIVE NAVBAR â€“ HAMBURGUESA (PRUEBA) */
 /* ============================================================= */
 
 @media (max-width: 1024px) {
@@ -376,7 +610,7 @@ body {
   min-width: 100%;
 }
 
-/* ── Session Expiration Dialog ─────────────────────────────────── */
+/* â”€â”€ Session Expiration Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .session-expiration-dialog.cdk-overlay-pane {
   border-radius: 30px !important;
   overflow: hidden !important;
@@ -409,28 +643,63 @@ html[data-theme="dark"] {
   --texto: #f4f4f5;
   --texto-gris: #a1a1aa;
 
-  --bg-app: #18181b;
-  --bg-card: #27272a;
-  --bg-surface: #202124;
-  --bg-hover: #3f3f46;
+  --bg-app: #0a0a0a;
+  --bg-card: #141414;
+  --bg-surface: #1c1c1c;
+  --bg-hover: #252525;
+  --bg-soft: #1a1a1a;
+  --bg-subtle: #141414;
 
-  --text-main: #f4f4f5;
-  --text-secondary: #d4d4d8;
-  --text-muted: #a1a1aa;
+  --text-main: #f0f4f8;
+  --text-body: #d8e4ee;
+  --text-secondary: #a0b4c4;
+  --text-muted: #6b8599;
+  --text-title: #3b82f6;
 
-  --border-color: #3f3f46;
+  --border-color: #2a2a2a;
+  --border-default: #2a2a2a;
+  --border-soft: #333333;
+  --border-card: var(--border-default);
+  --border-table: var(--border-default);
 
-  --primary-color: #3b82f6;
+  --primary-color: #163572;
   --primary-text: #ffffff;
 
   --icon-color: #d4d4d8;
 
-  --input-bg: #27272a;
-  --input-border: #52525b;
+  --input-bg: #1c1c1c;
+  --input-border: #333333;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 
-  /* ── Layout principal, app container & fondos ───────────────────── */
+  --pattern-panel-bg: var(--bg-card);
+  --pattern-table-bg: var(--bg-card);
+  --pattern-table-header-bg: var(--bg-surface);
+  --pattern-table-row-hover: var(--bg-hover);
+  --pattern-control-bg: var(--input-bg);
+  --pattern-control-color: var(--text-main);
+  --pattern-border-color: var(--border-default);
+
+  /* Estados sobre superficies oscuras: mismos significados, contraste legible. */
+  --status-success-text: #4ade80;
+  --status-success-bg-soft: rgba(34, 197, 94, .14);
+  --status-success-border: #166534;
+  --status-info-text: #60a5fa;
+  --status-info-bg-soft: rgba(59, 130, 246, .14);
+  --status-info-border: #1d4ed8;
+  --status-warning-text: #fbbf24;
+  --status-warning-bg-soft: rgba(245, 158, 11, .14);
+  --status-warning-border: #92400e;
+  --status-danger-text: #f87171;
+  --status-danger-bg-soft: rgba(239, 68, 68, .14);
+  --status-danger-border: #991b1b;
+  --elevation-card: 0 8px 24px rgba(0, 0, 0, .28);
+  --elevation-dropdown: 0 12px 30px rgba(0, 0, 0, .42);
+  --elevation-modal: 0 20px 60px rgba(0, 0, 0, .6);
+  --overlay-backdrop: rgba(0, 0, 0, .65);
+  --focus-ring-primary: 0 0 0 3px rgba(59, 130, 246, .22);
+
+  /* â”€â”€ Layout principal, app container & fondos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   html,
   body,
   .layout,
@@ -457,7 +726,7 @@ html[data-theme="dark"] {
     color: var(--text-main) !important;
   }
 
-  /* ── Headers de Página reutilizables (app-header) ───────────────── */
+  /* â”€â”€ Headers de PÃ¡gina reutilizables (app-header) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   app-header,
   .header-container {
     .header-title,
@@ -471,7 +740,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── Navbar superior ────────────────────────────────────────────── */
+  /* â”€â”€ Navbar superior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .navbar {
     background-color: var(--bg-card) !important;
     border-bottom: 1px solid var(--border-color) !important;
@@ -523,7 +792,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── Profile Popover ────────────────────────────────────────────── */
+  /* â”€â”€ Profile Popover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .profile-popover__card {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
@@ -573,13 +842,13 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── Sidebar lateral ────────────────────────────────────────────── */
+  /* â”€â”€ Sidebar lateral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .sidebar {
     background-color: var(--bg-card) !important;
-    border-right: 1px solid var(--border-color) !important;
+    border-right: 0 !important;
 
     .sidebar__logo {
-      border-bottom: 1px solid var(--border-color) !important;
+      border-bottom: 0 !important;
     }
 
     .sidebar__link {
@@ -602,7 +871,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── Tarjeta de Login ───────────────────────────────────────────── */
+  /* â”€â”€ Tarjeta de Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .login-card {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
@@ -620,7 +889,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 1. Filtros y Buscadores Compartidos ────────────────────────── */
+  /* â”€â”€ 1. Filtros y Buscadores Compartidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .filters-bar {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
@@ -664,7 +933,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 2. Tablas Compartidas ──────────────────────────────────────── */
+  /* â”€â”€ 2. Tablas Compartidas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .table-card {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
@@ -678,14 +947,14 @@ html[data-theme="dark"] {
 
     th,
     .mat-mdc-header-cell {
-      background: var(--bg-surface) !important;
+      //background: var(--bg-surface) !important;
       color: var(--text-secondary) !important;
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
     }
 
     td,
     .mat-mdc-cell {
-      border-bottom: 1px solid var(--border-color) !important;
+      //border-bottom: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
       .colab-name {
@@ -705,7 +974,7 @@ html[data-theme="dark"] {
     p { color: var(--text-muted) !important; }
   }
 
-  /* ── Badges de Estado (.status-badge, .seguimiento-badge, app-badge-estado) ── */
+  /* â”€â”€ Badges de Estado (.status-badge, .seguimiento-badge, app-badge-estado) â”€â”€ */
   .status-badge,
   .seguimiento-badge,
   .badge {
@@ -791,7 +1060,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 3. Angular Material Overlays & Diálogos Reutilizables ──────── */
+  /* â”€â”€ 3. Angular Material Overlays & DiÃ¡logos Reutilizables â”€â”€â”€â”€â”€â”€â”€â”€ */
   .cdk-overlay-container,
   body {
     .mat-mdc-dialog-container,
@@ -811,7 +1080,6 @@ html[data-theme="dark"] {
     .mat-datepicker-content,
     .mdc-menu-surface {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -820,7 +1088,6 @@ html[data-theme="dark"] {
       .mdc-list-item,
       .mat-mdc-menu-item {
         background-color: var(--bg-card) !important;
-        background: var(--bg-card) !important;
         color: var(--text-main) !important;
 
         .mdc-list-item__primary-text,
@@ -846,6 +1113,59 @@ html[data-theme="dark"] {
         }
       }
     }
+
+    .mat-datepicker-content {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+
+      .mat-calendar,
+      .mat-calendar-header,
+      .mat-calendar-content {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+      }
+
+      .mat-calendar-period-button,
+      .mat-calendar-previous-button,
+      .mat-calendar-next-button {
+        color: var(--text-main) !important;
+
+        &:hover {
+          background-color: var(--bg-hover) !important;
+        }
+      }
+
+      .mat-calendar-table-header,
+      .mat-calendar-body-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-calendar-body-cell-content {
+        color: var(--text-main) !important;
+        border-color: transparent !important;
+      }
+
+      .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: var(--bg-hover) !important;
+      }
+
+      .mat-calendar-body-selected {
+        background-color: var(--primary-color) !important;
+        color: #ffffff !important;
+      }
+
+      .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-calendar-body-disabled {
+        color: var(--text-muted) !important;
+      }
+
+      .mat-calendar-body-cell-container {
+        color: var(--text-main) !important;
+      }
+    }
   }
 
   .mat-mdc-autocomplete-panel,
@@ -855,7 +1175,6 @@ html[data-theme="dark"] {
   .mat-menu-panel,
   .mdc-menu-surface {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -864,7 +1183,6 @@ html[data-theme="dark"] {
     .mdc-list-item,
     .mat-mdc-menu-item {
       background-color: var(--bg-card) !important;
-      background: var(--bg-card) !important;
       color: var(--text-main) !important;
 
       .mdc-list-item__primary-text,
@@ -891,14 +1209,13 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── Menú de Descarga Reutilizable (app-descarga-menu & app-descargar-menu) ── */
+  /* â”€â”€ MenÃº de Descarga Reutilizable (app-descarga-menu & app-descargar-menu) â”€â”€ */
   app-descarga-menu,
   app-descargar-menu,
   .descarga-menu,
   .descargar {
     .descarga-menu__trigger,
     .descargar__btn {
-      background: var(--bg-surface) !important;
       background-color: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: #ffffff !important;
@@ -922,7 +1239,6 @@ html[data-theme="dark"] {
 
     .descarga-menu__panel,
     .descargar__panel {
-      background: var(--bg-card) !important;
       background-color: var(--bg-card) !important;
       border: 1px solid var(--border-color) !important;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5) !important;
@@ -970,7 +1286,6 @@ html[data-theme="dark"] {
 
   .descarga-menu__select-panel {
     background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
 
     .mat-mdc-option,
@@ -984,7 +1299,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 4. Modales Específicos del Sistema & Modal Base ──────────────── */
+  /* â”€â”€ 4. Modales EspecÃ­ficos del Sistema & Modal Base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .modal,
   .modal-base,
   app-modal-base .modal,
@@ -1044,7 +1359,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 5. Inputs y Formularios Generales ──────────────────────────── */
+  /* â”€â”€ 5. Inputs y Formularios Generales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   input[type="text"],
   input[type="email"],
   input[type="number"],
@@ -1055,7 +1370,7 @@ html[data-theme="dark"] {
   .form-control,
   .form-select {
     background-color: var(--input-bg) !important;
-    border: 1px solid var(--input-border) !important;
+    //order: 1px solid var(--input-border) !important;
     color: var(--text-main) !important;
 
     &::placeholder {
@@ -1067,11 +1382,11 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ═════════════════════════════════════════════════════════════════ */
-  /*  FASE 4: MÓDULOS PRINCIPALES (PROYECTOS, CLIENTES, COLABORADORES) */
-  /* ═════════════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  FASE 4: MÃ“DULOS PRINCIPALES (PROYECTOS, CLIENTES, COLABORADORES) */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-  /* ── 1. Feature Proyectos ───────────────────────────────────────── */
+  /* â”€â”€ 1. Feature Proyectos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .proyectos-page {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
@@ -1126,7 +1441,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* Botón y Menú de Descargar */
+  /* BotÃ³n y MenÃº de Descargar */
   .descarga-menu__trigger,
   .btn-descargar {
     background-color: var(--bg-surface) !important;
@@ -1165,14 +1480,13 @@ html[data-theme="dark"] {
     }
   }
 
-  /* Paginación y Pie de Tabla (.tabla-footer, .paginacion, app-paginacion) */
+  /* PaginaciÃ³n y Pie de Tabla (.tabla-footer, .paginacion, app-paginacion) */
   .tabla-footer,
   div.tabla-footer,
   app-paginacion,
   .paginacion,
   div.paginacion {
-    background-color: var(--bg-card) !important;
-    background: var(--bg-card) !important;
+    background-color: #202124 !important;
     border-color: var(--border-color) !important;
     color: var(--text-main) !important;
 
@@ -1192,7 +1506,6 @@ html[data-theme="dark"] {
 
     .paginacion__btn {
       background-color: var(--bg-surface) !important;
-      background: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
       color: var(--text-main) !important;
 
@@ -1235,6 +1548,10 @@ html[data-theme="dark"] {
       background-color: var(--input-bg) !important;
       border: 1px solid var(--input-border) !important;
       color: #ffffff !important;
+    }
+
+    .proyecto-form__date-control {
+      color-scheme: dark;
     }
 
     .proyecto-form__date-label {
@@ -1287,6 +1604,27 @@ html[data-theme="dark"] {
 
     .mat-datepicker-toggle {
       color: var(--icon-color) !important;
+    }
+
+    // Controles internos de Angular Material que no heredan el color del formulario.
+    // Sin estas reglas, títulos de recursos, búsquedas y flechas quedan casi negros.
+    .proyecto-form__resource {
+      .mat-expansion-panel-header,
+      .mat-expansion-panel-header-title,
+      .mat-expansion-indicator::after {
+        color: var(--text-main) !important;
+      }
+
+      mat-icon,
+      .mat-icon,
+      .mat-mdc-form-field-icon-prefix,
+      .mat-mdc-select-arrow {
+        color: var(--primary-color) !important;
+      }
+
+      .proyecto-form__remove {
+        color: #f87171 !important;
+      }
     }
   }
 
@@ -1342,7 +1680,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 2. Feature Clientes ────────────────────────────────────────── */
+  /* â”€â”€ 2. Feature Clientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .clientes-page,
   .lista-clientes,
   .modal-crear,
@@ -1375,7 +1713,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 3. Feature Colaboradores ───────────────────────────────────── */
+  /* â”€â”€ 3. Feature Colaboradores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .colaboradores-page,
   .cards-metricas,
   .filtros-colaboradores,
@@ -1395,7 +1733,7 @@ html[data-theme="dark"] {
     .metric-card {
       background-color: var(--bg-surface) !important;
       border: 1px solid var(--border-color) !important;
-      
+
       .metric-value { color: var(--text-main) !important; }
       .metric-label { color: var(--text-secondary) !important; }
     }
@@ -1416,11 +1754,11 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ═════════════════════════════════════════════════════════════════ */
-  /*  FASE 5: MÓDULOS DE CONFIGURACIÓN Y LÍDERES                      */
-  /* ═════════════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  FASE 5: MÃ“DULOS DE CONFIGURACIÃ“N Y LÃDERES                      */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-  /* ── 1. Usuarios, Roles, Feriados, Catálogos ────────────────────── */
+  /* â”€â”€ 1. Usuarios, Roles, Feriados, CatÃ¡logos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .usuarios-page,
   .roles-page,
   .feriados-page,
@@ -1447,7 +1785,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 2. Calendario de Feriados y Calendario de Actividades ──────── */
+  /* â”€â”€ 2. Calendario de Feriados y Calendario de Actividades â”€â”€â”€â”€â”€â”€â”€â”€ */
   .feriados-calendar,
   .calendario-container,
   .calendar-wrapper,
@@ -1484,7 +1822,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 3. Líderes & Modales ───────────────────────────────────────── */
+  /* â”€â”€ 3. LÃ­deres & Modales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .lideres-page,
   .lideres-component,
   .lideres-container,
@@ -1614,7 +1952,7 @@ html[data-theme="dark"] {
 
     .table-wrapper {
       background-color: var(--bg-card) !important;
-      border-color: var(--border-color) !important;
+      border-color: var(--phase6-border) !important;
     }
 
     .lideres-table {
@@ -1630,7 +1968,7 @@ html[data-theme="dark"] {
       }
 
       tr:hover {
-        background-color: var(--bg-hover) !important;
+        background-color: var(--phase6-bg-surface) !important;
       }
     }
 
@@ -1698,8 +2036,7 @@ html[data-theme="dark"] {
     .descargar__panel,
     .descarga-menu__panel,
     .descarga-dropdown {
-      background-color: #27272a !important;
-      background: #27272a !important;
+      background-color: var(--phase6-bg-app) !important;
       border: 1px solid #3f3f46 !important;
       color: #f4f4f5 !important;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
@@ -1722,19 +2059,31 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ═════════════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   /*  FASE 6: TIME REPORT, CARGA DE ACTIVIDADES, REPORTES Y DASHBOARD  */
-  /* ═════════════════════════════════════════════════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-  /* ── 1. Actividades y Calendario ────────────────────────────────── */
+  --phase6-bg-app: #0a0a0a;
+  --phase6-bg-panel: #141414;
+  --phase6-bg-card: #141414;
+  --phase6-bg-surface: #1c1c1c;
+  --phase6-bg-hover: #252525;
+  --phase6-border: #2a2a2a;
+  --phase6-text: #f0f4f8;
+  --phase6-text-secondary: #a0b4c4;
+  --phase6-text-muted: #6b8599;
+  --phase6-primary: #163572;
+  --phase6-primary-hover: #0097d6;
+
+  /* â”€â”€ 1. Actividades y Calendario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .actividades-page,
   .actividades-container,
   .calendar-card,
   .metrics-bar,
   .mobile-actividades-seccion {
     background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    //border: 1px solid var(--border-color) !important;
+    //box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     color: var(--text-main) !important;
 
     .metric-value,
@@ -1752,12 +2101,12 @@ html[data-theme="dark"] {
   }
 
   .btn-agregar {
-    background-color: #163572 !important;
-    color: #ffffff !important;
-    border: 1px solid #163572 !important;
+    background-color: var(--phase6-primary) !important;
+    color: #0f172a !important;
+    border: 1px solid var(--phase6-primary) !important;
 
     &:hover {
-      background-color: #122d63 !important;
+      background-color: var(--phase6-primary-hover) !important;
     }
   }
 
@@ -1771,10 +2120,211 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 2. Seguimiento ─────────────────────────────────────────────── */
+  .actividades-page,
+  .actividades-container,
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .report-wrapper,
+  .dashboard-container {
+    color: var(--phase6-text) !important;
+  }
+
+  .actividades-page,
+  .actividades-container,
+  .carga-actividades-container,
+  .carga-actividades-card,
+  .seguimiento-page,
+  .seguimiento-container,
+  .dashboard-container {
+    background-color: var(--phase6-bg-app) !important;
+  }
+
+  .calendar-card,
+  .metrics-bar,
+  .mobile-actividades-seccion,
+  .filters-card,
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28) !important;
+  }
+
+  .actividad-card,
+  .no-actividades-msg,
+  .horas-badge,
+  .actividad-horas-badge {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .actividad-card:hover {
+    background-color: var(--phase6-bg-hover) !important;
+    border-color: var(--phase6-primary) !important;
+  }
+
+  .actividad-card .actividad-proyecto,
+  .actividad-card .actividad-desc,
+  .no-actividades-msg,
+  .horas-badge {
+    color: var(--phase6-text-secondary) !important;
+  }
+
+  .actividad-card .actividad-card-footer {
+    color: var(--phase6-text-muted) !important;
+    border-top-color: var(--phase6-border) !important;
+  }
+
+  .actividad-card .actividad-horas-badge {
+    color: var(--phase6-primary-hover) !important;
+    background-color: rgba(96, 165, 250, 0.14) !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.green,
+  .metrics-bar .metric-icon-wrap.purple,
+  .metrics-bar .metric-icon-wrap.orange {
+    background-color: var(--phase6-bg-surface) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.blue,
+  .metrics-bar .metric-icon-wrap.purple {
+    color: var(--phase6-primary) !important;
+  }
+
+  .metrics-bar .metric-icon-wrap.green { color: #4ade80 !important; }
+  .metrics-bar .metric-icon-wrap.orange { color: #fbbf24 !important; }
+
+  .metrics-bar .metric-value,
+  .metrics-bar .metric-name { color: var(--phase6-text) !important; }
+  .metrics-bar .metric-desc { color: var(--phase6-text-muted) !important; }
+
+  .table-card,
+  .content-card,
+  .table-wrapper,
+  .report-wrapper,
+  .dashboard-container,
+  .proximamente-card,
+  .grafico-card {
+    background-color: var(--phase6-bg-panel) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .data-table,
+  .report-table,
+  .seguimiento-table,
+  .donut-table {
+    background-color: var(--phase6-bg-panel) !important;
+
+    th,
+    thead,
+    thead th {
+      background-color: var(--phase6-bg-surface) !important;
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    td {
+      color: var(--phase6-text-secondary) !important;
+      border-bottom-color: var(--phase6-border) !important;
+    }
+
+    tr:hover,
+    tbody tr:hover {
+      background-color: rgba(96, 165, 250, 0.08) !important;
+    }
+  }
+
+  .search-input-wrapper,
+  .date-controls,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select,
+  .btn-clear {
+    background-color: var(--phase6-bg-surface) !important;
+    border-color: var(--phase6-border) !important;
+    color: var(--phase6-text) !important;
+  }
+
+  .search-input-wrapper input,
+  .filter-input,
+  .filter-select,
+  .date-input,
+  .rango-select {
+    color: var(--phase6-text) !important;
+
+    &::placeholder {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
+  .filter-label,
+  .filter-icon,
+  .filter-icon-right,
+  .date-controls label,
+  .stats-label,
+  .metrica-label {
+    color: var(--phase6-text-muted) !important;
+  }
+
+  .stats-value,
+  .metrica-valor,
+  .font-bold,
+  .text-dark,
+  .text-highlight {
+    color: var(--phase6-text) !important;
+  }
+
+  .page-title,
+  .dashboard-header h1,
+  .report-title,
+  .month-year-label,
+  .card-header h2,
+  .carousel-title,
+  .stat-value,
+  .donut-center-value {
+    color: var(--phase6-primary-hover) !important;
+  }
+
+  .proximamente-card .project-item,
+  .project-hours-badge,
+  .collaborator-card {
+    background-color: var(--phase6-bg-card) !important;
+    border-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .card-header-carousel,
+  .drawer-panel .drawer-header {
+    background-color: var(--phase6-bg-surface) !important;
+    border-bottom-color: var(--phase6-border) !important;
+  }
+
+  .grafico-card .bar-column {
+    background-color: var(--phase6-bg-hover) !important;
+  }
+
+  .grafico-card .bar-column:hover {
+    background-color: #475569 !important;
+  }
+
+  .grafico-card .grafico-stats,
+  .grafico-card .donut-table th,
+  .grafico-card .donut-table td {
+    border-color: var(--phase6-border) !important;
+  }
+
+  /* â”€â”€ 2. Seguimiento â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .seguimiento-page,
   .seguimiento-container {
-    background-color: var(--bg-app) !important;
+    background-color: var(--phase6-bg-app) !important;
     color: var(--text-main) !important;
 
     .header-title, h1, h2 {
@@ -1842,6 +2392,7 @@ html[data-theme="dark"] {
       thead, th {
         background-color: var(--bg-surface) !important;
         color: var(--text-secondary) !important;
+        font-weight: bolder !important;
         border-bottom: 1px solid var(--border-color) !important;
       }
 
@@ -1876,7 +2427,100 @@ html[data-theme="dark"] {
     }
   }
 
+  /* Modal Generar Reporte */
+  .modal-wrap {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    .modal-title {
+      color: var(--primary-color) !important;
+    }
+
+    .empleado-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .empleado-value {
+      color: var(--text-main) !important;
+    }
+
+    .mat-mdc-form-field {
+      --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+      --mdc-outlined-text-field-input-text-color: var(--text-main);
+      --mdc-outlined-text-field-outline-color: var(--input-border);
+      --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
+      --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+      --mat-select-enabled-trigger-text-color: var(--text-main);
+      --mat-select-enabled-arrow-color: var(--text-secondary);
+      --mat-select-focused-arrow-color: var(--primary-color);
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--input-border) !important;
+      }
+
+      &:hover .mdc-notched-outline__leading,
+      &:hover .mdc-notched-outline__notch,
+      &:hover .mdc-notched-outline__trailing {
+        border-color: var(--text-secondary) !important;
+      }
+
+      &.mat-focused .mdc-notched-outline__leading,
+      &.mat-focused .mdc-notched-outline__notch,
+      &.mat-focused .mdc-notched-outline__trailing {
+        border-color: var(--primary-color) !important;
+      }
+
+      .mat-mdc-floating-label,
+      .mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      .mat-mdc-select-value,
+      .mat-mdc-select-value-text,
+      .mat-mdc-select-placeholder {
+        color: var(--text-main) !important;
+      }
+
+      .mat-mdc-select-arrow {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
   /* Calendario Grid & Controles */
+  .calendar-wrapper {
+    background-color: var(--bg-card) !important;
+    color: var(--phase6-text) !important;
+
+    .calendar-topbar {
+      color: var(--phase6-text) !important;
+    }
+
+    .month-title-wrap {
+      color: var(--phase6-text) !important;
+
+      .month-select {
+        color-scheme: dark;
+
+        option {
+          background-color: var(--phase6-bg-surface) !important;
+          color: var(--phase6-text) !important;
+        }
+      }
+    }
+
+    .month-year-label {
+      color: var(--phase6-primary-hover) !important;
+    }
+
+    .dropdown-chevron,
+    .legend {
+      color: var(--phase6-text-muted) !important;
+    }
+  }
+
   .calendar-grid {
     border-color: var(--border-color) !important;
 
@@ -1915,7 +2559,12 @@ html[data-theme="dark"] {
     }
 
     .day-number {
-      color: var(--text-secondary) !important;
+      color: var(--phase6-text-secondary) !important;
+    }
+
+    .day-cell-header,
+    .day-hours-block {
+      color: var(--phase6-text) !important;
     }
 
     .day-hours-text.blue-text {
@@ -1992,6 +2641,18 @@ html[data-theme="dark"] {
       }
     }
 
+    .actividad-modal__help {
+      background-color: var(--bg-surface) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        background-color: rgba(59, 130, 246, 0.14) !important;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+      }
+    }
+
     .actividad-modal__label {
       color: var(--text-main) !important;
     }
@@ -2018,6 +2679,34 @@ html[data-theme="dark"] {
     .actividad-modal__info-icon,
     .actividad-modal__select-wrap::after {
       color: var(--text-secondary) !important;
+    }
+
+    .actividad-modal__input-wrap {
+      .actividad-modal__input-icon {
+        color: var(--text-secondary) !important;
+      }
+
+      img.actividad-modal__input-icon {
+        filter: brightness(0) saturate(100%) invert(83%) sepia(8%) saturate(450%) hue-rotate(182deg) brightness(92%) contrast(88%);
+      }
+    }
+
+    .actividad-modal__info-icon {
+      color: var(--text-secondary) !important;
+
+      &:hover {
+        color: var(--primary-color) !important;
+      }
+    }
+
+    .actividad-modal__close {
+      img {
+        filter: brightness(0) invert(1);
+      }
+
+      &:hover img {
+        filter: brightness(0) saturate(100%) invert(65%) sepia(82%) saturate(1700%) hue-rotate(190deg) brightness(102%) contrast(101%);
+      }
     }
 
     .actividad-modal__checkbox-container {
@@ -2050,7 +2739,18 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 2. Carga Actividades ───────────────────────────────────────── */
+  .actividad-modal__input-wrap {
+    .mat-datepicker-toggle {
+      color: var(--text-secondary) !important;
+
+      .mat-mdc-icon-button:hover {
+        color: var(--text-main) !important;
+        background-color: var(--bg-hover) !important;
+      }
+    }
+  }
+
+  /* â”€â”€ 2. Carga Actividades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .carga-actividades-container,
   .carga-actividades-card,
   app-carga-actividades-component,
@@ -2150,13 +2850,10 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 3. Reportes (Fechas & Horas) ───────────────────────────────── */
+  /* â”€â”€ 3. Reportes (Fechas & Horas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .reporte-fechas-container,
   .reporte-horas-container,
-  .reporte-card,
-  app-reporte-fechas,
-  app-reporte-horas,
-  .report-wrapper {
+  .reporte-card {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
@@ -2251,7 +2948,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* ── 4. Dashboard ───────────────────────────────────────────────── */
+  /* â”€â”€ 4. Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .dashboard-container {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
@@ -2271,7 +2968,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* Métricas del Dashboard */
+  /* MÃ©tricas del Dashboard */
   .metrica-card {
     background-color: var(--bg-surface) !important;
     border: 1px solid var(--border-color) !important;
@@ -2286,7 +2983,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* Próximos a cerrar */
+  /* PrÃ³ximos a cerrar */
   .proximamente-card {
     background-color: var(--bg-surface) !important;
     border: 1px solid var(--border-color) !important;
@@ -2328,7 +3025,7 @@ html[data-theme="dark"] {
     }
   }
 
-  /* Gráfico de horas */
+  /* GrÃ¡fico de horas */
   .grafico-card {
     background-color: var(--bg-surface) !important;
     border: 1px solid var(--border-color) !important;
@@ -2431,4 +3128,454 @@ html[data-theme="dark"] {
     caret-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s !important;
   }
+      /* Override for tables to ensure dark gray #202124 instead of blue */
+  .seguimiento-page .table-scroll-container,
+  .seguimiento-page .table-wrapper,
+  .seguimiento-table,
+  app-carga-actividades .table-scroll-container,
+  app-carga-actividades .table-wrapper,
+  app-carga-actividades table,
+  app-carga-actividades .data-table {
+    background-color: #202124 !important;
+
+    th, thead, thead th {
+      background-color: #202124 !important;
+    }
+  }
+}
+/* Override for Carga de Actividades table-card to be borderless and transparent */
+html[data-theme="dark"] app-carga-actividades .table-card,
+app-carga-actividades .table-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] app-carga-actividades,
+html[data-theme="dark"] app-carga-actividades-component {
+  background-color: #18181b !important;
+}
+
+/* Contraste consistente para controles reutilizados en todas las pantallas oscuras.
+   Algunos componentes antiguos traen colores del tema claro encapsulados. */
+html[data-theme="dark"] {
+  .mat-mdc-dialog-surface,
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .cdk-overlay-pane .mat-mdc-autocomplete-panel {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .mat-mdc-dialog-surface {
+    h1, h2, h3, h4, h5, h6, label, p, span, strong {
+      color: var(--text-main);
+    }
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper,
+    .mdc-text-field {
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+    }
+
+    input,
+    textarea,
+    .mat-mdc-input-element,
+    .mat-mdc-select-value,
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      color: var(--text-main) !important;
+    }
+
+    mat-icon,
+    .mat-icon,
+    .mat-mdc-form-field-icon-suffix {
+      color: var(--icon-color) !important;
+    }
+
+    // Los iconos de búsqueda/ayuda sí funcionan como affordance interactiva.
+    .mat-mdc-form-field-icon-prefix {
+      color: var(--primary-color) !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: var(--text-secondary) !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted) !important;
+      opacity: 1;
+    }
+  }
+
+  .mat-mdc-menu-item,
+  .mat-mdc-option {
+    color: var(--text-main) !important;
+
+    mat-icon,
+    .mat-icon {
+      color: var(--text-secondary) !important;
+    }
+
+    &:hover,
+    &.mdc-list-item--selected {
+      background-color: var(--bg-hover) !important;
+    }
+  }
+
+  button mat-icon,
+  button .material-symbols-outlined {
+    color: inherit;
+  }
+
+  .mat-datepicker-toggle,
+  .mat-mdc-icon-button {
+    color: var(--primary-color) !important;
+  }
+}
+
+/* Layout estable: los nombres largos no deben empujar logos, acciones ni títulos. */
+.header-container,
+.navbar,
+.sidebar__logo,
+.sidebar__link,
+.sidebar__sublink {
+  min-width: 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+}
+
+.header-container .header-info,
+.header-container .header-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.header-container .header-title,
+.header-container .header-subtitle {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-container .header-title {
+  white-space: nowrap;
+}
+
+.header-container .header-subtitle {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.header-container .header-actions,
+.header-container .header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar__user {
+  min-width: 0;
+}
+
+.navbar__profile-text {
+  max-width: min(28vw, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar__logo-img {
+  max-width: 100%;
+  max-height: 72px;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-container .header-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .header-container .header-actions,
+  .header-container .header-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+/* Barras de desplazamiento discretas en el tema oscuro, incluido el documento.
+   El scrollbar de la ventana pertenece a html/body, por lo que no basta con
+   seleccionar sus descendientes. */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] * {
+  scrollbar-color: rgba(148, 163, 184, 0.48) #18181b;
+  scrollbar-width: thin;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar,
+html[data-theme="dark"] body::-webkit-scrollbar,
+html[data-theme="dark"] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-track,
+html[data-theme="dark"] body::-webkit-scrollbar-track,
+html[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: #18181b;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-thumb,
+html[data-theme="dark"] body::-webkit-scrollbar-thumb,
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+html[data-theme="dark"]::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] body::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.65);
+  background-clip: padding-box;
+}
+
+/* Ajustes de contraste exclusivos del dashboard ejecutivo. Reutilizan los
+   acentos existentes sin modificar la paleta global del tema oscuro. */
+html[data-theme="dark"] {
+  app-dashboard-ejecutivo app-header .header-title,
+  app-dashboard-ejecutivo .chip-corte,
+  app-dashboard-ejecutivo .aviso-fuera,
+  app-sidebar .sidebar__link.active {
+    color: var(--accent-cian) !important;
+  }
+
+  app-dashboard-ejecutivo .chip-corte {
+    background: var(--primary-light);
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-corporativo {
+    --acento: var(--accent-cian);
+    --icono-color: var(--accent-cian);
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-corporativo .tarjeta-icono {
+    color: var(--accent-cian) !important;
+    opacity: .28;
+  }
+
+  app-dashboard-ejecutivo app-tarjeta-resumen .tarjeta.tono-peligro .tarjeta-icono {
+    color: var(--status-danger-bg-solid) !important;
+    opacity: .28;
+  }
+}
+
+/* Patrones reutilizados por pantallas con estilos encapsulados antiguos.
+   !important se limita a estas superficies para que sus fondos literales no
+   ganen al token activo del tema; los componentes nuevos usan los tokens base. */
+html[data-theme] .filters-container,
+html[data-theme] .filters-card,
+html[data-theme] .filter-panel,
+html[data-theme] .table-scroll-container,
+html[data-theme] .pagination-bar {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--elevation-card) !important;
+}
+
+html[data-theme] .filters-container .filter-input,
+html[data-theme] .filters-container .filter-select,
+html[data-theme] .filters-card .filter-input,
+html[data-theme] .filters-card .filter-select,
+html[data-theme] .filter-panel input,
+html[data-theme] .filter-panel select {
+  background: var(--pattern-control-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--pattern-control-color) !important;
+}
+
+/* Contrato visual único de tablas. Estas reglas globales son intencionales:
+   Angular encapsula los SCSS de cada pantalla y varios estilos antiguos tienen
+   más especificidad; los tokens deben prevalecer en cualquier tabla/paginador. */
+html[data-theme] .table-scroll-container,
+html[data-theme] .table-wrapper,
+html[data-theme] .pagination-bar,
+html[data-theme] .paginacion {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme] table,
+html[data-theme] .mat-mdc-table {
+  background: var(--pattern-table-bg) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme] table thead,
+html[data-theme] table thead tr,
+html[data-theme] table thead th,
+html[data-theme] table th,
+html[data-theme] .mat-mdc-header-row,
+html[data-theme] .mat-mdc-header-cell {
+  background: var(--pattern-table-header-bg) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table tbody tr,
+html[data-theme] .mat-mdc-row {
+  background: var(--pattern-table-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table tbody tr:hover,
+html[data-theme] .mat-mdc-row:hover {
+  background: var(--pattern-table-row-hover) !important;
+}
+
+html[data-theme] table tbody td,
+html[data-theme] .mat-mdc-cell {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] .paginacion__btn:hover:not(:disabled):not(.paginacion__btn--activo) {
+  background: var(--pattern-table-row-hover) !important;
+}
+
+html[data-theme] .empty-state {
+  background: var(--pattern-panel-bg) !important;
+  border-color: var(--pattern-border-color) !important;
+  color: var(--text-main) !important;
+}
+
+/* Encabezados de todas las tablas, incluidas las tablas nativas y Material.
+   Varias pantallas heredadas los declaran en blanco dentro de su componente. */
+html[data-theme] table thead,
+html[data-theme] table thead tr,
+html[data-theme] table thead th,
+html[data-theme] table th,
+html[data-theme] .mat-mdc-header-row,
+html[data-theme] .mat-mdc-header-cell,
+html[data-theme] [role="rowgroup"] [role="columnheader"] {
+  background-color: var(--pattern-table-header-bg) !important;
+  background: var(--pattern-table-header-bg) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--pattern-border-color) !important;
+}
+
+html[data-theme] table thead .sort-icon,
+html[data-theme] table thead mat-icon,
+html[data-theme] .mat-mdc-header-cell mat-icon {
+  color: var(--text-muted);
+}
+
+/* Badge de estado único para tablas, tarjetas y modales. Las clases locales
+   (.status-pill, .estado-badge y .badge-estado) conservan su semántica, pero
+   comparten exactamente la misma geometría y paleta. */
+html[data-theme] .status-badge,
+html[data-theme] .status-pill,
+html[data-theme] .estado-badge,
+html[data-theme] .badge-estado {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  gap: 7px !important;
+  min-height: 32px;
+  padding: 6px 14px !important;
+  border: 1px solid var(--status-success-border) !important;
+  border-radius: 999px !important;
+  background: var(--status-success-bg-soft) !important;
+  color: var(--status-success-text) !important;
+  font: 500 13px/1 'Inter', sans-serif !important;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+html[data-theme] .status-badge .status-dot,
+html[data-theme] .estado-badge .estado-dot,
+html[data-theme] .badge-estado .badge-circulo,
+html[data-theme] .status-pill::before {
+  content: '';
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px;
+  border-radius: 50%;
+  background: var(--status-success-bg-solid) !important;
+  display: inline-block;
+}
+
+html[data-theme] .status-badge.inactive,
+html[data-theme] .status-pill.status-pill--inactive,
+html[data-theme] .estado-badge.inactivo,
+html[data-theme] .badge-estado.badge-inactivo {
+  border-color: var(--border-soft) !important;
+  background: var(--bg-soft) !important;
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme] .status-badge.inactive .status-dot,
+html[data-theme] .estado-badge.inactivo .estado-dot,
+html[data-theme] .badge-estado.badge-inactivo .badge-circulo,
+html[data-theme] .status-pill.status-pill--inactive::before {
+  background: var(--text-muted) !important;
+}
+
+html[data-theme] .status-badge.progress,
+html[data-theme] .status-badge.approved,
+html[data-theme] .status-badge.planning,
+html[data-theme] .status-badge.development {
+  border-color: var(--status-info-border) !important;
+  background: var(--status-info-bg-soft) !important;
+  color: var(--status-info-text) !important;
+}
+
+html[data-theme] .status-badge.progress .status-dot,
+html[data-theme] .status-badge.approved .status-dot,
+html[data-theme] .status-badge.planning .status-dot,
+html[data-theme] .status-badge.development .status-dot {
+  background: var(--status-info-bg-solid) !important;
+}
+
+html[data-theme] .status-badge.waiting,
+html[data-theme] .status-badge.delayed {
+  border-color: var(--status-warning-border) !important;
+  background: var(--status-warning-bg-soft) !important;
+  color: var(--status-warning-text) !important;
+}
+
+html[data-theme] .status-badge.waiting .status-dot,
+html[data-theme] .status-badge.delayed .status-dot {
+  background: var(--status-warning-bg-solid) !important;
+}
+
+html[data-theme] .status-badge.cancelled {
+  border-color: var(--status-danger-border) !important;
+  background: var(--status-danger-bg-soft) !important;
+  color: var(--status-danger-text) !important;
+}
+
+html[data-theme] .status-badge.cancelled .status-dot {
+  background: var(--status-danger-bg-solid) !important;
 }

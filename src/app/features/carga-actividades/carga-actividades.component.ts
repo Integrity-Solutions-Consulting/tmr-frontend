@@ -2,6 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PaginacionComponent } from '../../shared/components/paginacion/paginacion.component';
 import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, shareReplay, startWith, take, tap } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
@@ -12,6 +15,7 @@ import { ClientesService } from '../clientes/servicios/clientes.service';
 import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
 import { exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 
 const COLOR_PRIMARIO = 'FF163572';
 const COLOR_RECURSO = 'FFFFFFFF';
@@ -19,10 +23,13 @@ const COLOR_RECURSO_ALT = 'FFF8FAFC';
 const COLOR_TEXTO = 'FF334155';
 const COLOR_BORDE = 'FFE2E8F0';
 
+// sm - Columnas por las que se puede ordenar la tabla (igual mecánica que Seguimiento).
+type CampoOrdenableActividad = 'colaborador' | 'proyecto' | 'cliente' | 'fecha' | 'nroHoras' | 'estado';
+
 @Component({
   selector: 'app-carga-actividades',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, PaginacionComponent],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, PaginacionComponent, HeaderComponent, MatIconModule, MatCheckboxModule],
   templateUrl: './carga-actividades.component.html',
   styleUrls: ['./carga-actividades.component.scss']
 })
@@ -37,7 +44,8 @@ export class CargaActividadesComponent implements OnInit {
   searchControl = new FormControl('', { nonNullable: true });
   proyectoControl = new FormControl('', { nonNullable: true });
   fechaDesdeControl = new FormControl('', { nonNullable: true });
-  fechaHastaControl = new FormControl('', { nonNullable: true });
+  // sm - "Fecha hasta" arranca en el día de hoy (igual que Seguimiento), no vacío.
+  fechaHastaControl = new FormControl(this.fechaHoyInputDate(), { nonNullable: true });
 
   errorMessage: string = '';
   successMessage: string = '';
@@ -46,6 +54,15 @@ export class CargaActividadesComponent implements OnInit {
 
   paginaActual$ = new BehaviorSubject<number>(1);
   itemsPorPagina = 10;
+
+  // sm - Selección de filas (antes los checkboxes no estaban conectados a nada: no hacían nada al marcarlos).
+  selection = new SelectionModel<Actividad>(true, []);
+
+  // sm - Orden manual por columna (igual mecánica que Seguimiento): clic en el encabezado ordena por ese
+  // campo, un segundo clic invierte el sentido. Se aplica sobre TODO lo filtrado, antes de paginar.
+  sortField: CampoOrdenableActividad | '' = '';
+  sortAsc = true;
+  private sortState$ = new BehaviorSubject<{ campo: CampoOrdenableActividad | ''; asc: boolean }>({ campo: '', asc: true });
 
   private proyectosValidos: string[] = [];
   private clientesValidos: string[] = [];
@@ -74,15 +91,17 @@ export class CargaActividadesComponent implements OnInit {
     })
   );
 
-  private actividadesFiltradasTodas$ = combineLatest([
+  actividadesFiltradasTodas$ = combineLatest([
     this.actividadesRaw$,
     this.cambioFiltro(this.searchControl),
     this.cambioFiltro(this.proyectoControl),
     this.cambioFiltro(this.fechaDesdeControl),
-    this.cambioFiltro(this.fechaHastaControl)
+    this.cambioFiltro(this.fechaHastaControl),
+    this.sortState$
   ]).pipe(
-    map(([actividades, searchTerm, proyectoSelected, desde, hasta]) => {
-      return this.aplicarFiltros(actividades, searchTerm, proyectoSelected, desde, hasta);
+    map(([actividades, searchTerm, proyectoSelected, desde, hasta, orden]) => {
+      const filtradas = this.aplicarFiltros(actividades, searchTerm, proyectoSelected, desde, hasta);
+      return this.ordenarActividades(filtradas, orden.campo, orden.asc);
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -103,6 +122,9 @@ export class CargaActividadesComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(ActividadesActions.cargarActividades());
+    // sm - Cada recarga reconstruye las actividades como objetos nuevos, así que una selección previa quedaría
+    // con referencias huérfanas (igual que en Seguimiento).
+    this.actividadesRaw$.subscribe(() => this.selection.clear());
   }
 
   mostrarDetalle = false;
@@ -169,6 +191,58 @@ export class CargaActividadesComponent implements OnInit {
     }
 
     return filtrados;
+  }
+
+  private ordenarActividades(actividades: Actividad[], campo: CampoOrdenableActividad | '', asc: boolean): Actividad[] {
+    if (!campo) return actividades;
+    const copia = [...actividades];
+    copia.sort((a, b) => {
+      const valA = campo === 'fecha' ? (this.parseFechaLocal(a.fecha)?.getTime() ?? 0) : a[campo];
+      const valB = campo === 'fecha' ? (this.parseFechaLocal(b.fecha)?.getTime() ?? 0) : b[campo];
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return asc ? valA - valB : valB - valA;
+      }
+
+      const strA = String(valA ?? '').toLowerCase();
+      const strB = String(valB ?? '').toLowerCase();
+      return asc ? strA.localeCompare(strB) : strB.localeCompare(strA);
+    });
+    return copia;
+  }
+
+  ordenar(campo: CampoOrdenableActividad): void {
+    if (this.sortField === campo) {
+      this.sortAsc = !this.sortAsc;
+    } else {
+      this.sortField = campo;
+      this.sortAsc = true;
+    }
+    this.sortState$.next({ campo: this.sortField, asc: this.sortAsc });
+    this.paginaActual$.next(1);
+  }
+
+  direccionOrden(campo: CampoOrdenableActividad): 'ascending' | 'descending' | 'none' {
+    if (this.sortField !== campo) return 'none';
+    return this.sortAsc ? 'ascending' : 'descending';
+  }
+
+  // sm - "Seleccionar todos" cubre TODO lo filtrado (todas las páginas), no solo la página visible; igual
+  // criterio que Seguimiento.
+  toggleTodos(items: Actividad[]): void {
+    if (this.estanTodosSeleccionados(items)) {
+      items.forEach(i => this.selection.deselect(i));
+    } else {
+      items.forEach(i => this.selection.select(i));
+    }
+  }
+
+  estanTodosSeleccionados(items: Actividad[]): boolean {
+    return items.length > 0 && items.every(i => this.selection.isSelected(i));
+  }
+
+  haySeleccionParcial(items: Actividad[]): boolean {
+    return items.some(i => this.selection.isSelected(i)) && !this.estanTodosSeleccionados(items);
   }
 
   paginaSiguiente() {
@@ -483,6 +557,14 @@ export class CargaActividadesComponent implements OnInit {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  // sm - Fecha de hoy en formato yyyy-MM-dd (el que espera <input type="date">), en hora local.
+  private fechaHoyInputDate(): string {
+    const hoy = new Date();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    return `${hoy.getFullYear()}-${mes}-${dia}`;
   }
 
   formatearFecha(fecha?: string | Date | null): string {

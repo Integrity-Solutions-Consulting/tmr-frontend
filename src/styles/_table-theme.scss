@@ -1,0 +1,46 @@
+// Paleta y estados compartidos por las tablas de gestión. El layout (anchos,
+// padding y scroll) sigue perteneciendo a cada componente; la apariencia no.
+@mixin data-table {
+  background: var(--pattern-table-bg);
+  color: var(--text-main);
+
+  thead {
+    background: var(--pattern-table-header-bg);
+    border-color: var(--pattern-border-color);
+
+    th {
+      background: var(--pattern-table-header-bg);
+      color: var(--text-secondary);
+      border-color: var(--pattern-border-color);
+    }
+  }
+
+  tbody {
+    tr {
+      background: var(--pattern-table-bg);
+      border-color: var(--pattern-border-color);
+
+      &:hover,
+      &.selected-row {
+        background: var(--pattern-table-row-hover);
+      }
+    }
+
+    td {
+      background: transparent;
+      color: var(--text-main);
+      border-color: var(--pattern-border-color);
+    }
+  }
+}
+
+@mixin table-shell {
+  background: var(--pattern-table-bg);
+  border-color: var(--pattern-border-color);
+}
+
+@mixin table-pagination {
+  background: var(--pattern-panel-bg);
+  color: var(--text-secondary);
+  border-color: var(--pattern-border-color);
+}

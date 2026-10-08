@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { authRoutes } from './features/auth/auth.routes';
 import { AppLayout } from './core/layout/app-layout/app-layout';
-import { ProyectosPage } from './features/proyectos/paginas/proyectos-page/proyectos-page';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -26,14 +25,28 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         canActivate: [roleGuard],
+        // sm - Se reemplaza el dashboard anterior por el Dashboard ejecutivo (Requerimiento_Funcional_Dashboard_Time_Report):
+        // tenía el gráfico general de horas reportadas (se elimina), contaba proyectos activos sin mirar el estado
+        // y solo filtraba por mes/trimestre/año. Los componentes anteriores se conservan sin uso.
+        // loadComponent: () =>
+        //   import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
+        //     m => m.DashboardPageComponent
+        //   ),
         loadComponent: () =>
-          import('./features/dashboard/componentes/dashboard-page/dashboard-page.component').then(
-            m => m.DashboardPageComponent
+          import('./features/dashboard/componentes/dashboard-ejecutivo/dashboard-ejecutivo.component').then(
+            m => m.DashboardEjecutivoComponent
           ),
       },
 
       // Proyectos
-      { path: 'proyectos', component: ProyectosPage, canActivate: [roleGuard] },
+      {
+        path: 'proyectos',
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/proyectos/paginas/proyectos-page/proyectos-page').then(
+            m => m.ProyectosPage
+          ),
+      },
 
       // Colaboradores
       {

@@ -3,13 +3,27 @@
   <table class="tabla">
     <thead class="tabla__head">
       <tr>
-        <th class="tabla__th">Identificaci&oacute;n</th>
-        <th class="tabla__th">Empresa</th>
-        <th class="tabla__th">Nombre</th>
-        <th class="tabla__th tabla__th--center">N&uacute;m. Proyectos</th>
-        <th class="tabla__th">Correo electr&oacute;nico</th>
-        <th class="tabla__th">Cargo</th>
-        <th class="tabla__th">Estado</th>
+        <th class="tabla__th sortable" (click)="ordenar('identificacion')" [attr.aria-sort]="direccionOrden('identificacion')">
+          <span class="th-inner"><span class="th-label">Identificaci&oacute;n</span><mat-icon class="sort-icon">{{ sortField === 'identificacion' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th sortable" (click)="ordenar('tipoIdentificacion')" [attr.aria-sort]="direccionOrden('tipoIdentificacion')">
+          <span class="th-inner"><span class="th-label">Empresa</span><mat-icon class="sort-icon">{{ sortField === 'tipoIdentificacion' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th sortable" (click)="ordenar('nombreCompleto')" [attr.aria-sort]="direccionOrden('nombreCompleto')">
+          <span class="th-inner"><span class="th-label">Nombre</span><mat-icon class="sort-icon">{{ sortField === 'nombreCompleto' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th tabla__th--center sortable" (click)="ordenar('numProyectos')" [attr.aria-sort]="direccionOrden('numProyectos')">
+          <span class="th-inner"><span class="th-label">N&uacute;m. Proyectos</span><mat-icon class="sort-icon">{{ sortField === 'numProyectos' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th sortable" (click)="ordenar('correoElectronico')" [attr.aria-sort]="direccionOrden('correoElectronico')">
+          <span class="th-inner"><span class="th-label">Correo electr&oacute;nico</span><mat-icon class="sort-icon">{{ sortField === 'correoElectronico' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th sortable" (click)="ordenar('cargo')" [attr.aria-sort]="direccionOrden('cargo')">
+          <span class="th-inner"><span class="th-label">Cargo</span><mat-icon class="sort-icon">{{ sortField === 'cargo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
+        <th class="tabla__th sortable" (click)="ordenar('estado')" [attr.aria-sort]="direccionOrden('estado')">
+          <span class="th-inner"><span class="th-label">Estado</span><mat-icon class="sort-icon">{{ sortField === 'estado' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        </th>
         <th class="tabla__th tabla__th--actions"></th>
       </tr>
     </thead>
@@ -37,7 +51,7 @@
       }
 
       @if (!cargando) {
-        @for (col of colaboradores; track col.id) {
+        @for (col of colaboradoresOrdenados; track col.id) {
           <tr class="tabla__row">
 
             <td class="tabla__td tabla__td--id">{{ col.identificacion }}</td>

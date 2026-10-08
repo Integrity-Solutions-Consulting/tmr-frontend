@@ -5,11 +5,20 @@
       <thead>
         <tr class="tabla-header-row">
           @for (columna of columnas; track columna.property) {
-            <th 
-              class="tabla-header-cell" 
-              [ngClass]="columna.headerClass"
-              [style.width]="columna.width">
-              {{ columna.header }}
+            <th
+              class="tabla-header-cell"
+              [ngClass]="[columna.headerClass || '', columna.sortable ? 'sortable' : '']"
+              [style.width]="columna.width"
+              [attr.aria-sort]="columna.sortable ? direccionOrden(columna.property) : null"
+              (click)="columna.sortable ? ordenar(columna.property) : null">
+              @if (columna.sortable) {
+                <span class="th-inner">
+                  <span class="th-label">{{ columna.header }}</span>
+                  <mat-icon class="sort-icon">{{ sortField === columna.property ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+                </span>
+              } @else {
+                {{ columna.header }}
+              }
             </th>
           }
         </tr>
@@ -44,12 +53,12 @@
           <!-- Filas de datos -->
           @if (rowTemplate) {
             <!-- Template personalizado -->
-            @for (item of datosPaginados; track getRowId(item, $index)) {
+            @for (item of datosPaginadosOrdenados; track getRowId(item, $index)) {
               <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: item, index: $index }"/>
             }
           } @else {
             <!-- Filas automáticas -->
-            @for (item of datosPaginados; track getRowId(item, $index)) {
+            @for (item of datosPaginadosOrdenados; track getRowId(item, $index)) {
               <tr 
                 class="tabla-row"
                 (click)="onRowClick(item)"
@@ -105,6 +114,7 @@
     </table>
   </div>
 
+</div>
   <!-- Paginación -->
   @if (getSignalValue(mostrarDatos) && datosPaginados.length > 0) {
     <div class="pagination-wrapper">
@@ -117,4 +127,4 @@
       </app-paginacion>
     </div>
   }
-</div>
+

@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (visible) {
-      <div class="confirm-dialog__backdrop" (click)="cancelar.emit()">
+      <div class="confirm-dialog__backdrop">
         <section class="confirm-dialog" (click)="$event.stopPropagation()">
           <button
             type="button"
@@ -55,17 +55,18 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: rgba(0, 0, 0, 0.35);
+      background: var(--overlay-backdrop);
     }
 
     .confirm-dialog {
       position: relative;
       min-width: 260px;
       width: min(92vw, 420px);
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border-default);
       border-radius: 14px;
-      background: #ffffff;
-      box-shadow: 0 8px 32px rgba(22, 53, 114, 0.15);
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: var(--elevation-modal);
       padding: 40px 48px;
       text-align: center;
     }
@@ -79,14 +80,14 @@ import { CommonModule } from '@angular/common';
       border: 0;
       border-radius: 8px;
       background: transparent;
-      color: #737373;
+      color: var(--text-muted);
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
     }
 
     .confirm-dialog__close:hover {
-      background: #f5f5f5;
+      background: var(--bg-hover);
     }
 
     .confirm-dialog__icon {
@@ -94,8 +95,8 @@ import { CommonModule } from '@angular/common';
       height: 44px;
       margin: 0 auto 14px;
       border-radius: 999px;
-      background: #f5f5f5;
-      color: #ef4444;
+      background: var(--status-danger-bg-soft);
+      color: var(--status-danger-text);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -105,14 +106,14 @@ import { CommonModule } from '@angular/common';
 
     .confirm-dialog h2 {
       margin: 0;
-      color: #163572;
+      color: var(--primary-color);
       font-size: 24px;
       font-weight: 700;
     }
 
     .confirm-dialog p {
       margin: 10px 0 22px;
-      color: #737373;
+      color: var(--text-secondary);
       font-size: 13px;
       line-height: 1.45;
     }
@@ -135,56 +136,56 @@ import { CommonModule } from '@angular/common';
     }
 
     .confirm-dialog__button--secondary {
-      border: 1px solid #e5e5e5;
-      background: #ffffff;
-      color: #737373;
+      border: 1px solid var(--border-default);
+      background: var(--pattern-control-bg);
+      color: var(--text-secondary);
     }
 
     .confirm-dialog__button--danger {
-      border: 1px solid #ef4444;
-      background: #ef4444;
-      color: #ffffff;
+      border: 1px solid var(--status-danger-bg-solid);
+      background: var(--status-danger-bg-solid);
+      color: var(--text-inverse);
     }
 
     :host-context(html[data-theme="dark"]) {
       .confirm-dialog__backdrop {
-        background: rgba(0, 0, 0, 0.65) !important;
+        background: var(--overlay-backdrop) !important;
       }
 
       .confirm-dialog {
-        background-color: #27272a !important;
-        background: #27272a !important;
-        border-color: #3f3f46 !important;
-        color: #f4f4f5 !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+        background-color: var(--bg-card) !important;
+        background: var(--bg-card) !important;
+        border-color: var(--border-default) !important;
+        color: var(--text-main) !important;
+        box-shadow: var(--elevation-modal) !important;
 
         h2 {
-          color: #3b82f6 !important;
+          color: var(--primary-color) !important;
         }
 
         p {
-          color: #a1a1aa !important;
+          color: var(--text-secondary) !important;
         }
 
         .confirm-dialog__close {
-          color: #a1a1aa !important;
+          color: var(--text-muted) !important;
           &:hover {
-            background: #3f3f46 !important;
-            color: #ffffff !important;
+            background: var(--bg-hover) !important;
+            color: var(--text-main) !important;
           }
         }
 
         .confirm-dialog__icon {
-          background: rgba(239, 68, 68, 0.15) !important;
-          color: #f87171 !important;
+          background: var(--status-danger-bg-soft) !important;
+          color: var(--status-danger-text) !important;
         }
 
         .confirm-dialog__button--secondary {
-          background: #202124 !important;
-          border-color: #3f3f46 !important;
-          color: #ffffff !important;
+          background: var(--pattern-control-bg) !important;
+          border-color: var(--border-default) !important;
+          color: var(--text-main) !important;
           &:hover {
-            background: #3f3f46 !important;
+            background: var(--bg-hover) !important;
           }
         }
       }
