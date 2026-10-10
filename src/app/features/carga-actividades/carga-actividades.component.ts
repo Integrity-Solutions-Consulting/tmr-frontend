@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -16,6 +17,7 @@ import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.s
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
 import { exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { ajustarFinRango, fechaLocalInputHoy } from '../../shared/utils/date-range.utils';
 
 const COLOR_PRIMARIO = 'FF163572';
 const COLOR_RECURSO = 'FFFFFFFF';
@@ -40,12 +42,14 @@ export class CargaActividadesComponent implements OnInit {
   private proyectosService = inject(ProyectosService);
   private clientesService = inject(ClientesService);
   private colaboradoresService = inject(ColaboradoresService);
+  private destroyRef = inject(DestroyRef);
 
   searchControl = new FormControl('', { nonNullable: true });
   proyectoControl = new FormControl('', { nonNullable: true });
   fechaDesdeControl = new FormControl('', { nonNullable: true });
   // sm - "Fecha hasta" arranca en el día de hoy (igual que Seguimiento), no vacío.
   fechaHastaControl = new FormControl(this.fechaHoyInputDate(), { nonNullable: true });
+  readonly fechaMaxima = fechaLocalInputHoy();
 
   errorMessage: string = '';
   successMessage: string = '';
@@ -124,7 +128,18 @@ export class CargaActividadesComponent implements OnInit {
     this.store.dispatch(ActividadesActions.cargarActividades());
     // sm - Cada recarga reconstruye las actividades como objetos nuevos, así que una selección previa quedaría
     // con referencias huérfanas (igual que en Seguimiento).
-    this.actividadesRaw$.subscribe(() => this.selection.clear());
+    this.actividadesRaw$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.selection.clear());
+  }
+
+  ajustarRangoFechas(): void {
+    const desde = this.fechaDesdeControl.value;
+    const hastaAjustada = ajustarFinRango(desde, this.fechaHastaControl.value);
+    if (hastaAjustada !== this.fechaHastaControl.value) {
+      this.fechaHastaControl.setValue(hastaAjustada);
+      this.errorMessage = 'La fecha hasta se ajustó para que no sea anterior a la fecha desde.';
+    }
   }
 
   mostrarDetalle = false;
@@ -561,10 +576,7 @@ export class CargaActividadesComponent implements OnInit {
 
   // sm - Fecha de hoy en formato yyyy-MM-dd (el que espera <input type="date">), en hora local.
   private fechaHoyInputDate(): string {
-    const hoy = new Date();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    return `${hoy.getFullYear()}-${mes}-${dia}`;
+    return fechaLocalInputHoy();
   }
 
   formatearFecha(fecha?: string | Date | null): string {
