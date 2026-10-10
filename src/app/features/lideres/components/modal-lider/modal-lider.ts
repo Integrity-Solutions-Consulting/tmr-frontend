@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 
 interface TipoLider {
   id: number;
@@ -141,9 +142,8 @@ export class ModalLider implements OnInit, OnChanges {
   }
 
   filtrarPersonas() {
-    const busqueda = this.busquedaPersona.toLowerCase().trim();
     this.personasFiltradas = this.personasDisponibles.filter(p =>
-      p.nombreCompleto.toLowerCase().includes(busqueda)
+      coincideBusqueda(p.nombreCompleto, this.busquedaPersona)
     );
   }
 

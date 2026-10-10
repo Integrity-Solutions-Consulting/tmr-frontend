@@ -21,6 +21,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
@@ -87,7 +88,7 @@ export class UsuariosPage {
 
   // ── Filtrado local por texto y estado ──────────────────────────────────────
   readonly filteredUsuarios = computed(() => {
-    const query = this.query().trim().toLowerCase();
+    const query = this.query();
     const filtro = this.filtroActivo();
 
     const filtered = this.usuarios().filter((usuario) => {
@@ -96,20 +97,16 @@ export class UsuariosPage {
       if (filtro === 'activos' && !esActivo) return false;
       if (filtro === 'inactivos' && esActivo) return false;
 
-      // Filtro por texto
-      if (!query) return true;
-
-      return [
+      // Filtro por texto: coincide por palabras sueltas, así "Jorge Lino" encuentra a
+      // "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
+      return coincideBusqueda([
         usuario.nombres,
         usuario.apellidos,
         usuario.usuario,
         usuario.email,
         usuario.estado,
         this.resolveRoleNames(usuario.rolesids).join(' '),
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(query);
+      ].join(' '), query);
     });
 
     return filtered.sort((a, b) => b.id - a.id);

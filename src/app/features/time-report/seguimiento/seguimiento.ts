@@ -28,6 +28,7 @@ import JSZip from 'jszip';
 // sm - Operadores para cancelar la descarga desde el toast (takeUntil).
 import { Observable, Subject, lastValueFrom, takeUntil } from 'rxjs';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
@@ -247,11 +248,12 @@ export class SeguimientoComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         this.dataSource.paginator = this.paginator;
-        // sm - La búsqueda es solo por colaborador (nombre completo) y proyecto. Se normaliza el texto (sin tildes,
-        // minúsculas y espacios simples) para que "juan  perez" encuentre a "Juan Pérez".
+        // sm - La búsqueda es solo por colaborador (nombre completo) y proyecto. Coincide por palabras sueltas
+        // (sin tildes, minúsculas y espacios simples) para que "juan perez" o "Jorge Lino" encuentren a
+        // "Juan Pérez" o "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
         this.dataSource.filterPredicate = (data: Colaborador, filter: string) =>
-            this.normalizarBusqueda(data.nombre).includes(filter)
-            || this.normalizarBusqueda(data.proyecto).includes(filter);
+            coincideBusqueda(data.nombre, filter)
+            || coincideBusqueda(data.proyecto, filter);
 
         // Cargar clientes desde lookups
         this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
@@ -312,7 +314,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Búsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
     // Se limpia la selección para que siempre corresponda a los resultados visibles (igual que al recargar).
     public aplicarBusqueda() {
-        this.dataSource.filter = this.normalizarBusqueda(this.busqueda);
+        this.dataSource.filter = normalizarTexto(this.busqueda);
         this.selection.clear();
         this.irAPrimeraPagina();
     }
@@ -349,14 +351,6 @@ export class SeguimientoComponent implements AfterViewInit {
     private irAPrimeraPagina() {
         this.pageIndex = 0;
         this.dataSource.paginator?.firstPage();
-    }
-
-    private normalizarBusqueda(texto: string): string {
-        return (texto ?? '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/\s+/g, ' ')
-            .trim();
     }
 
     // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado

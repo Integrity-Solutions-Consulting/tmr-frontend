@@ -14,6 +14,7 @@ import {
 } from '../../servicios/catalogos.service';
 import { ColaboradoresService } from '../../servicios/colaboradores.service';
 import { Colaborador } from '../../models/colaborador.model';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 
 @Component({
   selector: 'app-modal-crear-colaborador',
@@ -173,14 +174,14 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
   filtrarColaboradores(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.busquedaActual = input.value.toLowerCase().trim();
+    this.busquedaActual = input.value.trim();
 
     if (this.busquedaActual === '') {
       this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
     } else {
       this.colaboradoresFiltrados = this.colaboradoresInactivos.filter(c =>
-        c.nombreCompleto.toLowerCase().includes(this.busquedaActual) ||
-        c.identificacion.includes(this.busquedaActual)
+        coincideBusqueda(c.nombreCompleto, this.busquedaActual) ||
+        coincideBusqueda(c.identificacion, this.busquedaActual)
       );
     }
 

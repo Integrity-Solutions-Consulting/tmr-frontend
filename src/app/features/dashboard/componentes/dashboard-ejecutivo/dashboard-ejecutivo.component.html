@@ -126,29 +126,24 @@
         }
       </div>
 
-      <div class="filter-group filter-group--desplegable" (click)="toggleFiltro('colaborador', $event)">
-        <label class="filter-label">Colaborador</label>
+      <div class="filter-group">
+        <label class="filter-label" for="f-colaborador">Colaborador</label>
         <div class="filter-input-wrapper">
-          <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'colaborador'">
-            <span class="filter-trigger-texto">{{ etiquetaFiltro('colaborador') }}</span>
-            <span class="material-symbols-outlined select-chevron">expand_more</span>
-          </div>
-        </div>
-        @if (filtroAbierto() === 'colaborador') {
-          <div class="dropdown-estado" (click)="$event.stopPropagation()">
-            @for (c of opciones().colaboradores; track c.id) {
-            <div class="dropdown-opcion" (click)="elegirFiltro('idEmpleado', c.id, $event)">
-              <div class="dropdown-checkbox" [class.checked]="filtros().idEmpleado === c.id">
-                @if (filtros().idEmpleado === c.id) {
-                  <span class="material-icons">check</span>
-                }
-              </div>
-              <span class="opcion-label">{{ c.nombre }}</span>
-            </div>
+          <span class="material-symbols-outlined filter-icon">search</span>
+          <input id="f-colaborador" type="text" class="filter-input" placeholder="Todos los colaboradores"
+            [ngModel]="colaboradorTexto()" (ngModelChange)="onColaboradorTextoChange($event)"
+            [matAutocomplete]="autoColaborador" autocomplete="off" />
+          <mat-autocomplete #autoColaborador="matAutocomplete" (optionSelected)="seleccionarColaborador($event)"
+            (closed)="onColaboradorPanelCerrado()">
+            <mat-option [value]="null">Todos los colaboradores</mat-option>
+            @for (c of colaboradoresFiltrados(); track c.id) {
+              <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
             }
-            <div class="dropdown-limpiar" (click)="elegirFiltro('idEmpleado', null, $event)">Limpiar filtro</div>
-          </div>
-        }
+          </mat-autocomplete>
+          @if (colaboradorTexto()) {
+            <button type="button" class="filter-clear" (click)="onColaboradorTextoChange('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+          }
+        </div>
       </div>
 
       <div class="filter-group filtro-horizonte">

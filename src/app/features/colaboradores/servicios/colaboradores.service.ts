@@ -7,6 +7,7 @@ import {
   ColaboradorListaApi,
   FiltrosColaborador,
   RegistrarSalidaRequest,
+  EstadoColaborador,
 } from '../models/colaborador.model';
 import { environment } from '../../../../environments/environment';
 
@@ -119,6 +120,32 @@ export class ColaboradoresService {
     );
   }
 
+  // =========================================================================
+  // LISTAR TODOS (sin busqueda ni paginar) — para filtrar el texto en el
+  // cliente, igual que en Usuarios/Líderes, sin volver a pedirle datos al
+  // backend en cada tecla que se escribe en el buscador.
+  // =========================================================================
+  getTodosColaboradores(estado: EstadoColaborador | 'Todos'): Observable<Colaborador[]> {
+    const params: string[] = [];
+
+    if (estado === 'Activo') {
+      params.push('activo=true');
+    } else if (estado === 'Inactivo') {
+      params.push('activo=false');
+    }
+
+    const queryString = params.length ? `?${params.join('&')}` : '';
+
+    return this.http.get<ColaboradorListaApi[]>(
+      `${this.apiUrl}${queryString}`,
+      this.httpOptions
+    ).pipe(
+      map(respuesta => this.ordenarActivosPrimero(
+        respuesta.map(api => this.mapApiAColaborador(api))
+      ))
+    );
+  }
+
   // ── Convierte el item del backend al modelo del frontend ──
   private ordenarActivosPrimero(colaboradores: Colaborador[]): Colaborador[] {
     return [...colaboradores].sort((a, b) => {
@@ -130,6 +157,7 @@ export class ColaboradoresService {
   private mapApiAColaborador(api: ColaboradorListaApi): Colaborador {
     return {
       id: api.id.toString(),
+      codigoEmpleado: api.codigoEmpleado,
       identificacion: api.numeroIdentificacion,
       tipoIdentificacion: api.asociacion as any,
       nombreCompleto: api.nombreCompleto,

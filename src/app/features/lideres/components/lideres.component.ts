@@ -22,6 +22,7 @@ import {
 import { TarjetaResumenComponent } from '../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { MatIconModule } from '@angular/material/icon';
+import { coincideBusqueda } from '../../../shared/utils/texto.utils';
 export interface ProyectoAsignado {
   id?: number;
   codigo: string;
@@ -279,13 +280,15 @@ export class LideresComponent implements OnInit {
     this.cerrarLiderExpandido();
   }
   aplicarFiltros(): void {
-    const texto = this.busqueda.toLowerCase();
+    // sm - Coincide por palabras sueltas: "Jorge Lino" encuentra a "Jorge Augusto Lino Bermeo"
+    // aunque se salte el segundo nombre.
+    const texto = this.busqueda;
     this.lideresFiltrados = this.lideres.filter(l => {
-      const matchTexto = !texto ||
-        (l.nombre && l.nombre.toLowerCase().includes(texto)) ||
-        (l.codigo && l.codigo.toLowerCase().includes(texto)) ||
-        (l.correo && l.correo.toLowerCase().includes(texto)) ||
-        (l.cliente && l.cliente.toLowerCase().includes(texto));
+      const matchTexto =
+        coincideBusqueda(l.nombre, texto) ||
+        coincideBusqueda(l.codigo, texto) ||
+        coincideBusqueda(l.correo, texto) ||
+        coincideBusqueda(l.cliente, texto);
       const matchTipo = !this.tipoFiltro || l.tipo === this.tipoFiltro;
       const matchEstado = !this.estadoFiltro || l.estado === this.estadoFiltro;
       return matchTexto && matchTipo && matchEstado;

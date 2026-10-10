@@ -23,6 +23,7 @@ import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/mo
 import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';  // ← NUEVO
 import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 
 @Component({
   selector: 'app-colaboradores-page',
@@ -51,6 +52,11 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   cargando      = false;
   total         = 0;
   totalPaginas  = 0;
+
+  // sm - Lista completa del estado actual (sin filtrar por texto), para poder filtrar la
+  // búsqueda en el cliente (como en Usuarios/Líderes) sin volver a pedirle datos al backend
+  // en cada tecla que se escribe — evita el parpadeo de "cargando" al escribir.
+  private colaboradoresCargados: Colaborador[] = [];
 
   // ── Paginación ───────────────────────────────────────────
   paginaActual = 1;
@@ -91,23 +97,42 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   // ── Carga ────────────────────────────────────────────────
+  // sm - Trae del backend todos los colaboradores del Estado actual (sin filtrar por texto) y
+  // deja que aplicarBusqueda() filtre/pagine en el cliente. Solo esto muestra el "cargando"
+  // (cambia de Estado, recarga tras crear/editar/eliminar, etc.).
   cargarDatos(): void {
     this.cargando = true;
     this.svc
-      .getColaboradores(this.filtros, this.paginaActual, this.porPagina)
+      .getTodosColaboradores(this.filtros.estado)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
-          this.colaboradores = res.data;
-          this.total         = res.total;
-          this.totalPaginas  = res.totalPaginas;
-          this.cargando      = false;
+          this.colaboradoresCargados = res;
+          this.cargando = false;
+          this.aplicarBusqueda();
         },
         error: () => {
           this.cargando = false;
           console.error('Error al cargar los colaboradores');
         },
       });
+  }
+
+  // sm - Filtra por texto (nombre completo, identificación o código) y pagina en memoria,
+  // igual que en Usuarios/Líderes: no hace ninguna llamada al backend, así que escribir en el
+  // buscador no "recarga" la tabla.
+  private aplicarBusqueda(): void {
+    const busqueda = this.filtros.busqueda;
+    const filtrados = this.colaboradoresCargados.filter(c =>
+      coincideBusqueda(c.nombreCompleto, busqueda) ||
+      coincideBusqueda(c.identificacion, busqueda) ||
+      coincideBusqueda(c.codigoEmpleado, busqueda)
+    );
+
+    this.total = filtrados.length;
+    this.totalPaginas = Math.ceil(this.total / this.porPagina) || 1;
+    const inicio = (this.paginaActual - 1) * this.porPagina;
+    this.colaboradores = filtrados.slice(inicio, inicio + this.porPagina);
   }
 
   cargarMetricas(): void {
@@ -120,16 +145,25 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   // ── Filtros ──────────────────────────────────────────────
+  // sm - Solo recarga desde el backend si cambió el Estado (el filtro que sí requiere volver a
+  // pedir datos). Si lo único que cambió fue el texto de búsqueda, se filtra en el cliente sobre
+  // lo que ya está cargado — así no "parpadea" la tabla con cada tecla, igual que en Usuarios/Líderes.
   onFiltrosCambian(filtros: FiltrosColaborador): void {
+    const cambioEstado = filtros.estado !== this.filtros.estado;
     this.filtros = { ...filtros };
     this.paginaActual = 1;
-    this.cargarDatos();
+
+    if (cambioEstado) {
+      this.cargarDatos();
+    } else {
+      this.aplicarBusqueda();
+    }
   }
 
   // ── Paginación ───────────────────────────────────────────
   onPaginaCambia(pagina: number): void {
     this.paginaActual = pagina;
-    this.cargarDatos();
+    this.aplicarBusqueda();
   }
 
   // ── Modales abrir ────────────────────────────────────────
