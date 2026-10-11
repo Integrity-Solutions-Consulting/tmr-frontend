@@ -1,5 +1,6 @@
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,19 +12,21 @@ import {
 } from '@angular/forms';
 import { CrearClienteRequest } from '../../modelos/cliente.model';
 import { ClientesService, TipoIdentificacionBackend } from '../../servicios/clientes.service';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-crear',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ScrollingModule],
   templateUrl: './modal-crear.component.html',
   styleUrl: './modal-crear.component.scss',
 })
-export class ModalCrearComponent implements OnInit {
+export class ModalCrearComponent implements OnInit, OnDestroy {
   @Output() guardar = new EventEmitter<CrearClienteRequest>();
   @Output() cancelar = new EventEmitter<void>();
 
   private clientesService = inject(ClientesService);
+  private scrollLock = inject(ModalScrollLockService);
 
   tipos: TipoIdentificacionBackend[] = [];
   enviado = false;
@@ -48,7 +51,12 @@ export class ModalCrearComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.scrollLock.lock();
     this.cargarTiposIdentificacion();
+  }
+
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
   }
 
   cargarTiposIdentificacion(): void {

@@ -34,7 +34,7 @@
             <label class="float-field__label">Colaborador <span class="req">*</span></label>
 
             @if (dropdownColaboradorAbierto) {
-            <ul class="colaborador-picker__list">
+            <ul class="colaborador-picker__list" data-scroll-lock-exempt>
               @for (colaborador of colaboradoresFiltrados; track colaborador.id) {
               <li (mousedown)="seleccionarColaborador(colaborador)">
                 {{ colaborador.nombreCompleto }}

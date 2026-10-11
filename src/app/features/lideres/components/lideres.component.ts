@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ import { TarjetaResumenComponent } from '../../../shared/components/tarjeta-resu
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { MatIconModule } from '@angular/material/icon';
 import { coincideBusqueda } from '../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../shared/services/dropdown-scroll-lock.service';
 export interface ProyectoAsignado {
   id?: number;
   codigo: string;
@@ -63,7 +64,7 @@ export interface Lider {
   templateUrl: './lideres.component.html',
   styleUrls: ['./lideres.component.scss'],
 })
-export class LideresComponent implements OnInit {
+export class LideresComponent implements OnInit, OnDestroy {
 
   lideres: Lider[] = [];
   lideresFiltrados: Lider[] = [];
@@ -82,7 +83,6 @@ export class LideresComponent implements OnInit {
 
   mostrarFormulario = false;
   mostrarDetalle = false;
-  mostrarDescarga = false;
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   liderSeleccionado: any = null;
@@ -91,8 +91,42 @@ export class LideresComponent implements OnInit {
   liderEditando: Lider | null = null;
   liderForm!: FormGroup;
   guardandoLider = false;
-  mostrarEstadoDropdown = false;
   errorFormulario: string | null = null;
+
+  // sm - mostrarDescarga/mostrarEstadoDropdown se asignan desde muchos sitios (handlers del
+  // componente y expresiones inline del template). En vez de tocar cada punto, se exponen como
+  // accessors: cualquier asignación (true/false) dispara sola el bloqueo/liberación de scroll
+  // (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _mostrarDescarga = false;
+  get mostrarDescarga(): boolean {
+    return this._mostrarDescarga;
+  }
+  set mostrarDescarga(valor: boolean) {
+    this._mostrarDescarga = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    this._mostrarEstadoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private dropdownLockActivo = false;
+
+  private actualizarLockDropdowns(): void {
+    const hayAlguno = this._mostrarDescarga || this._mostrarEstadoDropdown;
+    if (hayAlguno && !this.dropdownLockActivo) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    } else if (!hayAlguno && this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
 
   // ── Orden de columnas ──────────────────────────────────
   sortField: keyof Lider | null = null;
@@ -140,7 +174,18 @@ export class LideresComponent implements OnInit {
   liderAEliminar: Lider | null = null;
   errorEliminar: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) { }
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private dropdownScrollLock: DropdownScrollLockService,
+  ) { }
+
+  ngOnDestroy(): void {
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
 
   ngOnInit(): void {
     this.liderForm = this.fb.group({

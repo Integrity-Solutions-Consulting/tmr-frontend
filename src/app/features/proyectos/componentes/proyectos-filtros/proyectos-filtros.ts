@@ -8,6 +8,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ProyectosService } from '../../servicios/proyectos.service';
 import { ID_SEGUIMIENTO_INHABILITADO, LookupOption, Proyecto } from '../../modelos/proyecto.model';
 import { selectProyectos } from '../../store/proyectos.selectors';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 export interface FiltrosProyecto {
   busqueda: string;
@@ -28,6 +29,7 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
 
   private proyectosService = inject(ProyectosService);
   private store = inject(Store);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
 
   // sm - Filtro en cascada: cada dropdown solo muestra las opciones que realmente tienen al menos un proyecto
   // que coincide con los OTROS filtros ya aplicados (igual universo de proyectos y misma normalización que usa
@@ -43,11 +45,50 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
   tipos: LookupOption[] = [];
   estadosFiltro = ['Activo', 'Inactivo'];
 
-  mostrarEstadoDropdown = false;
-  mostrarSeguimientoDropdown = false;
-  mostrarTipoDropdown = false;
+  // sm - Los 3 dropdowns se asignan desde muchos sitios (toggles, cerrarDropdowns). En vez de
+  // tocar cada punto, se exponen como accessors: cualquier asignación bloquea/libera sola el
+  // scroll de fondo (DropdownScrollLockService) — ya NO se cierran solos al hacer scroll, se
+  // comportan igual que mat-select ("Tipo de proyecto"): el scroll queda bloqueado mientras
+  // estén abiertos.
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    this._mostrarEstadoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
 
-  private scrollHandler = () => this.cerrarDropdowns();
+  private _mostrarSeguimientoDropdown = false;
+  get mostrarSeguimientoDropdown(): boolean {
+    return this._mostrarSeguimientoDropdown;
+  }
+  set mostrarSeguimientoDropdown(valor: boolean) {
+    this._mostrarSeguimientoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private _mostrarTipoDropdown = false;
+  get mostrarTipoDropdown(): boolean {
+    return this._mostrarTipoDropdown;
+  }
+  set mostrarTipoDropdown(valor: boolean) {
+    this._mostrarTipoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private dropdownLockActivo = false;
+
+  private actualizarLockDropdowns(): void {
+    const hayAlguno = this._mostrarEstadoDropdown || this._mostrarSeguimientoDropdown || this._mostrarTipoDropdown;
+    if (hayAlguno && !this.dropdownLockActivo) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    } else if (!hayAlguno && this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
 
   readonly idSeguimientoInhabilitado = ID_SEGUIMIENTO_INHABILITADO;
 
@@ -152,11 +193,13 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
       },
       error: (err) => console.error('Error al cargar lookups:', err)
     });
-    window.addEventListener('scroll', this.scrollHandler, true);
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('scroll', this.scrollHandler, true);
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
   }
 
   @HostListener('document:click')

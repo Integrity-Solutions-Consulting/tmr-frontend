@@ -36,6 +36,7 @@ import {
 import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/brecha-historico.component';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
 type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
@@ -96,6 +97,7 @@ export class DashboardEjecutivoComponent implements OnInit {
   private servicio = inject(DashboardEjecutivoService);
   private dashboardService = inject(DashboardService);
   private destroyRef = inject(DestroyRef);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;
@@ -424,19 +426,37 @@ export class DashboardEjecutivoComponent implements OnInit {
   // ── Desplegables de filtros (mismo diseño que Proyectos) ──
   readonly filtroAbierto = signal<'anio' | 'mes' | 'estado' | null>(null);
 
+  private readonly liberarDropdownAlDestruir = this.destroyRef.onDestroy(() => {
+    if (this.filtroAbierto() !== null) {
+      this.dropdownScrollLock.unlock();
+    }
+  });
+
   toggleFiltro(nombre: 'anio' | 'mes' | 'estado', event: Event): void {
     event.stopPropagation();
-    this.filtroAbierto.set(this.filtroAbierto() === nombre ? null : nombre);
+    if (this.filtroAbierto() === nombre) {
+      this.cerrarFiltros();
+      return;
+    }
+    if (this.filtroAbierto() === null) {
+      this.dropdownScrollLock.lock();
+    }
+    this.filtroAbierto.set(nombre);
   }
 
+  // sm - Bloquea/libera el scroll de fondo mientras el desplegable está abierto, igual que
+  // mat-select ("Tipo de proyecto").
   @HostListener('document:click')
   cerrarFiltros(): void {
+    if (this.filtroAbierto() !== null) {
+      this.dropdownScrollLock.unlock();
+    }
     this.filtroAbierto.set(null);
   }
 
   elegirFiltro<K extends keyof DashboardFiltros>(clave: K, valor: DashboardFiltros[K], event: Event): void {
     event.stopPropagation();
-    this.filtroAbierto.set(null);
+    this.cerrarFiltros();
     this.actualizarFiltro(clave, valor);
   }
 

@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,20 +12,22 @@ import {
 } from '@angular/forms';
 import { Cliente, EditarClienteRequest } from '../../modelos/cliente.model';
 import { ClientesService, TipoIdentificacionBackend } from '../../servicios/clientes.service';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-editar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ScrollingModule],
   templateUrl: './modal-editar.component.html',
   styleUrl: './modal-editar.component.scss',
 })
-export class ModalEditarComponent implements OnChanges, OnInit {
+export class ModalEditarComponent implements OnChanges, OnInit, OnDestroy {
   @Input() cliente!: Cliente;
   @Output() guardar = new EventEmitter<EditarClienteRequest>();
   @Output() cancelar = new EventEmitter<void>();
 
   private clientesService = inject(ClientesService);
+  private scrollLock = inject(ModalScrollLockService);
 
   tipos: TipoIdentificacionBackend[] = [];
   enviado = false;
@@ -33,7 +36,12 @@ export class ModalEditarComponent implements OnChanges, OnInit {
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
+    this.scrollLock.lock();
     this.cargarTiposIdentificacion();
+  }
+
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

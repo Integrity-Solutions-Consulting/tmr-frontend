@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -16,20 +17,24 @@ import {
   CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
 import { ColaboradoresService } from '../../servicios/colaboradores.service';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-editar-colaborador',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ScrollingModule],
   templateUrl: './modal-editar-colaborador.component.html',
   styleUrl: './modal-editar-colaborador.component.scss',
 })
-export class ModalEditarColaboradorComponent implements OnInit {
+export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
   @Input() colaborador!: Colaborador;
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<any>();
 
   private fb = inject(FormBuilder);
+  private scrollLock = inject(ModalScrollLockService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
   private catalogosService = inject(CatalogosService);
   private colaboradoresService = inject(ColaboradoresService);
 
@@ -59,9 +64,25 @@ export class ModalEditarColaboradorComponent implements OnInit {
   seccionReemplazoAbierta = false;
   colaboradoresInactivos: Colaborador[] = [];
   colaboradoresFiltrados: Colaborador[] = [];
-  mostrarLista = false;
   reemplazoSeleccionado: Colaborador | null = null;
   busquedaActual = '';
+
+  // sm - mostrarLista se asigna desde muchos sitios. Accessor: cualquier asignación bloquea/
+  // libera el scroll de fondo sola (DropdownScrollLockService), igual que mat-select
+  // ("Tipo de proyecto").
+  private _mostrarLista = false;
+  get mostrarLista(): boolean {
+    return this._mostrarLista;
+  }
+  set mostrarLista(valor: boolean) {
+    if (valor === this._mostrarLista) return;
+    this._mostrarLista = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
 
   // sm - Historial de contrato: tipo con el que se abrió el modal. Si se cambia, se pide desde qué fecha rige el nuevo
   // (la jornada esperada depende del tipo: 8 h o 6 h pasante, y el histórico debe usar el que tenía cada día).
@@ -72,7 +93,16 @@ export class ModalEditarColaboradorComponent implements OnInit {
     return this.tipoContratoOriginal !== null && actual !== null && Number(actual) !== this.tipoContratoOriginal;
   }
 
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
+    if (this._mostrarLista) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarLista = false;
+    }
+  }
+
   ngOnInit(): void {
+    this.scrollLock.lock();
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: [null],

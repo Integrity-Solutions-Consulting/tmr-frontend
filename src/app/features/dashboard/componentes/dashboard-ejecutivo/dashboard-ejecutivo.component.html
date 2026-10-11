@@ -22,7 +22,7 @@
           </div>
         </div>
         @if (filtroAbierto() === 'anio') {
-          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+          <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (a of anios; track a) {
             <div class="dropdown-opcion" (click)="elegirFiltro('anio', a, $event)">
               <div class="dropdown-checkbox" [class.checked]="filtros().anio === a">
@@ -46,7 +46,7 @@
           </div>
         </div>
         @if (filtroAbierto() === 'mes') {
-          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+          <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (m of meses; track $index) {
             <div class="dropdown-opcion" [class.dropdown-opcion--deshabilitada]="mesDeshabilitado($index + 1)" (click)="!mesDeshabilitado($index + 1) && elegirFiltro('mes', $index + 1, $event)">
               <div class="dropdown-checkbox" [class.checked]="filtros().mes === $index + 1">
@@ -110,7 +110,7 @@
           </div>
         </div>
         @if (filtroAbierto() === 'estado') {
-          <div class="dropdown-estado" (click)="$event.stopPropagation()">
+          <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (e of opciones().estados; track e.id) {
             <div class="dropdown-opcion" (click)="elegirFiltro('idEstado', e.id, $event)">
               <div class="dropdown-checkbox" [class.checked]="filtros().idEstado === e.id">

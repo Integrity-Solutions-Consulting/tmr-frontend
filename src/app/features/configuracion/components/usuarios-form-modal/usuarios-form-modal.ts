@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -10,6 +10,7 @@ import {
   temporaryPasswordValidator,
 } from '../../../../shared/validators/form-validators';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
@@ -19,11 +20,12 @@ const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
   templateUrl: './usuarios-form-modal.html',
   styleUrl: './usuarios-form-modal.scss',
 })
-export class UsuariosFormModal {
+export class UsuariosFormModal implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<UsuariosFormModal>);
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly usuariosService = inject(UsuariosService);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
   readonly data = inject<{ usuario?: Usuario; roles: Rol[]; nextId: number }>(MAT_DIALOG_DATA);
 
   readonly guardando = signal(false);
@@ -94,6 +96,13 @@ export class UsuariosFormModal {
     }
   }
 
+  ngOnDestroy(): void {
+    if (this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownColaboradorAbierto = false;
+    }
+  }
+
   get isEdit(): boolean {
     return Boolean(this.data.usuario);
   }
@@ -123,14 +132,19 @@ export class UsuariosFormModal {
   // directamente ahí, sin una cajita de búsqueda aparte dentro del desplegable.
   onBusquedaColaboradorInput(valor: string): void {
     this.busquedaColaborador = valor;
-    this.dropdownColaboradorAbierto = true;
+    this.abrirDropdownColaborador();
 
     if (!valor.trim() && this.form.controls.idColaborador.value) {
       this.form.controls.idColaborador.setValue('');
     }
   }
 
+  // sm - Bloquea el scroll de fondo mientras el desplegable está abierto, igual que mat-select
+  // ("Tipo de proyecto"). La guarda evita bloquear dos veces si ya estaba abierto.
   abrirDropdownColaborador(): void {
+    if (!this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.lock();
+    }
     this.dropdownColaboradorAbierto = true;
   }
 
@@ -139,6 +153,9 @@ export class UsuariosFormModal {
   // Colaboradores: modal-crear-colaborador.component.ts).
   cerrarDropdownColaborador(): void {
     setTimeout(() => {
+      if (this.dropdownColaboradorAbierto) {
+        this.dropdownScrollLock.unlock();
+      }
       this.dropdownColaboradorAbierto = false;
       this.busquedaColaborador = this.colaboradorSeleccionado?.nombreCompleto ?? '';
     }, 200);
@@ -148,6 +165,9 @@ export class UsuariosFormModal {
     this.form.controls.idColaborador.setValue(String(colaborador.id));
     this.form.controls.idColaborador.markAsTouched();
     this.busquedaColaborador = colaborador.nombreCompleto;
+    if (this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.unlock();
+    }
     this.dropdownColaboradorAbierto = false;
   }
 

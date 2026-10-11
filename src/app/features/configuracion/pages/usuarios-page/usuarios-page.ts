@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
@@ -22,6 +22,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
@@ -30,9 +31,10 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
-export class UsuariosPage {
+export class UsuariosPage implements OnDestroy {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
 
   // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
@@ -46,7 +48,21 @@ export class UsuariosPage {
   readonly filtroActivo = signal<FiltroEstado>('activos');
 
   // ── Estado del dropdown Estado ────────────────────────────────────────────
-  mostrarEstadoDropdown = false;
+  // sm - Accessor: cualquier asignación bloquea/libera el scroll de fondo sola
+  // (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    if (valor === this._mostrarEstadoDropdown) return;
+    this._mostrarEstadoDropdown = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
 
   // ── Modal de éxito ────────────────────────────────────────────────────────
   readonly exitoVisible = signal(false);
@@ -150,6 +166,13 @@ export class UsuariosPage {
   }
 
   // ── Control del dropdown Estado ────────────────────────────────────────────
+
+  ngOnDestroy(): void {
+    if (this._mostrarEstadoDropdown) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarEstadoDropdown = false;
+    }
+  }
 
   toggleEstadoDropdown(event?: Event): void {
     event?.stopPropagation();

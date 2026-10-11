@@ -1,5 +1,5 @@
 <div class="modal-overlay" *ngIf="mostrarFormulario">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card" cdkScrollable (click)="$event.stopPropagation()">
 
     <!-- HEADER -->
     <div class="modal-header">
@@ -43,7 +43,7 @@
                 líder' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
-            <ul class="custom-select-options" *ngIf="dropdownAbierto === 'tipo'">
+            <ul class="custom-select-options" data-scroll-lock-exempt *ngIf="dropdownAbierto === 'tipo'">
               <li *ngFor="let opcion of tiposLideres" (click)="seleccionar('tipo', opcion, $event)">
                 {{ opcion.valor }}
               </li>
@@ -60,7 +60,7 @@
                 'Colaborador' }}</span>
               <span class="material-icons custom-select-arrow">expand_more</span>
             </div>
-            <div class="custom-select-options" *ngIf="dropdownAbierto === 'persona'">
+            <div class="custom-select-options" data-scroll-lock-exempt *ngIf="dropdownAbierto === 'persona'">
               <div class="dropdown-search-box" (click)="$event.stopPropagation()">
                 <span class="material-icons dropdown-search-icon">search</span>
                 <input type="text" class="dropdown-search-input" placeholder="Buscar colaborador..."

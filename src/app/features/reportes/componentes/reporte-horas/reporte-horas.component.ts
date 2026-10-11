@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, inject, effect, HostListener } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, inject, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';
@@ -12,6 +12,7 @@ import { DescargarMenuComponent } from '../../../colaboradores/componentes/desca
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 @Component({
   selector: 'app-reporte-horas',
   standalone: true,
@@ -19,7 +20,14 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
   templateUrl: './reporte-horas.component.html',
   styleUrl: './reporte-horas.component.scss'
 })
-export class ReporteHorasComponent {
+export class ReporteHorasComponent implements OnDestroy {
+  ngOnDestroy(): void {
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
+
   columnasTabla: ColumnDefinition[] = [
     { header: 'Cliente', property: 'cliente', type: 'text', sortable: true },
     { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado', sortable: true },
@@ -46,6 +54,7 @@ export class ReporteHorasComponent {
   totalItems = signal(0);
 
   private reportesService = inject(ReportesService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
   datos = signal<ReporteHoras[]>([]);
 
   constructor() {
@@ -161,10 +170,18 @@ export class ReporteHorasComponent {
     return !valor || valor === 'ALL';
   }
 
+  // sm - Bloquea/libera el scroll de fondo mientras alguno de los dos está abierto, igual que
+  // mat-select ("Tipo de proyecto").
+  private dropdownLockActivo = false;
+
   @HostListener('document:click')
   cerrarDropdowns() {
     this.mesAbierto.set(false);
     this.anioAbierto.set(false);
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
   }
 
   toggleMes(event: Event) {
@@ -172,6 +189,10 @@ export class ReporteHorasComponent {
     const abrir = !this.mesAbierto();
     this.cerrarDropdowns();
     this.mesAbierto.set(abrir);
+    if (abrir) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    }
   }
 
   toggleAnio(event: Event) {
@@ -179,6 +200,10 @@ export class ReporteHorasComponent {
     const abrir = !this.anioAbierto();
     this.cerrarDropdowns();
     this.anioAbierto.set(abrir);
+    if (abrir) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    }
   }
 
   seleccionarMes(mes: string, event: Event) {

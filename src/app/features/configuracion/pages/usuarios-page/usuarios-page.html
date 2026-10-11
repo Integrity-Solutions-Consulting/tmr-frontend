@@ -40,7 +40,7 @@
             <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
-      <div class="dropdown-estado" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+      <div class="dropdown-estado" data-scroll-lock-exempt *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
         <div class="dropdown-opcion" (click)="seleccionarEstado('activos'); $event.stopPropagation()">
           <div class="dropdown-checkbox" [class.checked]="filtroActivo() === 'activos'">
             <span class="material-icons" *ngIf="filtroActivo() === 'activos'">check</span>

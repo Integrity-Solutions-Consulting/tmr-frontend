@@ -14,7 +14,7 @@
       </button>
 
       <!-- Panel Dropdown de Notificaciones -->
-      <div class="navbar__bell-dropdown" *ngIf="notificacionesAbierto">
+      <div class="navbar__bell-dropdown" data-scroll-lock-exempt *ngIf="notificacionesAbierto">
         <div class="navbar__bell-dropdown-header">Notificaciones</div>
         <div class="navbar__bell-dropdown-body">
           <div class="navbar__bell-item" *ngIf="tieneNotificaciones">

@@ -9,6 +9,7 @@ import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/uti
 import { Cliente, CrearClienteRequest, EditarClienteRequest } from '../../modelos/cliente.model';
 import { ClientesService } from '../../servicios/clientes.service';
 import { ClientesActions } from '../../store/clientes.actions';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 import {
   selectClientes, selectCargando, selectNotificacion,
   selectClienteSeleccionado, selectModalCrearAbierto,
@@ -56,6 +57,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   private store    = inject(Store);
   private fb       = inject(FormBuilder);
   private clientesService = inject(ClientesService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
   private destroy$ = new Subject<void>();
 
   // ── Selectores ────────────────────────────────────────────
@@ -85,7 +87,23 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   descargaAbierta = false;
 
   // ── Dropdown estado personalizado ─────────────────────────
-  dropdownEstadoAbierto    = false;
+  // sm - Accessor: cualquier asignación (true/false), venga de donde venga, bloquea/libera el
+  // scroll de fondo sola (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  // (descargaAbierta NO necesita esto: ese dropdown vive en app-modal-descarga, un componente que
+  // el *ngIf crea/destruye, y ya se bloquea/libera solo en su propio ngOnInit/ngOnDestroy.)
+  private _dropdownEstadoAbierto = false;
+  get dropdownEstadoAbierto(): boolean {
+    return this._dropdownEstadoAbierto;
+  }
+  set dropdownEstadoAbierto(valor: boolean) {
+    if (valor === this._dropdownEstadoAbierto) return;
+    this._dropdownEstadoAbierto = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
   estadoSeleccionado       = 'Estado';
   estadosSeleccionados: string[] = [];
 
@@ -134,6 +152,10 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this._dropdownEstadoAbierto) {
+      this.dropdownScrollLock.unlock();
+      this._dropdownEstadoAbierto = false;
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
