@@ -77,7 +77,6 @@
     <div class="table-wrapper" #tableWrapper>
       <table class="lideres-table">
         <colgroup>
-          <col class="col-codigo">
           <col class="col-tipo">
           <col class="col-nombre">
           <col class="col-cliente">
@@ -88,9 +87,6 @@
         </colgroup>
         <thead>
           <tr>
-            <th class="sortable" (click)="ordenar('codigo')" [attr.aria-sort]="direccionOrden('codigo')">
-              <span class="th-inner"><span class="th-label">Código</span><mat-icon class="sort-icon">{{ sortField === 'codigo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
-            </th>
             <th class="sortable" (click)="ordenar('tipo')" [attr.aria-sort]="direccionOrden('tipo')">
               <span class="th-inner"><span class="th-label">Tipo</span><mat-icon class="sort-icon">{{ sortField === 'tipo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
             </th>
@@ -114,7 +110,6 @@
         </thead>
         <tbody>
           <tr *ngFor="let lider of lideresPaginados; let i = index">
-            <td [title]="lider.codigo">{{ lider.codigo }}</td>
             <td [title]="lider.tipo">{{ lider.tipo }}</td>
             <td class="td-truncate" [title]="lider.nombre">
               <span class="cell-ellipsis">{{ lider.nombre }}</span>

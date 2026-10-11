@@ -105,7 +105,7 @@
         <label class="filter-label">Estado</label>
         <div class="filter-input-wrapper">
           <div class="filter-input filter-trigger" [attr.aria-expanded]="filtroAbierto() === 'estado'">
-            <span class="filter-trigger-texto">{{ etiquetaFiltro('estado') }}</span>
+            <span class="filter-trigger-texto" [class.filter-trigger-texto--vacio]="filtros().idEstado === null">{{ etiquetaFiltro('estado') }}</span>
             <span class="material-symbols-outlined select-chevron">expand_more</span>
           </div>
         </div>

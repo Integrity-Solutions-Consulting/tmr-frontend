@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SuccessModalComponent } from '../../../../shared/components/success-modal/success-modal.component';
@@ -17,6 +17,8 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 export class FeriadosPage {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+
+  private readonly calendario = viewChild(FeriadosCalendar);
 
   readonly feriados = this.configuracionService.feriados;
   readonly eliminarError = signal<string | null>(null);
@@ -67,6 +69,25 @@ export class FeriadosPage {
 
   cambiarAnioImportar(valor: string): void {
     this.anioImportar.set(Math.trunc(Number(valor)));
+  }
+
+  // sm - Campo separado del año a importar: este solo mueve el calendario a la fecha elegida, no importa nada.
+  readonly fechaCalendario = signal(this.formatearFecha(new Date()));
+
+  cambiarFechaCalendario(valor: string): void {
+    const [anio, mes, dia] = valor.split('-').map(Number);
+    if (!anio || !mes || !dia) {
+      return;
+    }
+    this.fechaCalendario.set(valor);
+    this.calendario()?.irAFecha(new Date(anio, mes - 1, dia));
+  }
+
+  private formatearFecha(date: Date): string {
+    const anio = date.getFullYear();
+    const mes = `${date.getMonth() + 1}`.padStart(2, '0');
+    const dia = `${date.getDate()}`.padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
   }
 
   openModal(feriado?: Feriado, mode: 'create' | 'edit' | 'view' = 'create', fecha?: string): void {

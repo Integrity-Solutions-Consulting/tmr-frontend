@@ -71,6 +71,10 @@ export class FeriadosCalendar {
     this.currentMonth.set(this.startOfMonth(new Date()));
   }
 
+  irAFecha(fecha: Date): void {
+    this.currentMonth.set(this.startOfMonth(fecha));
+  }
+
   selectDay(day: CalendarDay): void {
     this.addFeriado.emit(day.key);
   }

@@ -930,6 +930,12 @@
   padding-left: 16px;
 }
 
+// sm - El color de .filter-trigger-texto--vacio (gris cuando no hay estado elegido) se define en el
+// styles.scss global, no aquí: la regla a la que hay que ganarle (html[data-theme] .filters-card
+// .filter-input) también es global y "html" no es un elemento del template de este componente, así que
+// Angular no puede aplicarle el atributo de scoping (_ngcontent) a ese selector si se escribe acá — la
+// regla quedaría sin efecto. Ver styles.scss, junto a esa misma regla.
+
 .btn-limpiar {
   flex-shrink: 0;
 }

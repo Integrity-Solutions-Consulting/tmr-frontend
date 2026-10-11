@@ -3361,6 +3361,14 @@ html[data-theme] .filter-panel select {
   color: var(--pattern-control-color) !important;
 }
 
+/* sm - Texto de un desplegable propio (ej. "Estado" del Dashboard) cuando no hay nada elegido todavía
+   (ej. "Todos los estados"): debe verse gris como un placeholder, no con el negro de .filter-input de
+   arriba. Más específica que esa regla (mismo prefijo + una clase más) para poder ganarle pese al
+   !important. Si ya hay un valor elegido no se le agrega esta clase y se queda con el negro normal. */
+html[data-theme] .filters-card .filter-input .filter-trigger-texto--vacio {
+  color: var(--text-muted) !important;
+}
+
 /* Contrato visual único de tablas. Estas reglas globales son intencionales:
    Angular encapsula los SCSS de cada pantalla y varios estilos antiguos tienen
    más especificidad; los tokens deben prevalecer en cualquier tabla/paginador. */

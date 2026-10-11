@@ -331,7 +331,6 @@ export class LideresComponent implements OnInit, OnDestroy {
     this.lideresFiltrados = this.lideres.filter(l => {
       const matchTexto =
         coincideBusqueda(l.nombre, texto) ||
-        coincideBusqueda(l.codigo, texto) ||
         coincideBusqueda(l.correo, texto) ||
         coincideBusqueda(l.cliente, texto);
       const matchTipo = !this.tipoFiltro || l.tipo === this.tipoFiltro;
