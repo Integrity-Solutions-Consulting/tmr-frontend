@@ -18,6 +18,7 @@ import { ProyectosService } from '../proyectos/servicios/proyectos.service';
 import { exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ajustarFinRango, fechaLocalInputHoy } from '../../shared/utils/date-range.utils';
+import { FechaLimitesService } from '../../shared/services/fecha-limites.service';
 
 const COLOR_PRIMARIO = 'FF163572';
 const COLOR_RECURSO = 'FFFFFFFF';
@@ -43,6 +44,7 @@ export class CargaActividadesComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private colaboradoresService = inject(ColaboradoresService);
   private destroyRef = inject(DestroyRef);
+  private fechaLimites = inject(FechaLimitesService);
 
   searchControl = new FormControl('', { nonNullable: true });
   proyectoControl = new FormControl('', { nonNullable: true });
@@ -50,6 +52,8 @@ export class CargaActividadesComponent implements OnInit {
   // sm - "Fecha hasta" arranca en el día de hoy (igual que Seguimiento), no vacío.
   fechaHastaControl = new FormControl(this.fechaHoyInputDate(), { nonNullable: true });
   readonly fechaMaxima = fechaLocalInputHoy();
+  // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+  fechaMinima: string | null = null;
 
   errorMessage: string = '';
   successMessage: string = '';
@@ -125,6 +129,7 @@ export class CargaActividadesComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    this.fechaLimites.obtenerFechaMinimaActividades().subscribe(f => this.fechaMinima = f);
     this.store.dispatch(ActividadesActions.cargarActividades());
     // sm - Cada recarga reconstruye las actividades como objetos nuevos, así que una selección previa quedaría
     // con referencias huérfanas (igual que en Seguimiento).

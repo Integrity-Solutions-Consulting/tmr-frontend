@@ -177,6 +177,21 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe((idEstado: number | null) => {
         this.actualizarCamposEspera(idEstado);
       });
+
+    // sm - Si cambia la fecha de inicio del proyecto, las entradas de los recursos ya cargadas deben revalidarse
+    // contra el nuevo límite (Angular no revalida automáticamente un control por el cambio de otro control lejano).
+    this.formulario.get('fechaInicio')
+      ?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.revalidarEntradasRecursos());
+  }
+
+  private revalidarEntradasRecursos(): void {
+    this.lideres.controls.forEach(lider => {
+      (lider.get('recursos') as FormArray<FormGroup>).controls.forEach(r =>
+        r.updateValueAndValidity({ emitEvent: false })
+      );
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -384,7 +399,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       horas: ['', [this.numeroValido(false), Validators.min(0)]],
       // sm - Estado de asignación: Inactivo indica que la persona terminó en el proyecto y exige fecha de salida.
       estadoAsignacion: ['Activo', Validators.required]
-    }, { validators: [this.rangoFechasValido('entrada', 'salida', 'salidaMenor'), this.salidaRequeridaSiInactivo()] });
+    }, { validators: [this.rangoFechasValido('entrada', 'salida', 'salidaMenor'), this.salidaRequeridaSiInactivo(), this.entradaNoAnteriorInicioProyecto()] });
   }
 
   // ── Líderes: agregar / eliminar ───────────────────────────────────────────
@@ -616,6 +631,16 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return Boolean(g.hasError('salidaMenor') && (g.get('salida')?.touched || this.intentoGuardar));
   }
 
+  recursoEntradaAnteriorInicio(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('entradaAnteriorInicio') && (g.get('entrada')?.touched || this.intentoGuardar));
+  }
+
+  recursoEntradaSinInicioProyecto(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('entradaSinInicioProyecto') && (g.get('entrada')?.touched || this.intentoGuardar));
+  }
+
   fechaFinInvalida(): boolean {
     return Boolean(
       this.formulario.hasError('fechaFinMenor') &&
@@ -810,6 +835,21 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return (group: AbstractControl): ValidationErrors | null => {
       const inactivo = group.get('estadoAsignacion')?.value === 'Inactivo';
       return inactivo && !group.get('salida')?.value ? { salidaRequerida: true } : null;
+    };
+  }
+
+  // sm - La entrada de un recurso/líder al proyecto no puede ser anterior a la fecha de inicio del propio proyecto.
+  // Tampoco se puede evaluar (ni guardar) una entrada si el proyecto todavía no tiene fecha de inicio definida.
+  private entradaNoAnteriorInicioProyecto(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const entrada = group.get('entrada')?.value;
+      const inicioProyecto = group.root.get('fechaInicio')?.value;
+      if (!entrada) return null;
+      if (!inicioProyecto) return { entradaSinInicioProyecto: true };
+      const e = this.parseFechaString(String(entrada));
+      const i = this.parseFechaString(String(inicioProyecto));
+      if (!e || !i) return null;
+      return e < i ? { entradaAnteriorInicio: true } : null;
     };
   }
 

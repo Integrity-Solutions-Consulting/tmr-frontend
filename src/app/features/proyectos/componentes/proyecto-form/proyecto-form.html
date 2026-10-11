@@ -351,10 +351,17 @@
                       <div class="proyecto-form__resource-bottom">
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                           <input #entradaInput class="proyecto-form__date-control" type="date"
-                            autocomplete="off" formControlName="entrada">
+                            autocomplete="off" formControlName="entrada" [attr.min]="formulario.get('fechaInicio')?.value || null">
                           <label class="proyecto-form__date-label">Entrada</label>
+                          <div class="proyecto-form__date-error" *ngIf="recursoEntradaSinInicioProyecto(li, ri)">
+                            Defina primero la fecha de inicio del proyecto
+                          </div>
                           <div class="proyecto-form__date-error"
-                            *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
+                            *ngIf="!recursoEntradaSinInicioProyecto(li, ri) && recursoEntradaAnteriorInicio(li, ri)">
+                            No puede ser anterior al inicio del proyecto
+                          </div>
+                          <div class="proyecto-form__date-error"
+                            *ngIf="!recursoEntradaSinInicioProyecto(li, ri) && !recursoEntradaAnteriorInicio(li, ri) && (getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
                             Fecha inválida
                           </div>
                         </div>

@@ -46,7 +46,7 @@
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
       <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="onFiltroChange('fechaInicio', $event)"
-        [max]="fechaMaxima" class="filter-input">
+        [attr.min]="fechaMinima()" [max]="fechaMaxima" class="filter-input">
     </div>
 
     <div class="filter-group date-group">

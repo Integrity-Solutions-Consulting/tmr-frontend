@@ -70,7 +70,7 @@
         <!-- Fecha Desde -->
         <div class="filter-group date-group">
             <label class="filter-label">Fecha desde</label>
-            <input class="filter-input" type="date" [(ngModel)]="fechaDesde" [max]="fechaMaxima" (ngModelChange)="onFechaManualChange()">
+            <input class="filter-input" type="date" [(ngModel)]="fechaDesde" [attr.min]="fechaMinima" [max]="fechaMaxima" (ngModelChange)="onFechaManualChange()">
         </div>
 
         <!-- Fecha Hasta -->

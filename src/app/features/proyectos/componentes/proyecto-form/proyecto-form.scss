@@ -551,11 +551,18 @@
 }
 
 .proyecto-form__resource-top,
-.proyecto-form__resource-middle,
-.proyecto-form__resource-bottom {
+.proyecto-form__resource-middle {
   display: grid;
   gap: 12px;
   align-items: center;
+}
+
+// sm - align-items: start (no center): si aparece un mensaje de error bajo Entrada/Salida (p. ej. "Obligatoria si
+// el recurso está Inactivo"), la fila crece hacia abajo sin recentrar y "saltar" las cajitas de fecha hacia arriba.
+.proyecto-form__resource-bottom {
+  display: grid;
+  gap: 12px;
+  align-items: start;
 }
 
 .proyecto-form__resource-top {

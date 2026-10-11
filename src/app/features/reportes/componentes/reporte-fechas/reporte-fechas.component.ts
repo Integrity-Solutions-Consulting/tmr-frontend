@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
 import { ajustarFinRango, fechaLocalInputHoy } from '../../../../shared/utils/date-range.utils';
+import { FechaLimitesService } from '../../../../shared/services/fecha-limites.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 @Component({
@@ -36,6 +37,8 @@ export class ReporteFechasComponent {
   fechaInicio = signal('');
   fechaFin = signal(this.fechaHoyInputDate());
   readonly fechaMaxima = fechaLocalInputHoy();
+  // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+  fechaMinima = signal<string | null>(null);
   forzarMostrar = signal(false);
 
   paginaActual = signal(1);
@@ -43,9 +46,12 @@ export class ReporteFechasComponent {
   totalItems = signal(0);
 
   private reportesService = inject(ReportesService);
+  private fechaLimites = inject(FechaLimitesService);
   datos = signal<ReporteFechas[]>([]);
 
   constructor() {
+    this.fechaLimites.obtenerFechaMinimaActividades().subscribe(f => this.fechaMinima.set(f));
+
     effect((onCleanup) => {
       // Signals we depend on
       const cliente = this.busquedaCliente();

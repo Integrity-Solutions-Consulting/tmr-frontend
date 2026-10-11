@@ -74,7 +74,7 @@
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
-      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
+      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [attr.min]="fechaMinima" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <div class="filter-group date-group">

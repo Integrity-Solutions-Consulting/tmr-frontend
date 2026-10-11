@@ -34,6 +34,7 @@ import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calen
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
 import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
+import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
 class SinActividadesError extends Error {
@@ -91,6 +92,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private http = inject(HttpClient);
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
+    private fechaLimites = inject(FechaLimitesService);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -141,6 +143,8 @@ export class SeguimientoComponent implements AfterViewInit {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     })();
     public readonly fechaMaxima = fechaLocalInputHoy();
+    // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+    public fechaMinima: string | null = null;
 
     // Paginación (Estado Local para Rango)
     public pageIndex = 0;
@@ -219,6 +223,8 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     constructor() {
+        this.fechaLimites.obtenerFechaMinimaActividades().subscribe(f => this.fechaMinima = f);
+
         effect(() => {
             const raw = this.seguimientoService.colaboradores();
             const formatted = raw.map(c => ({
