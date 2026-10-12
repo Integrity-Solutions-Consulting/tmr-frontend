@@ -645,7 +645,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
     public verCalendarioColaborador(col: Colaborador): void {
         this.dialog.open(CalendarioColaboradorModal, {
-            data: { colaborador: col },
+            data: { colaborador: col, fechaDesde: this.fechaDesde },
             width: '900px',
             maxHeight: '90vh',
             panelClass: 'tmr-dialog-panel',
