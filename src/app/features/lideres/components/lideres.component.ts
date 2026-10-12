@@ -1,7 +1,6 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { exportarReporteExcel, exportarReportePdf } from '../../../shared/utils/reporte-export.utils';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -173,6 +172,8 @@ export class LideresComponent implements OnInit, OnDestroy {
   mostrarEliminar = false;
   liderAEliminar: Lider | null = null;
   errorEliminar: string | null = null;
+
+  private descargas = inject(DescargaProgresoService);
 
   constructor(
     private fb: FormBuilder,
@@ -578,7 +579,9 @@ export class LideresComponent implements OnInit, OnDestroy {
   }
 
   descargarPDF(): void {
-    void exportarReportePdf({
+    this.mostrarDescarga = false;
+    // sm - Toast de progreso compartido (con Cancelar).
+    this.descargas.ejecutar('pdf', ctx => exportarReportePdf({
       titulo: 'Reporte de Líderes',
       nombreArchivo: 'Lideres',
       nombreHoja: 'Líderes',
@@ -599,111 +602,12 @@ export class LideresComponent implements OnInit, OnDestroy {
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
       ]),
       columnaEstado: 5,
-    });
-    this.mostrarDescarga = false;
-    return;
-
-    const doc = new jsPDF({ orientation: 'landscape' });
-    const fecha = new Date().toLocaleDateString('es-EC');
-    const pageW = 297;
-    const pageH = 210;
-    const marginX = 12;
-    const footerY = pageH - 8;
-
-    const dibujarCabecera = () => {
-      doc.setFillColor(22, 53, 114);
-      doc.rect(0, 0, pageW, 22, 'F');
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Líderes', marginX, 14);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
-      doc.setDrawColor(99, 135, 190);
-      doc.setLineWidth(0.5);
-      doc.line(0, 22, pageW, 22);
-    };
-
-    dibujarCabecera();
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(22, 53, 114);
-    doc.text('Listado de Líderes', marginX, 32);
-    doc.setDrawColor(22, 53, 114);
-    doc.setLineWidth(0.3);
-    doc.line(marginX, 34, marginX + 60, 34);
-
-    const bodyData = this.lideresFiltrados.map(l => [
-      l.nombre || '-',
-      l.correo || '-',
-      l.telefono || '-',
-      l.tipo || '-',
-      l.estado === 'Activo' ? 'Activo' : 'Inactivo',
-    ]);
-
-    autoTable(doc, {
-      startY: 37,
-      head: [['Nombre del Líder', 'Correo Electrónico', 'Teléfono', 'Tipo', 'Estado']],
-      body: bodyData,
-      styles: {
-        fontSize: 8,
-        cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
-        valign: 'middle',
-        overflow: 'linebreak',
-        font: 'helvetica',
-        lineColor: [226, 232, 240],
-        lineWidth: 0.2,
-      },
-      headStyles: {
-        fillColor: [22, 53, 114],
-        textColor: 255,
-        fontStyle: 'bold',
-        fontSize: 8,
-        halign: 'center',
-        cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
-      },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
-      columnStyles: {
-        0: { cellWidth: 70 },
-        1: { cellWidth: 70 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 30, halign: 'center' },
-        4: { cellWidth: 30, halign: 'center' },
-      },
-      didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 4) {
-          const val = String(data.cell.raw ?? '').toLowerCase();
-          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      },
-      margin: { left: marginX, right: marginX, bottom: 18 },
-      didDrawPage: () => dibujarCabecera(),
-    });
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(marginX, footerY, pageW - marginX, footerY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(156, 163, 175);
-      doc.text(`Página ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-      doc.text('TMR — Reporte de Líderes', marginX, footerY + 4);
-      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
-    }
-
-    doc.save(`Lideres_${new Date().toISOString().slice(0, 10)}.pdf`);
-    this.mostrarDescarga = false;
+    }, ctx)).catch(error => console.error('Error al exportar líderes:', error));
   }
 
   async descargarExcel(): Promise<void> {
-    await exportarReporteExcel({
+    this.mostrarDescarga = false;
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel({
       titulo: 'Reporte de Líderes',
       nombreArchivo: 'Lideres',
       nombreHoja: 'Líderes',
@@ -724,8 +628,7 @@ export class LideresComponent implements OnInit, OnDestroy {
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
       ]),
       columnaEstado: 5,
-    });
-    this.mostrarDescarga = false;
+    }, ctx)).catch(error => console.error('Error al exportar líderes:', error));
     return;
 
     const ExcelJS = await import('exceljs');

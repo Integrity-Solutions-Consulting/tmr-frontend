@@ -10,6 +10,7 @@ import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tab
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
@@ -55,6 +56,7 @@ export class ReporteHorasComponent implements OnDestroy {
 
   private reportesService = inject(ReportesService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
+  private descargas = inject(DescargaProgresoService);
   datos = signal<ReporteHoras[]>([]);
 
   constructor() {
@@ -251,37 +253,36 @@ export class ReporteHorasComponent implements OnDestroy {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('xlsx', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteHoras(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReporteExcel({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar Excel:', err)
-    });
+      await exportarReporteExcel({
+        titulo: 'Reporte de Horas por Cliente',
+        nombreArchivo: 'Horas',
+        nombreHoja: 'Reporte de Horas',
+        columnas: [
+          { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
+          { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
+          { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
+          { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+          { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+        ],
+        filas: data.map((item) => [
+          item.cliente,
+          item.estadoCliente,
+          item.mes,
+          item.anio,
+          item.recursos,
+          Number(item.horas).toFixed(1),
+        ]),
+        columnaEstado: 1,
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar Excel:', err));
   }
 
   async exportarPDF() {
@@ -294,36 +295,35 @@ export class ReporteHorasComponent implements OnDestroy {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('pdf', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteHoras(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReportePdf({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar PDF:', err)
-    });
+      await exportarReportePdf({
+        titulo: 'Reporte de Horas por Cliente',
+        nombreArchivo: 'Horas',
+        nombreHoja: 'Reporte de Horas',
+        columnas: [
+          { encabezado: 'Cliente', anchoPdf: 75 },
+          { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
+          { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
+          { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
+          { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
+        ],
+        filas: data.map((item) => [
+          item.cliente,
+          item.estadoCliente,
+          item.mes,
+          item.anio,
+          item.recursos,
+          Number(item.horas).toFixed(1),
+        ]),
+        columnaEstado: 1,
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar PDF:', err));
   }
 }

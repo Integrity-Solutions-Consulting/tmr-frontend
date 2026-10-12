@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, BehaviorSubject, combineLatest, takeUntil, debounceTime, distinctUntilChanged, forkJoin, of, switchMap, map } from 'rxjs';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { AvanceExportacion, exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import { Cliente, CrearClienteRequest, EditarClienteRequest } from '../../modelos/cliente.model';
 import { ClientesService } from '../../servicios/clientes.service';
 import { ClientesActions } from '../../store/clientes.actions';
@@ -58,6 +57,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
   private fb       = inject(FormBuilder);
   private clientesService = inject(ClientesService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
+  private descargas = inject(DescargaProgresoService);
   private destroy$ = new Subject<void>();
 
   // ── Selectores ────────────────────────────────────────────
@@ -399,13 +399,12 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
 
   onDescargar(formato: 'pdf' | 'excel'): void {
     this.descargaAbierta = false;
-    this.obtenerClientesParaExportar().subscribe({
-      next: clientes => {
-        if (formato === 'pdf') this.descargarPDF(clientes);
-        if (formato === 'excel') void this.descargarExcel(clientes);
-      },
-      error: error => console.error('Error al exportar clientes:', error),
-    });
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    this.descargas.ejecutar(formato === 'pdf' ? 'pdf' : 'xlsx', async ctx => {
+      const clientes = await ctx.esperar(this.obtenerClientesParaExportar());
+      if (formato === 'pdf') await this.descargarPDF(clientes, ctx);
+      else await this.descargarExcel(clientes, ctx);
+    }).catch(error => console.error('Error al exportar clientes:', error));
   }
 
   private obtenerClientesParaExportar() {
@@ -418,8 +417,8 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
     );
   }
 
-  private descargarPDF(clientes: Cliente[]): void {
-    void exportarReportePdf({
+  private descargarPDF(clientes: Cliente[], avance?: AvanceExportacion): Promise<void> {
+    return exportarReportePdf({
       titulo: 'Reporte de Clientes',
       nombreArchivo: 'Clientes',
       nombreHoja: 'Clientes',
@@ -449,140 +448,10 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
       ]),
       columnaEstado: 8,
       orientacionPdf: 'landscape',
-    });
-    return;
-
-    const doc = new jsPDF({ orientation: 'landscape' });
-    const fecha = this.formatearFecha(new Date());
-    const pageW = 297;
-    const pageH = 210;
-    const marginX = 12;
-    const footerY = pageH - 8;
-
-    const dibujarCabecera = () => {
-      doc.setFillColor(22, 53, 114);
-      doc.rect(0, 0, pageW, 22, 'F');
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Reporte de Clientes', marginX, 14);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generado: ${fecha}`, pageW - marginX, 14, { align: 'right' });
-      doc.setDrawColor(99, 135, 190);
-      doc.setLineWidth(0.5);
-      doc.line(0, 22, pageW, 22);
-    };
-
-    dibujarCabecera();
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(22, 53, 114);
-    doc.text('Resumen de Clientes', marginX, 32);
-    doc.setDrawColor(22, 53, 114);
-    doc.setLineWidth(0.3);
-    doc.line(marginX, 34, marginX + 55, 34);
-
-    autoTable(doc, {
-      startY: 37,
-      head: [[
-        'Tipo ID', 'Identificador', 'Nombre comercial', 'Nombres', 'Apellidos',
-        'Correo electrÃ³nico', 'TelÃ©fono', 'DirecciÃ³n', 'Estado', 'Proyectos asignados'
-      ]],
-      body: clientes.map(c => [
-        c.tipoId ?? '-',
-        c.identificador ?? '-',
-        c.nombreComercial ?? '-',
-        c.nombres ?? '-',
-        c.apellidos ?? '-',
-        c.correoElectronico ?? '-',
-        c.telefono ?? '-',
-        c.direccion ?? '-',
-        c.estado ?? '-',
-        this.formatearProyectosCliente(c),
-      ]),
-      styles: {
-        fontSize: 7.5,
-        cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
-        valign: 'middle',
-        overflow: 'linebreak',
-        font: 'helvetica',
-        lineColor: [226, 232, 240],
-        lineWidth: 0.2,
-      },
-      headStyles: {
-        fillColor: [22, 53, 114],
-        textColor: 255,
-        fontStyle: 'bold',
-        fontSize: 7.5,
-        halign: 'center',
-        cellPadding: { top: 4, bottom: 4, left: 3, right: 3 },
-      },
-      bodyStyles: { textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
-      columnStyles: {
-        0: { cellWidth: 17, halign: 'center' },
-        1: { cellWidth: 25, halign: 'center' },
-        2: { cellWidth: 38 },
-        3: { cellWidth: 28 },
-        4: { cellWidth: 28 },
-        5: { cellWidth: 40 },
-        6: { cellWidth: 22, halign: 'center' },
-        7: { cellWidth: 32 },
-        8: { cellWidth: 18, halign: 'center' },
-        9: { cellWidth: 25 },
-      },
-      didParseCell: data => {
-        if (data.section === 'body' && data.column.index === 8) {
-          const val = String(data.cell.raw ?? '').toLowerCase();
-          data.cell.styles.textColor = val === 'activo' ? [22, 163, 74] : [107, 114, 128];
-          data.cell.styles.fontStyle = 'bold';
-        }
-      },
-      margin: { left: marginX, right: marginX, bottom: 18 },
-      didDrawPage: () => dibujarCabecera(),
-    });
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(marginX, footerY, pageW - marginX, footerY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(156, 163, 175);
-      doc.text(`PÃ¡gina ${i} de ${pageCount}`, pageW / 2, footerY + 4, { align: 'center' });
-      doc.text('TMR - Reporte de Clientes', marginX, footerY + 4);
-      doc.text(fecha, pageW - marginX, footerY + 4, { align: 'right' });
-    }
-
-    doc.save('clientes.pdf');
-    return;
-    this.clientes$.subscribe(clientes => {
-      const doc = new jsPDF({ orientation: 'landscape' });
-
-      doc.setFontSize(16);
-      doc.setTextColor(22, 53, 114);
-      doc.text('Listado de Clientes', 14, 16);
-
-      autoTable(doc, {
-        startY: 24,
-        head: [['Tipo', 'Identificador', 'Nombre Comercial', 'Correo electrónico', 'Teléfono', 'Estado']],
-        body: clientes.map(c => [
-          c.tipoId, c.identificador,
-          c.nombreComercial, c.correoElectronico, c.telefono, c.estado,
-        ]),
-        styles: { fontSize: 9, cellPadding: 4 },
-        headStyles: { fillColor: [22, 53, 114], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-      });
-
-      doc.save('clientes.pdf');
-    }).unsubscribe();
+    }, avance);
   }
 
-  private async descargarExcel(clientes: Cliente[]): Promise<void> {
+  private async descargarExcel(clientes: Cliente[], avance?: AvanceExportacion): Promise<void> {
     await exportarReporteExcel({
       titulo: 'Reporte de Clientes',
       nombreArchivo: 'Clientes',
@@ -613,7 +482,7 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
       ]),
       columnaEstado: 7,
       orientacionPdf: 'landscape',
-    });
+    }, avance);
     return;
 
     const ExcelJS = await import('exceljs');

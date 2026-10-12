@@ -10,6 +10,7 @@ import { TokenService } from './features/auth/servicios/token.service';
 import { AuthResponse } from './features/auth/modelos/auth.models';
 import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
 import { CambiarPasswordModalComponent } from './features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
+import { DescargaProgresoComponent } from './shared/components/descarga-progreso/descarga-progreso.component';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap } from 'rxjs/operators';
 import { NavigationEnd } from '@angular/router';
@@ -21,7 +22,7 @@ interface SessionExpirationResult {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, DescargaProgresoComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.scss'
 })
