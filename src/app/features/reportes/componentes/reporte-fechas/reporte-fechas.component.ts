@@ -45,6 +45,8 @@ export class ReporteFechasComponent {
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
   totalItems = signal(0);
+  // sm - Muestra la fila "Cargando ..." en la tabla mientras llega la respuesta del servidor.
+  cargando = signal(true);
 
   private reportesService = inject(ReportesService);
   private fechaLimites = inject(FechaLimitesService);
@@ -67,8 +69,11 @@ export class ReporteFechasComponent {
       if (!mostrar) {
         this.datos.set([]);
         this.totalItems.set(0);
+        this.cargando.set(false);
         return;
       }
+
+      this.cargando.set(true);
 
       const filtros = {
         cliente: cliente || undefined,
@@ -81,10 +86,12 @@ export class ReporteFechasComponent {
       const timer = window.setTimeout(() => {
         request = this.reportesService.getReporteFechas(filtros, page, pageSize).subscribe({
           next: (res) => {
+            this.cargando.set(false);
             this.datos.set(res.data || []);
             this.totalItems.set(res.total || 0);
           },
           error: (err) => {
+            this.cargando.set(false);
             console.error('Error al cargar reporte de fechas:', err);
           }
         });

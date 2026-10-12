@@ -174,6 +174,8 @@ export class LideresComponent implements OnInit, OnDestroy {
   errorEliminar: string | null = null;
 
   private descargas = inject(DescargaProgresoService);
+  // sm - Fila "Cargando líderes..." mientras llega la lista (antes se veía "No se encontraron líderes" al cargar).
+  cargando = true;
 
   constructor(
     private fb: FormBuilder,
@@ -203,14 +205,19 @@ export class LideresComponent implements OnInit, OnDestroy {
   }
 
   obtenerLideresDelBackend(): void {
+    this.cargando = true;
     forkJoin({
       lideres: this.http.get<any[]>(this.apiUrl),
       proyectos: this.http.get<any[]>(`${environment.apiUrl}/proyectos`).pipe(
         catchError(() => of([] as any[]))
       )
     }).subscribe({
-      next: ({ lideres, proyectos }) => this.procesarLideres(lideres, proyectos),
+      next: ({ lideres, proyectos }) => {
+        this.procesarLideres(lideres, proyectos);
+        this.cargando = false;
+      },
       error: (err) => {
+        this.cargando = false;
         console.error('❌ Error al traer líderes:', err);
       }
     });

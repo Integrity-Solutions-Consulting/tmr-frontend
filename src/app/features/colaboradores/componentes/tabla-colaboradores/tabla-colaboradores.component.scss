@@ -101,10 +101,6 @@
     &:hover {
       background: var(--pattern-table-row-hover);
     }
-
-    &--skeleton {
-      pointer-events: none;
-    }
   }
 
   &__td {
@@ -242,28 +238,6 @@
   color: var(--text-muted);
   vertical-align: middle;
   flex-shrink: 0;
-}
-
-.skeleton-line {
-  height: 14px;
-  background: linear-gradient(90deg,
-      var(--bg-soft) 25%,
-      var(--bg-hover) 50%,
-      var(--bg-soft) 75%);
-  background-size: 200% 100%;
-  border-radius: 4px;
-  animation: shimmer 1.5s infinite;
-  width: 80%;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 @keyframes dropFade {

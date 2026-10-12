@@ -172,7 +172,12 @@
                             </button>
                         </td>
                     </tr>
-                    <tr *ngIf="totalRegistros === 0">
+                    <tr *ngIf="totalRegistros === 0 && cargando()">
+                        <td colspan="10">
+                            <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando registros...</div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="totalRegistros === 0 && !cargando()">
                         <td colspan="10" class="empty-state">No se encontraron registros</td>
                     </tr>
                 </tbody>

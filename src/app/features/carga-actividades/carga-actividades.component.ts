@@ -11,7 +11,7 @@ import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, shareR
 import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
 import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
-import { selectActividadesList } from '../../core/state/actividades/actividades.selectors';
+import { selectActividadesCargando, selectActividadesList } from '../../core/state/actividades/actividades.selectors';
 import { ClientesService } from '../clientes/servicios/clientes.service';
 import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
@@ -86,6 +86,8 @@ export class CargaActividadesComponent implements OnInit {
   }
 
   private actividadesRaw$: Observable<Actividad[]> = this.store.select(selectActividadesList) as Observable<Actividad[]>;
+  // sm - Fila "Cargando actividades..." mientras el store pide la lista.
+  cargandoActividades$: Observable<boolean> = this.store.select(selectActividadesCargando);
 
   horasPorRegistrar$: Observable<string> = this.actividadesRaw$.pipe(
     map((actividades: Actividad[]) => {

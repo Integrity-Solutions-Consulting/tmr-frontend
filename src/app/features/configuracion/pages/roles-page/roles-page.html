@@ -88,9 +88,17 @@
           </thead>
           <tbody>
             @if (filteredRoles().length === 0) {
-              <tr>
-                <td colspan="5" class="empty-state">No se encontraron roles.</td>
-              </tr>
+              @if (cargando()) {
+                <tr>
+                  <td colspan="5">
+                    <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando roles...</div>
+                  </td>
+                </tr>
+              } @else {
+                <tr>
+                  <td colspan="5" class="empty-state">No se encontraron roles.</td>
+                </tr>
+              }
             }
 
             @for (rol of rolesPaginados(); track rol.id) {

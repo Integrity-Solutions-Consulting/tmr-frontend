@@ -43,6 +43,8 @@ export class UsuariosPage implements OnDestroy {
   readonly paginaActual = signal(1);
   readonly porPagina = 10;
   readonly usuarios = this.configuracionService.usuarios;
+  // sm - Fila "Cargando usuarios..." mientras llega la lista.
+  readonly cargando = this.configuracionService.cargandoUsuarios;
   readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
 

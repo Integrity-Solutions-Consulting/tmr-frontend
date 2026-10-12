@@ -25,7 +25,7 @@ import {
 import { ID_SEGUIMIENTO_INHABILITADO, Proyecto, LookupOption } from '../../../features/proyectos/modelos/proyecto.model';
 import { ProyectosService } from '../../../features/proyectos/servicios/proyectos.service';
 import { FiltrosProyecto } from '../../../features/proyectos/componentes/proyectos-filtros/proyectos-filtros';
-import { selectProyectos } from '../../../features/proyectos/store/proyectos.selectors';
+import { selectProyectos, selectProyectosCargando } from '../../../features/proyectos/store/proyectos.selectors';
 
 // sm - Columnas por las que se puede ordenar la tabla (igual mecánica que Seguimiento).
 type CampoOrdenable = 'codigo' | 'nombre' | 'cliente' | 'fechaInicio' | 'numeroRecursos';
@@ -61,6 +61,9 @@ export class Tabla {
     this.store.select(selectProyectos),
     { initialValue: [] }
   );
+
+  // sm - Fila "Cargando proyectos..." mientras el store pide la lista (ver proyectos.reducer).
+  cargando = toSignal(this.store.select(selectProyectosCargando), { initialValue: true });
 
   private _filtros = signal<FiltrosProyecto>({
     busqueda: '',

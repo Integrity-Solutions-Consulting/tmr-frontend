@@ -49,6 +49,13 @@
               </div>
             </td>
           </tr>
+        } @else if (cargando) {
+          <!-- sm - Cargando: evita que la tabla quede en blanco y parezca que no hay datos. -->
+          <tr>
+            <td [attr.colspan]="columnas.length">
+              <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>{{ textoCargando }}</div>
+            </td>
+          </tr>
         } @else {
           <!-- Filas de datos -->
           @if (rowTemplate) {

@@ -53,6 +53,8 @@ export class ReporteHorasComponent implements OnDestroy {
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
   totalItems = signal(0);
+  // sm - Muestra la fila "Cargando ..." en la tabla mientras llega la respuesta del servidor.
+  cargando = signal(true);
 
   private reportesService = inject(ReportesService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -71,8 +73,11 @@ export class ReporteHorasComponent implements OnDestroy {
       if (!mostrar) {
         this.datos.set([]);
         this.totalItems.set(0);
+        this.cargando.set(false);
         return;
       }
+
+      this.cargando.set(true);
 
       const filtros = {
         cliente: cliente || undefined,
@@ -84,6 +89,7 @@ export class ReporteHorasComponent implements OnDestroy {
       const timer = window.setTimeout(() => {
         request = this.reportesService.getReporteHoras(filtros, page, pageSize).subscribe({
           next: (res) => {
+            this.cargando.set(false);
             this.datos.set(res.data || []);
             this.totalItems.set(res.total || 0);
 
@@ -97,6 +103,7 @@ export class ReporteHorasComponent implements OnDestroy {
             }
           },
           error: (err) => {
+            this.cargando.set(false);
             console.error('Error al cargar reporte de horas:', err);
           }
         });

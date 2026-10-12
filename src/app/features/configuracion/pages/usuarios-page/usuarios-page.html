@@ -96,9 +96,17 @@
           </thead>
           <tbody>
             @if ($any(filteredUsuarios()).length === 0) {
-              <tr>
-                <td colspan="6" class="empty-state">No se encontraron usuarios</td>
-              </tr>
+              @if (cargando()) {
+                <tr>
+                  <td colspan="6">
+                    <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando usuarios...</div>
+                  </td>
+                </tr>
+              } @else {
+                <tr>
+                  <td colspan="6" class="empty-state">No se encontraron usuarios</td>
+                </tr>
+              }
             }
             @for (usuario of usuariosPaginados(); track usuario.id) {
               <tr>

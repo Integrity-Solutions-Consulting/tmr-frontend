@@ -96,6 +96,8 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
+    // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
+    public cargando = this.seguimientoService.cargando;
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';

@@ -88,3 +88,33 @@
   gap: 14px;
   flex-shrink: 0;
 }
+
+// sm - Fila "Cargando ..." de todas las tablas mientras llegan los datos (diseño original de Clientes: spinner +
+// texto centrado). Se usa dentro de un <td colspan="N"> para que no se confunda con "no hay datos".
+// Va en un div y no en el td para que los estilos de celda de cada tabla no la pisen.
+.tabla-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.tabla-cargando__spinner {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border: 2px solid var(--border-soft);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: tabla-cargando-spin 0.7s linear infinite;
+}
+
+@keyframes tabla-cargando-spin {
+  to { transform: rotate(360deg); }
+}
