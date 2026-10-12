@@ -12,6 +12,8 @@ import { Colaborador } from '../../../../shared/models/colaborador.model';
 
 export interface CalendarioColaboradorModalData {
     colaborador: Colaborador;
+    // sm - "Fecha desde" del filtro de Seguimiento: el calendario abre en ese mes.
+    fechaDesde?: string;
 }
 
 @Component({

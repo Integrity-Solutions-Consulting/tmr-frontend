@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, inject, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Output, Input, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +34,7 @@ interface DiaCalendario {
     templateUrl: './calendario.html',
     styleUrls: ['./calendario.scss']
 })
-export class Calendario {
+export class Calendario implements OnInit {
     @Output() diaSeleccionado = new EventEmitter<Date>();
     @Output() editarActividadEvent = new EventEmitter<any>();
 
@@ -48,6 +48,9 @@ export class Calendario {
     // No filtra las actividades que se ven en las celdas del calendario: ahí se deja el día completo del colaborador
     // (incluye otros proyectos y novedades sin proyecto) para no ocultar contexto en una vista de solo lectura.
     @Input() idProyectoOverride?: number;
+    // sm - Fecha (yyyy-MM-dd) cuyo mes se muestra al abrir. El modal de Seguimiento manda el "Fecha desde" del filtro
+    // para que el calendario abra en el mes consultado y no siempre en el mes actual.
+    @Input() fechaInicialOverride?: string;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -67,6 +70,14 @@ export class Calendario {
 
     private _fechaActual = signal(new Date());
     public mesSeleccionado = this._fechaActual().getMonth();
+
+    ngOnInit() {
+        const [anio, mes] = (this.fechaInicialOverride ?? '').split('-').map(Number);
+        if (anio && mes) {
+            this._fechaActual.set(new Date(anio, mes - 1, 1));
+            this.mesSeleccionado = mes - 1;
+        }
+    }
 
     get mesLabel(): string {
         return this.mesesNombres[this._fechaActual().getMonth()];
