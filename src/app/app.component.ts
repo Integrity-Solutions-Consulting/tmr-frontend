@@ -11,9 +11,13 @@ import { AuthResponse } from './features/auth/modelos/auth.models';
 import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
 import { CambiarPasswordModalComponent } from './features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
 import { DescargaProgresoComponent } from './shared/components/descarga-progreso/descarga-progreso.component';
+import { DescargaProgresoService } from './shared/services/descarga-progreso.service';
+import { PopupService } from './shared/services/popup.service';
+import { ModalScrollLockService } from './shared/services/modal-scroll-lock.service';
+import { DropdownScrollLockService } from './shared/services/dropdown-scroll-lock.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap } from 'rxjs/operators';
-import { NavigationEnd } from '@angular/router';
+import { NavigationEnd, NavigationStart } from '@angular/router';
 
 interface SessionExpirationResult {
   action: 'extend' | 'logout' | 'timeout';
@@ -37,6 +41,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private tokenService = inject(TokenService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
+  private descargas = inject(DescargaProgresoService);
+  private popup = inject(PopupService);
+  private modalScrollLock = inject(ModalScrollLockService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
   private currentDialogRef: any; // Referencia al modal abierto
   private passwordDialogRef: any;
 
@@ -137,6 +145,15 @@ export class AppComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe(() => this.enforcePasswordChange());
+
+    // sm - Cualquier camino que lleve al login (sesión expirada, "Cerrar sesión", 401, guards) deja la pantalla limpia:
+    // los MatDialog no se cierran solos con router.navigate (solo con atrás/adelante del navegador).
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationStart => event instanceof NavigationStart && event.url.startsWith('/auth/login')),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => this.limpiarPantallaAlCerrarSesion());
 
     // ← NUEVO: Escuchar refresh silencioso (con actividad)
     this.tokenMonitor
@@ -283,6 +300,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.navigate(['/auth/login'], {
       queryParams: { reason: 'session-expired' }
     });
+  }
+
+  // sm - Cierra todo lo que pueda quedar flotando sobre el login: modales, pop ups, toast de descarga y bloqueos de scroll.
+  private limpiarPantallaAlCerrarSesion(): void {
+    this.dialog.closeAll();
+    this.popup.close();
+    this.descargas.cancelar();
+    this.descargas.cerrar();
+    this.modalScrollLock.reset();
+    this.dropdownScrollLock.reset();
+    document.body.classList.remove('sidebar-open');
   }
 
   private enforcePasswordChange(): void {
