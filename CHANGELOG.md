@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.0.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.2...v3.0.3) (2026-10-12)
+
+
+### Bug Fixes
+
+* cambios ([e6eea52](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e6eea5240dd7c982e46952bb7988d58f9013faf3))
+* mejora en el diseño del fondo cuando se abren modales e interacción de filtros ([75de257](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/75de25795e06162f0d99ac7e4444a9e823b851af))
+* mejora en modal de nuevo proyecto + validaciones ([a3753f7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a3753f7d9451a2c9b397680416afa032077a0ac6))
+* Mejoras ([c0c5346](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/c0c5346e3f040ef882b2800074c802c2c9f9074c))
+* Mejoras en dashboard y en modales ([5e33bbf](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5e33bbfb9522229d3ef6cb943adda7123f79ef41))
+* mejoras en todos los filtros del sistema ([527ab5d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/527ab5d94778cc4359cdd0e1f554c65c77c7906f))
+* uno siempre vuelve donde fue feliz ([7b51c3d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/7b51c3de03861dbf2d1ff56d4bce9b17d163404b))
+* uno siempre vuelve donde fue feliz ([46dacd8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/46dacd86ec228661ba18a23165c9117bd957d3f0))
+
 ## [3.0.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.1...v3.0.2) (2026-10-08)
 
 
