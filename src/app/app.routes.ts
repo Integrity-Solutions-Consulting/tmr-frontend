@@ -66,6 +66,13 @@ export const routes: Routes = [
           import('./features/clientes/clientes.routes').then(m => m.clientesRoutes),
       },
 
+      // Proveedores de inventario
+      {
+        path: 'proveedores',
+        canActivate: [roleGuard],
+        loadComponent: () => import('./features/proveedores/proveedores.page').then(m => m.ProveedoresPage),
+      },
+
       // Líderes
       {
         path: 'lideres',
