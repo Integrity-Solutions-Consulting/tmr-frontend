@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.3...v3.0.4) (2026-10-12)
+
+
+### Bug Fixes
+
+* Agregar aviso de cargando a todas las tablas ([e71b684](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e71b684b52c50bd5474a59e22e79c3d9f9beba18))
+* Mejora, cuando se cierra sesión, ahora también se cierran los modales ([eb7732d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/eb7732dec7782f25f053531fa50b63f62f5bf4b0))
+* mejoras en proyectos, y añadí modales de descarga en todas las ventanas ([fda44bd](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/fda44bd721119c86f97688f1eee4f9e46dadee56))
+
 ## [3.0.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.2...v3.0.3) (2026-10-12)
 
 
