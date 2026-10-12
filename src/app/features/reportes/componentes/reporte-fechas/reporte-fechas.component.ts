@@ -10,6 +10,7 @@ import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tab
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import { ajustarFinRango, fechaLocalInputHoy } from '../../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../../shared/services/fecha-limites.service';
 
@@ -44,9 +45,12 @@ export class ReporteFechasComponent {
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
   totalItems = signal(0);
+  // sm - Muestra la fila "Cargando ..." en la tabla mientras llega la respuesta del servidor.
+  cargando = signal(true);
 
   private reportesService = inject(ReportesService);
   private fechaLimites = inject(FechaLimitesService);
+  private descargas = inject(DescargaProgresoService);
   datos = signal<ReporteFechas[]>([]);
 
   constructor() {
@@ -65,8 +69,11 @@ export class ReporteFechasComponent {
       if (!mostrar) {
         this.datos.set([]);
         this.totalItems.set(0);
+        this.cargando.set(false);
         return;
       }
+
+      this.cargando.set(true);
 
       const filtros = {
         cliente: cliente || undefined,
@@ -79,10 +86,12 @@ export class ReporteFechasComponent {
       const timer = window.setTimeout(() => {
         request = this.reportesService.getReporteFechas(filtros, page, pageSize).subscribe({
           next: (res) => {
+            this.cargando.set(false);
             this.datos.set(res.data || []);
             this.totalItems.set(res.total || 0);
           },
           error: (err) => {
+            this.cargando.set(false);
             console.error('Error al cargar reporte de fechas:', err);
           }
         });
@@ -180,56 +189,55 @@ export class ReporteFechasComponent {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteFechas(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('xlsx', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteFechas(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReporteExcel({
-          titulo: 'Reporte por Fechas de Asignación',
-          nombreArchivo: 'Fechas',
-          nombreHoja: 'Reporte de Fechas',
-          columnas: [
-            { encabezado: 'Código del Proyecto', anchoExcel: 20 },
-            { encabezado: 'Proyecto', anchoExcel: 25 },
-            { encabezado: 'Líder', anchoExcel: 25 },
-            { encabezado: 'Cliente', anchoExcel: 25 },
-            { encabezado: 'Estado del Proyecto', anchoExcel: 20 },
-            { encabezado: 'Tipo de Proyecto', anchoExcel: 20 },
-            { encabezado: 'Recurso', anchoExcel: 25 },
-            { encabezado: 'Cargo', anchoExcel: 20 },
-            { encabezado: 'Fecha de Inicio', anchoExcel: 15, alineacion: 'center' },
-            { encabezado: 'Fecha de Fin Estimada', anchoExcel: 18, alineacion: 'center' },
-            { encabezado: 'Fecha Fin Real', anchoExcel: 15, alineacion: 'center' },
-            { encabezado: 'Presupuesto', anchoExcel: 15, alineacion: 'right' },
-            { encabezado: 'Horas', anchoExcel: 12, alineacion: 'center' },
-            { encabezado: 'Fecha Inicio Espera', anchoExcel: 18, alineacion: 'center' },
-            { encabezado: 'Fecha Fin Espera', anchoExcel: 18, alineacion: 'center' },
-            { encabezado: 'Observaciones', anchoExcel: 30 },
-          ],
-          filas: data.map((item) => [
-            item.codigoProyecto || '',
-            item.proyecto || '',
-            item.lider,
-            item.cliente,
-            item.estadoProyecto || '',
-            item.tipoProyecto || '',
-            item.recurso,
-            item.cargo,
-            item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
-            item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
-            item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
-            item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
-            item.horas !== null && item.horas !== undefined ? item.horas : '',
-            item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
-            item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
-            item.observaciones || '',
-          ]),
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar Excel:', err)
-    });
+      await exportarReporteExcel({
+        titulo: 'Reporte por Fechas de Asignación',
+        nombreArchivo: 'Fechas',
+        nombreHoja: 'Reporte de Fechas',
+        columnas: [
+          { encabezado: 'Código del Proyecto', anchoExcel: 20 },
+          { encabezado: 'Proyecto', anchoExcel: 25 },
+          { encabezado: 'Líder', anchoExcel: 25 },
+          { encabezado: 'Cliente', anchoExcel: 25 },
+          { encabezado: 'Estado del Proyecto', anchoExcel: 20 },
+          { encabezado: 'Tipo de Proyecto', anchoExcel: 20 },
+          { encabezado: 'Recurso', anchoExcel: 25 },
+          { encabezado: 'Cargo', anchoExcel: 20 },
+          { encabezado: 'Fecha de Inicio', anchoExcel: 15, alineacion: 'center' },
+          { encabezado: 'Fecha de Fin Estimada', anchoExcel: 18, alineacion: 'center' },
+          { encabezado: 'Fecha Fin Real', anchoExcel: 15, alineacion: 'center' },
+          { encabezado: 'Presupuesto', anchoExcel: 15, alineacion: 'right' },
+          { encabezado: 'Horas', anchoExcel: 12, alineacion: 'center' },
+          { encabezado: 'Fecha Inicio Espera', anchoExcel: 18, alineacion: 'center' },
+          { encabezado: 'Fecha Fin Espera', anchoExcel: 18, alineacion: 'center' },
+          { encabezado: 'Observaciones', anchoExcel: 30 },
+        ],
+        filas: data.map((item) => [
+          item.codigoProyecto || '',
+          item.proyecto || '',
+          item.lider,
+          item.cliente,
+          item.estadoProyecto || '',
+          item.tipoProyecto || '',
+          item.recurso,
+          item.cargo,
+          item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+          item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+          item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
+          item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
+          item.horas !== null && item.horas !== undefined ? item.horas : '',
+          item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
+          item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
+          item.observaciones || '',
+        ]),
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar Excel:', err));
   }
 
   async exportarPDF() {
@@ -243,55 +251,54 @@ export class ReporteFechasComponent {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteFechas(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('pdf', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteFechas(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReportePdf({
-          titulo: 'Reporte por Fechas de Asignación',
-          nombreArchivo: 'Fechas',
-          nombreHoja: 'Reporte de Fechas',
-          columnas: [
-            { encabezado: 'Código del Proyecto', anchoPdf: 25 },
-            { encabezado: 'Proyecto', anchoPdf: 30 },
-            { encabezado: 'Líder', anchoPdf: 30 },
-            { encabezado: 'Cliente', anchoPdf: 30 },
-            { encabezado: 'Estado del Proyecto', anchoPdf: 22 },
-            { encabezado: 'Tipo de Proyecto', anchoPdf: 22 },
-            { encabezado: 'Recurso', anchoPdf: 30 },
-            { encabezado: 'Cargo', anchoPdf: 22 },
-            { encabezado: 'Fecha de Inicio', anchoPdf: 18, alineacion: 'center' },
-            { encabezado: 'Fecha de Fin Estimada', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Fecha Fin Real', anchoPdf: 18, alineacion: 'center' },
-            { encabezado: 'Presupuesto', anchoPdf: 18, alineacion: 'right' },
-            { encabezado: 'Horas', anchoPdf: 12, alineacion: 'center' },
-            { encabezado: 'Fecha Inicio Espera', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Fecha Fin Espera', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Observaciones', anchoPdf: 35 },
-          ],
-          filas: data.map((item) => [
-            item.codigoProyecto || '',
-            item.proyecto || '',
-            item.lider,
-            item.cliente,
-            item.estadoProyecto || '',
-            item.tipoProyecto || '',
-            item.recurso,
-            item.cargo,
-            item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
-            item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
-            item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
-            item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
-            item.horas !== null && item.horas !== undefined ? item.horas : '',
-            item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
-            item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
-            item.observaciones || '',
-          ]),
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar PDF:', err)
-    });
+      await exportarReportePdf({
+        titulo: 'Reporte por Fechas de Asignación',
+        nombreArchivo: 'Fechas',
+        nombreHoja: 'Reporte de Fechas',
+        columnas: [
+          { encabezado: 'Código del Proyecto', anchoPdf: 25 },
+          { encabezado: 'Proyecto', anchoPdf: 30 },
+          { encabezado: 'Líder', anchoPdf: 30 },
+          { encabezado: 'Cliente', anchoPdf: 30 },
+          { encabezado: 'Estado del Proyecto', anchoPdf: 22 },
+          { encabezado: 'Tipo de Proyecto', anchoPdf: 22 },
+          { encabezado: 'Recurso', anchoPdf: 30 },
+          { encabezado: 'Cargo', anchoPdf: 22 },
+          { encabezado: 'Fecha de Inicio', anchoPdf: 18, alineacion: 'center' },
+          { encabezado: 'Fecha de Fin Estimada', anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Fecha Fin Real', anchoPdf: 18, alineacion: 'center' },
+          { encabezado: 'Presupuesto', anchoPdf: 18, alineacion: 'right' },
+          { encabezado: 'Horas', anchoPdf: 12, alineacion: 'center' },
+          { encabezado: 'Fecha Inicio Espera', anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Fecha Fin Espera', anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Observaciones', anchoPdf: 35 },
+        ],
+        filas: data.map((item) => [
+          item.codigoProyecto || '',
+          item.proyecto || '',
+          item.lider,
+          item.cliente,
+          item.estadoProyecto || '',
+          item.tipoProyecto || '',
+          item.recurso,
+          item.cargo,
+          item.fechaInicio ? item.fechaInicio.toLocaleDateString('es-EC') : '',
+          item.fechaFin ? item.fechaFin.toLocaleDateString('es-EC') : '',
+          item.fechaFinReal ? item.fechaFinReal.toLocaleDateString('es-EC') : '',
+          item.presupuesto !== null && item.presupuesto !== undefined ? `$${item.presupuesto.toFixed(2)}` : '',
+          item.horas !== null && item.horas !== undefined ? item.horas : '',
+          item.fechaInicioEspera ? item.fechaInicioEspera.toLocaleDateString('es-EC') : '',
+          item.fechaFinEspera ? item.fechaFinEspera.toLocaleDateString('es-EC') : '',
+          item.observaciones || '',
+        ]),
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar PDF:', err));
   }
 }

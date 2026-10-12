@@ -25,6 +25,23 @@ export interface ReporteTabularConfig {
   subtituloPdf?: string;
 }
 
+/**
+ * Avance opcional de una exportación (lo implementa DescargaProgresoService → ContextoDescarga): reporta
+ * etapas al toast de progreso y corta antes de guardar si el usuario pulsó "Cancelar".
+ */
+export interface AvanceExportacion {
+  actualizar(progreso: number, detalle: string): void;
+  verificarCancelacion(): void;
+}
+
+// sm - Reporta una etapa y cede el hilo un instante para que el toast se repinte antes del trabajo pesado.
+export async function reportarAvance(avance: AvanceExportacion | undefined, progreso: number, detalle: string): Promise<void> {
+  if (!avance) return;
+  avance.verificarCancelacion();
+  avance.actualizar(progreso, detalle);
+  await new Promise(resolve => setTimeout(resolve, 30));
+}
+
 const COLOR_CABECERA = 'FF163572';
 const COLOR_TABLA = 'FF163572';
 const COLOR_TEXTO = 'FF334155';
@@ -159,7 +176,8 @@ export async function estandarizarCabeceraExcelExistente(
   };
 }
 
-export async function exportarReporteExcel(config: ReporteTabularConfig): Promise<void> {
+export async function exportarReporteExcel(config: ReporteTabularConfig, avance?: AvanceExportacion): Promise<void> {
+  await reportarAvance(avance, 30, 'Generando Excel...');
   const ExcelJS = await import('exceljs');
   const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
   const workbook = new Workbook();
@@ -273,7 +291,9 @@ export async function exportarReporteExcel(config: ReporteTabularConfig): Promis
     margins: { left: 0.35, right: 0.35, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 },
   };
 
+  await reportarAvance(avance, 75, 'Armando archivo...');
   const buffer = await workbook.xlsx.writeBuffer();
+  await reportarAvance(avance, 95, 'Guardando archivo...');
   descargarBlob(
     new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
     `Reporte_${config.nombreArchivo}_${fechaArchivo()}.xlsx`,
@@ -283,7 +303,9 @@ export async function exportarReporteExcel(config: ReporteTabularConfig): Promis
 export async function exportarReporteExcelMultihoja(
   configs: ReporteTabularConfig[],
   nombreArchivo: string,
+  avance?: AvanceExportacion,
 ): Promise<void> {
+  await reportarAvance(avance, 30, 'Generando Excel...');
   const ExcelJS = await import('exceljs');
   const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
   const workbook = new Workbook();
@@ -400,18 +422,25 @@ export async function exportarReporteExcelMultihoja(
     };
   }
 
+  await reportarAvance(avance, 75, 'Armando archivo...');
   const buffer = await workbook.xlsx.writeBuffer();
+  await reportarAvance(avance, 95, 'Guardando archivo...');
   descargarBlob(
     new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
     `Reporte_${nombreArchivo}_${fechaArchivo()}.xlsx`,
   );
 }
 
-export async function exportarReportePdf(config: ReporteTabularConfig): Promise<void> {
+export async function exportarReportePdf(config: ReporteTabularConfig, avance?: AvanceExportacion): Promise<void> {
+  await reportarAvance(avance, 30, 'Generando PDF...');
   const doc = await crearReportePdf(config);
+  await reportarAvance(avance, 95, 'Guardando archivo...');
   doc.save(`Reporte_${config.nombreArchivo}_${fechaArchivo()}.pdf`);
 }
 
+// Diseño estándar de todos los PDF tabulares, tomado del Reporte de Proyectos (proyectos-page.ts → descargarPDF):
+// banda azul de 24mm con logo, título centrado y "Generado", título de sección subrayado, márgenes de 14mm
+// y pie de página dibujado una sola vez al final (con el total real de páginas).
 export async function crearReportePdf(config: ReporteTabularConfig): Promise<jsPDF> {
   const orientation = config.orientacionPdf ?? (config.columnas.length > 6 ? 'landscape' : 'portrait');
   const doc = new jsPDF({
@@ -421,27 +450,70 @@ export async function crearReportePdf(config: ReporteTabularConfig): Promise<jsP
   });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 0;
+  const marginX = 14;
+  const footerY = pageHeight - 10;
   const logo = await obtenerLogo();
   const fecha = formatearFecha(new Date());
 
+  // Tablas muy anchas (muchas columnas) conservan una densidad menor para que quepan.
+  const compacta = config.columnas.length > 12;
+  const fontSize = config.columnas.length > 16 ? 5.4 : compacta ? 6 : 7.5;
+  const bodyPadding = config.columnas.length > 16 ? 1 : compacta
+    ? 1.4
+    : { top: 4, bottom: 4, left: 5, right: 5 };
+  const headPadding = compacta
+    ? { top: 2, bottom: 2, left: 2, right: 2 }
+    : { top: 5, bottom: 5, left: 6, right: 6 };
+
+  // ── Cabecera de página ──
   const dibujarCabecera = () => {
-    doc.setFillColor(31, 73, 125);
-    doc.rect(0, 0, pageWidth, 30, 'F');
-    if (logo) doc.addImage(logo, 'PNG', margin, 6, 50, 15);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    const titleSize = config.titulo.length > 32 ? 13 : config.titulo.length > 24 ? 14 : 15;
-    doc.setFontSize(titleSize);
-    const titleLines = doc.splitTextToSize(config.titulo, pageWidth - (margin + 60) * 2);
-    doc.text(titleLines, pageWidth * 0.73, titleLines.length > 1 ? 16 : 17, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    if (config.subtituloPdf) {
-      doc.text(config.subtituloPdf, pageWidth / 2, 27, { align: 'center', maxWidth: pageWidth - 12 });
+    doc.setFillColor(22, 53, 114);
+    doc.rect(0, 0, pageWidth, 24, 'F');
+
+    if (logo) {
+      doc.addImage(logo, 'PNG', marginX, 4, 38, 14);
     }
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(config.titulo, pageWidth / 2, 15, { align: 'center' });
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generado: ${fecha}`, pageWidth - marginX, 15, { align: 'right' });
+
+    doc.setDrawColor(99, 135, 190);
+    doc.setLineWidth(0.5);
+    doc.line(0, 24, pageWidth, 24);
   };
-  const anchoUtil = pageWidth - margin * 2;
+
+  // ── Pie de página ──
+  const dibujarPie = (pagina: number, totalPaginas: number) => {
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, footerY, pageWidth - marginX, footerY);
+
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(156, 163, 175);
+    doc.text(`Página ${pagina} de ${totalPaginas}`, pageWidth / 2, footerY + 5, { align: 'center' });
+    doc.text(`TMR — ${config.titulo}`, marginX, footerY + 5);
+    doc.text(fecha, pageWidth - marginX, footerY + 5, { align: 'right' });
+  };
+
+  // ── Título de sección subrayado ("Reporte de X" → "Resumen de X") ──
+  const dibujarTituloSeccion = (texto: string, y: number) => {
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(22, 53, 114);
+    doc.text(texto, marginX, y);
+    doc.setDrawColor(22, 53, 114);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, y + 2, marginX + doc.getTextWidth(texto) + 4, y + 2);
+  };
+
+  const anchoUtil = pageWidth - marginX * 2;
   const totalSolicitado = config.columnas.reduce((t, c) => t + (c.anchoPdf ?? 0), 0);
   const escala = totalSolicitado > 0 ? anchoUtil / totalSolicitado : 1;
   const columnStyles: Record<number, Partial<Styles>> = {};
@@ -452,29 +524,51 @@ export async function crearReportePdf(config: ReporteTabularConfig): Promise<jsP
     };
   });
 
-  dibujarCabecera();
-  autoTable(doc, {
-    startY: 30,
-    head: [config.columnas.map((columna) => columna.encabezado)],
-    body: config.filas,
+  const estilosTabla = {
     styles: {
       font: 'helvetica',
-      fontSize: config.columnas.length > 16 ? 5.4 : config.columnas.length > 12 ? 6 : 7.5,
-      cellPadding: config.columnas.length > 16 ? 1 : config.columnas.length > 12 ? 1.4 : 2,
-      overflow: 'linebreak',
-      lineColor: [226, 232, 240],
+      fontSize,
+      cellPadding: bodyPadding,
+      valign: 'middle' as const,
+      overflow: 'linebreak' as const,
+      lineColor: [226, 232, 240] as [number, number, number],
       lineWidth: 0.2,
     },
     headStyles: {
-      fillColor: [22, 53, 114],
+      fillColor: [22, 53, 114] as [number, number, number],
       textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center',
-      valign: 'middle',
-      cellPadding: { top: 1.5, bottom: 1.5, left: 2, right: 2 },
+      fontStyle: 'bold' as const,
+      fontSize: compacta ? fontSize : 8,
+      halign: 'center' as const,
+      valign: 'middle' as const,
+      cellPadding: headPadding,
     },
-    bodyStyles: { textColor: [51, 65, 85], halign: 'left' },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
+    bodyStyles: { textColor: [55, 65, 81] as [number, number, number] },
+    alternateRowStyles: { fillColor: [248, 250, 252] as [number, number, number] },
+    margin: { left: marginX, right: marginX, bottom: 22, top: 30 },
+    didDrawPage: () => dibujarCabecera(),
+  };
+
+  // ── Tabla principal ──
+  dibujarCabecera();
+  dibujarTituloSeccion(config.titulo.replace(/^Reporte\b/i, 'Resumen'), 34);
+
+  let startY = 40;
+  if (config.subtituloPdf) {
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(107, 114, 128);
+    const lineas = doc.splitTextToSize(config.subtituloPdf, anchoUtil);
+    doc.text(lineas, marginX, 41);
+    startY = 41 + lineas.length * 3.5 + 2;
+  }
+
+  autoTable(doc, {
+    ...estilosTabla,
+    startY,
+    head: [config.columnas.map((columna) => columna.encabezado)],
+    body: config.filas,
+    bodyStyles: { ...estilosTabla.bodyStyles, halign: 'left' },
     columnStyles,
     didParseCell: (data) => {
       if (data.section === 'body' && data.column.index === config.columnaEstado) {
@@ -483,75 +577,32 @@ export async function crearReportePdf(config: ReporteTabularConfig): Promise<jsP
         data.cell.styles.fontStyle = 'bold';
       }
     },
-    margin: { left: 0, right: 0, bottom: 18, top: 30 },
-    didDrawPage: dibujarCabecera,
   });
 
+  // ── Segunda tabla: datos de salida ──
+  if (config.columnasSalida && config.filasSalida && config.filasSalida.length > 0) {
+    let y = (doc as any).lastAutoTable.finalY + 14;
+    if (y > footerY - 40) {
+      doc.addPage();
+      dibujarCabecera();
+      y = 34;
+    }
 
- //=====================================================
-  // SEGUNDA TABLA: DATOS DE SALIDA
-  //=====================================================
+    dibujarTituloSeccion('Datos de Salida', y);
 
-  if (
-    config.columnasSalida &&
-    config.filasSalida &&
-    config.filasSalida.length > 0
-  ) {
-
-    const ultimaTabla = (doc as any).lastAutoTable;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(22,53,114);
-
-    doc.text(
-      'DATOS DE SALIDA',
-      0,
-      ultimaTabla.finalY + 10
-    );
-
-    autoTable(doc,{
-      startY: ultimaTabla.finalY + 14,
-
-      head:[
-        config.columnasSalida.map(c=>c.encabezado)
-      ],
-
+    autoTable(doc, {
+      ...estilosTabla,
+      startY: y + 6,
+      head: [config.columnasSalida.map((columna) => columna.encabezado)],
       body: config.filasSalida,
-
-      theme:'grid',
-
-      headStyles:{
-        fillColor:[22,53,114],
-        textColor:255,
-        fontStyle:'bold',
-        halign:'center'
-      },
-
-      alternateRowStyles:{
-        fillColor:[248,250,252]
-      },
-
-      styles:{
-        font:'helvetica',
-        fontSize:8,
-        cellPadding:2
-      }
     });
-
   }
 
+  // ── Pie en todas las páginas (una sola vez, con el total real) ──
   const pageCount = doc.getNumberOfPages();
   for (let page = 1; page <= pageCount; page++) {
     doc.setPage(page);
-    const footerY = pageHeight - 8;
-    doc.setDrawColor(226, 232, 240);
-    doc.line(margin, footerY, pageWidth - margin, footerY);
-    doc.setTextColor(156, 163, 175);
-    doc.setFontSize(7);
-    doc.text(`Página ${page} de ${pageCount}`, pageWidth / 2, footerY + 4, { align: 'center' });
-    doc.text(`TMR - ${config.titulo}`, margin, footerY + 4);
-    doc.text(fecha, pageWidth - margin, footerY + 4, { align: 'right' });
+    dibujarPie(page, pageCount);
   }
 
   return doc;

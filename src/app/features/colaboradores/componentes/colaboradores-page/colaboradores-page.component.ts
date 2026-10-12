@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, of, Subject, switchMap, takeUntil, catchError, map } from 'rxjs';
 import { exportarReporteExcelMultihoja, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import { ColaboradoresService }             from '../../servicios/colaboradores.service';
 import { CatalogosService, CargoItem, CatalogoItem } from '../../servicios/catalogos.service';
 import {
@@ -85,6 +86,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   toasts: any[] = [];
 
   private destroy$ = new Subject<void>();
+  private descargas = inject(DescargaProgresoService);
 
   constructor(
     private svc:         ColaboradoresService,
@@ -479,11 +481,10 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   onDescargarPDF(): void {
-    this.obtenerColaboradoresParaExportar()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: colaboradores => {
-          void exportarReportePdf({
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    this.descargas.ejecutar('pdf', async ctx => {
+          const colaboradores = await ctx.esperar(this.obtenerColaboradoresParaExportar().pipe(takeUntil(this.destroy$)));
+          await exportarReportePdf({
             titulo: 'Reporte de Colaboradores',
             nombreArchivo: 'Colaboradores',
             nombreHoja: 'Colaboradores',
@@ -553,18 +554,14 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
             columnaEstado: 2,
             orientacionPdf: 'landscape',
             formatoPdf: 'a3',
-          });
-          console.log('PDF generado correctamente');
-        },
-        error: () => console.error('Error al generar el PDF'),
-      });
+          }, ctx);
+    }).catch(() => console.error('Error al generar el PDF'));
   }
 
   onDescargarExcel(): void {
-    this.obtenerColaboradoresParaExportar()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: colaboradores => {
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    this.descargas.ejecutar('xlsx', async ctx => {
+          const colaboradores = await ctx.esperar(this.obtenerColaboradoresParaExportar().pipe(takeUntil(this.destroy$)));
           const activosCount = colaboradores.filter(c => c.estado === 'Activo').length;
           const inactivosCount = colaboradores.filter(c => c.estado === 'Inactivo').length;
           // sm - Asignado = al menos un proyecto con estado de asignación Activo.
@@ -572,7 +569,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
           const asignadosCount = colaboradores.filter(c => c.numProyectos > 0 && c.estado === 'Activo').length;
 
 
-          void exportarReporteExcelMultihoja(
+          await exportarReporteExcelMultihoja(
             [
               {
                 titulo: 'Reporte de Colaboradores',
@@ -651,12 +648,10 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   ]),
               },
             ],
-            'Colaboradores'
+            'Colaboradores',
+            ctx,
           );
-          console.log('Excel generado correctamente');
-        },
-        error: () => console.error('Error al generar el Excel'),
-      });
+    }).catch(() => console.error('Error al generar el Excel'));
   }
 
   private formatearFechaValor(fecha?: string | null): string {

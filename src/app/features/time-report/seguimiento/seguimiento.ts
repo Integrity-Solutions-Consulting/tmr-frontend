@@ -25,8 +25,9 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-// sm - Operadores para cancelar la descarga desde el toast (takeUntil).
-import { Observable, Subject, lastValueFrom, takeUntil } from 'rxjs';
+import { Observable } from 'rxjs';
+// sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
+import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
@@ -54,13 +55,6 @@ interface RangoDescarga {
 interface ItemDescarga {
     colaborador: Colaborador;
     proyecto?: ProyectoResumen;
-}
-
-// sm - Error propio para identificar que el usuario canceló la descarga desde el toast de progreso.
-class DescargaCanceladaError extends Error {
-    constructor() {
-        super('Descarga cancelada por el usuario.');
-    }
 }
 
 @Component({
@@ -93,6 +87,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
     private fechaLimites = inject(FechaLimitesService);
+    private descargas = inject(DescargaProgresoService);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -101,18 +96,8 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
-    // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
-    public progresoDescarga = {
-        visible: false,
-        cerrando: false,
-        titulo: '',
-        detalle: '',
-        progreso: 0,
-        indeterminado: true,
-    };
-    // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la petición HTTP en curso.
-    private cancelarDescarga$ = new Subject<void>();
-    private descargaCancelada = false;
+    // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
+    public cargando = this.seguimientoService.cargando;
 
     // Filtros de búsqueda (Estado Local)
     public busqueda = '';
@@ -476,63 +461,26 @@ export class SeguimientoComponent implements AfterViewInit {
         }
     }
 
-    // sm - Muestra el toast de descarga. La descarga múltiple avanza por archivo/reporte (progreso real);
-    // el Excel individual no reporta avance, así que usa barra indeterminada.
+    // sm - El toast (título, barra, porcentaje y Cancelar) ahora es el compartido de la app: DescargaProgresoService.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
-        this.descargaCancelada = false;
-        this.progresoDescarga = {
-            visible: true,
-            cerrando: false,
-            titulo: `Descargando ${formato === 'pdf' ? 'PDF' : 'Excel'}${cantidad > 1 ? ` (${cantidad} reportes)` : ''}`,
-            detalle: cantidad > 1 ? `0 de ${cantidad} reportes generados` : 'Generando reporte...',
-            progreso: 0,
-            indeterminado: cantidad === 1 && formato === 'xlsx',
-        };
+        this.descargas.iniciar(formato, cantidad);
     }
 
-    // sm - Actualiza el porcentaje y el texto del toast; al recibir un valor la barra deja de ser indeterminada.
     private actualizarProgresoDescarga(progreso: number, detalle: string): void {
-        this.progresoDescarga = {
-            ...this.progresoDescarga,
-            progreso: Math.min(100, Math.max(0, Math.round(progreso))),
-            detalle,
-            indeterminado: false,
-        };
+        this.descargas.actualizar(progreso, detalle);
     }
 
-    // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animación de salida.
-    private async finalizarProgresoDescarga(): Promise<void> {
-        this.actualizarProgresoDescarga(100, 'Descarga completada');
-        await new Promise(resolve => setTimeout(resolve, 600));
-        this.cerrarProgresoDescarga();
+    private finalizarProgresoDescarga(): Promise<void> {
+        return this.descargas.finalizar();
     }
 
-    // sm - Cierra el toast con la animación de salida y luego lo quita del DOM.
     private cerrarProgresoDescarga(): void {
-        if (!this.progresoDescarga.visible) return;
-        this.progresoDescarga = { ...this.progresoDescarga, cerrando: true };
-        setTimeout(() => {
-            this.progresoDescarga = { ...this.progresoDescarga, visible: false, cerrando: false };
-        }, 200);
-    }
-
-    // sm - Botón "Cancelar" del toast: corta la petición HTTP en curso y marca la descarga como cancelada.
-    public cancelarDescarga(): void {
-        if (!this.isDownloading || this.descargaCancelada) return;
-        this.descargaCancelada = true;
-        this.cancelarDescarga$.next();
-        this.progresoDescarga = { ...this.progresoDescarga, detalle: 'Cancelando...' };
+        this.descargas.cerrar();
     }
 
     // sm - Espera una petición HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
-    private async esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
-        try {
-            return await lastValueFrom(peticion.pipe(takeUntil(this.cancelarDescarga$)));
-        } catch (error) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
-            throw error;
-        }
+    private esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
+        return this.descargas.esperarCancelable(peticion);
     }
 
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
@@ -541,7 +489,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private async descargarReportesDirecto(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         let incluidos = 0;
         for (const [indice, item] of items.entries()) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            this.descargas.verificarCancelacion();
             const nombreBase = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
             if (formato === 'pdf') {
                 const contenido = await this.generarPdfColaborador(item.colaborador, rango, item.proyecto);
@@ -572,7 +520,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const nombresUsados = new Set<string>();
         let incluidos = 0;
         for (const [indice, item] of items.entries()) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            this.descargas.verificarCancelacion();
             const contenido = formato === 'pdf'
                 ? await this.generarPdfColaborador(item.colaborador, rango, item.proyecto)
                 : await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
@@ -596,7 +544,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const contenidoZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }, metadata => {
             this.actualizarProgresoDescarga(90 + metadata.percent * 0.1, 'Comprimiendo archivos...');
         });
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        this.descargas.verificarCancelacion();
         this.guardarArchivo(contenidoZip, `Seguimiento_${formato === 'pdf' ? 'PDF' : 'Excel'}_${rango.desde}_a_${rango.hasta}.zip`);
         return incluidos;
     }
@@ -650,11 +598,13 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Botón "Reporte": exporta la tabla (resultados filtrados) con el formato estándar de reportes de la app.
     // Se eliminó la versión anterior (ExcelJS/jsPDF manual) que quedaba después de un "return" y nunca se ejecutaba.
     public async exportarExcel() {
-        await exportarReporteExcel(this.configuracionReporteTabla());
+        await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel(this.configuracionReporteTabla(), ctx))
+            .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
     }
 
     public exportarPDF() {
-        void exportarReportePdf(this.configuracionReporteTabla());
+        this.descargas.ejecutar('pdf', ctx => exportarReportePdf(this.configuracionReporteTabla(), ctx))
+            .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
     }
 
     // sm - Columnas y filas compartidas por el Excel y el PDF del reporte de la tabla.
@@ -723,7 +673,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const respuesta = await this.obtenerActividadesColaborador(col, rango, proyecto);
         if (!respuesta.actividades || respuesta.actividades.length === 0) return undefined;
         const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta);
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        this.descargas.verificarCancelacion();
         return contenido;
     }
 
@@ -1074,7 +1024,7 @@ export class SeguimientoComponent implements AfterViewInit {
         // Guardar archivo y disparar descarga
         const buffer = await workbook.xlsx.writeBuffer();
         // sm - Si el usuario canceló mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        this.descargas.verificarCancelacion();
         if (devolverBuffer) return buffer;
         this.guardarArchivo(
             new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),

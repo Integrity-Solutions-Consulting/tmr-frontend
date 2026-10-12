@@ -100,7 +100,7 @@
       </mat-form-field>
 
       @if (proyecto) {
-        <mat-form-field>
+        <mat-form-field appearance="outline" class="proyecto-form__field">
           <mat-label>Estado</mat-label>
           <mat-select yPosition="below" formControlName="estado" [disabled]="true">
             <mat-option value="Activo">Activo</mat-option>

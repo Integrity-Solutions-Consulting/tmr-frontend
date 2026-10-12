@@ -7,7 +7,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { finalize, map, take } from 'rxjs/operators';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { agregarCabeceraExcel, obtenerLogoReporte } from '../../../../shared/utils/reporte-export.utils';
+import { AvanceExportacion, agregarCabeceraExcel, obtenerLogoReporte, reportarAvance } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 
 import { Tabla } from '../../../../shared/components/tabla/tabla';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -68,6 +69,7 @@ export class ProyectosPage implements OnDestroy {
   private store = inject(Store);
   private proyectosService = inject(ProyectosService);
   private popup = inject(PopupService);
+  private descargas = inject(DescargaProgresoService);
 
   // sm - Tarjetas de resumen (igual que Clientes/Colaboradores/Líderes): totales sobre TODOS los proyectos
   // cargados en el store, no sobre la página/filtro visible en la tabla.
@@ -387,18 +389,19 @@ export class ProyectosPage implements OnDestroy {
     this.filtros = filtros;
   }
 
+  // sm - Toast de progreso compartido (con Cancelar): obtiene los proyectos filtrados y genera el archivo.
   descargarProyectosExcel(): void {
-    this.obtenerProyectosFiltrados().subscribe({
-      next: (proyectos) => void this.descargarXlsx(proyectos, 'Proyectos'),
-      error: (error) => console.error('Error al descargar proyectos:', error)
-    });
+    this.descargas.ejecutar('xlsx', async ctx => {
+      const proyectos = await ctx.esperar(this.obtenerProyectosFiltrados());
+      await this.descargarXlsx(proyectos, 'Proyectos', ctx);
+    }).catch((error) => console.error('Error al descargar proyectos:', error));
   }
 
   descargarProyectosPdf(): void {
-    this.obtenerProyectosFiltrados().subscribe({
-      next: (proyectos) => void this.descargarPDF(proyectos, 'Proyectos'),
-      error: (error) => console.error('Error al descargar proyectos:', error)
-    });
+    this.descargas.ejecutar('pdf', async ctx => {
+      const proyectos = await ctx.esperar(this.obtenerProyectosFiltrados());
+      await this.descargarPDF(proyectos, 'Proyectos', ctx);
+    }).catch((error) => console.error('Error al descargar proyectos:', error));
   }
 
   private obtenerProyectosFiltrados() {
@@ -449,7 +452,8 @@ export class ProyectosPage implements OnDestroy {
   }
 
   // ─── EXCEL ────────────────────────────────────────────────────────────────
-  private async descargarXlsx(proyectos: Proyecto[], nombreBase: string): Promise<void> {
+  private async descargarXlsx(proyectos: Proyecto[], nombreBase: string, avance?: AvanceExportacion): Promise<void> {
+    await reportarAvance(avance, 30, 'Generando Excel...');
     const ExcelJS = await import('exceljs');
     const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
     const workbook = new Workbook();
@@ -601,7 +605,9 @@ export class ProyectosPage implements OnDestroy {
       });
     });
 
+    await reportarAvance(avance, 75, 'Armando archivo...');
     const buffer = await workbook.xlsx.writeBuffer();
+    await reportarAvance(avance, 95, 'Guardando archivo...');
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
@@ -614,7 +620,8 @@ export class ProyectosPage implements OnDestroy {
   }
 
   // ─── PDF ──────────────────────────────────────────────────────────────────
-  private async descargarPDF(proyectos: Proyecto[], nombreBase: string): Promise<void> {
+  private async descargarPDF(proyectos: Proyecto[], nombreBase: string, avance?: AvanceExportacion): Promise<void> {
+    await reportarAvance(avance, 30, 'Generando PDF...');
     const doc = new jsPDF({ orientation: 'landscape' });
     const fecha = new Date().toLocaleDateString('es-EC');
     const pageW = 297;
@@ -731,11 +738,11 @@ export class ProyectosPage implements OnDestroy {
         }
       },
       margin: { left: marginX, right: marginX, bottom: 22, top: 30 },
+      // El pie se dibuja solo al final (con el total real); dibujarlo aquí lo duplicaba superpuesto.
       didDrawPage: (data) => {
         const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
         const total = (doc as any).internal.getNumberOfPages();
         dibujarCabecera(pageNum, total);
-        dibujarPie(pageNum, total);
       },
     });
 
@@ -882,7 +889,6 @@ export class ProyectosPage implements OnDestroy {
         doc.addPage();
         currentPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
         dibujarCabecera(currentPageNum, currentPageNum);
-        dibujarPie(currentPageNum, currentPageNum);
         currentY = 32;
       }
 
@@ -937,7 +943,6 @@ export class ProyectosPage implements OnDestroy {
           const pageNum = (doc as any).internal.getCurrentPageInfo().pageNumber;
           const total = (doc as any).internal.getNumberOfPages();
           dibujarCabecera(pageNum, total);
-          dibujarPie(pageNum, total);
 
           if (data.pageNumber > 1 && data.cursor) {
             const yBanner = 32;
@@ -966,6 +971,7 @@ export class ProyectosPage implements OnDestroy {
       dibujarPie(i, totalPages);
     }
 
+    await reportarAvance(avance, 95, 'Guardando archivo...');
     doc.save(`Reporte_${nombreBase}_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 

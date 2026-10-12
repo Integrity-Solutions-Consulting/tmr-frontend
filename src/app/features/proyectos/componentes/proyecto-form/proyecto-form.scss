@@ -599,10 +599,13 @@
   align-self: center;
 }
 
+// La X se alinea arriba con la misma altura del campo (42px): los campos reservan 22px de subscript
+// abajo, así que centrarla en la fila la dejaba más baja que el cuadro de Departamento.
 .proyecto-form__remove {
   width: 36px !important;
-  height: 40px !important;
+  height: 42px !important;
   margin-top: 0;
+  align-self: start;
   border-radius: 8px !important;
   color: var(--status-danger-text) !important;
   background: transparent !important;

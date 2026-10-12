@@ -28,6 +28,14 @@ export class DropdownScrollLockService {
     }
   }
 
+  // sm - Al cerrar sesión los desplegables se destruyen sin llamar a unlock(): se libera todo de una vez.
+  reset(): void {
+    if (this.contador === 0) return;
+    this.contador = 0;
+    window.removeEventListener('wheel', this.onWheel);
+    window.removeEventListener('touchmove', this.onTouchMove);
+  }
+
   private bloquearSiFuera(e: Event): void {
     const destino = e.target as HTMLElement | null;
     if (destino?.closest?.('[data-scroll-lock-exempt]')) return;

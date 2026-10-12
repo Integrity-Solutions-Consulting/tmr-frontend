@@ -31,13 +31,12 @@
     <tbody class="tabla__body">
 
       @if (cargando) {
-        @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
-          <tr class="tabla__row tabla__row--skeleton">
-            @for (j of [1,2,3,4,5,6,7,8]; track j) {
-              <td class="tabla__td"><div class="skeleton-line"></div></td>
-            }
-          </tr>
-        }
+        <!-- sm - Mismo aviso de carga que Clientes (antes eran filas skeleton). -->
+        <tr>
+          <td class="tabla__td" colspan="8">
+            <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando colaboradores...</div>
+          </td>
+        </tr>
       }
 
       @if (!cargando && colaboradores.length === 0) {

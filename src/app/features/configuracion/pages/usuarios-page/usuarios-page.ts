@@ -2,6 +2,7 @@ import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import {
   ActionMenuComponent,
   ActionMenuItem,
@@ -35,12 +36,15 @@ export class UsuariosPage implements OnDestroy {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
   private readonly dropdownScrollLock = inject(DropdownScrollLockService);
+  private readonly descargas = inject(DescargaProgresoService);
 
   // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
   readonly paginaActual = signal(1);
   readonly porPagina = 10;
   readonly usuarios = this.configuracionService.usuarios;
+  // sm - Fila "Cargando usuarios..." mientras llega la lista.
+  readonly cargando = this.configuracionService.cargandoUsuarios;
   readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
 
@@ -252,7 +256,8 @@ export class UsuariosPage implements OnDestroy {
   }
 
   descargarUsuariosExcel(): void {
-    void exportarReporteExcel({
+    // sm - Toast de progreso compartido (con Cancelar).
+    this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel({
       titulo: 'Reporte de Usuarios',
       nombreArchivo: 'Usuarios',
       nombreHoja: 'Usuarios',
@@ -266,11 +271,12 @@ export class UsuariosPage implements OnDestroy {
       ],
       filas: this.obtenerFilasExportacion(this.obtenerUsuariosExportables()),
       columnaEstado: 5,
-    });
+    }, ctx)).catch(error => console.error('Error al exportar usuarios:', error));
   }
 
   descargarUsuariosPdf(): void {
-    void exportarReportePdf({
+    // sm - Toast de progreso compartido (con Cancelar).
+    this.descargas.ejecutar('pdf', ctx => exportarReportePdf({
       titulo: 'Reporte de Usuarios',
       nombreArchivo: 'Usuarios',
       nombreHoja: 'Usuarios',
@@ -284,7 +290,7 @@ export class UsuariosPage implements OnDestroy {
       ],
       filas: this.obtenerFilasExportacion(this.obtenerUsuariosExportables()),
       columnaEstado: 5,
-    });
+    }, ctx)).catch(error => console.error('Error al exportar usuarios:', error));
   }
 
   private obtenerUsuariosExportables(): Usuario[] {

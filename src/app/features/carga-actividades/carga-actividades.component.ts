@@ -11,11 +11,12 @@ import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, shareR
 import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
 import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
-import { selectActividadesList } from '../../core/state/actividades/actividades.selectors';
+import { selectActividadesCargando, selectActividadesList } from '../../core/state/actividades/actividades.selectors';
 import { ClientesService } from '../clientes/servicios/clientes.service';
 import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
-import { exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
+import { AvanceExportacion, exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
+import { DescargaCanceladaError, DescargaProgresoService } from '../../shared/services/descarga-progreso.service';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ajustarFinRango, fechaLocalInputHoy } from '../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../shared/services/fecha-limites.service';
@@ -45,6 +46,7 @@ export class CargaActividadesComponent implements OnInit {
   private colaboradoresService = inject(ColaboradoresService);
   private destroyRef = inject(DestroyRef);
   private fechaLimites = inject(FechaLimitesService);
+  private descargas = inject(DescargaProgresoService);
 
   searchControl = new FormControl('', { nonNullable: true });
   proyectoControl = new FormControl('', { nonNullable: true });
@@ -84,6 +86,8 @@ export class CargaActividadesComponent implements OnInit {
   }
 
   private actividadesRaw$: Observable<Actividad[]> = this.store.select(selectActividadesList) as Observable<Actividad[]>;
+  // sm - Fila "Cargando actividades..." mientras el store pide la lista.
+  cargandoActividades$: Observable<boolean> = this.store.select(selectActividadesCargando);
 
   horasPorRegistrar$: Observable<string> = this.actividadesRaw$.pipe(
     map((actividades: Actividad[]) => {
@@ -448,16 +452,17 @@ export class CargaActividadesComponent implements OnInit {
   }
 
   descargarExcel(): void {
-    this.actividadesFiltradasTodas$.pipe(take(1)).subscribe({
-      next: actividades => void this.descargarActividadesExcel(actividades),
-      error: error => {
-        this.errorMessage = 'No se pudo preparar el reporte.';
-        console.error(error);
-      }
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    this.descargas.ejecutar('xlsx', async ctx => {
+      const actividades = await ctx.esperar(this.actividadesFiltradasTodas$.pipe(take(1)));
+      await this.descargarActividadesExcel(actividades, ctx);
+    }).catch(error => {
+      this.errorMessage = 'No se pudo preparar el reporte.';
+      console.error(error);
     });
   }
 
-  private async descargarActividadesExcel(actividades: Actividad[]): Promise<void> {
+  private async descargarActividadesExcel(actividades: Actividad[], avance?: AvanceExportacion): Promise<void> {
     try {
       await exportarReporteExcel({
         titulo: 'Reporte de Actividades',
@@ -482,7 +487,7 @@ export class CargaActividadesComponent implements OnInit {
           actividad.estado || 'Pendiente',
         ]),
         orientacionPdf: 'landscape',
-      });
+      }, avance);
       return;
 
       const ExcelJS = await import('exceljs');
@@ -522,6 +527,8 @@ export class CargaActividadesComponent implements OnInit {
 
       this.crearDescarga(blob, `Reporte_Actividades_${new Date().toISOString().slice(0, 10)}.xlsx`);
     } catch (error) {
+      // sm - Cancelar desde el toast no es un error: se deja subir para que el toast se cierre sin mensaje.
+      if (error instanceof DescargaCanceladaError) throw error;
       this.errorMessage = 'No se pudo descargar el reporte.';
       console.error(error);
     }

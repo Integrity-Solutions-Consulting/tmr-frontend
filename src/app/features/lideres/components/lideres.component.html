@@ -153,7 +153,12 @@
                 (accionSeleccionada)="onAccionSeleccionada($event, lider, rangoInicio + i)"></app-action-menu>
             </td>
           </tr>
-          <tr *ngIf="lideresFiltrados.length === 0">
+          <tr *ngIf="cargando && lideresFiltrados.length === 0">
+            <td colspan="8">
+              <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando líderes...</div>
+            </td>
+          </tr>
+          <tr *ngIf="!cargando && lideresFiltrados.length === 0">
             <td colspan="8" class="empty-state">No se encontraron líderes</td>
           </tr>
         </tbody>

@@ -43,6 +43,8 @@ export class CatalogosPage implements OnInit, OnDestroy {
 
   // ── Detalles del Maestro Seleccionado ─────────────────────────────────────
   readonly detalles = signal<CatalogoDetalle[]>([]);
+  // sm - Fila "Cargando ítems..." mientras llegan los detalles del catálogo seleccionado.
+  readonly cargando = signal(false);
 
   // ── Señales de control y paginación ───────────────────────────────────────
   readonly query = signal('');
@@ -176,11 +178,14 @@ export class CatalogosPage implements OnInit, OnDestroy {
 
   cargarDetalles(idCatalogo: number): void {
     this.estadoError.set(null);
+    this.cargando.set(true);
     this.configuracionService.getDetallesPorCatalogoId(idCatalogo).subscribe({
       next: (data) => {
         this.detalles.set(data ?? []);
+        this.cargando.set(false);
       },
       error: (err) => {
+        this.cargando.set(false);
         console.error(err);
         this.estadoError.set('Error al cargar los detalles del catálogo.');
       },

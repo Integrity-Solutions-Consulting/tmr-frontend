@@ -8,6 +8,7 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
 import { Subscription, forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import { DashboardEjecutivoService } from '../../servicios/dashboard-ejecutivo.service';
 import { DashboardService } from '../../servicios/dashboard.service';
 import {
@@ -98,6 +99,7 @@ export class DashboardEjecutivoComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private destroyRef = inject(DestroyRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
+  private descargas = inject(DescargaProgresoService);
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;
@@ -896,7 +898,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       }));
     }
 
-    await exportarReporteExcelMultihoja(
+    // sm - Toast de progreso compartido (con Cancelar).
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcelMultihoja(
       [
         {
           titulo: detalle.titulo,
@@ -911,7 +914,8 @@ export class DashboardEjecutivoComponent implements OnInit {
         this.hojaParametros(detalle.definicion),
       ],
       `Dashboard_${this.nombreArchivo(detalle.titulo)}`,
-    );
+      ctx,
+    )).catch(error => console.error('Error al exportar el detalle del dashboard:', error));
   }
 
   // sm - Descarga general: todo el conjunto filtrado del dashboard, en varias hojas.
@@ -971,7 +975,9 @@ export class DashboardEjecutivoComponent implements OnInit {
       this.hojaParametros('Dashboard Time Report: conjunto completo con los filtros aplicados.'),
     ];
 
-    await exportarReporteExcelMultihoja(hojas, `Dashboard_${MESES[d.periodo.mes - 1]}_${d.periodo.anio}`);
+    // sm - Toast de progreso compartido (con Cancelar).
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcelMultihoja(hojas, `Dashboard_${MESES[d.periodo.mes - 1]}_${d.periodo.anio}`, ctx))
+      .catch(error => console.error('Error al exportar el dashboard:', error));
   }
 
   private hojaParametros(definicion: string): ReporteTabularConfig {

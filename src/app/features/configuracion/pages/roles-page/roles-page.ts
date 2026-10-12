@@ -40,6 +40,8 @@ export class RolesPage implements OnDestroy {
   readonly estadoError = signal<string | null>(null);
   readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
+  // sm - Fila "Cargando roles..." mientras llega la lista.
+  readonly cargando = this.configuracionService.cargandoRoles;
   readonly modulos = this.configuracionService.modulos;
 
   // ── Filtro por estado ─────────────────────────────────────────────────────
