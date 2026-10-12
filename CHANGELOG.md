@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.0...v3.1.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* Mejora de bug en seguimiento ([b31a1e7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b31a1e7e61e62cd9085f1d6fb11d2f938bb70208))
+
 ## [3.1.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.0.4...v3.1.0) (2026-10-12)
 
 
