@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.1...v3.1.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* correcion de pestaña de proveedores con permisos ([fc9b31f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/fc9b31f620de24a07099c744176daa9d5fe0a2e6))
+
 ## [3.1.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.0...v3.1.1) (2026-10-12)
 
 
