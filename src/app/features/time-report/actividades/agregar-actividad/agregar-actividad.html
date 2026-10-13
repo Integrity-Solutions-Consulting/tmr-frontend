@@ -501,6 +501,7 @@
   [mostrar]="mostrarEliminar"
   [descripcionActividad]="data?.actividad?.descripcionactividad || ''"
   [error]="errorEliminar"
+  [procesando]="eliminando"
   (cerrarModal)="mostrarEliminar = false"
   (confirmarEliminar)="confirmarEliminarActividad()"
 ></app-modal-eliminar-actividad>

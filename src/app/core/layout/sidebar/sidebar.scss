@@ -123,6 +123,15 @@
   height: 14px;
 }
 
+// Ícono de Proveedores: 85 % del tamaño Material Symbols base (24 px), sin alterar otros iconos.
+.sidebar__supplier-icon {
+  width: 24px;
+  flex: 0 0 24px;
+  font-size: 20.4px;
+  line-height: 1;
+  text-align: center;
+}
+
 /* ── Chevron (misma técnica) ── */
 .sidebar__chevron {
   display: inline-block;

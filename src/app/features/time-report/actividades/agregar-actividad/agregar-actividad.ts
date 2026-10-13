@@ -62,6 +62,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     // sin esperar la respuesta y el error quedaba oculto en la consola.
     public errorGuardar: string | null = null;
     public guardando = false;
+    public eliminando = false;
     // sm - En actividades recurrentes, si una parte de los días ya se guardó no se permite volver a guardar (duplicaría).
     public guardadoParcial = false;
     public mostrarConfirmacionHoras = false;
@@ -445,7 +446,9 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     }
 
     confirmarEliminarActividad() {
+        if (this.eliminando) return;
         this.errorEliminar = null;
+        this.eliminando = true;
         this.actividadesService.eliminarActividad(
             this.data.actividad.id,
             () => {
@@ -453,12 +456,14 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 this.dialogRef.close();
             },
             (err) => {
+                this.eliminando = false;
                 this.errorEliminar = err?.error?.detail || err?.error?.message || 'No se pudo eliminar la actividad. Intente de nuevo.';
             }
         );
     }
 
     guardar() {
+        if (this.guardando || this.guardadoParcial) return;
         if (this.form.valid) {
             const rawValue = this.form.getRawValue();
             const esRecurrente = rawValue.esRecurrente;
@@ -474,6 +479,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     }
 
     confirmarGuardar() {
+        if (this.guardando || this.guardadoParcial) return;
         this.mostrarConfirmacionHoras = false;
         this.ejecutarGuardar();
     }
@@ -483,6 +489,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private ejecutarGuardar() {
+        if (this.guardando || this.guardadoParcial) return;
         const rawValue = this.form.getRawValue();
         const formValue = {
             ...rawValue,
