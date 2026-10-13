@@ -24,19 +24,27 @@
 
         @if (isInternalUser) {
         <div class="form-field">
-          <div class="float-select">
-            <select class="float-select__input" formControlName="idColaborador"
-              [class.float-select__input--error]="campoInvalido('idColaborador')">
-              <option value="">Seleccione un colaborador</option>
-              @for (colaborador of colaboradores; track colaborador.id) {
-              <option [value]="colaborador.id">
+          <div class="float-field colaborador-picker">
+            <input class="float-field__input" type="text" placeholder=" " autocomplete="off"
+              [class.float-field__input--error]="campoInvalido('idColaborador')"
+              [value]="busquedaColaborador"
+              (input)="onBusquedaColaboradorInput($any($event.target).value)"
+              (focus)="abrirDropdownColaborador()"
+              (blur)="cerrarDropdownColaborador()" />
+            <label class="float-field__label">Colaborador <span class="req">*</span></label>
+
+            @if (dropdownColaboradorAbierto) {
+            <ul class="colaborador-picker__list" data-scroll-lock-exempt>
+              @for (colaborador of colaboradoresFiltrados; track colaborador.id) {
+              <li (mousedown)="seleccionarColaborador(colaborador)">
                 {{ colaborador.nombreCompleto }}
-              </option>
+              </li>
               }
-            </select>
-            <label class="float-select__label float-select__label--up">
-              Colaborador <span class="req">*</span>
-            </label>
+              @if (colaboradoresFiltrados.length === 0) {
+              <li class="colaborador-picker__empty">No se encontraron colaboradores</li>
+              }
+            </ul>
+            }
           </div>
           @if (cargandoColaboradores()) {
           <span class="form-field__hint">Cargando colaboradores...</span>

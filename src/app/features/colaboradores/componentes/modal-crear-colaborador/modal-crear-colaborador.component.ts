@@ -1,5 +1,6 @@
-import { Component, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Output, EventEmitter, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -14,19 +15,24 @@ import {
 } from '../../servicios/catalogos.service';
 import { ColaboradoresService } from '../../servicios/colaboradores.service';
 import { Colaborador } from '../../models/colaborador.model';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-crear-colaborador',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ScrollingModule],
   templateUrl: './modal-crear-colaborador.component.html',
   styleUrl: './modal-crear-colaborador.component.scss',
 })
-export class ModalCrearColaboradorComponent implements OnInit {
+export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<any>();
 
   private fb = inject(FormBuilder);
+  private scrollLock = inject(ModalScrollLockService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
   private catalogosService = inject(CatalogosService);
   private colaboradoresService = inject(ColaboradoresService);
 
@@ -56,11 +62,36 @@ export class ModalCrearColaboradorComponent implements OnInit {
   seccionReemplazoAbierta = false;
   colaboradoresInactivos: Colaborador[] = [];
   colaboradoresFiltrados: Colaborador[] = [];
-  mostrarLista = false;
   reemplazoSeleccionado: Colaborador | null = null;
   busquedaActual = '';
 
+  // sm - mostrarLista se asigna desde muchos sitios. Accessor: cualquier asignación bloquea/
+  // libera el scroll de fondo sola (DropdownScrollLockService), igual que mat-select
+  // ("Tipo de proyecto").
+  private _mostrarLista = false;
+  get mostrarLista(): boolean {
+    return this._mostrarLista;
+  }
+  set mostrarLista(valor: boolean) {
+    if (valor === this._mostrarLista) return;
+    this._mostrarLista = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
+    if (this._mostrarLista) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarLista = false;
+    }
+  }
+
   ngOnInit(): void {
+    this.scrollLock.lock();
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: [null, Validators.required],
@@ -173,14 +204,14 @@ export class ModalCrearColaboradorComponent implements OnInit {
 
   filtrarColaboradores(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.busquedaActual = input.value.toLowerCase().trim();
+    this.busquedaActual = input.value.trim();
 
     if (this.busquedaActual === '') {
       this.colaboradoresFiltrados = [...this.colaboradoresInactivos];
     } else {
       this.colaboradoresFiltrados = this.colaboradoresInactivos.filter(c =>
-        c.nombreCompleto.toLowerCase().includes(this.busquedaActual) ||
-        c.identificacion.includes(this.busquedaActual)
+        coincideBusqueda(c.nombreCompleto, this.busquedaActual) ||
+        coincideBusqueda(c.identificacion, this.busquedaActual)
       );
     }
 

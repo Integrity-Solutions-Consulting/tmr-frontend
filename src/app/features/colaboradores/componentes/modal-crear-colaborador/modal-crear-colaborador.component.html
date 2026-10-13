@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <div class="modal-form__body" [formGroup]="form">
+    <div class="modal-form__body" cdkScrollable [formGroup]="form">
 
       <!-- CONTRATO -->
       <div class="form-section">
@@ -551,7 +551,7 @@
 
               <!-- Lista de resultados (dropdown estilizado) -->
               @if (!reemplazoSeleccionado && mostrarLista) {
-                <div class="reemplazo-dropdown">
+                <div class="reemplazo-dropdown" data-scroll-lock-exempt>
                   @if (colaboradoresFiltrados.length === 0) {
                     <div class="reemplazo-dropdown__empty">
                       No se encontraron colaboradores

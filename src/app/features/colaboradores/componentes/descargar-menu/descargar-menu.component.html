@@ -7,7 +7,7 @@
 
     @if (abierto) {
       <div class="descargar__overlay" (click)="cerrar()"></div>
-      <div class="descargar__panel">
+      <div class="descargar__panel" data-scroll-lock-exempt>
         <p class="descargar__title">Seleccione el formato:</p>
         <button class="descargar__option" (click)="onPDF()" type="button">
           Descargar PDF

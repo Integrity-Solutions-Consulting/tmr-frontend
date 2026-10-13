@@ -501,6 +501,8 @@
     background: var(--primary-color) ;
     color: var(--text-inverse) ;
     border-color: var(--primary-color) ;
+    // Hereda de .btn-descargar, cuyo cursor por defecto es "not-allowed"; Agregar siempre está habilitado.
+    cursor: pointer;
 
     &:hover {
         background: var(--primary-hover) ;

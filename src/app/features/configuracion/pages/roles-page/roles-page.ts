@@ -1,4 +1,4 @@
-import { Component, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { SearchInput } from '../../../../shared/components/search-input/search-input';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
 
 @Component({
@@ -24,9 +25,10 @@ type FiltroEstadoRol = 'Activo' | 'Inactivo' | '';
   templateUrl: './roles-page.html',
   styleUrl: './roles-page.scss',
 })
-export class RolesPage {
+export class RolesPage implements OnDestroy {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
 
   @ViewChildren(ActionMenuComponent)
   private readonly actionMenus!: QueryList<ActionMenuComponent>;
@@ -38,13 +40,36 @@ export class RolesPage {
   readonly estadoError = signal<string | null>(null);
   readonly rolEliminandoId = signal<number | null>(null);
   readonly roles = this.configuracionService.roles;
+  // sm - Fila "Cargando roles..." mientras llega la lista.
+  readonly cargando = this.configuracionService.cargandoRoles;
   readonly modulos = this.configuracionService.modulos;
 
   // ── Filtro por estado ─────────────────────────────────────────────────────
   readonly filtroEstado = signal<FiltroEstadoRol>('Activo');
 
   // ── Estado dropdown ───────────────────────────────────────────────────────
-  mostrarEstadoDropdown = false;
+  // sm - Accessor: cualquier asignación bloquea/libera el scroll de fondo sola
+  // (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    if (valor === this._mostrarEstadoDropdown) return;
+    this._mostrarEstadoDropdown = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this._mostrarEstadoDropdown) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarEstadoDropdown = false;
+    }
+  }
 
   // ── Confirmación y éxito ──────────────────────────────────────────────────
   readonly exitoVisible = signal(false);

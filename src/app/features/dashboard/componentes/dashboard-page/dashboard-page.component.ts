@@ -11,6 +11,7 @@ import { ProximosACerrarComponent } from './proximamente-cerrar/proximamente-cer
 import { GraficoHorasComponent } from './grafico-horas/grafico-horas.component';
 import { DashboardService } from '../../servicios/dashboard.service';
 import { exportarReporteExcel } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 
 
 @Component({
@@ -30,6 +31,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   
   private destroy$ = new Subject<void>();
   private dashboardService = inject(DashboardService);
+  private descargas = inject(DescargaProgresoService);
 
   metricas$!: Observable<any>;
   proximosACerrar$!: Observable<any>;
@@ -149,7 +151,8 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       }
     }
 
-    await exportarReporteExcel({
+    // sm - Toast de progreso compartido (con Cancelar).
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel({
       titulo: tituloReporte,
       nombreArchivo: nombreArchivo,
       nombreHoja: 'Faltantes',
@@ -161,7 +164,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
         { encabezado: 'Horas Faltantes', anchoExcel: 18, alineacion: 'right' },
       ],
       filas: filas
-    });
+    }, ctx)).catch(error => console.error('Error al exportar horas faltantes:', error));
   }
 
   ngOnDestroy(): void {

@@ -3,7 +3,6 @@
     <section
       class="modal"
       [class.modal--wide]="wide"
-      (click)="$event.stopPropagation()"
     >
       <header class="modal__header">
         <h2>{{ titulo }}</h2>
@@ -13,7 +12,7 @@
         </button>
       </header>
 
-      <div class="modal__body">
+      <div class="modal__body" cdkScrollable>
         <ng-content></ng-content>
       </div>
     </section>

@@ -65,6 +65,16 @@ export class TablaComponent<T = any> implements OnInit {
   @Input() mostrarDatos: Signal<boolean> | boolean = false;
 
   /**
+   * sm - Mientras llegan los datos muestra la fila "Cargando ..." (mismo diseño que Clientes) en lugar de la tabla vacía.
+   */
+  @Input() cargando: boolean = false;
+
+  /**
+   * Texto de la fila de carga, p. ej. "Cargando reporte..."
+   */
+  @Input() textoCargando: string = 'Cargando datos...';
+
+  /**
    * Configuración de la tabla
    */
   @Input() config: TableConfig = {

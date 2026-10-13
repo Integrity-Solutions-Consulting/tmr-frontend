@@ -11,7 +11,7 @@ $inactivo: #ef4444;
 .detalle-overlay {
   position: fixed;
   inset: 0;
-  background: rgba($primary-dark, 0.45);
+  background: var(--overlay-backdrop);
   backdrop-filter: blur(3px);
   z-index: 1000;
   display: flex;

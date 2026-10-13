@@ -1,6 +1,6 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, finalize, map, tap } from 'rxjs';
 import { Feriado, Modulo, Rol, Usuario, CatalogoMaster, CatalogoDetalle, CreateCatalogoDetalleRequest, UpdateCatalogoDetalleRequest } from '../models/configuracion.models';
 import { environment } from '../../../../environments/environment';
 
@@ -52,6 +52,13 @@ export class ConfiguracionService {
   readonly modulos = this.modulosState.asReadonly();
   readonly catalogosMaestros = this.catalogosMaestrosState.asReadonly();
 
+  // sm - Peticiones en curso de roles/usuarios: las tablas muestran "Cargando ..." mientras sea > 0
+  // (contador para que una recarga que termina antes que otra no apague el aviso).
+  private readonly rolesPendientes = signal(0);
+  private readonly usuariosPendientes = signal(0);
+  readonly cargandoRoles = computed(() => this.rolesPendientes() > 0);
+  readonly cargandoUsuarios = computed(() => this.usuariosPendientes() > 0);
+
   constructor() {
     this.loadModulos();
     this.loadRoles();
@@ -68,27 +75,30 @@ export class ConfiguracionService {
   }
 
   loadRoles(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/configuracion/roles?pageSize=1000`).subscribe({
-      next: (data) => this.rolesState.set((data ?? []).map((d) => ({
-        id: d.idRol || d.id,
-        nombre: d.nombreRol || d.nombre || '',
-        descripcion: d.descripcionRol || d.descripcion || '',
-        modulos: Array.isArray(d.modulos)
-          ? d.modulos.map((m: any) => ({
-              id: Number(m.id ?? m.idModulo ?? m.idmodulo ?? m.idRolModulo ?? m),
-              nombre: String(m.nombre ?? m.nombreModulo ?? m.modulo ?? m.id ?? m),
-            }))
-              .filter((m: Modulo) => Number.isFinite(m.id) && m.id > 0)
-          : [],
-        modulosids: Array.isArray(d.modulosids ?? d.modulosIds ?? d.moduloIds)
-          ? (d.modulosids ?? d.modulosIds ?? d.moduloIds)
-              .map((id: unknown) => Number((id as any)?.id ?? id))
-              .filter((id: number) => Number.isFinite(id) && id > 0)
-          : undefined,
-        activo: d.activo ?? true,
-      }))),
-      error: (err) => console.error(err),
-    });
+    this.rolesPendientes.update(n => n + 1);
+    this.http.get<any[]>(`${environment.apiUrl}/configuracion/roles?pageSize=1000`)
+      .pipe(finalize(() => this.rolesPendientes.update(n => Math.max(0, n - 1))))
+      .subscribe({
+        next: (data) => this.rolesState.set((data ?? []).map((d) => ({
+          id: d.idRol || d.id,
+          nombre: d.nombreRol || d.nombre || '',
+          descripcion: d.descripcionRol || d.descripcion || '',
+          modulos: Array.isArray(d.modulos)
+            ? d.modulos.map((m: any) => ({
+                id: Number(m.id ?? m.idModulo ?? m.idmodulo ?? m.idRolModulo ?? m),
+                nombre: String(m.nombre ?? m.nombreModulo ?? m.modulo ?? m.id ?? m),
+              }))
+                .filter((m: Modulo) => Number.isFinite(m.id) && m.id > 0)
+            : [],
+          modulosids: Array.isArray(d.modulosids ?? d.modulosIds ?? d.moduloIds)
+            ? (d.modulosids ?? d.modulosIds ?? d.moduloIds)
+                .map((id: unknown) => Number((id as any)?.id ?? id))
+                .filter((id: number) => Number.isFinite(id) && id > 0)
+            : undefined,
+          activo: d.activo ?? true,
+        }))),
+        error: (err) => console.error(err),
+      });
   }
 
   upsertRol(rol: Rol): void {
@@ -139,10 +149,12 @@ export class ConfiguracionService {
 
     const queryString = '?' + new URLSearchParams(params).toString();
 
+    this.usuariosPendientes.update(n => n + 1);
     this.http
       .get<unknown[] | { items?: unknown[]; data?: unknown[] }>(
         `${environment.apiUrl}/configuracion/usuarios${queryString}`
       )
+      .pipe(finalize(() => this.usuariosPendientes.update(n => Math.max(0, n - 1))))
       .subscribe({
         next: (response) => {
           const data = Array.isArray(response) ? response : response.items ?? response.data ?? [];

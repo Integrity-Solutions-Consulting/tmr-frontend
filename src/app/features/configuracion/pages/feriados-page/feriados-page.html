@@ -14,16 +14,28 @@
     <app-tarjeta-resumen titulo="Religiosos" icono="celebration" tono="advertencia" [valor]="religiosos()" />
   </div>
 
-  <!-- sm - Acciones a la derecha, con los botones estándar del sistema (btn-descargar / btn-agregar, como Usuarios). -->
-  <div class="acciones">
-    <!-- sm - Importar feriados de Ecuador del año indicado; luego se revisan/corrigen a mano los traslados por decreto. -->
-    <input type="number" class="importar-anio" min="2000" max="2100" aria-label="Año a importar"
-      title="Año a importar" [value]="anioImportar()" (change)="cambiarAnioImportar($any($event.target).value)" />
+  <!-- sm - Barra de filtros con el mismo diseño de Proyectos (ver styles/_filtros.scss). Separa el año a
+       importar (solo dispara la importación) de la fecha a visualizar (solo mueve el calendario de abajo). -->
+  <div class="filters-card">
+    <div class="filter-group date-group">
+      <label class="filter-label">Año a importar</label>
+      <input type="number" class="filter-input" min="2000" max="2100" aria-label="Año a importar"
+        title="Año a importar" [value]="anioImportar()" (change)="cambiarAnioImportar($any($event.target).value)" />
+    </div>
+
     <button type="button" class="btn-descargar enabled" [class.loading]="importando()" [disabled]="importando()"
       (click)="importarFeriados()" title="Carga los feriados nacionales de Ecuador del año. No duplica los ya registrados.">
       {{ importando() ? 'Importando…' : 'Importar' }}
       <span class="material-icons download-icon" [class.girando]="importando()">{{ importando() ? 'sync' : 'cloud_download' }}</span>
     </button>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Ir a fecha</label>
+      <input type="date" class="filter-input" aria-label="Ir a fecha"
+        title="Mueve el calendario a la fecha elegida" [value]="fechaCalendario()"
+        (change)="cambiarFechaCalendario($any($event.target).value)" />
+    </div>
+
     <button type="button" class="btn-descargar btn-agregar" (click)="openModal()">
       Agregar
       <span class="material-icons download-icon">add</span>

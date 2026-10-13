@@ -551,11 +551,18 @@
 }
 
 .proyecto-form__resource-top,
-.proyecto-form__resource-middle,
-.proyecto-form__resource-bottom {
+.proyecto-form__resource-middle {
   display: grid;
   gap: 12px;
   align-items: center;
+}
+
+// sm - align-items: start (no center): si aparece un mensaje de error bajo Entrada/Salida (p. ej. "Obligatoria si
+// el recurso está Inactivo"), la fila crece hacia abajo sin recentrar y "saltar" las cajitas de fecha hacia arriba.
+.proyecto-form__resource-bottom {
+  display: grid;
+  gap: 12px;
+  align-items: start;
 }
 
 .proyecto-form__resource-top {
@@ -563,7 +570,7 @@
 }
 
 .proyecto-form__resource-middle {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) 200px;
 }
 
 .proyecto-form__resource-bottom {
@@ -575,6 +582,7 @@
 .proyecto-form__resource-nombre,
 .proyecto-form__resource-departamento,
 .proyecto-form__resource-rol,
+.proyecto-form__resource-estado,
 .proyecto-form__resource-fecha,
 .proyecto-form__resource-costo,
 .proyecto-form__resource-horas {
@@ -591,10 +599,13 @@
   align-self: center;
 }
 
+// La X se alinea arriba con la misma altura del campo (42px): los campos reservan 22px de subscript
+// abajo, así que centrarla en la fila la dejaba más baja que el cuadro de Departamento.
 .proyecto-form__remove {
   width: 36px !important;
-  height: 40px !important;
+  height: 42px !important;
   margin-top: 0;
+  align-self: start;
   border-radius: 8px !important;
   color: var(--status-danger-text) !important;
   background: transparent !important;
@@ -721,6 +732,10 @@
   .proyecto-form__remove {
     grid-column: 2;
     grid-row: 1;
+  }
+
+  .proyecto-form__resource-middle {
+    grid-template-columns: 1fr;
   }
 
   .proyecto-form__resource-bottom {

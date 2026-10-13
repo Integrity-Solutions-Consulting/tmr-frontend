@@ -66,7 +66,7 @@
             <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
-      <div class="dropdown-estado" *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
+      <div class="dropdown-estado" data-scroll-lock-exempt *ngIf="dropdownEstadoAbierto" (click)="$event.stopPropagation()">
 
         <!-- Opción Activo -->
         <div class="dropdown-opcion" (click)="toggleEstado('Activo')">

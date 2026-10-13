@@ -177,6 +177,21 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe((idEstado: number | null) => {
         this.actualizarCamposEspera(idEstado);
       });
+
+    // sm - Si cambia la fecha de inicio del proyecto, las entradas de los recursos ya cargadas deben revalidarse
+    // contra el nuevo límite (Angular no revalida automáticamente un control por el cambio de otro control lejano).
+    this.formulario.get('fechaInicio')
+      ?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.revalidarEntradasRecursos());
+  }
+
+  private revalidarEntradasRecursos(): void {
+    this.lideres.controls.forEach(lider => {
+      (lider.get('recursos') as FormArray<FormGroup>).controls.forEach(r =>
+        r.updateValueAndValidity({ emitEvent: false })
+      );
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -311,7 +326,8 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
               entrada: this.normalizarFecha(r.entrada),
               salida: this.normalizarFecha(r.salida),
               costoHora: this.valorFormularioNumerico(r.costoHora),
-              horas: this.valorFormularioNumerico(r.horas)
+              horas: this.valorFormularioNumerico(r.horas),
+              estadoAsignacion: r.estadoAsignacion === false ? 'Inactivo' : 'Activo'
             });
             recursosArr.push(rg);
             cargosLider.push(idDep
@@ -380,8 +396,10 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       entrada: this.fb.control<string | null>('', [this.fechaValida()]),
       salida: this.fb.control<string | null>('', [this.fechaValida()]),
       costoHora: ['', [this.numeroValido(true)]],
-      horas: ['', [this.numeroValido(false), Validators.min(0)]]
-    }, { validators: this.rangoFechasValido('entrada', 'salida', 'salidaMenor') });
+      horas: ['', [this.numeroValido(false), Validators.min(0)]],
+      // sm - Estado de asignación: Inactivo indica que la persona terminó en el proyecto y exige fecha de salida.
+      estadoAsignacion: ['Activo', Validators.required]
+    }, { validators: [this.rangoFechasValido('entrada', 'salida', 'salidaMenor'), this.salidaRequeridaSiInactivo(), this.entradaNoAnteriorInicioProyecto()] });
   }
 
   // ── Líderes: agregar / eliminar ───────────────────────────────────────────
@@ -598,9 +616,29 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return Boolean(c?.invalid && (c.touched || this.intentoGuardar));
   }
 
+  recursoSalidaRequerida(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('salidaRequerida') && (g.get('salida')?.touched || g.get('estadoAsignacion')?.touched || this.intentoGuardar));
+  }
+
+  onEstadoAsignacionChange(li: number, ri: number): void {
+    this.getRecursosDelLider(li).at(ri).get('estadoAsignacion')?.markAsTouched();
+    this.actualizarNumeroRecursos();
+  }
+
   recursoFechaSalidaInvalida(li: number, ri: number): boolean {
     const g = this.getRecursosDelLider(li).at(ri);
     return Boolean(g.hasError('salidaMenor') && (g.get('salida')?.touched || this.intentoGuardar));
+  }
+
+  recursoEntradaAnteriorInicio(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('entradaAnteriorInicio') && (g.get('entrada')?.touched || this.intentoGuardar));
+  }
+
+  recursoEntradaSinInicioProyecto(li: number, ri: number): boolean {
+    const g = this.getRecursosDelLider(li).at(ri);
+    return Boolean(g.hasError('entradaSinInicioProyecto') && (g.get('entrada')?.touched || this.intentoGuardar));
   }
 
   fechaFinInvalida(): boolean {
@@ -664,7 +702,8 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
           entrada: this.normalizarFecha(r.entrada),
           salida: this.normalizarFecha(r.salida),
           costoHora: this.normalizarNumero(r.costoHora),
-          horas: this.normalizarNumero(r.horas)
+          horas: this.normalizarNumero(r.horas),
+          estadoAsignacion: r.estadoAsignacion !== 'Inactivo'
         } as any))
       };
     });
@@ -696,7 +735,7 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
       horasLider: primerLider?.horasLider ?? 0,
       lideres: lideresPayload,
       recursos: todosRecursos as any,
-      numeroRecursos: todosRecursos.length
+      numeroRecursos: todosRecursos.filter(r => this.esRecursoVigente(r.estadoAsignacion !== false, r.salida)).length
     };
 
     this.guardarProyecto.emit(proyecto);
@@ -742,6 +781,9 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
         if (recurso.hasError('salidaMenor')) {
           return `La fecha de salida del recurso ${ri + 1} no puede ser anterior a su entrada.`;
         }
+        if (recurso.hasError('salidaRequerida')) {
+          return `El recurso ${ri + 1} de la asignación ${li + 1} está Inactivo: registra su fecha de salida.`;
+        }
         if (recurso.invalid) {
           return `Completa correctamente los campos obligatorios del recurso ${ri + 1} de la asignación ${li + 1}.`;
         }
@@ -769,11 +811,46 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
 
   // ── Helpers privados ──────────────────────────────────────────────────────
 
+  // sm - Solo cuentan los recursos activos (antes se contaban todos).
   private actualizarNumeroRecursos(): void {
     const total = this.lideres.controls.reduce(
-      (acc, l) => acc + (l.get('recursos') as FormArray).length, 0
+      (acc, l) => acc + (l.get('recursos') as FormArray).controls.filter(r =>
+        this.esRecursoVigente(r.get('estadoAsignacion')?.value !== 'Inactivo', this.normalizarFecha(r.get('salida')?.value))
+      ).length, 0
     );
     this.formulario.controls.numeroRecursos.setValue(total);
+  }
+
+  // sm - Misma regla que el backend (ProyectosEndpoints.EsAsignacionVigente): Activo y con salida no pasada.
+  private esRecursoVigente(activo: boolean, salida: string | null | undefined): boolean {
+    if (!activo) return false;
+    if (!salida) return true;
+    const hoy = new Date();
+    const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    return salida >= hoyIso;
+  }
+
+  // sm - Un recurso Inactivo debe tener fecha de salida: delimita hasta cuándo puede registrar horas.
+  private salidaRequeridaSiInactivo(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const inactivo = group.get('estadoAsignacion')?.value === 'Inactivo';
+      return inactivo && !group.get('salida')?.value ? { salidaRequerida: true } : null;
+    };
+  }
+
+  // sm - La entrada de un recurso/líder al proyecto no puede ser anterior a la fecha de inicio del propio proyecto.
+  // Tampoco se puede evaluar (ni guardar) una entrada si el proyecto todavía no tiene fecha de inicio definida.
+  private entradaNoAnteriorInicioProyecto(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const entrada = group.get('entrada')?.value;
+      const inicioProyecto = group.root.get('fechaInicio')?.value;
+      if (!entrada) return null;
+      if (!inicioProyecto) return { entradaSinInicioProyecto: true };
+      const e = this.parseFechaString(String(entrada));
+      const i = this.parseFechaString(String(inicioProyecto));
+      if (!e || !i) return null;
+      return e < i ? { entradaAnteriorInicio: true } : null;
+    };
   }
 
   private fechaValida(): ValidatorFn {

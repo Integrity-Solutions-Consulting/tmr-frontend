@@ -1,6 +1,8 @@
 // sm - Se quitaron estilos copiados de Catálogos que esta página no usa (panel lateral, búsqueda, filtro de estado,
 // tabla, status pill) y la palabra "scss" suelta al inicio del archivo. La hoja pasa de 11,6 kB a menos de 10 kB.
 
+@use '../../../../../styles/filtros' as filtros;
+
 // ── Contenido Principal ──────────────────────────────────────────────────
 
 .page {
@@ -37,37 +39,12 @@
 
 // ── Acciones (botones estándar del sistema, copiados de Usuarios) ─────────
 
-.acciones {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.importar-anio {
-  width: 90px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  background: var(--input-bg);
-  color: var(--text-main);
-  font: 600 13px 'Inter', sans-serif;
-  box-sizing: border-box;
-  outline: none;
-
-  &:focus {
-    border-color: var(--primary-color);
-  }
-}
-
 .btn-descargar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 40px;
+  height: 42px;
   padding: 0 16px;
   border-radius: 12px;
   border: 1px solid var(--border-default);
@@ -113,6 +90,7 @@
 }
 
 .btn-agregar {
+  margin-left: auto;
   background: var(--primary-color);
   color: var(--text-inverse);
   border-color: var(--primary-color);
@@ -160,3 +138,6 @@
     height: 20px;
   }
 }
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;

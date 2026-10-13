@@ -2,7 +2,7 @@
   <div class="profile-popover">
     <button class="profile-popover__overlay" type="button" aria-label="Cerrar perfil" (click)="cerrar.emit()"></button>
 
-    <section class="profile-popover__card" role="menu">
+    <section class="profile-popover__card" role="menu" data-scroll-lock-exempt>
       <div class="profile-popover__user-info">
         <strong>{{ nombre }}</strong>
         <span>{{ correo }}</span>

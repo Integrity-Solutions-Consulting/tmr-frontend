@@ -60,7 +60,8 @@ export class ProyectosService {
           Entrada: fmt(r.entrada),
           Salida: fmt(r.salida),
           CostoHora: r.costoHora,
-          Horas: r.horas
+          Horas: r.horas,
+          EstadoAsignacion: r.estadoAsignacion ?? true
         }))
       }))
     };

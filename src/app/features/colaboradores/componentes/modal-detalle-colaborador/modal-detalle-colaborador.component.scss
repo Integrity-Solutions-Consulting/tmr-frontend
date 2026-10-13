@@ -308,6 +308,14 @@
     gap: 12px;
   }
 
+  &__item-estados {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
   &__item-info {
     display: flex;
     flex-direction: column;

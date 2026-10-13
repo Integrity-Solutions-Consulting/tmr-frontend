@@ -100,7 +100,7 @@
       </mat-form-field>
 
       @if (proyecto) {
-        <mat-form-field>
+        <mat-form-field appearance="outline" class="proyecto-form__field">
           <mat-label>Estado</mat-label>
           <mat-select yPosition="below" formControlName="estado" [disabled]="true">
             <mat-option value="Activo">Activo</mat-option>
@@ -336,15 +336,32 @@
                           </mat-select>
                           <mat-error *ngIf="recursoLiderCampoInvalido(li, ri, 'rol')">Obligatorio</mat-error>
                         </mat-form-field>
+
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                          class="proyecto-form__resource-estado">
+                          <mat-label>Estado de asignación</mat-label>
+                          <mat-select yPosition="below" formControlName="estadoAsignacion"
+                            (selectionChange)="onEstadoAsignacionChange(li, ri)">
+                            <mat-option value="Activo">Activo</mat-option>
+                            <mat-option value="Inactivo">Inactivo</mat-option>
+                          </mat-select>
+                        </mat-form-field>
                       </div>
 
                       <div class="proyecto-form__resource-bottom">
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
                           <input #entradaInput class="proyecto-form__date-control" type="date"
-                            autocomplete="off" formControlName="entrada">
+                            autocomplete="off" formControlName="entrada" [attr.min]="formulario.get('fechaInicio')?.value || null">
                           <label class="proyecto-form__date-label">Entrada</label>
+                          <div class="proyecto-form__date-error" *ngIf="recursoEntradaSinInicioProyecto(li, ri)">
+                            Defina primero la fecha de inicio del proyecto
+                          </div>
                           <div class="proyecto-form__date-error"
-                            *ngIf="(getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
+                            *ngIf="!recursoEntradaSinInicioProyecto(li, ri) && recursoEntradaAnteriorInicio(li, ri)">
+                            No puede ser anterior al inicio del proyecto
+                          </div>
+                          <div class="proyecto-form__date-error"
+                            *ngIf="!recursoEntradaSinInicioProyecto(li, ri) && !recursoEntradaAnteriorInicio(li, ri) && (getRecursosDelLider(li).at(ri).get('entrada')?.hasError('fechaInvalida') || entradaInput.validity.badInput) && (getRecursosDelLider(li).at(ri).get('entrada')?.touched || intentoGuardar)">
                             Fecha inválida
                           </div>
                         </div>
@@ -353,6 +370,9 @@
                           <input #salidaInput class="proyecto-form__date-control" type="date"
                             autocomplete="off" formControlName="salida">
                           <label class="proyecto-form__date-label">Salida</label>
+                          <div class="proyecto-form__date-error" *ngIf="recursoSalidaRequerida(li, ri)">
+                            Obligatoria si el recurso está Inactivo
+                          </div>
                           <div class="proyecto-form__date-error" *ngIf="recursoFechaSalidaInvalida(li, ri)">
                             La salida no puede ser menor que la entrada
                           </div>

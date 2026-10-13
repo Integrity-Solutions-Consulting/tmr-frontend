@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, inject, effect, HostListener } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, inject, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';
@@ -10,8 +10,10 @@ import { ColumnDefinition } from '../../../../shared/components/tabla-colega/tab
 import { MatIconModule } from '@angular/material/icon';
 import { DescargarMenuComponent } from '../../../colaboradores/componentes/descargar-menu/descargar-menu.component';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 @Component({
   selector: 'app-reporte-horas',
   standalone: true,
@@ -19,7 +21,14 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
   templateUrl: './reporte-horas.component.html',
   styleUrl: './reporte-horas.component.scss'
 })
-export class ReporteHorasComponent {
+export class ReporteHorasComponent implements OnDestroy {
+  ngOnDestroy(): void {
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
+
   columnasTabla: ColumnDefinition[] = [
     { header: 'Cliente', property: 'cliente', type: 'text', sortable: true },
     { header: 'Estado Cliente', property: 'estadoCliente', type: 'badge-estado', sortable: true },
@@ -44,8 +53,12 @@ export class ReporteHorasComponent {
   paginaActual = signal(1);
   itemsPorPagina = signal(10);
   totalItems = signal(0);
+  // sm - Muestra la fila "Cargando ..." en la tabla mientras llega la respuesta del servidor.
+  cargando = signal(true);
 
   private reportesService = inject(ReportesService);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
+  private descargas = inject(DescargaProgresoService);
   datos = signal<ReporteHoras[]>([]);
 
   constructor() {
@@ -60,8 +73,11 @@ export class ReporteHorasComponent {
       if (!mostrar) {
         this.datos.set([]);
         this.totalItems.set(0);
+        this.cargando.set(false);
         return;
       }
+
+      this.cargando.set(true);
 
       const filtros = {
         cliente: cliente || undefined,
@@ -73,6 +89,7 @@ export class ReporteHorasComponent {
       const timer = window.setTimeout(() => {
         request = this.reportesService.getReporteHoras(filtros, page, pageSize).subscribe({
           next: (res) => {
+            this.cargando.set(false);
             this.datos.set(res.data || []);
             this.totalItems.set(res.total || 0);
 
@@ -86,6 +103,7 @@ export class ReporteHorasComponent {
             }
           },
           error: (err) => {
+            this.cargando.set(false);
             console.error('Error al cargar reporte de horas:', err);
           }
         });
@@ -161,10 +179,18 @@ export class ReporteHorasComponent {
     return !valor || valor === 'ALL';
   }
 
+  // sm - Bloquea/libera el scroll de fondo mientras alguno de los dos está abierto, igual que
+  // mat-select ("Tipo de proyecto").
+  private dropdownLockActivo = false;
+
   @HostListener('document:click')
   cerrarDropdowns() {
     this.mesAbierto.set(false);
     this.anioAbierto.set(false);
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
   }
 
   toggleMes(event: Event) {
@@ -172,6 +198,10 @@ export class ReporteHorasComponent {
     const abrir = !this.mesAbierto();
     this.cerrarDropdowns();
     this.mesAbierto.set(abrir);
+    if (abrir) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    }
   }
 
   toggleAnio(event: Event) {
@@ -179,6 +209,10 @@ export class ReporteHorasComponent {
     const abrir = !this.anioAbierto();
     this.cerrarDropdowns();
     this.anioAbierto.set(abrir);
+    if (abrir) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    }
   }
 
   seleccionarMes(mes: string, event: Event) {
@@ -226,37 +260,36 @@ export class ReporteHorasComponent {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('xlsx', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteHoras(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReporteExcel({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar Excel:', err)
-    });
+      await exportarReporteExcel({
+        titulo: 'Reporte de Horas por Cliente',
+        nombreArchivo: 'Horas',
+        nombreHoja: 'Reporte de Horas',
+        columnas: [
+          { encabezado: 'Cliente', anchoExcel: 30, anchoPdf: 75 },
+          { encabezado: 'Estado Cliente', anchoExcel: 18, anchoPdf: 30, alineacion: 'center' },
+          { encabezado: 'Mes', anchoExcel: 15, anchoPdf: 28, alineacion: 'center' },
+          { encabezado: 'Año', anchoExcel: 15, anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Recursos', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+          { encabezado: 'Horas', anchoExcel: 15, anchoPdf: 25, alineacion: 'center' },
+        ],
+        filas: data.map((item) => [
+          item.cliente,
+          item.estadoCliente,
+          item.mes,
+          item.anio,
+          item.recursos,
+          Number(item.horas).toFixed(1),
+        ]),
+        columnaEstado: 1,
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar Excel:', err));
   }
 
   async exportarPDF() {
@@ -269,36 +302,35 @@ export class ReporteHorasComponent {
     const total = this.totalItems();
     if (total === 0) return;
 
-    this.reportesService.getReporteHoras(filtros, 1, total).subscribe({
-      next: async (res) => {
-        const data = res.data || [];
-        if (data.length === 0) return;
+    // sm - Toast de progreso compartido (con Cancelar): obtiene los datos y genera el archivo.
+    await this.descargas.ejecutar('pdf', async ctx => {
+      const res = await ctx.esperar(this.reportesService.getReporteHoras(filtros, 1, total));
+      const data = res.data || [];
+      if (data.length === 0) return;
 
-        await exportarReportePdf({
-          titulo: 'Reporte de Horas por Cliente',
-          nombreArchivo: 'Horas',
-          nombreHoja: 'Reporte de Horas',
-          columnas: [
-            { encabezado: 'Cliente', anchoPdf: 75 },
-            { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
-            { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
-            { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
-            { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
-            { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
-          ],
-          filas: data.map((item) => [
-            item.cliente,
-            item.estadoCliente,
-            item.mes,
-            item.anio,
-            item.recursos,
-            Number(item.horas).toFixed(1),
-          ]),
-          columnaEstado: 1,
-          orientacionPdf: 'landscape',
-        });
-      },
-      error: (err) => console.error('Error al exportar PDF:', err)
-    });
+      await exportarReportePdf({
+        titulo: 'Reporte de Horas por Cliente',
+        nombreArchivo: 'Horas',
+        nombreHoja: 'Reporte de Horas',
+        columnas: [
+          { encabezado: 'Cliente', anchoPdf: 75 },
+          { encabezado: 'Estado Cliente', anchoPdf: 30, alineacion: 'center' },
+          { encabezado: 'Mes', anchoPdf: 28, alineacion: 'center' },
+          { encabezado: 'Año', anchoPdf: 20, alineacion: 'center' },
+          { encabezado: 'Recursos', anchoPdf: 25, alineacion: 'center' },
+          { encabezado: 'Horas', anchoPdf: 25, alineacion: 'center' },
+        ],
+        filas: data.map((item) => [
+          item.cliente,
+          item.estadoCliente,
+          item.mes,
+          item.anio,
+          item.recursos,
+          Number(item.horas).toFixed(1),
+        ]),
+        columnaEstado: 1,
+        orientacionPdf: 'landscape',
+      }, ctx);
+    }).catch((err) => console.error('Error al exportar PDF:', err));
   }
 }

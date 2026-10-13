@@ -7,7 +7,7 @@
   @if (abierto) {
     <button class="descarga-menu__overlay" type="button" aria-label="Cerrar descarga" (click)="cerrar()"></button>
 
-    <section class="descarga-menu__panel">
+    <section class="descarga-menu__panel" data-scroll-lock-exempt>
       <label for="descarga-contenido">Contenido</label>
 
       <mat-select

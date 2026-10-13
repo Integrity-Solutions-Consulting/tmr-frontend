@@ -74,7 +74,7 @@
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
-      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
+      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [attr.min]="fechaMinima" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <div class="filter-group date-group">
@@ -141,11 +141,19 @@
                   </td>
                 </tr>
               } @empty {
-                <tr>
-                  <td colspan="7" class="empty-row">
-                    No hay registros disponibles para los filtros seleccionados.
-                  </td>
-                </tr>
+                @if (cargandoActividades$ | async) {
+                  <tr>
+                    <td colspan="7">
+                      <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando actividades...</div>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td colspan="7" class="empty-row">
+                      No hay registros disponibles para los filtros seleccionados.
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>

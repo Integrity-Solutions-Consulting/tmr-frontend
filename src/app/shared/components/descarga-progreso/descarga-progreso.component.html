@@ -1,0 +1,28 @@
+@if (estado().visible) {
+  <section class="download-progress-toast" [class.closing]="estado().cerrando" role="status" aria-live="polite">
+    <div class="download-progress-header">
+      <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">cloud_download</span>
+      <span class="download-progress-title">{{ estado().titulo }}</span>
+    </div>
+    <div class="download-progress-body">
+      <div class="download-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+        [attr.aria-valuenow]="estado().indeterminado ? null : estado().progreso"
+        [attr.aria-label]="estado().titulo">
+        <div class="download-progress-fill" [class.indeterminate]="estado().indeterminado"
+          [style.width.%]="estado().indeterminado ? null : estado().progreso"></div>
+      </div>
+      <div class="download-progress-labels">
+        <span>{{ estado().detalle }}</span>
+        @if (!estado().indeterminado) {
+          <span class="download-progress-percent">{{ estado().progreso }}%</span>
+        }
+      </div>
+    </div>
+    <div class="download-progress-actions">
+      <button type="button" class="download-progress-cancel" (click)="descargas.cancelar()"
+        [disabled]="estado().progreso >= 100 || estado().cancelando">
+        Cancelar
+      </button>
+    </div>
+  </section>
+}

@@ -22,7 +22,7 @@
          </div>
       </div>
       @if (mostrarEstadoDropdown) {
-        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+        <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (estado of estadosDisponibles; track estado) {
               <div class="dropdown-opcion" (click)="toggleEstado(estado, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaEstadoSeleccionado(estado)">
@@ -48,7 +48,7 @@
          </div>
       </div>
       @if (mostrarSeguimientoDropdown) {
-        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+        <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (e of seguimientoOpcionesDisponibles; track e.id) {
               <div class="dropdown-opcion" (click)="toggleSeguimiento(e.id, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaSeguimientoSeleccionado(e.id)">
@@ -88,7 +88,7 @@
          </div>
       </div>
       @if (mostrarTipoDropdown) {
-        <div class="dropdown-estado" (click)="$event.stopPropagation()">
+        <div class="dropdown-estado" data-scroll-lock-exempt (click)="$event.stopPropagation()">
             @for (t of tiposDisponibles; track t.id) {
               <div class="dropdown-opcion" (click)="toggleTipo(t.nombre, $event)">
                 <div class="dropdown-checkbox" [class.checked]="estaTipoSeleccionado(t.nombre)">

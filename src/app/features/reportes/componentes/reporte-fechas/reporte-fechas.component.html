@@ -46,7 +46,7 @@
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
       <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="onFiltroChange('fechaInicio', $event)"
-        [max]="fechaMaxima" class="filter-input">
+        [attr.min]="fechaMinima()" [max]="fechaMaxima" class="filter-input">
     </div>
 
     <div class="filter-group date-group">
@@ -74,7 +74,8 @@
   } @else {
     <app-tabla [datosPaginados]="datosPaginados()" [columnas]="columnasTabla" [paginaActual]="paginaActual"
       [totalPaginas]="totalPaginas" [total]="totalItems()" [porPagina]="itemsPorPagina()"
-      [mostrarDatos]="mostrarDatos()" (paginaCambia)="paginaActual.set($event)">
+      [mostrarDatos]="mostrarDatos()" [cargando]="cargando()" textoCargando="Cargando reporte de fechas..."
+      (paginaCambia)="paginaActual.set($event)">
     </app-tabla>
   }
 

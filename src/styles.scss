@@ -251,7 +251,9 @@ body {
   --elevation-card: 0 8px 24px rgba(17, 24, 39, .05);
   --elevation-dropdown: 0 4px 12px rgba(15, 23, 42, .12);
   --elevation-modal: 0 20px 60px rgba(15, 23, 42, .18);
-  --overlay-backdrop: rgba(15, 23, 42, .45);
+  // sm - Mismo gris neutro que trae Angular Material por defecto para el fondo de sus modales
+  // (.cdk-overlay-dark-backdrop), para que todos los modales del sistema se vean igual.
+  --overlay-backdrop: rgba(0, 0, 0, .32);
   --accent-purple: #7c3aed;
   --accent-purple-bg: #f3e8ff;
   --focus-ring-primary: 0 0 0 3px rgba(21, 101, 192, .08);
@@ -696,7 +698,8 @@ html[data-theme="dark"] {
   --elevation-card: 0 8px 24px rgba(0, 0, 0, .28);
   --elevation-dropdown: 0 12px 30px rgba(0, 0, 0, .42);
   --elevation-modal: 0 20px 60px rgba(0, 0, 0, .6);
-  --overlay-backdrop: rgba(0, 0, 0, .65);
+  // sm - Mismo gris que .cdk-overlay-dark-backdrop de Material en ambos temas (no cambia con el tema).
+  --overlay-backdrop: rgba(0, 0, 0, .32);
   --focus-ring-primary: 0 0 0 3px rgba(59, 130, 246, .22);
 
   /* â”€â”€ Layout principal, app container & fondos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -3356,6 +3359,14 @@ html[data-theme] .filter-panel select {
   background: var(--pattern-control-bg) !important;
   border-color: var(--input-border) !important;
   color: var(--pattern-control-color) !important;
+}
+
+/* sm - Texto de un desplegable propio (ej. "Estado" del Dashboard) cuando no hay nada elegido todavía
+   (ej. "Todos los estados"): debe verse gris como un placeholder, no con el negro de .filter-input de
+   arriba. Más específica que esa regla (mismo prefijo + una clase más) para poder ganarle pese al
+   !important. Si ya hay un valor elegido no se le agrega esta clase y se queda con el negro normal. */
+html[data-theme] .filters-card .filter-input .filter-trigger-texto--vacio {
+  color: var(--text-muted) !important;
 }
 
 /* Contrato visual único de tablas. Estas reglas globales son intencionales:

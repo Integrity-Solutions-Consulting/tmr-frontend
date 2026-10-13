@@ -8,6 +8,7 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
 import { Subscription, forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import { DashboardEjecutivoService } from '../../servicios/dashboard-ejecutivo.service';
 import { DashboardService } from '../../servicios/dashboard.service';
 import {
@@ -35,6 +36,8 @@ import {
 } from './dashboard-ejecutivo.utils';
 import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/brecha-historico.component';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
 type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
@@ -95,6 +98,8 @@ export class DashboardEjecutivoComponent implements OnInit {
   private servicio = inject(DashboardEjecutivoService);
   private dashboardService = inject(DashboardService);
   private destroyRef = inject(DestroyRef);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
+  private descargas = inject(DescargaProgresoService);
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;
@@ -117,11 +122,12 @@ export class DashboardEjecutivoComponent implements OnInit {
   mesesVentana = signal<6 | 12>(6);
   umbralRecurrencia = signal(3);
 
-  // sm - Cliente y Proyecto ahora se escriben en vez de elegirse de una lista larga: el texto del input se guarda
-  // aparte del filtro aplicado (igual que el filtro de cliente de Seguimiento) y filtra las opciones del
-  // autocompletado; el filtro real (idCliente/idProyecto) solo cambia al elegir una opción.
+  // sm - Cliente, Proyecto y Colaborador se escriben en vez de elegirse de una lista larga: el texto del input se
+  // guarda aparte del filtro aplicado (igual que el filtro de cliente de Seguimiento) y filtra las opciones del
+  // autocompletado; el filtro real (idCliente/idProyecto/idEmpleado) solo cambia al elegir una opción.
   clienteTexto = signal('');
   proyectoTexto = signal('');
+  colaboradorTexto = signal('');
 
   detalle = signal<DetalleAbierto | null>(null);
   enviandoCorreo: Record<string, boolean> = {};
@@ -136,19 +142,27 @@ export class DashboardEjecutivoComponent implements OnInit {
     );
   });
 
-  // sm - Opciones del autocompletado de Cliente/Proyecto: se filtran con el texto escrito (no con el filtro
-  // aplicado), para que mientras se escribe se vean las coincidencias antes de elegir una.
+  // sm - Opciones del autocompletado de Cliente/Proyecto/Colaborador: se filtran con el texto escrito (no con el
+  // filtro aplicado), para que mientras se escribe se vean las coincidencias antes de elegir una. Coincide por
+  // palabras sueltas (sin tildes, minúsculas): "Jorge Lino" encuentra a "Jorge Augusto Lino Bermeo" aunque se
+  // salte el segundo nombre, igual que en las demás búsquedas por nombre de la app.
   clientesFiltrados = computed(() => {
-    const q = this.clienteTexto().toLowerCase().trim();
-    if (!q) return this.opciones().clientes;
-    return this.opciones().clientes.filter((c) => c.nombre.toLowerCase().includes(q));
+    const q = this.clienteTexto();
+    if (!q.trim()) return this.opciones().clientes;
+    return this.opciones().clientes.filter((c) => coincideBusqueda(c.nombre, q));
   });
 
   proyectosFiltrados = computed(() => {
-    const q = this.proyectoTexto().toLowerCase().trim();
+    const q = this.proyectoTexto();
     const base = this.proyectosFiltro();
-    if (!q) return base;
-    return base.filter((p) => `${p.codigo ?? ''} ${p.nombre}`.toLowerCase().includes(q));
+    if (!q.trim()) return base;
+    return base.filter((p) => coincideBusqueda(`${p.codigo ?? ''} ${p.nombre}`, q));
+  });
+
+  colaboradoresFiltrados = computed(() => {
+    const q = this.colaboradorTexto();
+    if (!q.trim()) return this.opciones().colaboradores;
+    return this.opciones().colaboradores.filter((c) => coincideBusqueda(c.nombre, q));
   });
 
   tarjetas = computed<TarjetaIndicador[]>(() => {
@@ -412,32 +426,47 @@ export class DashboardEjecutivoComponent implements OnInit {
   }
 
   // ── Desplegables de filtros (mismo diseño que Proyectos) ──
-  readonly filtroAbierto = signal<'anio' | 'mes' | 'estado' | 'colaborador' | null>(null);
+  readonly filtroAbierto = signal<'anio' | 'mes' | 'estado' | null>(null);
 
-  toggleFiltro(nombre: 'anio' | 'mes' | 'estado' | 'colaborador', event: Event): void {
+  private readonly liberarDropdownAlDestruir = this.destroyRef.onDestroy(() => {
+    if (this.filtroAbierto() !== null) {
+      this.dropdownScrollLock.unlock();
+    }
+  });
+
+  toggleFiltro(nombre: 'anio' | 'mes' | 'estado', event: Event): void {
     event.stopPropagation();
-    this.filtroAbierto.set(this.filtroAbierto() === nombre ? null : nombre);
+    if (this.filtroAbierto() === nombre) {
+      this.cerrarFiltros();
+      return;
+    }
+    if (this.filtroAbierto() === null) {
+      this.dropdownScrollLock.lock();
+    }
+    this.filtroAbierto.set(nombre);
   }
 
+  // sm - Bloquea/libera el scroll de fondo mientras el desplegable está abierto, igual que
+  // mat-select ("Tipo de proyecto").
   @HostListener('document:click')
   cerrarFiltros(): void {
+    if (this.filtroAbierto() !== null) {
+      this.dropdownScrollLock.unlock();
+    }
     this.filtroAbierto.set(null);
   }
 
   elegirFiltro<K extends keyof DashboardFiltros>(clave: K, valor: DashboardFiltros[K], event: Event): void {
     event.stopPropagation();
-    this.filtroAbierto.set(null);
+    this.cerrarFiltros();
     this.actualizarFiltro(clave, valor);
   }
 
-  etiquetaFiltro(nombre: 'anio' | 'mes' | 'estado' | 'colaborador'): string {
+  etiquetaFiltro(nombre: 'anio' | 'mes' | 'estado'): string {
     const f = this.filtros();
     if (nombre === 'anio') return String(f.anio);
     if (nombre === 'mes') return this.meses[f.mes - 1] ?? '';
-    if (nombre === 'estado') {
-      return this.opciones().estados.find((e) => e.id === f.idEstado)?.nombre ?? 'Todos los estados';
-    }
-    return this.opciones().colaboradores.find((c) => c.id === f.idEmpleado)?.nombre ?? 'Todos los colaboradores';
+    return this.opciones().estados.find((e) => e.id === f.idEstado)?.nombre ?? 'Todos los estados';
   }
 
   aNumero(valor: string): number | null {
@@ -491,11 +520,32 @@ export class DashboardEjecutivoComponent implements OnInit {
     this.proyectoTexto.set(proyecto ? this.etiquetaProyecto(proyecto) : '');
   }
 
+  // sm - Mismo criterio que Cliente/Proyecto: el texto solo filtra el autocompletado hasta que se elige una opción.
+  onColaboradorTextoChange(valor: string): void {
+    this.colaboradorTexto.set(valor);
+    if (!valor.trim() && this.filtros().idEmpleado != null) {
+      this.actualizarFiltro('idEmpleado', null);
+    }
+  }
+
+  seleccionarColaborador(event: MatAutocompleteSelectedEvent): void {
+    const id = event.option.value as number | null;
+    const nombre = id == null ? '' : (this.opciones().colaboradores.find((c) => c.id === id)?.nombre ?? '');
+    this.colaboradorTexto.set(nombre);
+    this.actualizarFiltro('idEmpleado', id);
+  }
+
+  onColaboradorPanelCerrado(): void {
+    const id = this.filtros().idEmpleado;
+    this.colaboradorTexto.set(id == null ? '' : (this.opciones().colaboradores.find((c) => c.id === id)?.nombre ?? ''));
+  }
+
   // sm - Limpiar filtros restablece el periodo vigente (RF 01).
   limpiarFiltros(): void {
     this.filtros.set(this.filtrosIniciales());
     this.clienteTexto.set('');
     this.proyectoTexto.set('');
+    this.colaboradorTexto.set('');
     this.cerrarDetalle();
     this.cargar();
   }
@@ -848,7 +898,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       }));
     }
 
-    await exportarReporteExcelMultihoja(
+    // sm - Toast de progreso compartido (con Cancelar).
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcelMultihoja(
       [
         {
           titulo: detalle.titulo,
@@ -863,7 +914,8 @@ export class DashboardEjecutivoComponent implements OnInit {
         this.hojaParametros(detalle.definicion),
       ],
       `Dashboard_${this.nombreArchivo(detalle.titulo)}`,
-    );
+      ctx,
+    )).catch(error => console.error('Error al exportar el detalle del dashboard:', error));
   }
 
   // sm - Descarga general: todo el conjunto filtrado del dashboard, en varias hojas.
@@ -923,7 +975,9 @@ export class DashboardEjecutivoComponent implements OnInit {
       this.hojaParametros('Dashboard Time Report: conjunto completo con los filtros aplicados.'),
     ];
 
-    await exportarReporteExcelMultihoja(hojas, `Dashboard_${MESES[d.periodo.mes - 1]}_${d.periodo.anio}`);
+    // sm - Toast de progreso compartido (con Cancelar).
+    await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcelMultihoja(hojas, `Dashboard_${MESES[d.periodo.mes - 1]}_${d.periodo.anio}`, ctx))
+      .catch(error => console.error('Error al exportar el dashboard:', error));
   }
 
   private hojaParametros(definicion: string): ReporteTabularConfig {

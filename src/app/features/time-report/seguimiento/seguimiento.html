@@ -70,7 +70,7 @@
         <!-- Fecha Desde -->
         <div class="filter-group date-group">
             <label class="filter-label">Fecha desde</label>
-            <input class="filter-input" type="date" [(ngModel)]="fechaDesde" [max]="fechaMaxima" (ngModelChange)="onFechaManualChange()">
+            <input class="filter-input" type="date" [(ngModel)]="fechaDesde" [attr.min]="fechaMinima" [max]="fechaMaxima" (ngModelChange)="onFechaManualChange()">
         </div>
 
         <!-- Fecha Hasta -->
@@ -98,32 +98,7 @@
         </mat-menu>
     </div>
 
-    <!-- sm - Toast animado de descarga de seleccionados: reemplaza el mensaje "Preparando..." con título, barra de progreso y botón Cancelar. -->
-    <section *ngIf="progresoDescarga.visible" class="download-progress-toast" [class.closing]="progresoDescarga.cerrando"
-        role="status" aria-live="polite">
-        <div class="download-progress-header">
-            <span class="material-symbols-outlined download-progress-icon" aria-hidden="true">cloud_download</span>
-            <span class="download-progress-title">{{ progresoDescarga.titulo }}</span>
-        </div>
-        <div class="download-progress-body">
-            <div class="download-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
-                [attr.aria-valuenow]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"
-                [attr.aria-label]="progresoDescarga.titulo">
-                <div class="download-progress-fill" [class.indeterminate]="progresoDescarga.indeterminado"
-                    [style.width.%]="progresoDescarga.indeterminado ? null : progresoDescarga.progreso"></div>
-            </div>
-            <div class="download-progress-labels">
-                <span>{{ progresoDescarga.detalle }}</span>
-                <span *ngIf="!progresoDescarga.indeterminado" class="download-progress-percent">{{ progresoDescarga.progreso }}%</span>
-            </div>
-        </div>
-        <div class="download-progress-actions">
-            <button type="button" class="download-progress-cancel" (click)="cancelarDescarga()"
-                [disabled]="progresoDescarga.progreso >= 100 || progresoDescarga.detalle === 'Cancelando...'">
-                Cancelar
-            </button>
-        </div>
-    </section>
+    <!-- sm - El toast de progreso de descarga ahora es global: <app-descarga-progreso> en el AppComponent. -->
 
     <!-- ===== TABLE ===== -->
     <div class="table-scroll-container">
@@ -197,7 +172,12 @@
                             </button>
                         </td>
                     </tr>
-                    <tr *ngIf="totalRegistros === 0">
+                    <tr *ngIf="totalRegistros === 0 && cargando()">
+                        <td colspan="10">
+                            <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando registros...</div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="totalRegistros === 0 && !cargando()">
                         <td colspan="10" class="empty-state">No se encontraron registros</td>
                     </tr>
                 </tbody>
