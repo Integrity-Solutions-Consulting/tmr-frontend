@@ -25,9 +25,9 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable, Subject, takeUntil } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
-import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
+import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
@@ -539,18 +539,9 @@ export class SeguimientoComponent implements AfterViewInit {
             if (this.descargaCancelada) throw new DescargaCanceladaError();
             throw error;
         }
-    private finalizarProgresoDescarga(): Promise<void> {
-        return this.descargas.finalizar();
     }
 
-    private cerrarProgresoDescarga(): void {
-        this.descargas.cerrar();
-    }
 
-    // sm - Espera una petición HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
-    private esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
-        return this.descargas.esperarCancelable(peticion);
-    }
 
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
     // con varios proyectos, para no armar un ZIP con un Ãºnico colaborador adentro. Devuelve cuÃ¡ntos se descargaron;
