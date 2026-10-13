@@ -62,3 +62,5 @@ export class ProveedoresPage implements OnInit {
     return params;
   }
 }
+
+//comentario
