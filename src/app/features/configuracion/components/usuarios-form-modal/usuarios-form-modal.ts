@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -9,6 +9,8 @@ import {
   INTERNAL_USERNAME_REGEX,
   temporaryPasswordValidator,
 } from '../../../../shared/validators/form-validators';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
 
@@ -18,11 +20,12 @@ const INTERNAL_EMAIL_DOMAIN = '@integritysolutions.com.ec';
   templateUrl: './usuarios-form-modal.html',
   styleUrl: './usuarios-form-modal.scss',
 })
-export class UsuariosFormModal {
+export class UsuariosFormModal implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<UsuariosFormModal>);
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly usuariosService = inject(UsuariosService);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
   readonly data = inject<{ usuario?: Usuario; roles: Rol[]; nextId: number }>(MAT_DIALOG_DATA);
 
   readonly guardando = signal(false);
@@ -30,6 +33,11 @@ export class UsuariosFormModal {
   readonly errorGuardar = signal<string | null>(null);
   showTemporaryPassword = false;
   colaboradores: ColaboradorUsuarioOption[] = [];
+
+  // sm - Selector de colaborador con búsqueda (en vez de <select> nativo): se puede escribir
+  // para filtrar, igual que en los demás buscadores por nombre de la app.
+  busquedaColaborador = '';
+  dropdownColaboradorAbierto = false;
 
   readonly rolesList = (this.data.roles ?? [])
     .filter((rol) => rol.activo)
@@ -88,6 +96,13 @@ export class UsuariosFormModal {
     }
   }
 
+  ngOnDestroy(): void {
+    if (this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownColaboradorAbierto = false;
+    }
+  }
+
   get isEdit(): boolean {
     return Boolean(this.data.usuario);
   }
@@ -103,6 +118,57 @@ export class UsuariosFormModal {
   get colaboradorSeleccionado(): ColaboradorUsuarioOption | undefined {
     const id = Number(this.form.controls.idColaborador.value);
     return this.colaboradores.find((colaborador) => colaborador.id === id);
+  }
+
+  // sm - Coincide por palabras sueltas (sin tildes, mayúsculas/minúsculas), igual que en las
+  // demás búsquedas por nombre de la app: "Jorge Lino" encuentra a "Jorge Augusto Lino Bermeo".
+  get colaboradoresFiltrados(): ColaboradorUsuarioOption[] {
+    return this.colaboradores.filter((colaborador) =>
+      coincideBusqueda(colaborador.nombreCompleto, this.busquedaColaborador),
+    );
+  }
+
+  // sm - El propio campo es el buscador (igual que los demás filtros de la app): se escribe
+  // directamente ahí, sin una cajita de búsqueda aparte dentro del desplegable.
+  onBusquedaColaboradorInput(valor: string): void {
+    this.busquedaColaborador = valor;
+    this.abrirDropdownColaborador();
+
+    if (!valor.trim() && this.form.controls.idColaborador.value) {
+      this.form.controls.idColaborador.setValue('');
+    }
+  }
+
+  // sm - Bloquea el scroll de fondo mientras el desplegable está abierto, igual que mat-select
+  // ("Tipo de proyecto"). La guarda evita bloquear dos veces si ya estaba abierto.
+  abrirDropdownColaborador(): void {
+    if (!this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.lock();
+    }
+    this.dropdownColaboradorAbierto = true;
+  }
+
+  // sm - El blur llega antes que el click sobre un ítem de la lista; se retrasa el cierre para
+  // que la selección alcance a registrarse (mismo truco que el selector de reemplazo de
+  // Colaboradores: modal-crear-colaborador.component.ts).
+  cerrarDropdownColaborador(): void {
+    setTimeout(() => {
+      if (this.dropdownColaboradorAbierto) {
+        this.dropdownScrollLock.unlock();
+      }
+      this.dropdownColaboradorAbierto = false;
+      this.busquedaColaborador = this.colaboradorSeleccionado?.nombreCompleto ?? '';
+    }, 200);
+  }
+
+  seleccionarColaborador(colaborador: ColaboradorUsuarioOption): void {
+    this.form.controls.idColaborador.setValue(String(colaborador.id));
+    this.form.controls.idColaborador.markAsTouched();
+    this.busquedaColaborador = colaborador.nombreCompleto;
+    if (this.dropdownColaboradorAbierto) {
+      this.dropdownScrollLock.unlock();
+    }
+    this.dropdownColaboradorAbierto = false;
   }
 
   tieneValor(campo: keyof typeof this.form.controls): boolean {
@@ -299,6 +365,7 @@ export class UsuariosFormModal {
     if (colaborador) {
       this.form.controls.idColaborador.setValue(String(colaborador.id), { emitEvent: false });
       this.form.controls.idPersona.setValue(idPersona, { emitEvent: false });
+      this.busquedaColaborador = colaborador.nombreCompleto;
     }
   }
 

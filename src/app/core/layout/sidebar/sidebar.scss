@@ -172,6 +172,20 @@
   position: relative;
 }
 
+/* El padre se marca activo cuando la ruta actual es uno de sus hijos y estos no se ven
+   (grupo cerrado o menú reducido) */
+.sidebar__group--active:not(.sidebar__group--open) > .sidebar__link--parent,
+.sidebar--collapsed .sidebar__group--active > .sidebar__link--parent {
+  color: var(--primary-color);
+  background: var(--primary-light);
+  font-weight: 600;
+}
+
+:host-context(html[data-theme='dark']) .sidebar__group--active:not(.sidebar__group--open) > .sidebar__link--parent,
+:host-context(html[data-theme='dark']) .sidebar--collapsed .sidebar__group--active > .sidebar__link--parent {
+  color: var(--accent-cian);
+}
+
 /* ── Submenu ── */
 .sidebar__submenu {
   display: flex;

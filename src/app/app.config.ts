@@ -7,6 +7,7 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MAT_DATE_LOCALE, MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
+import { MAT_AUTOCOMPLETE_DEFAULT_OPTIONS } from '@angular/material/autocomplete';
 
 import { routes } from './app.routes';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
@@ -53,6 +54,10 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },       // idioma del calendario (meses/días en español)
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }, // formato dd/MM/yyyy
     { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { disableClose: true } },
+    // sm - Mismo backdrop "bloqueador" que ya trae mat-select de fábrica: bloquea el scroll y
+    // cierra al hacer clic afuera, para que todos los mat-autocomplete de la app se comporten
+    // igual que los mat-select (ej. "Tipo de proyecto" vs "Cliente" en Nuevo Proyecto).
+    { provide: MAT_AUTOCOMPLETE_DEFAULT_OPTIONS, useValue: { hasBackdrop: true } },
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,

@@ -1,4 +1,5 @@
 @use '../../../../../styles/table-theme' as table-theme;
+@use '../../../../../styles/filtros' as filtros;
 
 // sm - Contenedor a ancho completo, sin tarjeta/borde/tope de ancho: mismo criterio que Seguimiento
 // (el padding de la página lo pone el layout global, no cada página).
@@ -8,22 +9,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-// sm - Mismo diseño que la barra de filtros de Seguimiento: sin borde (solo una sombra suave), padding
-// 16px 20px, y sin margen propio (el espaciado entre header/filtros/tabla ya lo da el gap del contenedor).
-.filters-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 16px;
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: var(--elevation-card);
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .acciones-derecha {
@@ -164,3 +149,6 @@
 .proyecto-detalle__table th { background: var(--bg-surface); color: var(--text-subtle); font-weight: 600; }
 .proyecto-detalle__table tr:last-child td { border-bottom: none; }
 .proyecto-detalle__table table { @include table-theme.data-table; }
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;

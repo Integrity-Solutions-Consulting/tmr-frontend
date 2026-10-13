@@ -7,6 +7,7 @@ export const ID_SEGUIMIENTO_INHABILITADO = -99;
 export interface RecursoProyecto {
   id?: number;
   idEmpleado?: number | null;
+  idProveedor?: number | null;
   idDepartamento?: number | null;
   tipo: string;
   nombre: string;
@@ -16,6 +17,9 @@ export interface RecursoProyecto {
   salida?: string | null;
   costoHora: number;
   horas: number;
+  // sm - Estado de asignación del recurso (true = Activo, false = Inactivo). El backend lo devuelve Inactivo
+  // también cuando la fecha de salida ya pasó.
+  estadoAsignacion?: boolean;
 }
 
 export interface LiderProyecto {
@@ -79,4 +83,5 @@ export interface ProyectoLookups {
   estados: LookupOption[];
   tipos: LookupOption[];
   departamentos: LookupOption[];
+  proveedores: LookupOption[];
 }

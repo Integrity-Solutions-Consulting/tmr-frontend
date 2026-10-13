@@ -22,6 +22,6 @@
          esta fila, no al total de todos los proyectos del colaborador (ver Calendario.idProyectoOverride). -->
     <!-- sm - soloLectura: bloquea agregar/editar actividades; la navegación entre meses sigue disponible. -->
     <div class="calcol-modal__body">
-        <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="true"></app-calendario>
+        <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="true" [fechaInicialOverride]="data.fechaDesde"></app-calendario>
     </div>
 </div>

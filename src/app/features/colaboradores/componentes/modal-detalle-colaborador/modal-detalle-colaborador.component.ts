@@ -1,19 +1,31 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Colaborador } from '../../models/colaborador.model';
 import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-detalle-colaborador',
   standalone: true,
-  imports: [CommonModule, BadgeEstadoComponent],
+  imports: [CommonModule, BadgeEstadoComponent, ScrollingModule],
   templateUrl: './modal-detalle-colaborador.component.html',
   styleUrl: './modal-detalle-colaborador.component.scss',
 })
-export class ModalDetalleColaboradorComponent {
+export class ModalDetalleColaboradorComponent implements OnInit, OnDestroy {
   @Input() colaborador!: Colaborador;
   @Output() cerrar = new EventEmitter<void>();
   @Output() editar = new EventEmitter<Colaborador>();
+
+  private scrollLock = inject(ModalScrollLockService);
+
+  ngOnInit(): void {
+    this.scrollLock.lock();
+  }
+
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
+  }
 
   seccionesExpandido = {
     laborales: true,
@@ -35,7 +47,9 @@ export class ModalDetalleColaboradorComponent {
   }
 
   get totalProyectos(): number {
-    return this.colaborador?.proyectosAsignados?.length ?? this.colaborador?.numProyectos ?? 0;
+    // sm - Solo cuentan los proyectos con estado de asignación Activo (la lista muestra también los inactivos).
+    return this.colaborador?.proyectosAsignados?.filter(p => p.estadoAsignacion !== false).length
+      ?? this.colaborador?.numProyectos ?? 0;
   }
 
   toggleSeccion(seccion: 'laborales' | 'personales' | 'contacto' | 'proyectos' | 'salida' | 'reemplazo'): void {

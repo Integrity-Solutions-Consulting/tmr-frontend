@@ -13,6 +13,7 @@ export class PaginacionComponent implements OnChanges {
   @Input() totalPaginas: number = 1;
   @Input() total: number = 0;
   @Input() porPagina: number = 10;
+  @Input() etiquetaRegistros = 'registros';
   @Output() paginaCambia = new EventEmitter<number>();
 
   paginas: (number | '...')[] = [];
@@ -43,7 +44,11 @@ export class PaginacionComponent implements OnChanges {
   get registroInicio() { return this.total === 0 ? 0 : (this.paginaActual - 1) * this.porPagina + 1; }
   get registroFin() { return Math.min(this.paginaActual * this.porPagina, this.total); }
 
-  irA(p: number | '...') { if (p !== '...') this.paginaCambia.emit(p); }
+  irA(p: number | '...') {
+    if (p !== '...' && p !== this.paginaActual && p >= 1 && p <= this.totalPaginas) {
+      this.paginaCambia.emit(p);
+    }
+  }
   primera() { this.irA(1); }
   anterior() { if (this.paginaActual > 1) this.irA(this.paginaActual - 1); }
   siguiente() { if (this.paginaActual < this.totalPaginas) this.irA(this.paginaActual + 1); }

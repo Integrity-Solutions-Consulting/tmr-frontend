@@ -19,33 +19,36 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input type="text" class="filter-input" placeholder="Buscar por nombres, identificación..." [(ngModel)]="busqueda"
           (input)="aplicarFiltros()" />
+        @if (busqueda) {
+          <button type="button" class="filter-clear" (click)="busqueda = ''; aplicarFiltros()" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
-    <div class="filter-group date-group" style="width: auto; min-width: 140px; cursor: pointer;" (click)="toggleEstadoDropdown($event)">
+    <div class="filter-group filter-group--desplegable" (click)="toggleEstadoDropdown($event)">
       <label class="filter-label">Estado</label>
       <div class="filter-input-wrapper">
-         <div class="filter-input" style="display: flex; align-items: center; justify-content: space-between; padding-right: 12px; height: 42px;">
-            <span>{{ estadoFiltro || 'Todos' }}</span>
-            <span class="material-symbols-outlined select-chevron" style="position: static; font-size: 20px;">expand_more</span>
+         <div class="filter-input filter-trigger">
+            <span class="filter-trigger-texto">{{ estadoFiltro || 'Todos' }}</span>
+            <span class="material-symbols-outlined select-chevron">expand_more</span>
          </div>
       </div>
-      <div class="estado-dropdown" *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
-        <div class="dropdown-option"
+      <div class="dropdown-estado" data-scroll-lock-exempt *ngIf="mostrarEstadoDropdown" (click)="$event.stopPropagation()">
+        <div class="dropdown-opcion"
           (click)="seleccionarEstado('Activo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Activo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Activo'">check</span>
           </div>
-          <span>Activo</span>
-          <span class="dropdown-count">{{ totalActivos }}</span>
+          <span class="opcion-label">Activo</span>
+          <span class="opcion-contador">{{ totalActivos }}</span>
         </div>
-        <div class="dropdown-option"
+        <div class="dropdown-opcion"
           (click)="seleccionarEstado('Inactivo'); $event.stopPropagation(); mostrarEstadoDropdown = true">
           <div class="dropdown-checkbox" [class.checked]="estadoFiltro === 'Inactivo'">
             <span class="material-icons" *ngIf="estadoFiltro === 'Inactivo'">check</span>
           </div>
-          <span>Inactivo</span>
-          <span class="dropdown-count">{{ totalInactivos }}</span>
+          <span class="opcion-label">Inactivo</span>
+          <span class="opcion-contador">{{ totalInactivos }}</span>
         </div>
         <div class="dropdown-limpiar" (click)="seleccionarEstado(''); $event.stopPropagation()">Limpiar filtro</div>
       </div>
@@ -74,7 +77,6 @@
     <div class="table-wrapper" #tableWrapper>
       <table class="lideres-table">
         <colgroup>
-          <col class="col-codigo">
           <col class="col-tipo">
           <col class="col-nombre">
           <col class="col-cliente">
@@ -85,9 +87,6 @@
         </colgroup>
         <thead>
           <tr>
-            <th class="sortable" (click)="ordenar('codigo')" [attr.aria-sort]="direccionOrden('codigo')">
-              <span class="th-inner"><span class="th-label">Código</span><mat-icon class="sort-icon">{{ sortField === 'codigo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
-            </th>
             <th class="sortable" (click)="ordenar('tipo')" [attr.aria-sort]="direccionOrden('tipo')">
               <span class="th-inner"><span class="th-label">Tipo</span><mat-icon class="sort-icon">{{ sortField === 'tipo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
             </th>
@@ -111,7 +110,6 @@
         </thead>
         <tbody>
           <tr *ngFor="let lider of lideresPaginados; let i = index">
-            <td [title]="lider.codigo">{{ lider.codigo }}</td>
             <td [title]="lider.tipo">{{ lider.tipo }}</td>
             <td class="td-truncate" [title]="lider.nombre">
               <span class="cell-ellipsis">{{ lider.nombre }}</span>
@@ -155,7 +153,12 @@
                 (accionSeleccionada)="onAccionSeleccionada($event, lider, rangoInicio + i)"></app-action-menu>
             </td>
           </tr>
-          <tr *ngIf="lideresFiltrados.length === 0">
+          <tr *ngIf="cargando && lideresFiltrados.length === 0">
+            <td colspan="8">
+              <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando líderes...</div>
+            </td>
+          </tr>
+          <tr *ngIf="!cargando && lideresFiltrados.length === 0">
             <td colspan="8" class="empty-state">No se encontraron líderes</td>
           </tr>
         </tbody>

@@ -1,4 +1,4 @@
-import { Component, QueryList, ViewChildren, computed, inject, signal, OnInit, effect } from '@angular/core';
+import { Component, QueryList, ViewChildren, computed, inject, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 type FiltroEstadoCatalogo = 'Activo' | 'Inactivo' | '';
 
 @Component({
@@ -28,9 +29,10 @@ type FiltroEstadoCatalogo = 'Activo' | 'Inactivo' | '';
   templateUrl: './catalogos-page.html',
   styleUrl: './catalogos-page.scss',
 })
-export class CatalogosPage implements OnInit {
+export class CatalogosPage implements OnInit, OnDestroy {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
 
   @ViewChildren(ActionMenuComponent)
   private readonly actionMenus!: QueryList<ActionMenuComponent>;
@@ -41,6 +43,8 @@ export class CatalogosPage implements OnInit {
 
   // ── Detalles del Maestro Seleccionado ─────────────────────────────────────
   readonly detalles = signal<CatalogoDetalle[]>([]);
+  // sm - Fila "Cargando ítems..." mientras llegan los detalles del catálogo seleccionado.
+  readonly cargando = signal(false);
 
   // ── Señales de control y paginación ───────────────────────────────────────
   readonly query = signal('');
@@ -51,7 +55,29 @@ export class CatalogosPage implements OnInit {
 
   // ── Filtro por estado ─────────────────────────────────────────────────────
   readonly filtroEstado = signal<FiltroEstadoCatalogo>('Activo');
-  mostrarEstadoDropdown = false;
+
+  // sm - Accessor: cualquier asignación bloquea/libera el scroll de fondo sola
+  // (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    if (valor === this._mostrarEstadoDropdown) return;
+    this._mostrarEstadoDropdown = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this._mostrarEstadoDropdown) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarEstadoDropdown = false;
+    }
+  }
 
   // ── Confirmación de Eliminación Lógica ────────────────────────────────────
   readonly confirmVisible = signal(false);
@@ -152,11 +178,14 @@ export class CatalogosPage implements OnInit {
 
   cargarDetalles(idCatalogo: number): void {
     this.estadoError.set(null);
+    this.cargando.set(true);
     this.configuracionService.getDetallesPorCatalogoId(idCatalogo).subscribe({
       next: (data) => {
         this.detalles.set(data ?? []);
+        this.cargando.set(false);
       },
       error: (err) => {
+        this.cargando.set(false);
         console.error(err);
         this.estadoError.set('Error al cargar los detalles del catálogo.');
       },

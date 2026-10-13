@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { FiltrosColaborador, EstadoColaborador } from '../../models/colaborador.model';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 @Component({
   selector: 'app-filtros-colaboradores',
@@ -25,7 +26,7 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private dropdownScrollLock: DropdownScrollLockService) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -49,10 +50,18 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
   toggleEstado(event?: MouseEvent): void {
     event?.stopPropagation();
     this.estadoAbierto = !this.estadoAbierto;
+    if (this.estadoAbierto) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
   }
 
   @HostListener('document:click')
   cerrarDropdowns(): void {
+    if (this.estadoAbierto) {
+      this.dropdownScrollLock.unlock();
+    }
     this.estadoAbierto = false;
   }
 
@@ -72,6 +81,9 @@ export class FiltrosColaboradoresComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.estadoAbierto) {
+      this.dropdownScrollLock.unlock();
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }

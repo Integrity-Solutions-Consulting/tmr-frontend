@@ -10,6 +10,7 @@ import { UsuariosService } from '../../../features/configuracion/services/usuari
 import { MiPerfilModalComponent, MiPerfilData } from '../../../shared/components/mi-perfil-modal/mi-perfil-modal.component';
 import { ConfiguracionModalComponent } from '../../../shared/components/configuracion-modal/configuracion-modal.component';
 import { CommonModule } from '@angular/common';
+import { DropdownScrollLockService } from '../../../shared/services/dropdown-scroll-lock.service';
 
 @Component({
   selector: 'app-navbar',
@@ -25,8 +26,8 @@ export class Navbar implements OnInit {
   private dialog = inject(MatDialog);
   private dashboardService = inject(DashboardService);
   private elementRef = inject(ElementRef);
-  
-  perfilAbierto = false;
+  private dropdownScrollLock = inject(DropdownScrollLockService);
+
   user = {
     name: 'Usuario',
     email: ''
@@ -35,7 +36,40 @@ export class Navbar implements OnInit {
   // Estado de notificaciones de horas faltantes
   tieneNotificaciones = false;
   horasFaltantes = 0;
-  notificacionesAbierto = false;
+
+  // sm - perfilAbierto/notificacionesAbierto se asignan desde muchos sitios. En vez de tocar cada
+  // punto, se exponen como accessors: cualquier asignación bloquea/libera sola el scroll de
+  // fondo (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _perfilAbierto = false;
+  get perfilAbierto(): boolean {
+    return this._perfilAbierto;
+  }
+  set perfilAbierto(valor: boolean) {
+    this._perfilAbierto = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private _notificacionesAbierto = false;
+  get notificacionesAbierto(): boolean {
+    return this._notificacionesAbierto;
+  }
+  set notificacionesAbierto(valor: boolean) {
+    this._notificacionesAbierto = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private dropdownLockActivo = false;
+
+  private actualizarLockDropdowns(): void {
+    const hayAlguno = this._perfilAbierto || this._notificacionesAbierto;
+    if (hayAlguno && !this.dropdownLockActivo) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    } else if (!hayAlguno && this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();

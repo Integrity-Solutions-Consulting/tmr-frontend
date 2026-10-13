@@ -113,6 +113,17 @@
     <tr mat-header-row *matHeaderRowDef="columnas"></tr>
     <tr mat-row *matRowDef="let row; columns: columnas"></tr>
 
+    <!-- sm - Sin filas que mostrar: mientras carga se ve "Cargando proyectos..." (no una tabla en blanco). -->
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="mat-mdc-cell" [attr.colspan]="columnas.length">
+        @if (cargando()) {
+          <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando proyectos...</div>
+        } @else {
+          <div class="tabla-cargando">No se encontraron proyectos</div>
+        }
+      </td>
+    </tr>
+
   </table></div></div>
 
 <div class="pagination-bar">

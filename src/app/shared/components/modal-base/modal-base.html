@@ -3,17 +3,16 @@
     <section
       class="modal"
       [class.modal--wide]="wide"
-      (click)="$event.stopPropagation()"
     >
       <header class="modal__header">
         <h2>{{ titulo }}</h2>
 
-        <button type="button" class="modal__cerrar" (click)="cerrar.emit()">
-          ×
+        <button type="button" class="modal__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
+          <span class="material-icons" aria-hidden="true">close</span>
         </button>
       </header>
 
-      <div class="modal__body">
+      <div class="modal__body" cdkScrollable>
         <ng-content></ng-content>
       </div>
     </section>

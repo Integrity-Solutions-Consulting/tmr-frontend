@@ -1,23 +1,26 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogosService, CatalogoItem } from '../../servicios/catalogos.service';
 import { ColaboradoresService } from '../../servicios/colaboradores.service';
 import { RegistrarSalidaRequest } from '../../models/colaborador.model';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
 
 @Component({
   selector: 'app-modal-registrar-salida',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ScrollingModule],
   templateUrl: './modal-registrar-salida.component.html',
   styleUrl: './modal-registrar-salida.component.scss',
 })
-export class ModalRegistrarSalidaComponent implements OnInit {
+export class ModalRegistrarSalidaComponent implements OnInit, OnDestroy {
   @Input() colaborador!: any;
   @Output() cerrar = new EventEmitter<void>();
   @Output() salidaRegistrada = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
+  private scrollLock = inject(ModalScrollLockService);
   private catalogosService = inject(CatalogosService);
   private colaboradoresService = inject(ColaboradoresService);
 
@@ -28,7 +31,12 @@ export class ModalRegistrarSalidaComponent implements OnInit {
   tiposSalida: CatalogoItem[] = [];
   causasSalida: CatalogoItem[] = [];
 
+  ngOnDestroy(): void {
+    this.scrollLock.unlock();
+  }
+
   ngOnInit(): void {
+    this.scrollLock.lock();
     this.form = this.fb.group({
       fechaSalida: [this.obtenerFechaActual(), Validators.required],
       idTipoSalida: [null, Validators.required],

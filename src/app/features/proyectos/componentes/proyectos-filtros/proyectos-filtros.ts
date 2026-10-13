@@ -3,8 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProyectosService } from '../../servicios/proyectos.service';
-import { ID_SEGUIMIENTO_INHABILITADO, LookupOption } from '../../modelos/proyecto.model';
+import { ID_SEGUIMIENTO_INHABILITADO, LookupOption, Proyecto } from '../../modelos/proyecto.model';
+import { selectProyectos } from '../../store/proyectos.selectors';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 export interface FiltrosProyecto {
   busqueda: string;
@@ -24,6 +28,13 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
   @Output() filtrosChange = new EventEmitter<FiltrosProyecto>();
 
   private proyectosService = inject(ProyectosService);
+  private store = inject(Store);
+  private dropdownScrollLock = inject(DropdownScrollLockService);
+
+  // sm - Filtro en cascada: cada dropdown solo muestra las opciones que realmente tienen al menos un proyecto
+  // que coincide con los OTROS filtros ya aplicados (igual universo de proyectos y misma normalización que usa
+  // la tabla en Tabla.proyectosFiltrados, para que "lo que se puede elegir" y "lo que se ve" sean coherentes).
+  private proyectosSignal = toSignal(this.store.select(selectProyectos), { initialValue: [] as Proyecto[] });
 
   busqueda = '';
   estadosSeleccionados: string[] = [];
@@ -34,16 +45,122 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
   tipos: LookupOption[] = [];
   estadosFiltro = ['Activo', 'Inactivo'];
 
-  mostrarEstadoDropdown = false;
-  mostrarSeguimientoDropdown = false;
-  mostrarTipoDropdown = false;
+  // sm - Los 3 dropdowns se asignan desde muchos sitios (toggles, cerrarDropdowns). En vez de
+  // tocar cada punto, se exponen como accessors: cualquier asignación bloquea/libera sola el
+  // scroll de fondo (DropdownScrollLockService) — ya NO se cierran solos al hacer scroll, se
+  // comportan igual que mat-select ("Tipo de proyecto"): el scroll queda bloqueado mientras
+  // estén abiertos.
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    this._mostrarEstadoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
 
-  private scrollHandler = () => this.cerrarDropdowns();
+  private _mostrarSeguimientoDropdown = false;
+  get mostrarSeguimientoDropdown(): boolean {
+    return this._mostrarSeguimientoDropdown;
+  }
+  set mostrarSeguimientoDropdown(valor: boolean) {
+    this._mostrarSeguimientoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private _mostrarTipoDropdown = false;
+  get mostrarTipoDropdown(): boolean {
+    return this._mostrarTipoDropdown;
+  }
+  set mostrarTipoDropdown(valor: boolean) {
+    this._mostrarTipoDropdown = valor;
+    this.actualizarLockDropdowns();
+  }
+
+  private dropdownLockActivo = false;
+
+  private actualizarLockDropdowns(): void {
+    const hayAlguno = this._mostrarEstadoDropdown || this._mostrarSeguimientoDropdown || this._mostrarTipoDropdown;
+    if (hayAlguno && !this.dropdownLockActivo) {
+      this.dropdownScrollLock.lock();
+      this.dropdownLockActivo = true;
+    } else if (!hayAlguno && this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
+  }
 
   readonly idSeguimientoInhabilitado = ID_SEGUIMIENTO_INHABILITADO;
 
   get seguimientoOpciones(): LookupOption[] {
     return this.estados.filter(e => !this.estadosFiltro.includes(e.nombre));
+  }
+
+  // ── Cascada: opciones disponibles de cada dropdown según los demás filtros activos ──
+
+  private normalizarEstadoProyecto(p: Proyecto): string {
+    if (typeof p.activo === 'boolean') return p.activo ? 'Activo' : 'Inactivo';
+    return (p.estado ?? '').trim().toLowerCase() === 'inactivo' ? 'Inactivo' : 'Activo';
+  }
+
+  private coincideBusqueda(p: Proyecto): boolean {
+    const q = this.busqueda.toLowerCase();
+    if (!q) return true;
+    return p.codigo.toLowerCase().includes(q) ||
+      p.nombre.toLowerCase().includes(q) ||
+      (p.cliente ?? '').toLowerCase().includes(q);
+  }
+
+  private coincideEstado(p: Proyecto): boolean {
+    return !this.estadosSeleccionados.length || this.estadosSeleccionados.includes(this.normalizarEstadoProyecto(p));
+  }
+
+  private coincideTipo(p: Proyecto): boolean {
+    return !this.tiposSeleccionados.length || this.tiposSeleccionados.includes(p.tipo ?? '');
+  }
+
+  private coincideSeguimiento(p: Proyecto): boolean {
+    if (!this.seguimientoSeleccionados.length) return true;
+    return this.normalizarEstadoProyecto(p) === 'Inactivo'
+      ? this.seguimientoSeleccionados.includes(this.idSeguimientoInhabilitado)
+      : this.seguimientoSeleccionados.includes(p.idEstadoProyecto ?? -1);
+  }
+
+  // sm - Estado: disponible si hay al menos un proyecto (que coincide con búsqueda+tipo+seguimiento) en ese
+  // estado, o si ya está seleccionado (para no ocultar una selección vigente aunque quede sin resultados).
+  get estadosDisponibles(): string[] {
+    const disponibles = new Set(
+      this.proyectosSignal()
+        .filter(p => this.coincideBusqueda(p) && this.coincideTipo(p) && this.coincideSeguimiento(p))
+        .map(p => this.normalizarEstadoProyecto(p))
+    );
+    return this.estadosFiltro.filter(e => disponibles.has(e) || this.estadosSeleccionados.includes(e));
+  }
+
+  get seguimientoOpcionesDisponibles(): LookupOption[] {
+    const disponibles = new Set(
+      this.proyectosSignal()
+        .filter(p => this.coincideBusqueda(p) && this.coincideEstado(p) && this.coincideTipo(p))
+        .map(p => this.normalizarEstadoProyecto(p) === 'Inactivo' ? this.idSeguimientoInhabilitado : (p.idEstadoProyecto ?? -1))
+    );
+    return this.seguimientoOpciones.filter(e => disponibles.has(e.id) || this.seguimientoSeleccionados.includes(e.id));
+  }
+
+  get mostrarInhabilitado(): boolean {
+    return this.proyectosSignal()
+      .filter(p => this.coincideBusqueda(p) && this.coincideEstado(p) && this.coincideTipo(p))
+      .some(p => this.normalizarEstadoProyecto(p) === 'Inactivo')
+      || this.seguimientoSeleccionados.includes(this.idSeguimientoInhabilitado);
+  }
+
+  get tiposDisponibles(): LookupOption[] {
+    const disponibles = new Set(
+      this.proyectosSignal()
+        .filter(p => this.coincideBusqueda(p) && this.coincideEstado(p) && this.coincideSeguimiento(p))
+        .map(p => p.tipo ?? '')
+        .filter(Boolean)
+    );
+    return this.tipos.filter(t => disponibles.has(t.nombre) || this.tiposSeleccionados.includes(t.nombre));
   }
 
   get labelEstado(): string {
@@ -76,11 +193,13 @@ export class ProyectosFiltros implements OnInit, OnDestroy {
       },
       error: (err) => console.error('Error al cargar lookups:', err)
     });
-    window.addEventListener('scroll', this.scrollHandler, true);
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('scroll', this.scrollHandler, true);
+    if (this.dropdownLockActivo) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownLockActivo = false;
+    }
   }
 
   @HostListener('document:click')

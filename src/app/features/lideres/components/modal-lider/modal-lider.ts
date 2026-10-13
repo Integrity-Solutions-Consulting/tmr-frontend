@@ -1,9 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, HostListener, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
 interface TipoLider {
   id: number;
@@ -22,11 +26,11 @@ interface PersonaDisponible {
 @Component({
   selector: 'app-modal-lider',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatIconModule, FormsModule, ScrollingModule],
   templateUrl: './modal-lider.html',
   styleUrl: './modal-lider.scss'
 })
-export class ModalLider implements OnInit, OnChanges {
+export class ModalLider implements OnInit, OnChanges, OnDestroy {
   @Input() mostrarFormulario = false;
   @Input() modoEdicion = false;
   @Input() lider: any | null = null;
@@ -57,7 +61,13 @@ export class ModalLider implements OnInit, OnChanges {
     estado: 'Activo'
   };
 
-  constructor(private http: HttpClient) {}
+  private estabaAbierto = false;
+
+  constructor(
+    private http: HttpClient,
+    private scrollLock: ModalScrollLockService,
+    private dropdownScrollLock: DropdownScrollLockService,
+  ) {}
 
   ngOnInit() {
     this.loadTiposLideres();
@@ -68,6 +78,27 @@ export class ModalLider implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['lider'] || changes['modoEdicion']) {
       this.syncFormWithLider();
+    }
+
+    if (changes['mostrarFormulario']) {
+      if (this.mostrarFormulario && !this.estabaAbierto) {
+        this.scrollLock.lock();
+        this.estabaAbierto = true;
+      } else if (!this.mostrarFormulario && this.estabaAbierto) {
+        this.scrollLock.unlock();
+        this.estabaAbierto = false;
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.estabaAbierto) {
+      this.scrollLock.unlock();
+      this.estabaAbierto = false;
+    }
+    if (this.dropdownAbierto !== null) {
+      this.dropdownScrollLock.unlock();
+      this.dropdownAbierto = null;
     }
   }
 
@@ -128,22 +159,37 @@ export class ModalLider implements OnInit, OnChanges {
 
   @HostListener('document:click')
   onClickFuera() {
-    this.dropdownAbierto = null;
+    this.cerrarDropdown();
   }
 
   toggleDropdown(nombre: string, event: Event) {
     event.stopPropagation();
-    this.dropdownAbierto = this.dropdownAbierto === nombre ? null : nombre;
-    if (nombre === 'persona' && this.dropdownAbierto === 'persona') {
+    if (this.dropdownAbierto === nombre) {
+      this.cerrarDropdown();
+      return;
+    }
+    if (this.dropdownAbierto === null) {
+      this.dropdownScrollLock.lock();
+    }
+    this.dropdownAbierto = nombre;
+    if (nombre === 'persona') {
       this.busquedaPersona = '';
       this.personasFiltradas = [...this.personasDisponibles];
     }
   }
 
+  // sm - Bloquea/libera el scroll de fondo mientras el desplegable casero (tipo/persona) está
+  // abierto, igual que hace mat-select de forma nativa con "Tipo de proyecto".
+  private cerrarDropdown(): void {
+    if (this.dropdownAbierto !== null) {
+      this.dropdownScrollLock.unlock();
+    }
+    this.dropdownAbierto = null;
+  }
+
   filtrarPersonas() {
-    const busqueda = this.busquedaPersona.toLowerCase().trim();
     this.personasFiltradas = this.personasDisponibles.filter(p =>
-      p.nombreCompleto.toLowerCase().includes(busqueda)
+      coincideBusqueda(p.nombreCompleto, this.busquedaPersona)
     );
   }
 
@@ -170,7 +216,7 @@ export class ModalLider implements OnInit, OnChanges {
       (this.form as any)[campo] = valor;
     }
 
-    this.dropdownAbierto = null;
+    this.cerrarDropdown();
   }
 
   getPersonaNombre(): string {
@@ -188,7 +234,7 @@ get nombreApellidoBloqueado(): boolean {
 }
   cerrar() {
     this.enviado = false;
-    this.dropdownAbierto = null;
+    this.cerrarDropdown();
     this.nombresInvalido = false;
     this.apellidosInvalido = false;
     this.syncFormWithLider();

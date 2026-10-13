@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { exportarReporteExcel, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
+import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
 import {
   ActionMenuComponent,
   ActionMenuItem,
@@ -21,6 +22,8 @@ import { ConfiguracionService } from '../../services/configuracion.service';
 
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
@@ -29,15 +32,19 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
   templateUrl: './usuarios-page.html',
   styleUrl: './usuarios-page.scss',
 })
-export class UsuariosPage {
+export class UsuariosPage implements OnDestroy {
   private readonly configuracionService = inject(ConfiguracionService);
   private readonly dialog = inject(MatDialog);
+  private readonly dropdownScrollLock = inject(DropdownScrollLockService);
+  private readonly descargas = inject(DescargaProgresoService);
 
   // ── Señales de datos ──────────────────────────────────────────────────────
   readonly query = signal('');
   readonly paginaActual = signal(1);
   readonly porPagina = 10;
   readonly usuarios = this.configuracionService.usuarios;
+  // sm - Fila "Cargando usuarios..." mientras llega la lista.
+  readonly cargando = this.configuracionService.cargandoUsuarios;
   readonly usuariosTotales = this.configuracionService.usuariosTotales;
   readonly roles = this.configuracionService.roles;
 
@@ -45,7 +52,21 @@ export class UsuariosPage {
   readonly filtroActivo = signal<FiltroEstado>('activos');
 
   // ── Estado del dropdown Estado ────────────────────────────────────────────
-  mostrarEstadoDropdown = false;
+  // sm - Accessor: cualquier asignación bloquea/libera el scroll de fondo sola
+  // (DropdownScrollLockService), igual que mat-select ("Tipo de proyecto").
+  private _mostrarEstadoDropdown = false;
+  get mostrarEstadoDropdown(): boolean {
+    return this._mostrarEstadoDropdown;
+  }
+  set mostrarEstadoDropdown(valor: boolean) {
+    if (valor === this._mostrarEstadoDropdown) return;
+    this._mostrarEstadoDropdown = valor;
+    if (valor) {
+      this.dropdownScrollLock.lock();
+    } else {
+      this.dropdownScrollLock.unlock();
+    }
+  }
 
   // ── Modal de éxito ────────────────────────────────────────────────────────
   readonly exitoVisible = signal(false);
@@ -87,7 +108,7 @@ export class UsuariosPage {
 
   // ── Filtrado local por texto y estado ──────────────────────────────────────
   readonly filteredUsuarios = computed(() => {
-    const query = this.query().trim().toLowerCase();
+    const query = this.query();
     const filtro = this.filtroActivo();
 
     const filtered = this.usuarios().filter((usuario) => {
@@ -96,20 +117,16 @@ export class UsuariosPage {
       if (filtro === 'activos' && !esActivo) return false;
       if (filtro === 'inactivos' && esActivo) return false;
 
-      // Filtro por texto
-      if (!query) return true;
-
-      return [
+      // Filtro por texto: coincide por palabras sueltas, así "Jorge Lino" encuentra a
+      // "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
+      return coincideBusqueda([
         usuario.nombres,
         usuario.apellidos,
         usuario.usuario,
         usuario.email,
         usuario.estado,
         this.resolveRoleNames(usuario.rolesids).join(' '),
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(query);
+      ].join(' '), query);
     });
 
     return filtered.sort((a, b) => b.id - a.id);
@@ -153,6 +170,13 @@ export class UsuariosPage {
   }
 
   // ── Control del dropdown Estado ────────────────────────────────────────────
+
+  ngOnDestroy(): void {
+    if (this._mostrarEstadoDropdown) {
+      this.dropdownScrollLock.unlock();
+      this._mostrarEstadoDropdown = false;
+    }
+  }
 
   toggleEstadoDropdown(event?: Event): void {
     event?.stopPropagation();
@@ -232,7 +256,8 @@ export class UsuariosPage {
   }
 
   descargarUsuariosExcel(): void {
-    void exportarReporteExcel({
+    // sm - Toast de progreso compartido (con Cancelar).
+    this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel({
       titulo: 'Reporte de Usuarios',
       nombreArchivo: 'Usuarios',
       nombreHoja: 'Usuarios',
@@ -246,11 +271,12 @@ export class UsuariosPage {
       ],
       filas: this.obtenerFilasExportacion(this.obtenerUsuariosExportables()),
       columnaEstado: 5,
-    });
+    }, ctx)).catch(error => console.error('Error al exportar usuarios:', error));
   }
 
   descargarUsuariosPdf(): void {
-    void exportarReportePdf({
+    // sm - Toast de progreso compartido (con Cancelar).
+    this.descargas.ejecutar('pdf', ctx => exportarReportePdf({
       titulo: 'Reporte de Usuarios',
       nombreArchivo: 'Usuarios',
       nombreHoja: 'Usuarios',
@@ -264,7 +290,7 @@ export class UsuariosPage {
       ],
       filas: this.obtenerFilasExportacion(this.obtenerUsuariosExportables()),
       columnaEstado: 5,
-    });
+    }, ctx)).catch(error => console.error('Error al exportar usuarios:', error));
   }
 
   private obtenerUsuariosExportables(): Usuario[] {

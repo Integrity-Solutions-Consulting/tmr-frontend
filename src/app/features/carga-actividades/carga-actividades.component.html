@@ -66,17 +66,20 @@
         <span class="material-symbols-outlined filter-icon">search</span>
         <input class="filter-input" type="text" placeholder="Buscar proyecto, cliente, codigo..."
                [formControl]="searchControl" />
+        @if (searchControl.value) {
+          <button type="button" class="filter-clear" (click)="searchControl.setValue('')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
       </div>
     </div>
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha desde</label>
-      <input class="filter-input" type="date" [formControl]="fechaDesdeControl">
+      <input class="filter-input" type="date" [formControl]="fechaDesdeControl" [attr.min]="fechaMinima" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <div class="filter-group date-group">
       <label class="filter-label">Fecha hasta</label>
-      <input class="filter-input" type="date" [formControl]="fechaHastaControl">
+      <input class="filter-input" type="date" [formControl]="fechaHastaControl" [min]="fechaDesdeControl.value" [max]="fechaMaxima" (change)="ajustarRangoFechas()">
     </div>
 
     <button class="btn-descargar enabled" (click)="descargarExcel()">
@@ -138,11 +141,19 @@
                   </td>
                 </tr>
               } @empty {
-                <tr>
-                  <td colspan="7" class="empty-row">
-                    No hay registros disponibles para los filtros seleccionados.
-                  </td>
-                </tr>
+                @if (cargandoActividades$ | async) {
+                  <tr>
+                    <td colspan="7">
+                      <div class="tabla-cargando"><span class="tabla-cargando__spinner"></span>Cargando actividades...</div>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td colspan="7" class="empty-row">
+                      No hay registros disponibles para los filtros seleccionados.
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>

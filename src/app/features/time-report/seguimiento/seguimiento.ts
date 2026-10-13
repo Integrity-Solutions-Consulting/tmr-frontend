@@ -25,14 +25,18 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-// sm - Operadores para cancelar la descarga desde el toast (takeUntil).
-import { Observable, Subject, lastValueFrom, takeUntil } from 'rxjs';
+import { Observable } from 'rxjs';
+// sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
+import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
+import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
 import { NotificacionesService } from '../../../shared/services/notificaciones.service';
+import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
+import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generaciÃ³n.
 class SinActividadesError extends Error {
@@ -91,6 +95,8 @@ export class SeguimientoComponent implements AfterViewInit {
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
     private notificacionesService = inject(NotificacionesService);
+    private fechaLimites = inject(FechaLimitesService);
+    private descargas = inject(DescargaProgresoService);
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -111,6 +117,8 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la peticiÃ³n HTTP en curso.
     private cancelarDescarga$ = new Subject<void>();
     private descargaCancelada = false;
+    // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
+    public cargando = this.seguimientoService.cargando;
 
     // Filtros de bÃºsqueda (Estado Local)
     public busqueda = '';
@@ -140,6 +148,9 @@ export class SeguimientoComponent implements AfterViewInit {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     })();
+    public readonly fechaMaxima = fechaLocalInputHoy();
+    // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+    public fechaMinima: string | null = null;
 
     // PaginaciÃ³n (Estado Local para Rango)
     public pageIndex = 0;
@@ -218,6 +229,8 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     constructor() {
+        this.fechaLimites.obtenerFechaMinimaActividades().subscribe(f => this.fechaMinima = f);
+
         effect(() => {
             const raw = this.seguimientoService.colaboradores();
             const formatted = raw.map(c => ({
@@ -249,9 +262,12 @@ export class SeguimientoComponent implements AfterViewInit {
         this.dataSource.paginator = this.paginator;
         // sm - La bÃºsqueda es solo por colaborador (nombre completo) y proyecto. Se normaliza el texto (sin tildes,
         // minÃºsculas y espacios simples) para que "juan  perez" encuentre a "Juan PÃ©rez".
+        // sm - La búsqueda es solo por colaborador (nombre completo) y proyecto. Coincide por palabras sueltas
+        // (sin tildes, minúsculas y espacios simples) para que "juan perez" o "Jorge Lino" encuentren a
+        // "Juan Pérez" o "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
         this.dataSource.filterPredicate = (data: Colaborador, filter: string) =>
-            this.normalizarBusqueda(data.nombre).includes(filter)
-            || this.normalizarBusqueda(data.proyecto).includes(filter);
+            coincideBusqueda(data.nombre, filter)
+            || coincideBusqueda(data.proyecto, filter);
 
         // Cargar clientes desde lookups
         this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
@@ -312,7 +328,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - BÃºsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
     // Se limpia la selecciÃ³n para que siempre corresponda a los resultados visibles (igual que al recargar).
     public aplicarBusqueda() {
-        this.dataSource.filter = this.normalizarBusqueda(this.busqueda);
+        this.dataSource.filter = normalizarTexto(this.busqueda);
         this.selection.clear();
         this.irAPrimeraPagina();
     }
@@ -362,6 +378,9 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - "Seleccionar todos" debe cubrir todas las pÃ¡ginas del resultado ya filtrado
     // (rango de fechas/cliente del backend + bÃºsqueda de texto del cliente), no solo dataSource.data
     // (que ignora la bÃºsqueda de texto) ni la pÃ¡gina visible.
+    // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado
+    // (rango de fechas/cliente del backend + búsqueda de texto del cliente), no solo dataSource.data
+    // (que ignora la búsqueda de texto) ni la página visible.
     public isAllSelected() {
         const filtrados = this.dataSource.filteredData;
         return filtrados.length > 0 && this.selection.selected.length === filtrados.length;
@@ -478,26 +497,13 @@ export class SeguimientoComponent implements AfterViewInit {
 
     // sm - Muestra el toast de descarga. La descarga mÃºltiple avanza por archivo/reporte (progreso real);
     // el Excel individual no reporta avance, asÃ­ que usa barra indeterminada.
+    // sm - El toast (título, barra, porcentaje y Cancelar) ahora es el compartido de la app: DescargaProgresoService.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
-        this.descargaCancelada = false;
-        this.progresoDescarga = {
-            visible: true,
-            cerrando: false,
-            titulo: `Descargando ${formato === 'pdf' ? 'PDF' : 'Excel'}${cantidad > 1 ? ` (${cantidad} reportes)` : ''}`,
-            detalle: cantidad > 1 ? `0 de ${cantidad} reportes generados` : 'Generando reporte...',
-            progreso: 0,
-            indeterminado: cantidad === 1 && formato === 'xlsx',
-        };
+        this.descargas.iniciar(formato, cantidad);
     }
 
-    // sm - Actualiza el porcentaje y el texto del toast; al recibir un valor la barra deja de ser indeterminada.
     private actualizarProgresoDescarga(progreso: number, detalle: string): void {
-        this.progresoDescarga = {
-            ...this.progresoDescarga,
-            progreso: Math.min(100, Math.max(0, Math.round(progreso))),
-            detalle,
-            indeterminado: false,
-        };
+        this.descargas.actualizar(progreso, detalle);
     }
 
     // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animaciÃ³n de salida.
@@ -533,6 +539,17 @@ export class SeguimientoComponent implements AfterViewInit {
             if (this.descargaCancelada) throw new DescargaCanceladaError();
             throw error;
         }
+    private finalizarProgresoDescarga(): Promise<void> {
+        return this.descargas.finalizar();
+    }
+
+    private cerrarProgresoDescarga(): void {
+        this.descargas.cerrar();
+    }
+
+    // sm - Espera una petición HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
+    private esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
+        return this.descargas.esperarCancelable(peticion);
     }
 
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
@@ -541,7 +558,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private async descargarReportesDirecto(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         let incluidos = 0;
         for (const [indice, item] of items.entries()) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            this.descargas.verificarCancelacion();
             const nombreBase = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
             if (formato === 'pdf') {
                 const contenido = await this.generarPdfColaborador(item.colaborador, rango, item.proyecto);
@@ -572,7 +589,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const nombresUsados = new Set<string>();
         let incluidos = 0;
         for (const [indice, item] of items.entries()) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            this.descargas.verificarCancelacion();
             const contenido = formato === 'pdf'
                 ? await this.generarPdfColaborador(item.colaborador, rango, item.proyecto)
                 : await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
@@ -596,7 +613,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const contenidoZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }, metadata => {
             this.actualizarProgresoDescarga(90 + metadata.percent * 0.1, 'Comprimiendo archivos...');
         });
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        this.descargas.verificarCancelacion();
         this.guardarArchivo(contenidoZip, `Seguimiento_${formato === 'pdf' ? 'PDF' : 'Excel'}_${rango.desde}_a_${rango.hasta}.zip`);
         return incluidos;
     }
@@ -650,11 +667,13 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - BotÃ³n "Reporte": exporta la tabla (resultados filtrados) con el formato estÃ¡ndar de reportes de la app.
     // Se eliminÃ³ la versiÃ³n anterior (ExcelJS/jsPDF manual) que quedaba despuÃ©s de un "return" y nunca se ejecutaba.
     public async exportarExcel() {
-        await exportarReporteExcel(this.configuracionReporteTabla());
+        await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel(this.configuracionReporteTabla(), ctx))
+            .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
     }
 
     public exportarPDF() {
-        void exportarReportePdf(this.configuracionReporteTabla());
+        this.descargas.ejecutar('pdf', ctx => exportarReportePdf(this.configuracionReporteTabla(), ctx))
+            .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
     }
 
     // sm - Columnas y filas compartidas por el Excel y el PDF del reporte de la tabla.
@@ -695,7 +714,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de pÃ¡gina) y solo lectura.
     public verCalendarioColaborador(col: Colaborador): void {
         this.dialog.open(CalendarioColaboradorModal, {
-            data: { colaborador: col },
+            data: { colaborador: col, fechaDesde: this.fechaDesde },
             width: '900px',
             maxHeight: '90vh',
             panelClass: 'tmr-dialog-panel',
@@ -723,7 +742,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const respuesta = await this.obtenerActividadesColaborador(col, rango, proyecto);
         if (!respuesta.actividades || respuesta.actividades.length === 0) return undefined;
         const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta);
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        this.descargas.verificarCancelacion();
         return contenido;
     }
 
@@ -1075,6 +1094,8 @@ export class SeguimientoComponent implements AfterViewInit {
         const buffer = await workbook.xlsx.writeBuffer();
         // sm - Si el usuario cancelÃ³ mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
         if (this.descargaCancelada) throw new DescargaCanceladaError();
+        // sm - Si el usuario canceló mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
+        this.descargas.verificarCancelacion();
         if (devolverBuffer) return buffer;
         this.guardarArchivo(
             new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),

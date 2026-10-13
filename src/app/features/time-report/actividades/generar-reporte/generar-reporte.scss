@@ -46,7 +46,8 @@
     }
 }
 
-.req {
+// Material ya agrega el asterisco en los campos obligatorios; solo se le da el color rojo.
+:host ::ng-deep .mat-mdc-form-field-required-marker {
     color: var(--status-danger-text);
 }
 

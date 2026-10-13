@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use '../../../../../styles/filtros' as filtros;
 
 /* ============================================================
    TABLA COMPARTIDA
@@ -38,151 +39,21 @@
    FILTROS
    ============================================================ */
 
-// sm - Mismo diseño que la barra de filtros de Seguimiento: colores exactos (no tokens var(--...) que podían
-// resolver a un tono distinto), sin borde (solo una sombra suave).
-.filters-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 16px;
-  background-color: var(--pattern-panel-bg);
-  border: 1px solid var(--pattern-border-color);
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: var(--elevation-card);
-}
-
-.filter-group {
-  flex: 1;
-  min-width: 250px;
-}
-
-.select-group {
-  flex: none;
-  width: 192px;
-}
-
-.filter-label {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  margin-left: 4px;
-}
-
 /* ============================================================
    INPUTS DE FILTRO
    ============================================================ */
-
-.filter-input-wrapper {
-  position: relative;
-
-  &:focus-within .filter-icon {
-    color: var(--primary-color);
-  }
-}
-
-.filter-input {
-  width: 100%;
-  padding: 10px 16px;
-  background-color: var(--pattern-control-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  outline: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--pattern-control-color);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  box-sizing: border-box;
-
-  &:focus {
-    border-color: var(--primary-color);
-    box-shadow: var(--focus-ring-primary);
-  }
-
-  &::placeholder {
-    color: var(--text-muted) !important;
-    opacity: 1 !important;
-  }
-  &::-webkit-input-placeholder {
-    color: var(--text-muted) !important;
-    opacity: 1 !important;
-  }
-  &::-moz-placeholder {
-    color: var(--text-muted) !important;
-    opacity: 1 !important;
-  }
-}
-
-/* Espacio para iconos de la izquierda */
-
-input.filter-input {
-  padding-left: 40px;
-}
 
 /* ============================================================
    SELECT
    ============================================================ */
 
-.filter-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 40px;
-  cursor: pointer;
-  color: var(--pattern-control-color);
-  background-color: var(--pattern-control-bg);
-}
-
 /* ============================================================
    ICONOS DE FILTROS
    ============================================================ */
 
-.filter-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  transition: color 0.2s;
-}
-
-.filter-icon-right {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  pointer-events: none;
-}
-
 /* ============================================================
-   LIMPIAR FILTROS
+   DESPLEGABLES MES / AÑO (mismo diseño que los filtros de Proyectos)
    ============================================================ */
-
-.btn-clear {
-  padding: 10px;
-  color: var(--text-muted);
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    color: var(--status-danger-text);
-    background-color: var(--status-danger-bg-soft);
-    border-color: var(--status-danger-border);
-  }
-}
 
 /* ============================================================
    TABLA
@@ -427,13 +298,6 @@ input.filter-input {
     width: 100% !important;
     flex: 1 1 auto;
   }
-
-  .btn-clear {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
 }
 
 /* ============================================================
@@ -458,3 +322,12 @@ input.filter-input {
   }
 }
 
+// Tema oscuro: mismo color de label que Seguimiento.
+:host-context(html[data-theme="dark"]) {
+  .filter-label {
+    color: #cbd5e1;
+  }
+}
+
+// Barra de filtros: diseño único de la app (modelo: Proyectos). Ver styles/_filtros.scss
+@include filtros.estandar;

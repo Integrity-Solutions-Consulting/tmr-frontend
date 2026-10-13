@@ -1,0 +1,11 @@
+<div class="search-input">
+  <svg class="search-input__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <input class="search-input__field" type="search" [attr.aria-label]="ariaLabel" [placeholder]="placeholder" [ngModel]="value" (ngModelChange)="update($event)" />
+  @if (value) {
+    <button type="button" class="search-input__clear" (click)="clear()" aria-label="Limpiar búsqueda" title="Limpiar búsqueda">
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  }
+</div>

@@ -1,3 +1,4 @@
+@use '../../../../../styles/ui-patterns' as ui;
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -23,49 +24,19 @@
   overflow: hidden;
 
   &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 22px 24px 16px;
-    border-bottom: 1px solid var(--border-default);
-    flex-shrink: 0;
+    @include ui.modal-header;
   }
 
   &__title {
-    font-family: 'Inter', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0 0 4px;
+    @include ui.modal-title;
   }
 
   &__subtitle {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    color: var(--text-disabled);
-    margin: 0;
+    @include ui.modal-subtitle;
   }
 
   &__close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-disabled);
-    padding: 4px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    transition: color 0.15s, background 0.15s;
-    flex-shrink: 0;
-
-    .material-icons {
-      font-size: 20px;
-    }
-
-    &:hover {
-      color: var(--text-body);
-      background: var(--bg-soft);
-    }
+    @include ui.modal-close;
   }
 
   &__body {

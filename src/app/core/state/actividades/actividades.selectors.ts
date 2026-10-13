@@ -8,6 +8,11 @@ export const selectActividadesList = createSelector(
   (state) => state.items
 );
 
+export const selectActividadesCargando = createSelector(
+  selectActividadesState,
+  (state) => state.cargando
+);
+
 export const selectIsImporting = createSelector(
   selectActividadesState,
   (state) => state.importing

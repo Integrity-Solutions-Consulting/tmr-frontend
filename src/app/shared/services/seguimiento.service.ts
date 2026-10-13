@@ -18,6 +18,10 @@ export class SeguimientoService {
   private _colaboradores = signal<Colaborador[]>([]);
   public colaboradores = this._colaboradores.asReadonly();
 
+  // sm - true mientras se pide la lista: la tabla muestra "Cargando registros..." en lugar de quedar en blanco.
+  private _cargando = signal(true);
+  public cargando = this._cargando.asReadonly();
+
   private _metricas = signal<MetricasSeguimiento>({
     horasPendientes: 0,
     horasRegistradas: 0,
@@ -40,12 +44,17 @@ export class SeguimientoService {
     // sm - Se cancela la carga anterior si sigue en curso: así una respuesta vieja que llegue tarde
     // no pisa los datos del último filtro aplicado.
     this.cargaEnCurso?.unsubscribe();
+    this._cargando.set(true);
     this.cargaEnCurso = this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
         this._colaboradores.set(data || []);
         this._metricas.set(this.calcularMetricas(data || []));
+        this._cargando.set(false);
       },
-      error: (err) => console.error('Error al cargar seguimiento', err)
+      error: (err) => {
+        this._cargando.set(false);
+        console.error('Error al cargar seguimiento', err);
+      }
     });
   }
   //SM -Extraer la lógica de cálculo de métricas a un método separado para poder reutilizarlo en otros lugares

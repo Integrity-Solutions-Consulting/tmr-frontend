@@ -21,7 +21,7 @@
 
             <!-- Selección de Año -->
             <mat-form-field appearance="outline">
-                <mat-label>Año <span class="req">*</span></mat-label>
+                <mat-label>Año</mat-label>
                 <mat-select formControlName="anio">
                     <mat-option [value]="2024">2024</mat-option>
                     <mat-option [value]="2025">2025</mat-option>
@@ -31,7 +31,7 @@
 
             <!-- Selección de Mes -->
             <mat-form-field appearance="outline">
-                <mat-label>Mes <span class="req">*</span></mat-label>
+                <mat-label>Mes</mat-label>
                 <mat-select formControlName="mes">
                     @for (m of meses; track m; let i = $index) {
                     <mat-option [value]="i">{{ m }}</mat-option>
@@ -40,7 +40,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-                <mat-label>Formato <span class="req">*</span></mat-label>
+                <mat-label>Formato</mat-label>
                 <mat-select formControlName="formato">
                     <mat-option value="xlsx">Excel (.xlsx)</mat-option>
                     <mat-option value="pdf">PDF</mat-option>
