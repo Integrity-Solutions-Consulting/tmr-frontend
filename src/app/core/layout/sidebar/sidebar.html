@@ -79,8 +79,8 @@
     <span>Clientes</span>
   </a>
 
-  <a routerLink="/proveedores" routerLinkActive="active" class="sidebar__link" title="Proveedores" *ngIf="hasModule('Proveedores')">
-    <span class="material-symbols-outlined">local_shipping</span>
+  <a routerLink="/proveedores" routerLinkActive="active" class="sidebar__link" title="Proveedores" *ngIf="hasProveedoresModule()">
+    <span class="material-symbols-outlined sidebar__supplier-icon">local_shipping</span>
     <span>Proveedores</span>
   </a>
 

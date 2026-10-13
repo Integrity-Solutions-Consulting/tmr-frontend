@@ -17,11 +17,6 @@ export const roleGuard: CanActivateFn = (route) => {
     return false;
   }
 
-  // Si es administrador, tiene acceso a todo de forma predeterminada
-  if (tokenService.isAdmin()) {
-    return true;
-  }
-
   const path = route.routeConfig?.path;
 
   // Mapa de rutas de Angular a nombres de módulos en la Base de Datos
@@ -30,6 +25,7 @@ export const roleGuard: CanActivateFn = (route) => {
     'proyectos': 'Proyectos',
     'colaboradores': 'Colaboradores',
     'clientes': 'Clientes',
+    'proveedores': 'Proveedores',
     'lideres': 'Lideres',
     'reportes': 'Reportes',
     'configuracion': 'Configuracion',
@@ -39,6 +35,14 @@ export const roleGuard: CanActivateFn = (route) => {
 
   if (path && pathModuleMap[path]) {
     const requiredModule = pathModuleMap[path];
+    // Proveedores no usa el atajo histórico isAdmin(): ese método también contempla
+    // Recursos Humanos para otros flujos. Solo Administrador, Gerente y Lider pueden entrar.
+    if (path === 'proveedores' && !tokenService.canAccessProveedores()) {
+      router.navigate(['/dashboard']);
+      return false;
+    }
+    // Si es administrador, tiene acceso a los demás módulos de forma predeterminada.
+    if (tokenService.isAdmin()) return true;
     // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
@@ -52,5 +56,6 @@ export const roleGuard: CanActivateFn = (route) => {
     }
   }
 
+  if (tokenService.isAdmin()) return true;
   return true;
 };

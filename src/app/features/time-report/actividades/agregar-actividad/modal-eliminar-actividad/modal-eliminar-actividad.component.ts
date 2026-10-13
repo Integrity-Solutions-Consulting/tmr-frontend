@@ -12,6 +12,7 @@ export class ModalEliminarActividadComponent {
   @Input() mostrar = false;
   @Input() descripcionActividad = '';
   @Input() error: string | null = null;
+  @Input() procesando = false;
   @Output() cerrarModal = new EventEmitter<void>();
   @Output() confirmarEliminar = new EventEmitter<void>();
 }

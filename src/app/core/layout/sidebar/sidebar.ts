@@ -82,4 +82,8 @@ export class Sidebar {
   hasModule(moduleName: string): boolean {
     return this.tokenService.hasModule(moduleName);
   }
+
+  hasProveedoresModule(): boolean {
+    return this.tokenService.canAccessProveedores();
+  }
 }

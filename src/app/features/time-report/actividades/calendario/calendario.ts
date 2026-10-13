@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, inject, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Output, Input, inject, signal, computed, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +34,7 @@ interface DiaCalendario {
     templateUrl: './calendario.html',
     styleUrls: ['./calendario.scss']
 })
-export class Calendario {
+export class Calendario implements OnInit, OnChanges {
     @Output() diaSeleccionado = new EventEmitter<Date>();
     @Output() editarActividadEvent = new EventEmitter<any>();
 
@@ -48,6 +48,7 @@ export class Calendario {
     // No filtra las actividades que se ven en las celdas del calendario: ahí se deja el día completo del colaborador
     // (incluye otros proyectos y novedades sin proyecto) para no ocultar contexto en una vista de solo lectura.
     @Input() idProyectoOverride?: number;
+    private inicializado = false;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -55,14 +56,16 @@ export class Calendario {
     public nombresDias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
     public mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-    constructor() {
-        effect(() => {
-            const fecha = this._fechaActual();
-            const y = fecha.getFullYear();
-            const m = fecha.getMonth() + 1;
-            this.actividadesService.cargarCalendario(y, m, this.idEmpleadoOverride);
-            this.actividadesService.cargarResumen(y, m, this.idEmpleadoOverride, this.idProyectoOverride);
-        });
+    ngOnInit(): void {
+        this.inicializado = true;
+        this.cargarMesActual();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // Los inputs llegan después del constructor. Sin esta recarga el calendario reutilizado
+        // en Seguimiento podía consultar al empleado de sesión en vez del empleado solicitado.
+        if (!this.inicializado || (!changes['idEmpleadoOverride'] && !changes['idProyectoOverride'])) return;
+        this.cargarMesActual();
     }
 
     private _fechaActual = signal(new Date());
@@ -79,6 +82,7 @@ export class Calendario {
     onMesChange() {
         const d = this._fechaActual();
         this._fechaActual.set(new Date(d.getFullYear(), this.mesSeleccionado, 1));
+        this.cargarMesActual();
     }
 
     diasCalendario = computed(() => {
@@ -141,6 +145,7 @@ export class Calendario {
         const nuevo = new Date(d.getFullYear(), d.getMonth() - 1, 1);
         this._fechaActual.set(nuevo);
         this.mesSeleccionado = nuevo.getMonth();
+        this.cargarMesActual();
     }
 
     siguienteMes() {
@@ -148,17 +153,25 @@ export class Calendario {
         const nuevo = new Date(d.getFullYear(), d.getMonth() + 1, 1);
         this._fechaActual.set(nuevo);
         this.mesSeleccionado = nuevo.getMonth();
+        this.cargarMesActual();
     }
 
     irAHoy() {
         const hoy = new Date();
         this._fechaActual.set(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
         this.mesSeleccionado = hoy.getMonth();
+        this.cargarMesActual();
     }
 
     seleccionarDia(fecha: Date) {
         // sm - En modo solo lectura no se permite abrir el modal de agregar actividad al hacer clic en un día.
         if (this.soloLectura) return;
         this.diaSeleccionado.emit(fecha);
+    }
+
+    private cargarMesActual(): void {
+        const fecha = this._fechaActual();
+        this.actividadesService.cargarCalendario(fecha.getFullYear(), fecha.getMonth() + 1, this.idEmpleadoOverride);
+        this.actividadesService.cargarResumen(fecha.getFullYear(), fecha.getMonth() + 1, this.idEmpleadoOverride, this.idProyectoOverride);
     }
 }
