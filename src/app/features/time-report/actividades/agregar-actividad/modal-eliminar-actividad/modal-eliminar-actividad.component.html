@@ -8,7 +8,7 @@
     <h2 class="modal-title">¿Eliminar actividad?</h2>
 
     <p class="modal-mensaje">
-      Esta acción eliminará la actividad <strong *ngIf="descripcionActividad; else sinDesc">{{ descripcionActividad }}</strong><ng-template #sinDesc><strong>sin descripción</strong></ng-template> permanentemente.
+      Esta acción desactivará la actividad <strong *ngIf="descripcionActividad; else sinDesc">{{ descripcionActividad }}</strong><ng-template #sinDesc><strong>sin descripción</strong></ng-template>. Podrá conservarse para fines de auditoría.
     </p>
 
     <div class="modal-form__error-banner" *ngIf="error">
@@ -17,8 +17,8 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn-cancelar" type="button" (click)="cerrarModal.emit()">Cancelar</button>
-      <button class="btn-eliminar" type="button" (click)="confirmarEliminar.emit()">Eliminar</button>
+      <button class="btn-cancelar" type="button" [disabled]="procesando" (click)="cerrarModal.emit()">Cancelar</button>
+      <button class="btn-eliminar" type="button" [disabled]="procesando" (click)="confirmarEliminar.emit()">{{ procesando ? 'Eliminando…' : 'Eliminar' }}</button>
     </div>
 
   </div>

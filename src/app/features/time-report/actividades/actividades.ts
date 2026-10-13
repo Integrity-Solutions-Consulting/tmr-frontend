@@ -43,12 +43,7 @@ export class Actividades implements OnInit {
         return `${dia}/${mes}/${anio}`;
     }
 
-    ngOnInit() {
-        this.actividadesService.cargarResumen();
-        // Si tienes el mes y año actual, llama a cargarCalendario también
-        const hoy = new Date();
-        this.actividadesService.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
-    }
+    ngOnInit() {}
 
     /**
      * Abre el modal de agregar actividad sin fecha preseleccionada

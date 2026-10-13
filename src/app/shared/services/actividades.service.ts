@@ -19,6 +19,10 @@ export class ActividadesService {
   // Variables de estado del mes activo en el calendario
   private currentAnio = signal<number>(new Date().getFullYear());
   private currentMes = signal<number>(new Date().getMonth() + 1);
+  // Cada respuesta se acepta únicamente si corresponde a la última consulta solicitada.
+  // Esto impide que una respuesta lenta de otro mes reemplace el calendario vigente.
+  private solicitudCalendario = 0;
+  private solicitudResumen = 0;
 
   // Signals para métricas
   // sm - Se comentan las métricas anteriores (horas de hoy, semana y mes): Actividades ahora muestra las mismas
@@ -45,6 +49,7 @@ export class ActividadesService {
   // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
   // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
   cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number): void {
+    const solicitud = ++this.solicitudResumen;
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
     if (!empId) {
       // sm - Sin empleado no hay horas que mostrar: las métricas quedan en 0.
@@ -62,18 +67,20 @@ export class ActividadesService {
     }
     this.http.get<ResumenHorasDto>(url).subscribe({
       next: (res) => {
+        if (solicitud !== this.solicitudResumen) return;
         // sm - Si no hay registros, las métricas quedan en 0 (no en guion).
         this._horasPorRegistrar.set(Number(res?.horasPorRegistrar ?? 0));
         this._horasRegistradas.set(Number(res?.horasRegistradas ?? 0));
         this._promedioPorDia.set(Number(res?.promedioPorDia ?? 0));
       },
-      error: (err) => console.error('Error al cargar resumen', err)
+      error: (err) => { if (solicitud === this.solicitudResumen) console.error('Error al cargar resumen', err); }
     });
   }
 
   // sm - idEmpleadoOverride permite pedir el calendario de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
   // en vez de siempre usar al usuario logueado.
   cargarCalendario(anio: number, mes: number, idEmpleadoOverride?: number): void {
+    const solicitud = ++this.solicitudCalendario;
     this.currentAnio.set(anio);
     this.currentMes.set(mes);
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
@@ -83,6 +90,7 @@ export class ActividadesService {
     }
     this.http.get<any[]>(`${this.apiUrl}/calendario?idEmpleado=${empId}&anio=${anio}&mes=${mes}`).subscribe({
       next: (data) => {
+        if (solicitud !== this.solicitudCalendario) return;
         const mapped = (data || []).map(item => ({
           id: String(item.id),
           idempleado: item.idEmpleado,
@@ -99,7 +107,7 @@ export class ActividadesService {
         } as Actividad));
         this._actividades.set(mapped);
       },
-      error: (err) => console.error('Error al cargar calendario', err)
+      error: (err) => { if (solicitud === this.solicitudCalendario) console.error('Error al cargar calendario', err); }
     });
   }
 
@@ -173,9 +181,7 @@ export class ActividadesService {
         let primerError: string | null = null;
         const alTerminar = () => {
           if (completed < requests.length) return;
-          this.cargarResumen(this.currentAnio(), this.currentMes());
-          const actDate = parseLocal(data.fechaInicio);
-          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          this.recargarMesActual();
           if (primerError === null) {
             if (callback) callback();
           } else if (errorCallback) {
@@ -221,9 +227,7 @@ export class ActividadesService {
 
       this.http.post(this.apiUrl, payload).subscribe({
         next: (res) => {
-          this.cargarResumen(this.currentAnio(), this.currentMes());
-          const actDate = new Date(data.fechaActividad);
-          this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+          this.recargarMesActual();
           if (callback) callback();
         },
         error: (err) => {
@@ -251,9 +255,7 @@ export class ActividadesService {
 
     this.http.put(`${this.apiUrl}/${id}`, payload).subscribe({
       next: () => {
-        this.cargarResumen(this.currentAnio(), this.currentMes());
-        const actDate = new Date(data.fechaActividad);
-        this.cargarCalendario(actDate.getFullYear(), actDate.getMonth() + 1);
+        this.recargarMesActual();
 
         if (callback) callback();
       },
@@ -267,10 +269,7 @@ export class ActividadesService {
   eliminarActividad(id: number | string, callback?: () => void, errorCallback?: (err: any) => void): void {
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
-        this.cargarResumen(this.currentAnio(), this.currentMes());
-        // Recargar el calendario actual
-        const hoy = new Date();
-        this.cargarCalendario(hoy.getFullYear(), hoy.getMonth() + 1);
+        this.recargarMesActual();
 
         if (callback) callback();
       },
@@ -288,5 +287,10 @@ export class ActividadesService {
       dateA.getMonth() === b.getMonth() &&
       dateA.getFullYear() === b.getFullYear()
     );
+  }
+
+  private recargarMesActual(): void {
+    this.cargarResumen(this.currentAnio(), this.currentMes());
+    this.cargarCalendario(this.currentAnio(), this.currentMes());
   }
 }

@@ -120,6 +120,16 @@ export class TokenService {
     return this.hasRole('ADMINISTRATIVO');
   }
 
+  // La matriz inicial de Proveedores solo concede CREATE/UPDATE/DELETE a Administrador.
+  // Gerente y Lider conservan consulta mediante PROVEEDORES_READ.
+  canManageProveedores(): boolean {
+    return this.hasRole('ADMINISTRADOR');
+  }
+
+  canAccessProveedores(): boolean {
+    return this.hasRole('ADMINISTRADOR') || this.hasRole('GERENTE') || this.hasRole('LIDER') || this.hasRole('LÍDER');
+  }
+
   isColaborador(): boolean {
     if (this.isAdmin() || this.isLider() || this.isGerente() || this.isAdministrativo()) {
       return false;
