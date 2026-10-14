@@ -25,9 +25,9 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { lastValueFrom, Observable, Subject, takeUntil } from 'rxjs';
+import { Observable } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
-import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
+import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
@@ -56,13 +56,6 @@ interface RangoDescarga {
 interface ItemDescarga {
     colaborador: Colaborador;
     proyecto?: ProyectoResumen;
-}
-
-// sm - Error propio para identificar que el usuario cancelÃ³ la descarga desde el toast de progreso.
-class DescargaCanceladaError extends Error {
-    constructor() {
-        super('Descarga cancelada por el usuario.');
-    }
 }
 
 @Component({
@@ -105,18 +98,6 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
-    // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
-    public progresoDescarga = {
-        visible: false,
-        cerrando: false,
-        titulo: '',
-        detalle: '',
-        progreso: 0,
-        indeterminado: true,
-    };
-    // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la peticiÃ³n HTTP en curso.
-    private cancelarDescarga$ = new Subject<void>();
-    private descargaCancelada = false;
     // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
     public cargando = this.seguimientoService.cargando;
 
@@ -508,41 +489,17 @@ export class SeguimientoComponent implements AfterViewInit {
 
     // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animaciÃ³n de salida.
     private async finalizarProgresoDescarga(): Promise<void> {
-        this.actualizarProgresoDescarga(100, 'Descarga completada');
-        await new Promise(resolve => setTimeout(resolve, 600));
-        this.cerrarProgresoDescarga();
+        await this.descargas.finalizar();
     }
 
     // sm - Cierra el toast con la animaciÃ³n de salida y luego lo quita del DOM.
     private cerrarProgresoDescarga(): void {
-        if (!this.progresoDescarga.visible) return;
-        this.progresoDescarga = { ...this.progresoDescarga, cerrando: true };
-        setTimeout(() => {
-            this.progresoDescarga = { ...this.progresoDescarga, visible: false, cerrando: false };
-        }, 200);
+        this.descargas.cerrar();
     }
 
-    // sm - BotÃ³n "Cancelar" del toast: corta la peticiÃ³n HTTP en curso y marca la descarga como cancelada.
-    public cancelarDescarga(): void {
-        if (!this.isDownloading || this.descargaCancelada) return;
-        this.descargaCancelada = true;
-        this.cancelarDescarga$.next();
-        this.progresoDescarga = { ...this.progresoDescarga, detalle: 'Cancelando...' };
-    }
-
-    // sm - Espera una peticiÃ³n HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
     private async esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
-        try {
-            return await lastValueFrom(peticion.pipe(takeUntil(this.cancelarDescarga$)));
-        } catch (error) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
-            throw error;
-        }
+        return this.descargas.esperarCancelable(peticion);
     }
-
-
-
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
     // con varios proyectos, para no armar un ZIP con un Ãºnico colaborador adentro. Devuelve cuÃ¡ntos se descargaron;
     // los que no tengan actividades en el rango se omiten.
@@ -1083,8 +1040,6 @@ export class SeguimientoComponent implements AfterViewInit {
 
         // Guardar archivo y disparar descarga
         const buffer = await workbook.xlsx.writeBuffer();
-        // sm - Si el usuario cancelÃ³ mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
         // sm - Si el usuario canceló mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
         this.descargas.verificarCancelacion();
         if (devolverBuffer) return buffer;
@@ -1110,7 +1065,6 @@ export class SeguimientoComponent implements AfterViewInit {
         }
         this.aplicarFiltros();
     }
-
     //notificacaiones mock hay que cambiar la logica cuando ya se encuentre realizado el backend
 
     notificarColaborador(colaborador: Colaborador) {
@@ -1133,6 +1087,5 @@ export class SeguimientoComponent implements AfterViewInit {
             }
           });
     }
-}
 
-//comentario de prueba
+}
