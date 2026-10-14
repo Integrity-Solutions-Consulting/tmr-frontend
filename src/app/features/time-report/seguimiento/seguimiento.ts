@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect } from '@angular/core';
+﻿import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -25,19 +25,20 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable, Subject, takeUntil } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
-import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
+import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
+import { NotificacionesService } from '../../../shared/services/notificaciones.service';
 import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
 
-// sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
+// sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generaciÃ³n.
 class SinActividadesError extends Error {
     constructor(public readonly colaborador: string) {
         super(`No hay actividades registradas para ${colaborador} en este rango.`);
@@ -55,6 +56,13 @@ interface RangoDescarga {
 interface ItemDescarga {
     colaborador: Colaborador;
     proyecto?: ProyectoResumen;
+}
+
+// sm - Error propio para identificar que el usuario cancelÃ³ la descarga desde el toast de progreso.
+class DescargaCanceladaError extends Error {
+    constructor() {
+        super('Descarga cancelada por el usuario.');
+    }
 }
 
 @Component({
@@ -86,6 +94,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private http = inject(HttpClient);
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
+    private notificacionesService = inject(NotificacionesService);
     private fechaLimites = inject(FechaLimitesService);
     private descargas = inject(DescargaProgresoService);
 
@@ -96,12 +105,24 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
+    // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
+    public progresoDescarga = {
+        visible: false,
+        cerrando: false,
+        titulo: '',
+        detalle: '',
+        progreso: 0,
+        indeterminado: true,
+    };
+    // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la peticiÃ³n HTTP en curso.
+    private cancelarDescarga$ = new Subject<void>();
+    private descargaCancelada = false;
     // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
     public cargando = this.seguimientoService.cargando;
 
-    // Filtros de búsqueda (Estado Local)
+    // Filtros de bÃºsqueda (Estado Local)
     public busqueda = '';
-    // sm - clienteSeleccionado es el texto del campo; clienteAplicado es el cliente con el que se filtró la tabla.
+    // sm - clienteSeleccionado es el texto del campo; clienteAplicado es el cliente con el que se filtrÃ³ la tabla.
     public clienteSeleccionado = '';
     private clienteAplicado = '';
     public clientes = signal<{ id: number, nombre: string }[]>([]);
@@ -116,7 +137,7 @@ export class SeguimientoComponent implements AfterViewInit {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
     })();
-    // sm - Se comenta el valor por defecto anterior (último día del mes actual) porque "Fecha hasta" debe iniciar en el día de hoy.
+    // sm - Se comenta el valor por defecto anterior (Ãºltimo dÃ­a del mes actual) porque "Fecha hasta" debe iniciar en el dÃ­a de hoy.
     // public fechaHasta = (() => {
     //     const d = new Date();
     //     const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
@@ -131,15 +152,15 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
     public fechaMinima: string | null = null;
 
-    // Paginación (Estado Local para Rango)
+    // PaginaciÃ³n (Estado Local para Rango)
     public pageIndex = 0;
     public pageSize = 5;
 
     @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-    // Reactividad vía Signals desde el Servicio de Negocio
+    // Reactividad vÃ­a Signals desde el Servicio de Negocio
     //public metricas = computed(() => this.seguimientoService.getMetricas());
-    //SM - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados
+    //SM - Esto hace que cuando se seleccionen colaboradores, las mÃ©tricas se recalculen con base a los colaboradores seleccionados
     get metricas(): MetricasSeguimiento {
         if (this.selection.hasValue()) {
             return this.seguimientoService.calcularMetricas(this.selection.selected);
@@ -147,13 +168,13 @@ export class SeguimientoComponent implements AfterViewInit {
         return this.seguimientoService.getMetricas();
     }
 
-    // sm - La barra de métricas queda "en blanco" (valores con guion) cuando no hay ningún colaborador seleccionado
-    // o cuando están seleccionados todos; solo muestra valores con una selección parcial (uno o varios, no todos).
+    // sm - La barra de mÃ©tricas queda "en blanco" (valores con guion) cuando no hay ningÃºn colaborador seleccionado
+    // o cuando estÃ¡n seleccionados todos; solo muestra valores con una selecciÃ³n parcial (uno o varios, no todos).
     get metricasEnBlanco(): boolean {
         return !this.selection.hasValue() || this.isAllSelected();
     }
 
-    // Ordenación manual para tabla HTML nativa
+    // OrdenaciÃ³n manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
     public sortAsc = true;
 
@@ -229,16 +250,18 @@ export class SeguimientoComponent implements AfterViewInit {
             }));
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
-            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, así que cualquier
-            // selección previa queda con referencias huérfanas (el checkbox del header se veía
-            // "indeterminado" y el footer de métricas podía mostrar la selección vieja). Se limpia
-            // para que la selección siempre corresponda a la data recién cargada/filtrada.
+            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, asÃ­ que cualquier
+            // selecciÃ³n previa queda con referencias huÃ©rfanas (el checkbox del header se veÃ­a
+            // "indeterminado" y el footer de mÃ©tricas podÃ­a mostrar la selecciÃ³n vieja). Se limpia
+            // para que la selecciÃ³n siempre corresponda a la data reciÃ©n cargada/filtrada.
             this.selection.clear();
         });
     }
 
     ngAfterViewInit() {
         this.dataSource.paginator = this.paginator;
+        // sm - La bÃºsqueda es solo por colaborador (nombre completo) y proyecto. Se normaliza el texto (sin tildes,
+        // minÃºsculas y espacios simples) para que "juan  perez" encuentre a "Juan PÃ©rez".
         // sm - La búsqueda es solo por colaborador (nombre completo) y proyecto. Coincide por palabras sueltas
         // (sin tildes, minúsculas y espacios simples) para que "juan perez" o "Jorge Lino" encuentren a
         // "Juan Pérez" o "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
@@ -273,7 +296,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     get totalRegistros(): number {
-        // sm - Solo filteredData: antes, si la búsqueda no encontraba nada, mostraba el total sin filtrar.
+        // sm - Solo filteredData: antes, si la bÃºsqueda no encontraba nada, mostraba el total sin filtrar.
         return this.dataSource.filteredData.length;
     }
 
@@ -302,8 +325,8 @@ export class SeguimientoComponent implements AfterViewInit {
         this.recargarColaboradores();
     }
 
-    // sm - Búsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
-    // Se limpia la selección para que siempre corresponda a los resultados visibles (igual que al recargar).
+    // sm - BÃºsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
+    // Se limpia la selecciÃ³n para que siempre corresponda a los resultados visibles (igual que al recargar).
     public aplicarBusqueda() {
         this.dataSource.filter = normalizarTexto(this.busqueda);
         this.selection.clear();
@@ -311,7 +334,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Cliente: mientras se escribe solo se filtran las opciones del autocompletado; la tabla se recarga
-    // al elegir una opción o al borrar el campo (todos los clientes), no con cada letra.
+    // al elegir una opciÃ³n o al borrar el campo (todos los clientes), no con cada letra.
     public onClienteInput(event: Event) {
         this.filtrarClientes(event);
         if (!this.clienteSeleccionado.trim() && this.clienteAplicado) {
@@ -325,7 +348,7 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 
-    // sm - Al cerrar el autocompletado sin elegir una opción, el campo vuelve a mostrar el cliente realmente aplicado.
+    // sm - Al cerrar el autocompletado sin elegir una opciÃ³n, el campo vuelve a mostrar el cliente realmente aplicado.
     public onClientePanelCerrado() {
         this.clienteSeleccionado = this.clienteAplicado;
         this.clienteFilter.set('');
@@ -344,6 +367,17 @@ export class SeguimientoComponent implements AfterViewInit {
         this.dataSource.paginator?.firstPage();
     }
 
+    private normalizarBusqueda(texto: string): string {
+        return (texto ?? '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    // sm - "Seleccionar todos" debe cubrir todas las pÃ¡ginas del resultado ya filtrado
+    // (rango de fechas/cliente del backend + bÃºsqueda de texto del cliente), no solo dataSource.data
+    // (que ignora la bÃºsqueda de texto) ni la pÃ¡gina visible.
     // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado
     // (rango de fechas/cliente del backend + búsqueda de texto del cliente), no solo dataSource.data
     // (que ignora la búsqueda de texto) ni la página visible.
@@ -373,7 +407,7 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
-        // sm - Un colaborador con varios proyectos genera un archivo por proyecto, así que el total de archivos
+        // sm - Un colaborador con varios proyectos genera un archivo por proyecto, asÃ­ que el total de archivos
         // puede ser mayor que la cantidad de filas seleccionadas.
         const items = this.itemsParaDescarga(seleccionados);
         // sm - El rango se fija al iniciar: si el usuario cambia las fechas durante la descarga,
@@ -397,7 +431,7 @@ export class SeguimientoComponent implements AfterViewInit {
             if (seleccionados.length === 1) {
                 // sm - Un solo colaborador con varios proyectos: se descargan sus archivos directo, sin ZIP
                 // (un ZIP con un solo colaborador adentro no aporta nada, y evita que al seleccionar varios
-                // colaboradores se termine armando un ZIP con otros ZIPs adentro; ese caso sí usa un único
+                // colaboradores se termine armando un ZIP con otros ZIPs adentro; ese caso sÃ­ usa un Ãºnico
                 // ZIP plano con todos los archivos, ver descargarReportesZip).
                 const incluidos = await this.descargarReportesDirecto(items, formato, rango);
                 const sinActividades = items.length - incluidos;
@@ -405,7 +439,7 @@ export class SeguimientoComponent implements AfterViewInit {
                     this.cerrarProgresoDescarga();
                     this.mostrarPopup('event_busy', 'Sin actividades',
                         `<strong>${this.escaparHtml(seleccionados[0].nombre)}</strong> no tiene actividades registradas en ninguno de sus `
-                        + `<strong>${items.length}</strong> proyectos entre ${this.rangoPopup(rango)}. No se generó ningún archivo.`);
+                        + `<strong>${items.length}</strong> proyectos entre ${this.rangoPopup(rango)}. No se generÃ³ ningÃºn archivo.`);
                     return;
                 }
                 await this.finalizarProgresoDescarga();
@@ -419,38 +453,38 @@ export class SeguimientoComponent implements AfterViewInit {
                 return;
             }
 
-            // sm - Varios colaboradores seleccionados: un único ZIP plano con todos los reportes (cada colaborador
+            // sm - Varios colaboradores seleccionados: un Ãºnico ZIP plano con todos los reportes (cada colaborador
             // aporta un archivo por proyecto), sin anidar un ZIP dentro de otro.
             const incluidos = await this.descargarReportesZip(items, formato, rango);
             const sinActividades = items.length - incluidos;
             if (incluidos === 0) {
-                // sm - Todos los seleccionados están vacíos: no se descarga ningún ZIP.
+                // sm - Todos los seleccionados estÃ¡n vacÃ­os: no se descarga ningÃºn ZIP.
                 this.cerrarProgresoDescarga();
                 this.mostrarPopup('event_busy', 'Sin actividades',
                     `Ninguno de los <strong>${items.length}</strong> reportes seleccionados tiene actividades registradas entre `
-                    + `${this.rangoPopup(rango)}. No se generó ningún archivo.`);
+                    + `${this.rangoPopup(rango)}. No se generÃ³ ningÃºn archivo.`);
                 return;
             }
             // sm - Se completa la barra al 100% antes de cerrar el toast.
             await this.finalizarProgresoDescarga();
             if (sinActividades > 0) {
-                // sm - Mezcla de vacíos y llenos: se informa solo el conteo de lo descargado y lo omitido.
+                // sm - Mezcla de vacÃ­os y llenos: se informa solo el conteo de lo descargado y lo omitido.
                 const uno = sinActividades === 1;
                 this.mostrarPopup('rule', 'Descarga parcial',
                     `Se descargaron <strong>${incluidos} de ${items.length}</strong> reportes. `
                     + `<strong>${sinActividades}</strong> ${uno ? 'reporte no tiene' : 'reportes no tienen'} `
-                    + `actividades entre ${this.rangoPopup(rango)} y no se ${uno ? 'incluyó' : 'incluyeron'} en el ZIP.`);
+                    + `actividades entre ${this.rangoPopup(rango)} y no se ${uno ? 'incluyÃ³' : 'incluyeron'} en el ZIP.`);
             }
         } catch (error) {
-            // sm - Cualquier fin anticipado (sin actividades, cancelación o error) cierra el toast de progreso.
+            // sm - Cualquier fin anticipado (sin actividades, cancelaciÃ³n o error) cierra el toast de progreso.
             this.cerrarProgresoDescarga();
-            // sm - Si el único colaborador seleccionado no tiene actividades, se muestra el pop up en lugar del error genérico.
+            // sm - Si el Ãºnico colaborador seleccionado no tiene actividades, se muestra el pop up en lugar del error genÃ©rico.
             if (error instanceof SinActividadesError) {
                 this.mostrarPopup('event_busy', 'Sin actividades',
                     `<strong>${this.escaparHtml(error.colaborador)}</strong> no tiene actividades registradas entre ${this.rangoPopup(rango)}.`);
                 return;
             }
-            // sm - Si el usuario pulsó "Cancelar" en el toast, no se muestra nada más.
+            // sm - Si el usuario pulsÃ³ "Cancelar" en el toast, no se muestra nada mÃ¡s.
             if (error instanceof DescargaCanceladaError) {
                 return;
             }
@@ -461,6 +495,8 @@ export class SeguimientoComponent implements AfterViewInit {
         }
     }
 
+    // sm - Muestra el toast de descarga. La descarga mÃºltiple avanza por archivo/reporte (progreso real);
+    // el Excel individual no reporta avance, asÃ­ que usa barra indeterminada.
     // sm - El toast (título, barra, porcentaje y Cancelar) ahora es el compartido de la app: DescargaProgresoService.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
         this.descargas.iniciar(formato, cantidad);
@@ -470,21 +506,45 @@ export class SeguimientoComponent implements AfterViewInit {
         this.descargas.actualizar(progreso, detalle);
     }
 
-    private finalizarProgresoDescarga(): Promise<void> {
-        return this.descargas.finalizar();
+    // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animaciÃ³n de salida.
+    private async finalizarProgresoDescarga(): Promise<void> {
+        this.actualizarProgresoDescarga(100, 'Descarga completada');
+        await new Promise(resolve => setTimeout(resolve, 600));
+        this.cerrarProgresoDescarga();
     }
 
+    // sm - Cierra el toast con la animaciÃ³n de salida y luego lo quita del DOM.
     private cerrarProgresoDescarga(): void {
-        this.descargas.cerrar();
+        if (!this.progresoDescarga.visible) return;
+        this.progresoDescarga = { ...this.progresoDescarga, cerrando: true };
+        setTimeout(() => {
+            this.progresoDescarga = { ...this.progresoDescarga, visible: false, cerrando: false };
+        }, 200);
     }
 
-    // sm - Espera una petición HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
-    private esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
-        return this.descargas.esperarCancelable(peticion);
+    // sm - BotÃ³n "Cancelar" del toast: corta la peticiÃ³n HTTP en curso y marca la descarga como cancelada.
+    public cancelarDescarga(): void {
+        if (!this.isDownloading || this.descargaCancelada) return;
+        this.descargaCancelada = true;
+        this.cancelarDescarga$.next();
+        this.progresoDescarga = { ...this.progresoDescarga, detalle: 'Cancelando...' };
     }
+
+    // sm - Espera una peticiÃ³n HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
+    private async esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
+        if (this.descargaCancelada) throw new DescargaCanceladaError();
+        try {
+            return await lastValueFrom(peticion.pipe(takeUntil(this.cancelarDescarga$)));
+        } catch (error) {
+            if (this.descargaCancelada) throw new DescargaCanceladaError();
+            throw error;
+        }
+    }
+
+
 
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
-    // con varios proyectos, para no armar un ZIP con un único colaborador adentro. Devuelve cuántos se descargaron;
+    // con varios proyectos, para no armar un ZIP con un Ãºnico colaborador adentro. Devuelve cuÃ¡ntos se descargaron;
     // los que no tengan actividades en el rango se omiten.
     private async descargarReportesDirecto(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         let incluidos = 0;
@@ -512,9 +572,9 @@ export class SeguimientoComponent implements AfterViewInit {
         return incluidos;
     }
 
-    // sm - Arma un único ZIP (PDF o Excel) solo con los reportes que tienen actividades en el rango. Un colaborador
+    // sm - Arma un Ãºnico ZIP (PDF o Excel) solo con los reportes que tienen actividades en el rango. Un colaborador
     // con varios proyectos aporta un item por proyecto (ver itemsParaDescarga), cada uno con su propio archivo.
-    // Devuelve cuántos reportes se incluyeron; si es 0 no se descarga nada.
+    // Devuelve cuÃ¡ntos reportes se incluyeron; si es 0 no se descarga nada.
     private async descargarReportesZip(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         const zip = new JSZip();
         const nombresUsados = new Set<string>();
@@ -525,7 +585,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 ? await this.generarPdfColaborador(item.colaborador, rango, item.proyecto)
                 : await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
             if (contenido) {
-                // sm - Nombres repetidos (homónimos, o el mismo proyecto por alguna razón) no se sobrescriben: se les agrega un sufijo.
+                // sm - Nombres repetidos (homÃ³nimos, o el mismo proyecto por alguna razÃ³n) no se sobrescriben: se les agrega un sufijo.
                 const base = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
                 let nombre = base;
                 for (let sufijo = 2; nombresUsados.has(nombre.toLowerCase()); sufijo++) nombre = `${base}_${sufijo}`;
@@ -561,7 +621,7 @@ export class SeguimientoComponent implements AfterViewInit {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // sm - Nombre de archivo (sin extensión) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez_Proyecto".
+    // sm - Nombre de archivo (sin extensiÃ³n) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez_Proyecto".
     // Se agrega el proyecto porque una misma persona puede generar varios archivos (uno por proyecto).
     private nombreArchivo(nombre: string, proyecto?: string): string {
         const limpiar = (texto: string) => texto.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().replace(/\s+/g, '_').slice(0, 100);
@@ -571,7 +631,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Pop up base de las descargas de Seguimiento. Usa las clases "tmr-swal" (styles/_sweetalert.scss) para verse
-    // igual que los modales de la app: tarjeta blanca, icono en círculo azul, título oscuro, texto gris y botón primario
+    // igual que los modales de la app: tarjeta blanca, icono en cÃ­rculo azul, tÃ­tulo oscuro, texto gris y botÃ³n primario
     // #163572 (con soporte de tema oscuro).
     private mostrarPopup(icono: string, titulo: string, html: string): void {
         void this.popup.show(icono, titulo, html, icono === 'download_done');
@@ -595,8 +655,8 @@ export class SeguimientoComponent implements AfterViewInit {
         return anio && mes && dia ? `${dia}/${mes}/${anio}` : fecha;
     }
 
-    // sm - Botón "Reporte": exporta la tabla (resultados filtrados) con el formato estándar de reportes de la app.
-    // Se eliminó la versión anterior (ExcelJS/jsPDF manual) que quedaba después de un "return" y nunca se ejecutaba.
+    // sm - BotÃ³n "Reporte": exporta la tabla (resultados filtrados) con el formato estÃ¡ndar de reportes de la app.
+    // Se eliminÃ³ la versiÃ³n anterior (ExcelJS/jsPDF manual) que quedaba despuÃ©s de un "return" y nunca se ejecutaba.
     public async exportarExcel() {
         await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel(this.configuracionReporteTabla(), ctx))
             .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
@@ -617,11 +677,11 @@ export class SeguimientoComponent implements AfterViewInit {
                 { encabezado: 'Colaborador', anchoExcel: 30, anchoPdf: 48 },
                 { encabezado: 'Proyecto', anchoExcel: 25, anchoPdf: 45 },
                 { encabezado: 'Cliente', anchoExcel: 25, anchoPdf: 42 },
-                { encabezado: 'Líder técnico', anchoExcel: 25, anchoPdf: 42 },
+                { encabezado: 'LÃ­der tÃ©cnico', anchoExcel: 25, anchoPdf: 42 },
                 { encabezado: 'Horas registradas', anchoExcel: 18, anchoPdf: 22, alineacion: 'center' },
                 { encabezado: 'Seguimiento', anchoExcel: 18, anchoPdf: 28, alineacion: 'center' },
-                { encabezado: 'Días con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
-                { encabezado: 'Días a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                { encabezado: 'DÃ­as con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                { encabezado: 'DÃ­as a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
             ],
             filas: this.dataSource.filteredData.map((colaborador) => [
                 colaborador.nombre,
@@ -642,7 +702,7 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de pÃ¡gina) y solo lectura.
     public verCalendarioColaborador(col: Colaborador): void {
         this.dialog.open(CalendarioColaboradorModal, {
             data: { colaborador: col, fechaDesde: this.fechaDesde },
@@ -659,7 +719,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private obtenerActividadesColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<DatosSeguimientoPdf> {
         const params: Record<string, string> = { fechaDesde: rango.desde, fechaHasta: rango.hasta };
         // sm - Ahora cada fila de Seguimiento es un colaborador+proyecto puntual (ya no una fila por colaborador
-        // con todos sus proyectos mezclados), así que siempre se filtra por el proyecto de la fila para no mezclar
+        // con todos sus proyectos mezclados), asÃ­ que siempre se filtra por el proyecto de la fila para no mezclar
         // horas de otro proyecto del mismo colaborador en el reporte.
         if (proyecto) params['idProyecto'] = String(proyecto.idProyecto);
         return this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
@@ -684,7 +744,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Genera el Excel de un colaborador (o de uno de sus proyectos). Con devolverBuffer devuelve el contenido
-    // (para el ZIP) o undefined si no tiene actividades; sin él lo descarga directamente o lanza SinActividadesError
+    // (para el ZIP) o undefined si no tiene actividades; sin Ã©l lo descarga directamente o lanza SinActividadesError
     // para mostrar el pop up.
     private async descargarDetalle(col: Colaborador, rango: RangoDescarga, devolverBuffer = false, proyecto?: ProyectoResumen) {
         const res = await this.obtenerActividadesColaborador(col, rango, proyecto);
@@ -697,7 +757,7 @@ export class SeguimientoComponent implements AfterViewInit {
             throw new SinActividadesError(proyecto ? `${col.nombre} (${proyecto.nombre})` : col.nombre);
         }
 
-        // Agrupación de actividades por Cliente
+        // AgrupaciÃ³n de actividades por Cliente
         const groupsByClient: { [clientName: string]: any[] } = {};
         rawActividades.forEach(act => {
             const client = act.clienteProyecto || 'Sin Cliente';
@@ -716,7 +776,7 @@ export class SeguimientoComponent implements AfterViewInit {
             cur.setDate(cur.getDate() + 1);
         }
         const totalDays = listDates.length;
-        const totalCols = 6 + totalDays + 1; // N° + Tipo + Líder + Req + Desc + TotalAct + Días + TotalActFinal
+        const totalCols = 6 + totalDays + 1; // NÂ° + Tipo + LÃ­der + Req + Desc + TotalAct + DÃ­as + TotalActFinal
 
         const workbook = new ExcelJS.Workbook();
 
@@ -725,15 +785,15 @@ export class SeguimientoComponent implements AfterViewInit {
             const clientName = clientNames[clientIdx];
             const clientActividades = groupsByClient[clientName];
 
-            // Limpiar nombre de hoja para que sea válido en Excel
+            // Limpiar nombre de hoja para que sea vÃ¡lido en Excel
             let sheetName = `Reporte_${clientName}`.replace(/[*?:\\/\[\]]/g, '').substring(0, 31);
             if (sheetName.length === 0) sheetName = `Reporte_${clientIdx + 1}`;
             const worksheet = workbook.addWorksheet(sheetName);
 
             // Configurar anchos de columna
-            const colWidths = [5, 20, 25, 25, 60, 15]; // N°, Tipo, Líder, Req, Desc, Total
+            const colWidths = [5, 20, 25, 25, 60, 15]; // NÂ°, Tipo, LÃ­der, Req, Desc, Total
             for (let i = 0; i < totalDays; i++) {
-                colWidths.push(4.5); // Días
+                colWidths.push(4.5); // DÃ­as
             }
             colWidths.push(15); // Total Final
             worksheet.columns = colWidths.map((w, idx) => ({
@@ -754,7 +814,7 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(5, 3).font = { name: 'Arial', size: 11, bold: true };
 
             // Fila 6: Encabezados de tabla
-            worksheet.getCell(6, 1).value = 'N°';
+            worksheet.getCell(6, 1).value = 'NÂ°';
             worksheet.getCell(6, 2).value = 'TIPO DE ACTIVIDAD';
             worksheet.getCell(6, 3).value = 'LIDER DE PROYECTO';
             worksheet.getCell(6, 4).value = 'CODIGO REQUERIMIENTO / INCIDENTE';
@@ -764,22 +824,22 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(6, totalCols).value = 'TOTAL HORAS POR ACT.';
 
             // Combinaciones de encabezado
-            worksheet.mergeCells(6, 1, 8, 1); // N°
+            worksheet.mergeCells(6, 1, 8, 1); // NÂ°
             worksheet.mergeCells(6, 2, 8, 2); // Tipo
-            worksheet.mergeCells(6, 3, 8, 3); // Líder
+            worksheet.mergeCells(6, 3, 8, 3); // LÃ­der
             worksheet.mergeCells(6, 4, 8, 4); // Req
             worksheet.mergeCells(6, 5, 8, 5); // Desc
             worksheet.mergeCells(6, 6, 8, 6); // Total
-            worksheet.mergeCells(6, 7, 6, 6 + totalDays); // Distribución del tiempo
+            worksheet.mergeCells(6, 7, 6, 6 + totalDays); // DistribuciÃ³n del tiempo
             worksheet.mergeCells(6, totalCols, 8, totalCols); // Total Final
 
-            // Fila 7: Números de día (01..31)
+            // Fila 7: NÃºmeros de dÃ­a (01..31)
             listDates.forEach((date, dateIdx) => {
                 const dayNum = String(date.getDate()).padStart(2, '0');
                 worksheet.getCell(7, 7 + dateIdx).value = dayNum;
             });
 
-            // Fila 8: Iniciales de día de la semana (L, M, M, J, V, S, D)
+            // Fila 8: Iniciales de dÃ­a de la semana (L, M, M, J, V, S, D)
             const weekdays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
             listDates.forEach((date, dateIdx) => {
                 const dayName = weekdays[date.getDay()];
@@ -808,7 +868,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 }
             }
 
-            // Agrupar actividades por combinación única
+            // Agrupar actividades por combinaciÃ³n Ãºnica
             const groupedRows: { [key: string]: {
                 tipo: string,
                 lider: string,
@@ -858,7 +918,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 worksheet.getCell(currentRow, 4).value = group.req;
                 worksheet.getCell(currentRow, 5).value = group.desc;
 
-                // Días
+                // DÃ­as
                 listDates.forEach((date, dateIdx) => {
                     const dateStr = this.formatDate(date);
                     const hrs = group.hoursByDay[dateStr];
@@ -867,7 +927,7 @@ export class SeguimientoComponent implements AfterViewInit {
                     }
                 });
 
-                // Fórmulas
+                // FÃ³rmulas
                 const startAddr = worksheet.getCell(currentRow, 7).address.replace(/[0-9]/g, '');
                 const endAddr = worksheet.getCell(currentRow, 6 + totalDays).address.replace(/[0-9]/g, '');
                 worksheet.getCell(currentRow, 6).value = { formula: `SUM(${startAddr}${currentRow}:${endAddr}${currentRow})` } as any;
@@ -969,7 +1029,7 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(sigRow2, 2).font = { name: 'Arial', size: 10, bold: true };
 
             const distinctLeaders = Array.from(new Set(clientActividades.map(act => act.liderProyecto).filter(Boolean)));
-            const leaderName = distinctLeaders.length > 0 ? distinctLeaders.join(', ') : 'Sin Líder';
+            const leaderName = distinctLeaders.length > 0 ? distinctLeaders.join(', ') : 'Sin LÃ­der';
             worksheet.getCell(sigRow1, 8).value = `Revisado y Aprobado por: ${leaderName}`;
             worksheet.getCell(sigRow1, 8).font = { name: 'Arial', size: 10, italic: true };
             worksheet.getCell(sigRow2, 8).value = `Empresa: ${clientName}`;
@@ -1008,7 +1068,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 };
             });
 
-            // Llamar a la estandarización de cabeceras corporativas
+            // Llamar a la estandarizaciÃ³n de cabeceras corporativas
             const currentMonthName = startDate.toLocaleString('es-EC', { month: 'long' }).toUpperCase();
             await estandarizarCabeceraExcelExistente(
                 workbook,
@@ -1023,6 +1083,8 @@ export class SeguimientoComponent implements AfterViewInit {
 
         // Guardar archivo y disparar descarga
         const buffer = await workbook.xlsx.writeBuffer();
+        // sm - Si el usuario cancelÃ³ mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
+        if (this.descargaCancelada) throw new DescargaCanceladaError();
         // sm - Si el usuario canceló mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
         this.descargas.verificarCancelacion();
         if (devolverBuffer) return buffer;
@@ -1041,12 +1103,35 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Se eliminaron cambiarPeriodo/ajustarFechasPorPeriodo (ya no existen los botones Quincena/Mes completo) y el
-    // cálculo del "periodo" que se enviaba al backend sin usarse. Solo se asegura que "hasta" no sea menor que "desde".
+    // cÃ¡lculo del "periodo" que se enviaba al backend sin usarse. Solo se asegura que "hasta" no sea menor que "desde".
     public onFechaManualChange() {
         if (this.fechaDesde && this.fechaHasta && this.fechaHasta < this.fechaDesde) {
             this.fechaHasta = this.fechaDesde;
         }
         this.aplicarFiltros();
+    }
+
+    //notificacaiones mock hay que cambiar la logica cuando ya se encuentre realizado el backend
+
+    notificarColaborador(colaborador: Colaborador) {
+        this.popup.loading('Enviando...', 'Espera un momento');
+
+        this.notificacionesService.notificar({ empleadoIds: [+colaborador.id] })
+          .subscribe({
+            next: (response) => {
+              console.log('Respuesta del endpoint de notificar:', response);
+              this.popup.show(
+                'check_circle',
+                'Notificación Enviada',
+                response.mensaje || `Se ha enviado un recordatorio a <b>${colaborador.nombre}</b>.`, 
+                true
+              );
+            },
+            error: (err) => {
+              console.error('Error al notificar:', err);
+              this.popup.show('error', 'Error', 'No se pudo enviar la notificación');
+            }
+          });
     }
 }
 
