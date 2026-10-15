@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, map, switchMap, of } from 'rxjs';
+import { Observable, map, switchMap, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   Cliente, CrearClienteRequest, EditarClienteRequest,
@@ -31,6 +31,26 @@ export class ClientesService {
 
   // Cache de tipos (id ↔ valor) para traducir texto → Id.
   private tiposCache: TipoIdentificacionBackend[] = [];
+  private readonly listasCache = new Map<string, {
+    expiresAt: number;
+    request$: Observable<ClienteBackendLista[]>;
+  }>();
+  private readonly listasCacheTtlMs = 30_000;
+
+  private obtenerLista(url: string): Observable<ClienteBackendLista[]> {
+    const existente = this.listasCache.get(url);
+    if (existente && existente.expiresAt > Date.now()) return existente.request$;
+
+    const request$ = this.http.get<ClienteBackendLista[]>(url, this.options).pipe(
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    this.listasCache.set(url, { expiresAt: Date.now() + this.listasCacheTtlMs, request$ });
+    return request$;
+  }
+
+  private invalidarListas(): void {
+    this.listasCache.clear();
+  }
 
   // ── Opciones de petición: cookies automáticas (token de Auth) ─
   private get options() {
@@ -87,7 +107,7 @@ export class ClientesService {
     if (filtros.estado === 'Inactivo') params.push('activo=false');
     if (params.length) url += '?' + params.join('&');
 
-    return this.http.get<ClienteBackendLista[]>(url, this.options).pipe(
+    return this.obtenerLista(url).pipe(
       map(lista => {
         const clientes = this.ordenarActivosPrimero(
           lista.map(c => this.mapListaACliente(c))
@@ -105,7 +125,7 @@ export class ClientesService {
   //  POR ID
   // ─────────────────────────────────────────────────────────
   getResumenClientes(): Observable<ResumenClientes> {
-    return this.http.get<ClienteBackendLista[]>(this.baseUrl, this.options).pipe(
+    return this.obtenerLista(this.baseUrl).pipe(
       map(lista => {
         const clientes = lista.map(c => this.mapListaACliente(c));
         const totalActivos = clientes.filter(c => c.estado === 'Activo').length;
@@ -179,6 +199,7 @@ export class ClientesService {
           direccion:            req.direccion,
         };
         return this.http.post<{ id: number }>(this.baseUrl, body, this.options).pipe(
+          tap(() => this.invalidarListas()),
           map(resp => ({
             id:                resp.id,
             tipoId:            req.tipoId,
@@ -214,6 +235,7 @@ export class ClientesService {
           direccion:            req.direccion,
         };
         return this.http.put(`${this.baseUrl}/${id}`, body, this.options).pipe(
+          tap(() => this.invalidarListas()),
           map(() => ({
             id,
             tipoId:            req.tipoId,

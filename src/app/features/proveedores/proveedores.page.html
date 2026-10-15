@@ -1,15 +1,313 @@
 <main class="proveedores-page">
-  <app-header title="Proveedores" subtitle="Gestión de proveedores de inventario"><button *ngIf="puedeGestionar" class="primary" (click)="abrirCrear()">+ Agregar proveedor</button></app-header>
-  <section class="filters-card" [formGroup]="filtros">
-    <input formControlName="busqueda" (input)="filtrar()" placeholder="Buscar por nombre, RUC, correo o teléfono" aria-label="Buscar proveedores">
-    <select formControlName="tipoProveedorId" (change)="filtrar()"><option value="">Todos los tipos</option><option *ngFor="let tipo of tipos" [value]="tipo.id">{{ tipo.nombre }}</option></select>
-    <select formControlName="estado" (change)="filtrar()"><option value="">Todos los estados</option><option value="true">Activos</option><option value="false">Inactivos</option></select>
-    <button type="button" class="secondary" (click)="limpiar()">Limpiar filtros</button><span class="spacer"></span>
-    <button type="button" class="secondary" (click)="exportar('excel')">Excel</button><button type="button" class="secondary" (click)="exportar('pdf')">PDF</button>
+  <app-header title="Proveedores" subtitle="Gestión de proveedores de inventario"></app-header>
+
+  <section class="tarjetas-resumen" aria-label="Resumen de proveedores">
+    <app-tarjeta-resumen
+      titulo="Total proveedores"
+      icono="local_shipping"
+      tono="destacado"
+      [valor]="resumen.total"
+    />
+    <app-tarjeta-resumen
+      titulo="Activos"
+      icono="domain_verification"
+      tono="corporativo"
+      [valor]="resumen.activos"
+    />
+    <app-tarjeta-resumen
+      titulo="Inactivos"
+      icono="domain_disabled"
+      tono="neutro"
+      [valor]="resumen.inactivos"
+    />
   </section>
-  <p class="result-count">{{ total }} resultado(s)</p><p *ngIf="error" class="error">{{ error }} <button (click)="cargar()">Reintentar</button></p>
-  <div class="table-wrap"><table><thead><tr><th (click)="ordenar('nombreproveedor')">Proveedor</th><th (click)="ordenar('tipoProveedor')">Tipo</th><th (click)="ordenar('ruc')">RUC</th><th>Contacto</th><th (click)="ordenar('activo')">Estado</th><th>Acciones</th></tr></thead>
-    <tbody><tr *ngIf="cargando"><td colspan="6">Cargando proveedores…</td></tr><tr *ngIf="!cargando && !proveedores.length"><td colspan="6">No se encontraron proveedores.</td></tr><tr *ngFor="let p of proveedores"><td><strong>{{p.nombreproveedor}}</strong><small>{{p.direccion || 'Sin dirección'}}</small></td><td>{{p.tipoProveedor || 'Sin tipo'}}</td><td>{{p.ruc || '—'}}</td><td>{{p.email || '—'}}<small>{{p.telefono || ''}}</small></td><td><span class="badge" [class.inactive]="!p.activo">{{p.activo ? 'Activo' : 'Inactivo'}}</span></td><td class="actions"><button (click)="ver(p)">Ver</button><button *ngIf="puedeGestionar" (click)="abrirEditar(p)">Editar</button><button *ngIf="puedeGestionar" (click)="eliminar(p)" [disabled]="!p.activo">Eliminar</button></td></tr></tbody></table></div>
-  <app-paginacion [paginaActual]="pagina" [totalPaginas]="totalPaginas" [total]="total" [porPagina]="porPagina" etiquetaRegistros="proveedores" (paginaCambia)="cambiarPagina($event)" />
+
+  <app-filter-bar [formGroup]="filtros">
+    <div filter-control class="standard-filter-field standard-filter-field--search">
+      <span class="standard-filter-field__label">Búsqueda</span>
+      <app-search-input
+        [value]="filtros.controls.busqueda.value"
+        placeholder="Buscar por nombre, RUC, correo o teléfono"
+        ariaLabel="Buscar proveedores"
+        (valueChange)="actualizarBusqueda($event)"
+      ></app-search-input>
+    </div>
+    <app-filter-dropdown
+      filter-control
+      label="Tipo"
+      placeholder="Todos los tipos"
+      [options]="opcionesTiposFiltro"
+      [selected]="tiposSeleccionados"
+      [multiple]="false"
+      (selectedChange)="actualizarTipo($event)"
+    ></app-filter-dropdown>
+    <app-filter-dropdown
+      filter-control
+      label="Estado"
+      placeholder="Todos"
+      [options]="opcionesEstadoBarra"
+      [selected]="filtros.controls.estado.value"
+      (selectedChange)="actualizarEstados($event)"
+    ></app-filter-dropdown>
+    <app-boton
+      filter-action
+      label="Limpiar filtros"
+      type="secondary"
+      (clicked)="limpiar()"
+    ></app-boton>
+    <app-descarga-menu
+      filter-action
+      [opciones]="opcionesDescarga"
+      etiquetaBoton="Descargar"
+    ></app-descarga-menu>
+    <app-boton
+      *ngIf="puedeGestionar"
+      filter-action
+      label="Agregar"
+      icon="add"
+      (clicked)="abrirCrear()"
+    ></app-boton>
+  </app-filter-bar>
+
+  <div *ngIf="error" class="error-banner" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button type="button" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th
+            class="sortable"
+            (click)="ordenar('nombreproveedor')"
+            [attr.aria-sort]="direccionOrden('nombreproveedor')"
+          >
+            <span class="th-inner"
+              ><span class="th-label">Proveedor</span
+              ><mat-icon class="sort-icon">{{
+                orden === 'nombreproveedor'
+                  ? asc
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'unfold_more'
+              }}</mat-icon></span
+            >
+          </th>
+          <th
+            class="sortable"
+            (click)="ordenar('tipoProveedor')"
+            [attr.aria-sort]="direccionOrden('tipoProveedor')"
+          >
+            <span class="th-inner"
+              ><span class="th-label">Tipo</span
+              ><mat-icon class="sort-icon">{{
+                orden === 'tipoProveedor'
+                  ? asc
+                    ? 'arrow_upward'
+                    : 'arrow_downward'
+                  : 'unfold_more'
+              }}</mat-icon></span
+            >
+          </th>
+          <th class="sortable" (click)="ordenar('ruc')" [attr.aria-sort]="direccionOrden('ruc')">
+            <span class="th-inner"
+              ><span class="th-label">RUC</span
+              ><mat-icon class="sort-icon">{{
+                orden === 'ruc' ? (asc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+              }}</mat-icon></span
+            >
+          </th>
+          <th>Contacto</th>
+          <th
+            class="sortable"
+            (click)="ordenar('activo')"
+            [attr.aria-sort]="direccionOrden('activo')"
+          >
+            <span class="th-inner"
+              ><span class="th-label">Estado</span
+              ><mat-icon class="sort-icon">{{
+                orden === 'activo' ? (asc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+              }}</mat-icon></span
+            >
+          </th>
+          <th aria-label="Acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="cargando">
+          <td colspan="6" class="table-state">
+            <span class="spinner"></span>Cargando proveedores...
+          </td>
+        </tr>
+        <tr *ngIf="!cargando && !proveedores.length">
+          <td colspan="6" class="table-state">No se encontraron proveedores.</td>
+        </tr>
+        <tr *ngFor="let p of proveedores; trackBy: trackByProveedor">
+          <td>
+            <strong>{{ p.nombreproveedor }}</strong
+            ><small>{{ p.direccion || 'Sin dirección' }}</small>
+          </td>
+          <td>{{ p.tipoProveedor || 'Sin tipo' }}</td>
+          <td>{{ p.ruc || '—' }}</td>
+          <td>
+            {{ p.email || '—' }}<small>{{ p.telefono || '' }}</small>
+          </td>
+          <td><app-badge-estado [estado]="p.activo ? 'Activo' : 'Inactivo'"></app-badge-estado></td>
+          <td class="actions">
+            <app-action-menu
+              [itemId]="p.id.toString()"
+              [acciones]="accionesProveedor(p)"
+            ></app-action-menu>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <app-paginacion
+    [paginaActual]="pagina"
+    [totalPaginas]="totalPaginas"
+    [total]="total"
+    [porPagina]="porPagina"
+    etiquetaRegistros="proveedores"
+    (paginaCambia)="cambiarPagina($event)"
+  />
 </main>
-<div class="modal-backdrop" *ngIf="modalAbierto"><form class="modal" [formGroup]="form" (ngSubmit)="guardar()"><h2>{{editando ? 'Editar proveedor' : 'Registrar proveedor'}}</h2><label>Nombre *<input formControlName="nombreProveedor" maxlength="150"></label><small class="error" *ngIf="form.controls.nombreProveedor.touched && form.controls.nombreProveedor.invalid">El nombre es obligatorio.</small><label>Tipo de proveedor *<select formControlName="idTipoProveedor"><option value="">Seleccione un tipo</option><option *ngFor="let tipo of tipos" [value]="tipo.id">{{tipo.nombre}}</option></select></label><small class="error" *ngIf="form.controls.idTipoProveedor.touched && form.controls.idTipoProveedor.invalid">Seleccione un tipo de proveedor.</small><div class="grid"><label>RUC<input formControlName="ruc" maxlength="13"></label><label>Teléfono<input formControlName="telefono" maxlength="20"></label></div><small class="error" *ngIf="form.controls.ruc.touched && form.controls.ruc.invalid">Ingrese un RUC ecuatoriano válido.</small><label>Correo<input type="email" formControlName="email" maxlength="100"></label><small class="error" *ngIf="form.controls.email.touched && form.controls.email.invalid">Ingrese un correo válido.</small><label>Dirección<textarea formControlName="direccion" maxlength="255"></textarea></label><label class="check"><input type="checkbox" formControlName="activo"> Activo</label><footer><button type="button" class="secondary" (click)="cerrar()">Cancelar</button><button class="primary" [disabled]="guardando">{{guardando ? 'Guardando…' : 'Guardar'}}</button></footer></form></div>
+<app-modal-base
+  [visible]="modalAbierto"
+  [titulo]="editando ? 'Editar proveedor' : 'Registrar proveedor'"
+  [wide]="true"
+  (cerrar)="cerrar()"
+>
+  <form
+    class="proveedor-form"
+    [formGroup]="form"
+    (ngSubmit)="guardar()"
+    autocomplete="off"
+    novalidate
+  >
+    <p class="proveedor-form__intro">
+      Complete la información comercial y de contacto del proveedor.
+    </p>
+
+    <div class="proveedor-form__grid">
+      <mat-form-field
+        appearance="outline"
+        class="proveedor-form__field proveedor-form__field--full"
+      >
+        <mat-label>Nombre o razón social</mat-label>
+        <input
+          matInput
+          formControlName="nombreProveedor"
+          maxlength="150"
+          autocomplete="organization"
+        />
+        <mat-hint>Entre 3 y 150 caracteres</mat-hint>
+        <mat-error *ngIf="form.controls.nombreProveedor.hasError('required')"
+          >El nombre o razón social es obligatorio.</mat-error
+        >
+        <mat-error *ngIf="form.controls.nombreProveedor.hasError('minlength')"
+          >Ingrese al menos 3 caracteres.</mat-error
+        >
+        <mat-error *ngIf="form.controls.nombreProveedor.hasError('pattern')"
+          >El nombre no puede contener solo espacios.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="proveedor-form__field proveedor-form__field--full"
+      >
+        <mat-label>Tipo de proveedor</mat-label>
+        <mat-select formControlName="idTipoProveedor" yPosition="below">
+          <mat-option value="">Seleccione un tipo</mat-option>
+          <mat-option *ngFor="let tipo of tipos" [value]="tipo.id">{{ tipo.nombre }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls.idTipoProveedor.hasError('required')"
+          >Seleccione un tipo de proveedor.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proveedor-form__field">
+        <mat-label>RUC</mat-label>
+        <input
+          matInput
+          formControlName="ruc"
+          maxlength="13"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+        <mat-hint>Opcional · 13 dígitos ecuatorianos</mat-hint>
+        <mat-error *ngIf="form.controls.ruc.hasError('numbersOnly')"
+          >El RUC solo admite números.</mat-error
+        >
+        <mat-error *ngIf="form.controls.ruc.hasError('rucEcuador')"
+          >Ingrese un RUC ecuatoriano válido.</mat-error
+        >
+        <mat-error *ngIf="form.controls.ruc.hasError('maxlength')"
+          >El RUC no puede superar 13 dígitos.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="proveedor-form__field">
+        <mat-label>Teléfono</mat-label>
+        <input
+          matInput
+          formControlName="telefono"
+          maxlength="13"
+          inputmode="tel"
+          autocomplete="tel"
+        />
+        <mat-hint>Opcional · Ej.: 0991234567</mat-hint>
+        <mat-error *ngIf="form.controls.telefono.hasError('pattern')"
+          >Use un celular ecuatoriano: 0991234567 o +593991234567.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="proveedor-form__field proveedor-form__field--full"
+      >
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput type="email" formControlName="email" maxlength="100" autocomplete="email" />
+        <mat-hint>Opcional · contacto@empresa.com</mat-hint>
+        <mat-error *ngIf="form.controls.email.hasError('email')"
+          >Ingrese un correo electrónico válido.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="proveedor-form__field proveedor-form__field--full"
+      >
+        <mat-label>Dirección</mat-label>
+        <textarea
+          matInput
+          formControlName="direccion"
+          maxlength="255"
+          rows="3"
+          autocomplete="street-address"
+        ></textarea>
+        <mat-hint>Opcional · mínimo 5 caracteres</mat-hint>
+        <mat-error *ngIf="form.controls.direccion.hasError('minlength')"
+          >Ingrese al menos 5 caracteres.</mat-error
+        >
+        <mat-error *ngIf="form.controls.direccion.hasError('pattern')"
+          >La dirección no puede contener solo espacios.</mat-error
+        >
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="activo" color="primary">Proveedor activo</mat-checkbox>
+
+    <footer class="proveedor-form__actions">
+      <app-boton label="Cancelar" type="secondary" (clicked)="cerrar()"></app-boton>
+      <app-boton
+        [label]="guardando ? 'Guardando…' : 'Guardar proveedor'"
+        buttonType="submit"
+        [disabled]="guardando"
+      ></app-boton>
+    </footer>
+  </form>
+</app-modal-base>

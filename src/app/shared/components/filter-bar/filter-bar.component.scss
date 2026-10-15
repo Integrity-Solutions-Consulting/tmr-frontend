@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.app-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--elevation-card);
+  box-sizing: border-box;
+}
+
+.app-filter-bar__controls,
+.app-filter-bar__actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 100%;
+}
+.app-filter-bar__controls {
+  flex: 1 1 650px;
+  min-width: 0;
+}
+.app-filter-bar__actions {
+  margin-left: auto;
+  flex: 0 1 auto;
+  justify-content: flex-end;
+}
+
+@media (max-width: 860px) {
+  .app-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .app-filter-bar__controls,
+  .app-filter-bar__actions {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .app-filter-bar__actions {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-filter-bar {
+    padding: 16px;
+  }
+  .app-filter-bar__controls,
+  .app-filter-bar__actions {
+    flex-direction: column;
+  }
+  .app-filter-bar__actions {
+    justify-content: stretch;
+  }
+}

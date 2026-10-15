@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, shareReplay, tap } from 'rxjs';
 import {
   Colaborador,
   ColaboradoresPaginados,
@@ -22,11 +22,35 @@ export class ColaboradoresService {
 
   // Guardamos la última lista cargada para las métricas reactivas.
   private _colaboradores = signal<Colaborador[]>([]);
+  private readonly listasCache = new Map<string, {
+    expiresAt: number;
+    request$: Observable<ColaboradorListaApi[]>;
+  }>();
+  private readonly listasCacheTtlMs = 30_000;
 
   // Configuración para enviar cookies al backend.
   private readonly httpOptions = {
     withCredentials: true
   };
+
+  private obtenerLista(queryString = ''): Observable<ColaboradorListaApi[]> {
+    const existente = this.listasCache.get(queryString);
+    if (existente && existente.expiresAt > Date.now()) return existente.request$;
+
+    const request$ = this.http.get<ColaboradorListaApi[]>(
+      `${this.apiUrl}${queryString}`,
+      this.httpOptions
+    ).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    this.listasCache.set(queryString, {
+      expiresAt: Date.now() + this.listasCacheTtlMs,
+      request$,
+    });
+    return request$;
+  }
+
+  private invalidarListas(): void {
+    this.listasCache.clear();
+  }
 
   // ── Métricas reactivas ───────────────────────────────────
   readonly noAsignados = computed(() =>
@@ -55,10 +79,7 @@ export class ColaboradoresService {
   }
 
   getMetricasGenerales(): Observable<void> {
-    return this.http.get<ColaboradorListaApi[]>(
-      this.apiUrl,
-      this.httpOptions
-    ).pipe(
+    return this.obtenerLista().pipe(
       map(respuesta => {
         const todos = respuesta.map(api => this.mapApiAColaborador(api));
         this._colaboradores.set(this.ordenarActivosPrimero(todos));
@@ -95,10 +116,7 @@ export class ColaboradoresService {
 
     const queryString = params.length ? `?${params.join('&')}` : '';
 
-    return this.http.get<ColaboradorListaApi[]>(
-      `${this.apiUrl}${queryString}`,
-      this.httpOptions
-    ).pipe(
+    return this.obtenerLista(queryString).pipe(
       map(respuesta => {
         const todos = this.ordenarActivosPrimero(
           respuesta.map(api => this.mapApiAColaborador(api))
@@ -136,10 +154,7 @@ export class ColaboradoresService {
 
     const queryString = params.length ? `?${params.join('&')}` : '';
 
-    return this.http.get<ColaboradorListaApi[]>(
-      `${this.apiUrl}${queryString}`,
-      this.httpOptions
-    ).pipe(
+    return this.obtenerLista(queryString).pipe(
       map(respuesta => this.ordenarActivosPrimero(
         respuesta.map(api => this.mapApiAColaborador(api))
       ))
@@ -337,7 +352,7 @@ export class ColaboradoresService {
       `${this.apiUrl}`,
       request,
       this.httpOptions
-    );
+    ).pipe(tap(() => this.invalidarListas()));
   }
 
   // =========================================================================
@@ -348,7 +363,7 @@ export class ColaboradoresService {
       `${this.apiUrl}/${id}`,
       request,
       this.httpOptions
-    );
+    ).pipe(tap(() => this.invalidarListas()));
   }
 
   // =========================================================================
@@ -358,7 +373,7 @@ export class ColaboradoresService {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
       this.httpOptions
-    );
+    ).pipe(tap(() => this.invalidarListas()));
   }
 
   // ================================================================
@@ -375,6 +390,6 @@ export class ColaboradoresService {
       `${this.apiUrl}/${id}/salida`,
       request,
       this.httpOptions
-    );
+    ).pipe(tap(() => this.invalidarListas()));
   }
 }
