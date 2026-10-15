@@ -28,6 +28,27 @@ export class PopupService {
     });
   }
 
+  /** Muestra contenido no confiable como texto para evitar interpretar HTML. */
+  showText(icon: string, title: string, message: string, success = false): Promise<any> {
+    return Swal.fire({
+      icon: 'info',
+      iconHtml: `<span class="material-symbols-outlined">${icon}</span>`,
+      title,
+      text: message,
+      confirmButtonText: 'Entendido',
+      buttonsStyling: false,
+      customClass: {
+        container: 'tmr-swal-container',
+        popup: 'tmr-swal',
+        icon: `tmr-swal__icon${success ? ' tmr-swal__icon--success' : ''}`,
+        title: 'tmr-swal__title',
+        htmlContainer: 'tmr-swal__text',
+        actions: 'tmr-swal__actions',
+        confirmButton: 'tmr-swal__btn-primary',
+      },
+    });
+  }
+
   loading(title: string, html: string): void {
     void Swal.fire({
       title,

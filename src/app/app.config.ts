@@ -1,16 +1,26 @@
-import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, isDevMode, APP_INITIALIZER, ErrorHandler } from '@angular/core';
+import {
+  ApplicationConfig,
+  LOCALE_ID,
+  provideBrowserGlobalErrorListeners,
+  isDevMode,
+  APP_INITIALIZER,
+  ErrorHandler,
+} from '@angular/core';
 import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { MAT_DATE_LOCALE, MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
+import {
+  MAT_DATE_LOCALE,
+  MAT_DATE_FORMATS,
+  provideNativeDateAdapter,
+} from '@angular/material/core';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { MAT_AUTOCOMPLETE_DEFAULT_OPTIONS } from '@angular/material/autocomplete';
 
 import { routes } from './app.routes';
-import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
 import { loadUserModulesInitializer } from './core/initializers/load-user-modules.initializer';
@@ -51,7 +61,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     { provide: LOCALE_ID, useValue: 'es-EC' },
     provideNativeDateAdapter(MY_DATE_FORMATS),
-    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },       // idioma del calendario (meses/días en español)
+    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' }, // idioma del calendario (meses/días en español)
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }, // formato dd/MM/yyyy
     { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { disableClose: true } },
     // sm - Mismo backdrop "bloqueador" que ya trae mat-select de fábrica: bloquea el scroll y
@@ -66,11 +76,6 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: JwtInterceptor,
-      multi: true,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
       multi: true,
     },
@@ -81,7 +86,13 @@ export const appConfig: ApplicationConfig = {
       proyectos: proyectosReducer,
       dashboard: dashboardReducer,
     }),
-    provideEffects(AuthEffects, ClientesEffects, ActividadesEffects, ProyectosEffects, DashboardEffects),
+    provideEffects(
+      AuthEffects,
+      ClientesEffects,
+      ActividadesEffects,
+      ProyectosEffects,
+      DashboardEffects,
+    ),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     // ✅ CAMBIO: Agregar inicializador para precargar módulos al arrancar
     {
