@@ -1,0 +1,23 @@
+<mat-form-field
+  appearance="outline"
+  subscriptSizing="dynamic"
+  class="app-select"
+  [class.app-select--open]="abierto"
+>
+  <mat-select
+    [value]="value"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel"
+    panelClass="tmr-select-panel"
+    (openedChange)="abierto = $event"
+    (selectionChange)="seleccionar($event.value)"
+    (blur)="marcarTocado()"
+  >
+    @for (option of options; track option.value) {
+      <mat-option [value]="option.value" [disabled]="option.disabled">{{
+        option.label
+      }}</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
