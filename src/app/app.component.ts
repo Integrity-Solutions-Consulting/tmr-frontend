@@ -11,6 +11,8 @@ import { AuthResponse } from './features/auth/modelos/auth.models';
 import { SessionExpirationModalComponent } from './core/components/session-expiration-modal/session-expiration-modal.component';
 import { CambiarPasswordModalComponent } from './features/auth/componentes/cambiar-password-modal/cambiar-password-modal.component';
 import { DescargaProgresoComponent } from './shared/components/descarga-progreso/descarga-progreso.component';
+import { NotificacionToastComponent } from './shared/components/notificacion-toast/notificacion-toast.component';
+import { NotificacionToastService } from './shared/services/notificacion-toast.service';
 import { DescargaProgresoService } from './shared/services/descarga-progreso.service';
 import { PopupService } from './shared/services/popup.service';
 import { ModalScrollLockService } from './shared/services/modal-scroll-lock.service';
@@ -26,7 +28,7 @@ interface SessionExpirationResult {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, DescargaProgresoComponent],
+  imports: [RouterOutlet, DescargaProgresoComponent, NotificacionToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.scss'
 })
@@ -42,6 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private router = inject(Router);
   private descargas = inject(DescargaProgresoService);
+  private notificacionToast = inject(NotificacionToastService);
   private popup = inject(PopupService);
   private modalScrollLock = inject(ModalScrollLockService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -308,6 +311,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.popup.close();
     this.descargas.cancelar();
     this.descargas.cerrar();
+    this.notificacionToast.cerrarTodos();
     this.modalScrollLock.reset();
     this.dropdownScrollLock.reset();
     document.body.classList.remove('sidebar-open');

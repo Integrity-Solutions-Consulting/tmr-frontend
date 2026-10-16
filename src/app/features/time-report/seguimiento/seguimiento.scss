@@ -397,9 +397,15 @@ $text-muted: #9CA3AF;
         height: 18px;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: #f3f4f6;
         color: #111827;
+    }
+
+    // Mientras se envía un aviso a ese colaborador el botón queda deshabilitado (evita doble clic).
+    &:disabled {
+        opacity: 0.45;
+        cursor: progress;
     }
 }
 

@@ -34,7 +34,8 @@ import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.u
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
-import { NotificacionesService } from '../../../shared/services/notificaciones.service';
+import { NotificacionToastService } from '../../../shared/services/notificacion-toast.service';
+import { EstadoEmpleado, NotificacionesService } from '../../../shared/services/notificaciones.service';
 import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
 
@@ -95,6 +96,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
     private notificacionesService = inject(NotificacionesService);
+    private toastService = inject(NotificacionToastService);
     private fechaLimites = inject(FechaLimitesService);
     private descargas = inject(DescargaProgresoService);
 
@@ -1111,28 +1113,79 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 
-    //notificacaiones mock hay que cambiar la logica cuando ya se encuentre realizado el backend
+    // Aviso manual: el POST solo encola la solicitud (202); el resultado real (enviado / fallido / omitido)
+    // se consulta con GET /notificaciones/estado hasta que el backend lo registre. El avance se muestra en un
+    // toast arriba a la derecha (no bloquea la pantalla), así que se puede avisar a varios colaboradores a la vez.
+    private notificandoIds = signal<ReadonlySet<number>>(new Set());
 
-    notificarColaborador(colaborador: Colaborador) {
-        this.popup.loading('Enviando...', 'Espera un momento');
+    public estaNotificando(colaborador: Colaborador): boolean {
+        return this.notificandoIds().has(+colaborador.id);
+    }
 
-        this.notificacionesService.notificar({ empleadoIds: [+colaborador.id] })
-          .subscribe({
-            next: (response) => {
-              console.log('Respuesta del endpoint de notificar:', response);
-              this.popup.show(
-                'check_circle',
-                'Notificación Enviada',
-                response.mensaje || `Se ha enviado un recordatorio a <b>${colaborador.nombre}</b>.`, 
-                true
-              );
-            },
-            error: (err) => {
-              console.error('Error al notificar:', err);
-              this.popup.show('error', 'Error', 'No se pudo enviar la notificación');
+    private marcarNotificando(idEmpleado: number, activo: boolean) {
+        this.notificandoIds.update(ids => {
+            const siguiente = new Set(ids);
+            if (activo) siguiente.add(idEmpleado); else siguiente.delete(idEmpleado);
+            return siguiente;
+        });
+    }
+
+    async notificarColaborador(colaborador: Colaborador) {
+        const idEmpleado = +colaborador.id;
+        if (this.notificandoIds().has(idEmpleado)) return;
+        this.marcarNotificando(idEmpleado, true);
+
+        const nombre = colaborador.nombre;
+        const toast = this.toastService.iniciar(
+            `Notificando a ${nombre}`,
+            'Enviando la solicitud al servidor...',
+            ['Solicitud enviada', 'Procesando y enviando el correo']);
+
+        try {
+            const solicitud = await lastValueFrom(this.notificacionesService.notificar({ empleadoIds: [idEmpleado] }));
+            this.toastService.avanzar(toast, 'Esperando la confirmación del envío...');
+
+            const estado = await this.esperarResultadoNotificacion(idEmpleado, solicitud.solicitadoEnMs);
+
+            switch (estado?.estado) {
+                case 'Enviado':
+                    this.toastService.exito(toast, 'Notificación enviada', `Se envió un recordatorio a ${nombre}.`);
+                    break;
+                case 'Omitido':
+                    this.toastService.aviso(toast, 'Notificación no enviada',
+                        `${nombre}: ${estado.detalle ?? 'no corresponde avisar en este momento'}.`);
+                    break;
+                case 'Fallido':
+                    this.toastService.error(toast, 'No se pudo enviar',
+                        `El correo para ${nombre} no pudo enviarse. Intenta nuevamente en unos minutos.`);
+                    break;
+                default:
+                    this.toastService.aviso(toast, 'Envío en proceso',
+                        `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
             }
-          });
+        } catch (err) {
+            console.error('Error al notificar:', err);
+            this.toastService.error(toast, 'No se pudo enviar la notificación',
+                `No se pudo registrar la solicitud para ${nombre}.`);
+        } finally {
+            this.marcarNotificando(idEmpleado, false);
+        }
+    }
+
+    // Consulta el estado cada 2 s (máx. ~20 s). Devuelve null si el backend nunca lo registró o si la consulta falla.
+    private async esperarResultadoNotificacion(idEmpleado: number, desdeMs: number): Promise<EstadoEmpleado | null> {
+        const intentos = 10;
+        for (let i = 0; i < intentos; i++) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            try {
+                const respuesta = await lastValueFrom(this.notificacionesService.getEstado([idEmpleado], desdeMs));
+                const estado = respuesta.empleados.find(e => e.idEmpleado === idEmpleado);
+                if (estado && estado.estado !== 'Pendiente') return estado;
+            } catch (err) {
+                console.error('Error al consultar el estado de la notificación:', err);
+                return null;
+            }
+        }
+        return null;
     }
 }
-
-//comentario de prueba

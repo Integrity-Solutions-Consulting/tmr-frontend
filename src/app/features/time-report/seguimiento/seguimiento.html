@@ -171,6 +171,7 @@
                                 <mat-icon>visibility</mat-icon>
                             </button>
                             <button class="action-btn" type="button" (click)="notificarColaborador(el)"
+                                [disabled]="estaNotificando(el)"
                                 title="Notificar Colaborador" aria-label="Notificar colaborador">
                                 <mat-icon>notifications_active</mat-icon>
                             </button>
