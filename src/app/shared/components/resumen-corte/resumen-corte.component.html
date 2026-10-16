@@ -1,0 +1,95 @@
+@if (servicio.popupVisible() && resumen(); as r) {
+  <div class="corte-overlay">
+    <section class="corte-popup" role="dialog" aria-modal="true" aria-labelledby="corte-popup-titulo">
+      <div class="corte-popup__icono" [class.corte-popup__icono--proceso]="r.enProceso" aria-hidden="true">
+        <span class="material-symbols-outlined">{{ r.enProceso ? 'forward_to_inbox' : 'mark_email_read' }}</span>
+      </div>
+
+      <h2 id="corte-popup-titulo" class="corte-popup__titulo">
+        {{ r.enProceso ? 'Corte de horas en proceso' : 'Corte de horas completado' }}
+      </h2>
+      <p class="corte-popup__texto">
+        Notificaciones de horas faltantes del <strong>{{ periodo() }}</strong>.
+      </p>
+
+      <div class="corte-popup__conteos">
+        <div class="conteo conteo--enviado">
+          <span class="conteo__valor">{{ r.enviados }}</span>
+          <span class="conteo__texto">Enviados</span>
+        </div>
+        <div class="conteo conteo--fallido">
+          <span class="conteo__valor">{{ r.fallidos }}</span>
+          <span class="conteo__texto">Fallidos</span>
+        </div>
+        <div class="conteo conteo--omitido">
+          <span class="conteo__valor">{{ r.omitidos }}</span>
+          <span class="conteo__texto">Omitidos</span>
+        </div>
+      </div>
+
+      @if (r.enProceso) {
+        <p class="corte-popup__proceso">
+          <span class="corte-popup__spinner" aria-hidden="true"></span>
+          Enviando correos... {{ r.pendientes }} pendiente{{ r.pendientes === 1 ? '' : 's' }}
+        </p>
+      }
+
+      <div class="corte-popup__acciones">
+        <button type="button" class="btn-secundario" (click)="verDetalle()">Ver más</button>
+        <button type="button" class="btn-primario" (click)="servicio.cerrarPopup()">Entendido</button>
+      </div>
+    </section>
+  </div>
+}
+
+<app-modal-base
+  [visible]="servicio.detalleVisible() && !!resumen()"
+  titulo="Resultado del corte de horas"
+  (cerrar)="servicio.cerrarDetalle()">
+  @if (resumen(); as r) {
+    <p class="corte-detalle__subtitulo">
+      Período del {{ periodo() }} · corte del {{ r.fechaCorte | date: 'dd/MM/yyyy HH:mm' }}
+      @if (r.enProceso) { <span class="corte-detalle__en-proceso">· en proceso</span> }
+    </p>
+
+    <div class="corte-detalle__filtros" role="tablist" aria-label="Filtrar por resultado">
+      @for (f of filtros(); track f.valor) {
+        <button type="button" role="tab" class="filtro-chip"
+          [class.filtro-chip--activo]="filtro() === f.valor"
+          [attr.aria-selected]="filtro() === f.valor"
+          (click)="filtro.set(f.valor)">
+          {{ f.texto }} <span class="filtro-chip__cantidad">{{ f.cantidad }}</span>
+        </button>
+      }
+    </div>
+
+    @if (empleadosFiltrados().length === 0) {
+      <p class="corte-detalle__vacio">No hay colaboradores en esta categoría.</p>
+    } @else {
+      <div class="corte-detalle__tabla-wrap">
+        <table class="corte-detalle__tabla">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Resultado</th>
+              <th class="num">Horas faltantes</th>
+              <th>Detalle</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of empleadosFiltrados(); track e.idEmpleado) {
+              <tr>
+                <td class="nombre">{{ e.nombre }}</td>
+                <td><span [class]="claseEstado(e.estado)">{{ e.estado }}</span></td>
+                <td class="num">{{ e.horasFaltantes | horasFormat }}</td>
+                <td class="detalle">{{ e.detalle || (e.estado === 'Enviado' ? 'Correo enviado' : '-') }}</td>
+                <td class="fecha">{{ e.fecha ? (e.fecha | date: 'dd/MM HH:mm') : '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</app-modal-base>

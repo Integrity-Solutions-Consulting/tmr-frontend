@@ -25,7 +25,7 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { lastValueFrom, Observable, Subject, takeUntil } from 'rxjs';
+import { filter, firstValueFrom, lastValueFrom, Observable, Subject, takeUntil, timeout } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
 import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
@@ -38,6 +38,7 @@ import { NotificacionToastService } from '../../../shared/services/notificacion-
 import { EstadoEmpleado, NotificacionesService } from '../../../shared/services/notificaciones.service';
 import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
+import { TokenService } from '../../auth/servicios/token.service';
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generaciÃ³n.
 class SinActividadesError extends Error {
@@ -98,6 +99,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private notificacionesService = inject(NotificacionesService);
     private toastService = inject(NotificacionToastService);
     private fechaLimites = inject(FechaLimitesService);
+    private tokenService = inject(TokenService);
     private descargas = inject(DescargaProgresoService);
 
     public columnas: string[] = [
@@ -1130,9 +1132,12 @@ export class SeguimientoComponent implements AfterViewInit {
         });
     }
 
+    // El permiso NOTIFICACIONES_EJECUTAR se asigna a Administrador y Líder (script 14); el backend lo valida igual.
+    public readonly puedeNotificar = this.tokenService.hasRole('ADMINISTRADOR') || this.tokenService.isLider();
+
     async notificarColaborador(colaborador: Colaborador) {
         const idEmpleado = +colaborador.id;
-        if (this.notificandoIds().has(idEmpleado)) return;
+        if (!this.puedeNotificar || this.notificandoIds().has(idEmpleado)) return;
         this.marcarNotificando(idEmpleado, true);
 
         const nombre = colaborador.nombre;
@@ -1141,9 +1146,17 @@ export class SeguimientoComponent implements AfterViewInit {
             'Enviando la solicitud al servidor...',
             ['Solicitud enviada', 'Procesando y enviando el correo']);
 
+        let avisoDemora: ReturnType<typeof setTimeout> | undefined;
         try {
-            const solicitud = await lastValueFrom(this.notificacionesService.notificar({ empleadoIds: [idEmpleado] }));
+            // Mismo rango que el filtro de la pantalla: el correo informa las horas que el líder está viendo
+            const solicitud = await lastValueFrom(this.notificacionesService.notificar({
+                empleadoIds: [idEmpleado],
+                fechaDesde: this.fechaDesde,
+                fechaHasta: this.fechaHasta,
+            }));
             this.toastService.avanzar(toast, 'Esperando la confirmación del envío...');
+            avisoDemora = setTimeout(() => this.toastService.actualizarDetalle(toast,
+                'Hay otros correos en cola; el resultado aparecerá aquí cuando termine.'), 20000);
 
             const estado = await this.esperarResultadoNotificacion(idEmpleado, solicitud.solicitadoEnMs);
 
@@ -1163,20 +1176,44 @@ export class SeguimientoComponent implements AfterViewInit {
                     this.toastService.aviso(toast, 'Envío en proceso',
                         `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error al notificar:', err);
-            this.toastService.error(toast, 'No se pudo enviar la notificación',
-                `No se pudo registrar la solicitud para ${nombre}.`);
+            const detalle = err?.status === 403
+                ? 'No tienes permiso para enviar notificaciones.'
+                : err?.status === 400 && err?.error?.mensaje
+                    ? err.error.mensaje
+                    : `No se pudo registrar la solicitud para ${nombre}.`;
+            this.toastService.error(toast, 'No se pudo enviar la notificación', detalle);
         } finally {
+            clearTimeout(avisoDemora);
             this.marcarNotificando(idEmpleado, false);
         }
     }
 
-    // Consulta el estado cada 2 s (máx. ~20 s). Devuelve null si el backend nunca lo registró o si la consulta falla.
+    // Espera el resultado por SSE (el backend lo empuja en cuanto lo registra, hasta ~5 min).
+    // Si el stream no está disponible o se corta, sigue consultando GET /estado.
+    // Devuelve null si el aviso sigue en cola al agotarse la espera.
     private async esperarResultadoNotificacion(idEmpleado: number, desdeMs: number): Promise<EstadoEmpleado | null> {
-        const intentos = 10;
+        try {
+            const evento = await firstValueFrom(
+                this.notificacionesService.streamEstado([idEmpleado], desdeMs).pipe(
+                    filter(e => e.tipo === 'fin' || e.estado.idEmpleado === idEmpleado),
+                    timeout(6 * 60 * 1000)),
+                { defaultValue: undefined });
+            if (evento?.tipo === 'estado') return evento.estado;
+            if (evento?.tipo === 'fin') return null;
+            // Sin "fin": la conexión se cortó antes de tiempo, se sigue por consulta
+        } catch (err) {
+            console.warn('Stream de estado no disponible; se consulta el estado periódicamente:', err);
+        }
+        return this.consultarResultadoNotificacion(idEmpleado, desdeMs);
+    }
+
+    // Respaldo: consulta el estado cada 3 s (máx. ~90 s). Devuelve null si no se registró o si la consulta falla.
+    private async consultarResultadoNotificacion(idEmpleado: number, desdeMs: number): Promise<EstadoEmpleado | null> {
+        const intentos = 30;
         for (let i = 0; i < intentos; i++) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             try {
                 const respuesta = await lastValueFrom(this.notificacionesService.getEstado([idEmpleado], desdeMs));
                 const estado = respuesta.empleados.find(e => e.idEmpleado === idEmpleado);

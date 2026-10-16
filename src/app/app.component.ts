@@ -13,6 +13,8 @@ import { CambiarPasswordModalComponent } from './features/auth/componentes/cambi
 import { DescargaProgresoComponent } from './shared/components/descarga-progreso/descarga-progreso.component';
 import { NotificacionToastComponent } from './shared/components/notificacion-toast/notificacion-toast.component';
 import { NotificacionToastService } from './shared/services/notificacion-toast.service';
+import { ResumenCorteComponent } from './shared/components/resumen-corte/resumen-corte.component';
+import { ResumenCorteService } from './shared/services/resumen-corte.service';
 import { DescargaProgresoService } from './shared/services/descarga-progreso.service';
 import { PopupService } from './shared/services/popup.service';
 import { ModalScrollLockService } from './shared/services/modal-scroll-lock.service';
@@ -28,7 +30,7 @@ interface SessionExpirationResult {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, DescargaProgresoComponent, NotificacionToastComponent],
+  imports: [RouterOutlet, DescargaProgresoComponent, NotificacionToastComponent, ResumenCorteComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.scss'
 })
@@ -45,6 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private descargas = inject(DescargaProgresoService);
   private notificacionToast = inject(NotificacionToastService);
+  private resumenCorte = inject(ResumenCorteService);
   private popup = inject(PopupService);
   private modalScrollLock = inject(ModalScrollLockService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -147,7 +150,11 @@ export class AppComponent implements OnInit, OnDestroy {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntil(this.destroy$),
       )
-      .subscribe(() => this.enforcePasswordChange());
+      .subscribe(event => {
+        this.enforcePasswordChange();
+        // Retroalimentación del corte de horas por SSE (solo Administrador y Líder); no hace nada si ya está conectado
+        if (!event.urlAfterRedirects.startsWith('/auth')) this.resumenCorte.iniciar();
+      });
 
     // sm - Cualquier camino que lleve al login (sesión expirada, "Cerrar sesión", 401, guards) deja la pantalla limpia:
     // los MatDialog no se cierran solos con router.navigate (solo con atrás/adelante del navegador).
@@ -298,6 +305,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.userActivity.stopTracking();
+    this.resumenCorte.detener();
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {
@@ -312,6 +320,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.descargas.cancelar();
     this.descargas.cerrar();
     this.notificacionToast.cerrarTodos();
+    this.resumenCorte.detener();
     this.modalScrollLock.reset();
     this.dropdownScrollLock.reset();
     document.body.classList.remove('sidebar-open');
