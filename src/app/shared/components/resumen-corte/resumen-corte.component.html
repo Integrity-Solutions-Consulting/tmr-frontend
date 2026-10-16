@@ -4,7 +4,7 @@
   (cerrar)="servicio.cerrarDetalle()">
   @if (resumen(); as r) {
     <p class="corte-detalle__subtitulo">
-      Período del {{ periodo() }} · corte del {{ r.fechaCorte | date: 'dd/MM/yyyy HH:mm' }}
+      Período del {{ periodo() }} · corte del {{ formatoFechaHora(r.fechaCorte) }}
       @if (r.enProceso) { <span class="corte-detalle__en-proceso">· en proceso</span> }
     </p>
 
@@ -40,7 +40,7 @@
                 <td><span [class]="claseEstado(e.estado)">{{ e.estado }}</span></td>
                 <td class="num">{{ e.horasFaltantes | horasFormat }}</td>
                 <td class="detalle">{{ e.detalle || (e.estado === 'Enviado' ? 'Correo enviado' : '-') }}</td>
-                <td class="fecha">{{ e.fecha ? (e.fecha | date: 'dd/MM HH:mm') : '-' }}</td>
+                <td class="fecha">{{ formatoFechaHora(e.fecha) }}</td>
               </tr>
             }
           </tbody>

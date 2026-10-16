@@ -80,6 +80,20 @@ export interface ResumenCorte {
   ejecucion: string | null;
 }
 
+/** Correo de horas faltantes que se le envió al usuario actual (campana del colaborador). */
+export interface AvisoColaborador {
+  id: number;
+  /** Manual: su líder desde Seguimiento. Automatico: corte de quincena o fin de mes. */
+  origen: 'Manual' | 'Automatico';
+  horasFaltantes: number;
+  inicioPeriodo: string;
+  finPeriodo: string;
+  proyecto: string | null;
+  /** Corte: "Portal Web: 16 h · ERP: 8 h". */
+  detalle: string | null;
+  fechaEnvio: string;
+}
+
 /** Un evento leído de un stream SSE: nombre del evento y su data (texto crudo). */
 interface EventoSse {
   evento: string;
@@ -159,6 +173,23 @@ export class NotificacionesService {
       const sub = this.leerSse(`${this.apiUrl}/cortes/stream`).subscribe({
         next: ({ evento, data }) => {
           if (evento === 'corte') subscriber.next(this.parsearJson<ResumenCorte>(data));
+        },
+        error: err => subscriber.error(err),
+        complete: () => subscriber.complete(),
+      });
+      return () => sub.unsubscribe();
+    });
+  }
+
+  /**
+   * Server-Sent Events con los correos de horas faltantes enviados al usuario actual (avisos de su líder y del
+   * corte): al conectarse llegan los recientes y luego la lista actualizada con cada correo nuevo.
+   */
+  streamMisAvisos(): Observable<AvisoColaborador[]> {
+    return new Observable<AvisoColaborador[]>(subscriber => {
+      const sub = this.leerSse(`${this.apiUrl}/mias/stream`).subscribe({
+        next: ({ evento, data }) => {
+          if (evento === 'avisos') subscriber.next(this.parsearJson<AvisoColaborador[]>(data) ?? []);
         },
         error: err => subscriber.error(err),
         complete: () => subscriber.complete(),

@@ -15,6 +15,7 @@ import { NotificacionToastComponent } from './shared/components/notificacion-toa
 import { NotificacionToastService } from './shared/services/notificacion-toast.service';
 import { ResumenCorteComponent } from './shared/components/resumen-corte/resumen-corte.component';
 import { ResumenCorteService } from './shared/services/resumen-corte.service';
+import { MisAvisosService } from './shared/services/mis-avisos.service';
 import { DescargaProgresoService } from './shared/services/descarga-progreso.service';
 import { PopupService } from './shared/services/popup.service';
 import { ModalScrollLockService } from './shared/services/modal-scroll-lock.service';
@@ -48,6 +49,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private descargas = inject(DescargaProgresoService);
   private notificacionToast = inject(NotificacionToastService);
   private resumenCorte = inject(ResumenCorteService);
+  private misAvisos = inject(MisAvisosService);
   private popup = inject(PopupService);
   private modalScrollLock = inject(ModalScrollLockService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -152,8 +154,12 @@ export class AppComponent implements OnInit, OnDestroy {
       )
       .subscribe(event => {
         this.enforcePasswordChange();
-        // Retroalimentación del corte de horas por SSE (solo Administrador y Líder); no hace nada si ya está conectado
-        if (!event.urlAfterRedirects.startsWith('/auth')) this.resumenCorte.iniciar();
+        // Por SSE (no hacen nada si ya están conectados): retroalimentación del corte (solo Administrador y Líder)
+        // y los correos de horas faltantes que le llegaron al usuario (campana de cualquier colaborador)
+        if (!event.urlAfterRedirects.startsWith('/auth')) {
+          this.resumenCorte.iniciar();
+          this.misAvisos.iniciar();
+        }
       });
 
     // sm - Cualquier camino que lleve al login (sesión expirada, "Cerrar sesión", 401, guards) deja la pantalla limpia:
@@ -306,6 +312,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.userActivity.stopTracking();
     this.resumenCorte.detener();
+    this.misAvisos.detener();
+    this.misAvisos.detener();
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {

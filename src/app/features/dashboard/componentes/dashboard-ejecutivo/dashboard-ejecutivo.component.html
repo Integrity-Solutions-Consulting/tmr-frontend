@@ -211,8 +211,8 @@
           <span class="badge-semaforo" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)">{{ d.cumplimientoTotal.semaforo }}</span>
         </div>
 
-        <div class="resumen-cifras" [class.resumen-cifras--con-corte]="resumenCorte.resumen()">
-          <!-- Izquierda: cumplimiento del período filtrado -->
+        <div class="resumen-cifras">
+          <!-- Cumplimiento del período filtrado -->
           <div class="resumen-cumplimiento">
             <div class="cifras">
               <div class="cifra">
@@ -249,46 +249,31 @@
             </div>
           </div>
 
-          <!-- Derecha: resultado del último corte de horas (SSE, solo Administrador y Líder).
+          <!-- Aviso informativo del último corte de horas (SSE, solo Administrador y Líder).
                No depende de los filtros: siempre es el último corte de los últimos 16 días. -->
           @if (resumenCorte.resumen(); as corte) {
-            <div class="resumen-corte">
-              <div class="corte-encabezado">
-                <span class="cifra-label">Último corte de horas</span>
-                <span class="corte-periodo">
-                  {{ describirPeriodoCorte(corte) }}
-                  @if (corte.enProceso) {
-                    <span class="corte-estado corte-estado--proceso"><span class="corte-spinner" aria-hidden="true"></span>En proceso</span>
-                  } @else {
-                    <span class="corte-estado">Completado</span>
+            <div class="aviso-corte">
+              <button type="button" class="aviso-corte__boton" (click)="abrirDetalleCorte()"
+                [class.aviso-corte__boton--seleccionado]="esSeleccionado('corteHoras')"
+                aria-label="Ver el resultado del último corte de horas">
+                <span class="aviso-corte__icono">
+                  <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                  @if (resumenCorte.campanaPendiente()) {
+                    <span class="aviso-corte__punto" aria-hidden="true"></span>
                   }
                 </span>
-              </div>
-
-              <div class="cifras cifras--corte">
-                <div class="cifra">
-                  <span class="cifra-label">Enviados</span>
-                  <span class="cifra-valor corte-enviados">{{ corte.enviados }}</span>
-                </div>
-                <div class="cifra">
-                  <span class="cifra-label">Fallidos</span>
-                  <span class="cifra-valor corte-fallidos">{{ corte.fallidos }}</span>
-                </div>
-                <div class="cifra">
-                  <span class="cifra-label">Omitidos</span>
-                  <span class="cifra-valor corte-omitidos">{{ corte.omitidos }}</span>
-                </div>
-              </div>
-
-              <div class="resumen-acciones">
-                <button type="button" class="btn-link" (click)="resumenCorte.verDetalle()">
-                  Ver detalle del corte
-                  <mat-icon>arrow_forward</mat-icon>
-                </button>
-                @if (corte.enProceso && corte.pendientes > 0) {
-                  <span class="corte-pendientes">{{ corte.pendientes }} pendiente{{ corte.pendientes === 1 ? '' : 's' }}</span>
+                <span class="cifra-label">Último corte de horas</span>
+                <span class="aviso-corte__periodo">{{ describirPeriodoCorte(corte) }}</span>
+                @if (corte.enProceso) {
+                  <span class="aviso-corte__estado aviso-corte__estado--proceso">
+                    <span class="aviso-corte__spinner" aria-hidden="true"></span>En proceso
+                  </span>
+                } @else {
+                  <span class="aviso-corte__estado">Completado</span>
                 }
-              </div>
+                <span class="aviso-corte__enlace">Ver más <mat-icon>arrow_forward</mat-icon></span>
+              </button>
+
             </div>
           }
         </div>
@@ -448,7 +433,7 @@
       <div class="drawer-header">
         <div class="drawer-title-group">
           <span class="drawer-subtitle">
-            {{ datos() ? meses[datos()!.periodo.mes - 1] + ' ' + datos()!.periodo.anio + ' · Corte ' + formatoFecha(datos()!.periodo.fechaCorte) : '' }}
+            {{ det.subtitulo ?? (datos() ? meses[datos()!.periodo.mes - 1] + ' ' + datos()!.periodo.anio + ' · Corte ' + formatoFecha(datos()!.periodo.fechaCorte) : '') }}
           </span>
           <h2 class="drawer-title">{{ det.titulo }}</h2>
           <p class="drawer-definicion">{{ det.definicion }}</p>
@@ -499,6 +484,8 @@
                       <td [class.num]="c.tipo === 'horas' || c.tipo === 'porcentaje' || c.tipo === 'numero'">
                         @if (c.tipo === 'semaforo') {
                           <span class="badge-semaforo" [ngClass]="claseSemaforo(f[c.clave])">{{ f[c.clave] }}</span>
+                        } @else if (c.tipo === 'resultado') {
+                          <span class="badge-resultado" [ngClass]="'badge-resultado--' + f[c.clave].toLowerCase()">{{ f[c.clave] }}</span>
                         } @else if (c.clave === 'pendientes') {
                           <span [class.pendiente]="f[c.clave] > 0">{{ valorCelda(f, c) }}</span>
                         } @else {

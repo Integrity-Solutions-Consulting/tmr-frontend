@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal, HostListener } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, effect, inject, signal, untracked, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -38,10 +38,10 @@ import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
-import { describirPeriodoCorte, ResumenCorteService } from '../../../../shared/services/resumen-corte.service';
+import { describirPeriodoCorte, formatoFechaHoraEcuador, ResumenCorteService } from '../../../../shared/services/resumen-corte.service';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
-type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
+type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero' | 'resultado';
 interface ColumnaDetalle {
   clave: string;
   titulo: string;
@@ -52,6 +52,8 @@ interface ColumnaDetalle {
 interface DetalleAbierto {
   clave: string;
   titulo: string;
+  // Línea sobre el título; sin ella se muestra el periodo de los filtros (el corte no depende de ellos)
+  subtitulo?: string;
   definicion: string;
   columnas: ColumnaDetalle[];
   filas: any[];
@@ -101,9 +103,18 @@ export class DashboardEjecutivoComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
   private descargas = inject(DescargaProgresoService);
-  // Resultado del último corte de horas (lado derecho del resumen); el detalle lo abre <app-resumen-corte>
+  // Aviso informativo del último corte de horas (a la derecha del resumen); su "Ver más" abre el panel de detalle
   protected readonly resumenCorte = inject(ResumenCorteService);
   protected readonly describirPeriodoCorte = describirPeriodoCorte;
+
+  // El corte avanza en vivo por SSE: si su detalle está abierto, se rearma con cada actualización
+  private readonly refrescoDetalleCorte = effect(() => {
+    const corte = this.resumenCorte.resumen();
+    untracked(() => {
+      if (this.detalle()?.clave !== 'corteHoras') return;
+      corte ? this.abrirDetalleCorte() : this.cerrarDetalle();
+    });
+  });
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;
@@ -792,6 +803,36 @@ export class DashboardEjecutivoComponent implements OnInit {
     });
   }
 
+  // Igual que las tarjetas: "Ver más" del aviso abre el panel de detalle con cada colaborador y su resultado.
+  // Al abrirlo el corte deja de contar como nuevo (también se apaga el punto de la campana).
+  abrirDetalleCorte(): void {
+    const corte = this.resumenCorte.resumen();
+    if (!corte) return;
+    this.resumenCorte.marcarCampanaVista();
+
+    const pendientes = corte.enProceso ? `, ${corte.pendientes} pendientes (en proceso)` : '';
+    this.abrirDetalle({
+      clave: 'corteHoras',
+      titulo: 'Último corte de horas',
+      subtitulo: `${describirPeriodoCorte(corte)} · Corte ${formatoFechaHoraEcuador(corte.fechaCorte)}`,
+      definicion:
+        `Aviso automático de horas faltantes: ${corte.enviados} enviados, ${corte.fallidos} fallidos y ` +
+        `${corte.omitidos} omitidos${pendientes}. No depende de los filtros del Dashboard.`,
+      columnas: [
+        { clave: 'nombre', titulo: 'Colaborador' },
+        { clave: 'estado', titulo: 'Resultado', tipo: 'resultado' },
+        { clave: 'horasFaltantes', titulo: 'Horas faltantes', tipo: 'horas' },
+        { clave: 'detalle', titulo: 'Detalle' },
+        { clave: 'fechaTexto', titulo: 'Fecha' },
+      ],
+      filas: corte.empleados.map((e) => ({
+        ...e,
+        detalle: e.detalle ?? (e.estado === 'Enviado' ? 'Correo enviado' : null),
+        fechaTexto: e.fecha ? formatoFechaHoraEcuador(e.fecha) : null,
+      })),
+    });
+  }
+
   private columnasCumplimiento(): ColumnaDetalle[] {
     return [
       { clave: 'colaborador', titulo: 'Colaborador' },
@@ -827,6 +868,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       this.abrirTodoIncumplimiento();
     } else if (tipo === 'fueraAsignacion') {
       this.abrirFueraDeAsignacion();
+    } else if (tipo === 'corteHoras') {
+      this.resumenCorte.resumen() ? this.abrirDetalleCorte() : this.cerrarDetalle();
     } else {
       this.abrirTarjeta(actual.clave);
     }

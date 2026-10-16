@@ -3,15 +3,30 @@ import { Subscription } from 'rxjs';
 import { TokenService } from '../../features/auth/servicios/token.service';
 import { NotificacionesService, ResumenCorte } from './notificaciones.service';
 
+/** "15/10/2026 18:00" en hora de Ecuador (UTC−5), venga la fecha del servidor en UTC o con su offset. */
+export function formatoFechaHoraEcuador(valor: string | null | undefined): string {
+  if (!valor) return '—';
+  const fecha = new Date(valor);
+  if (isNaN(fecha.getTime())) return valor;
+  const ecuador = new Date(fecha.getTime() - 5 * 60 * 60 * 1000);
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return `${dos(ecuador.getUTCDate())}/${dos(ecuador.getUTCMonth() + 1)}/${ecuador.getUTCFullYear()} ` +
+    `${dos(ecuador.getUTCHours())}:${dos(ecuador.getUTCMinutes())}`;
+}
+
 /** "1 al 15 de octubre de 2026" (las fechas llegan como yyyy-MM-dd y se leen en hora local para no correr un día). */
-export function describirPeriodoCorte(resumen: ResumenCorte): string {
+export function describirPeriodo(inicioPeriodo: string, finPeriodo: string): string {
   const leer = (fecha: string) => {
     const [anio, mes, dia] = fecha.split('-').map(Number);
     return new Date(anio, mes - 1, dia);
   };
-  const inicio = leer(resumen.inicioPeriodo);
-  const fin = leer(resumen.finPeriodo);
+  const inicio = leer(inicioPeriodo);
+  const fin = leer(finPeriodo);
   return `${inicio.getDate()} al ${fin.getDate()} de ${fin.toLocaleDateString('es-EC', { month: 'long', year: 'numeric' })}`;
+}
+
+export function describirPeriodoCorte(resumen: ResumenCorte): string {
+  return describirPeriodo(resumen.inicioPeriodo, resumen.finPeriodo);
 }
 
 /**

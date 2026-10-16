@@ -1,7 +1,6 @@
-import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { EstadoEnvioCorte } from '../../services/notificaciones.service';
-import { describirPeriodoCorte, ResumenCorteService } from '../../services/resumen-corte.service';
+import { describirPeriodoCorte, formatoFechaHoraEcuador, ResumenCorteService } from '../../services/resumen-corte.service';
 import { HorasFormatPipe } from '../../pipes/horas-format.pipe';
 import { ModalBase } from '../modal-base/modal-base';
 
@@ -12,7 +11,7 @@ type FiltroEstado = 'Todos' | EstadoEnvioCorte;
 @Component({
   selector: 'app-resumen-corte',
   standalone: true,
-  imports: [DatePipe, HorasFormatPipe, ModalBase],
+  imports: [HorasFormatPipe, ModalBase],
   templateUrl: './resumen-corte.component.html',
   styleUrl: './resumen-corte.component.scss',
 })
@@ -20,6 +19,7 @@ export class ResumenCorteComponent {
   protected readonly servicio = inject(ResumenCorteService);
 
   protected readonly resumen = this.servicio.resumen;
+  protected readonly formatoFechaHora = formatoFechaHoraEcuador;
   protected readonly filtro = signal<FiltroEstado>('Todos');
 
   protected readonly filtros = computed(() => {
