@@ -11,6 +11,7 @@ import { MiPerfilModalComponent, MiPerfilData } from '../../../shared/components
 import { ConfiguracionModalComponent } from '../../../shared/components/configuracion-modal/configuracion-modal.component';
 import { CommonModule } from '@angular/common';
 import { DropdownScrollLockService } from '../../../shared/services/dropdown-scroll-lock.service';
+import { describirPeriodoCorte, ResumenCorteService } from '../../../shared/services/resumen-corte.service';
 
 @Component({
   selector: 'app-navbar',
@@ -27,6 +28,9 @@ export class Navbar implements OnInit {
   private dashboardService = inject(DashboardService);
   private elementRef = inject(ElementRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
+  // Resultado del corte de horas (SSE, solo Administrador y Líder): aviso en la campana además del popup
+  protected readonly resumenCorte = inject(ResumenCorteService);
+  protected readonly describirPeriodoCorte = describirPeriodoCorte;
 
   user = {
     name: 'Usuario',
@@ -104,7 +108,14 @@ export class Navbar implements OnInit {
     if (this.notificacionesAbierto) {
       this.perfilAbierto = false;
       this.consultarHorasIncompletas();
+      this.resumenCorte.marcarCampanaVista();
     }
+  }
+
+  /** Clic en el aviso del corte: abre directo la lista de colaboradores con su resultado ("Ver más"). */
+  abrirDetalleCorte(): void {
+    this.notificacionesAbierto = false;
+    this.resumenCorte.verDetalle();
   }
 
   @HostListener('document:click', ['$event'])

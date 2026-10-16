@@ -9,14 +9,33 @@
     <!-- Notificaciones en App (Campana) -->
     <div class="navbar__bell-wrapper">
       <button type="button" class="navbar__bell-btn" (click)="toggleNotificaciones()" aria-label="Notificaciones">
-        <span class="material-symbols-outlined navbar__bell-icon" [class.navbar__bell-icon--active]="tieneNotificaciones">notifications</span>
-        <span class="navbar__bell-badge" *ngIf="tieneNotificaciones"></span>
+        <span class="material-symbols-outlined navbar__bell-icon" [class.navbar__bell-icon--active]="tieneNotificaciones || resumenCorte.campanaPendiente()">notifications</span>
+        <span class="navbar__bell-badge" *ngIf="tieneNotificaciones || resumenCorte.campanaPendiente()"></span>
       </button>
 
       <!-- Panel Dropdown de Notificaciones -->
       <div class="navbar__bell-dropdown" data-scroll-lock-exempt *ngIf="notificacionesAbierto">
         <div class="navbar__bell-dropdown-header">Notificaciones</div>
         <div class="navbar__bell-dropdown-body">
+          <!-- Resultado del último corte de horas (solo Administrador y Líder) -->
+          @if (resumenCorte.resumen(); as corte) {
+            <button type="button" class="navbar__bell-item navbar__bell-item--corte" (click)="abrirDetalleCorte()">
+              <span class="material-symbols-outlined navbar__bell-item-icon navbar__bell-item-icon--corte">
+                {{ corte.enProceso ? 'forward_to_inbox' : 'mark_email_read' }}
+              </span>
+              <span class="navbar__bell-item-content">
+                <span class="navbar__bell-item-title">
+                  Corte de horas {{ describirPeriodoCorte(corte) }}{{ corte.enProceso ? ' (en proceso)' : '' }}
+                </span>
+                <span class="navbar__bell-item-desc navbar__bell-item-desc--corte">
+                  <strong class="corte-enviados">{{ corte.enviados }} enviados</strong> ·
+                  <strong class="corte-fallidos">{{ corte.fallidos }} fallidos</strong> ·
+                  <strong class="corte-omitidos">{{ corte.omitidos }} omitidos</strong>
+                </span>
+                <span class="navbar__bell-item-link">Ver detalle</span>
+              </span>
+            </button>
+          }
           <div class="navbar__bell-item" *ngIf="tieneNotificaciones">
             <span class="material-symbols-outlined navbar__bell-item-icon">warning</span>
             <div class="navbar__bell-item-content">

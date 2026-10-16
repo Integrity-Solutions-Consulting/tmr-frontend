@@ -38,6 +38,7 @@ import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
+import { describirPeriodoCorte, ResumenCorteService } from '../../../../shared/services/resumen-corte.service';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
 type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
@@ -100,6 +101,9 @@ export class DashboardEjecutivoComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
   private descargas = inject(DescargaProgresoService);
+  // Resultado del último corte de horas (lado derecho del resumen); el detalle lo abre <app-resumen-corte>
+  protected readonly resumenCorte = inject(ResumenCorteService);
+  protected readonly describirPeriodoCorte = describirPeriodoCorte;
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;

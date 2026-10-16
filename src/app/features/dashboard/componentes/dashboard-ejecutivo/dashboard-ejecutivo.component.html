@@ -211,45 +211,86 @@
           <span class="badge-semaforo" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)">{{ d.cumplimientoTotal.semaforo }}</span>
         </div>
 
-        <div class="resumen-cifras">
-          <div class="cifras">
-            <div class="cifra">
-              <span class="cifra-label">Horas esperadas</span>
-              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.esperadas) }}</span>
+        <div class="resumen-cifras" [class.resumen-cifras--con-corte]="resumenCorte.resumen()">
+          <!-- Izquierda: cumplimiento del período filtrado -->
+          <div class="resumen-cumplimiento">
+            <div class="cifras">
+              <div class="cifra">
+                <span class="cifra-label">Horas esperadas</span>
+                <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.esperadas) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Horas reportadas</span>
+                <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.reportadas) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Horas pendientes</span>
+                <span class="cifra-valor pendiente">{{ formatoHoras(d.cumplimientoTotal.pendientes) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Colaboradores con pendientes</span>
+                <span class="cifra-valor">{{ colaboradoresConPendientes() }}</span>
+              </div>
             </div>
-            <div class="cifra">
-              <span class="cifra-label">Horas reportadas</span>
-              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.reportadas) }}</span>
-            </div>
-            <div class="cifra">
-              <span class="cifra-label">Horas pendientes</span>
-              <span class="cifra-valor pendiente">{{ formatoHoras(d.cumplimientoTotal.pendientes) }}</span>
-            </div>
-            <div class="cifra">
-              <span class="cifra-label">Colaboradores con pendientes</span>
-              <span class="cifra-valor">{{ colaboradoresConPendientes() }}</span>
-            </div>
-          </div>
 
-          <div class="barra-progreso" [matTooltip]="formatoHoras(d.cumplimientoTotal.reportadas) + ' de ' + formatoHoras(d.cumplimientoTotal.esperadas)">
-            <span class="barra-relleno" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)"
-              [style.width.%]="anchoBarra(d.cumplimientoTotal.porcentaje)"></span>
-          </div>
-
-          <div class="resumen-acciones">
-            <button type="button" class="btn-link" (click)="abrirTodoIncumplimiento()"
-              [disabled]="d.cumplimientoTotal.pendientes === 0">
-              Ver detalle de incumplimiento
-              <mat-icon>arrow_forward</mat-icon>
-            </button>
-            @if (totalFueraDeAsignacion() > 0) {
-              <button type="button" class="aviso-fuera" (click)="abrirFueraDeAsignacion()"
-                matTooltip="Horas registradas en proyectos donde la persona no está asignada. No suman al cumplimiento.">
-                <mat-icon>info</mat-icon>
-                {{ formatoHoras(totalFueraDeAsignacion()) }} registradas fuera de asignación
+            <div class="resumen-acciones">
+              <button type="button" class="btn-link" (click)="abrirTodoIncumplimiento()"
+                [disabled]="d.cumplimientoTotal.pendientes === 0">
+                Ver detalle de incumplimiento
+                <mat-icon>arrow_forward</mat-icon>
               </button>
-            }
+              @if (totalFueraDeAsignacion() > 0) {
+                <button type="button" class="aviso-fuera" (click)="abrirFueraDeAsignacion()"
+                  matTooltip="Horas registradas en proyectos donde la persona no está asignada. No suman al cumplimiento.">
+                  <mat-icon>info</mat-icon>
+                  {{ formatoHoras(totalFueraDeAsignacion()) }} registradas fuera de asignación
+                </button>
+              }
+            </div>
           </div>
+
+          <!-- Derecha: resultado del último corte de horas (SSE, solo Administrador y Líder).
+               No depende de los filtros: siempre es el último corte de los últimos 16 días. -->
+          @if (resumenCorte.resumen(); as corte) {
+            <div class="resumen-corte">
+              <div class="corte-encabezado">
+                <span class="cifra-label">Último corte de horas</span>
+                <span class="corte-periodo">
+                  {{ describirPeriodoCorte(corte) }}
+                  @if (corte.enProceso) {
+                    <span class="corte-estado corte-estado--proceso"><span class="corte-spinner" aria-hidden="true"></span>En proceso</span>
+                  } @else {
+                    <span class="corte-estado">Completado</span>
+                  }
+                </span>
+              </div>
+
+              <div class="cifras cifras--corte">
+                <div class="cifra">
+                  <span class="cifra-label">Enviados</span>
+                  <span class="cifra-valor corte-enviados">{{ corte.enviados }}</span>
+                </div>
+                <div class="cifra">
+                  <span class="cifra-label">Fallidos</span>
+                  <span class="cifra-valor corte-fallidos">{{ corte.fallidos }}</span>
+                </div>
+                <div class="cifra">
+                  <span class="cifra-label">Omitidos</span>
+                  <span class="cifra-valor corte-omitidos">{{ corte.omitidos }}</span>
+                </div>
+              </div>
+
+              <div class="resumen-acciones">
+                <button type="button" class="btn-link" (click)="resumenCorte.verDetalle()">
+                  Ver detalle del corte
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+                @if (corte.enProceso && corte.pendientes > 0) {
+                  <span class="corte-pendientes">{{ corte.pendientes }} pendiente{{ corte.pendientes === 1 ? '' : 's' }}</span>
+                }
+              </div>
+            </div>
+          }
         </div>
       </section>
 

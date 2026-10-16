@@ -25,6 +25,8 @@ export interface NotificarRequest {
   /** Rango del filtro de Seguimiento (yyyy-MM-dd). Sin rango, el backend usa la quincena en curso hasta ayer. */
   fechaDesde?: string;
   fechaHasta?: string;
+  /** Proyecto de la fila: solo sus horas, y el umbral entre avisos es por proyecto. Sin valor = fila "Sin Proyecto". */
+  idProyecto?: number;
 }
 
 /** Respuesta 202: la solicitud quedó en cola, el resultado real llega por streamEstado (o getEstado). */
@@ -74,6 +76,8 @@ export interface ResumenCorte {
   omitidos: number;
   pendientes: number;
   empleados: EmpleadoCorte[];
+  /** Cuándo se disparó la ejecución más reciente del corte; cambia si el mismo corte se vuelve a ejecutar. */
+  ejecucion: string | null;
 }
 
 /** Un evento leído de un stream SSE: nombre del evento y su data (texto crudo). */
@@ -109,8 +113,9 @@ export class NotificacionesService {
    * Resultado de los avisos pedidos por el usuario actual desde `desdeMs`
    * (el `solicitadoEnMs` que devolvió notificar). Se usa como respaldo si el stream SSE no está disponible.
    */
-  getEstado(empleadoIds: number[], desdeMs: number): Observable<EstadoNotificacionResponse> {
+  getEstado(empleadoIds: number[], desdeMs: number, idProyecto?: number): Observable<EstadoNotificacionResponse> {
     let params = new HttpParams().set('desdeMs', desdeMs);
+    if (idProyecto != null) params = params.set('idProyecto', idProyecto);
     for (const id of empleadoIds) {
       params = params.append('empleadoIds', id);
     }
@@ -121,8 +126,9 @@ export class NotificacionesService {
    * Server-Sent Events con el resultado de los avisos: el backend empuja cada estado en cuanto lo registra.
    * El Observable termina al recibir "fin" o al cerrarse la conexión, y falla si la respuesta no es 2xx.
    */
-  streamEstado(empleadoIds: number[], desdeMs: number): Observable<EventoEstadoStream> {
+  streamEstado(empleadoIds: number[], desdeMs: number, idProyecto?: number): Observable<EventoEstadoStream> {
     const params = new URLSearchParams({ desdeMs: String(desdeMs) });
+    if (idProyecto != null) params.set('idProyecto', String(idProyecto));
     for (const id of empleadoIds) params.append('empleadoIds', String(id));
 
     return new Observable<EventoEstadoStream>(subscriber => {

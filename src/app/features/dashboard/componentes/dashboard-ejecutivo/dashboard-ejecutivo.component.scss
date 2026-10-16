@@ -336,6 +336,110 @@
   }
 }
 
+// Con corte: cumplimiento a la izquierda y el último corte a la derecha
+.resumen-cifras--con-corte {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+
+  .resumen-cumplimiento,
+  .resumen-corte {
+    padding: 22px 26px;
+
+    @media (max-width: 600px) {
+      padding: 18px 16px;
+    }
+  }
+
+  .resumen-cumplimiento .cifras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.resumen-cumplimiento {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.resumen-corte {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  border-left: 1px solid var(--border-default);
+
+  @media (max-width: 1100px) {
+    border-left: none;
+    border-top: 1px solid var(--border-default);
+  }
+}
+
+.corte-encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.corte-periodo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.corte-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--status-success-border);
+  background: var(--status-success-bg-soft);
+  color: var(--status-success-text);
+  font-size: 11px;
+  font-weight: 700;
+
+  &--proceso {
+    border-color: var(--status-info-border);
+    background: var(--status-info-bg-soft);
+    color: var(--status-info-text);
+  }
+}
+
+.corte-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: corte-giro 0.8s linear infinite;
+}
+
+@keyframes corte-giro {
+  to { transform: rotate(360deg); }
+}
+
+.corte-enviados { color: var(--status-success-text); }
+.corte-fallidos { color: var(--status-danger-text); }
+.corte-omitidos { color: var(--status-warning-text); }
+
+.corte-pendientes {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .cifras {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -343,6 +447,10 @@
 
   @media (max-width: 900px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &--corte {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -365,13 +473,6 @@
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.1;
-}
-
-.barra-progreso {
-  height: 12px;
-  border-radius: 999px;
-  background: var(--bg-surface);
-  overflow: hidden;
 }
 
 .resumen-acciones {
