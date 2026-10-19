@@ -201,6 +201,12 @@
   padding-left: 4px;
 }
 
+// sm - Aviso general del backend (no ligado a un campo), debajo del formulario.
+.form-field__error--general {
+  display: block;
+  margin-top: 12px;
+}
+
 .req {
   color: var(--status-danger-text);
   margin-left: 1px;

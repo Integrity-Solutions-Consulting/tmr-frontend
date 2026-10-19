@@ -34,7 +34,9 @@ export class SeguimientoService {
     return this._metricas();
   }
 
-  cargarColaboradores(filtros: SeguimientoFiltros): void {
+  // sm - silencioso: recarga automática (otra pestaña guardó, o se volvió a la pestaña). No muestra
+  // "Cargando registros..." ni vacía la tabla: los datos se reemplazan cuando llegan.
+  cargarColaboradores(filtros: SeguimientoFiltros, silencioso = false): void {
     let params = new HttpParams()
       .set('fechaDesde', filtros.fechaDesde || '')
       .set('fechaHasta', filtros.fechaHasta || '');
@@ -44,7 +46,7 @@ export class SeguimientoService {
     // sm - Se cancela la carga anterior si sigue en curso: así una respuesta vieja que llegue tarde
     // no pisa los datos del último filtro aplicado.
     this.cargaEnCurso?.unsubscribe();
-    this._cargando.set(true);
+    if (!silencioso) this._cargando.set(true);
     this.cargaEnCurso = this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
         this._colaboradores.set(data || []);

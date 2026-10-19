@@ -23,6 +23,7 @@ import { MAT_AUTOCOMPLETE_DEFAULT_OPTIONS } from '@angular/material/autocomplete
 import { routes } from './app.routes';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
+import { CambiosDatosInterceptor } from './core/interceptors/cambios-datos.interceptor';
 import { loadUserModulesInitializer } from './core/initializers/load-user-modules.initializer';
 import { ChunkErrorHandler } from './core/handlers/chunk-error.handler';
 
@@ -77,6 +78,12 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
+      multi: true,
+    },
+    // sm - Avisa a las otras pestañas cuando se guardan datos que cambian las horas (ver CambiosDatosService).
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CambiosDatosInterceptor,
       multi: true,
     },
     provideStore({
