@@ -506,10 +506,18 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
               { encabezado: 'Teléfono', anchoPdf: 17 },
               { encabezado: 'Dirección', anchoPdf: 28 },
               { encabezado: 'Proyectos asignados', anchoPdf: 36 },
+              // sm - Datos de salida (solo se llenan si el colaborador está Inactivo).
+              { encabezado: 'Fecha salida', anchoPdf: 17 },
+              { encabezado: 'Tipo salida', anchoPdf: 18 },
+              { encabezado: 'Causa salida', anchoPdf: 24 },
+              { encabezado: 'Motivo salida', anchoPdf: 30 },
+              { encabezado: 'Reemplazo', anchoPdf: 24 },
             ],
 
+            // sm - Se comenta el filtro: los inactivos no salían en la tabla principal, solo en "Datos de salida".
+            // Ahora van todos los colaboradores del filtro de la pantalla, con sus datos de salida al final.
             filas: colaboradores
-              .filter(c => c.estado === 'Activo')
+              // .filter(c => c.estado === 'Activo')
               .map(c => [
                 c.asociacion ?? '-',
                 c.tipoContrato ?? '-',
@@ -528,27 +536,29 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                 c.telefono ?? '-',
                 c.direccion ?? '-',
                 this.formatearProyectosColaborador(c),
+                ...this.datosSalidaExportacion(c),
             ]),
 
-            columnasSalida: [
-              { encabezado: 'Núm. ID', anchoPdf: 20 },
-              { encabezado: 'Nombre', anchoPdf: 35 },
-              { encabezado: 'Fecha salida', anchoPdf: 20 },
-              { encabezado: 'Tipo salida', anchoPdf: 25 },
-              { encabezado: 'Causa salida', anchoPdf: 55 },
-              { encabezado: 'Reemplazo', anchoPdf: 35 },
-            ],
-
-            filasSalida: colaboradores
-              .filter(c => c.estado === 'Inactivo')
-              .map(c => [
-                c.numeroIdentificacion ?? c.identificacion ?? '-',
-                `${c.nombres ?? ''} ${c.apellidos ?? ''}`.trim(),
-                this.formatearFechaValor(c.fechaSalida),
-                c.tipoSalida ?? '-',
-                c.causaSalida ?? '-',
-                c.reemplazoNombre ?? '-',
-            ]),
+            // sm - Se comenta la tabla aparte "Datos de salida": esos datos ahora son columnas de la tabla principal.
+            // columnasSalida: [
+            //   { encabezado: 'Núm. ID', anchoPdf: 20 },
+            //   { encabezado: 'Nombre', anchoPdf: 35 },
+            //   { encabezado: 'Fecha salida', anchoPdf: 20 },
+            //   { encabezado: 'Tipo salida', anchoPdf: 25 },
+            //   { encabezado: 'Causa salida', anchoPdf: 55 },
+            //   { encabezado: 'Reemplazo', anchoPdf: 35 },
+            // ],
+            //
+            // filasSalida: colaboradores
+            //   .filter(c => c.estado === 'Inactivo')
+            //   .map(c => [
+            //     c.numeroIdentificacion ?? c.identificacion ?? '-',
+            //     `${c.nombres ?? ''} ${c.apellidos ?? ''}`.trim(),
+            //     this.formatearFechaValor(c.fechaSalida),
+            //     c.tipoSalida ?? '-',
+            //     c.causaSalida ?? '-',
+            //     c.reemplazoNombre ?? '-',
+            // ]),
 
 
             columnaEstado: 2,
@@ -593,9 +603,16 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   { encabezado: 'Teléfono', anchoExcel: 16 },
                   { encabezado: 'Dirección', anchoExcel: 36 },
                   { encabezado: 'Proyectos asignados', anchoExcel: 54 },
+                  // sm - Datos de salida (solo se llenan si el colaborador está Inactivo).
+                  { encabezado: 'Fecha de salida', anchoExcel: 16 },
+                  { encabezado: 'Tipo de salida', anchoExcel: 18 },
+                  { encabezado: 'Causa de salida', anchoExcel: 26 },
+                  { encabezado: 'Motivo de salida', anchoExcel: 36 },
+                  { encabezado: 'Reemplazo', anchoExcel: 26 },
                 ],
+                // sm - Se comenta el filtro: los inactivos no salían en la hoja principal, solo en "Datos de salida".
                 filas: colaboradores
-                  .filter(c => c.estado === 'Activo')
+                  // .filter(c => c.estado === 'Activo')
                   .map(c => [
                     c.asociacion ?? '-',
                     c.tipoContrato ?? '-',
@@ -614,39 +631,41 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                     c.telefono ?? '-',
                     c.direccion ?? '-',
                     this.formatearProyectosColaborador(c),
+                    ...this.datosSalidaExportacion(c),
                   ]),
                 columnaEstado: 2,
               },
 
-              {
-                titulo: 'Datos de salida',
-                nombreArchivo: 'DatosSalida',
-                nombreHoja: 'Datos de salida',
-
-                columnas: [
-                  { encabezado: 'Código', anchoExcel: 15 },
-                  { encabezado: 'Identificación', anchoExcel: 20 },
-                  { encabezado: 'Nombres', anchoExcel: 25 },
-                  { encabezado: 'Apellidos', anchoExcel: 25 },
-                  { encabezado: 'Fecha salida', anchoExcel: 18 },
-                  { encabezado: 'Tipo salida', anchoExcel: 22 },
-                  { encabezado: 'Causa salida', anchoExcel: 35 },
-                  { encabezado: 'Reemplazo', anchoExcel: 25 },
-                ],
-
-                filas: colaboradores
-                  .filter(c => c.estado === 'Inactivo')  
-                  .map(c => [
-                    c.codigoEmpleado ?? '-',
-                    c.numeroIdentificacion ?? c.identificacion ?? '-',
-                    c.nombres ?? '-',
-                    c.apellidos ?? '-',
-                    this.formatearFechaValor(c.fechaSalida),
-                    c.tipoSalida ?? '-',
-                    c.causaSalida ?? '-',
-                    c.reemplazoNombre ?? '-',
-                  ]),
-              },
+              // sm - Se comenta la hoja aparte "Datos de salida": esos datos ahora son columnas de la hoja principal.
+              // {
+              //   titulo: 'Datos de salida',
+              //   nombreArchivo: 'DatosSalida',
+              //   nombreHoja: 'Datos de salida',
+              //
+              //   columnas: [
+              //     { encabezado: 'Código', anchoExcel: 15 },
+              //     { encabezado: 'Identificación', anchoExcel: 20 },
+              //     { encabezado: 'Nombres', anchoExcel: 25 },
+              //     { encabezado: 'Apellidos', anchoExcel: 25 },
+              //     { encabezado: 'Fecha salida', anchoExcel: 18 },
+              //     { encabezado: 'Tipo salida', anchoExcel: 22 },
+              //     { encabezado: 'Causa salida', anchoExcel: 35 },
+              //     { encabezado: 'Reemplazo', anchoExcel: 25 },
+              //   ],
+              //
+              //   filas: colaboradores
+              //     .filter(c => c.estado === 'Inactivo')
+              //     .map(c => [
+              //       c.codigoEmpleado ?? '-',
+              //       c.numeroIdentificacion ?? c.identificacion ?? '-',
+              //       c.nombres ?? '-',
+              //       c.apellidos ?? '-',
+              //       this.formatearFechaValor(c.fechaSalida),
+              //       c.tipoSalida ?? '-',
+              //       c.causaSalida ?? '-',
+              //       c.reemplazoNombre ?? '-',
+              //     ]),
+              // },
             ],
             'Colaboradores',
             ctx,
@@ -662,6 +681,19 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
       return `${d}/${m}/${y}`;
     }
     return valor;
+  }
+
+  // sm - Fecha, tipo, causa, motivo (comentario) de salida y reemplazo, solo para Inactivos: un colaborador
+  // reactivado conserva sus datos de salida viejos y no deben aparecer como si hubiera salido.
+  private datosSalidaExportacion(c: Colaborador): string[] {
+    if (c.estado !== 'Inactivo') return ['-', '-', '-', '-', '-'];
+    return [
+      this.formatearFechaValor(c.fechaSalida),
+      c.tipoSalida || '-',
+      c.causaSalida || '-',
+      c.comentarioSalida?.trim() || '-',
+      c.reemplazoNombre || '-',
+    ];
   }
 
   private formatearProyectosColaborador(colaborador: Colaborador): string {

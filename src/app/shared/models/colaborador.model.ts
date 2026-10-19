@@ -33,4 +33,12 @@ export interface Colaborador {
   // y horas registradas en esos días.
   diasLaborables?: number;
   horasDiasLaborables?: number;
+  // sm - Datos de salida para las descargas de Seguimiento. Los del colaborador solo vienen si está Inactivo;
+  // salidaProyecto es su salida del proyecto de esta fila. Fechas en dd-MM-yyyy (convertidor global del backend).
+  colaboradorActivo?: boolean;
+  fechaSalida?: string | null;
+  tipoSalida?: string | null;
+  causaSalida?: string | null;
+  motivoSalida?: string | null;
+  salidaProyecto?: string | null;
 }
