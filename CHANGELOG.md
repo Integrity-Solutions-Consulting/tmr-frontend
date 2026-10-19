@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.2.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.1...v3.2.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* digame don armando ([6061a2c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6061a2ca29af226daa5ba84f457ff872602c62ee))
+* digame don armando ([e02ee93](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e02ee9314479a7c7794cec9c8afd50361e090c53))
+
 ## [3.2.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.0...v3.2.1) (2026-10-19)
 
 
