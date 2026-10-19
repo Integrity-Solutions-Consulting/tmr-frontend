@@ -276,6 +276,8 @@ export async function exportarReporteExcel(config: ReporteTabularConfig, avance?
     });
     column.width = Math.min(maximoPorColumna, Math.max(column.width ?? 10, maximo + 3));
   });
+  // sm - Las filas crecen según el texto (antes 18 fijo: los textos largos quedaban cortados en la celda).
+  ajustarAltoFilasExcel(worksheet, 3);
 
   worksheet.views = [{ state: 'frozen', ySplit: 3 }];
   worksheet.autoFilter = {
@@ -298,6 +300,23 @@ export async function exportarReporteExcel(config: ReporteTabularConfig, avance?
     new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
     `Reporte_${config.nombreArchivo}_${fechaArchivo()}.xlsx`,
   );
+}
+
+// sm - Alto de cada fila desde la de encabezados según cuántas líneas ocupa su texto más largo con el ancho final de la
+// columna (wrapText). ExcelJS no autoajusta el alto al abrir el archivo, así que se estima aquí: ~1 línea por cada
+// "ancho de columna" de caracteres, 15 pt por línea, mínimo 18 pt.
+function ajustarAltoFilasExcel(worksheet: any, filaEncabezados: number): void {
+  worksheet.eachRow((row: any, rowNumber: number) => {
+    if (rowNumber < filaEncabezados) return;
+    let lineas = 1;
+    row.eachCell((cell: any, colNumber: number) => {
+      const ancho = Math.max(1, (worksheet.getColumn(colNumber).width ?? 10) - 2);
+      const texto = String(cell.value ?? '');
+      const lineasCelda = texto.split('\n').reduce((total, parte) => total + Math.max(1, Math.ceil(parte.length / ancho)), 0);
+      lineas = Math.max(lineas, lineasCelda);
+    });
+    row.height = Math.max(18, lineas * 15);
+  });
 }
 
 export async function exportarReporteExcelMultihoja(
@@ -406,6 +425,8 @@ export async function exportarReporteExcelMultihoja(
       });
       column.width = Math.min(maximoPorColumna, Math.max(column.width ?? 10, maximo + 3));
     });
+    // sm - Las filas crecen según el texto (antes 18 fijo: los textos largos quedaban cortados en la celda).
+    ajustarAltoFilasExcel(worksheet, 3);
 
     worksheet.views = [{ state: 'frozen', ySplit: 3 }];
     worksheet.autoFilter = {

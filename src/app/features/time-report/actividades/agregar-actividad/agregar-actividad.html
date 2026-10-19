@@ -224,7 +224,7 @@
           <div
             class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
             [class.actividad-modal__input-wrap--error]="
-              form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched
+              (form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) || form.get('fechaActividad')?.errors?.['vigencia']
             "
           >
             <input
@@ -238,12 +238,15 @@
             <mat-datepicker-toggle matSuffix [for]="pickerFechaActividad"></mat-datepicker-toggle>
             <mat-datepicker #pickerFechaActividad></mat-datepicker>
           </div>
-          @if (form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) {
+          <!-- sm - El aviso de vigencia (entrada/salida del proyecto) se muestra apenas se elige la fecha. -->
+          @if ((form.get('fechaActividad')?.invalid && form.get('fechaActividad')?.touched) || form.get('fechaActividad')?.errors?.['vigencia']) {
             <span class="actividad-modal__error">
               @if (form.get('fechaActividad')?.errors?.['required']) {
                 Campo requerido
               } @else if (form.get('fechaActividad')?.errors?.['formatoFecha']) {
                 El formato debe ser dd/mm/aaaa
+              } @else if (form.get('fechaActividad')?.errors?.['vigencia']) {
+                {{ form.get('fechaActividad')?.errors?.['vigencia'] }}
               }
             </span>
           }
@@ -321,7 +324,7 @@
             <div
               class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
               [class.actividad-modal__input-wrap--error]="
-                form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched
+                (form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) || form.get('fechaInicio')?.errors?.['vigencia']
               "
             >
               <input
@@ -335,12 +338,14 @@
               <mat-datepicker-toggle matSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerFechaInicio></mat-datepicker>
             </div>
-            @if (form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) {
+            @if ((form.get('fechaInicio')?.invalid && form.get('fechaInicio')?.touched) || form.get('fechaInicio')?.errors?.['vigencia']) {
               <span class="actividad-modal__error">
                 @if (form.get('fechaInicio')?.errors?.['required']) {
                   Campo requerido
                 } @else if (form.get('fechaInicio')?.errors?.['formatoFecha']) {
                   El formato debe ser dd/mm/aaaa
+                } @else if (form.get('fechaInicio')?.errors?.['vigencia']) {
+                  {{ form.get('fechaInicio')?.errors?.['vigencia'] }}
                 }
               </span>
             }
@@ -359,7 +364,7 @@
             <div
               class="actividad-modal__input-wrap actividad-modal__input-wrap--date"
               [class.actividad-modal__input-wrap--error]="
-                form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched
+                (form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched) || form.get('fechaFin')?.errors?.['vigencia']
               "
             >
               <input
@@ -373,12 +378,14 @@
               <mat-datepicker-toggle matSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
               <mat-datepicker #pickerFechaFin></mat-datepicker>
             </div>
-            @if (form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched) {
+            @if ((form.get('fechaFin')?.invalid && form.get('fechaFin')?.touched) || form.get('fechaFin')?.errors?.['vigencia']) {
               <span class="actividad-modal__error">
                 @if (form.get('fechaFin')?.errors?.['required']) {
                   Campo requerido
                 } @else if (form.get('fechaFin')?.errors?.['formatoFecha']) {
                   El formato debe ser dd/mm/aaaa
+                } @else if (form.get('fechaFin')?.errors?.['vigencia']) {
+                  {{ form.get('fechaFin')?.errors?.['vigencia'] }}
                 }
               </span>
             }

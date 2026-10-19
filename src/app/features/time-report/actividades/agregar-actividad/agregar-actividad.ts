@@ -69,7 +69,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
-    public proyectos = signal<{ id: string, nombre: string, codigo?: string | null }[]>([]);
+    // sm - fechaEntrada/fechaSalida: vigencia de la asignación; salidaColaborador: su salida de la empresa si está Inactivo.
+    public proyectos = signal<{
+        id: string, nombre: string, codigo?: string | null,
+        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null
+    }[]>([]);
 
     // Autocomplete filter signals
     public proyectoFilter = signal('');
@@ -138,6 +142,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             const [dia, mes, anio] = str.split('/').map(Number);
             return new Date(anio, mes - 1, dia);
         }
+        // sm - Formato en que el backend serializa DateOnly (dd-MM-yyyy).
+        if (/^\d{2}-\d{2}-\d{4}$/.test(str)) {
+            const [dia, mes, anio] = str.split('-').map(Number);
+            return new Date(anio, mes - 1, dia);
+        }
         return new Date(d);
     }
 
@@ -154,7 +163,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, [Validators.required, this.autocompleteValidator(this.proyectos)]],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
-            fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator()]],
+            fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]],
             numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
             fechaInicio: [defaultDate, [this.formatoFechaValidator()]],
@@ -168,6 +177,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
         // Listen for autocomplete search typing/value changes
         this.form.get('proyectoId')?.valueChanges.subscribe(val => {
+            // sm - La vigencia depende del proyecto: al cambiarlo se vuelven a validar las fechas.
+            queueMicrotask(() => this.revalidarFechas());
             const selectedProy = this.proyectos().find(p => String(p.id) === String(val));
             if (!selectedProy) {
                 this.proyectoFilter.set(val || '');
@@ -199,8 +210,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             if (isRecurrent) {
                 fechaActividadCtrl?.clearValidators();
                 numeroHorasCtrl?.clearValidators();
-                fechaInicioCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
-                fechaFinCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
+                fechaInicioCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
+                fechaFinCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
                 horasPorDiaCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
 
                 // Asigna por defecto 4 días después si fechaFin no tiene valor
@@ -214,7 +225,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
             } else {
-                fechaActividadCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
+                fechaActividadCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
                 numeroHorasCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
                 fechaInicioCtrl?.clearValidators();
                 fechaFinCtrl?.clearValidators();
@@ -245,6 +256,49 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 }
             }
         });
+    }
+
+    // sm - Valida al elegir la fecha (no recién al guardar) que esté dentro de la vigencia del colaborador en el proyecto
+    // elegido: no antes de su entrada ni después de su salida del proyecto o de la empresa (la más temprana).
+    // Al editar, si no cambian la fecha ni el proyecto se permite (hay actividades antiguas que deben poder corregirse).
+    private vigenciaValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const proyecto = this.proyectos().find(p => String(p.id) === String(this.form?.get('proyectoId')?.value));
+        if (!proyecto || !control.value) return null;
+        const fecha = this.parseLocal(control.value);
+        if (isNaN(fecha.getTime())) return null;
+
+        const act = this.data?.actividad;
+        if (this.esEdicion && act && String(act.idproyecto) === proyecto.id
+            && this.claveDia(this.parseLocal(act.fechaactividad)) === this.claveDia(fecha)) return null;
+
+        const dia = this.claveDia(fecha);
+        if (proyecto.fechaEntrada && dia < this.claveDia(proyecto.fechaEntrada)) {
+            return { vigencia: `Su asignación al proyecto ${proyecto.nombre} inicia el ${this.textoFecha(proyecto.fechaEntrada)}. No puede registrar actividades anteriores a esa fecha.` };
+        }
+        const salidaEmpresaPrimero = !!proyecto.salidaColaborador
+            && (!proyecto.fechaSalida || this.claveDia(proyecto.salidaColaborador) <= this.claveDia(proyecto.fechaSalida));
+        const salida = salidaEmpresaPrimero ? proyecto.salidaColaborador : proyecto.fechaSalida;
+        if (salida && dia > this.claveDia(salida)) {
+            return {
+                vigencia: salidaEmpresaPrimero
+                    ? `Su fecha de salida es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
+                    : `Su salida del proyecto ${proyecto.nombre} es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
+            };
+        }
+        return null;
+    };
+
+    private revalidarFechas(): void {
+        ['fechaActividad', 'fechaInicio', 'fechaFin'].forEach(nombre =>
+            this.form?.get(nombre)?.updateValueAndValidity({ emitEvent: false }));
+    }
+
+    private claveDia(d: Date): string {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    private textoFecha(d: Date): string {
+        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
     }
 
     private formatoFechaValidator(): ValidatorFn {
@@ -347,7 +401,15 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             .subscribe({
                 next: (res) => {
                     if (res) {
-                        const mapped = res.map(p => ({ id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo }));
+                        const fecha = (f: any) => {
+                            if (!f) return null;
+                            const d = this.parseLocal(f);
+                            return isNaN(d.getTime()) ? null : d;
+                        };
+                        const mapped = res.map(p => ({
+                            id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo,
+                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador)
+                        }));
                         const unique: typeof mapped = [];
                         const seen = new Set<string>();
                         for (const item of mapped) {
@@ -366,7 +428,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                                 unique.push({
                                     id: String(act.idproyecto),
                                     nombre: act.proyectoNombre || 'Sin Proyecto',
-                                    codigo: act.codigorequerimiento
+                                    codigo: act.codigorequerimiento,
+                                    // sm - Proyecto que ya no está en sus asignaciones: sin vigencia conocida (valida el backend).
+                                    fechaEntrada: null,
+                                    fechaSalida: null,
+                                    salidaColaborador: null
                                 });
                             }
                         }
@@ -382,6 +448,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                         this.proyectos.set([]);
                     }
                     this.form?.get('proyectoId')?.updateValueAndValidity();
+                    this.revalidarFechas();
                 },
                 error: (err) => console.error('Error al cargar proyectos disponibles', err)
             });
