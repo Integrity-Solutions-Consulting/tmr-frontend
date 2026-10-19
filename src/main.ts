@@ -6,6 +6,10 @@ import { AppComponent } from './app/app.component';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
+import { environment } from "../src/environments/environment";
+
+console.log("DIGAME DON ARMANDO: ", { environment })
+
 registerLocaleData(localeEs, 'es-EC');
 
 bootstrapApplication(AppComponent, {
