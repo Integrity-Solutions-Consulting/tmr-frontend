@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.0...v3.2.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* Mejoras en exportación Excel/PDF, seguimiento y gestión de actividades y bajas de colaboradores ([8a29af4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8a29af4b8021aa0d889dcc30e593a69eb0f9bb41))
+
 ## [3.2.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.2...v3.2.0) (2026-10-15)
 
 
