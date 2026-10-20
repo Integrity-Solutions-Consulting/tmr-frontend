@@ -34,6 +34,8 @@ export async function crearReporteSeguimientoPdf(
   fechaHasta: string,
   datos: DatosSeguimientoPdf,
   nombreProyecto = '',
+  // sm - Líneas de información adicional (datos de salida) que se imprimen debajo de la tabla, antes de las firmas.
+  infoAdicional: string[] = [],
 ): Promise<ArrayBuffer> {
   const fechas = fechasDelPeriodo(fechaDesde, fechaHasta);
   const feriados = new Set(datos.feriados ?? []);
@@ -55,11 +57,19 @@ export async function crearReporteSeguimientoPdf(
     ];
     const body = filas.map((fila, rowIndex) => [rowIndex + 1, fila.tipo, fila.lider, fila.req, fila.desc, horas(fila.horasPorDia), ...fechas.map(f => fila.horasPorDia[fechaClave(f)] || ''), horas(fila.horasPorDia)]);
     const total = ['TOTAL', '', '', '', '', horasTotales(filas)].concat(fechas.map(f => horasTotales(filas.map(fila => ({ horasPorDia: { [fechaClave(f)]: fila.horasPorDia[fechaClave(f)] || 0 } } as FilaPdf))))).concat([horasTotales(filas)]);
+    // sm - Los anchos base sumaban menos que la hoja (un mes de 30 días ocupaba ~240 de 277 mm) y la tabla quedaba
+    // más corta que el banner. Se escalan para que la tabla ocupe exactamente el ancho del banner (página − 10 mm por
+    // lado); la letra crece en la misma proporción (hasta 1,5×) para aprovechar el espacio.
+    const anchoTabla = doc.internal.pageSize.getWidth() - 20;
+    const anchoBase = 9.5 + 16 + 20 + 21 + 39 + 12 + 12 + 3.7 * fechas.length;
+    const escala = anchoTabla / anchoBase;
+    const escalaLetra = Math.min(1.5, Math.max(1, escala));
+    const ancho = (base: number) => Math.floor(base * escala * 1000) / 1000;
     autoTable(doc, {
-      startY: 39, head, body: body.concat([total]), theme: 'grid', margin: { left: 10, right: 10, bottom: 14 }, tableWidth: 'auto',
-      styles: { font: 'helvetica', fontSize: 3.8, cellPadding: 0.65, minCellWidth: 0, lineColor: [210, 220, 235], lineWidth: 0.12, valign: 'middle' },
-      headStyles: { fillColor: AZUL, textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 3.6, cellPadding: 0.55, minCellWidth: 0 },
-      columnStyles: Object.assign({ 0: { cellWidth: 9.5, halign: 'center' }, 1: { cellWidth: 16 }, 2: { cellWidth: 20 }, 3: { cellWidth: 21 }, 4: { cellWidth: 39 }, 5: { cellWidth: 12, halign: 'center' }, [6 + fechas.length]: { cellWidth: 12, halign: 'center' } }, Object.fromEntries(fechas.map((_, i) => [6 + i, { cellWidth: 3.7, halign: 'center' }]))) as any,
+      startY: 39, head, body: body.concat([total]), theme: 'grid', margin: { left: 10, right: 10, bottom: 14 }, tableWidth: anchoTabla,
+      styles: { font: 'helvetica', fontSize: 3.8 * escalaLetra, cellPadding: 0.65, minCellWidth: 0, lineColor: [210, 220, 235], lineWidth: 0.12, valign: 'middle' },
+      headStyles: { fillColor: AZUL, textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 3.6 * escalaLetra, cellPadding: 0.55, minCellWidth: 0 },
+      columnStyles: Object.assign({ 0: { cellWidth: ancho(9.5), halign: 'center' }, 1: { cellWidth: ancho(16) }, 2: { cellWidth: ancho(20) }, 3: { cellWidth: ancho(21) }, 4: { cellWidth: ancho(39) }, 5: { cellWidth: ancho(12), halign: 'center' }, [6 + fechas.length]: { cellWidth: ancho(12), halign: 'center' } }, Object.fromEntries(fechas.map((_, i) => [6 + i, { cellWidth: ancho(3.7), halign: 'center' }]))) as any,
       alternateRowStyles: { fillColor: [255, 255, 255] },
       didParseCell: (data: any) => {
         if (data.section !== 'body') return;
@@ -67,7 +77,7 @@ export async function crearReporteSeguimientoPdf(
         if (esTotal) {
           if (data.column.index === 0) {
             data.cell.text = ['TOTAL'];
-            data.cell.styles.cellWidth = 9.5;
+            data.cell.styles.cellWidth = ancho(9.5);
             data.cell.styles.overflow = 'hidden';
             data.cell.styles.halign = 'center';
           }
@@ -85,7 +95,9 @@ export async function crearReporteSeguimientoPdf(
         if ([0, 5, 6 + fechas.length].includes(data.column.index)) data.cell.styles.halign = 'center';
       },
     });
-    dibujarFirmasYLeyenda(doc, (doc as any).lastAutoTable.finalY, nombreColaborador, grupo.clienteReal || grupo.cliente, filas);
+    // sm - Las firmas quedan debajo de la información adicional (si la hay).
+    const finalY = dibujarInfoAdicional(doc, (doc as any).lastAutoTable.finalY, infoAdicional);
+    dibujarFirmasYLeyenda(doc, finalY, nombreColaborador, grupo.clienteReal || grupo.cliente, filas);
   }
   return doc.output('arraybuffer');
 }
@@ -106,6 +118,25 @@ function dibujarCabecera(doc: jsPDF, logo: string | null, titulo: string, client
   const anchoNombre = doc.getTextWidth(colaborador);
   doc.setFontSize(anchoNombre > espacioNombre ? Math.max(5.5, 7 * espacioNombre / anchoNombre) : 7);
   doc.text(colaborador, valorX, 38);
+}
+
+// sm - Imprime las líneas de información adicional debajo de la tabla (pasa a otra página si no caben) y devuelve la
+// "Y final" que deben usar las firmas para quedar debajo de ellas con el mismo espacio de siempre.
+function dibujarInfoAdicional(doc: jsPDF, finalY: number, lineas: string[]): number {
+  if (lineas.length === 0) return finalY;
+  const altoLinea = 4;
+  let y = finalY + 7;
+  if (y + lineas.length * altoLinea > doc.internal.pageSize.getHeight() - 14) { doc.addPage(); y = 20; }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...AZUL);
+  const ancho = doc.internal.pageSize.getWidth() - 22;
+  let ultimaY = y;
+  lineas.forEach(linea => {
+    const partes = doc.splitTextToSize(linea, ancho) as string[];
+    doc.text(partes, 11, y);
+    ultimaY = y + (partes.length - 1) * altoLinea;
+    y = ultimaY + altoLinea;
+  });
+  return ultimaY - 8;
 }
 
 function dibujarFirmasYLeyenda(doc: jsPDF, finalY: number, colaborador: string, cliente: string, filas: FilaPdf[]): void {

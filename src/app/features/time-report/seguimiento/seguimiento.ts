@@ -1,4 +1,5 @@
-﻿import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect } from '@angular/core';
+﻿import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -27,7 +28,7 @@ import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
 import { filter, firstValueFrom, lastValueFrom, Observable, Subject, takeUntil, timeout } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
-import { DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
+import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
 import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.utils';
 // sm - Modal de "Ver calendario" (solo lectura) para inspeccionar el calendario de un colaborador desde Seguimiento.
@@ -39,6 +40,29 @@ import { EstadoEmpleado, NotificacionesService } from '../../../shared/services/
 import { fechaEcuadorInputHoy, primerDiaMesEcuador } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
 import { TokenService } from '../../auth/servicios/token.service';
+import { CambiosDatosService } from '../../../shared/services/cambios-datos.service';
+
+// sm - Filtros que se recuerdan al salir y volver a Seguimiento. Se guardan en sessionStorage: duran mientras la
+// pestaña esté abierta (también tras F5); al cerrar el navegador se vuelve al rango por defecto.
+const CLAVE_FILTROS = 'tmr.seguimiento.filtros';
+// sm - Al volver a la pestaña solo se recarga si la última carga tiene más de este tiempo (evita llamadas por
+// cambiar de ventana un momento).
+const RECARGA_AL_VOLVER_MS = 60_000;
+
+interface FiltrosGuardados {
+    fechaDesde?: string;
+    fechaHasta?: string;
+    cliente?: string;
+    busqueda?: string;
+}
+
+function leerFiltrosGuardados(): FiltrosGuardados {
+    try {
+        return JSON.parse(sessionStorage.getItem(CLAVE_FILTROS) || '{}') ?? {};
+    } catch {
+        return {};
+    }
+}
 
 // sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generaciÃ³n.
 class SinActividadesError extends Error {
@@ -58,13 +82,6 @@ interface RangoDescarga {
 interface ItemDescarga {
     colaborador: Colaborador;
     proyecto?: ProyectoResumen;
-}
-
-// sm - Error propio para identificar que el usuario cancelÃ³ la descarga desde el toast de progreso.
-class DescargaCanceladaError extends Error {
-    constructor() {
-        super('Descarga cancelada por el usuario.');
-    }
 }
 
 @Component({
@@ -101,6 +118,15 @@ export class SeguimientoComponent implements AfterViewInit {
     private fechaLimites = inject(FechaLimitesService);
     private tokenService = inject(TokenService);
     private descargas = inject(DescargaProgresoService);
+    private cambiosDatos = inject(CambiosDatosService);
+    private destroyRef = inject(DestroyRef);
+    private readonly filtrosGuardados = leerFiltrosGuardados();
+
+    // sm - Recarga automática: hora de la última carga, recarga pendiente (llegó un aviso con la pestaña oculta, un
+    // modal abierto o una descarga en curso) y si la próxima carga debe conservar la selección del usuario.
+    private ultimaCarga = 0;
+    private recargaPendiente = false;
+    private conservarSeleccion = false;
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -109,26 +135,14 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
-    // sm - Estado del toast animado de descarga (reemplaza al mensaje "Preparando..." en la descarga de seleccionados).
-    public progresoDescarga = {
-        visible: false,
-        cerrando: false,
-        titulo: '',
-        detalle: '',
-        progreso: 0,
-        indeterminado: true,
-    };
-    // sm - Emite cuando el usuario pulsa "Cancelar" en el toast para cortar la peticiÃ³n HTTP en curso.
-    private cancelarDescarga$ = new Subject<void>();
-    private descargaCancelada = false;
     // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
     public cargando = this.seguimientoService.cargando;
 
     // Filtros de bÃºsqueda (Estado Local)
-    public busqueda = '';
+    public busqueda = this.filtrosGuardados.busqueda ?? '';
     // sm - clienteSeleccionado es el texto del campo; clienteAplicado es el cliente con el que se filtrÃ³ la tabla.
-    public clienteSeleccionado = '';
-    private clienteAplicado = '';
+    public clienteSeleccionado = this.filtrosGuardados.cliente ?? '';
+    private clienteAplicado = this.filtrosGuardados.cliente ?? '';
     public clientes = signal<{ id: number, nombre: string }[]>([]);
     public clienteFilter = signal('');
 
@@ -138,7 +152,7 @@ export class SeguimientoComponent implements AfterViewInit {
         return this.clientes().filter(c => c.nombre.toLowerCase().includes(q));
     });
     // Fechas con la hora de Ecuador (no la del navegador), igual que el backend al calcular y notificar
-    public fechaDesde = primerDiaMesEcuador();
+    public fechaDesde = this.filtrosGuardados.fechaDesde ?? primerDiaMesEcuador();
     // sm - Se comenta el valor por defecto anterior (Ãºltimo dÃ­a del mes actual) porque "Fecha hasta" debe iniciar en el dÃ­a de hoy.
     // public fechaHasta = (() => {
     //     const d = new Date();
@@ -146,9 +160,13 @@ export class SeguimientoComponent implements AfterViewInit {
     //     return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
     // })();
     // sm - Nuevo valor por defecto: la fecha de hoy (fecha local del navegador, formato yyyy-MM-dd).
-    public fechaHasta = fechaEcuadorInputHoy();
+    // Recupera la fecha guardada o utiliza la fecha actual de Ecuador.
+    public fechaHasta = this.filtrosGuardados.fechaHasta ?? fechaEcuadorInputHoy();
+
+    // Fecha máxima permitida: hoy en Ecuador.
     public readonly fechaMaxima = fechaEcuadorInputHoy();
-    // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+
+    // Fecha más antigua con actividades registradas.
     public fechaMinima: string | null = null;
 
     // PaginaciÃ³n (Estado Local para Rango)
@@ -247,14 +265,64 @@ export class SeguimientoComponent implements AfterViewInit {
                     liderTecnico: this.toTitleCase(p.liderTecnico)
                 }))
             }));
+            // sm - En una recarga automática se vuelven a marcar las filas que el usuario tenía seleccionadas
+            // (mismo colaborador y proyecto) y se mantiene la página, salvo que ya no exista.
+            const clavesSeleccionadas = this.conservarSeleccion
+                ? new Set(this.selection.selected.map(c => this.claveFila(c)))
+                : null;
+            this.conservarSeleccion = false;
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
+            if (clavesSeleccionadas) {
+                this.selection.setSelection(...this.dataSource.data.filter(c => clavesSeleccionadas.has(this.claveFila(c))));
+                this.pageIndex = Math.min(this.pageIndex, this.totalPaginas - 1);
+                return;
+            }
             // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, asÃ­ que cualquier
             // selecciÃ³n previa queda con referencias huÃ©rfanas (el checkbox del header se veÃ­a
             // "indeterminado" y el footer de mÃ©tricas podÃ­a mostrar la selecciÃ³n vieja). Se limpia
             // para que la selecciÃ³n siempre corresponda a la data reciÃ©n cargada/filtrada.
             this.selection.clear();
         });
+
+        // sm - Recarga automática: otra pestaña guardó proyectos/colaboradores/actividades/feriados.
+        this.cambiosDatos.cambios$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.recargarAutomatico(true));
+
+        // sm - Al volver a esta pestaña o ventana: recarga si hubo un aviso mientras estaba oculta o si los datos
+        // tienen más de un minuto (cubre cambios hechos por otras personas).
+        const alVolver = () => {
+            if (document.visibilityState === 'visible') this.recargarAutomatico(false);
+        };
+        document.addEventListener('visibilitychange', alVolver);
+        window.addEventListener('focus', alVolver);
+        this.destroyRef.onDestroy(() => {
+            document.removeEventListener('visibilitychange', alVolver);
+            window.removeEventListener('focus', alVolver);
+        });
+
+        // sm - Si la recarga quedó pendiente por un modal abierto, se hace al cerrarlo.
+        this.dialog.afterAllClosed
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.procesarRecargaPendiente());
+    }
+
+   
+    // sm - porAviso: llegó un aviso de cambios (recarga siempre). Si no, es la vuelta a la pestaña: solo con datos viejos.
+    // Nunca recarga con la pestaña oculta, un modal abierto o una descarga en curso: lo deja pendiente.
+    private recargarAutomatico(porAviso: boolean) {
+        if (porAviso) this.recargaPendiente = true;
+        else if (Date.now() - this.ultimaCarga >= RECARGA_AL_VOLVER_MS) this.recargaPendiente = true;
+        this.procesarRecargaPendiente();
+    }
+
+    private procesarRecargaPendiente() {
+        if (!this.recargaPendiente) return;
+        if (document.visibilityState !== 'visible' || this.dialog.openDialogs.length > 0 || this.isDownloading) return;
+        this.recargaPendiente = false;
+        this.conservarSeleccion = true;
+        this.recargarColaboradores(true);
     }
 
     ngAfterViewInit() {
@@ -267,6 +335,8 @@ export class SeguimientoComponent implements AfterViewInit {
         this.dataSource.filterPredicate = (data: Colaborador, filter: string) =>
             coincideBusqueda(data.nombre, filter)
             || coincideBusqueda(data.proyecto, filter);
+        // sm - Búsqueda recordada de la visita anterior a Seguimiento.
+        if (this.busqueda) this.dataSource.filter = normalizarTexto(this.busqueda);
 
         // Cargar clientes desde lookups
         this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
@@ -327,6 +397,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - BÃºsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
     // Se limpia la selecciÃ³n para que siempre corresponda a los resultados visibles (igual que al recargar).
     public aplicarBusqueda() {
+        this.guardarFiltros();
         this.dataSource.filter = normalizarTexto(this.busqueda);
         this.selection.clear();
         this.irAPrimeraPagina();
@@ -353,12 +424,30 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set('');
     }
 
-    private recargarColaboradores() {
+    private recargarColaboradores(silencioso = false) {
+        // sm - Una carga pedida por el usuario (filtros) no conserva la selección; la automática sí.
+        if (!silencioso) this.conservarSeleccion = false;
+        this.ultimaCarga = Date.now();
+        this.guardarFiltros();
         this.seguimientoService.cargarColaboradores({
             fechaDesde: this.fechaDesde,
             fechaHasta: this.fechaHasta,
             clienteSeleccionado: this.clienteAplicado
-        });
+        }, silencioso);
+    }
+
+    private guardarFiltros() {
+        const filtros: FiltrosGuardados = {
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            cliente: this.clienteAplicado,
+            busqueda: this.busqueda
+        };
+        try {
+            sessionStorage.setItem(CLAVE_FILTROS, JSON.stringify(filtros));
+        } catch {
+            // sm - Sin sessionStorage (modo privado/bloqueado) solo se pierde recordar los filtros.
+        }
     }
 
     private irAPrimeraPagina() {
@@ -491,6 +580,8 @@ export class SeguimientoComponent implements AfterViewInit {
             this.mostrarPopup('error', 'No se pudo descargar', 'No se pudieron preparar los reportes. Intenta nuevamente.');
         } finally {
             this.isDownloading = false;
+            // sm - Si llegó un aviso de cambios durante la descarga, se recarga ahora.
+            this.procesarRecargaPendiente();
         }
     }
 
@@ -507,41 +598,17 @@ export class SeguimientoComponent implements AfterViewInit {
 
     // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animaciÃ³n de salida.
     private async finalizarProgresoDescarga(): Promise<void> {
-        this.actualizarProgresoDescarga(100, 'Descarga completada');
-        await new Promise(resolve => setTimeout(resolve, 600));
-        this.cerrarProgresoDescarga();
+        await this.descargas.finalizar();
     }
 
     // sm - Cierra el toast con la animaciÃ³n de salida y luego lo quita del DOM.
     private cerrarProgresoDescarga(): void {
-        if (!this.progresoDescarga.visible) return;
-        this.progresoDescarga = { ...this.progresoDescarga, cerrando: true };
-        setTimeout(() => {
-            this.progresoDescarga = { ...this.progresoDescarga, visible: false, cerrando: false };
-        }, 200);
+        this.descargas.cerrar();
     }
 
-    // sm - BotÃ³n "Cancelar" del toast: corta la peticiÃ³n HTTP en curso y marca la descarga como cancelada.
-    public cancelarDescarga(): void {
-        if (!this.isDownloading || this.descargaCancelada) return;
-        this.descargaCancelada = true;
-        this.cancelarDescarga$.next();
-        this.progresoDescarga = { ...this.progresoDescarga, detalle: 'Cancelando...' };
-    }
-
-    // sm - Espera una peticiÃ³n HTTP permitiendo cancelarla desde el toast; si se cancela lanza DescargaCanceladaError.
     private async esperarCancelable<T>(peticion: Observable<T>): Promise<T> {
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
-        try {
-            return await lastValueFrom(peticion.pipe(takeUntil(this.cancelarDescarga$)));
-        } catch (error) {
-            if (this.descargaCancelada) throw new DescargaCanceladaError();
-            throw error;
-        }
+        return this.descargas.esperarCancelable(peticion);
     }
-
-
-
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
     // con varios proyectos, para no armar un ZIP con un Ãºnico colaborador adentro. Devuelve cuÃ¡ntos se descargaron;
     // los que no tengan actividades en el rango se omiten.
@@ -681,6 +748,13 @@ export class SeguimientoComponent implements AfterViewInit {
                 { encabezado: 'Seguimiento', anchoExcel: 18, anchoPdf: 28, alineacion: 'center' },
                 { encabezado: 'DÃ­as con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
                 { encabezado: 'DÃ­as a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                // sm - Datos de salida: los del colaborador solo si está Inactivo; la salida del proyecto, si la tiene.
+                { encabezado: 'Estado colaborador', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
+                { encabezado: 'Fecha de salida', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
+                { encabezado: 'Tipo de salida', anchoExcel: 18, anchoPdf: 26 },
+                { encabezado: 'Causa de salida', anchoExcel: 24, anchoPdf: 34 },
+                { encabezado: 'Motivo de salida', anchoExcel: 32, anchoPdf: 44 },
+                { encabezado: 'Salida del proyecto', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
             ],
             filas: this.dataSource.filteredData.map((colaborador) => [
                 colaborador.nombre,
@@ -691,9 +765,40 @@ export class SeguimientoComponent implements AfterViewInit {
                 colaborador.estado,
                 Number(colaborador.diasConReporte),
                 Number(colaborador.diasACompletar),
+                colaborador.colaboradorActivo === false ? 'Inactivo' : 'Activo',
+                this.formatearFechaSalida(colaborador.fechaSalida),
+                colaborador.tipoSalida || '-',
+                colaborador.causaSalida || '-',
+                colaborador.motivoSalida?.trim() || '-',
+                this.formatearFechaSalida(colaborador.salidaProyecto),
             ]),
             orientacionPdf: 'landscape',
         };
+    }
+
+    // sm - Fechas de salida del backend (dd-MM-yyyy, o ISO yyyy-MM-dd) a dd/MM/yyyy; '-' si no hay.
+    private formatearFechaSalida(fecha?: string | null): string {
+        if (!fecha) return '-';
+        const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(fecha);
+        if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+        return fecha.replace(/-/g, '/');
+    }
+
+    // sm - Información adicional (fuera de la tabla) del Time Report individual: salida del colaborador si está
+    // Inactivo y salida del proyecto si la tiene. Vacío si no aplica.
+    private infoSalidaReporte(col: Colaborador): string[] {
+        const lineas: string[] = [];
+        if (col.colaboradorActivo === false) {
+            const partes = [`Fecha de salida del colaborador: ${this.formatearFechaSalida(col.fechaSalida)}`];
+            if (col.tipoSalida) partes.push(`Tipo: ${col.tipoSalida}`);
+            if (col.causaSalida) partes.push(`Causa: ${col.causaSalida}`);
+            if (col.motivoSalida?.trim()) partes.push(`Motivo: ${col.motivoSalida.trim()}`);
+            lineas.push(partes.join('  |  '));
+        }
+        if (col.salidaProyecto) {
+            lineas.push(`Salida del proyecto: ${this.formatearFechaSalida(col.salidaProyecto)}`);
+        }
+        return lineas;
     }
 
     public filtrarClientes(event: any) {
@@ -731,7 +836,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private async generarPdfColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<ArrayBuffer | undefined> {
         const respuesta = await this.obtenerActividadesColaborador(col, rango, proyecto);
         if (!respuesta.actividades || respuesta.actividades.length === 0) return undefined;
-        const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta);
+        const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta, '', this.infoSalidaReporte(col));
         this.descargas.verificarCancelacion();
         return contenido;
     }
@@ -1018,6 +1123,13 @@ export class SeguimientoComponent implements AfterViewInit {
                 }
             }
 
+            // sm - Información adicional de salida (fuera de la tabla), entre los totales y las firmas.
+            this.infoSalidaReporte(col).forEach((linea, i) => {
+                const celda = worksheet.getCell(totalRow + 2 + i, 2);
+                celda.value = linea;
+                celda.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF163572' } };
+            });
+
             // Firmas
             const sigRow1 = totalRow + 5;
             const sigRow2 = totalRow + 6;
@@ -1082,8 +1194,6 @@ export class SeguimientoComponent implements AfterViewInit {
 
         // Guardar archivo y disparar descarga
         const buffer = await workbook.xlsx.writeBuffer();
-        // sm - Si el usuario cancelÃ³ mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
-        if (this.descargaCancelada) throw new DescargaCanceladaError();
         // sm - Si el usuario canceló mientras se armaba el Excel, no se descarga ni se agrega al ZIP.
         this.descargas.verificarCancelacion();
         if (devolverBuffer) return buffer;

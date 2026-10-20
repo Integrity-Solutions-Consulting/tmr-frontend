@@ -27,6 +27,8 @@ export class ModalRegistrarSalidaComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   enviado = false;
   cargando = false;
+  // sm - Mensaje del backend cuando no se puede registrar la salida (p. ej. un proyecto empieza después de la fecha).
+  errorMensaje: string | null = null;
 
   tiposSalida: CatalogoItem[] = [];
   causasSalida: CatalogoItem[] = [];
@@ -83,6 +85,7 @@ export class ModalRegistrarSalidaComponent implements OnInit, OnDestroy {
     }
 
     this.cargando = true;
+    this.errorMensaje = null;
     const v = this.form.getRawValue();
 
     const request: RegistrarSalidaRequest = {
@@ -102,6 +105,7 @@ export class ModalRegistrarSalidaComponent implements OnInit, OnDestroy {
         error: (err: any) => {
           this.cargando = false;
           console.error('Error al registrar salida:', err);
+          this.errorMensaje = err?.error?.detail || 'No se pudo registrar la salida. Intenta nuevamente.';
         }
       });
   }

@@ -13,6 +13,7 @@ export class Boton {
   @Input() label = '';
   @Input() icon = '';
   @Input() type: 'primary' | 'secondary' | 'danger' = 'primary';
+  @Input() buttonType: 'button' | 'submit' = 'button';
   @Input() disabled = false;
   
   @Output() clicked = new EventEmitter<void>();

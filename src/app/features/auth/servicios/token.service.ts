@@ -61,10 +61,11 @@ export class TokenService {
       const base64Url = parts[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
-        window.atob(base64)
+        window
+          .atob(base64)
           .split('')
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .join(''),
       );
       return JSON.parse(jsonPayload);
     } catch (e) {
@@ -76,21 +77,10 @@ export class TokenService {
     const token = this.getToken();
     if (!token) return [];
 
-    // Fallback de desarrollo: si es un email de demo o desarrollo local sin backend, otorgar ADMINISTRADOR
-    const userJson = this.getUser();
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        const email = String(user.email || user.correoContacto || '').toLowerCase();
-        if (email === 'demo@tmr.com' || email === 'josedexd122ador@gmail.com' || email === 'xavier@gmail.com') {
-          return ['ADMINISTRADOR'];
-        }
-      } catch (e) {}
-    }
-
     const decoded = this.decodeToken(token);
     if (!decoded) return [];
-    const roles = decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || [];
+    const roles =
+      decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || [];
     return Array.isArray(roles) ? roles : [roles];
   }
 
@@ -127,7 +117,12 @@ export class TokenService {
   }
 
   canAccessProveedores(): boolean {
-    return this.hasRole('ADMINISTRADOR') || this.hasRole('GERENTE') || this.hasRole('LIDER') || this.hasRole('LÍDER');
+    return (
+      this.hasRole('ADMINISTRADOR') ||
+      this.hasRole('GERENTE') ||
+      this.hasRole('LIDER') ||
+      this.hasRole('LÍDER')
+    );
   }
 
   isColaborador(): boolean {
