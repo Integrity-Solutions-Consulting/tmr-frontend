@@ -26,7 +26,7 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { Observable } from 'rxjs';
+import { filter, firstValueFrom, lastValueFrom, Observable, Subject, takeUntil, timeout } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
 import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
@@ -35,9 +35,11 @@ import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.u
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
-import { NotificacionesService } from '../../../shared/services/notificaciones.service';
-import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
+import { NotificacionToastService } from '../../../shared/services/notificacion-toast.service';
+import { EstadoEmpleado, NotificacionesService } from '../../../shared/services/notificaciones.service';
+import { fechaEcuadorInputHoy, primerDiaMesEcuador } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
+import { TokenService } from '../../auth/servicios/token.service';
 import { CambiosDatosService } from '../../../shared/services/cambios-datos.service';
 
 // sm - Filtros que se recuerdan al salir y volver a Seguimiento. Se guardan en sessionStorage: duran mientras la
@@ -112,7 +114,9 @@ export class SeguimientoComponent implements AfterViewInit {
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
     private notificacionesService = inject(NotificacionesService);
+    private toastService = inject(NotificacionToastService);
     private fechaLimites = inject(FechaLimitesService);
+    private tokenService = inject(TokenService);
     private descargas = inject(DescargaProgresoService);
     private cambiosDatos = inject(CambiosDatosService);
     private destroyRef = inject(DestroyRef);
@@ -147,10 +151,8 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!q) return this.clientes();
         return this.clientes().filter(c => c.nombre.toLowerCase().includes(q));
     });
-    public fechaDesde = this.filtrosGuardados.fechaDesde ?? (() => {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-    })();
+    // Fechas con la hora de Ecuador (no la del navegador), igual que el backend al calcular y notificar
+    public fechaDesde = this.filtrosGuardados.fechaDesde ?? primerDiaMesEcuador();
     // sm - Se comenta el valor por defecto anterior (Ãºltimo dÃ­a del mes actual) porque "Fecha hasta" debe iniciar en el dÃ­a de hoy.
     // public fechaHasta = (() => {
     //     const d = new Date();
@@ -158,12 +160,13 @@ export class SeguimientoComponent implements AfterViewInit {
     //     return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
     // })();
     // sm - Nuevo valor por defecto: la fecha de hoy (fecha local del navegador, formato yyyy-MM-dd).
-    public fechaHasta = this.filtrosGuardados.fechaHasta ?? (() => {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    })();
-    public readonly fechaMaxima = fechaLocalInputHoy();
-    // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+    // Recupera la fecha guardada o utiliza la fecha actual de Ecuador.
+    public fechaHasta = this.filtrosGuardados.fechaHasta ?? fechaEcuadorInputHoy();
+
+    // Fecha máxima permitida: hoy en Ecuador.
+    public readonly fechaMaxima = fechaEcuadorInputHoy();
+
+    // Fecha más antigua con actividades registradas.
     public fechaMinima: string | null = null;
 
     // PaginaciÃ³n (Estado Local para Rango)
@@ -305,11 +308,7 @@ export class SeguimientoComponent implements AfterViewInit {
             .subscribe(() => this.procesarRecargaPendiente());
     }
 
-    // sm - Identifica una fila (colaborador + proyecto) entre recargas, para conservar la selección.
-    private claveFila(c: Colaborador): string {
-        return `${c.id}|${c.proyectos?.[0]?.idProyecto ?? c.proyecto}`;
-    }
-
+   
     // sm - porAviso: llegó un aviso de cambios (recarga siempre). Si no, es la vuelta a la pestaña: solo con datos viejos.
     // Nunca recarga con la pestaña oculta, un modal abierto o una descarga en curso: lo deja pendiente.
     private recargarAutomatico(porAviso: boolean) {
@@ -1220,27 +1219,164 @@ export class SeguimientoComponent implements AfterViewInit {
         }
         this.aplicarFiltros();
     }
-    //notificacaiones mock hay que cambiar la logica cuando ya se encuentre realizado el backend
 
-    notificarColaborador(colaborador: Colaborador) {
-        this.popup.loading('Enviando...', 'Espera un momento');
+    // Aviso manual: el POST solo encola la solicitud (202); el resultado real (enviado / fallido / omitido)
+    // se consulta con GET /notificaciones/estado hasta que el backend lo registre. El avance se muestra en un
+    // toast arriba a la derecha (no bloquea la pantalla), así que se puede avisar a varios colaboradores a la vez.
+    // Cada fila es colaborador + proyecto y cada proyecto exige su propia jornada: el aviso es por fila.
+    private notificandoFilas = signal<ReadonlySet<string>>(new Set());
 
-        this.notificacionesService.notificar({ empleadoIds: [+colaborador.id] })
-          .subscribe({
-            next: (response) => {
-              console.log('Respuesta del endpoint de notificar:', response);
-              this.popup.show(
-                'check_circle',
-                'Notificación Enviada',
-                response.mensaje || `Se ha enviado un recordatorio a <b>${colaborador.nombre}</b>.`, 
-                true
-              );
-            },
-            error: (err) => {
-              console.error('Error al notificar:', err);
-              this.popup.show('error', 'Error', 'No se pudo enviar la notificación');
-            }
-          });
+    private claveFila(colaborador: Colaborador): string {
+        return `${colaborador.id}:${this.proyectoDeFila(colaborador)?.idProyecto ?? 'sin-proyecto'}`;
     }
 
+    // Undefined en la fila "Sin Proyecto" (el aviso usa todas sus horas, igual que esa fila)
+    private proyectoDeFila(colaborador: Colaborador) {
+        return colaborador.proyectos?.[0];
+    }
+
+    public estaNotificando(colaborador: Colaborador): boolean {
+        return this.notificandoFilas().has(this.claveFila(colaborador));
+    }
+
+    private marcarNotificando(clave: string, activo: boolean) {
+        this.notificandoFilas.update(claves => {
+            const siguiente = new Set(claves);
+            if (activo) siguiente.add(clave); else siguiente.delete(clave);
+            return siguiente;
+        });
+    }
+
+    // El permiso NOTIFICACIONES_EJECUTAR se asigna a Administrador y Líder (script 14); el backend lo valida igual.
+    public readonly puedeNotificar = this.tokenService.hasRole('ADMINISTRADOR') || this.tokenService.isLider();
+
+    async notificarColaborador(colaborador: Colaborador) {
+        const idEmpleado = +colaborador.id;
+        const clave = this.claveFila(colaborador);
+        if (!this.puedeNotificar || this.notificandoFilas().has(clave)) return;
+
+        const nombre = colaborador.nombre;
+        const proyecto = this.proyectoDeFila(colaborador);
+        const deProyecto = proyecto ? ` (${proyecto.nombre})` : '';
+
+        // Sin rango el backend no sabría qué horas informar
+        if (!this.fechaDesde || !this.fechaHasta) {
+            const toast = this.toastService.iniciar(`Notificando a ${nombre}`, '', []);
+            this.toastService.error(toast, 'Faltan las fechas',
+                'Selecciona la fecha desde y la fecha hasta del filtro antes de notificar.');
+            return;
+        }
+
+        this.marcarNotificando(clave, true);
+        const toast = this.toastService.iniciar(
+            `Notificando a ${nombre}${deProyecto}`,
+            'Enviando la solicitud al servidor...',
+            ['Solicitud enviada', 'Procesando y enviando el correo']);
+
+        let avisoDemora: ReturnType<typeof setTimeout> | undefined;
+        try {
+            // Mismo rango y proyecto que la fila: el correo informa las horas que el líder está viendo
+            const solicitud = await lastValueFrom(this.notificacionesService.notificar({
+                empleadoIds: [idEmpleado],
+                fechaDesde: this.fechaDesde,
+                fechaHasta: this.fechaHasta,
+                idProyecto: proyecto?.idProyecto,
+            }));
+            this.toastService.avanzar(toast, 'Esperando la confirmación del envío...');
+            avisoDemora = setTimeout(() => this.toastService.actualizarDetalle(toast,
+                'Hay otros correos en cola; el resultado aparecerá aquí cuando termine.'), 20000);
+
+            const estado = await this.esperarResultadoNotificacion(idEmpleado, solicitud.solicitadoEnMs, proyecto?.idProyecto);
+
+            switch (estado?.estado) {
+                case 'Enviado':
+                    this.toastService.exito(toast, 'Notificación enviada',
+                        `Se envió un recordatorio a ${nombre}${proyecto ? ` por el proyecto ${proyecto.nombre}` : ''}.`);
+                    break;
+                case 'Omitido':
+                    this.toastService.aviso(toast, 'Notificación no enviada',
+                        `${nombre}: ${estado.detalle ?? 'no corresponde avisar en este momento'}.`);
+                    break;
+                case 'Fallido':
+                    this.toastService.error(toast, 'No se pudo enviar',
+                        `El correo para ${nombre} no pudo enviarse${this.motivoFallo(estado.detalle)}. Intenta nuevamente en unos minutos.`);
+                    break;
+                default:
+                    this.toastService.aviso(toast, 'Envío en proceso',
+                        `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
+            }
+        } catch (err: any) {
+            console.error('Error al notificar:', err);
+            this.toastService.error(toast, 'No se pudo enviar la notificación', this.mensajeErrorSolicitud(err, nombre));
+        } finally {
+            clearTimeout(avisoDemora);
+            this.marcarNotificando(clave, false);
+        }
+    }
+
+    // El detalle técnico del fallo (p. ej. la respuesta de Apprise) puede ser largo: se muestra recortado
+    private motivoFallo(detalle: string | null): string {
+        const texto = detalle?.replace(/\s+/g, ' ').trim();
+        if (!texto) return '';
+        return ` (motivo: ${texto.length > 160 ? texto.slice(0, 157) + '...' : texto})`;
+    }
+
+    // Mensaje legible para el error del POST /notificar, venga como { mensaje }, ProblemDetails o validación
+    private mensajeErrorSolicitud(err: any, nombre: string): string {
+        if (err?.status === 403) return 'No tienes permiso para enviar notificaciones.';
+        if (err?.status === 401) return 'Tu sesión expiró. Vuelve a iniciar sesión e intenta de nuevo.';
+        if (err?.status === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.';
+
+        const cuerpo = err?.error;
+        if (err?.status === 400) {
+            const errores = cuerpo?.errors;
+            const primerError = Array.isArray(errores)
+                ? (errores[0]?.message ?? errores[0]?.mensaje ?? errores[0])
+                : errores && typeof errores === 'object'
+                    ? (Object.values(errores).flat()[0] as string | undefined)
+                    : undefined;
+            const texto = cuerpo?.mensaje ?? cuerpo?.message ?? cuerpo?.detail ?? primerError ?? cuerpo?.title;
+            return typeof texto === 'string' && texto.trim()
+                ? texto
+                : 'Los datos de la solicitud no son válidos. Revisa las fechas del filtro.';
+        }
+        if (err?.status >= 500) return 'El servidor no pudo registrar la solicitud. Intenta nuevamente en unos minutos.';
+        return `No se pudo registrar la solicitud para ${nombre}.`;
+    }
+
+    // Espera el resultado por SSE (el backend lo empuja en cuanto lo registra, hasta ~5 min).
+    // Si el stream no está disponible o se corta, sigue consultando GET /estado.
+    // Devuelve null si el aviso sigue en cola al agotarse la espera.
+    private async esperarResultadoNotificacion(idEmpleado: number, desdeMs: number, idProyecto?: number): Promise<EstadoEmpleado | null> {
+        try {
+            const evento = await firstValueFrom(
+                this.notificacionesService.streamEstado([idEmpleado], desdeMs, idProyecto).pipe(
+                    filter(e => e.tipo === 'fin' || e.estado.idEmpleado === idEmpleado),
+                    timeout(6 * 60 * 1000)),
+                { defaultValue: undefined });
+            if (evento?.tipo === 'estado') return evento.estado;
+            if (evento?.tipo === 'fin') return null;
+            // Sin "fin": la conexión se cortó antes de tiempo, se sigue por consulta
+        } catch (err) {
+            console.warn('Stream de estado no disponible; se consulta el estado periódicamente:', err);
+        }
+        return this.consultarResultadoNotificacion(idEmpleado, desdeMs, idProyecto);
+    }
+
+    // Respaldo: consulta el estado cada 3 s (máx. ~90 s). Devuelve null si no se registró o si la consulta falla.
+    private async consultarResultadoNotificacion(idEmpleado: number, desdeMs: number, idProyecto?: number): Promise<EstadoEmpleado | null> {
+        const intentos = 30;
+        for (let i = 0; i < intentos; i++) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            try {
+                const respuesta = await lastValueFrom(this.notificacionesService.getEstado([idEmpleado], desdeMs, idProyecto));
+                const estado = respuesta.empleados.find(e => e.idEmpleado === idEmpleado);
+                if (estado && estado.estado !== 'Pendiente') return estado;
+            } catch (err) {
+                console.error('Error al consultar el estado de la notificación:', err);
+                return null;
+            }
+        }
+        return null;
+    }
 }

@@ -217,6 +217,41 @@
   font-weight: 600;
 }
 
+// Resultado del aviso del corte (Enviado / Fallido / Omitido / Pendiente) en la tabla del panel
+.badge-resultado {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &--enviado {
+    border-color: var(--status-success-border);
+    background: var(--status-success-bg-soft);
+    color: var(--status-success-text);
+  }
+
+  &--fallido {
+    border-color: var(--status-danger-border);
+    background: var(--status-danger-bg-soft);
+    color: var(--status-danger-text);
+  }
+
+  &--omitido {
+    border-color: var(--status-warning-border);
+    background: var(--status-warning-bg-soft);
+    color: var(--status-warning-text);
+  }
+
+  &--pendiente {
+    border-color: var(--status-info-border);
+    background: var(--status-info-bg-soft);
+    color: var(--status-info-text);
+  }
+}
+
 .badge-semaforo {
   display: inline-block;
   padding: 2px 10px;
@@ -324,15 +359,158 @@
   color: var(--text-muted);
 }
 
+// Cumplimiento a la izquierda; el aviso del último corte (si hay) a la derecha, centrado a la altura
 .resumen-cifras {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 26px;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  @media (max-width: 600px) {
+    padding: 18px 16px;
+  }
+}
+
+.resumen-cumplimiento {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 16px;
-  padding: 22px 26px;
+}
 
-  @media (max-width: 600px) {
-    padding: 18px 16px;
+// ── Aviso informativo del último corte (angosto, en columna) ──
+.aviso-corte {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.aviso-corte__boton {
+  width: 168px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px;
+  border: 1px solid var(--status-info-border);
+  border-radius: 12px;
+  background: var(--status-info-bg-soft);
+  color: var(--primary-color);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary-color);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(22, 53, 114, 0.25);
+  }
+
+  // Su detalle está abierto en el panel (igual que una tarjeta seleccionada)
+  &--seleccionado {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color) inset;
+  }
+}
+
+.aviso-corte__icono {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 2px;
+  border-radius: 10px;
+  border: 1px solid var(--status-info-border);
+  background: var(--bg-card);
+  color: var(--primary-color);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+// Punto rojo mientras el corte es nuevo para el usuario (se apaga al abrir el aviso o la campana)
+.aviso-corte__punto {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--status-info-bg-soft);
+  background: var(--status-danger-bg-solid);
+  animation: aviso-corte-latido 1.8s ease-out infinite;
+}
+
+@keyframes aviso-corte-latido {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.aviso-corte__periodo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.aviso-corte__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--status-success-border);
+  background: var(--status-success-bg-soft);
+  color: var(--status-success-text);
+  font-size: 10.5px;
+  font-weight: 700;
+
+  &--proceso {
+    border-color: var(--status-info-border);
+    background: var(--bg-card);
+    color: var(--status-info-text);
+  }
+}
+
+.aviso-corte__spinner {
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: aviso-corte-giro 0.8s linear infinite;
+}
+
+@keyframes aviso-corte-giro {
+  to { transform: rotate(360deg); }
+}
+
+.aviso-corte__enlace {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-color);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -365,13 +543,6 @@
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.1;
-}
-
-.barra-progreso {
-  height: 12px;
-  border-radius: 999px;
-  background: var(--bg-surface);
-  overflow: hidden;
 }
 
 .resumen-acciones {

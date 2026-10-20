@@ -212,44 +212,70 @@
         </div>
 
         <div class="resumen-cifras">
-          <div class="cifras">
-            <div class="cifra">
-              <span class="cifra-label">Horas esperadas</span>
-              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.esperadas) }}</span>
+          <!-- Cumplimiento del período filtrado -->
+          <div class="resumen-cumplimiento">
+            <div class="cifras">
+              <div class="cifra">
+                <span class="cifra-label">Horas esperadas</span>
+                <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.esperadas) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Horas reportadas</span>
+                <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.reportadas) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Horas pendientes</span>
+                <span class="cifra-valor pendiente">{{ formatoHoras(d.cumplimientoTotal.pendientes) }}</span>
+              </div>
+              <div class="cifra">
+                <span class="cifra-label">Colaboradores con pendientes</span>
+                <span class="cifra-valor">{{ colaboradoresConPendientes() }}</span>
+              </div>
             </div>
-            <div class="cifra">
-              <span class="cifra-label">Horas reportadas</span>
-              <span class="cifra-valor">{{ formatoHoras(d.cumplimientoTotal.reportadas) }}</span>
-            </div>
-            <div class="cifra">
-              <span class="cifra-label">Horas pendientes</span>
-              <span class="cifra-valor pendiente">{{ formatoHoras(d.cumplimientoTotal.pendientes) }}</span>
-            </div>
-            <div class="cifra">
-              <span class="cifra-label">Colaboradores con pendientes</span>
-              <span class="cifra-valor">{{ colaboradoresConPendientes() }}</span>
-            </div>
-          </div>
 
-          <div class="barra-progreso" [matTooltip]="formatoHoras(d.cumplimientoTotal.reportadas) + ' de ' + formatoHoras(d.cumplimientoTotal.esperadas)">
-            <span class="barra-relleno" [ngClass]="claseSemaforo(d.cumplimientoTotal.semaforo)"
-              [style.width.%]="anchoBarra(d.cumplimientoTotal.porcentaje)"></span>
-          </div>
-
-          <div class="resumen-acciones">
-            <button type="button" class="btn-link" (click)="abrirTodoIncumplimiento()"
-              [disabled]="d.cumplimientoTotal.pendientes === 0">
-              Ver detalle de incumplimiento
-              <mat-icon>arrow_forward</mat-icon>
-            </button>
-            @if (totalFueraDeAsignacion() > 0) {
-              <button type="button" class="aviso-fuera" (click)="abrirFueraDeAsignacion()"
-                matTooltip="Horas registradas en proyectos donde la persona no está asignada. No suman al cumplimiento.">
-                <mat-icon>info</mat-icon>
-                {{ formatoHoras(totalFueraDeAsignacion()) }} registradas fuera de asignación
+            <div class="resumen-acciones">
+              <button type="button" class="btn-link" (click)="abrirTodoIncumplimiento()"
+                [disabled]="d.cumplimientoTotal.pendientes === 0">
+                Ver detalle de incumplimiento
+                <mat-icon>arrow_forward</mat-icon>
               </button>
-            }
+              @if (totalFueraDeAsignacion() > 0) {
+                <button type="button" class="aviso-fuera" (click)="abrirFueraDeAsignacion()"
+                  matTooltip="Horas registradas en proyectos donde la persona no está asignada. No suman al cumplimiento.">
+                  <mat-icon>info</mat-icon>
+                  {{ formatoHoras(totalFueraDeAsignacion()) }} registradas fuera de asignación
+                </button>
+              }
+            </div>
           </div>
+
+          <!-- Aviso informativo del último corte de horas (SSE, solo Administrador y Líder).
+               No depende de los filtros: siempre es el último corte de los últimos 16 días. -->
+          @if (resumenCorte.resumen(); as corte) {
+            <div class="aviso-corte">
+              <button type="button" class="aviso-corte__boton" (click)="abrirDetalleCorte()"
+                [class.aviso-corte__boton--seleccionado]="esSeleccionado('corteHoras')"
+                aria-label="Ver el resultado del último corte de horas">
+                <span class="aviso-corte__icono">
+                  <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                  @if (resumenCorte.campanaPendiente()) {
+                    <span class="aviso-corte__punto" aria-hidden="true"></span>
+                  }
+                </span>
+                <span class="cifra-label">Último corte de horas</span>
+                <span class="aviso-corte__periodo">{{ describirPeriodoCorte(corte) }}</span>
+                @if (corte.enProceso) {
+                  <span class="aviso-corte__estado aviso-corte__estado--proceso">
+                    <span class="aviso-corte__spinner" aria-hidden="true"></span>En proceso
+                  </span>
+                } @else {
+                  <span class="aviso-corte__estado">Completado</span>
+                }
+                <span class="aviso-corte__enlace">Ver más <mat-icon>arrow_forward</mat-icon></span>
+              </button>
+
+            </div>
+          }
         </div>
       </section>
 
@@ -407,7 +433,7 @@
       <div class="drawer-header">
         <div class="drawer-title-group">
           <span class="drawer-subtitle">
-            {{ datos() ? meses[datos()!.periodo.mes - 1] + ' ' + datos()!.periodo.anio + ' · Corte ' + formatoFecha(datos()!.periodo.fechaCorte) : '' }}
+            {{ det.subtitulo ?? (datos() ? meses[datos()!.periodo.mes - 1] + ' ' + datos()!.periodo.anio + ' · Corte ' + formatoFecha(datos()!.periodo.fechaCorte) : '') }}
           </span>
           <h2 class="drawer-title">{{ det.titulo }}</h2>
           <p class="drawer-definicion">{{ det.definicion }}</p>
@@ -458,6 +484,8 @@
                       <td [class.num]="c.tipo === 'horas' || c.tipo === 'porcentaje' || c.tipo === 'numero'">
                         @if (c.tipo === 'semaforo') {
                           <span class="badge-semaforo" [ngClass]="claseSemaforo(f[c.clave])">{{ f[c.clave] }}</span>
+                        } @else if (c.tipo === 'resultado') {
+                          <span class="badge-resultado" [ngClass]="'badge-resultado--' + f[c.clave].toLowerCase()">{{ f[c.clave] }}</span>
                         } @else if (c.clave === 'pendientes') {
                           <span [class.pendiente]="f[c.clave] > 0">{{ valorCelda(f, c) }}</span>
                         } @else {

@@ -9,14 +9,34 @@
     <!-- Notificaciones en App (Campana) -->
     <div class="navbar__bell-wrapper">
       <button type="button" class="navbar__bell-btn" (click)="toggleNotificaciones()" aria-label="Notificaciones">
-        <span class="material-symbols-outlined navbar__bell-icon" [class.navbar__bell-icon--active]="tieneNotificaciones">notifications</span>
-        <span class="navbar__bell-badge" *ngIf="tieneNotificaciones"></span>
+        <span class="material-symbols-outlined navbar__bell-icon" [class.navbar__bell-icon--active]="campanaConNovedades">notifications</span>
+        <span class="navbar__bell-badge" *ngIf="campanaConNovedades"></span>
       </button>
 
       <!-- Panel Dropdown de Notificaciones -->
       <div class="navbar__bell-dropdown" data-scroll-lock-exempt *ngIf="notificacionesAbierto">
         <div class="navbar__bell-dropdown-header">Notificaciones</div>
         <div class="navbar__bell-dropdown-body">
+          <!-- Último corte de horas (solo Administrador y Líder): solo el nombre; el clic abre el detalle completo -->
+          @if (resumenCorte.resumen(); as corte) {
+            <button type="button" class="navbar__bell-item navbar__bell-item--accion" (click)="abrirDetalleCorte()">
+              <span class="material-symbols-outlined navbar__bell-item-icon navbar__bell-item-icon--info" aria-hidden="true">fact_check</span>
+              <span class="navbar__bell-item-content">
+                <span class="navbar__bell-item-title">Corte de horas {{ describirPeriodoCorte(corte) }}</span>
+              </span>
+            </button>
+          }
+          <!-- Correos de horas faltantes que le llegaron (su líder o el corte): solo aviso, no es clickeable -->
+          @for (aviso of misAvisos.avisos(); track aviso.id) {
+            <div class="navbar__bell-item navbar__bell-item--aviso">
+              <span class="material-symbols-outlined navbar__bell-item-icon navbar__bell-item-icon--info" aria-hidden="true">pending_actions</span>
+              <div class="navbar__bell-item-content">
+                <span class="navbar__bell-item-title">{{ tituloAviso(aviso) }}</span>
+                <span class="navbar__bell-item-desc">{{ descripcionAviso(aviso) }}</span>
+                <span class="navbar__bell-item-fecha">{{ formatoFechaHora(aviso.fechaEnvio) }}</span>
+              </div>
+            </div>
+          }
           <div class="navbar__bell-item" *ngIf="tieneNotificaciones">
             <span class="material-symbols-outlined navbar__bell-item-icon">warning</span>
             <div class="navbar__bell-item-content">
