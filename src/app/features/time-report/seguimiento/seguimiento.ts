@@ -26,7 +26,7 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { filter, firstValueFrom, lastValueFrom, Observable, Subject, takeUntil, timeout } from 'rxjs';
+import { lastValueFrom, Observable, Subject, takeUntil, timeout } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
 import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
@@ -135,6 +135,7 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
+    public isNotifying = false;
     // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
     public cargando = this.seguimientoService.cargando;
 
@@ -478,6 +479,12 @@ export class SeguimientoComponent implements AfterViewInit {
         this.isAllSelected()
             ? this.selection.clear()
             : this.dataSource.filteredData.forEach(row => this.selection.select(row));
+    }
+
+    // Para el badge del botón Notificar: cuenta personas, no filas (una persona puede tener varias filas
+    // seleccionadas, una por proyecto, y eso manda un solo aviso general para ella).
+    public personasSeleccionadas(): number {
+        return new Set(this.selection.selected.map(c => c.id)).size;
     }
 
     // sm - Expande los colaboradores seleccionados a un item por archivo a generar: si un colaborador tiene varios
@@ -1221,11 +1228,9 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // Aviso manual: el POST solo encola la solicitud (202); el resultado real (enviado / fallido / omitido)
-    // se consulta con GET /notificaciones/estado hasta que el backend lo registre. El avance se muestra en un
-    // toast arriba a la derecha (no bloquea la pantalla), así que se puede avisar a varios colaboradores a la vez.
-    // Cada fila es colaborador + proyecto y cada proyecto exige su propia jornada: el aviso es por fila.
-    private notificandoFilas = signal<ReadonlySet<string>>(new Set());
-
+    // se consulta con GET /notificaciones/estado hasta que el backend lo registre. Se agrupa por colaborador:
+    // si tiene varias filas seleccionadas (varios proyectos) se manda un aviso general (sin idProyecto); si
+    // tiene una sola fila seleccionada, el aviso queda filtrado a ese proyecto puntual.
     private claveFila(colaborador: Colaborador): string {
         return `${colaborador.id}:${this.proyectoDeFila(colaborador)?.idProyecto ?? 'sin-proyecto'}`;
     }
@@ -1235,83 +1240,118 @@ export class SeguimientoComponent implements AfterViewInit {
         return colaborador.proyectos?.[0];
     }
 
-    public estaNotificando(colaborador: Colaborador): boolean {
-        return this.notificandoFilas().has(this.claveFila(colaborador));
-    }
-
-    private marcarNotificando(clave: string, activo: boolean) {
-        this.notificandoFilas.update(claves => {
-            const siguiente = new Set(claves);
-            if (activo) siguiente.add(clave); else siguiente.delete(clave);
-            return siguiente;
-        });
-    }
-
     // El permiso NOTIFICACIONES_EJECUTAR se asigna a Administrador y Líder (script 14); el backend lo valida igual.
     public readonly puedeNotificar = this.tokenService.hasRole('ADMINISTRADOR') || this.tokenService.isLider();
 
-    async notificarColaborador(colaborador: Colaborador) {
-        const idEmpleado = +colaborador.id;
-        const clave = this.claveFila(colaborador);
-        if (!this.puedeNotificar || this.notificandoFilas().has(clave)) return;
-
-        const nombre = colaborador.nombre;
-        const proyecto = this.proyectoDeFila(colaborador);
-        const deProyecto = proyecto ? ` (${proyecto.nombre})` : '';
+    async notificarSeleccionados() {
+        if (!this.puedeNotificar || this.isNotifying || !this.selection.hasValue()) return;
 
         // Sin rango el backend no sabría qué horas informar
         if (!this.fechaDesde || !this.fechaHasta) {
-            const toast = this.toastService.iniciar(`Notificando a ${nombre}`, '', []);
-            this.toastService.error(toast, 'Faltan las fechas',
+            this.toastService.error('Faltan las fechas',
                 'Selecciona la fecha desde y la fecha hasta del filtro antes de notificar.');
             return;
         }
 
-        this.marcarNotificando(clave, true);
-        const toast = this.toastService.iniciar(
-            `Notificando a ${nombre}${deProyecto}`,
-            'Enviando la solicitud al servidor...',
-            ['Solicitud enviada', 'Procesando y enviando el correo']);
+        // Una persona puede tener varias filas seleccionadas (una por proyecto): si tiene 2+, el aviso es
+        // general para esa persona (sin idProyecto); si tiene solo 1, queda filtrado a ese proyecto.
+        const filasPorEmpleado = new Map<number, Colaborador[]>();
+        for (const fila of this.selection.selected) {
+            const id = +fila.id;
+            const filas = filasPorEmpleado.get(id);
+            if (filas) filas.push(fila); else filasPorEmpleado.set(id, [fila]);
+        }
+        const idProyectoPorEmpleado = new Map<number, number | undefined>();
+        for (const [id, filas] of filasPorEmpleado) {
+            idProyectoPorEmpleado.set(id, filas.length === 1 ? this.proyectoDeFila(filas[0])?.idProyecto : undefined);
+        }
 
-        let avisoDemora: ReturnType<typeof setTimeout> | undefined;
+        // Se agrupan las personas por el idProyecto resultante: una sola llamada al backend por grupo.
+        const grupos = new Map<number | undefined, number[]>();
+        for (const [id, idProyecto] of idProyectoPorEmpleado) {
+            const ids = grupos.get(idProyecto);
+            if (ids) ids.push(id); else grupos.set(idProyecto, [id]);
+        }
+
+        const totalPersonas = filasPorEmpleado.size;
+        const [idUnico] = filasPorEmpleado.keys();
+        const esUnaSolaPersona = totalPersonas === 1;
+        const nombreUnico = esUnaSolaPersona ? filasPorEmpleado.get(idUnico)![0].nombre : '';
+        const proyectoUnico = esUnaSolaPersona ? this.proyectoDeFila(filasPorEmpleado.get(idUnico)![0]) : undefined;
+
+        this.toastService.info(
+            esUnaSolaPersona ? `Notificando a ${nombreUnico}` : `Notificando a ${totalPersonas} personas`,
+            'Se envió la solicitud, esperando confirmación...');
+
+        this.isNotifying = true;
         try {
-            // Mismo rango y proyecto que la fila: el correo informa las horas que el líder está viendo
-            const solicitud = await lastValueFrom(this.notificacionesService.notificar({
-                empleadoIds: [idEmpleado],
-                fechaDesde: this.fechaDesde,
-                fechaHasta: this.fechaHasta,
-                idProyecto: proyecto?.idProyecto,
+            const resultados = new Map<number, EstadoEmpleado | null>();
+            await Promise.all([...grupos.entries()].map(async ([idProyecto, ids]) => {
+                const solicitud = await lastValueFrom(this.notificacionesService.notificar({
+                    empleadoIds: ids,
+                    fechaDesde: this.fechaDesde,
+                    fechaHasta: this.fechaHasta,
+                    idProyecto,
+                }));
+                const resultadosGrupo = await this.esperarResultadosNotificacion(ids, solicitud.solicitadoEnMs, idProyecto);
+                for (const [id, estado] of resultadosGrupo) resultados.set(id, estado);
             }));
-            this.toastService.avanzar(toast, 'Esperando la confirmación del envío...');
-            avisoDemora = setTimeout(() => this.toastService.actualizarDetalle(toast,
-                'Hay otros correos en cola; el resultado aparecerá aquí cuando termine.'), 20000);
 
-            const estado = await this.esperarResultadoNotificacion(idEmpleado, solicitud.solicitadoEnMs, proyecto?.idProyecto);
-
-            switch (estado?.estado) {
-                case 'Enviado':
-                    this.toastService.exito(toast, 'Notificación enviada',
-                        `Se envió un recordatorio a ${nombre}${proyecto ? ` por el proyecto ${proyecto.nombre}` : ''}.`);
-                    break;
-                case 'Omitido':
-                    this.toastService.aviso(toast, 'Notificación no enviada',
-                        `${nombre}: ${estado.detalle ?? 'no corresponde avisar en este momento'}.`);
-                    break;
-                case 'Fallido':
-                    this.toastService.error(toast, 'No se pudo enviar',
-                        `El correo para ${nombre} no pudo enviarse${this.motivoFallo(estado.detalle)}. Intenta nuevamente en unos minutos.`);
-                    break;
-                default:
-                    this.toastService.aviso(toast, 'Envío en proceso',
-                        `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
+            if (esUnaSolaPersona) {
+                this.mostrarResultadoIndividual(nombreUnico, proyectoUnico, resultados.get(idUnico) ?? null);
+            } else {
+                this.mostrarResultadoMasivo(totalPersonas, resultados);
             }
         } catch (err: any) {
             console.error('Error al notificar:', err);
-            this.toastService.error(toast, 'No se pudo enviar la notificación', this.mensajeErrorSolicitud(err, nombre));
+            this.toastService.error('No se pudo enviar la notificación',
+                this.mensajeErrorSolicitud(err, esUnaSolaPersona ? nombreUnico : `${totalPersonas} personas`));
         } finally {
-            clearTimeout(avisoDemora);
-            this.marcarNotificando(clave, false);
+            this.isNotifying = false;
         }
+    }
+
+    private mostrarResultadoIndividual(nombre: string, proyecto: ProyectoResumen | undefined, estado: EstadoEmpleado | null) {
+        switch (estado?.estado) {
+            case 'Enviado':
+                this.toastService.exito('Notificación enviada',
+                    `Se envió un recordatorio a ${nombre}${proyecto ? ` por el proyecto ${proyecto.nombre}` : ''}.`);
+                break;
+            case 'Omitido':
+                this.toastService.warning('Notificación no enviada',
+                    `${nombre}: ${estado.detalle ?? 'no corresponde avisar en este momento'}.`);
+                break;
+            case 'Fallido':
+                this.toastService.error('No se pudo enviar',
+                    `El correo para ${nombre} no pudo enviarse${this.motivoFallo(estado.detalle)}. Intenta nuevamente en unos minutos.`);
+                break;
+            default:
+                this.toastService.warning('Envío en proceso',
+                    `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
+        }
+    }
+
+    private mostrarResultadoMasivo(totalPersonas: number, resultados: Map<number, EstadoEmpleado | null>) {
+        let enviados = 0, omitidos = 0, fallidos = 0, pendientes = 0;
+        for (const estado of resultados.values()) {
+            switch (estado?.estado) {
+                case 'Enviado': enviados++; break;
+                case 'Omitido': omitidos++; break;
+                case 'Fallido': fallidos++; break;
+                default: pendientes++;
+            }
+        }
+        const partes: string[] = [];
+        if (enviados > 0) partes.push(`${enviados} enviado${enviados > 1 ? 's' : ''}`);
+        if (omitidos > 0) partes.push(`${omitidos} omitido${omitidos > 1 ? 's' : ''}`);
+        if (fallidos > 0) partes.push(`${fallidos} fallido${fallidos > 1 ? 's' : ''}`);
+        if (pendientes > 0) partes.push(`${pendientes} en proceso`);
+        // Solo el agregado: quién y por qué falló se consulta notificando a esa persona sola.
+        const detalle = `De ${totalPersonas} personas: ${partes.join(', ')}.`;
+
+        if (fallidos > 0) this.toastService.error('Notificaciones procesadas', detalle);
+        else if (omitidos > 0 || pendientes > 0) this.toastService.warning('Notificaciones procesadas', detalle);
+        else this.toastService.exito('Notificaciones enviadas', detalle);
     }
 
     // El detalle técnico del fallo (p. ej. la respuesta de Apprise) puede ser largo: se muestra recortado
@@ -1322,7 +1362,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // Mensaje legible para el error del POST /notificar, venga como { mensaje }, ProblemDetails o validación
-    private mensajeErrorSolicitud(err: any, nombre: string): string {
+    private mensajeErrorSolicitud(err: any, destinatario: string): string {
         if (err?.status === 403) return 'No tienes permiso para enviar notificaciones.';
         if (err?.status === 401) return 'Tu sesión expiró. Vuelve a iniciar sesión e intenta de nuevo.';
         if (err?.status === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.';
@@ -1341,42 +1381,68 @@ export class SeguimientoComponent implements AfterViewInit {
                 : 'Los datos de la solicitud no son válidos. Revisa las fechas del filtro.';
         }
         if (err?.status >= 500) return 'El servidor no pudo registrar la solicitud. Intenta nuevamente en unos minutos.';
-        return `No se pudo registrar la solicitud para ${nombre}.`;
+        return `No se pudo registrar la solicitud para ${destinatario}.`;
     }
 
-    // Espera el resultado por SSE (el backend lo empuja en cuanto lo registra, hasta ~5 min).
-    // Si el stream no está disponible o se corta, sigue consultando GET /estado.
-    // Devuelve null si el aviso sigue en cola al agotarse la espera.
-    private async esperarResultadoNotificacion(idEmpleado: number, desdeMs: number, idProyecto?: number): Promise<EstadoEmpleado | null> {
-        try {
-            const evento = await firstValueFrom(
-                this.notificacionesService.streamEstado([idEmpleado], desdeMs, idProyecto).pipe(
-                    filter(e => e.tipo === 'fin' || e.estado.idEmpleado === idEmpleado),
-                    timeout(6 * 60 * 1000)),
-                { defaultValue: undefined });
-            if (evento?.tipo === 'estado') return evento.estado;
-            if (evento?.tipo === 'fin') return null;
-            // Sin "fin": la conexión se cortó antes de tiempo, se sigue por consulta
-        } catch (err) {
-            console.warn('Stream de estado no disponible; se consulta el estado periódicamente:', err);
+    // Espera el resultado de varios empleados a la vez por SSE (el backend empuja cada uno en cuanto lo
+    // registra, hasta ~6 min). Si el stream no está disponible o se corta antes de completarse, los que
+    // falten se siguen consultando por GET /estado. Los que sigan en cola al agotarse la espera quedan null.
+    private async esperarResultadosNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const faltantes = new Set(idEmpleados);
+
+        await new Promise<void>(resolve => {
+            const suscripcion = this.notificacionesService.streamEstado(idEmpleados, desdeMs, idProyecto).pipe(
+                timeout(6 * 60 * 1000),
+            ).subscribe({
+                next: evento => {
+                    if (evento.tipo === 'estado' && faltantes.has(evento.estado.idEmpleado)) {
+                        resultados.set(evento.estado.idEmpleado, evento.estado);
+                        faltantes.delete(evento.estado.idEmpleado);
+                        if (faltantes.size === 0) { suscripcion.unsubscribe(); resolve(); }
+                    } else if (evento.tipo === 'fin') {
+                        suscripcion.unsubscribe();
+                        resolve();
+                    }
+                },
+                error: err => {
+                    console.warn('Stream de estado no disponible; se consulta el estado periódicamente:', err);
+                    resolve();
+                },
+                complete: () => resolve(),
+            });
+        });
+
+        if (faltantes.size > 0) {
+            const porConsulta = await this.consultarResultadosNotificacion([...faltantes], desdeMs, idProyecto);
+            for (const [id, estado] of porConsulta) resultados.set(id, estado);
         }
-        return this.consultarResultadoNotificacion(idEmpleado, desdeMs, idProyecto);
+        return resultados;
     }
 
-    // Respaldo: consulta el estado cada 3 s (máx. ~90 s). Devuelve null si no se registró o si la consulta falla.
-    private async consultarResultadoNotificacion(idEmpleado: number, desdeMs: number, idProyecto?: number): Promise<EstadoEmpleado | null> {
+    // Respaldo: consulta el estado cada 3 s (máx. ~90 s) de los empleados que no llegaron a tiempo por SSE.
+    private async consultarResultadosNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        let pendientes = [...idEmpleados];
         const intentos = 30;
-        for (let i = 0; i < intentos; i++) {
+        for (let i = 0; i < intentos && pendientes.length > 0; i++) {
             await new Promise(resolve => setTimeout(resolve, 3000));
             try {
-                const respuesta = await lastValueFrom(this.notificacionesService.getEstado([idEmpleado], desdeMs, idProyecto));
-                const estado = respuesta.empleados.find(e => e.idEmpleado === idEmpleado);
-                if (estado && estado.estado !== 'Pendiente') return estado;
+                const respuesta = await lastValueFrom(this.notificacionesService.getEstado(pendientes, desdeMs, idProyecto));
+                for (const estado of respuesta.empleados) {
+                    if (estado.estado !== 'Pendiente') resultados.set(estado.idEmpleado, estado);
+                }
+                pendientes = pendientes.filter(id => !resultados.has(id));
             } catch (err) {
                 console.error('Error al consultar el estado de la notificación:', err);
-                return null;
+                break;
             }
         }
-        return null;
+        for (const id of pendientes) resultados.set(id, null);
+        return resultados;
     }
 }

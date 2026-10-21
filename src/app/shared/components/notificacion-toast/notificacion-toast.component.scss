@@ -37,7 +37,7 @@
 
     &--exito { --notif-accent: #16a34a; }
     &--error { --notif-accent: #dc2626; }
-    &--aviso { --notif-accent: #d97706; }
+    &--warning { --notif-accent: #d97706; }
 }
 
 .notif-toast__header {
@@ -79,6 +79,8 @@
     line-height: 1.35;
     color: var(--text-secondary, #6b7280);
     overflow-wrap: anywhere;
+    // Permite listar "• Nombre (motivo)" en líneas separadas cuando el toast masivo detalla cada fallido.
+    white-space: pre-line;
 }
 
 .notif-toast__close {
@@ -108,72 +110,6 @@
     }
 }
 
-// Pasos en una sola línea, discretos, debajo del texto.
-.notif-toast__steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 14px;
-    margin: 0;
-    padding: 0 0 0 38px;
-    list-style: none;
-}
-
-.notif-toast__step {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--text-muted, #737373);
-
-    &--activo { color: var(--text-main, #1a1a2e); font-weight: 600; }
-    &--ok { color: #16a34a; }
-    &--error { color: #dc2626; font-weight: 600; }
-    &--aviso { color: #d97706; font-weight: 600; }
-}
-
-.notif-toast__dot {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 14px;
-    height: 14px;
-    border: 1.5px solid currentColor;
-    border-radius: 50%;
-    opacity: 0.8;
-
-    .material-symbols-outlined { font-size: 10px; font-weight: 700; }
-
-    .notif-toast__step--activo & { border-color: transparent; opacity: 1; }
-}
-
-.notif-toast__spinner {
-    width: 12px;
-    height: 12px;
-    border: 2px solid var(--border-color, #e5e7eb);
-    border-top-color: var(--notif-accent);
-    border-radius: 50%;
-    animation: notif-spin 0.8s linear infinite;
-}
-
-// Barra fina pegada al borde inferior de la tarjeta.
-.notif-toast__track {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: var(--notif-accent-soft);
-    overflow: hidden;
-}
-
-.notif-toast__fill {
-    position: absolute;
-    width: 40%;
-    height: 100%;
-    background: var(--notif-accent);
-    animation: notif-progress 1.2s ease-in-out infinite;
-}
-
 @keyframes notif-toast-in {
     from { opacity: 0; transform: translateX(16px); }
     to { opacity: 1; transform: translateX(0); }
@@ -184,27 +120,10 @@
     to { opacity: 0; transform: translateX(16px); }
 }
 
-@keyframes notif-progress {
-    from { left: -40%; }
-    to { left: 100%; }
-}
-
-@keyframes notif-spin {
-    to { transform: rotate(360deg); }
-}
-
 // Respeta la preferencia de "reducir movimiento" del sistema operativo.
 @media (prefers-reduced-motion: reduce) {
-    .notif-toast,
-    .notif-toast__spinner,
-    .notif-toast__fill {
+    .notif-toast {
         animation: none;
-    }
-
-    .notif-toast__fill {
-        left: 0;
-        width: 100%;
-        opacity: 0.5;
     }
 }
 

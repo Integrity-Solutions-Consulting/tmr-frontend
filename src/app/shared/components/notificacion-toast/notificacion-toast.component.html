@@ -2,8 +2,8 @@
   @for (toast of toasts(); track toast.id) {
     <section class="notif-toast" [class.closing]="toast.cerrando"
       [class.notif-toast--exito]="toast.tipo === 'exito'"
+      [class.notif-toast--warning]="toast.tipo === 'warning'"
       [class.notif-toast--error]="toast.tipo === 'error'"
-      [class.notif-toast--aviso]="toast.tipo === 'aviso'"
       [attr.role]="toast.tipo === 'error' ? 'alert' : 'status'">
       <div class="notif-toast__header">
         <span class="material-symbols-outlined notif-toast__icon"
@@ -17,27 +17,6 @@
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-
-      @if (toast.pasos.length > 0) {
-        <ol class="notif-toast__steps">
-          @for (paso of toast.pasos; track $index) {
-            <li class="notif-toast__step" [ngClass]="'notif-toast__step--' + paso.estado">
-              <span class="notif-toast__dot" aria-hidden="true">
-                @if (paso.estado === 'activo') {
-                  <span class="notif-toast__spinner"></span>
-                } @else {
-                  <span class="material-symbols-outlined">{{ iconoPaso(paso.estado) }}</span>
-                }
-              </span>
-              <span>{{ paso.texto }}</span>
-            </li>
-          }
-        </ol>
-      }
-
-      @if (toast.tipo === 'progreso') {
-        <div class="notif-toast__track" aria-hidden="true"><div class="notif-toast__fill"></div></div>
-      }
     </section>
   }
 </div>

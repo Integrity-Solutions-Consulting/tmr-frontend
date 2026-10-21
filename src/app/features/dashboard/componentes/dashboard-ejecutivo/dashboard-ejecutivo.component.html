@@ -250,11 +250,14 @@
           </div>
 
           <!-- Aviso informativo del último corte de horas (SSE, solo Administrador y Líder).
-               No depende de los filtros: siempre es el último corte de los últimos 16 días. -->
-          @if (resumenCorte.resumen(); as corte) {
+               No depende de los filtros: siempre es el último corte de los últimos 16 días.
+               Permanece visible para Admin/Líder aunque todavía no haya llegado un resumen (se muestra con "-"). -->
+          @if (resumenCorte.puedeVer()) {
+            @let corte = resumenCorte.resumen();
             <div class="aviso-corte">
               <button type="button" class="aviso-corte__boton" (click)="abrirDetalleCorte()"
                 [class.aviso-corte__boton--seleccionado]="esSeleccionado('corteHoras')"
+                [disabled]="!corte"
                 aria-label="Ver el resultado del último corte de horas">
                 <span class="aviso-corte__icono">
                   <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
@@ -263,8 +266,10 @@
                   }
                 </span>
                 <span class="cifra-label">Último corte de horas</span>
-                <span class="aviso-corte__periodo">{{ describirPeriodoCorte(corte) }}</span>
-                @if (corte.enProceso) {
+                <span class="aviso-corte__periodo">{{ corte ? describirPeriodoCorte(corte) : '-' }}</span>
+                @if (!corte) {
+                  <span class="aviso-corte__estado">-</span>
+                } @else if (corte.enProceso) {
                   <span class="aviso-corte__estado aviso-corte__estado--proceso">
                     <span class="aviso-corte__spinner" aria-hidden="true"></span>En proceso
                   </span>
