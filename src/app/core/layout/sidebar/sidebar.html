@@ -18,7 +18,7 @@
   </a>
 
   <!-- ══ Time Report ══ -->
-  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento') || hasModule('Fechas de Corte')">
     <button type="button" class="sidebar__link sidebar__link--parent" title="Time Report" (click)="toggleGroup('timeReport')" [attr.aria-expanded]="trOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
       <span>Time Report</span>
@@ -32,6 +32,10 @@
       <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Seguimiento')">
         <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/seguimiento.svg')"></span>
         <span>Seguimiento</span>
+      </a>
+      <a routerLink="/time-report/fechas-corte" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Fechas de Corte')">
+        <span class="material-symbols-outlined sidebar__sublink-icon">event_repeat</span>
+        <span>Fechas de Corte</span>
       </a>
     </div>
   </div>
