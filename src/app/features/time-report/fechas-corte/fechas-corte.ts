@@ -52,6 +52,8 @@ export class FechasCorteComponent implements OnInit {
   readonly fechaEdit = signal('');
   readonly horaEdit = signal('');
 
+  private avisoErrorId: number | null = null;
+
   readonly meses = computed<MesCortes[]>(() => {
     const grupos = new Map<string, MesCortes>();
     for (const corte of this.cortes()) {
@@ -95,8 +97,32 @@ export class FechasCorteComponent implements OnInit {
     this.editandoId.set(corte.id);
     // Si la fecha actual ya pasó, se propone el primer día disponible (a la misma hora)
     const dia = this.diaDe(corte.fechaCorte);
-    this.fechaEdit.set(dia < corte.fechaMinima ? corte.fechaMinima : dia);
-    this.horaEdit.set(this.horaDe(corte.fechaCorte));
+    const fecha = dia < corte.fechaMinima ? corte.fechaMinima : dia;
+    let hora = this.horaDe(corte.fechaCorte);
+    // Si ese día es hoy y la hora ya pasó, se propone la siguiente hora en punto
+    if (`${fecha}T${hora}` <= this.ahoraEcuador()) {
+      const siguiente = Number(this.ahoraEcuador().slice(11, 13)) + 1;
+      hora = siguiente <= 23 ? `${String(siguiente).padStart(2, '0')}:00` : '23:59';
+    }
+    this.fechaEdit.set(fecha);
+    this.horaEdit.set(hora);
+  }
+
+  /** Hoy en Ecuador (yyyy-MM-dd). */
+  hoyEcuador(): string {
+    return this.ahoraEcuador().slice(0, 10);
+  }
+
+  /** Hora actual de Ecuador (HH:mm). */
+  horaActualEcuador(): string {
+    return this.ahoraEcuador().slice(11, 16);
+  }
+
+  /** La fecha y hora elegidas ya pasaron (el backend solo acepta fechas futuras). */
+  horaPasada(): boolean {
+    const fecha = this.fechaEdit();
+    const hora = this.horaEdit();
+    return !!fecha && !!hora && `${fecha}T${hora}` <= this.ahoraEcuador();
   }
 
   cancelar(): void {
@@ -106,14 +132,22 @@ export class FechasCorteComponent implements OnInit {
   guardar(corte: CorteProgramado): void {
     const fecha = this.fechaEdit();
     const hora = this.horaEdit();
+    if (this.guardandoId() !== null) return;
     if (!fecha || !hora) {
-      this.toast.error('Faltan datos', 'Selecciona el día y la hora del corte.');
+      this.avisarError('Faltan datos', 'Selecciona el día y la hora del corte.');
       return;
     }
     if (fecha < corte.fechaMinima || fecha > corte.fechaMaxima) {
-      this.toast.error(
+      this.avisarError(
         'Fecha fuera de rango',
         `Para este corte elige un día entre el ${this.dia(corte.fechaMinima)} y el ${this.dia(corte.fechaMaxima)}.`,
+      );
+      return;
+    }
+    if (this.horaPasada()) {
+      this.avisarError(
+        'La hora ya pasó',
+        `Para hoy elige una hora posterior a las ${this.horaActualEcuador()} (hora de Ecuador).`,
       );
       return;
     }
@@ -125,6 +159,7 @@ export class FechasCorteComponent implements OnInit {
         this.aplicar(r);
         this.guardandoId.set(null);
         this.editandoId.set(null);
+        this.cerrarError();
         this.toast.exito(
           this.esReprogramacion(corte) ? 'Corte reprogramado' : 'Fecha de corte actualizada',
           `${this.nombreCorte(corte)}: ${this.fechaHora(nueva)}.`,
@@ -132,7 +167,7 @@ export class FechasCorteComponent implements OnInit {
       },
       error: (err) => {
         this.guardandoId.set(null);
-        this.toast.error('No se pudo guardar', this.mensajeError(err, 'Intenta nuevamente.'));
+        this.avisarError('No se pudo guardar', this.mensajeError(err, 'Intenta nuevamente.'));
       },
     });
   }
@@ -144,6 +179,7 @@ export class FechasCorteComponent implements OnInit {
         this.aplicar(r);
         this.guardandoId.set(null);
         this.editandoId.set(null);
+        this.cerrarError();
         this.toast.exito(
           'Fecha restablecida',
           `${this.nombreCorte(corte)} vuelve a ${this.fechaHora(corte.fechaPorDefecto)}.`,
@@ -151,7 +187,7 @@ export class FechasCorteComponent implements OnInit {
       },
       error: (err) => {
         this.guardandoId.set(null);
-        this.toast.error('No se pudo restablecer', this.mensajeError(err, 'Intenta nuevamente.'));
+        this.avisarError('No se pudo restablecer', this.mensajeError(err, 'Intenta nuevamente.'));
       },
     });
   }
@@ -195,6 +231,24 @@ export class FechasCorteComponent implements OnInit {
 
   private horaDe(fecha: string): string {
     return fecha.slice(11, 16);
+  }
+
+  /** Muestra un error reemplazando el anterior, para no apilar el mismo aviso en cada clic. */
+  private avisarError(titulo: string, detalle: string): void {
+    this.cerrarError();
+    this.avisoErrorId = this.toast.error(titulo, detalle);
+  }
+
+  private cerrarError(): void {
+    if (this.avisoErrorId !== null) {
+      this.toast.cerrar(this.avisoErrorId);
+      this.avisoErrorId = null;
+    }
+  }
+
+  /** "yyyy-MM-ddTHH:mm" en hora de Ecuador (UTC−5, sin horario de verano), sin depender de la zona del navegador. */
+  private ahoraEcuador(): string {
+    return new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 16);
   }
 
   private aplicar(r: CortesProgramadosResponse): void {

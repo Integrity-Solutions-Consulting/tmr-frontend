@@ -187,12 +187,22 @@
     color: var(--text-main);
     font-family: inherit;
     font-size: 14px;
+
+    &--error {
+      border-color: var(--status-danger-border);
+      box-shadow: 0 0 0 1px var(--status-danger-border);
+    }
   }
 
   &__ayuda {
     flex-basis: 100%;
     font-size: 12px;
     color: var(--text-muted);
+
+    &--error {
+      color: var(--status-danger-text);
+      font-weight: 600;
+    }
 
     &--aviso {
       display: flex;

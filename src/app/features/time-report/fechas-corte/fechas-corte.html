@@ -62,9 +62,16 @@
                 <label class="campo">
                   <span class="campo__label">Hora (Ecuador)</span>
                   <input type="time" class="campo__input" step="60"
+                    [class.campo__input--error]="horaPasada()"
+                    [min]="fechaEdit() === hoyEcuador() ? horaActualEcuador() : null"
                     [value]="horaEdit()" (change)="horaEdit.set($any($event.target).value)"
                     aria-label="Hora del corte" />
                 </label>
+                @if (horaPasada()) {
+                  <div class="campo__ayuda campo__ayuda--error">
+                    Esa hora ya pasó. Para hoy elige una hora posterior a las {{ horaActualEcuador() }}.
+                  </div>
+                }
                 <div class="campo__ayuda">
                   Entre el {{ dia(corte.fechaMinima) }} y el {{ dia(corte.fechaMaxima) }}.
                   Si lo adelantas, el período termina ese día y el siguiente empieza al día siguiente.
@@ -103,7 +110,8 @@
 
             <div class="corte__acciones">
               @if (editandoId() === corte.id) {
-                <button type="button" class="btn btn--primario" [disabled]="guardandoId() === corte.id"
+                <button type="button" class="btn btn--primario"
+                  [disabled]="guardandoId() === corte.id || horaPasada()"
                   (click)="guardar(corte)">
                   {{ guardandoId() === corte.id ? 'Guardando…' : 'Guardar' }}
                 </button>
