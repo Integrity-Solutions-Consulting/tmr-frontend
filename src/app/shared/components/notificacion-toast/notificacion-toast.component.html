@@ -1,0 +1,22 @@
+<div class="notif-toast-stack" aria-live="polite">
+  @for (toast of toasts(); track toast.id) {
+    <section class="notif-toast" [class.closing]="toast.cerrando"
+      [class.notif-toast--exito]="toast.tipo === 'exito'"
+      [class.notif-toast--warning]="toast.tipo === 'warning'"
+      [class.notif-toast--error]="toast.tipo === 'error'"
+      [attr.role]="toast.tipo === 'error' ? 'alert' : 'status'">
+      <div class="notif-toast__header">
+        <span class="material-symbols-outlined notif-toast__icon"
+          aria-hidden="true">{{ icono(toast.tipo) }}</span>
+        <div class="notif-toast__text">
+          <span class="notif-toast__title">{{ toast.titulo }}</span>
+          <span class="notif-toast__detail">{{ toast.detalle }}</span>
+        </div>
+        <button type="button" class="notif-toast__close" aria-label="Cerrar notificación"
+          (click)="servicio.cerrar(toast.id)">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+    </section>
+  }
+</div>

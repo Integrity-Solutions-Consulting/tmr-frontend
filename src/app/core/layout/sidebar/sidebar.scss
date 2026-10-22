@@ -132,6 +132,15 @@
   text-align: center;
 }
 
+// Ícono de Fechas de Corte (Material Symbols): mismo tamaño que los SVG de los subítems.
+.sidebar__sublink-icon {
+  width: 14px;
+  flex: 0 0 14px;
+  font-size: 15px;
+  line-height: 1;
+  text-align: center;
+}
+
 /* ── Chevron (misma técnica) ── */
 .sidebar__chevron {
   display: inline-block;

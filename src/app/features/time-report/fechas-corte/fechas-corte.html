@@ -1,0 +1,140 @@
+<section class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Fechas de Corte</h1>
+      <p class="page-subtitle">
+        Cuándo se envía el correo automático a quienes deben horas. Por defecto, el día 15 y el último día
+        de cada mes a las 18:00 (hora de Ecuador).
+      </p>
+    </div>
+  </div>
+
+  @if (!cargando() && !errorCarga() && !habilitado()) {
+    <div class="aviso aviso--warning" role="status">
+      <span class="material-icons">notifications_off</span>
+      <span>
+        Las notificaciones automáticas están desactivadas en el servidor
+        (<code>NotificacionHoras:Habilitado</code>). Puedes programar las fechas, pero no se enviará ningún
+        correo hasta que se activen.
+      </span>
+    </div>
+  }
+
+  @if (proximo(); as p) {
+    <div class="proximo">
+      <span class="material-icons proximo__icono">event_upcoming</span>
+      <div>
+        <div class="proximo__titulo">Próximo corte</div>
+        <div class="proximo__fecha">{{ fechaHora(p.fechaCorte) }}</div>
+        <div class="proximo__detalle">{{ nombreCorte(p) }} · revisa las horas del {{ periodo(p) }}</div>
+      </div>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">Cargando fechas de corte…</div>
+  } @else if (errorCarga()) {
+    <div class="aviso aviso--error" role="alert">
+      <span class="material-icons">error_outline</span>
+      <span>{{ errorCarga() }}</span>
+      <button type="button" class="btn btn--secundario" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    @for (mes of meses(); track mes.clave) {
+      <div class="mes">
+        <h2 class="mes__titulo">{{ mes.titulo }}</h2>
+
+        @for (corte of mes.cortes; track corte.id) {
+          <div class="corte" [class.corte--editando]="editandoId() === corte.id">
+            <div class="corte__info">
+              <div class="corte__tipo">{{ nombreTipo(corte) }}</div>
+              <div class="corte__periodo">Horas del {{ periodo(corte) }}</div>
+            </div>
+
+            @if (editandoId() === corte.id) {
+              <div class="corte__editor">
+                <label class="campo">
+                  <span class="campo__label">Día</span>
+                  <input type="date" class="campo__input" [min]="corte.fechaMinima" [max]="corte.fechaMaxima"
+                    [value]="fechaEdit()" (change)="fechaEdit.set($any($event.target).value)"
+                    aria-label="Día del corte" />
+                </label>
+                <label class="campo">
+                  <span class="campo__label">Hora (Ecuador)</span>
+                  <input type="time" class="campo__input" step="60"
+                    [class.campo__input--error]="horaPasada()"
+                    [min]="fechaEdit() === hoyEcuador() ? horaActualEcuador() : null"
+                    [value]="horaEdit()" (change)="horaEdit.set($any($event.target).value)"
+                    aria-label="Hora del corte" />
+                </label>
+                @if (horaPasada()) {
+                  <div class="campo__ayuda campo__ayuda--error">
+                    Esa hora ya pasó. Para hoy elige una hora posterior a las {{ horaActualEcuador() }}.
+                  </div>
+                }
+                <div class="campo__ayuda">
+                  Entre el {{ dia(corte.fechaMinima) }} y el {{ dia(corte.fechaMaxima) }}.
+                  Si lo adelantas, el período termina ese día y el siguiente empieza al día siguiente.
+                </div>
+                @if (esReprogramacion(corte)) {
+                  <div class="campo__ayuda campo__ayuda--aviso">
+                    <span class="material-icons">info</span>
+                    @if (corte.estado === 'Ejecutado') {
+                      Este corte ya se ejecutó. En la nueva fecha se volverá a enviar el aviso a quienes sigan
+                      debiendo horas del período, aunque ya lo hayan recibido.
+                    } @else {
+                      Este corte no se ejecutó a tiempo. Se ejecutará en la nueva fecha.
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="corte__fecha">
+                <div class="corte__fecha-valor">{{ fechaHora(corte.fechaCorte) }}</div>
+                <div class="corte__fecha-nota">
+                  @if (corte.modificada) {
+                    Modificada{{ corte.modificadoPor ? ' por ' + corte.modificadoPor : '' }}
+                    @if (corte.fechaModificacion) { el {{ dia(corte.fechaModificacion) }} }
+                    · por defecto: {{ fechaHora(corte.fechaPorDefecto) }}
+                  } @else {
+                    Fecha por defecto
+                  }
+                  @if (corte.fechaEjecucion) {
+                    · ejecutado el {{ fechaHora(corte.fechaEjecucion) }}
+                  }
+                </div>
+              </div>
+            }
+
+            <span [class]="'badge badge--' + corte.estado">{{ etiquetaEstado(corte.estado) }}</span>
+
+            <div class="corte__acciones">
+              @if (editandoId() === corte.id) {
+                <button type="button" class="btn btn--primario"
+                  [disabled]="guardandoId() === corte.id || horaPasada()"
+                  (click)="guardar(corte)">
+                  {{ guardandoId() === corte.id ? 'Guardando…' : 'Guardar' }}
+                </button>
+                <button type="button" class="btn btn--secundario" [disabled]="guardandoId() === corte.id"
+                  (click)="cancelar()">Cancelar</button>
+              } @else if (corte.editable) {
+                <button type="button" class="btn btn--secundario" [disabled]="guardandoId() !== null"
+                  (click)="editar(corte)"
+                  [title]="esReprogramacion(corte) ? 'Programar una nueva ejecución de este corte' : 'Cambiar día y hora del corte'">
+                  <span class="material-icons">{{ esReprogramacion(corte) ? 'event_repeat' : 'edit_calendar' }}</span>
+                  {{ esReprogramacion(corte) ? 'Reprogramar' : 'Cambiar' }}
+                </button>
+                @if (corte.puedeRestablecer) {
+                  <button type="button" class="btn btn--texto" [disabled]="guardandoId() !== null"
+                    (click)="restablecer(corte)" title="Volver a la fecha por defecto">
+                    <span class="material-icons">restart_alt</span> Restablecer
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</section>

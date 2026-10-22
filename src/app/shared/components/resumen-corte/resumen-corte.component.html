@@ -1,0 +1,51 @@
+<app-modal-base
+  [visible]="servicio.detalleVisible() && !!resumen()"
+  titulo="Resultado del corte de horas"
+  (cerrar)="servicio.cerrarDetalle()">
+  @if (resumen(); as r) {
+    <p class="corte-detalle__subtitulo">
+      Período del {{ periodo() }} · corte del {{ formatoFechaHora(r.fechaCorte) }}
+      @if (r.enProceso) { <span class="corte-detalle__en-proceso">· en proceso</span> }
+    </p>
+
+    <div class="corte-detalle__filtros" role="tablist" aria-label="Filtrar por resultado">
+      @for (f of filtros(); track f.valor) {
+        <button type="button" role="tab" class="filtro-chip"
+          [class.filtro-chip--activo]="filtro() === f.valor"
+          [attr.aria-selected]="filtro() === f.valor"
+          (click)="filtro.set(f.valor)">
+          {{ f.texto }} <span class="filtro-chip__cantidad">{{ f.cantidad }}</span>
+        </button>
+      }
+    </div>
+
+    @if (empleadosFiltrados().length === 0) {
+      <p class="corte-detalle__vacio">No hay colaboradores en esta categoría.</p>
+    } @else {
+      <div class="corte-detalle__tabla-wrap">
+        <table class="corte-detalle__tabla">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Resultado</th>
+              <th class="num">Horas faltantes</th>
+              <th>Detalle</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of empleadosFiltrados(); track e.idEmpleado) {
+              <tr>
+                <td class="nombre">{{ e.nombre }}</td>
+                <td><span [class]="claseEstado(e.estado)">{{ e.estado }}</span></td>
+                <td class="num">{{ e.horasFaltantes | horasFormat }}</td>
+                <td class="detalle">{{ e.detalle || (e.estado === 'Enviado' ? 'Correo enviado' : '-') }}</td>
+                <td class="fecha">{{ formatoFechaHora(e.fecha) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</app-modal-base>

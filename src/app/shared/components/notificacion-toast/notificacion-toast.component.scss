@@ -1,0 +1,135 @@
+// Toasts de seguimiento de peticiones: tarjeta clara y compacta arriba a la derecha. Usa las variables de tema
+// de la app (claro/oscuro) y un acento de color a la izquierda según el estado.
+.notif-toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(340px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.notif-toast {
+    --notif-accent: var(--primary-color, #163572);
+    --notif-accent-soft: color-mix(in srgb, var(--notif-accent) 14%, transparent);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-left: 3px solid var(--notif-accent);
+    border-radius: 10px;
+    background: var(--bg-card, #ffffff);
+    color: var(--text-main, #1a1a2e);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+    pointer-events: auto;
+    animation: notif-toast-in 0.2s ease-out;
+
+    &.closing {
+        animation: notif-toast-out 0.18s ease-in forwards;
+    }
+
+    &--exito { --notif-accent: #16a34a; }
+    &--error { --notif-accent: #dc2626; }
+    &--warning { --notif-accent: #d97706; }
+}
+
+.notif-toast__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.notif-toast__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--notif-accent-soft);
+    color: var(--notif-accent);
+    font-size: 18px;
+}
+
+.notif-toast__text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+    padding-top: 1px;
+}
+
+.notif-toast__title {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.notif-toast__detail {
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--text-secondary, #6b7280);
+    overflow-wrap: anywhere;
+    // Permite listar "• Nombre (motivo)" en líneas separadas cuando el toast masivo detalla cada fallido.
+    white-space: pre-line;
+}
+
+.notif-toast__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted, #737373);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    .material-symbols-outlined { font-size: 16px; }
+
+    &:hover {
+        background: var(--bg-hover, #f0f1f3);
+        color: var(--text-main, #1a1a2e);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--notif-accent);
+        outline-offset: 1px;
+    }
+}
+
+@keyframes notif-toast-in {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes notif-toast-out {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(16px); }
+}
+
+// Respeta la preferencia de "reducir movimiento" del sistema operativo.
+@media (prefers-reduced-motion: reduce) {
+    .notif-toast {
+        animation: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .notif-toast-stack {
+        top: 12px;
+        right: 16px;
+    }
+}
