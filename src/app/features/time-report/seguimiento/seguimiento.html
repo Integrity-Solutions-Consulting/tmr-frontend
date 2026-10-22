@@ -171,14 +171,6 @@
                             }">
                                 {{ el.estado }}
                             </span>
-                            <!-- sm - El estado ya cuenta un día como pendiente si le faltan horas O si no llegó al mínimo
-                                 de 3 actividades ese día (ver CalculoHorasPeriodo). Este ícono distingue el motivo
-                                 cuando es por falta de detalle de actividades, no por horas. -->
-                            <mat-icon *ngIf="el.estado !== '-' && (el.diasActividadesInsuficientes ?? 0) > 0"
-                                class="estado-motivo-icon"
-                                [matTooltip]="(el.diasActividadesInsuficientes ?? 0) + ' día(s) con la jornada completa pero sin el mínimo de 3 actividades registradas.'">
-                                info_outline
-                            </mat-icon>
                             <ng-template #sinEstado>-</ng-template>
                         </td>
                         <td class="col-dias-reporte center">{{ el.diasConReporte }}</td>

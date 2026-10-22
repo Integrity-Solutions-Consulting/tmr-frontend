@@ -23,12 +23,10 @@ import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/moda
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
 
-// sm - Progreso de actividades/horas registradas en el proyecto+día que se está editando, contra el mínimo
-// exigido (ver CalculoHorasPeriodo en el backend: 3 actividades y jornada completa por proyecto y día).
+// sm - Progreso de horas registradas en el proyecto+día que se está editando, contra la jornada completa
+// exigida (ver CalculoHorasPeriodo en el backend).
 export interface ProgresoProyectoDia {
-    actividades: number;
     horas: number;
-    minimoActividades: number;
     horasJornada: number;
 }
 
@@ -289,10 +287,9 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             .filter(a => String(a.idproyecto) === String(proyectoId) && String(a.id) !== idActual);
     }
 
-    // sm - Cuenta la actividad que se está llenando (aunque no se haya guardado) junto a las ya existentes ese
-    // día para ese proyecto, contra el mínimo de 3 actividades y la jornada completa (8h/6h) que exige
-    // Seguimiento (ver CalculoHorasPeriodo). Solo aplica a la actividad simple (no a la recurrente, que crea
-    // una sola actividad por día en el rango).
+    // sm - Suma la actividad que se está llenando (aunque no se haya guardado) a las horas ya registradas ese
+    // día para ese proyecto, contra la jornada completa (8h/6h) que exige Seguimiento (ver CalculoHorasPeriodo).
+    // Solo aplica a la actividad simple (no a la recurrente, que crea una sola actividad por día en el rango).
     private recalcularProgreso(): void {
         const v = this.form?.getRawValue();
         if (!v || v.esRecurrente) { this.progreso.set(null); return; }
@@ -306,9 +303,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
         const horasNueva = Number(v.numeroHoras) || 0;
 
         this.progreso.set({
-            actividades: existentes.length + 1,
             horas: horasExistentes + horasNueva,
-            minimoActividades: this.actividadesService.minimoActividadesPorDia(),
             horasJornada: this.actividadesService.horasJornada()
         });
     }

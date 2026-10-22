@@ -35,7 +35,6 @@
         @for (dia of diasCalendario(); track dia.fecha.toISOString()) {
         <div class="day-cell" [class.weekend]="dia.esFinDeSemana" [class.holiday]="dia.esFeriado && dia.esMesActual"
             [class.today]="dia.esHoy" [class.other-month]="!dia.esMesActual" [class.readonly]="soloLectura"
-            [class.actividades-insuficientes]="dia.actividadesInsuficientes"
             (click)="dia.esMesActual && seleccionarDia(dia.fecha)">
 
             <div class="day-cell-header">
@@ -47,12 +46,6 @@
                     </span>
                 </div>
                 <div class="day-number-group">
-                    <!-- sm - Jornada completa pero sin el mínimo de actividades (ver DiaCalendario.actividadesInsuficientes).
-                         En el flujo normal junto al número (no absoluto): así nunca se superponen. -->
-                    @if (dia.actividadesInsuficientes) {
-                    <mat-icon class="day-warning-icon"
-                        matTooltip="Jornada completa, pero sin el mínimo de actividades registradas ese día.">warning</mat-icon>
-                    }
                     <span class="day-number">{{ dia.fecha.getDate() }}</span>
                 </div>
             </div>

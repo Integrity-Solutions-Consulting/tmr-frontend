@@ -18,8 +18,6 @@ interface DiaCalendario {
     esFeriado: boolean;
     horas: number;
     actividades: any[];
-    // sm - Día con la jornada completa pero sin el mínimo de actividades (ver ActividadesService.fechasActividadesInsuficientes).
-    actividadesInsuficientes: boolean;
 }
 
 @Component({
@@ -129,15 +127,8 @@ export class Calendario implements OnInit {
             esFinDeSemana: fecha.getDay() === 0 || fecha.getDay() === 6,
             esFeriado: this.feriadosService.esFeriado(fecha),
             horas,
-            actividades,
-            actividadesInsuficientes: esMesActual && this.actividadesService.fechasActividadesInsuficientes().includes(this.fechaClave(fecha))
+            actividades
         };
-    }
-
-    // sm - Clave yyyy-MM-dd en hora local (no UTC), igual al formato que manda el backend en
-    // ResumenHorasDto.fechasActividadesInsuficientes.
-    private fechaClave(d: Date): string {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     editarActividad(event: MouseEvent, actividad: any) {
