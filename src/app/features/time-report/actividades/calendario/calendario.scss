@@ -211,13 +211,6 @@
         opacity: 0.5;
     }
 
-    // sm - Jornada completa pero sin el mínimo de actividades del día (ver DiaCalendario.actividadesInsuficientes).
-    // Outline en vez de background para no pisar el color de holiday/today si coinciden en el mismo día.
-    &.actividades-insuficientes {
-        outline: 2px dashed var(--status-warning-border);
-        outline-offset: -1px;
-    }
-
     // Modo solo lectura:
     // modal "Ver calendario" desde Seguimiento.
     &.readonly {

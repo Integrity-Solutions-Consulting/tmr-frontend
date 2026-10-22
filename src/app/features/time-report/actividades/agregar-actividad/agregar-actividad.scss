@@ -414,6 +414,10 @@ img.actividad-modal__input-icon {
   gap: 8px;
   line-height: 1.4;
 
+  span {
+    min-width: 0;
+  }
+
   mat-icon {
     font-size: 18px;
     width: 18px;

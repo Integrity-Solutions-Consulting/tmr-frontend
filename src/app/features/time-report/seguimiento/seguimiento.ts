@@ -819,9 +819,12 @@ export class SeguimientoComponent implements AfterViewInit {
     public verCalendarioColaborador(col: Colaborador): void {
         this.dialog.open(CalendarioColaboradorModal, {
             data: { colaborador: col, fechaDesde: this.fechaDesde },
-            // sm - Se amplía de 900px a 1100px: con el ícono de aviso junto al número del día, el calendario
-            // necesitaba más aire (ver calendario-colaborador-modal.scss --modal-max-width).
-            width: '1100px',
+            // sm - 1400px: punto medio entre que las celdas trunquen el texto de horas (pasaba con menos)
+            // y que el modal ocupe toda la pantalla (pasaba con más) (ver calendario-colaborador-modal.scss
+            // --modal-max-width). maxWidth: 'none' porque Angular Material limita el diálogo a 80vw por
+            // defecto si no se indica.
+            width: '1400px',
+            maxWidth: 'none',
             maxHeight: '90vh',
             panelClass: 'tmr-dialog-panel',
             disableClose: true
