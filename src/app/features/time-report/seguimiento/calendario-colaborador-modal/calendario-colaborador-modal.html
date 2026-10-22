@@ -22,6 +22,18 @@
          esta fila, no al total de todos los proyectos del colaborador (ver Calendario.idProyectoOverride). -->
     <!-- sm - soloLectura: bloquea agregar/editar actividades; la navegación entre meses sigue disponible. -->
     <div class="calcol-modal__body">
+        <!-- sm - Resumen del MES que se está viendo (se recalcula al cambiar de mes, ver Calendario): cuántos días
+             tienen la jornada completa pero no el mínimo de 3 actividades. Los días puntuales están marcados
+             con el ícono de advertencia en el calendario de abajo. -->
+        @if (actividadesService.fechasActividadesInsuficientes().length > 0) {
+        <div class="calcol-modal__aviso-actividades">
+            <mat-icon>warning</mat-icon>
+            <span>
+                {{ actividadesService.fechasActividadesInsuficientes().length }}
+                día(s) con la jornada completa pero sin el mínimo de 3 actividades registradas (marcados abajo).
+            </span>
+        </div>
+        }
         <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="true" [fechaInicialOverride]="data.fechaDesde"></app-calendario>
     </div>
 </div>

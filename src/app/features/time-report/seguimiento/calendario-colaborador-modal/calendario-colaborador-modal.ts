@@ -33,6 +33,10 @@ export interface CalendarioColaboradorModalData {
 })
 export class CalendarioColaboradorModal {
     private dialogRef = inject(MatDialogRef<CalendarioColaboradorModal>);
+    // sm - Misma instancia (aislada, ver providers arriba) que usa <app-calendario>: permite mostrar aquí el
+    // resumen de "días con jornada completa pero sin el mínimo de actividades" del mes que esté viendo el líder,
+    // sin duplicar la llamada al backend.
+    public actividadesService = inject(ActividadesService);
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: CalendarioColaboradorModalData) {}
 

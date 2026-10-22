@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
 import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
@@ -17,6 +18,8 @@ interface DiaCalendario {
     esFeriado: boolean;
     horas: number;
     actividades: any[];
+    // sm - Día con la jornada completa pero sin el mínimo de actividades (ver ActividadesService.fechasActividadesInsuficientes).
+    actividadesInsuficientes: boolean;
 }
 
 @Component({
@@ -29,6 +32,7 @@ interface DiaCalendario {
         MatIconModule,
         MatSelectModule,
         MatFormFieldModule,
+        MatTooltipModule,
         HorasFormatPipe
     ],
     templateUrl: './calendario.html',
@@ -125,8 +129,15 @@ export class Calendario implements OnInit {
             esFinDeSemana: fecha.getDay() === 0 || fecha.getDay() === 6,
             esFeriado: this.feriadosService.esFeriado(fecha),
             horas,
-            actividades
+            actividades,
+            actividadesInsuficientes: esMesActual && this.actividadesService.fechasActividadesInsuficientes().includes(this.fechaClave(fecha))
         };
+    }
+
+    // sm - Clave yyyy-MM-dd en hora local (no UTC), igual al formato que manda el backend en
+    // ResumenHorasDto.fechasActividadesInsuficientes.
+    private fechaClave(d: Date): string {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     editarActividad(event: MouseEvent, actividad: any) {

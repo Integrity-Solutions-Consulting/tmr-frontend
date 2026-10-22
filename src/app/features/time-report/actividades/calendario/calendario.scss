@@ -211,6 +211,13 @@
         opacity: 0.5;
     }
 
+    // sm - Jornada completa pero sin el mínimo de actividades del día (ver DiaCalendario.actividadesInsuficientes).
+    // Outline en vez de background para no pisar el color de holiday/today si coinciden en el mismo día.
+    &.actividades-insuficientes {
+        outline: 2px dashed var(--status-warning-border);
+        outline-offset: -1px;
+    }
+
     // Modo solo lectura:
     // modal "Ver calendario" desde Seguimiento.
     &.readonly {
@@ -237,6 +244,23 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+}
+
+// sm - Agrupa el ícono de aviso con el número del día (en el flujo normal, no absoluto) para que nunca se
+// superpongan, sin importar el ancho de la celda.
+.day-number-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.day-warning-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--status-warning-text);
+    cursor: help;
 }
 
 .day-actividades-block {
@@ -321,6 +345,9 @@
     .day-hours-text {
         font-size: 12px;
         font-weight: 600;
+        // sm - El pipe devuelve "8.00 h" (con espacio): sin esto, al apretar el ancho de la celda el navegador
+        // corta justo en ese espacio y la "h" cae a una segunda línea.
+        white-space: nowrap;
 
          &.blue-text {
             color: var(--primary-color);

@@ -41,4 +41,7 @@ export interface Colaborador {
   causaSalida?: string | null;
   motivoSalida?: string | null;
   salidaProyecto?: string | null;
+  // sm - Días laborables que llegaron a la jornada completa (8h/6h) pero no alcanzaron el mínimo de 3 actividades
+  // distintas ese día: permite distinguir "no aprobado por horas" de "no aprobado por falta de detalle".
+  diasActividadesInsuficientes?: number;
 }

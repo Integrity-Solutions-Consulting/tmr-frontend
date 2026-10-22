@@ -2,7 +2,10 @@
 
 :host {
     --modal-width: 100%;
-    --modal-max-width: 900px;
+    // sm - Más ancho que antes (900px): con el ícono de aviso junto al número del día, cada celda necesita
+    // algo más de aire para que el bloque de horas ("8.00 h") no quede apretado. Debe ir igual o por encima
+    // del `width` que fija seguimiento.ts al abrir este modal (dialog.open), si no, este max-width lo recorta.
+    --modal-max-width: 1100px;
 }
 
 .calcol-modal {
@@ -78,4 +81,27 @@
 .calcol-modal__body {
     padding: 20px 28px 28px;
     overflow-y: auto;
+}
+
+// sm - Resumen de días con jornada completa pero sin el mínimo de actividades (ver calendario-colaborador-modal.ts).
+.calcol-modal__aviso-actividades {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--status-warning-bg-soft);
+    color: var(--status-warning-text);
+    border: 1px solid var(--status-warning-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.4;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
 }

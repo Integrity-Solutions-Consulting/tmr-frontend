@@ -45,6 +45,20 @@ export class ActividadesService {
   private _promedioPorDia = signal<number>(0);
   public readonly promedioPorDia = this._promedioPorDia.asReadonly();
 
+  // sm - Jornada diaria del colaborador (8h, o 6h si es pasante) y mínimo de actividades distintas por día y
+  // proyecto exigido por el backend (ver CalculoHorasPeriodo), para mostrar el progreso en "Agregar actividad".
+  private _horasJornada = signal<number>(8);
+  public readonly horasJornada = this._horasJornada.asReadonly();
+
+  private _minimoActividadesPorDia = signal<number>(3);
+  public readonly minimoActividadesPorDia = this._minimoActividadesPorDia.asReadonly();
+
+  // sm - Fechas (yyyy-MM-dd) del mes/proyecto consultado con la jornada completa pero sin el mínimo de
+  // actividades: las usa el calendario para resaltar esos días (ver calendario.ts) y el modal de Seguimiento
+  // para el resumen de "Ver detalle".
+  private _fechasActividadesInsuficientes = signal<string[]>([]);
+  public readonly fechasActividadesInsuficientes = this._fechasActividadesInsuficientes.asReadonly();
+
   // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
   // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
   // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
@@ -56,6 +70,7 @@ export class ActividadesService {
       this._horasPorRegistrar.set(0);
       this._horasRegistradas.set(0);
       this._promedioPorDia.set(0);
+      this._fechasActividadesInsuficientes.set([]);
       return;
     }
     let url = `${this.apiUrl}/resumen?idEmpleado=${empId}`;
@@ -72,6 +87,9 @@ export class ActividadesService {
         this._horasPorRegistrar.set(Number(res?.horasPorRegistrar ?? 0));
         this._horasRegistradas.set(Number(res?.horasRegistradas ?? 0));
         this._promedioPorDia.set(Number(res?.promedioPorDia ?? 0));
+        this._horasJornada.set(Number(res?.horasJornada ?? 8));
+        this._minimoActividadesPorDia.set(Number(res?.minimoActividadesPorDia ?? 3));
+        this._fechasActividadesInsuficientes.set(res?.fechasActividadesInsuficientes ?? []);
       },
       error: (err) => { if (solicitud === this.solicitudResumen) console.error('Error al cargar resumen', err); }
     });

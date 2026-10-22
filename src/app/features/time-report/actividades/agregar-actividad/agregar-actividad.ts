@@ -21,6 +21,16 @@ import { FeriadosService } from '../../../../shared/services/feriados.service';
 import { TourService } from '../../../../shared/services/tour.service';
 import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/modal-eliminar-actividad.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
+
+// sm - Progreso de actividades/horas registradas en el proyecto+día que se está editando, contra el mínimo
+// exigido (ver CalculoHorasPeriodo en el backend: 3 actividades y jornada completa por proyecto y día).
+export interface ProgresoProyectoDia {
+    actividades: number;
+    horas: number;
+    minimoActividades: number;
+    horasJornada: number;
+}
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -40,7 +50,8 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
         MatNativeDateModule,
         MatAutocompleteModule,
         ModalEliminarActividadComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        HorasFormatPipe
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -66,6 +77,12 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     // sm - En actividades recurrentes, si una parte de los días ya se guardó no se permite volver a guardar (duplicaría).
     public guardadoParcial = false;
     public mostrarConfirmacionHoras = false;
+
+    // sm - Progreso de actividades y horas ya registradas en el proyecto+día seleccionados, para que el
+    // colaborador sepa si le faltan actividades u horas antes de guardar (el mínimo lo exige Seguimiento, no
+    // este guardado: ver respuesta del usuario sobre "dónde se bloquea"). Null si no aplica (recurrente, o
+    // todavía no se elige proyecto/fecha).
+    public progreso = signal<ProgresoProyectoDia | null>(null);
 
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
@@ -255,6 +272,44 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
             }
+        });
+
+        // sm - Progreso de actividades/horas del proyecto+día elegidos (ver this.progreso). Se recalcula con
+        // cada cambio relevante del formulario.
+        ['proyectoId', 'fechaActividad', 'numeroHoras', 'esRecurrente'].forEach(nombre =>
+            this.form.get(nombre)?.valueChanges.subscribe(() => this.recalcularProgreso()));
+        this.recalcularProgreso();
+    }
+
+    // sm - Actividades ya guardadas ese día para ese proyecto (de las cargadas en el calendario del mes visible),
+    // sin contar la propia actividad si se está editando.
+    private existentesProyectoDia(proyectoId: string, fecha: Date): any[] {
+        const idActual = this.esEdicion ? String(this.data.actividad.id) : null;
+        return this.actividadesService.getActividadesPorFecha(fecha)
+            .filter(a => String(a.idproyecto) === String(proyectoId) && String(a.id) !== idActual);
+    }
+
+    // sm - Cuenta la actividad que se está llenando (aunque no se haya guardado) junto a las ya existentes ese
+    // día para ese proyecto, contra el mínimo de 3 actividades y la jornada completa (8h/6h) que exige
+    // Seguimiento (ver CalculoHorasPeriodo). Solo aplica a la actividad simple (no a la recurrente, que crea
+    // una sola actividad por día en el rango).
+    private recalcularProgreso(): void {
+        const v = this.form?.getRawValue();
+        if (!v || v.esRecurrente) { this.progreso.set(null); return; }
+
+        const proyectoId = v.proyectoId;
+        const fecha = this.parseLocal(v.fechaActividad);
+        if (!proyectoId || isNaN(fecha.getTime())) { this.progreso.set(null); return; }
+
+        const existentes = this.existentesProyectoDia(proyectoId, fecha);
+        const horasExistentes = existentes.reduce((acc, a) => acc + (Number(a.cantidadhoras) || 0), 0);
+        const horasNueva = Number(v.numeroHoras) || 0;
+
+        this.progreso.set({
+            actividades: existentes.length + 1,
+            horas: horasExistentes + horasNueva,
+            minimoActividades: this.actividadesService.minimoActividadesPorDia(),
+            horasJornada: this.actividadesService.horasJornada()
         });
     }
 
