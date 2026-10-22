@@ -239,6 +239,14 @@
     width: 100%;
 }
 
+// sm - Agrupa el ícono de aviso con el número del día (en el flujo normal, no absoluto) para que nunca se
+// superpongan, sin importar el ancho de la celda.
+.day-number-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
 .day-actividades-block {
     display: flex;
     flex-direction: column;
@@ -321,6 +329,9 @@
     .day-hours-text {
         font-size: 12px;
         font-weight: 600;
+        // sm - El pipe devuelve "8.00 h" (con espacio): sin esto, al apretar el ancho de la celda el navegador
+        // corta justo en ese espacio y la "h" cae a una segunda línea.
+        white-space: nowrap;
 
          &.blue-text {
             color: var(--primary-color);

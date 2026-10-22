@@ -45,7 +45,9 @@
                         {{ dia.horas | horasFormat }}
                     </span>
                 </div>
-                <span class="day-number">{{ dia.fecha.getDate() }}</span>
+                <div class="day-number-group">
+                    <span class="day-number">{{ dia.fecha.getDate() }}</span>
+                </div>
             </div>
 
             <!-- Listado de actividades individuales como pastillas (estilo feriados-calendar) -->

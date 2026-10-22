@@ -50,6 +50,7 @@ export class Actividades implements OnInit {
      */
     abrirAgregarActividad() {
         this.dialog.open(AgregarActividad, {
+            width: '560px',
             maxHeight: '90vh',
             data: { fecha: this.fechaSeleccionada },
             disableClose: true,
@@ -67,6 +68,7 @@ export class Actividades implements OnInit {
         this.fechaSeleccionada = fecha;
         if (window.innerWidth > 1024) {
             this.dialog.open(AgregarActividad, {
+                width: '560px',
                 maxHeight: '90vh',
                 data: { fecha },
                 disableClose: true,
@@ -82,6 +84,7 @@ export class Actividades implements OnInit {
      */
     abrirAgregarActividadConFecha(fecha: Date) {
         this.dialog.open(AgregarActividad, {
+            width: '560px',
             maxHeight: '90vh',
             data: { fecha },
             disableClose: true,
@@ -96,6 +99,7 @@ export class Actividades implements OnInit {
      */
     onEditarActividad(actividad: any) {
         this.dialog.open(AgregarActividad, {
+            width: '560px',
             maxHeight: '90vh',
             data: { actividad },
             disableClose: true,

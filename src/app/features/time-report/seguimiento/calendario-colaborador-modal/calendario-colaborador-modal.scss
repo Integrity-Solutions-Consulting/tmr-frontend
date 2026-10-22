@@ -2,7 +2,9 @@
 
 :host {
     --modal-width: 100%;
-    --modal-max-width: 900px;
+    // sm - Más ancho para que las celdas del calendario no trunquen el texto de horas. Debe ir igual o por encima
+    // del `width` que fija seguimiento.ts al abrir este modal (dialog.open), si no, este max-width lo recorta.
+    --modal-max-width: 1400px;
 }
 
 .calcol-modal {

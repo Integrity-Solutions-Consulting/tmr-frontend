@@ -294,6 +294,20 @@
           }
         </div>
       </div>
+
+      <!-- sm - Progreso de horas de este proyecto en este día (se exige por proyecto y por día: jornada completa).
+           No bloquea el guardado de esta actividad; el cumplimiento se refleja en Seguimiento. -->
+      @if (progreso(); as p) {
+        <div
+          class="actividad-modal__field actividad-modal__field--width-80 actividad-modal__progreso-banner"
+          [class.actividad-modal__progreso-banner--completo]="p.horas >= p.horasJornada"
+        >
+          <mat-icon>{{ p.horas >= p.horasJornada ? 'check_circle' : 'info' }}</mat-icon>
+          <span>
+            {{ p.horas | horasFormat }} de {{ p.horasJornada | horasFormat }} registradas en este proyecto este día
+          </span>
+        </div>
+      }
     }
 
     <!-- Recurrente Checkbox (sólo si no es edición) -->

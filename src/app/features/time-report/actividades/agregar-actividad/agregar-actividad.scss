@@ -399,6 +399,39 @@ img.actividad-modal__input-icon {
   gap: 14px;
 }
 
+// sm - Progreso de actividades/horas del proyecto+día (ver agregar-actividad.ts: recalcularProgreso).
+// Por defecto en amarillo (incompleto); en verde cuando ya cumple el mínimo de actividades y horas.
+.actividad-modal__progreso-banner {
+  background: var(--status-warning-bg-soft);
+  color: var(--status-warning-text);
+  border: 1px solid var(--status-warning-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+
+  span {
+    min-width: 0;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &.actividad-modal__progreso-banner--completo {
+    background: var(--status-success-bg-soft);
+    color: var(--status-success-text);
+    border-color: var(--status-success-border);
+  }
+}
+
 .actividad-modal__preview-banner {
   background: var(--status-success-bg-soft);
   color: var(--status-success-text);

@@ -45,6 +45,11 @@ export class ActividadesService {
   private _promedioPorDia = signal<number>(0);
   public readonly promedioPorDia = this._promedioPorDia.asReadonly();
 
+  // sm - Jornada diaria del colaborador (8h, o 6h si es pasante) exigida por el backend (ver CalculoHorasPeriodo),
+  // para mostrar el progreso de horas en "Agregar actividad".
+  private _horasJornada = signal<number>(8);
+  public readonly horasJornada = this._horasJornada.asReadonly();
+
   // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
   // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
   // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
@@ -72,6 +77,7 @@ export class ActividadesService {
         this._horasPorRegistrar.set(Number(res?.horasPorRegistrar ?? 0));
         this._horasRegistradas.set(Number(res?.horasRegistradas ?? 0));
         this._promedioPorDia.set(Number(res?.promedioPorDia ?? 0));
+        this._horasJornada.set(Number(res?.horasJornada ?? 8));
       },
       error: (err) => { if (solicitud === this.solicitudResumen) console.error('Error al cargar resumen', err); }
     });
