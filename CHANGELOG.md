@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.0...v3.3.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* Ajustar ancho de modales de Seguimiento y Agregar actividad ([d9444e9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d9444e9394211b6b17a6460a3ca099d66b5a83f2))
+* Se elimina validación de mínimo 3 actividades por día ([5916542](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/591654243ec001e35d9b8f169baf97368580103a))
+
 ## [3.3.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.2...v3.3.0) (2026-10-22)
 
 
