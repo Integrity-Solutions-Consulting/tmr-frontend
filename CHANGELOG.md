@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.3.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.2...v3.3.0) (2026-10-22)
+
+
+### Features
+
+* Actualización de notificaciones ([ce69999](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ce6999984b5e91039f4177a23d21ccb99f93d973))
+* Integración del módulo de Notificaciones en frontend ([1106172](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1106172b120d0479de0c02d8942985dc9093f4fd))
+* **notificaciones:** pantalla Fechas de Corte (flujo 3) ([ceb9f5b](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ceb9f5b75255aa37ced4355b9fa4c90c863dc2c2))
+
+
+### Bug Fixes
+
+* **fechas-corte:** validar hora pasada y no repetir avisos de error ([64e1141](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/64e114179aab319de6168d50fdb6e896bff56816))
+* **fechas-corte:** validar hora pasada y no repetir avisos de error ([a89628f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a89628f3d65e48e97d70cb5f4bc9f7d4d93a494d))
+
 ## [3.2.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.1...v3.2.2) (2026-10-19)
 
 
