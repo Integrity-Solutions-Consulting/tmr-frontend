@@ -1,0 +1,265 @@
+<div class="permisos-page">
+  <app-header
+    title="Mis Permisos"
+    subtitle="Solicitud y seguimiento de permisos y vacaciones">
+  </app-header>
+
+  <div class="kpis-grid">
+    <app-tarjeta-resumen valor="15 días" titulo="Disponibles" icono="beach_access" tono="corporativo" />
+    <app-tarjeta-resumen valor="2" titulo="En proceso" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen valor="4" titulo="Aprobados" icono="verified" tono="exito" />
+    <app-tarjeta-resumen valor="4 h" titulo="Por horas" icono="schedule" tono="cian" />
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label">Búsqueda</label>
+      <input
+        class="filter-control"
+        type="text"
+        placeholder="Código, cliente o tipo..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)" />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Período</label>
+      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todos</option>
+        <option value="HOY">Hoy</option>
+        <option value="ESTA_SEMANA">Esta semana</option>
+        <option value="ESTE_MES">Este mes</option>
+        <option value="MES_ANTERIOR">Mes anterior</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="ANIO_ACTUAL">Este año (2026)</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Desde</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)" />
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Hasta</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)" />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Tipo</label>
+      <select class="filter-control" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="VACACIONES">Vacaciones</option>
+        <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+        <option value="CITAS_MEDICAS">Citas médicas</option>
+        <option value="MATRIMONIO">Matrimonio</option>
+        <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+        <option value="MATERNIDAD">Maternidad</option>
+        <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+        <option value="OTROS">Otros</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Estado</label>
+      <select class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendiente Jefe</option>
+        <option value="rrhh">En Talento Humano</option>
+        <option value="confirmado">Confirmado</option>
+        <option value="rechazado">Rechazado</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <a routerLink="/permisos/revision-externa" class="btn-tmr btn-tmr--secondary">
+        <span class="material-symbols-outlined">open_in_new</span>
+        Vista Externa
+      </a>
+      <button type="button" class="btn-tmr btn-tmr--primary" (click)="abrirNuevaSolicitud()">
+        <span class="material-symbols-outlined">add</span>
+        Nueva Solicitud
+      </button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="permisos-table">
+      <colgroup>
+        <col style="width: 12%;" />
+        <col style="width: 17%;" />
+        <col style="width: 19%;" />
+        <col style="width: 14%;" />
+        <col style="width: 17%;" />
+        <col style="width: 13%;" />
+        <col style="width: 8%;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th>Fechas</th>
+          <th>Duración</th>
+          <th>Jefe Inmediato</th>
+          <th>Estado</th>
+          <th style="text-align: right;">PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.codigo) {
+          <tr>
+            <td class="codigo-cell">{{ item.codigo }}</td>
+            <td>{{ item.tipo }}</td>
+            <td>{{ item.fechas }}</td>
+            <td>{{ item.diasSolicitados }} ({{ item.horasSolicitadas }})</td>
+            <td>
+              {{ item.lider }}
+              <span class="tag-lider" [class.tag-lider--int]="item.tipoLider === 'INT'" [class.tag-lider--ext]="item.tipoLider === 'EXT'">
+                {{ item.tipoLider }}
+              </span>
+            </td>
+            <td>
+              <span [class]="'status-badge status-badge--' + item.estadoClase">
+                {{ item.estadoTexto }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="verFormulario(item)" title="Ver PDF">
+                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL 1: NUEVA SOLICITUD -->
+  <app-modal-base
+    titulo="Nueva Solicitud de Permiso / Vacaciones"
+    [visible]="modalNuevaVisible()"
+    [wide]="true"
+    (cerrar)="modalNuevaVisible.set(false)">
+    <div class="modal-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Cliente *</label>
+          <select>
+            <option>Banco del Pacífico (Core Bancario BDP)</option>
+            <option>Integrity Solutions (Portal Web ISC)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Jefe inmediato *</label>
+          <select>
+            <option>Ing. Roberto Gómez (Líder Externo)</option>
+            <option>Ing. Carlos Méndez (Líder Interno)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Tipo de Permiso *</label>
+          <select [ngModel]="tipoSeleccionado()" (ngModelChange)="tipoSeleccionado.set($event)">
+            <option value="VACACIONES">Vacaciones</option>
+            <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+            <option value="CITAS_MEDICAS">Citas médicas</option>
+            <option value="MATRIMONIO">Matrimonio</option>
+            <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+            <option value="MATERNIDAD">Maternidad</option>
+            <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+            <option value="OTROS">Otros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Fecha de inicio *</label>
+          <input type="date" value="2026-11-09" />
+        </div>
+        <div class="form-field">
+          <label>Fecha de finalización *</label>
+          <input type="date" value="2026-11-13" />
+        </div>
+        <div class="form-field">
+          <label>Fecha de regreso *</label>
+          <input type="date" value="2026-11-16" />
+        </div>
+        <div class="form-field">
+          <label>Horario</label>
+          <select [ngModel]="horarioSeleccionado()" (ngModelChange)="horarioSeleccionado.set($event)">
+            <option value="COMPLETA">Completa</option>
+            <option value="MANANA">Mañana</option>
+            <option value="TARDE">Tarde</option>
+            <option value="OTROS">Otros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Días solicitados</label>
+          <input type="text" value="5 días" readonly />
+        </div>
+        <div class="form-field">
+          <label>Horas solicitadas</label>
+          <input type="text" value="40 horas" />
+        </div>
+        <div class="form-field">
+          <label>Evidencia (Opcional)</label>
+          <div class="dropzone-box">
+            <span class="material-symbols-outlined">attach_file</span>
+            <span>Adjuntar archivo (.pdf, .jpg)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Motivo *</label>
+        <textarea rows="2" placeholder="Motivo de la solicitud...">Solicitud de vacaciones anuales programadas.</textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalNuevaVisible.set(false)">Cancelar</button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="simularEnvioSolicitud()">
+          Guardar Solicitud
+        </button>
+      </div>
+    </div>
+  </app-modal-base>
+
+  <!-- MODAL 2: VISTA DEL DOCUMENTO PDF -->
+  <app-modal-base
+    [titulo]="'Documento PDF — ' + (solicitudSeleccionada()?.codigo ?? '')"
+    [visible]="modalFormularioVisible()"
+    [wide]="true"
+    (cerrar)="modalFormularioVisible.set(false)">
+    @if (solicitudSeleccionada(); as sel) {
+      <div class="modal-form">
+        <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
+
+        <div class="modal-footer">
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalFormularioVisible.set(false)">
+            <span class="material-symbols-outlined">download</span>
+            Descargar PDF
+          </button>
+        </div>
+      </div>
+    }
+  </app-modal-base>
+</div>

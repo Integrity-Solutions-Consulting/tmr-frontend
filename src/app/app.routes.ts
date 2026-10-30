@@ -14,6 +14,15 @@ export const routes: Routes = [
   // ── Reset Password (standalone route for email links) ───
   { path: 'reset', redirectTo: 'auth/reset', pathMatch: 'full' },
 
+  // ── Portal Público Seguro de Líder Externo (Magic Link sin sesión TMR) ───
+  {
+    path: 'permisos/revision-externa',
+    loadComponent: () =>
+      import('./features/time-report/permisos/revision-externa/revision-externa').then(
+        m => m.RevisionExternaComponent
+      ),
+  },
+
   // ── App principal (sidebar + navbar) — requiere auth ─────
   {
     path: '',

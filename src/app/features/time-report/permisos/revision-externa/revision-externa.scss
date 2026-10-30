@@ -1,0 +1,119 @@
+@use '../permisos-shared';
+
+.portal-externo-wrapper {
+  min-height: 100vh;
+  background: var(--bg-app);
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Inter', 'Roboto', sans-serif;
+
+  @media (max-width: 640px) {
+    padding: 12px 8px;
+  }
+}
+
+.portal-externo-card {
+  width: min(100%, 900px);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  box-shadow: var(--elevation-modal);
+  overflow: hidden;
+}
+
+.portal-banner {
+  background: linear-gradient(135deg, #163572 0%, #162056 100%);
+  color: #ffffff;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  @media (max-width: 640px) {
+    padding: 16px;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 240px;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: 18px;
+      font-weight: 800;
+
+      @media (max-width: 640px) {
+        font-size: 15px;
+      }
+    }
+
+    p {
+      margin: 0;
+      font-size: 11.5px;
+      opacity: 0.85;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  &__logo-box {
+    background: #ffffff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  &__logo-img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__meta {
+    text-align: right;
+    font-size: 12px;
+
+    @media (max-width: 640px) {
+      text-align: left;
+    }
+  }
+}
+
+.portal-body {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  @media (max-width: 640px) {
+    padding: 16px;
+  }
+}
+
+.portal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    width: 100%;
+
+    .btn-tmr {
+      flex: 1 1 100%;
+    }
+  }
+}

@@ -1,0 +1,146 @@
+<div class="permisos-page">
+  <app-header
+    title="Aprobación de Permisos"
+    subtitle="Solicitudes del equipo asignado">
+  </app-header>
+
+  <div class="kpis-grid">
+    <app-tarjeta-resumen valor="2" titulo="Pendientes" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen valor="1" titulo="Ausentes hoy" icono="event_busy" tono="corporativo" />
+    <app-tarjeta-resumen valor="14" titulo="Aprobados" icono="task_alt" tono="exito" />
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label">Búsqueda</label>
+      <input
+        class="filter-control"
+        type="text"
+        placeholder="Colaborador o código..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Período</label>
+      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todos</option>
+        <option value="HOY">Hoy</option>
+        <option value="ESTA_SEMANA">Esta semana</option>
+        <option value="ESTE_MES">Este mes</option>
+        <option value="MES_ANTERIOR">Mes anterior</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="ANIO_ACTUAL">Este año (2026)</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+    <div class="filter-group date-group">
+      <label class="filter-label">Desde</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)" />
+    </div>
+    <div class="filter-group date-group">
+      <label class="filter-label">Hasta</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Proyecto</label>
+      <select class="filter-control" [ngModel]="proyectoFiltro()" (ngModelChange)="proyectoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="Portal Web ISC">Portal Web ISC</option>
+        <option value="Migración Microservicios">Migración Microservicios</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="permisos-table">
+      <colgroup>
+        <col style="width: 12%;" />
+        <col style="width: 19%;" />
+        <col style="width: 17%;" />
+        <col style="width: 17%;" />
+        <col style="width: 15%;" />
+        <col style="width: 10%;" />
+        <col style="width: 10%;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Colaborador</th>
+          <th>Proyecto</th>
+          <th>Tipo</th>
+          <th>Fechas</th>
+          <th>Estado</th>
+          <th style="text-align: right;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.codigo) {
+          <tr>
+            <td class="codigo-cell">{{ item.codigo }}</td>
+            <td>{{ item.colaborador }}</td>
+            <td>{{ item.proyecto }}</td>
+            <td>{{ item.tipo }}</td>
+            <td>{{ item.fechas }}</td>
+            <td>
+              <span class="status-badge"
+                [class.status-badge--pendiente]="item.estado === 'Pendiente'"
+                [class.status-badge--confirmado]="item.estado === 'Aprobado'">
+                {{ item.estado }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" (click)="abrirRevision(item)">
+                  Revisar
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL DE REVISIÓN Y APROBACIÓN DEL LÍDER -->
+  <app-modal-base
+    [titulo]="'Revisión — ' + (solicitudActiva()?.codigo ?? '')"
+    [visible]="modalRevisorVisible()"
+    [wide]="true"
+    (cerrar)="modalRevisorVisible.set(false)">
+    @if (solicitudActiva(); as sel) {
+      <div class="modal-form">
+        <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
+
+        <div class="form-field">
+          <label>Comentario</label>
+          <textarea
+            rows="2"
+            [ngModel]="comentarioLider()"
+            (ngModelChange)="comentarioLider.set($event)"
+            placeholder="Comentario u observación..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-tmr btn-tmr--danger" (click)="simularDecisionLider('rechazar')">
+            Rechazar
+          </button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="simularDecisionLider('aprobar')">
+            Aprobar
+          </button>
+        </div>
+      </div>
+    }
+  </app-modal-base>
+</div>

@@ -1,0 +1,236 @@
+<div class="permisos-page">
+  <app-header
+    title="Validación Talento Humano"
+    subtitle="Confirmación final de permisos y vacaciones"
+  />
+
+  <section class="kpis-grid">
+    <app-tarjeta-resumen [valor]="totalPorConfirmar()" titulo="Por confirmar" icono="verified" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="totalPendientesExternos()" titulo="Pendientes líder" icono="forward_to_inbox" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalConfirmadasMes()" titulo="Confirmados" icono="task_alt" tono="exito" />
+  </section>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label">Búsqueda</label>
+      <input
+        type="text"
+        class="filter-control"
+        placeholder="Colaborador, folio o líder..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Período</label>
+      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todos</option>
+        <option value="HOY">Hoy</option>
+        <option value="ESTA_SEMANA">Esta semana</option>
+        <option value="ESTE_MES">Este mes</option>
+        <option value="MES_ANTERIOR">Mes anterior</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="ANIO_ACTUAL">Este año (2026)</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Desde</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)"
+      />
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Hasta</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Tipo</label>
+      <select
+        class="filter-control"
+        [ngModel]="filtroTipo()"
+        (ngModelChange)="filtroTipo.set($event)"
+      >
+        <option value="TODOS">Todos</option>
+        <option value="Vacaciones">Vacaciones</option>
+        <option value="Licencia">Licencia por enfermedad</option>
+        <option value="Citas">Citas médicas</option>
+        <option value="Fallecimiento">Fallecimiento de un familiar</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Bandeja</label>
+      <select
+        class="filter-control"
+        [ngModel]="tabActiva()"
+        (ngModelChange)="tabActiva.set($event)"
+      >
+        <option value="POR_CONFIRMAR">Por confirmar ({{ totalPorConfirmar() }})</option>
+        <option value="LIDER_EXTERNO">Pendientes líder ({{ totalPendientesExternos() }})</option>
+        <option value="HISTORIAL">Confirmados</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="permisos-table">
+      <colgroup>
+        <col style="width: 12%;" />
+        <col style="width: 18%;" />
+        <col style="width: 17%;" />
+        <col style="width: 17%;" />
+        <col style="width: 16%;" />
+        <col style="width: 8%;" />
+        <col style="width: 12%;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Folio</th>
+          <th>Colaborador</th>
+          <th>Tipo</th>
+          <th>Período</th>
+          <th>Jefe Inmediato</th>
+          <th>Horas</th>
+          <th style="text-align: right;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.id) {
+          <tr>
+            <td class="codigo-cell">{{ item.folio }}</td>
+            <td>{{ item.colaborador }}</td>
+            <td>{{ item.tipo }}</td>
+            <td>{{ item.periodo }}</td>
+            <td>
+              {{ item.liderNombre }}
+              <span class="tag-lider" [class.tag-lider--int]="item.liderTipo === 'Interno'" [class.tag-lider--ext]="item.liderTipo === 'Externo'">
+                {{ item.liderTipo === 'Externo' ? 'EXT' : 'INT' }}
+              </span>
+            </td>
+            <td>-{{ item.horasEquivalentes }} h</td>
+            <td>
+              <div class="actions-cell">
+                @if (item.estado === 'CONFIRMADO_LIDER') {
+                  <button
+                    type="button"
+                    class="btn-tmr btn-tmr--primary btn-tmr--sm"
+                    (click)="abrirModalValidacion(item)"
+                  >
+                    Confirmar
+                  </button>
+                } @else if (item.estado === 'PENDIENTE_LIDER_EXT') {
+                  <button
+                    type="button"
+                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
+                    (click)="reenviarEnlaceExterno(item)"
+                    title="Reenviar Magic Link"
+                  >
+                    Reenviar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
+                    (click)="abrirVistaFormulario(item)"
+                    title="Ver PDF"
+                  >
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL 1: VALIDACIÓN FINAL -->
+<app-modal-base
+  titulo="Confirmación de Talento Humano"
+  [visible]="modalValidacionAbierto()"
+  [wide]="true"
+  (cerrar)="modalValidacionAbierto.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Impacto en Time Report</label>
+          <select
+            [ngModel]="impactoSeleccionado()"
+            (ngModelChange)="impactoSeleccionado.set($event)"
+          >
+            <option value="RESTA_META">Restar {{ sol.horasEquivalentes }} h de la meta del período</option>
+            <option value="SUMA_REPORTADAS">Acreditar {{ sol.horasEquivalentes }} h justificadas</option>
+            <option value="SIN_IMPACTO">Sin impacto en meta de horas</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Observaciones</label>
+          <input
+            type="text"
+            [ngModel]="observacionesRrhh()"
+            (ngModelChange)="observacionesRrhh.set($event)"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--danger" (click)="devolverConObservacion()">
+          Devolver
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalValidacionAbierto.set(false)">
+          Cancelar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="confirmarDefinitivamenteRrhh()">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>
+
+<!-- MODAL 2: VISTA DEL DOCUMENTO PDF -->
+<app-modal-base
+  titulo="Documento PDF"
+  [visible]="modalFormularioAbierto()"
+  [wide]="true"
+  (cerrar)="modalFormularioAbierto.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
+          Cerrar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalFormularioAbierto.set(false)">
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>

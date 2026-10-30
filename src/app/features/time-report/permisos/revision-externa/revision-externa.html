@@ -1,0 +1,61 @@
+<div class="portal-externo-wrapper">
+  <div class="portal-externo-card">
+    <header class="portal-banner">
+      <div class="portal-banner__brand">
+        <div class="portal-banner__logo-box">
+          <img
+            src="assets/img/logo-isc.png"
+            alt="Integrity Solutions"
+            class="portal-banner__logo-img" />
+        </div>
+        <div>
+          <p>Portal Líder Externo</p>
+          <h1>Aprobación de Solicitud</h1>
+        </div>
+      </div>
+      <div class="portal-banner__meta">
+        <strong>PER-2026-005</strong>
+      </div>
+    </header>
+
+    <div class="portal-body">
+      <app-formulario-permiso-oficial [datos]="datosFormulario()" />
+
+      @if (procesado() === 'pendiente') {
+        <div class="modal-form">
+          <div class="form-field">
+            <label>Comentarios</label>
+            <textarea
+              rows="2"
+              [ngModel]="observacionLider()"
+              (ngModelChange)="observacionLider.set($event)"
+              placeholder="Observaciones..."></textarea>
+          </div>
+
+          <div class="modal-footer" style="justify-content: space-between;">
+            <a routerLink="/time-report/permisos" class="btn-tmr btn-tmr--secondary">
+              Volver
+            </a>
+            <div class="portal-actions">
+              <button type="button" class="btn-tmr btn-tmr--danger" (click)="rechazarExterno()">
+                Rechazar
+              </button>
+              <button type="button" class="btn-tmr btn-tmr--primary" (click)="confirmarExterno()">
+                Aprobar
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+          <span class="status-badge" [class.status-badge--confirmado]="procesado() === 'confirmado'" [class.status-badge--rechazado]="procesado() !== 'confirmado'">
+            {{ procesado() === 'confirmado' ? 'Solicitud Aprobada' : 'Solicitud Rechazada' }}
+          </span>
+          <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="procesado.set('pendiente')">
+            Reiniciar
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

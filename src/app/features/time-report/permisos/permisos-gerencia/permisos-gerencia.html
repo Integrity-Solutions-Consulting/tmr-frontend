@@ -1,0 +1,179 @@
+<div class="permisos-page">
+  <app-header
+    title="Historial General de Permisos (Gerencia)"
+    subtitle="Consulta histórica de todos los permisos y vacaciones solicitados, confirmados y rechazados"
+  />
+
+  <section class="kpis-grid">
+    <app-tarjeta-resumen [valor]="totalHistorico()" titulo="Total histórico" icono="folder_shared" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalConfirmados()" titulo="Confirmados" icono="verified" tono="exito" />
+    <app-tarjeta-resumen [valor]="totalEnProceso()" titulo="En proceso" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="totalRechazados()" titulo="Rechazados" icono="block" tono="peligro" />
+  </section>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label">Búsqueda</label>
+      <input
+        type="text"
+        class="filter-control"
+        placeholder="Colaborador, código, cliente o líder..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Período</label>
+      <select
+        class="filter-control"
+        [ngModel]="periodoPreset()"
+        (ngModelChange)="cambiarPresetPeriodo($event)"
+      >
+        <option value="TODOS">Todos los tiempos</option>
+        <option value="HOY">Hoy</option>
+        <option value="ESTA_SEMANA">Esta semana</option>
+        <option value="ESTE_MES">Este mes</option>
+        <option value="MES_ANTERIOR">Mes anterior</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="ANIO_ACTUAL">Este año (2026)</option>
+        <option value="ANIO_ANTERIOR">Año anterior (2025)</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Desde</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)"
+      />
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Hasta</label>
+      <input
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Tipo</label>
+      <select class="filter-control" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+        <option value="TODOS">Todos</option>
+        <option value="VACACIONES">Vacaciones</option>
+        <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+        <option value="CITAS_MEDICAS">Citas médicas</option>
+        <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+        <option value="OTROS">Otros</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Estado</label>
+      <select class="filter-control" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+        <option value="TODOS">Todos</option>
+        <option value="confirmado">Confirmado</option>
+        <option value="pendiente">Pendiente Jefe</option>
+        <option value="rrhh">En Talento Humano</option>
+        <option value="rechazado">Rechazado</option>
+      </select>
+    </div>
+
+    @if (tieneFiltrosActivos()) {
+      <div class="filter-actions">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="table-card">
+    <table class="permisos-table">
+      <colgroup>
+        <col style="width: 11%;" />
+        <col style="width: 17%;" />
+        <col style="width: 15%;" />
+        <col style="width: 16%;" />
+        <col style="width: 15%;" />
+        <col style="width: 9%;" />
+        <col style="width: 11%;" />
+        <col style="width: 6%;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Folio</th>
+          <th>Colaborador</th>
+          <th>Cliente</th>
+          <th>Tipo</th>
+          <th>Fechas</th>
+          <th>Duración</th>
+          <th>Estado</th>
+          <th style="text-align: right;">PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.id) {
+          <tr>
+            <td class="codigo-cell">{{ item.folio }}</td>
+            <td>{{ item.colaborador }}</td>
+            <td>{{ item.cliente }}</td>
+            <td>{{ item.tipo }}</td>
+            <td>{{ item.fechas }}</td>
+            <td>{{ item.diasSolicitados }} ({{ item.horasSolicitadas }})</td>
+            <td>
+              <span [class]="'status-badge status-badge--' + item.estadoClase">
+                {{ item.estadoTexto }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--secondary btn-tmr--sm"
+                  (click)="verPdf(item)"
+                  title="Ver PDF"
+                >
+                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="empty-row">No se encontraron permisos en el rango seleccionado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: VISTA DEL DOCUMENTO PDF -->
+<app-modal-base
+  [titulo]="'Documento PDF — ' + (solicitudActiva()?.folio ?? '')"
+  [visible]="modalPdfVisible()"
+  [wide]="true"
+  (cerrar)="modalPdfVisible.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalPdfVisible.set(false)">
+          Cerrar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalPdfVisible.set(false)">
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>
