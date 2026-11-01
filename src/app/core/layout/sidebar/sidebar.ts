@@ -25,9 +25,10 @@ export class Sidebar {
   }
 
   /** Estado abierto/cerrado de los grupos colapsables */
-  trOpen  = false;   // Time Report
-  repOpen = false;   // Reportes
-  cfgOpen = false;   // Configuración
+  trOpen   = false;   // Time Report
+  permOpen = false;   // Permisos
+  repOpen  = false;   // Reportes
+  cfgOpen  = false;   // Configuración
 
   collapsed = false;
 
@@ -39,7 +40,7 @@ export class Sidebar {
    * Los grupos no pierden sus destinos cuando el menú está reducido: el primer
    * clic recupera el ancho normal y muestra las opciones correspondientes.
    */
-  toggleGroup(group: 'timeReport' | 'reportes' | 'configuracion'): void {
+  toggleGroup(group: 'timeReport' | 'permisos' | 'reportes' | 'configuracion'): void {
     const wasCollapsed = this.collapsed;
 
     if (wasCollapsed) {
@@ -48,6 +49,11 @@ export class Sidebar {
 
     if (group === 'timeReport') {
       this.trOpen = wasCollapsed || !this.trOpen;
+      return;
+    }
+
+    if (group === 'permisos') {
+      this.permOpen = wasCollapsed || !this.permOpen;
       return;
     }
 
@@ -85,5 +91,21 @@ export class Sidebar {
 
   hasProveedoresModule(): boolean {
     return this.tokenService.canAccessProveedores();
+  }
+
+  canAccessMisPermisos(): boolean {
+    return this.tokenService.canAccessMisPermisos();
+  }
+
+  canAccessPermisosLider(): boolean {
+    return this.tokenService.canAccessPermisosLider();
+  }
+
+  canAccessPermisosRrhh(): boolean {
+    return this.tokenService.canAccessPermisosRrhh();
+  }
+
+  canAccessPermisosGerencia(): boolean {
+    return this.tokenService.canAccessPermisosGerencia();
   }
 }

@@ -132,7 +132,13 @@
     @if (datos.evidenciaNombre) {
       <div class="isc-text-box__attachment">
         <span class="material-symbols-outlined" style="font-size: 16px;">attach_file</span>
-        <span>Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong></span>
+        @if (datos.evidenciaUrlDescarga || datos.evidenciaUrl) {
+          <a [href]="datos.evidenciaUrlDescarga || datos.evidenciaUrl" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">
+            Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong> (Ver / Descargar)
+          </a>
+        } @else {
+          <span>Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong></span>
+        }
       </div>
     }
   </div>

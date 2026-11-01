@@ -13,11 +13,11 @@
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda</label>
+      <label class="filter-label">Búsqueda inteligente</label>
       <input
         type="text"
         class="filter-control"
-        placeholder="Colaborador, código, cliente o líder..."
+        placeholder="Colaborador, código, proyecto, cliente, líder, duración o motivo..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
@@ -81,6 +81,7 @@
         <option value="confirmado">Confirmado</option>
         <option value="pendiente">Pendiente Jefe</option>
         <option value="rrhh">En Talento Humano</option>
+        <option value="observado">Observado</option>
         <option value="rechazado">Rechazado</option>
       </select>
     </div>
@@ -169,7 +170,7 @@
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalPdfVisible.set(false)">
           Cerrar
         </button>
-        <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalPdfVisible.set(false)">
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
           <span class="material-symbols-outlined">download</span>
           Descargar PDF
         </button>

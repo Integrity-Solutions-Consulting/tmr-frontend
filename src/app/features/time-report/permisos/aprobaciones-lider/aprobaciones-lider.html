@@ -5,18 +5,18 @@
   </app-header>
 
   <div class="kpis-grid">
-    <app-tarjeta-resumen valor="2" titulo="Pendientes" icono="pending_actions" tono="advertencia" />
-    <app-tarjeta-resumen valor="1" titulo="Ausentes hoy" icono="event_busy" tono="corporativo" />
-    <app-tarjeta-resumen valor="14" titulo="Aprobados" icono="task_alt" tono="exito" />
+    <app-tarjeta-resumen [valor]="kpiPendientes()" titulo="Pendientes" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="kpiAusentesHoy()" titulo="Ausentes hoy" icono="event_busy" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="kpiAprobados()" titulo="Aprobados" icono="task_alt" tono="exito" />
   </div>
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda</label>
+      <label class="filter-label">Búsqueda inteligente</label>
       <input
         class="filter-control"
         type="text"
-        placeholder="Colaborador o código..."
+        placeholder="Colaborador, código, tipo, proyecto, cliente, duración, estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)" />
     </div>
@@ -57,18 +57,29 @@
         <option value="Migración Microservicios">Migración Microservicios</option>
       </select>
     </div>
+    <div class="filter-group">
+      <label class="filter-label">Estado</label>
+      <select class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="Aprobado">Aprobado</option>
+        <option value="Observado">Observado</option>
+        <option value="Rechazado">Rechazado</option>
+      </select>
+    </div>
   </div>
 
   <div class="table-card">
     <table class="permisos-table">
       <colgroup>
-        <col style="width: 12%;" />
-        <col style="width: 19%;" />
+        <col style="width: 11%;" />
         <col style="width: 17%;" />
-        <col style="width: 17%;" />
-        <col style="width: 15%;" />
-        <col style="width: 10%;" />
-        <col style="width: 10%;" />
+        <col style="width: 16%;" />
+        <col style="width: 16%;" />
+        <col style="width: 14%;" />
+        <col style="width: 11%;" />
+        <col style="width: 8%;" />
+        <col style="width: 7%;" />
       </colgroup>
       <thead>
         <tr>
@@ -77,6 +88,7 @@
           <th>Proyecto</th>
           <th>Tipo</th>
           <th>Fechas</th>
+          <th>Duración</th>
           <th>Estado</th>
           <th style="text-align: right;">Acción</th>
         </tr>
@@ -89,10 +101,9 @@
             <td>{{ item.proyecto }}</td>
             <td>{{ item.tipo }}</td>
             <td>{{ item.fechas }}</td>
+            <td>{{ item.duracion }}</td>
             <td>
-              <span class="status-badge"
-                [class.status-badge--pendiente]="item.estado === 'Pendiente'"
-                [class.status-badge--confirmado]="item.estado === 'Aprobado'">
+              <span [class]="obtenerClaseEstado(item.estado)">
                 {{ item.estado }}
               </span>
             </td>
@@ -106,7 +117,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+            <td colspan="8" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
       </tbody>
@@ -115,7 +126,7 @@
 
   <!-- MODAL DE REVISIÓN Y APROBACIÓN DEL LÍDER -->
   <app-modal-base
-    [titulo]="'Revisión — ' + (solicitudActiva()?.codigo ?? '')"
+    [titulo]="'Revisión de Jefe Inmediato — ' + (solicitudActiva()?.codigo ?? '')"
     [visible]="modalRevisorVisible()"
     [wide]="true"
     (cerrar)="modalRevisorVisible.set(false)">
@@ -124,7 +135,7 @@
         <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
 
         <div class="form-field">
-          <label>Comentario</label>
+          <label>Comentario de revisión</label>
           <textarea
             rows="2"
             [ngModel]="comentarioLider()"
@@ -133,6 +144,13 @@
         </div>
 
         <div class="modal-footer">
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf(sel)">
+            <span class="material-symbols-outlined">download</span>
+            Descargar PDF
+          </button>
+          <button type="button" class="btn-tmr btn-tmr--warning" (click)="simularDecisionLider('observar')">
+            Observar
+          </button>
           <button type="button" class="btn-tmr btn-tmr--danger" (click)="simularDecisionLider('rechazar')">
             Rechazar
           </button>

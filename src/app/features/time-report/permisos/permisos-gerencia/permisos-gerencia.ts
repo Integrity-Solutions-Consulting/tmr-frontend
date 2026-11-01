@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -12,9 +12,12 @@ import {
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
   calcularRangoPreset,
+  coincideBusquedaInteligente,
   cumpleRangoFechas,
   PeriodoPreset,
 } from '../filtro-fechas.util';
+import { PermisosPdfService } from '../permisos-pdf.service';
+import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
 
 export interface SolicitudGerenciaMock {
   id: number;
@@ -39,8 +42,9 @@ export interface SolicitudGerenciaMock {
   horasSolicitadas: string;
   motivo: string;
   evidencia?: string;
-  estadoClase: 'confirmado' | 'pendiente' | 'rrhh' | 'rechazado';
-  estadoTexto: 'Confirmado' | 'Pendiente Jefe' | 'En Talento Humano' | 'Rechazado';
+  evidenciaUrl?: string;
+  estadoClase: 'confirmado' | 'pendiente' | 'rrhh' | 'observado' | 'rechazado';
+  estadoTexto: string;
   comentarios?: string;
 }
 
@@ -58,7 +62,10 @@ export interface SolicitudGerenciaMock {
   templateUrl: './permisos-gerencia.html',
   styleUrl: './permisos-gerencia.scss',
 })
-export class PermisosGerenciaComponent {
+export class PermisosGerenciaComponent implements OnInit {
+  private readonly pdfService = inject(PermisosPdfService);
+  private readonly apiService = inject(PermisosApiService);
+
   readonly busqueda = signal('');
   readonly periodoPreset = signal<PeriodoPreset>('TODOS');
   readonly fechaDesde = signal('');
@@ -251,8 +258,54 @@ export class PermisosGerenciaComponent {
     },
   ]);
 
+  ngOnInit(): void {
+    this.cargarHistorialDesdeApi();
+  }
+
+  cargarHistorialDesdeApi(): void {
+    this.apiService.obtenerHistorialGerencia().subscribe({
+      next: res => {
+        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+          this.solicitudes.set(
+            res.data.map((item: PermisoItemApi) => ({
+              id: item.id,
+              folio: item.codigo,
+              anio: item.anioSolicitud,
+              colaborador: item.colaborador,
+              cedula: item.cedula,
+              cargo: item.cargo,
+              cliente: item.cliente,
+              proyecto: item.proyecto,
+              liderNombre: item.liderNombre,
+              liderTipo: item.liderTipo,
+              tipo: item.tipo,
+              tipoOficial: item.tipoOficial,
+              fechas: item.fechas,
+              fechaInicio: item.fechaInicio,
+              fechaFin: item.fechaFin,
+              fechaRegreso: item.fechaRegreso,
+              fechaAprobacion: item.fechaAprobacion,
+              diasSolicitados: `${item.totalDias} días`,
+              horario: item.horario,
+              horasSolicitadas: `${item.totalHoras} h`,
+              motivo: item.motivo,
+              evidencia: item.evidenciaNombre ?? undefined,
+              evidenciaUrl: item.evidenciaUrl ?? undefined,
+              estadoClase: item.estadoClase,
+              estadoTexto: item.estadoTexto,
+              comentarios: item.comentarios ?? undefined,
+            })),
+          );
+        }
+      },
+      error: () => {
+        // Fallback amigable a datos locales
+      },
+    });
+  }
+
   readonly solicitudesFiltradas = computed(() => {
-    const q = this.busqueda().trim().toLowerCase();
+    const q = this.busqueda();
     const desde = this.fechaDesde();
     const hasta = this.fechaHasta();
     const tipo = this.filtroTipo();
@@ -263,11 +316,26 @@ export class PermisosGerenciaComponent {
       if (tipo !== 'TODOS' && s.tipoOficial !== tipo) return false;
       if (estado !== 'TODOS' && s.estadoClase !== estado) return false;
       if (
-        q &&
-        !s.colaborador.toLowerCase().includes(q) &&
-        !s.folio.toLowerCase().includes(q) &&
-        !s.cliente.toLowerCase().includes(q) &&
-        !s.liderNombre.toLowerCase().includes(q)
+        !coincideBusquedaInteligente(q, [
+          s.folio,
+          s.anio,
+          s.colaborador,
+          s.cedula,
+          s.cargo,
+          s.cliente,
+          s.proyecto,
+          s.liderNombre,
+          s.liderTipo,
+          s.tipo,
+          s.fechas,
+          s.fechaInicio,
+          s.fechaFin,
+          s.diasSolicitados,
+          s.horasSolicitadas,
+          s.motivo,
+          s.estadoTexto,
+          s.evidencia,
+        ])
       ) {
         return false;
       }
@@ -277,13 +345,16 @@ export class PermisosGerenciaComponent {
 
   readonly totalHistorico = computed(() => this.solicitudesFiltradas().length);
   readonly totalConfirmados = computed(
-    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'confirmado').length
+    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'confirmado').length,
   );
   readonly totalEnProceso = computed(
-    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'pendiente' || s.estadoClase === 'rrhh').length
+    () =>
+      this.solicitudesFiltradas().filter(
+        s => s.estadoClase === 'pendiente' || s.estadoClase === 'rrhh' || s.estadoClase === 'observado',
+      ).length,
   );
   readonly totalRechazados = computed(
-    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'rechazado').length
+    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'rechazado').length,
   );
 
   readonly tieneFiltrosActivos = computed(
@@ -293,7 +364,7 @@ export class PermisosGerenciaComponent {
       Boolean(this.fechaDesde()) ||
       Boolean(this.fechaHasta()) ||
       this.filtroTipo() !== 'TODOS' ||
-      this.filtroEstado() !== 'TODOS'
+      this.filtroEstado() !== 'TODOS',
   );
 
   cambiarPresetPeriodo(preset: PeriodoPreset): void {
@@ -307,7 +378,7 @@ export class PermisosGerenciaComponent {
 
   cambiarFechaDesde(valor: string): void {
     this.fechaDesde.set(valor);
-    if (this. fechaHasta() && valor && valor > this.fechaHasta()) {
+    if (this.fechaHasta() && valor && valor > this.fechaHasta()) {
       this.fechaHasta.set(valor);
     }
     this.periodoPreset.set(!valor && !this.fechaHasta() ? 'TODOS' : 'PERSONALIZADO');
@@ -335,6 +406,10 @@ export class PermisosGerenciaComponent {
     this.modalPdfVisible.set(true);
   }
 
+  async descargarPdf(item: SolicitudGerenciaMock): Promise<void> {
+    await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
+  }
+
   obtenerDatosFormulario(item: SolicitudGerenciaMock): DatosFormularioOficial {
     const aprobadoLider = item.estadoClase === 'rrhh' || item.estadoClase === 'confirmado';
     const confirmadoRrhh = item.estadoClase === 'confirmado';
@@ -352,6 +427,7 @@ export class PermisosGerenciaComponent {
       tipoPermiso: item.tipoOficial,
       motivos: item.motivo,
       evidenciaNombre: item.evidencia,
+      evidenciaUrl: item.evidenciaUrl,
       fechaInicio: item.fechaInicio,
       fechaFinalizacion: item.fechaFin,
       fechaRegreso: item.fechaRegreso,
@@ -367,7 +443,7 @@ export class PermisosGerenciaComponent {
       },
       aprobacionTalentoHumano: {
         aprobado: confirmadoRrhh,
-        responsable: 'Lic. Sofía Mendoza (TH)',
+        responsable: 'Talento Humano ISC',
         fecha: confirmadoRrhh ? item.fechaAprobacion : undefined,
       },
       comentarios: item.comentarios,

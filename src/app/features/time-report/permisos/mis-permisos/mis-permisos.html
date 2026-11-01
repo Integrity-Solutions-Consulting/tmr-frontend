@@ -5,19 +5,19 @@
   </app-header>
 
   <div class="kpis-grid">
-    <app-tarjeta-resumen valor="15 días" titulo="Disponibles" icono="beach_access" tono="corporativo" />
-    <app-tarjeta-resumen valor="2" titulo="En proceso" icono="pending_actions" tono="advertencia" />
-    <app-tarjeta-resumen valor="4" titulo="Aprobados" icono="verified" tono="exito" />
-    <app-tarjeta-resumen valor="4 h" titulo="Por horas" icono="schedule" tono="cian" />
+    <app-tarjeta-resumen [valor]="kpiDisponibles()" titulo="Disponibles" icono="beach_access" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="kpiEnProceso()" titulo="En proceso" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="kpiAprobados()" titulo="Aprobados" icono="verified" tono="exito" />
+    <app-tarjeta-resumen [valor]="kpiPorHoras()" titulo="Por horas" icono="schedule" tono="cian" />
   </div>
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda</label>
+      <label class="filter-label">Búsqueda inteligente</label>
       <input
         class="filter-control"
         type="text"
-        placeholder="Código, cliente o tipo..."
+        placeholder="Código, tipo, cliente, proyecto, líder, días, horas, estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)" />
     </div>
@@ -75,6 +75,7 @@
         <option value="">Todos</option>
         <option value="pendiente">Pendiente Jefe</option>
         <option value="rrhh">En Talento Humano</option>
+        <option value="observado">Observado</option>
         <option value="confirmado">Confirmado</option>
         <option value="rechazado">Rechazado</option>
       </select>
@@ -134,7 +135,7 @@
             </td>
             <td>
               <div class="actions-cell">
-                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="verFormulario(item)" title="Ver PDF">
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="verFormulario(item)" title="Consultar y Descargar PDF">
                   <span class="material-symbols-outlined">picture_as_pdf</span>
                 </button>
               </div>
@@ -142,101 +143,400 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+            <td colspan="7" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
       </tbody>
     </table>
   </div>
 
-  <!-- MODAL 1: NUEVA SOLICITUD -->
+  <!-- MODAL 1: NUEVA SOLICITUD CON DISEÑO DE FORMULARIO OFICIAL ISC -->
   <app-modal-base
-    titulo="Nueva Solicitud de Permiso / Vacaciones"
+    titulo="Nueva Solicitud — Formulario Oficial de Permisos, Licencias y Vacaciones"
     [visible]="modalNuevaVisible()"
     [wide]="true"
     (cerrar)="modalNuevaVisible.set(false)">
     <div class="modal-form">
-      <div class="form-row">
-        <div class="form-field">
-          <label>Cliente *</label>
-          <select>
-            <option>Banco del Pacífico (Core Bancario BDP)</option>
-            <option>Integrity Solutions (Portal Web ISC)</option>
-          </select>
+      <div class="isc-form-sheet isc-form-sheet--interactive">
+        <!-- LOGO SUPERIOR INTEGRITY SOLUTIONS -->
+        <div class="isc-form-sheet__logo-wrap">
+          <img
+            src="assets/img/logo-isc.png"
+            alt="Integrity Solutions"
+            class="isc-form-sheet__logo"
+          />
+          <span class="isc-form-sheet__folio">Nueva Solicitud · Formulario Oficial</span>
         </div>
-        <div class="form-field">
-          <label>Jefe inmediato *</label>
-          <select>
-            <option>Ing. Roberto Gómez (Líder Externo)</option>
-            <option>Ing. Carlos Méndez (Líder Interno)</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label>Tipo de Permiso *</label>
-          <select [ngModel]="tipoSeleccionado()" (ngModelChange)="tipoSeleccionado.set($event)">
-            <option value="VACACIONES">Vacaciones</option>
-            <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
-            <option value="CITAS_MEDICAS">Citas médicas</option>
-            <option value="MATRIMONIO">Matrimonio</option>
-            <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
-            <option value="MATERNIDAD">Maternidad</option>
-            <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
-            <option value="OTROS">Otros</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="form-row">
-        <div class="form-field">
-          <label>Fecha de inicio *</label>
-          <input type="date" value="2026-11-09" />
+        <!-- TABLA 1: TÍTULO Y FECHA DE SOLICITUD -->
+        <div class="isc-table-scroll">
+          <table class="isc-table isc-table--header">
+            <tbody>
+              <tr>
+                <td rowspan="3" class="isc-table__doc-title">
+                  FORMULARIO DE SOLICITUD DE PERMISOS, LICENCIAS<br />Y VACACIONES
+                </td>
+                <th colspan="3" class="isc-table__th-grey">FECHA DE SOLICITUD</th>
+              </tr>
+              <tr>
+                <th class="isc-table__th-sub">Día</th>
+                <th class="isc-table__th-sub">Mes</th>
+                <th class="isc-table__th-sub">Año</th>
+              </tr>
+              <tr>
+                <td class="isc-table__td-center">{{ hoyDia }}</td>
+                <td class="isc-table__td-center">{{ hoyMes }}</td>
+                <td class="isc-table__td-center">{{ hoyAnio }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="form-field">
-          <label>Fecha de finalización *</label>
-          <input type="date" value="2026-11-13" />
-        </div>
-        <div class="form-field">
-          <label>Fecha de regreso *</label>
-          <input type="date" value="2026-11-16" />
-        </div>
-        <div class="form-field">
-          <label>Horario</label>
-          <select [ngModel]="horarioSeleccionado()" (ngModelChange)="horarioSeleccionado.set($event)">
-            <option value="COMPLETA">Completa</option>
-            <option value="MANANA">Mañana</option>
-            <option value="TARDE">Tarde</option>
-            <option value="OTROS">Otros</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="form-row">
-        <div class="form-field">
-          <label>Días solicitados</label>
-          <input type="text" value="5 días" readonly />
+        <!-- TABLA 2: DATOS DEL COLABORADOR -->
+        <div class="isc-table-scroll">
+          <table class="isc-table">
+            <thead>
+              <tr>
+                <th colspan="5" class="isc-table__th-grey">DATOS DEL COLABORADOR</th>
+              </tr>
+              <tr>
+                <th class="isc-table__th-sub" style="width: 22%;">Apellidos y nombres</th>
+                <th class="isc-table__th-sub" style="width: 14%;">Número de cédula</th>
+                <th class="isc-table__th-sub" style="width: 18%;">Cargo</th>
+                <th class="isc-table__th-sub" style="width: 24%;">Cliente / Proyecto *</th>
+                <th class="isc-table__th-sub" style="width: 22%;">Jefe inmediato *</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="isc-table__td-center">{{ colaboradorNombre() }}</td>
+                <td class="isc-table__td-center">{{ colaboradorCedula() }}</td>
+                <td class="isc-table__td-center">{{ colaboradorCargo() }}</td>
+                <td class="isc-table__td-center">
+                  <select
+                    class="isc-inline-select"
+                    [ngModel]="indiceClienteForm()"
+                    (ngModelChange)="seleccionarClienteForm($event)">
+                    @for (c of opcionesCliente(); track c.etiqueta; let idx = $index) {
+                      <option [value]="idx">{{ c.etiqueta }}</option>
+                    }
+                  </select>
+                </td>
+                <td class="isc-table__td-center">
+                  <select
+                    class="isc-inline-select"
+                    [ngModel]="indiceLiderForm()"
+                    (ngModelChange)="indiceLiderForm.set(+$event)">
+                    @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
+                      <option [value]="idx">{{ l.etiqueta }}</option>
+                    }
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="form-field">
-          <label>Horas solicitadas</label>
-          <input type="text" value="40 horas" />
+
+        <!-- SECCIÓN 3: TIPO DE PERMISO DE AUSENCIA DE TRABAJO (INTERACTIVO CON X) -->
+        <div class="isc-section-bar">TIPO DE PERMISO DE AUSENCIA DE TRABAJO</div>
+        <div class="isc-section-instruction">
+          Favor marcar con una X el tipo de permiso solicitado (haz clic sobre el tipo):
         </div>
-        <div class="form-field">
-          <label>Evidencia (Opcional)</label>
-          <div class="dropzone-box">
-            <span class="material-symbols-outlined">attach_file</span>
-            <span>Adjuntar archivo (.pdf, .jpg)</span>
+
+        <div class="isc-checkbox-grid">
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'VACACIONES'"
+            (click)="tipoSeleccionado.set('VACACIONES')">
+            <span class="isc-checkbox-item__label">Vacaciones</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'VACACIONES'">
+              {{ tipoSeleccionado() === 'VACACIONES' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'"
+            (click)="tipoSeleccionado.set('LICENCIA_ENFERMEDAD')">
+            <span class="isc-checkbox-item__label">Licencia por enfermedad</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'">
+              {{ tipoSeleccionado() === 'LICENCIA_ENFERMEDAD' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'CITAS_MEDICAS'"
+            (click)="tipoSeleccionado.set('CITAS_MEDICAS')">
+            <span class="isc-checkbox-item__label">Citas médicas</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'CITAS_MEDICAS'">
+              {{ tipoSeleccionado() === 'CITAS_MEDICAS' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATRIMONIO'"
+            (click)="tipoSeleccionado.set('MATRIMONIO')">
+            <span class="isc-checkbox-item__label">Matrimonio</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATRIMONIO'">
+              {{ tipoSeleccionado() === 'MATRIMONIO' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'NACIMIENTO_HIJO'"
+            (click)="tipoSeleccionado.set('NACIMIENTO_HIJO')">
+            <span class="isc-checkbox-item__label">Nacimiento de un Hijo/a</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'NACIMIENTO_HIJO'">
+              {{ tipoSeleccionado() === 'NACIMIENTO_HIJO' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'OTROS'"
+            (click)="tipoSeleccionado.set('OTROS')">
+            <span class="isc-checkbox-item__label">Otros</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'OTROS'">
+              {{ tipoSeleccionado() === 'OTROS' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATERNIDAD'"
+            (click)="tipoSeleccionado.set('MATERNIDAD')">
+            <span class="isc-checkbox-item__label">Maternidad</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATERNIDAD'">
+              {{ tipoSeleccionado() === 'MATERNIDAD' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div
+            class="isc-checkbox-item isc-checkbox-item--clickable"
+            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'"
+            (click)="tipoSeleccionado.set('FALLECIMIENTO_FAMILIAR')">
+            <span class="isc-checkbox-item__label">Fallecimiento de un familiar</span>
+            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'">
+              {{ tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR' ? 'X' : '' }}
+            </span>
+          </div>
+
+          <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
+        </div>
+
+        <!-- SECCIÓN 4: MOTIVOS Y CARGA DE EVIDENCIA (MINIO / STORAGE) -->
+        <div class="isc-section-bar">MOTIVOS DEL PERMISO LABORAL O VACACIONAL</div>
+        <div class="isc-text-box">
+          <textarea
+            class="isc-motivo-textarea"
+            rows="2"
+            placeholder="Describe el motivo detallado de la solicitud y la coordinación de actividades..."
+            [ngModel]="motivoForm()"
+            (ngModelChange)="motivoForm.set($event)"></textarea>
+
+          <div class="isc-upload-bar">
+            <label class="isc-upload-bar__trigger">
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                style="display: none;"
+                (change)="alSeleccionarArchivoEvidencia($event)" />
+              <span class="material-symbols-outlined" style="font-size: 17px;">cloud_upload</span>
+              <span>Adjuntar evidencia de respaldo (.pdf, .jpg, .png — máx. 10 MB)</span>
+            </label>
+
+            @if (archivoEvidencia(); as file) {
+              <span class="isc-upload-bar__file">
+                <span class="material-symbols-outlined" style="font-size: 15px;">attach_file</span>
+                <span>{{ file.name }}</span>
+                <button type="button" class="isc-upload-bar__remove" (click)="quitarArchivoEvidencia()" title="Quitar archivo">
+                  ✕
+                </button>
+              </span>
+            } @else {
+              <span style="font-size: 0.7rem; color: #64748b;">Almacenamiento seguro MinIO / S3</span>
+            }
           </div>
         </div>
-      </div>
 
-      <div class="form-field">
-        <label>Motivo *</label>
-        <textarea rows="2" placeholder="Motivo de la solicitud...">Solicitud de vacaciones anuales programadas.</textarea>
+        <!-- TABLA 5: FECHAS Y DÍAS SOLICITADOS -->
+        <div class="isc-table-scroll">
+          <table class="isc-table">
+            <tbody>
+              <tr>
+                <th rowspan="2" class="isc-table__th-side">Fecha de la solicitud</th>
+                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de inicio *</th>
+                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de finalización *</th>
+                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de regreso *</th>
+                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de aprobación</th>
+              </tr>
+              <tr>
+                <td class="isc-table__td-center isc-table__td-tall">
+                  <input
+                    type="date"
+                    class="isc-inline-date"
+                    [ngModel]="fechaInicioForm()"
+                    (ngModelChange)="cambiarFechaInicioForm($event)" />
+                </td>
+                <td class="isc-table__td-center isc-table__td-tall">
+                  <input
+                    type="date"
+                    class="isc-inline-date"
+                    [ngModel]="fechaFinForm()"
+                    (ngModelChange)="cambiarFechaFinForm($event)" />
+                </td>
+                <td class="isc-table__td-center isc-table__td-tall">
+                  <input
+                    type="date"
+                    class="isc-inline-date"
+                    [ngModel]="fechaRegresoForm()"
+                    (ngModelChange)="fechaRegresoForm.set($event)" />
+                </td>
+                <td class="isc-table__td-center isc-table__td-tall">Pendiente</td>
+              </tr>
+              <tr>
+                <th class="isc-table__th-side-bottom">Días solicitados</th>
+                <td colspan="4" class="isc-table__td-merged">{{ textoDiasForm() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TABLA 6: HORARIO Y HORAS SOLICITADAS (INTERACTIVO CON X) -->
+        <div class="isc-table-scroll">
+          <table class="isc-table">
+            <tbody>
+              <tr>
+                <th rowspan="2" class="isc-table__th-side">Horario (clic para marcar)</th>
+                <th
+                  class="isc-table__th-sub isc-horario-cell"
+                  style="width: 20.5%;"
+                  (click)="seleccionarHorarioForm('MANANA')">
+                  Mañana
+                </th>
+                <th
+                  class="isc-table__th-sub isc-horario-cell"
+                  style="width: 20.5%;"
+                  (click)="seleccionarHorarioForm('TARDE')">
+                  Tarde
+                </th>
+                <th
+                  class="isc-table__th-sub isc-horario-cell"
+                  style="width: 20.5%;"
+                  (click)="seleccionarHorarioForm('COMPLETA')">
+                  Completa
+                </th>
+                <th
+                  class="isc-table__th-sub isc-horario-cell"
+                  style="width: 20.5%;"
+                  (click)="seleccionarHorarioForm('OTROS')">
+                  Otros
+                </th>
+              </tr>
+              <tr>
+                <td
+                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
+                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'MANANA'"
+                  (click)="seleccionarHorarioForm('MANANA')">
+                  @if (horarioSeleccionado() === 'MANANA') {
+                    <strong class="isc-mark-x">X</strong>
+                    <div class="isc-schedule-detail">08:30 - 12:30</div>
+                  }
+                </td>
+                <td
+                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
+                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'TARDE'"
+                  (click)="seleccionarHorarioForm('TARDE')">
+                  @if (horarioSeleccionado() === 'TARDE') {
+                    <strong class="isc-mark-x">X</strong>
+                    <div class="isc-schedule-detail">13:30 - 17:30</div>
+                  }
+                </td>
+                <td
+                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
+                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'COMPLETA'"
+                  (click)="seleccionarHorarioForm('COMPLETA')">
+                  @if (horarioSeleccionado() === 'COMPLETA') {
+                    <strong class="isc-mark-x">X</strong>
+                    <div class="isc-schedule-detail">Jornada completa</div>
+                  }
+                </td>
+                <td
+                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
+                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'OTROS'"
+                  (click)="seleccionarHorarioForm('OTROS')">
+                  @if (horarioSeleccionado() === 'OTROS') {
+                    <strong class="isc-mark-x">X</strong>
+                    <input
+                      type="text"
+                      class="isc-inline-input"
+                      style="margin-top: 3px;"
+                      placeholder="Ej. 10:00 - 12:00"
+                      [ngModel]="detalleHorarioForm()"
+                      (ngModelChange)="detalleHorarioForm.set($event)"
+                      (click)="$event.stopPropagation()" />
+                  }
+                </td>
+              </tr>
+              <tr>
+                <th class="isc-table__th-side-bottom">Horas solicitadas</th>
+                <td colspan="4" class="isc-table__td-merged">{{ textoHorasForm() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SECCIÓN 7: TRAZABILIDAD DE APROBACIÓN EN SISTEMA -->
+        <div class="isc-section-bar">FLUJO DE APROBACIÓN Y NOTIFICACIÓN APPRISE</div>
+        <div class="isc-table-scroll" style="margin-bottom: 0;">
+          <table class="isc-table" style="margin-top: -1px;">
+            <thead>
+              <tr>
+                <th class="isc-table__th-sub" style="width: 33%;">1. Solicitante (Colaborador)</th>
+                <th class="isc-table__th-sub" style="width: 34%;">2. Jefe Inmediato / Líder</th>
+                <th class="isc-table__th-sub" style="width: 33%;">3. Talento Humano (RRHH)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="isc-table__td-center">
+                  <div><strong>{{ colaboradorNombre() }}</strong></div>
+                  <div class="isc-schedule-detail">Notificación de seguimiento por correo</div>
+                </td>
+                <td class="isc-table__td-center">
+                  <div><strong>{{ obtenerNombreLiderActualForm() }}</strong></div>
+                  <div class="isc-schedule-detail">
+                    {{ obtenerTipoLiderActualForm() === 'EXT' ? 'Recibirá Magic Link por correo' : 'Revisará en Aprobación Líder TMR' }}
+                  </div>
+                </td>
+                <td class="isc-table__td-center">
+                  <div><strong>Talento Humano ISC</strong></div>
+                  <div class="isc-schedule-detail">Confirmación final tras aprobación del líder</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalNuevaVisible.set(false)">Cancelar</button>
-        <button type="button" class="btn-tmr btn-tmr--primary" (click)="simularEnvioSolicitud()">
-          Guardar Solicitud
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalNuevaVisible.set(false)">
+          Cancelar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarVistaPreviaNuevaSolicitud()">
+          <span class="material-symbols-outlined">download</span>
+          Vista Previa PDF
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--primary"
+          [disabled]="guardandoSolicitud()"
+          (click)="guardarNuevaSolicitud()">
+          <span class="material-symbols-outlined">send</span>
+          {{ guardandoSolicitud() ? 'Enviando...' : 'Guardar y Enviar Solicitud' }}
         </button>
       </div>
     </div>
@@ -253,8 +553,10 @@
         <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
 
         <div class="modal-footer">
-          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
-          <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalFormularioVisible.set(false)">
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">
+            Cerrar
+          </button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdfSeleccionado(sel)">
             <span class="material-symbols-outlined">download</span>
             Descargar PDF
           </button>

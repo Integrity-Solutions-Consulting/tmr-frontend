@@ -6,6 +6,11 @@ import { UserModulesService } from '../../features/auth/servicios/user-modules.s
 /** Guard que protege rutas según el Rol del usuario.
  *  - Configuración: Solo accesible por Administradores.
  *  - Proyectos, Líderes, Colaboradores, Clientes y Reportes: No accesibles por Colaboradores.
+ *  - Permisos:
+ *      * Mis Permisos (/permisos): Todos los roles autenticados.
+ *      * Aprobación Líder (/permisos/equipo): Líder y Administrador.
+ *      * Validación RRHH (/permisos/rrhh): Recursos Humanos y Administrador.
+ *      * Historial Gerencia (/permisos/gerencia): Gerencia/Gerente, Recursos Humanos y Administrador.
  */
 export const roleGuard: CanActivateFn = (route) => {
   const tokenService = inject(TokenService);
@@ -18,6 +23,20 @@ export const roleGuard: CanActivateFn = (route) => {
   }
 
   const path = route.routeConfig?.path;
+
+  // Reglas específicas de visibilidad por rol en el módulo Permisos
+  if (path === 'equipo' && !tokenService.canAccessPermisosLider()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
+  if (path === 'rrhh' && !tokenService.canAccessPermisosRrhh()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
+  if (path === 'gerencia' && !tokenService.canAccessPermisosGerencia()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
 
   // Mapa de rutas de Angular a nombres de módulos en la Base de Datos
   const pathModuleMap: Record<string, string> = {

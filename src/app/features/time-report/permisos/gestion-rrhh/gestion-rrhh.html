@@ -12,11 +12,11 @@
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda</label>
+      <label class="filter-label">Búsqueda inteligente</label>
       <input
         type="text"
         class="filter-control"
-        placeholder="Colaborador, folio o líder..."
+        placeholder="Colaborador, folio, proyecto, cliente, líder, duración o estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
@@ -80,7 +80,7 @@
       >
         <option value="POR_CONFIRMAR">Por confirmar ({{ totalPorConfirmar() }})</option>
         <option value="LIDER_EXTERNO">Pendientes líder ({{ totalPendientesExternos() }})</option>
-        <option value="HISTORIAL">Confirmados</option>
+        <option value="HISTORIAL">Confirmados / Historial</option>
       </select>
     </div>
   </div>
@@ -88,13 +88,14 @@
   <div class="table-card">
     <table class="permisos-table">
       <colgroup>
-        <col style="width: 12%;" />
-        <col style="width: 18%;" />
-        <col style="width: 17%;" />
-        <col style="width: 17%;" />
+        <col style="width: 11%;" />
         <col style="width: 16%;" />
-        <col style="width: 8%;" />
-        <col style="width: 12%;" />
+        <col style="width: 15%;" />
+        <col style="width: 15%;" />
+        <col style="width: 15%;" />
+        <col style="width: 7%;" />
+        <col style="width: 11%;" />
+        <col style="width: 10%;" />
       </colgroup>
       <thead>
         <tr>
@@ -104,6 +105,7 @@
           <th>Período</th>
           <th>Jefe Inmediato</th>
           <th>Horas</th>
+          <th>Estado</th>
           <th style="text-align: right;">Acción</th>
         </tr>
       </thead>
@@ -122,6 +124,11 @@
             </td>
             <td>-{{ item.horasEquivalentes }} h</td>
             <td>
+              <span [class]="'status-badge status-badge--' + item.estadoClase">
+                {{ item.estadoTexto }}
+              </span>
+            </td>
+            <td>
               <div class="actions-cell">
                 @if (item.estado === 'CONFIRMADO_LIDER') {
                   <button
@@ -129,7 +136,7 @@
                     class="btn-tmr btn-tmr--primary btn-tmr--sm"
                     (click)="abrirModalValidacion(item)"
                   >
-                    Confirmar
+                    Revisar
                   </button>
                 } @else if (item.estado === 'PENDIENTE_LIDER_EXT') {
                   <button
@@ -155,7 +162,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+            <td colspan="8" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
           </tr>
         }
       </tbody>
@@ -163,9 +170,9 @@
   </div>
 </div>
 
-<!-- MODAL 1: VALIDACIÓN FINAL -->
+<!-- MODAL 1: VALIDACIÓN FINAL (REVISAR Y CONFIRMAR DENTRO DEL POPUP) -->
 <app-modal-base
-  titulo="Confirmación de Talento Humano"
+  titulo="Revisión y Confirmación de Talento Humano"
   [visible]="modalValidacionAbierto()"
   [wide]="true"
   (cerrar)="modalValidacionAbierto.set(false)"
@@ -198,13 +205,35 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-tmr btn-tmr--danger" (click)="devolverConObservacion()">
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="descargarPdf(sol)"
+        >
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--danger"
+          [disabled]="procesandoAccion()"
+          (click)="devolverConObservacion()"
+        >
           Devolver
         </button>
-        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalValidacionAbierto.set(false)">
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="modalValidacionAbierto.set(false)"
+        >
           Cancelar
         </button>
-        <button type="button" class="btn-tmr btn-tmr--primary" (click)="confirmarDefinitivamenteRrhh()">
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--primary"
+          [disabled]="procesandoAccion()"
+          (click)="confirmarDefinitivamenteRrhh()"
+        >
           Confirmar
         </button>
       </div>
@@ -226,7 +255,7 @@
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
           Cerrar
         </button>
-        <button type="button" class="btn-tmr btn-tmr--primary" (click)="modalFormularioAbierto.set(false)">
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
           <span class="material-symbols-outlined">download</span>
           Descargar PDF
         </button>

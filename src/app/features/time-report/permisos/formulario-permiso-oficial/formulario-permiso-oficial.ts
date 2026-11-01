@@ -14,6 +14,7 @@ export type TipoPermisoOficial =
 export type HorarioPermisoOficial = 'MANANA' | 'TARDE' | 'COMPLETA' | 'OTROS';
 
 export interface DatosFormularioOficial {
+  idPermiso?: number;
   folio?: string;
   diaSolicitud: string;
   mesSolicitud: string;
@@ -26,6 +27,8 @@ export interface DatosFormularioOficial {
   tipoPermiso: TipoPermisoOficial;
   motivos: string;
   evidenciaNombre?: string;
+  evidenciaUrl?: string;
+  evidenciaUrlDescarga?: string;
   fechaInicio: string;
   fechaFinalizacion: string;
   fechaRegreso: string;

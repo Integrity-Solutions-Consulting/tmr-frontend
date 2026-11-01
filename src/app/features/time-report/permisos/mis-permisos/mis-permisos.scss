@@ -1,1 +1,132 @@
-@use '../permisos-shared';
+@use "../permisos-shared";
+@use "../formulario-permiso-oficial/formulario-permiso-oficial.scss";
+
+.isc-form-sheet--interactive {
+  .isc-inline-select,
+  .isc-inline-input,
+  .isc-inline-date {
+    width: 100%;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #0f172a;
+    background: #f8fafc;
+    font-family: inherit;
+    text-align: center;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #163572;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(22, 53, 114, 0.14);
+    }
+  }
+
+  .isc-checkbox-item--clickable {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+    user-select: none;
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    &.isc-checkbox-item--active {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+  }
+
+  .isc-motivo-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: #0f172a;
+    background: #f8fafc;
+    resize: vertical;
+    min-height: 58px;
+    box-sizing: border-box;
+    outline: none;
+
+    &:focus {
+      border-color: #163572;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(22, 53, 114, 0.12);
+    }
+  }
+
+  .isc-upload-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    border: 1px dashed #94a3b8;
+    border-radius: 6px;
+    background: #f8fafc;
+    font-size: 0.75rem;
+    color: #334155;
+
+    &__trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #163572;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    &__file {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    &__remove {
+      background: transparent;
+      border: none;
+      color: #dc2626;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0 3px;
+    }
+  }
+
+  .isc-horario-cell {
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+    user-select: none;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &--active {
+      background: #eff6ff !important;
+    }
+  }
+}

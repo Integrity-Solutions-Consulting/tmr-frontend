@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="portal-banner__meta">
-        <strong>PER-2026-005</strong>
+        <strong>{{ datosFormulario().folio }}</strong>
       </div>
     </header>
 
@@ -33,10 +33,14 @@
           </div>
 
           <div class="modal-footer" style="justify-content: space-between;">
-            <a routerLink="/time-report/permisos" class="btn-tmr btn-tmr--secondary">
+            <a routerLink="/permisos" class="btn-tmr btn-tmr--secondary">
               Volver
             </a>
             <div class="portal-actions">
+              <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf()">
+                <span class="material-symbols-outlined">download</span>
+                Descargar PDF
+              </button>
               <button type="button" class="btn-tmr btn-tmr--danger" (click)="rechazarExterno()">
                 Rechazar
               </button>
@@ -51,9 +55,15 @@
           <span class="status-badge" [class.status-badge--confirmado]="procesado() === 'confirmado'" [class.status-badge--rechazado]="procesado() !== 'confirmado'">
             {{ procesado() === 'confirmado' ? 'Solicitud Aprobada' : 'Solicitud Rechazada' }}
           </span>
-          <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="procesado.set('pendiente')">
-            Reiniciar
-          </button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="descargarPdf()">
+              <span class="material-symbols-outlined">download</span>
+              Descargar PDF
+            </button>
+            <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="procesado.set('pendiente')">
+              Reiniciar
+            </button>
+          </div>
         </div>
       }
     </div>

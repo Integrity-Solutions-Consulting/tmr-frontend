@@ -99,6 +99,41 @@ export const routes: Routes = [
           import('./features/time-report/time-report.routes').then(m => m.TIME_REPORT_ROUTES),
       },
 
+      // Permisos y Vacaciones (Colaborador, Líder Interno, RRHH y Gerencia)
+      {
+        path: 'permisos',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/time-report/permisos/mis-permisos/mis-permisos').then(
+                m => m.MisPermisosComponent
+              ),
+          },
+          {
+            path: 'equipo',
+            loadComponent: () =>
+              import('./features/time-report/permisos/aprobaciones-lider/aprobaciones-lider').then(
+                m => m.AprobacionesLiderComponent
+              ),
+          },
+          {
+            path: 'rrhh',
+            loadComponent: () =>
+              import('./features/time-report/permisos/gestion-rrhh/gestion-rrhh').then(
+                m => m.GestionRrhhComponent
+              ),
+          },
+          {
+            path: 'gerencia',
+            loadComponent: () =>
+              import('./features/time-report/permisos/permisos-gerencia/permisos-gerencia').then(
+                m => m.PermisosGerenciaComponent
+              ),
+          },
+        ],
+      },
+
       // Carga de Actividades por Excel
       {
         path: 'carga-actividades',

@@ -89,13 +89,16 @@ export class TokenService {
     return roles.includes(roleName.toUpperCase());
   }
 
+  isAdminStrict(): boolean {
+    return this.hasRole('ADMINISTRADOR') || this.hasRole('ADMIN');
+  }
+
+  isRrhh(): boolean {
+    return this.hasRole('RECURSOS HUMANOS') || this.hasRole('RECURSOS_HUMANOS');
+  }
+
   isAdmin(): boolean {
-    return (
-      this.hasRole('ADMINISTRADOR') ||
-      this.hasRole('ADMIN') ||
-      this.hasRole('RECURSOS HUMANOS') ||
-      this.hasRole('RECURSOS_HUMANOS')
-    );
+    return this.isAdminStrict() || this.isRrhh();
   }
 
   isLider(): boolean {
@@ -103,7 +106,7 @@ export class TokenService {
   }
 
   isGerente(): boolean {
-    return this.hasRole('GERENTE');
+    return this.hasRole('GERENTE') || this.hasRole('GERENCIA');
   }
 
   isAdministrativo(): boolean {
@@ -120,8 +123,39 @@ export class TokenService {
     return (
       this.hasRole('ADMINISTRADOR') ||
       this.hasRole('GERENTE') ||
+      this.hasRole('GERENCIA') ||
       this.hasRole('LIDER') ||
       this.hasRole('LÍDER')
+    );
+  }
+
+  // Visibilidad por roles para las 4 pantallas de Permisos
+  canAccessMisPermisos(): boolean {
+    return this.isTokenValid();
+  }
+
+  canAccessPermisosLider(): boolean {
+    return (
+      this.isAdminStrict() ||
+      this.isLider() ||
+      this.userModulesService.hasModule('Aprobacion Lider')
+    );
+  }
+
+  canAccessPermisosRrhh(): boolean {
+    return (
+      this.isAdminStrict() ||
+      this.isRrhh() ||
+      this.userModulesService.hasModule('Validacion RRHH')
+    );
+  }
+
+  canAccessPermisosGerencia(): boolean {
+    return (
+      this.isAdminStrict() ||
+      this.isGerente() ||
+      this.isRrhh() ||
+      this.userModulesService.hasModule('Historial Gerencia')
     );
   }
 

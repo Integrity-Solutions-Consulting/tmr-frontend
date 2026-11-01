@@ -13,30 +13,5 @@ export const TIME_REPORT_ROUTES: Routes = [
     canActivate: [roleGuard],
     loadComponent: () => import('./fechas-corte/fechas-corte').then(m => m.FechasCorteComponent),
   },
-  // Diseño no funcional: Permisos por Ausencia y Vacaciones (Colaborador, Líder Interno y RRHH)
-  {
-    path: 'permisos',
-    loadComponent: () =>
-      import('./permisos/mis-permisos/mis-permisos').then(m => m.MisPermisosComponent),
-  },
-  {
-    path: 'permisos/equipo',
-    loadComponent: () =>
-      import('./permisos/aprobaciones-lider/aprobaciones-lider').then(
-        m => m.AprobacionesLiderComponent
-      ),
-  },
-  {
-    path: 'permisos/rrhh',
-    loadComponent: () =>
-      import('./permisos/gestion-rrhh/gestion-rrhh').then(m => m.GestionRrhhComponent),
-  },
-  {
-    path: 'permisos/gerencia',
-    loadComponent: () =>
-      import('./permisos/permisos-gerencia/permisos-gerencia').then(
-        m => m.PermisosGerenciaComponent
-      ),
-  },
   { path: '', redirectTo: 'actividades', pathMatch: 'full' }
 ];
