@@ -2,6 +2,10 @@
 @use "../formulario-permiso-oficial/formulario-permiso-oficial.scss";
 
 .isc-form-sheet--interactive {
+  .isc-table-scroll--overflow-visible {
+    overflow: visible;
+  }
+
   .isc-inline-select,
   .isc-inline-input,
   .isc-inline-date {
@@ -19,10 +23,125 @@
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
-    &:focus {
+    &:focus,
+    &:focus-visible {
       border-color: #163572;
       background: #ffffff;
       box-shadow: 0 0 0 2px rgba(22, 53, 114, 0.14);
+    }
+  }
+
+  .isc-combobox-cell {
+    position: relative;
+  }
+
+  .isc-combobox {
+    position: relative;
+    width: 100%;
+
+    &__control {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    &__icon {
+      position: absolute;
+      left: 6px;
+      font-size: 15px;
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    &__input {
+      padding-left: 24px;
+      text-align: left;
+    }
+
+    &__menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      min-width: 260px;
+      max-height: 220px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 4px;
+      list-style: none;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14);
+      z-index: 60;
+      text-align: left;
+    }
+
+    &__option {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.12s ease;
+
+      &:hover {
+        background: #f1f5f9;
+      }
+
+      &--selected {
+        background: #eff6ff;
+      }
+    }
+
+    &__option-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    &__badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      white-space: nowrap;
+    }
+
+    &__option-sub {
+      margin-top: 2px;
+      font-size: 0.69rem;
+      color: #475569;
+    }
+
+    &__empty {
+      padding: 8px;
+      font-size: 0.74rem;
+      color: #64748b;
+      text-align: center;
+    }
+  }
+
+  .isc-lider-autofill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #0f172a;
+
+    &__name {
+      line-height: 1.2;
     }
   }
 
@@ -59,7 +178,8 @@
     box-sizing: border-box;
     outline: none;
 
-    &:focus {
+    &:focus,
+    &:focus-visible {
       border-color: #163572;
       background: #ffffff;
       box-shadow: 0 0 0 2px rgba(22, 53, 114, 0.12);
@@ -87,10 +207,28 @@
       cursor: pointer;
       font-weight: 700;
       color: #163572;
+      border-radius: 4px;
 
       &:hover {
         text-decoration: underline;
       }
+
+      &:focus-within {
+        outline: 2px solid #163572;
+        outline-offset: 2px;
+      }
+    }
+
+    &__input-sr {
+      position: absolute;
+      clip-path: inset(50%);
+      overflow: hidden;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      white-space: nowrap;
     }
 
     &__file {

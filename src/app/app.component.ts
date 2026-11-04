@@ -16,6 +16,7 @@ import { NotificacionToastService } from './shared/services/notificacion-toast.s
 import { ResumenCorteComponent } from './shared/components/resumen-corte/resumen-corte.component';
 import { ResumenCorteService } from './shared/services/resumen-corte.service';
 import { MisAvisosService } from './shared/services/mis-avisos.service';
+import { NotificacionesInternasService } from './shared/services/notificaciones-internas.service';
 import { DescargaProgresoService } from './shared/services/descarga-progreso.service';
 import { PopupService } from './shared/services/popup.service';
 import { ModalScrollLockService } from './shared/services/modal-scroll-lock.service';
@@ -50,6 +51,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private notificacionToast = inject(NotificacionToastService);
   private resumenCorte = inject(ResumenCorteService);
   private misAvisos = inject(MisAvisosService);
+  private notificacionesInternas = inject(NotificacionesInternasService);
   private popup = inject(PopupService);
   private modalScrollLock = inject(ModalScrollLockService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -159,6 +161,7 @@ export class AppComponent implements OnInit, OnDestroy {
         if (!event.urlAfterRedirects.startsWith('/auth')) {
           this.resumenCorte.iniciar();
           this.misAvisos.iniciar();
+          this.notificacionesInternas.iniciar();
         }
       });
 
@@ -313,7 +316,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userActivity.stopTracking();
     this.resumenCorte.detener();
     this.misAvisos.detener();
+    this.notificacionesInternas.detener();
     this.misAvisos.detener();
+    this.notificacionesInternas.detener();
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {

@@ -25,7 +25,7 @@ export class RevisionExternaComponent implements OnInit {
 
   readonly tokenExterno = signal<string | null>(null);
   readonly solicitudApi = signal<PermisoItemApi | null>(null);
-  readonly observacionLider = signal('Confirmado. Las entregas del proyecto quedan coordinadas.');
+  readonly observacionLider = signal('');
   readonly procesado = signal<'pendiente' | 'confirmado' | 'rechazado'>('pendiente');
 
   ngOnInit(): void {
@@ -51,8 +51,11 @@ export class RevisionExternaComponent implements OnInit {
           }
         }
       },
-      error: () => {
-        // Fallback amigable al modo demostración si el token no existe
+      error: err => {
+        this.toast.error(
+          'Enlace no disponible',
+          err?.error?.message || 'El enlace externo es inválido o ha expirado.',
+        );
       },
     });
   }
@@ -60,9 +63,12 @@ export class RevisionExternaComponent implements OnInit {
   readonly datosFormulario = computed<DatosFormularioOficial>(() => {
     const api = this.solicitudApi();
     const aprobado = this.procesado() === 'confirmado';
+    const token = this.tokenExterno();
 
     if (api) {
       return {
+        idPermiso: api.id,
+        tokenExterno: token ?? undefined,
         folio: api.codigo,
         diaSolicitud: api.diaSolicitud,
         mesSolicitud: api.mesSolicitud,
@@ -75,7 +81,7 @@ export class RevisionExternaComponent implements OnInit {
         tipoPermiso: api.tipoOficial,
         motivos: api.motivo,
         evidenciaNombre: api.evidenciaNombre ?? undefined,
-        evidenciaUrl: api.evidenciaUrl ?? undefined,
+        evidenciaUrl: token && api.tieneEvidencia ? this.apiService.obtenerUrlEvidenciaExterna(token) : undefined,
         fechaInicio: api.fechaInicio,
         fechaFinalizacion: api.fechaFin,
         fechaRegreso: api.fechaRegreso,
@@ -100,36 +106,24 @@ export class RevisionExternaComponent implements OnInit {
     }
 
     return {
-      folio: 'PER-2026-005',
-      diaSolicitud: '30',
-      mesSolicitud: '10',
-      anioSolicitud: '2026',
-      apellidosNombres: 'Erazo Allan',
-      numeroCedula: '1723456789',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Banco del Pacífico (Core Bancario BDP)',
-      jefeInmediato: 'Ing. Roberto Gómez',
+      folio: 'PER-EXT',
+      diaSolicitud: '01',
+      mesSolicitud: '01',
+      anioSolicitud: String(new Date().getFullYear()),
+      apellidosNombres: 'Colaborador',
+      numeroCedula: '',
+      cargo: '',
+      cliente: '',
+      jefeInmediato: 'Líder Externo',
       tipoPermiso: 'VACACIONES',
-      motivos:
-        'Solicitud de 5 días de vacaciones anuales correspondientes al periodo vigente. Las entregas del sprint quedan cubiertas antes del viernes 06/11.',
-      fechaInicio: '09/11/2026',
-      fechaFinalizacion: '13/11/2026',
-      fechaRegreso: '16/11/2026',
-      fechaAprobacion: aprobado ? '30/10/2026' : 'Pendiente',
-      diasSolicitados: '5 días laborables',
+      motivos: '',
+      fechaInicio: '',
+      fechaFinalizacion: '',
+      fechaRegreso: '',
+      fechaAprobacion: 'Pendiente',
+      diasSolicitados: '',
       horario: 'COMPLETA',
-      detalleHorario: 'Jornada completa',
-      horasSolicitadas: '40 horas',
-      aprobacionLider: {
-        aprobado,
-        responsable: 'Ing. Roberto Gómez',
-        metodo: 'Magic Link Externo',
-        fecha: aprobado ? '30/10/2026' : undefined,
-      },
-      aprobacionTalentoHumano: {
-        aprobado: false,
-        responsable: 'Talento Humano ISC',
-      },
+      horasSolicitadas: '',
       comentarios: this.observacionLider(),
     };
   });
@@ -140,65 +134,64 @@ export class RevisionExternaComponent implements OnInit {
 
   confirmarExterno(): void {
     const token = this.tokenExterno();
-    if (token) {
-      this.apiService.registrarDecisionExterna(token, 'aprobar', this.observacionLider()).subscribe({
-        next: res => {
-          if (res?.success && res.data) {
-            this.solicitudApi.set(res.data);
-          }
-          this.procesado.set('confirmado');
-          this.toast.exito(
-            'Solicitud aprobada vía Magic Link',
-            'Se actualizó el documento PDF oficial y se notificó a Talento Humano y al colaborador vía Apprise.',
-          );
-        },
-        error: () => {
-          this.procesado.set('confirmado');
-          this.toast.exito(
-            'Solicitud aprobada vía Magic Link',
-            'Se actualizó el documento PDF oficial y se notificó a Talento Humano y al colaborador vía Apprise.',
-          );
-        },
-      });
+    if (!token) {
+      this.toast.error('Token no proporcionado', 'Abre este portal desde el enlace enviado a tu correo.');
       return;
     }
 
-    this.procesado.set('confirmado');
-    this.toast.exito(
-      'Solicitud aprobada vía Magic Link',
-      'Se actualizó automáticamente el documento PDF oficial y se notificó a Talento Humano y al colaborador vía Apprise.',
-    );
+    this.apiService.registrarDecisionExterna(token, 'aprobar', this.observacionLider().trim()).subscribe({
+      next: res => {
+        if (res?.success && res.data) {
+          this.solicitudApi.set(res.data);
+        }
+        this.procesado.set('confirmado');
+        this.toast.exito(
+          'Solicitud aprobada vía Magic Link',
+          'Se registró la aprobación y se notificó a Talento Humano y al colaborador.',
+        );
+      },
+      error: err => {
+        this.toast.error(
+          'No se pudo procesar la aprobación',
+          err?.error?.message || 'El enlace puede haber expirado o ya fue utilizado.',
+        );
+      },
+    });
   }
 
   rechazarExterno(): void {
     const token = this.tokenExterno();
-    if (token) {
-      this.apiService.registrarDecisionExterna(token, 'rechazar', this.observacionLider()).subscribe({
-        next: res => {
-          if (res?.success && res.data) {
-            this.solicitudApi.set(res.data);
-          }
-          this.procesado.set('rechazado');
-          this.toast.error(
-            'Solicitud rechazada por Líder Externo',
-            'Se notificó al colaborador y a Talento Humano mediante Apprise.',
-          );
-        },
-        error: () => {
-          this.procesado.set('rechazado');
-          this.toast.error(
-            'Solicitud rechazada por Líder Externo',
-            'Se notificó al colaborador y a Talento Humano mediante Apprise.',
-          );
-        },
-      });
+    if (!token) {
+      this.toast.error('Token no proporcionado', 'Abre este portal desde el enlace enviado a tu correo.');
       return;
     }
 
-    this.procesado.set('rechazado');
-    this.toast.error(
-      'Solicitud rechazada por Líder Externo',
-      'Se notificó al colaborador y a Talento Humano mediante Apprise.',
-    );
+    const comentario = this.observacionLider().trim();
+    if (!comentario) {
+      this.toast.error(
+        'Motivo obligatorio',
+        'Por favor ingresa el motivo por el cual rechazas la solicitud (RF-007).',
+      );
+      return;
+    }
+
+    this.apiService.registrarDecisionExterna(token, 'rechazar', comentario).subscribe({
+      next: res => {
+        if (res?.success && res.data) {
+          this.solicitudApi.set(res.data);
+        }
+        this.procesado.set('rechazado');
+        this.toast.error(
+          'Solicitud rechazada por Líder Externo',
+          'Se notificó al colaborador y a Talento Humano.',
+        );
+      },
+      error: err => {
+        this.toast.error(
+          'No se pudo procesar el rechazo',
+          err?.error?.message || 'El enlace puede haber expirado o ya fue utilizado.',
+        );
+      },
+    });
   }
 }

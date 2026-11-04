@@ -23,6 +23,8 @@ export interface SolicitudGerenciaMock {
   id: number;
   folio: string;
   anio: string;
+  diaSolicitud?: string;
+  mesSolicitud?: string;
   colaborador: string;
   cedula: string;
   cargo: string;
@@ -30,6 +32,7 @@ export interface SolicitudGerenciaMock {
   proyecto: string;
   liderNombre: string;
   liderTipo: 'INT' | 'EXT';
+  responsableRrhh?: string;
   tipo: string;
   tipoOficial: TipoPermisoOficial;
   fechas: string;
@@ -76,187 +79,7 @@ export class PermisosGerenciaComponent implements OnInit {
   readonly modalPdfVisible = signal(false);
   readonly solicitudActiva = signal<SolicitudGerenciaMock | null>(null);
 
-  readonly solicitudes = signal<SolicitudGerenciaMock[]>([
-    {
-      id: 1,
-      folio: 'PER-2026-006',
-      anio: '2026',
-      colaborador: 'Flores Jonathan',
-      cedula: '1719283746',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'INT',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      fechas: '04/11/2026 - 06/11/2026',
-      fechaInicio: '04/11/2026',
-      fechaFin: '06/11/2026',
-      fechaRegreso: '09/11/2026',
-      fechaAprobacion: 'Pendiente',
-      diasSolicitados: '3 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '24 h',
-      motivo: 'Vacaciones anuales programadas.',
-      estadoClase: 'pendiente',
-      estadoTexto: 'Pendiente Jefe',
-    },
-    {
-      id: 2,
-      folio: 'PER-2026-005',
-      anio: '2026',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      liderNombre: 'Ing. Roberto Gómez',
-      liderTipo: 'EXT',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      fechas: '09/11/2026 - 13/11/2026',
-      fechaInicio: '09/11/2026',
-      fechaFin: '13/11/2026',
-      fechaRegreso: '16/11/2026',
-      fechaAprobacion: 'Pendiente',
-      diasSolicitados: '5 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '40 h',
-      motivo: 'Vacaciones programadas noviembre.',
-      estadoClase: 'pendiente',
-      estadoTexto: 'Pendiente Jefe',
-    },
-    {
-      id: 3,
-      folio: 'PER-2026-004',
-      anio: '2026',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'INT',
-      tipo: 'Licencia por enfermedad',
-      tipoOficial: 'LICENCIA_ENFERMEDAD',
-      fechas: '02/11/2026 - 03/11/2026',
-      fechaInicio: '02/11/2026',
-      fechaFin: '03/11/2026',
-      fechaRegreso: '04/11/2026',
-      fechaAprobacion: '01/11/2026',
-      diasSolicitados: '2 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '16 h',
-      motivo: 'Reposo médico odontológico.',
-      evidencia: 'certificado_iess.pdf',
-      estadoClase: 'rrhh',
-      estadoTexto: 'En Talento Humano',
-    },
-    {
-      id: 4,
-      folio: 'PER-2026-003',
-      anio: '2026',
-      colaborador: 'Vera Cristopher',
-      cedula: '0928374651',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Banco Guayaquil',
-      proyecto: 'Banca Digital',
-      liderNombre: 'Lic. Mariana Solís',
-      liderTipo: 'EXT',
-      tipo: 'Otros',
-      tipoOficial: 'OTROS',
-      fechas: '20/10/2026 - 22/10/2026',
-      fechaInicio: '20/10/2026',
-      fechaFin: '22/10/2026',
-      fechaRegreso: '23/10/2026',
-      fechaAprobacion: '18/10/2026',
-      diasSolicitados: '3 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '24 h',
-      motivo: 'Permiso personal en semana de salida a producción.',
-      estadoClase: 'rechazado',
-      estadoTexto: 'Rechazado',
-      comentarios: 'Rechazado por coincidir con ventana de despliegue en producción.',
-    },
-    {
-      id: 5,
-      folio: 'PER-2026-001',
-      anio: '2026',
-      colaborador: 'Pazmiño Silvia',
-      cedula: '1714567890',
-      cargo: 'Ingeniera de Software',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Producto Digital',
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'INT',
-      tipo: 'Citas médicas',
-      tipoOficial: 'CITAS_MEDICAS',
-      fechas: '15/10/2026 (08:30 - 12:30)',
-      fechaInicio: '15/10/2026',
-      fechaFin: '15/10/2026',
-      fechaRegreso: '15/10/2026',
-      fechaAprobacion: '14/10/2026',
-      diasSolicitados: '0.5 días',
-      horario: 'MANANA',
-      horasSolicitadas: '4 h',
-      motivo: 'Control médico programado.',
-      evidencia: 'constancia_medica.pdf',
-      estadoClase: 'confirmado',
-      estadoTexto: 'Confirmado',
-    },
-    {
-      id: 6,
-      folio: 'PER-2025-118',
-      anio: '2025',
-      colaborador: 'Paredes Harold',
-      cedula: '1720918273',
-      cargo: 'Desarrollador Backend',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Migración Microservicios',
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'INT',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      fechas: '15/12/2025 - 19/12/2025',
-      fechaInicio: '15/12/2025',
-      fechaFin: '19/12/2025',
-      fechaRegreso: '22/12/2025',
-      fechaAprobacion: '10/12/2025',
-      diasSolicitados: '5 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '40 h',
-      motivo: 'Vacaciones anuales periodo 2025.',
-      estadoClase: 'confirmado',
-      estadoTexto: 'Confirmado',
-    },
-    {
-      id: 7,
-      folio: 'PER-2024-084',
-      anio: '2024',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      liderNombre: 'Ing. Roberto Gómez',
-      liderTipo: 'EXT',
-      tipo: 'Fallecimiento de un familiar',
-      tipoOficial: 'FALLECIMIENTO_FAMILIAR',
-      fechas: '04/08/2024 - 06/08/2024',
-      fechaInicio: '04/08/2024',
-      fechaFin: '06/08/2024',
-      fechaRegreso: '07/08/2024',
-      fechaAprobacion: '04/08/2024',
-      diasSolicitados: '3 días',
-      horario: 'COMPLETA',
-      horasSolicitadas: '24 h',
-      motivo: 'Licencia por calamidad doméstica.',
-      evidencia: 'justificante.pdf',
-      estadoClase: 'confirmado',
-      estadoTexto: 'Confirmado',
-    },
-  ]);
+  readonly solicitudes = signal<SolicitudGerenciaMock[]>([]);
 
   ngOnInit(): void {
     this.cargarHistorialDesdeApi();
@@ -265,12 +88,14 @@ export class PermisosGerenciaComponent implements OnInit {
   cargarHistorialDesdeApi(): void {
     this.apiService.obtenerHistorialGerencia().subscribe({
       next: res => {
-        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res?.success && Array.isArray(res.data)) {
           this.solicitudes.set(
             res.data.map((item: PermisoItemApi) => ({
               id: item.id,
               folio: item.codigo,
               anio: item.anioSolicitud,
+              diaSolicitud: item.diaSolicitud,
+              mesSolicitud: item.mesSolicitud,
               colaborador: item.colaborador,
               cedula: item.cedula,
               cargo: item.cargo,
@@ -278,6 +103,7 @@ export class PermisosGerenciaComponent implements OnInit {
               proyecto: item.proyecto,
               liderNombre: item.liderNombre,
               liderTipo: item.liderTipo,
+              responsableRrhh: item.responsableRrhh ?? undefined,
               tipo: item.tipo,
               tipoOficial: item.tipoOficial,
               fechas: item.fechas,
@@ -290,7 +116,7 @@ export class PermisosGerenciaComponent implements OnInit {
               horasSolicitadas: `${item.totalHoras} h`,
               motivo: item.motivo,
               evidencia: item.evidenciaNombre ?? undefined,
-              evidenciaUrl: item.evidenciaUrl ?? undefined,
+              evidenciaUrl: item.tieneEvidencia ? this.apiService.obtenerUrlEvidencia(item.id) : undefined,
               estadoClase: item.estadoClase,
               estadoTexto: item.estadoTexto,
               comentarios: item.comentarios ?? undefined,
@@ -298,9 +124,7 @@ export class PermisosGerenciaComponent implements OnInit {
           );
         }
       },
-      error: () => {
-        // Fallback amigable a datos locales
-      },
+      error: () => {},
     });
   }
 
@@ -415,9 +239,10 @@ export class PermisosGerenciaComponent implements OnInit {
     const confirmadoRrhh = item.estadoClase === 'confirmado';
 
     return {
+      idPermiso: item.id,
       folio: item.folio,
-      diaSolicitud: item.fechaInicio.slice(0, 2),
-      mesSolicitud: item.fechaInicio.slice(3, 5),
+      diaSolicitud: item.diaSolicitud || item.fechaInicio.slice(0, 2),
+      mesSolicitud: item.mesSolicitud || item.fechaInicio.slice(3, 5),
       anioSolicitud: item.anio,
       apellidosNombres: item.colaborador,
       numeroCedula: item.cedula,
@@ -428,6 +253,7 @@ export class PermisosGerenciaComponent implements OnInit {
       motivos: item.motivo,
       evidenciaNombre: item.evidencia,
       evidenciaUrl: item.evidenciaUrl,
+      evidenciaUrlDescarga: item.evidenciaUrl,
       fechaInicio: item.fechaInicio,
       fechaFinalizacion: item.fechaFin,
       fechaRegreso: item.fechaRegreso,
@@ -443,7 +269,7 @@ export class PermisosGerenciaComponent implements OnInit {
       },
       aprobacionTalentoHumano: {
         aprobado: confirmadoRrhh,
-        responsable: 'Talento Humano ISC',
+        responsable: item.responsableRrhh || 'Talento Humano ISC',
         fecha: confirmadoRrhh ? item.fechaAprobacion : undefined,
       },
       comentarios: item.comentarios,

@@ -15,8 +15,35 @@
 
       <!-- Panel Dropdown de Notificaciones -->
       <div class="navbar__bell-dropdown" data-scroll-lock-exempt *ngIf="notificacionesAbierto">
-        <div class="navbar__bell-dropdown-header">Notificaciones</div>
+        <div class="navbar__bell-dropdown-header" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>Notificaciones</span>
+          @if (notificacionesInternas.pendiente()) {
+            <button
+              type="button"
+              style="background: transparent; border: none; color: var(--primary-color); font-size: 11px; font-weight: 700; cursor: pointer; padding: 0;"
+              (click)="notificacionesInternas.marcarTodasLeidas()">
+              Marcar leídas
+            </button>
+          }
+        </div>
         <div class="navbar__bell-dropdown-body">
+          <!-- Notificaciones internas persistidas de Solicitudes y Permisos (RF-010 SSE) -->
+          @for (notif of notificacionesInternas.items(); track notif.id) {
+            <button
+              type="button"
+              class="navbar__bell-item navbar__bell-item--accion"
+              [style.background]="notif.leida ? 'transparent' : 'rgba(22, 53, 114, 0.05)'"
+              (click)="abrirNotificacionInterna(notif)">
+              <span class="material-symbols-outlined navbar__bell-item-icon navbar__bell-item-icon--info" aria-hidden="true">
+                {{ notif.leida ? 'drafts' : 'mark_email_unread' }}
+              </span>
+              <div class="navbar__bell-item-content">
+                <span class="navbar__bell-item-title">{{ notif.titulo }}</span>
+                <span class="navbar__bell-item-desc">{{ notif.mensaje }}</span>
+                <span class="navbar__bell-item-fecha">{{ formatoFechaHora(notif.fechaCreacion) }}</span>
+              </div>
+            </button>
+          }
           <!-- Último corte de horas (solo Administrador y Líder): solo el nombre; el clic abre el detalle completo -->
           @if (resumenCorte.resumen(); as corte) {
             <button type="button" class="navbar__bell-item navbar__bell-item--accion" (click)="abrirDetalleCorte()">
@@ -44,9 +71,9 @@
               <span class="navbar__bell-item-desc">Tienes <strong>{{ horasFaltantes }} horas</strong> pendientes por reportar en este periodo.</span>
             </div>
           </div>
-          <div class="navbar__bell-empty" *ngIf="!tieneNotificaciones">
+          <div class="navbar__bell-empty" *ngIf="!tieneNotificaciones && notificacionesInternas.items().length === 0 && misAvisos.avisos().length === 0">
             <span class="material-symbols-outlined navbar__bell-empty-icon">check_circle</span>
-            <span class="navbar__bell-empty-text">¡Estás al día con tus horas!</span>
+            <span class="navbar__bell-empty-text">¡Estás al día con tus notificaciones!</span>
           </div>
         </div>
       </div>

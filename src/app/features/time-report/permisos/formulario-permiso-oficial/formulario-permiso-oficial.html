@@ -132,9 +132,9 @@
     @if (datos.evidenciaNombre) {
       <div class="isc-text-box__attachment">
         <span class="material-symbols-outlined" style="font-size: 16px;">attach_file</span>
-        @if (datos.evidenciaUrlDescarga || datos.evidenciaUrl) {
-          <a [href]="datos.evidenciaUrlDescarga || datos.evidenciaUrl" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">
-            Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong> (Ver / Descargar)
+        @if (puedeDescargarEvidencia) {
+          <a href="#" (click)="abrirEvidencia($event)" style="color: inherit; text-decoration: underline;">
+            Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong> {{ descargandoEvidencia ? '(Descargando...)' : '(Ver / Descargar)' }}
           </a>
         } @else {
           <span>Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong></span>

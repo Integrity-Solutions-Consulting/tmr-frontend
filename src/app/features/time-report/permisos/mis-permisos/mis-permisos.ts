@@ -25,6 +25,7 @@ import { PermisosPdfService } from '../permisos-pdf.service';
 import {
   PermisoItemApi,
   PermisosApiService,
+  TipoPermisoCatalogoApi,
 } from '../permisos-api.service';
 
 export interface SolicitudColaboradorMock {
@@ -33,6 +34,9 @@ export interface SolicitudColaboradorMock {
   colaborador?: string;
   cedula?: string;
   cargo?: string;
+  diaSolicitud?: string;
+  mesSolicitud?: string;
+  anioSolicitud?: string;
   tipo: string;
   tipoOficial: TipoPermisoOficial;
   motivo: string;
@@ -50,6 +54,8 @@ export interface SolicitudColaboradorMock {
   proyecto: string;
   lider: string;
   tipoLider: 'INT' | 'EXT';
+  metodoLider?: string;
+  responsableRrhh?: string;
   evidencia: string | null;
   evidenciaUrl?: string | null;
   aprobadoLider: boolean;
@@ -60,6 +66,7 @@ export interface SolicitudColaboradorMock {
 }
 
 export interface OpcionClienteProyecto {
+  indiceOriginal: number;
   idProyecto: number | null;
   idCliente: number | null;
   cliente: string;
@@ -68,6 +75,7 @@ export interface OpcionClienteProyecto {
   idLider: number | null;
   liderNombre: string;
   tipoLider: 'INT' | 'EXT';
+  esAsignacionPropia: boolean;
 }
 
 export interface OpcionLiderFormulario {
@@ -109,61 +117,58 @@ export class MisPermisosComponent implements OnInit {
   readonly solicitudSeleccionada = signal<SolicitudColaboradorMock | null>(null);
   readonly guardandoSolicitud = signal(false);
 
-  // Datos del colaborador para el formulario oficial interactivo
-  readonly colaboradorNombre = signal('Erazo Allan');
-  readonly colaboradorCedula = signal('1723456789');
-  readonly colaboradorCargo = signal('Desarrollador Fullstack');
+  // Datos del colaborador leídos exclusivamente desde PostgreSQL (RF-001)
+  readonly colaboradorNombre = signal('');
+  readonly colaboradorCedula = signal('');
+  readonly colaboradorCargo = signal('');
+  readonly esNomina = signal(true);
 
-  readonly opcionesCliente = signal<OpcionClienteProyecto[]>([
-    {
-      idProyecto: 1,
-      idCliente: 1,
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      etiqueta: 'Banco del Pacífico (Core Bancario BDP)',
-      idLider: 1,
-      liderNombre: 'Ing. Roberto Gómez',
-      tipoLider: 'EXT',
-    },
-    {
-      idProyecto: 2,
-      idCliente: 2,
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      etiqueta: 'Integrity Solutions (Portal Web ISC)',
-      idLider: 2,
-      liderNombre: 'Ing. Carlos Méndez',
-      tipoLider: 'INT',
-    },
-  ]);
+  readonly opcionesCliente = signal<OpcionClienteProyecto[]>([]);
+  readonly opcionesLider = signal<OpcionLiderFormulario[]>([]);
+  readonly tiposPermisoCatalogo = signal<TipoPermisoCatalogoApi[]>([]);
 
-  readonly opcionesLider = signal<OpcionLiderFormulario[]>([
-    {
-      idLider: 1,
-      nombre: 'Ing. Roberto Gómez',
-      tipo: 'EXT',
-      etiqueta: 'Ing. Roberto Gómez (Líder Externo)',
-    },
-    {
-      idLider: 2,
-      nombre: 'Ing. Carlos Méndez',
-      tipo: 'INT',
-      etiqueta: 'Ing. Carlos Méndez (Líder Interno)',
-    },
-  ]);
-
-  // Estado interactivo del formulario oficial en el popup "Nueva Solicitud"
+  // Buscador interactivo de Cliente / Proyecto y autocompletado consiguiente de Jefe Inmediato
   readonly indiceClienteForm = signal(0);
   readonly indiceLiderForm = signal(0);
+  readonly busquedaClienteProyecto = signal('');
+  readonly comboboxClienteAbierto = signal(false);
+
+  readonly clienteActualForm = computed<OpcionClienteProyecto | null>(
+    () => this.opcionesCliente()[this.indiceClienteForm()] ?? null,
+  );
+
+  readonly opcionesClienteFiltradas = computed<OpcionClienteProyecto[]>(() => {
+    const termino = this.busquedaClienteProyecto().trim();
+    const todas = this.opcionesCliente();
+    if (!termino) return todas;
+
+    return todas.filter((opt) =>
+      coincideBusquedaInteligente(termino, [
+        opt.cliente,
+        opt.proyecto,
+        opt.etiqueta,
+        opt.liderNombre,
+      ]),
+    );
+  });
+
+  readonly valorInputClienteProyecto = computed(() => {
+    if (this.comboboxClienteAbierto()) {
+      return this.busquedaClienteProyecto();
+    }
+    return this.clienteActualForm()?.etiqueta ?? '';
+  });
+
   readonly tipoSeleccionado = signal<TipoPermisoOficial>('VACACIONES');
   readonly horarioSeleccionado = signal<HorarioPermisoOficial>('COMPLETA');
   readonly detalleHorarioForm = signal('Jornada completa (08:30 - 17:30)');
-  readonly fechaInicioForm = signal('2026-11-09');
-  readonly fechaFinForm = signal('2026-11-13');
-  readonly fechaRegresoForm = signal('2026-11-16');
-  readonly motivoForm = signal(
-    'Solicitud de vacaciones anuales programadas. Actividades del sprint coordinadas con el equipo.',
+  readonly fechaInicioForm = signal(new Date().toISOString().slice(0, 10));
+  readonly fechaFinForm = signal(new Date().toISOString().slice(0, 10));
+  readonly fechaRegresoForm = signal(
+    calcularSiguienteDiaLaborableIso(new Date().toISOString().slice(0, 10)) ||
+      new Date().toISOString().slice(0, 10),
   );
+  readonly motivoForm = signal('');
   readonly archivoEvidencia = signal<File | null>(null);
 
   readonly hoyDia = String(new Date().getDate()).padStart(2, '0');
@@ -186,6 +191,14 @@ export class MisPermisosComponent implements OnInit {
     return this.diasCalculadosForm() * 8;
   });
 
+  // RF-004: Colaborador en nómina con licencia por enfermedad > 1 día requiere certificado médico obligatorio
+  readonly requiereCertificadoMedicoObligatorio = computed(
+    () =>
+      this.esNomina() &&
+      this.tipoSeleccionado() === 'LICENCIA_ENFERMEDAD' &&
+      this.diasCalculadosForm() > 1,
+  );
+
   readonly textoDiasForm = computed(() => {
     const d = this.diasCalculadosForm();
     return d === 1 ? '1 día laborable' : `${d} días laborables`;
@@ -193,128 +206,22 @@ export class MisPermisosComponent implements OnInit {
 
   readonly textoHorasForm = computed(() => `${this.horasCalculadasForm()} horas`);
 
-  readonly solicitudes = signal<SolicitudColaboradorMock[]>([
-    {
-      id: 105,
-      codigo: 'PER-2026-005',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      motivo: 'Vacaciones programadas noviembre. Actividades del sprint coordinadas con el equipo.',
-      fechas: '09/11/2026 - 13/11/2026',
-      fechaInicio: '09/11/2026',
-      fechaFin: '13/11/2026',
-      fechaRegreso: '16/11/2026',
-      fechaAprobacion: 'Pendiente',
-      diasSolicitados: '5 días laborables',
-      horario: 'COMPLETA',
-      detalleHorario: 'Jornada completa (08:30 - 17:30)',
-      horasSolicitadas: '40 horas',
-      duracion: '5 días laborables (40 h)',
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      lider: 'Ing. Roberto Gómez',
-      tipoLider: 'EXT',
-      evidencia: null,
-      aprobadoLider: false,
-      confirmadoRrhh: false,
-      estadoClase: 'pendiente',
-      estadoTexto: 'Pendiente Jefe',
-      comentarios: 'En espera de confirmación del Jefe Inmediato vía Magic Link.',
-    },
-    {
-      id: 104,
-      codigo: 'PER-2026-004',
-      tipo: 'Licencia por enfermedad',
-      tipoOficial: 'LICENCIA_ENFERMEDAD',
-      motivo: 'Cita odontológica e indicación de reposo médico por 48 horas.',
-      fechas: '02/11/2026 - 03/11/2026',
-      fechaInicio: '02/11/2026',
-      fechaFin: '03/11/2026',
-      fechaRegreso: '04/11/2026',
-      fechaAprobacion: '01/11/2026',
-      diasSolicitados: '2 días laborables',
-      horario: 'COMPLETA',
-      detalleHorario: 'Jornada completa',
-      horasSolicitadas: '16 horas',
-      duracion: '2 días laborables (16 h)',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      lider: 'Ing. Carlos Méndez',
-      tipoLider: 'INT',
-      evidencia: 'certificado_iess.pdf',
-      aprobadoLider: true,
-      confirmadoRrhh: false,
-      estadoClase: 'rrhh',
-      estadoTexto: 'En Talento Humano',
-      comentarios: 'Aprobado desde cuenta de Jefe Inmediato. Adjunta certificado médico IESS.',
-    },
-    {
-      id: 103,
-      codigo: 'PER-2026-003',
-      tipo: 'Otros',
-      tipoOficial: 'OTROS',
-      motivo: 'Permiso personal en día de ventana de certificación.',
-      fechas: '20/10/2026 - 21/10/2026',
-      fechaInicio: '20/10/2026',
-      fechaFin: '21/10/2026',
-      fechaRegreso: '22/10/2026',
-      fechaAprobacion: '19/10/2026',
-      diasSolicitados: '2 días laborables',
-      horario: 'COMPLETA',
-      detalleHorario: 'Jornada completa',
-      horasSolicitadas: '16 horas',
-      duracion: '2 días laborables (16 h)',
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      lider: 'Ing. Roberto Gómez',
-      tipoLider: 'EXT',
-      evidencia: null,
-      aprobadoLider: false,
-      confirmadoRrhh: false,
-      estadoClase: 'rechazado',
-      estadoTexto: 'Rechazado',
-      comentarios: 'Rechazado por coincidir con ventana de certificación bancaria.',
-    },
-    {
-      id: 101,
-      codigo: 'PER-2026-001',
-      tipo: 'Citas médicas',
-      tipoOficial: 'CITAS_MEDICAS',
-      motivo: 'Control médico especializado y exámenes de laboratorio en la mañana.',
-      fechas: '15/10/2026 (08:30 - 12:30)',
-      fechaInicio: '15/10/2026',
-      fechaFin: '15/10/2026',
-      fechaRegreso: '15/10/2026 (13:30)',
-      fechaAprobacion: '14/10/2026',
-      diasSolicitados: '0.5 días',
-      horario: 'MANANA',
-      detalleHorario: '08:30 - 12:30',
-      horasSolicitadas: '4 horas',
-      duracion: '0.5 días (4 horas)',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      lider: 'Ing. Carlos Méndez',
-      tipoLider: 'INT',
-      evidencia: 'constancia_cita_medica.pdf',
-      aprobadoLider: true,
-      confirmadoRrhh: true,
-      estadoClase: 'confirmado',
-      estadoTexto: 'Confirmado',
-      comentarios: 'Solicitud aprobada por Jefe Inmediato y confirmada por Talento Humano. PDF generado.',
-    },
-  ]);
+  readonly solicitudes = signal<SolicitudColaboradorMock[]>([]);
 
-  readonly kpiDisponibles = signal('15 días');
+  readonly kpiDisponibles = signal('0 días');
   readonly kpiEnProceso = computed(
     () =>
       this.solicitudes().filter(
-        (s) => s.estadoClase === 'pendiente' || s.estadoClase === 'rrhh' || s.estadoClase === 'observado',
+        (s) =>
+          s.estadoClase === 'pendiente' ||
+          s.estadoClase === 'rrhh' ||
+          s.estadoClase === 'observado',
       ).length,
   );
   readonly kpiAprobados = computed(
     () => this.solicitudes().filter((s) => s.estadoClase === 'confirmado').length,
   );
-  readonly kpiPorHoras = signal('4 h');
+  readonly kpiPorHoras = signal('0 h');
 
   readonly solicitudesFiltradas = computed(() => {
     const q = this.busqueda();
@@ -365,27 +272,19 @@ export class MisPermisosComponent implements OnInit {
       next: (res) => {
         if (!res?.success || !res.data) return;
         const ctx = res.data;
-        if (ctx.apellidosNombres) this.colaboradorNombre.set(ctx.apellidosNombres);
-        if (ctx.numeroCedula) this.colaboradorCedula.set(ctx.numeroCedula);
-        if (ctx.cargo) this.colaboradorCargo.set(ctx.cargo);
-        this.kpiDisponibles.set(`${ctx.diasDisponibles} días`);
 
-        if (ctx.proyectosAsignados?.length > 0) {
-          this.opcionesCliente.set(
-            ctx.proyectosAsignados.map((p) => ({
-              idProyecto: p.idProyecto,
-              idCliente: p.idCliente,
-              cliente: p.clienteNombre,
-              proyecto: p.proyectoNombre,
-              etiqueta: `${p.clienteNombre} (${p.proyectoNombre})`,
-              idLider: p.idLider,
-              liderNombre: p.liderNombre,
-              tipoLider: p.liderTipo,
-            })),
-          );
+        this.colaboradorNombre.set(ctx.apellidosNombres ?? '');
+        this.colaboradorCedula.set(ctx.numeroCedula ?? '');
+        this.colaboradorCargo.set(ctx.cargo ?? '');
+        this.esNomina.set(ctx.esNomina ?? true);
+        this.kpiDisponibles.set(`${ctx.diasDisponibles ?? 0} días`);
+        this.kpiPorHoras.set(`${ctx.horasAcumuladas ?? 0} h`);
+
+        if (Array.isArray(ctx.tiposPermiso) && ctx.tiposPermiso.length > 0) {
+          this.tiposPermisoCatalogo.set(ctx.tiposPermiso);
         }
 
-        if (ctx.lideresDisponibles?.length > 0) {
+        if (Array.isArray(ctx.lideresDisponibles)) {
           this.opcionesLider.set(
             ctx.lideresDisponibles.map((l) => ({
               idLider: l.idLider,
@@ -395,20 +294,53 @@ export class MisPermisosComponent implements OnInit {
             })),
           );
         }
+
+        if (Array.isArray(ctx.proyectosAsignados)) {
+          const opciones = ctx.proyectosAsignados.map((p, idx) => {
+            const cli = (p.clienteNombre ?? '').trim();
+            const proy = (p.proyectoNombre ?? '').trim();
+            const etiqueta =
+              cli && proy ? `${cli} (${proy})` : proy || cli || `Proyecto #${p.idProyecto}`;
+
+            return {
+              indiceOriginal: idx,
+              idProyecto: p.idProyecto > 0 ? p.idProyecto : null,
+              idCliente: p.idCliente,
+              cliente: cli,
+              proyecto: proy,
+              etiqueta,
+              idLider: p.idLider,
+              liderNombre: (p.liderNombre ?? '').trim(),
+              tipoLider: p.liderTipo,
+              esAsignacionPropia: !!p.esAsignacionPropia,
+            } satisfies OpcionClienteProyecto;
+          });
+
+          this.opcionesCliente.set(opciones);
+          if (opciones.length > 0) {
+            this.seleccionarClienteForm('0');
+          }
+        }
       },
-      error: () => {
-        // Mantiene datos locales por defecto
+      error: (err) => {
+        this.toast.error(
+          'No se pudo cargar el contexto',
+          err?.error?.message || 'Verifica tu sesión o la conexión con el backend.',
+        );
       },
     });
 
     this.permisosApi.obtenerMisPermisos().subscribe({
       next: (res) => {
-        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res?.success && Array.isArray(res.data)) {
           this.solicitudes.set(res.data.map((item) => this.mapearApiAMock(item)));
         }
       },
-      error: () => {
-        // Mantiene registros iniciales
+      error: (err) => {
+        this.toast.error(
+          'Error al consultar tus solicitudes',
+          err?.error?.message || 'No se pudieron obtener tus solicitudes desde el servidor.',
+        );
       },
     });
   }
@@ -420,6 +352,9 @@ export class MisPermisosComponent implements OnInit {
       colaborador: item.colaborador,
       cedula: item.cedula,
       cargo: item.cargo,
+      diaSolicitud: item.diaSolicitud,
+      mesSolicitud: item.mesSolicitud,
+      anioSolicitud: item.anioSolicitud,
       tipo: item.tipo,
       tipoOficial: item.tipoOficial,
       motivo: item.motivo,
@@ -437,6 +372,8 @@ export class MisPermisosComponent implements OnInit {
       proyecto: item.proyecto,
       lider: item.liderNombre,
       tipoLider: item.liderTipo,
+      metodoLider: item.metodoLider,
+      responsableRrhh: item.responsableRrhh ?? undefined,
       evidencia: item.evidenciaNombre ?? null,
       evidenciaUrl: item.tieneEvidencia ? this.permisosApi.obtenerUrlEvidencia(item.id) : null,
       aprobadoLider: item.aprobadoLider,
@@ -474,7 +411,54 @@ export class MisPermisosComponent implements OnInit {
 
   abrirNuevaSolicitud(): void {
     this.archivoEvidencia.set(null);
+    this.comboboxClienteAbierto.set(false);
+    this.busquedaClienteProyecto.set('');
+    if (this.opcionesCliente().length === 0) {
+      this.cargarDatosBackend();
+    }
     this.modalNuevaVisible.set(true);
+  }
+
+  abrirBuscadorCliente(): void {
+    this.busquedaClienteProyecto.set('');
+    this.comboboxClienteAbierto.set(true);
+  }
+
+  alEscribirBusquedaCliente(valor: string): void {
+    this.busquedaClienteProyecto.set(valor);
+    if (!this.comboboxClienteAbierto()) {
+      this.comboboxClienteAbierto.set(true);
+    }
+  }
+
+  cerrarBuscadorClienteConRetardo(): void {
+    setTimeout(() => {
+      this.comboboxClienteAbierto.set(false);
+      this.busquedaClienteProyecto.set('');
+    }, 150);
+  }
+
+  alTeclaBuscadorCliente(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.comboboxClienteAbierto.set(false);
+      this.busquedaClienteProyecto.set('');
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const primera = this.opcionesClienteFiltradas()[0];
+      if (primera) {
+        this.elegirOpcionCliente(primera);
+      }
+    }
+  }
+
+  elegirOpcionCliente(opt: OpcionClienteProyecto, event?: MouseEvent): void {
+    event?.preventDefault();
+    this.seleccionarClienteForm(String(opt.indiceOriginal));
+    this.comboboxClienteAbierto.set(false);
+    this.busquedaClienteProyecto.set('');
   }
 
   seleccionarClienteForm(indexStr: string): void {
@@ -485,7 +469,7 @@ export class MisPermisosComponent implements OnInit {
       const liderIdx = this.opcionesLider().findIndex(
         (l) =>
           (clienteOpt.idLider && l.idLider === clienteOpt.idLider) ||
-          l.nombre === clienteOpt.liderNombre,
+          (clienteOpt.liderNombre && l.nombre === clienteOpt.liderNombre),
       );
       if (liderIdx >= 0) {
         this.indiceLiderForm.set(liderIdx);
@@ -531,9 +515,22 @@ export class MisPermisosComponent implements OnInit {
     const file = input?.files?.[0] ?? null;
     if (!file) return;
 
-    const maxBytes = 10 * 1024 * 1024;
+    const ext = file.name.includes('.')
+      ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
+      : '';
+    const permitidas = ['.pdf', '.png', '.jpg', '.jpeg'];
+    if (!permitidas.includes(ext)) {
+      this.toast.error(
+        'Formato no permitido',
+        'Solo se aceptan archivos PDF, PNG, JPG o JPEG (RNF-003).',
+      );
+      input.value = '';
+      return;
+    }
+
+    const maxBytes = 5 * 1024 * 1024;
     if (file.size > maxBytes) {
-      this.toast.error('Archivo demasiado grande', 'El tamaño máximo permitido es 10 MB.');
+      this.toast.error('Archivo demasiado grande', 'El tamaño máximo permitido es 5 MB (RNF-003).');
       input.value = '';
       return;
     }
@@ -546,11 +543,27 @@ export class MisPermisosComponent implements OnInit {
   }
 
   obtenerNombreLiderActualForm(): string {
-    return this.opcionesLider()[this.indiceLiderForm()]?.nombre ?? 'Ing. Roberto Gómez';
+    const cli = this.clienteActualForm();
+    if (cli?.liderNombre) {
+      return cli.liderNombre;
+    }
+    return this.opcionesLider()[this.indiceLiderForm()]?.nombre ?? 'Sin jefe asignado en BD';
   }
 
   obtenerTipoLiderActualForm(): 'INT' | 'EXT' {
-    return this.opcionesLider()[this.indiceLiderForm()]?.tipo ?? 'EXT';
+    const cli = this.clienteActualForm();
+    if (cli?.idLider) {
+      return cli.tipoLider;
+    }
+    return this.opcionesLider()[this.indiceLiderForm()]?.tipo ?? 'INT';
+  }
+
+  obtenerIdLiderActualForm(): number | null {
+    const cli = this.clienteActualForm();
+    if (cli?.idLider) {
+      return cli.idLider;
+    }
+    return this.opcionesLider()[this.indiceLiderForm()]?.idLider ?? null;
   }
 
   verFormulario(item: SolicitudColaboradorMock): void {
@@ -559,16 +572,21 @@ export class MisPermisosComponent implements OnInit {
   }
 
   obtenerDatosFormulario(item: SolicitudColaboradorMock): DatosFormularioOficial {
+    const etiquetaCliente =
+      item.cliente && item.proyecto
+        ? `${item.cliente} (${item.proyecto})`
+        : item.proyecto || item.cliente;
+
     return {
       idPermiso: item.id,
       folio: item.codigo,
-      diaSolicitud: '30',
-      mesSolicitud: '10',
-      anioSolicitud: '2026',
+      diaSolicitud: item.diaSolicitud || this.hoyDia,
+      mesSolicitud: item.mesSolicitud || this.hoyMes,
+      anioSolicitud: item.anioSolicitud || this.hoyAnio,
       apellidosNombres: item.colaborador || this.colaboradorNombre(),
       numeroCedula: item.cedula || this.colaboradorCedula(),
       cargo: item.cargo || this.colaboradorCargo(),
-      cliente: item.proyecto ? `${item.cliente} (${item.proyecto})` : item.cliente,
+      cliente: etiquetaCliente,
       jefeInmediato: item.lider,
       tipoPermiso: item.tipoOficial,
       motivos: item.motivo,
@@ -585,12 +603,13 @@ export class MisPermisosComponent implements OnInit {
       aprobacionLider: {
         aprobado: item.aprobadoLider,
         responsable: item.lider,
-        metodo: item.tipoLider === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder',
-        fecha: item.fechaAprobacion,
+        metodo:
+          item.metodoLider ||
+          (item.tipoLider === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder'),
       },
       aprobacionTalentoHumano: {
         aprobado: item.confirmadoRrhh,
-        responsable: 'Lic. Sofía Mendoza (TH)',
+        responsable: item.responsableRrhh || 'Talento Humano',
         fecha: item.confirmadoRrhh ? item.fechaAprobacion : undefined,
       },
       comentarios: item.comentarios,
@@ -598,8 +617,9 @@ export class MisPermisosComponent implements OnInit {
   }
 
   obtenerDatosBorradorFormulario(): DatosFormularioOficial {
-    const clienteOpt = this.opcionesCliente()[this.indiceClienteForm()] ?? this.opcionesCliente()[0];
-    const liderOpt = this.opcionesLider()[this.indiceLiderForm()] ?? this.opcionesLider()[0];
+    const clienteOpt = this.clienteActualForm();
+    const liderNombre = this.obtenerNombreLiderActualForm();
+    const liderTipo = this.obtenerTipoLiderActualForm();
 
     return {
       folio: `PER-${this.hoyAnio}-NUEVO`,
@@ -609,8 +629,8 @@ export class MisPermisosComponent implements OnInit {
       apellidosNombres: this.colaboradorNombre(),
       numeroCedula: this.colaboradorCedula(),
       cargo: this.colaboradorCargo(),
-      cliente: clienteOpt?.etiqueta ?? 'Integrity Solutions',
-      jefeInmediato: liderOpt?.nombre ?? 'Jefe Inmediato',
+      cliente: clienteOpt?.etiqueta ?? '',
+      jefeInmediato: liderNombre,
       tipoPermiso: this.tipoSeleccionado(),
       motivos: this.motivoForm(),
       evidenciaNombre: this.archivoEvidencia()?.name,
@@ -624,12 +644,12 @@ export class MisPermisosComponent implements OnInit {
       horasSolicitadas: this.textoHorasForm(),
       aprobacionLider: {
         aprobado: false,
-        responsable: liderOpt?.nombre ?? 'Jefe Inmediato',
-        metodo: liderOpt?.tipo === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder',
+        responsable: liderNombre,
+        metodo: liderTipo === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder',
       },
       aprobacionTalentoHumano: {
         aprobado: false,
-        responsable: 'Talento Humano ISC',
+        responsable: 'Talento Humano',
       },
       comentarios: 'En espera de aprobación del Jefe Inmediato y confirmación de Talento Humano.',
     };
@@ -657,18 +677,32 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
-    const clienteOpt = this.opcionesCliente()[this.indiceClienteForm()] ?? this.opcionesCliente()[0];
-    const liderOpt = this.opcionesLider()[this.indiceLiderForm()] ?? this.opcionesLider()[0];
+    const clienteOpt = this.clienteActualForm();
+    if (!clienteOpt) {
+      this.toast.error(
+        'Cliente / Proyecto requerido',
+        'Selecciona un Cliente / Proyecto activo desde la base de datos.',
+      );
+      return;
+    }
+
     const archivo = this.archivoEvidencia();
+    if (this.requiereCertificadoMedicoObligatorio() && !archivo) {
+      this.toast.error(
+        'Certificado médico obligatorio',
+        'Para colaboradores en nómina con licencia por enfermedad mayor a 1 día debes adjuntar el certificado médico (RF-004).',
+      );
+      return;
+    }
 
     this.guardandoSolicitud.set(true);
 
     this.permisosApi
       .crearSolicitud(
         {
-          idProyecto: clienteOpt?.idProyecto,
-          idCliente: clienteOpt?.idCliente,
-          idLider: liderOpt?.idLider,
+          idProyecto: clienteOpt.idProyecto,
+          idCliente: clienteOpt.idCliente,
+          idLider: this.obtenerIdLiderActualForm(),
           tipoOficial: this.tipoSeleccionado(),
           fechaInicio: this.fechaInicioForm(),
           fechaFin: this.fechaFinForm(),
@@ -684,83 +718,34 @@ export class MisPermisosComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.guardandoSolicitud.set(false);
-          if (res?.success && res.data) {
-            const nuevo = this.mapearApiAMock(res.data);
-            this.solicitudes.update((lista) => [nuevo, ...lista]);
-          } else {
-            this.insertarSolicitudLocalFallback(clienteOpt, liderOpt, archivo);
+          if (!res?.success || !res.data) {
+            this.toast.error(
+              'No se pudo registrar la solicitud',
+              res?.message || 'El servidor no devolvió los datos de la solicitud.',
+            );
+            return;
           }
+
+          const nuevo = this.mapearApiAMock(res.data);
+          this.solicitudes.update((lista) => [nuevo, ...lista]);
+          this.archivoEvidencia.set(null);
+          this.motivoForm.set('');
           this.modalNuevaVisible.set(false);
           this.toast.exito(
-            'Solicitud registrada y notificada vía Apprise',
-            'Se guardó tu solicitud con su evidencia y se envió correo personalizado con seguimiento de estado a ti, a tu Jefe Inmediato y a Talento Humano.',
+            `Solicitud ${nuevo.codigo} registrada`,
+            archivo
+              ? 'Tu solicitud y el adjunto en MinIO fueron guardados, y se enviaron las notificaciones correspondientes.'
+              : 'Tu solicitud fue registrada y notificada a tu Jefe Inmediato y a Talento Humano.',
           );
         },
-        error: () => {
+        error: (err) => {
           this.guardandoSolicitud.set(false);
-          this.insertarSolicitudLocalFallback(clienteOpt, liderOpt, archivo);
-          this.modalNuevaVisible.set(false);
-          this.toast.exito(
-            'Solicitud registrada y PDF generado',
-            'Se registró el formulario oficial y se programó la notificación vía Apprise a tu Jefe Inmediato y a Talento Humano.',
-          );
+          const detalle =
+            err?.error?.message ||
+            (Array.isArray(err?.error?.errors) && err.error.errors[0]) ||
+            'Error al comunicarse con el servidor o el almacenamiento MinIO.';
+          this.toast.error('No se pudo registrar la solicitud', detalle);
         },
       });
-  }
-
-  private insertarSolicitudLocalFallback(
-    clienteOpt: OpcionClienteProyecto | undefined,
-    liderOpt: OpcionLiderFormulario | undefined,
-    archivo: File | null,
-  ): void {
-    const num = this.solicitudes().length + 6;
-    const codigo = `PER-2026-${String(num).padStart(3, '0')}`;
-    const inicioDmy = isoADmy(this.fechaInicioForm());
-    const finDmy = isoADmy(this.fechaFinForm());
-
-    const etiquetasTipo: Record<TipoPermisoOficial, string> = {
-      VACACIONES: 'Vacaciones',
-      LICENCIA_ENFERMEDAD: 'Licencia por enfermedad',
-      CITAS_MEDICAS: 'Citas médicas',
-      MATRIMONIO: 'Matrimonio',
-      NACIMIENTO_HIJO: 'Nacimiento de un Hijo/a',
-      OTROS: 'Otros',
-      MATERNIDAD: 'Maternidad',
-      FALLECIMIENTO_FAMILIAR: 'Fallecimiento de un familiar',
-    };
-
-    const nueva: SolicitudColaboradorMock = {
-      id: Date.now(),
-      codigo,
-      colaborador: this.colaboradorNombre(),
-      cedula: this.colaboradorCedula(),
-      cargo: this.colaboradorCargo(),
-      tipo: etiquetasTipo[this.tipoSeleccionado()],
-      tipoOficial: this.tipoSeleccionado(),
-      motivo: this.motivoForm().trim(),
-      fechas: inicioDmy === finDmy ? inicioDmy : `${inicioDmy} - ${finDmy}`,
-      fechaInicio: inicioDmy,
-      fechaFin: finDmy,
-      fechaRegreso: isoADmy(this.fechaRegresoForm()),
-      fechaAprobacion: 'Pendiente',
-      diasSolicitados: this.textoDiasForm(),
-      horario: this.horarioSeleccionado(),
-      detalleHorario: this.detalleHorarioForm(),
-      horasSolicitadas: this.textoHorasForm(),
-      duracion: `${this.textoDiasForm()} (${this.horasCalculadasForm()} h)`,
-      cliente: clienteOpt?.cliente ?? 'Integrity Solutions',
-      proyecto: clienteOpt?.proyecto ?? 'Portal Web ISC',
-      lider: liderOpt?.nombre ?? 'Ing. Roberto Gómez',
-      tipoLider: liderOpt?.tipo ?? 'EXT',
-      evidencia: archivo?.name ?? null,
-      evidenciaUrl: archivo ? URL.createObjectURL(archivo) : null,
-      aprobadoLider: false,
-      confirmadoRrhh: false,
-      estadoClase: 'pendiente',
-      estadoTexto: 'Pendiente Jefe',
-      comentarios: 'Solicitud creada desde Formulario Oficial TMR. En espera de aprobación de Jefe Inmediato.',
-    };
-
-    this.solicitudes.update((lista) => [nueva, ...lista]);
   }
 }

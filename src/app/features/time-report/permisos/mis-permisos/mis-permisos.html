@@ -17,6 +17,10 @@
       <input
         class="filter-control"
         type="text"
+        name="busquedaSolicitudes"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         placeholder="Código, tipo, cliente, proyecto, líder, días, horas, estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)" />
@@ -24,7 +28,7 @@
 
     <div class="filter-group">
       <label class="filter-label">Período</label>
-      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+      <select class="filter-control" name="periodoFiltro" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
         <option value="TODOS">Todos</option>
         <option value="HOY">Hoy</option>
         <option value="ESTA_SEMANA">Esta semana</option>
@@ -40,6 +44,7 @@
       <label class="filter-label">Desde</label>
       <input
         type="date"
+        name="fechaDesdeFiltro"
         class="filter-control"
         [ngModel]="fechaDesde()"
         (ngModelChange)="cambiarFechaDesde($event)" />
@@ -49,6 +54,7 @@
       <label class="filter-label">Hasta</label>
       <input
         type="date"
+        name="fechaHastaFiltro"
         class="filter-control"
         [ngModel]="fechaHasta()"
         (ngModelChange)="cambiarFechaHasta($event)" />
@@ -56,22 +62,28 @@
 
     <div class="filter-group">
       <label class="filter-label">Tipo</label>
-      <select class="filter-control" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+      <select class="filter-control" name="tipoFiltro" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
         <option value="">Todos</option>
-        <option value="VACACIONES">Vacaciones</option>
-        <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
-        <option value="CITAS_MEDICAS">Citas médicas</option>
-        <option value="MATRIMONIO">Matrimonio</option>
-        <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
-        <option value="MATERNIDAD">Maternidad</option>
-        <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
-        <option value="OTROS">Otros</option>
+        @if (tiposPermisoCatalogo().length > 0) {
+          @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
+            <option [value]="tp.codigo">{{ tp.nombre }}</option>
+          }
+        } @else {
+          <option value="VACACIONES">Vacaciones</option>
+          <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+          <option value="CITAS_MEDICAS">Citas médicas</option>
+          <option value="MATRIMONIO">Matrimonio</option>
+          <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+          <option value="MATERNIDAD">Maternidad</option>
+          <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+          <option value="OTROS">Otros</option>
+        }
       </select>
     </div>
 
     <div class="filter-group">
       <label class="filter-label">Estado</label>
-      <select class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+      <select class="filter-control" name="estadoFiltro" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
         <option value="">Todos</option>
         <option value="pendiente">Pendiente Jefe</option>
         <option value="rrhh">En Talento Humano</option>
@@ -192,145 +204,223 @@
           </table>
         </div>
 
-        <!-- TABLA 2: DATOS DEL COLABORADOR -->
-        <div class="isc-table-scroll">
+        <!-- TABLA 2: DATOS DEL COLABORADOR (RF-001: Autocompletado desde BD + Buscador Cliente/Proyecto -> Jefe Inmediato) -->
+        <div class="isc-table-scroll isc-table-scroll--overflow-visible">
           <table class="isc-table">
             <thead>
               <tr>
                 <th colspan="5" class="isc-table__th-grey">DATOS DEL COLABORADOR</th>
               </tr>
               <tr>
-                <th class="isc-table__th-sub" style="width: 22%;">Apellidos y nombres</th>
-                <th class="isc-table__th-sub" style="width: 14%;">Número de cédula</th>
-                <th class="isc-table__th-sub" style="width: 18%;">Cargo</th>
-                <th class="isc-table__th-sub" style="width: 24%;">Cliente / Proyecto *</th>
-                <th class="isc-table__th-sub" style="width: 22%;">Jefe inmediato *</th>
+                <th class="isc-table__th-sub" style="width: 21%;">Apellidos y nombres</th>
+                <th class="isc-table__th-sub" style="width: 13%;">Número de cédula</th>
+                <th class="isc-table__th-sub" style="width: 16%;">Cargo</th>
+                <th class="isc-table__th-sub" style="width: 27%;">Cliente / Proyecto *</th>
+                <th class="isc-table__th-sub" style="width: 23%;">Jefe inmediato *</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="isc-table__td-center">{{ colaboradorNombre() }}</td>
-                <td class="isc-table__td-center">{{ colaboradorCedula() }}</td>
-                <td class="isc-table__td-center">{{ colaboradorCargo() }}</td>
-                <td class="isc-table__td-center">
-                  <select
-                    class="isc-inline-select"
-                    [ngModel]="indiceClienteForm()"
-                    (ngModelChange)="seleccionarClienteForm($event)">
-                    @for (c of opcionesCliente(); track c.etiqueta; let idx = $index) {
-                      <option [value]="idx">{{ c.etiqueta }}</option>
+                <td class="isc-table__td-center">{{ colaboradorNombre() || '—' }}</td>
+                <td class="isc-table__td-center">{{ colaboradorCedula() || '—' }}</td>
+                <td class="isc-table__td-center">{{ colaboradorCargo() || '—' }}</td>
+                <td class="isc-table__td-center isc-combobox-cell">
+                  <div class="isc-combobox">
+                    <div class="isc-combobox__control">
+                      <span class="material-symbols-outlined isc-combobox__icon">search</span>
+                      <input
+                        type="text"
+                        name="clienteProyectoBusqueda"
+                        class="isc-inline-input isc-combobox__input"
+                        placeholder="Buscar cliente o proyecto..."
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        role="combobox"
+                        aria-label="Buscar cliente o proyecto"
+                        [attr.aria-expanded]="comboboxClienteAbierto()"
+                        [ngModel]="valorInputClienteProyecto()"
+                        (focus)="abrirBuscadorCliente()"
+                        (click)="abrirBuscadorCliente()"
+                        (ngModelChange)="alEscribirBusquedaCliente($event)"
+                        (keydown)="alTeclaBuscadorCliente($event)"
+                        (blur)="cerrarBuscadorClienteConRetardo()" />
+                    </div>
+
+                    @if (comboboxClienteAbierto()) {
+                      <ul class="isc-combobox__menu" role="listbox">
+                        @for (opt of opcionesClienteFiltradas(); track opt.indiceOriginal) {
+                          <li
+                            role="option"
+                            class="isc-combobox__option"
+                            [class.isc-combobox__option--selected]="opt.indiceOriginal === indiceClienteForm()"
+                            [attr.aria-selected]="opt.indiceOriginal === indiceClienteForm()"
+                            (mousedown)="elegirOpcionCliente(opt, $event)">
+                            <div class="isc-combobox__option-main">
+                              <span>{{ opt.etiqueta }}</span>
+                              @if (opt.esAsignacionPropia) {
+                                <span class="isc-combobox__badge">Asignado</span>
+                              }
+                            </div>
+                            <div class="isc-combobox__option-sub">
+                              Jefe inmediato:
+                              <strong>{{ opt.liderNombre || 'Sin líder en proyecto' }}</strong>
+                              @if (opt.liderNombre) {
+                                <span>({{ opt.tipoLider === 'EXT' ? 'Externo' : 'Interno' }})</span>
+                              }
+                            </div>
+                          </li>
+                        } @empty {
+                          <li class="isc-combobox__empty">
+                            No se encontraron clientes o proyectos activos en BD.
+                          </li>
+                        }
+                      </ul>
                     }
-                  </select>
+                  </div>
                 </td>
                 <td class="isc-table__td-center">
-                  <select
-                    class="isc-inline-select"
-                    [ngModel]="indiceLiderForm()"
-                    (ngModelChange)="indiceLiderForm.set(+$event)">
-                    @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
-                      <option [value]="idx">{{ l.etiqueta }}</option>
-                    }
-                  </select>
+                  @if (clienteActualForm()?.liderNombre; as liderAuto) {
+                    <div class="isc-lider-autofill" title="Autocompletado según el Cliente / Proyecto seleccionado">
+                      <span class="isc-lider-autofill__name">{{ liderAuto }}</span>
+                      <span
+                        class="tag-lider"
+                        [class.tag-lider--int]="obtenerTipoLiderActualForm() === 'INT'"
+                        [class.tag-lider--ext]="obtenerTipoLiderActualForm() === 'EXT'">
+                        {{ obtenerTipoLiderActualForm() }}
+                      </span>
+                    </div>
+                  } @else {
+                    <select
+                      name="liderSeleccionado"
+                      class="isc-inline-select"
+                      [ngModel]="indiceLiderForm()"
+                      (ngModelChange)="indiceLiderForm.set(+$event)">
+                      @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
+                        <option [value]="idx">{{ l.etiqueta }}</option>
+                      } @empty {
+                        <option [value]="0" disabled>Sin líderes activos en BD</option>
+                      }
+                    </select>
+                  }
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- SECCIÓN 3: TIPO DE PERMISO DE AUSENCIA DE TRABAJO (INTERACTIVO CON X) -->
+        <!-- SECCIÓN 3: TIPO DE PERMISO DE AUSENCIA DE TRABAJO (LEÍDO DE CATÁLOGO BD RF-002) -->
         <div class="isc-section-bar">TIPO DE PERMISO DE AUSENCIA DE TRABAJO</div>
         <div class="isc-section-instruction">
           Favor marcar con una X el tipo de permiso solicitado (haz clic sobre el tipo):
         </div>
 
         <div class="isc-checkbox-grid">
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'VACACIONES'"
-            (click)="tipoSeleccionado.set('VACACIONES')">
-            <span class="isc-checkbox-item__label">Vacaciones</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'VACACIONES'">
-              {{ tipoSeleccionado() === 'VACACIONES' ? 'X' : '' }}
-            </span>
-          </div>
+          @if (tiposPermisoCatalogo().length > 0) {
+            @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
+              <div
+                class="isc-checkbox-item isc-checkbox-item--clickable"
+                [class.isc-checkbox-item--active]="tipoSeleccionado() === tp.codigo"
+                (click)="tipoSeleccionado.set(tp.codigo)">
+                <span class="isc-checkbox-item__label">{{ tp.nombre }}</span>
+                <span
+                  class="isc-checkbox-item__box"
+                  [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === tp.codigo">
+                  {{ tipoSeleccionado() === tp.codigo ? 'X' : '' }}
+                </span>
+              </div>
+            }
+            <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
+          } @else {
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'VACACIONES'"
+              (click)="tipoSeleccionado.set('VACACIONES')">
+              <span class="isc-checkbox-item__label">Vacaciones</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'VACACIONES'">
+                {{ tipoSeleccionado() === 'VACACIONES' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'"
-            (click)="tipoSeleccionado.set('LICENCIA_ENFERMEDAD')">
-            <span class="isc-checkbox-item__label">Licencia por enfermedad</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'">
-              {{ tipoSeleccionado() === 'LICENCIA_ENFERMEDAD' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'"
+              (click)="tipoSeleccionado.set('LICENCIA_ENFERMEDAD')">
+              <span class="isc-checkbox-item__label">Licencia por enfermedad</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'">
+                {{ tipoSeleccionado() === 'LICENCIA_ENFERMEDAD' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'CITAS_MEDICAS'"
-            (click)="tipoSeleccionado.set('CITAS_MEDICAS')">
-            <span class="isc-checkbox-item__label">Citas médicas</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'CITAS_MEDICAS'">
-              {{ tipoSeleccionado() === 'CITAS_MEDICAS' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'CITAS_MEDICAS'"
+              (click)="tipoSeleccionado.set('CITAS_MEDICAS')">
+              <span class="isc-checkbox-item__label">Citas médicas</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'CITAS_MEDICAS'">
+                {{ tipoSeleccionado() === 'CITAS_MEDICAS' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATRIMONIO'"
-            (click)="tipoSeleccionado.set('MATRIMONIO')">
-            <span class="isc-checkbox-item__label">Matrimonio</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATRIMONIO'">
-              {{ tipoSeleccionado() === 'MATRIMONIO' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATRIMONIO'"
+              (click)="tipoSeleccionado.set('MATRIMONIO')">
+              <span class="isc-checkbox-item__label">Matrimonio</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATRIMONIO'">
+                {{ tipoSeleccionado() === 'MATRIMONIO' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'NACIMIENTO_HIJO'"
-            (click)="tipoSeleccionado.set('NACIMIENTO_HIJO')">
-            <span class="isc-checkbox-item__label">Nacimiento de un Hijo/a</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'NACIMIENTO_HIJO'">
-              {{ tipoSeleccionado() === 'NACIMIENTO_HIJO' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'NACIMIENTO_HIJO'"
+              (click)="tipoSeleccionado.set('NACIMIENTO_HIJO')">
+              <span class="isc-checkbox-item__label">Nacimiento de un Hijo/a</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'NACIMIENTO_HIJO'">
+                {{ tipoSeleccionado() === 'NACIMIENTO_HIJO' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'OTROS'"
-            (click)="tipoSeleccionado.set('OTROS')">
-            <span class="isc-checkbox-item__label">Otros</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'OTROS'">
-              {{ tipoSeleccionado() === 'OTROS' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'OTROS'"
+              (click)="tipoSeleccionado.set('OTROS')">
+              <span class="isc-checkbox-item__label">Otros</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'OTROS'">
+                {{ tipoSeleccionado() === 'OTROS' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATERNIDAD'"
-            (click)="tipoSeleccionado.set('MATERNIDAD')">
-            <span class="isc-checkbox-item__label">Maternidad</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATERNIDAD'">
-              {{ tipoSeleccionado() === 'MATERNIDAD' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATERNIDAD'"
+              (click)="tipoSeleccionado.set('MATERNIDAD')">
+              <span class="isc-checkbox-item__label">Maternidad</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATERNIDAD'">
+                {{ tipoSeleccionado() === 'MATERNIDAD' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div
-            class="isc-checkbox-item isc-checkbox-item--clickable"
-            [class.isc-checkbox-item--active]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'"
-            (click)="tipoSeleccionado.set('FALLECIMIENTO_FAMILIAR')">
-            <span class="isc-checkbox-item__label">Fallecimiento de un familiar</span>
-            <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'">
-              {{ tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR' ? 'X' : '' }}
-            </span>
-          </div>
+            <div
+              class="isc-checkbox-item isc-checkbox-item--clickable"
+              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'"
+              (click)="tipoSeleccionado.set('FALLECIMIENTO_FAMILIAR')">
+              <span class="isc-checkbox-item__label">Fallecimiento de un familiar</span>
+              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'">
+                {{ tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR' ? 'X' : '' }}
+              </span>
+            </div>
 
-          <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
+            <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
+          }
         </div>
 
         <!-- SECCIÓN 4: MOTIVOS Y CARGA DE EVIDENCIA (MINIO / STORAGE) -->
         <div class="isc-section-bar">MOTIVOS DEL PERMISO LABORAL O VACACIONAL</div>
         <div class="isc-text-box">
           <textarea
+            name="motivoSolicitud"
             class="isc-motivo-textarea"
             rows="2"
             placeholder="Describe el motivo detallado de la solicitud y la coordinación de actividades..."
@@ -341,11 +431,12 @@
             <label class="isc-upload-bar__trigger">
               <input
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                style="display: none;"
+                name="evidencia"
+                accept=".pdf,.jpg,.jpeg,.png"
+                class="isc-upload-bar__input-sr"
                 (change)="alSeleccionarArchivoEvidencia($event)" />
               <span class="material-symbols-outlined" style="font-size: 17px;">cloud_upload</span>
-              <span>Adjuntar evidencia de respaldo (.pdf, .jpg, .png — máx. 10 MB)</span>
+              <span>Adjuntar evidencia de respaldo (.pdf, .jpg, .jpeg, .png — máx. 5 MB)@if (requiereCertificadoMedicoObligatorio()) { <strong style="color: #dc2626;">* Obligatorio</strong> }</span>
             </label>
 
             @if (archivoEvidencia(); as file) {
@@ -377,6 +468,7 @@
                 <td class="isc-table__td-center isc-table__td-tall">
                   <input
                     type="date"
+                    name="fechaInicioSolicitud"
                     class="isc-inline-date"
                     [ngModel]="fechaInicioForm()"
                     (ngModelChange)="cambiarFechaInicioForm($event)" />
@@ -384,6 +476,7 @@
                 <td class="isc-table__td-center isc-table__td-tall">
                   <input
                     type="date"
+                    name="fechaFinSolicitud"
                     class="isc-inline-date"
                     [ngModel]="fechaFinForm()"
                     (ngModelChange)="cambiarFechaFinForm($event)" />
@@ -391,6 +484,7 @@
                 <td class="isc-table__td-center isc-table__td-tall">
                   <input
                     type="date"
+                    name="fechaRegresoSolicitud"
                     class="isc-inline-date"
                     [ngModel]="fechaRegresoForm()"
                     (ngModelChange)="fechaRegresoForm.set($event)" />
@@ -472,6 +566,7 @@
                     <strong class="isc-mark-x">X</strong>
                     <input
                       type="text"
+                      name="detalleHorarioOtros"
                       class="isc-inline-input"
                       style="margin-top: 3px;"
                       placeholder="Ej. 10:00 - 12:00"
@@ -490,7 +585,7 @@
         </div>
 
         <!-- SECCIÓN 7: TRAZABILIDAD DE APROBACIÓN EN SISTEMA -->
-        <div class="isc-section-bar">FLUJO DE APROBACIÓN Y NOTIFICACIÓN APPRISE</div>
+        <div class="isc-section-bar">FLUJO DE APROBACIÓN Y NOTIFICACIÓN</div>
         <div class="isc-table-scroll" style="margin-bottom: 0;">
           <table class="isc-table" style="margin-top: -1px;">
             <thead>
@@ -503,7 +598,7 @@
             <tbody>
               <tr>
                 <td class="isc-table__td-center">
-                  <div><strong>{{ colaboradorNombre() }}</strong></div>
+                  <div><strong>{{ colaboradorNombre() || '—' }}</strong></div>
                   <div class="isc-schedule-detail">Notificación de seguimiento por correo</div>
                 </td>
                 <td class="isc-table__td-center">
@@ -513,7 +608,7 @@
                   </div>
                 </td>
                 <td class="isc-table__td-center">
-                  <div><strong>Talento Humano ISC</strong></div>
+                  <div><strong>Talento Humano</strong></div>
                   <div class="isc-schedule-detail">Confirmación final tras aprobación del líder</div>
                 </td>
               </tr>

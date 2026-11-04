@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   HorarioPermisoOficial,
@@ -23,6 +24,8 @@ export interface ProyectoAsignadoPermisoApi {
   liderNombre: string;
   liderTipo: 'INT' | 'EXT';
   liderCorreo?: string | null;
+  idAsignacionProyecto?: number | null;
+  esAsignacionPropia?: boolean;
 }
 
 export interface LiderDisponiblePermisoApi {
@@ -30,6 +33,17 @@ export interface LiderDisponiblePermisoApi {
   nombre: string;
   tipo: 'INT' | 'EXT';
   correo?: string | null;
+  esNomina?: boolean;
+  tipoContrato?: string;
+}
+
+export interface TipoPermisoCatalogoApi {
+  id: number;
+  codigo: TipoPermisoOficial;
+  codigoCorto: string;
+  nombre: string;
+  requiereAdjunto: boolean;
+  orden: number;
 }
 
 export interface ContextoColaboradorPermisoApi {
@@ -40,12 +54,15 @@ export interface ContextoColaboradorPermisoApi {
   cargo: string;
   area?: string | null;
   correo?: string | null;
+  esNomina?: boolean;
+  tipoContrato?: string;
   diasDisponibles: number;
   enProceso: number;
   aprobados: number;
   horasAcumuladas: number;
   proyectosAsignados: ProyectoAsignadoPermisoApi[];
   lideresDisponibles: LiderDisponiblePermisoApi[];
+  tiposPermiso?: TipoPermisoCatalogoApi[];
 }
 
 export interface PermisoItemApi {
@@ -130,12 +147,39 @@ export class PermisosApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/permisos`;
 
+  /**
+   * ApiResponseInterceptor extrae automáticamente body.data cuando el backend devuelve ApiResponse<T>.
+   * Este normalizador soporta tanto la respuesta ya desenvuelta como el sobre completo ApiEnvelope<T>.
+   */
+  private normalizarEnvelope<T>(raw: unknown): ApiEnvelope<T> {
+    if (
+      raw &&
+      typeof raw === 'object' &&
+      !Array.isArray(raw) &&
+      'success' in (raw as Record<string, unknown>) &&
+      'data' in (raw as Record<string, unknown>)
+    ) {
+      return raw as ApiEnvelope<T>;
+    }
+
+    return {
+      success: raw !== null && raw !== undefined,
+      statusCode: 200,
+      message: 'OK',
+      data: raw as T,
+    };
+  }
+
   obtenerContexto(): Observable<ApiEnvelope<ContextoColaboradorPermisoApi>> {
-    return this.http.get<ApiEnvelope<ContextoColaboradorPermisoApi>>(`${this.baseUrl}/contexto`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/contexto`)
+      .pipe(map((raw) => this.normalizarEnvelope<ContextoColaboradorPermisoApi>(raw)));
   }
 
   obtenerMisPermisos(): Observable<ApiEnvelope<PermisoItemApi[]>> {
-    return this.http.get<ApiEnvelope<PermisoItemApi[]>>(`${this.baseUrl}/mis-permisos`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/mis-permisos`)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
   crearSolicitud(
@@ -157,14 +201,20 @@ export class PermisosApiService {
       if (payload.totalHoras !== undefined) formData.append('totalHoras', String(payload.totalHoras));
       formData.append('motivo', payload.motivo);
       formData.append('evidencia', archivoEvidencia, archivoEvidencia.name);
-      return this.http.post<ApiEnvelope<PermisoItemApi>>(`${this.baseUrl}/con-evidencia`, formData);
+      return this.http
+        .post<unknown>(`${this.baseUrl}/con-evidencia`, formData)
+        .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
     }
 
-    return this.http.post<ApiEnvelope<PermisoItemApi>>(this.baseUrl, payload);
+    return this.http
+      .post<unknown>(this.baseUrl, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   obtenerEquipo(): Observable<ApiEnvelope<PermisoItemApi[]>> {
-    return this.http.get<ApiEnvelope<PermisoItemApi[]>>(`${this.baseUrl}/equipo`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/equipo`)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
   registrarDecisionLider(
@@ -172,14 +222,18 @@ export class PermisosApiService {
     accion: 'aprobar' | 'observar' | 'rechazar',
     comentario: string,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
-    return this.http.post<ApiEnvelope<PermisoItemApi>>(`${this.baseUrl}/${id}/decision-lider`, {
-      accion,
-      comentario,
-    });
+    return this.http
+      .post<unknown>(`${this.baseUrl}/${id}/decision-lider`, {
+        accion,
+        comentario,
+      })
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   obtenerBandejaRrhh(): Observable<ApiEnvelope<PermisoItemApi[]>> {
-    return this.http.get<ApiEnvelope<PermisoItemApi[]>>(`${this.baseUrl}/rrhh`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh`)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
   registrarDecisionRrhh(
@@ -188,26 +242,31 @@ export class PermisosApiService {
     impactoTimeReport: 'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO',
     observacion: string,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
-    return this.http.post<ApiEnvelope<PermisoItemApi>>(`${this.baseUrl}/${id}/decision-rrhh`, {
-      accion,
-      impactoTimeReport,
-      observacion,
-    });
+    return this.http
+      .post<unknown>(`${this.baseUrl}/${id}/decision-rrhh`, {
+        accion,
+        impactoTimeReport,
+        observacion,
+      })
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   reenviarEnlaceExterno(id: number): Observable<ApiEnvelope<PermisoItemApi>> {
-    return this.http.post<ApiEnvelope<PermisoItemApi>>(
-      `${this.baseUrl}/${id}/reenviar-enlace`,
-      {},
-    );
+    return this.http
+      .post<unknown>(`${this.baseUrl}/${id}/reenviar-enlace`, {})
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   obtenerHistorialGerencia(): Observable<ApiEnvelope<PermisoItemApi[]>> {
-    return this.http.get<ApiEnvelope<PermisoItemApi[]>>(`${this.baseUrl}/gerencia`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/gerencia`)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
   obtenerPorTokenExterno(token: string): Observable<ApiEnvelope<PermisoItemApi>> {
-    return this.http.get<ApiEnvelope<PermisoItemApi>>(`${this.baseUrl}/externo/${encodeURIComponent(token)}`);
+    return this.http
+      .get<unknown>(`${this.baseUrl}/externo/${encodeURIComponent(token)}`)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   registrarDecisionExterna(
@@ -215,14 +274,24 @@ export class PermisosApiService {
     accion: 'aprobar' | 'rechazar',
     comentario: string,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
-    return this.http.post<ApiEnvelope<PermisoItemApi>>(
-      `${this.baseUrl}/externo/${encodeURIComponent(token)}/decision`,
-      { accion, comentario },
-    );
+    return this.http
+      .post<unknown>(`${this.baseUrl}/externo/${encodeURIComponent(token)}/decision`, {
+        accion,
+        comentario,
+      })
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
   obtenerUrlEvidencia(id: number): string {
     return `${this.baseUrl}/${id}/evidencia`;
+  }
+
+  descargarEvidenciaBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/evidencia`, { responseType: 'blob' });
+  }
+
+  obtenerUrlEvidenciaExterna(token: string): string {
+    return `${this.baseUrl}/externo/${encodeURIComponent(token)}/evidencia`;
   }
 
   obtenerUrlPdfBackend(id: number): string {

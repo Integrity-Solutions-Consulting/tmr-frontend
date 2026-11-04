@@ -23,6 +23,9 @@ import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
 export interface SolicitudRrhhMock {
   id: number;
   folio: string;
+  diaSolicitud?: string;
+  mesSolicitud?: string;
+  anioSolicitud?: string;
   colaborador: string;
   cedula: string;
   codigoColaborador: string;
@@ -96,153 +99,7 @@ export class GestionRrhhComponent implements OnInit {
   readonly observacionesRrhh = signal('');
   readonly impactoSeleccionado = signal<'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO'>('RESTA_META');
 
-  readonly solicitudes = signal<SolicitudRrhhMock[]>([
-    {
-      id: 1,
-      folio: 'SOL-2026-0141',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      codigoColaborador: 'EMP-0104',
-      cargo: 'Desarrollador Fullstack Senior',
-      area: 'Fábrica de Software / Core Financiero',
-      cliente: 'Banco del Pacífico',
-      proyecto: 'Core Bancario BDP',
-      tipo: 'Citas médicas',
-      tipoOficial: 'CITAS_MEDICAS',
-      periodo: '18/11/2026 (08:30 - 12:30)',
-      fechaInicio: '18/11/2026',
-      fechaFin: '18/11/2026',
-      fechaRegreso: '18/11/2026 (13:30)',
-      diasSolicitados: '0.5 días',
-      horario: 'MANANA',
-      detalleHorario: '08:30 - 12:30',
-      duracion: '4 horas',
-      horasEquivalentes: 4,
-      liderNombre: 'Ing. Roberto Gómez',
-      liderTipo: 'Externo',
-      liderEmpresa: 'Banco del Pacífico',
-      liderCorreo: 'rgomez@bdp.com.ec',
-      metodoConfirmacionLider: 'Aprobado vía Magic Link',
-      fechaConfirmacionLider: '30/10/2026',
-      comentarioLider: 'Confirmado. Las entregas del sprint están cubiertas con el equipo.',
-      motivo: 'Control médico especializado programado con laboratorio clínico.',
-      evidencia: 'constancia_cita_medica.pdf (420 KB)',
-      goceSueldo: 'Con goce de sueldo',
-      impactoTimeReport: 'RESTA_META',
-      aprobadoLider: true,
-      confirmadoRrhh: false,
-      estado: 'CONFIRMADO_LIDER',
-      estadoClase: 'rrhh',
-      estadoTexto: 'En Talento Humano',
-    },
-    {
-      id: 2,
-      folio: 'SOL-2026-0139',
-      colaborador: 'Pazmiño Silvia',
-      cedula: '1714567890',
-      codigoColaborador: 'EMP-0082',
-      cargo: 'Ingeniera de Software',
-      area: 'Producto Digital',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Producto Digital',
-      tipo: 'Fallecimiento de un familiar',
-      tipoOficial: 'FALLECIMIENTO_FAMILIAR',
-      periodo: '11/11/2026 - 13/11/2026',
-      fechaInicio: '11/11/2026',
-      fechaFin: '13/11/2026',
-      fechaRegreso: '16/11/2026',
-      diasSolicitados: '3 días laborables',
-      horario: 'COMPLETA',
-      duracion: '3 días (24 hrs)',
-      horasEquivalentes: 24,
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'Interno',
-      metodoConfirmacionLider: 'Aprobado desde Cuenta TMR Líder',
-      fechaConfirmacionLider: '30/10/2026',
-      comentarioLider: 'Aprobado de inmediato según reglamento interno.',
-      motivo: 'Licencia por fallecimiento de familiar cercano.',
-      evidencia: 'acta_defuncion_familiar.pdf (510 KB)',
-      goceSueldo: 'Con goce de sueldo',
-      impactoTimeReport: 'RESTA_META',
-      aprobadoLider: true,
-      confirmadoRrhh: false,
-      estado: 'CONFIRMADO_LIDER',
-      estadoClase: 'rrhh',
-      estadoTexto: 'En Talento Humano',
-    },
-    {
-      id: 3,
-      folio: 'SOL-2026-0145',
-      colaborador: 'Vera Cristopher',
-      cedula: '0928374651',
-      codigoColaborador: 'EMP-0129',
-      cargo: 'Desarrollador Fullstack',
-      area: 'Banca Digital Regional',
-      cliente: 'Banco Guayaquil',
-      proyecto: 'Banca Digital',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      periodo: '16/11/2026 - 20/11/2026',
-      fechaInicio: '16/11/2026',
-      fechaFin: '20/11/2026',
-      fechaRegreso: '23/11/2026',
-      diasSolicitados: '5 días laborables',
-      horario: 'COMPLETA',
-      duracion: '5 días (40 hrs)',
-      horasEquivalentes: 40,
-      liderNombre: 'Lic. Mariana Solís',
-      liderTipo: 'Externo',
-      liderEmpresa: 'Banco Guayaquil',
-      liderCorreo: 'msolis@bancoguayaquil.com',
-      metodoConfirmacionLider: 'Magic Link enviado (Expira en 48h)',
-      fechaConfirmacionLider: 'Pendiente',
-      comentarioLider: '',
-      motivo: 'Vacaciones anuales correspondientes al período vigente.',
-      goceSueldo: 'Con goce de sueldo (Vacaciones)',
-      impactoTimeReport: 'RESTA_META',
-      aprobadoLider: false,
-      confirmadoRrhh: false,
-      estado: 'PENDIENTE_LIDER_EXT',
-      estadoClase: 'pendiente',
-      estadoTexto: 'Pendiente Jefe',
-    },
-    {
-      id: 4,
-      folio: 'SOL-2026-0098',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      codigoColaborador: 'EMP-0104',
-      cargo: 'Desarrollador Fullstack Senior',
-      area: 'Fábrica de Software / Core Financiero',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      periodo: '05/10/2026 - 07/10/2026',
-      fechaInicio: '05/10/2026',
-      fechaFin: '07/10/2026',
-      fechaRegreso: '08/10/2026',
-      diasSolicitados: '3 días laborables',
-      horario: 'COMPLETA',
-      duracion: '3 días (24 hrs)',
-      horasEquivalentes: 24,
-      liderNombre: 'Ing. Carlos Méndez',
-      liderTipo: 'Interno',
-      metodoConfirmacionLider: 'Aprobado desde Cuenta TMR Líder',
-      fechaConfirmacionLider: '01/10/2026',
-      comentarioLider: 'Aprobado sin inconvenientes.',
-      motivo: 'Descanso programado.',
-      goceSueldo: 'Con goce de sueldo (Vacaciones)',
-      impactoTimeReport: 'RESTA_META',
-      aprobadoLider: true,
-      confirmadoRrhh: true,
-      estado: 'APROBADO_RRHH',
-      estadoClase: 'confirmado',
-      estadoTexto: 'Confirmado',
-      fechaConfirmacionRrhh: '02/10/2026',
-      responsableRrhh: 'Lic. Sofía Mendoza (TH)',
-    },
-  ]);
+  readonly solicitudes = signal<SolicitudRrhhMock[]>([]);
 
   ngOnInit(): void {
     this.cargarBandejaDesdeApi();
@@ -251,12 +108,15 @@ export class GestionRrhhComponent implements OnInit {
   cargarBandejaDesdeApi(): void {
     this.apiService.obtenerBandejaRrhh().subscribe({
       next: res => {
-        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res?.success && Array.isArray(res.data)) {
           this.solicitudes.set(res.data.map(item => this.mapearDesdeApi(item)));
         }
       },
-      error: () => {
-        // Fallback amigable a datos locales
+      error: err => {
+        this.toast.error(
+          'No se pudo cargar la bandeja de RRHH',
+          err?.error?.message || 'Verifica tus permisos o la conexión con el servidor.',
+        );
       },
     });
   }
@@ -265,6 +125,9 @@ export class GestionRrhhComponent implements OnInit {
     return {
       id: item.id,
       folio: item.codigo,
+      diaSolicitud: item.diaSolicitud,
+      mesSolicitud: item.mesSolicitud,
+      anioSolicitud: item.anioSolicitud,
       colaborador: item.colaborador,
       cedula: item.cedula,
       codigoColaborador: item.codigoColaborador,
@@ -292,7 +155,7 @@ export class GestionRrhhComponent implements OnInit {
       comentarioLider: item.comentarioLider ?? '',
       motivo: item.motivo,
       evidencia: item.evidenciaNombre ?? undefined,
-      evidenciaUrl: item.evidenciaUrl ?? undefined,
+      evidenciaUrl: item.tieneEvidencia ? this.apiService.obtenerUrlEvidencia(item.id) : undefined,
       goceSueldo: item.tipoOficial === 'VACACIONES' ? 'Con goce de sueldo (Vacaciones)' : 'Con goce de sueldo',
       impactoTimeReport: item.impactoTimeReport ?? 'RESTA_META',
       aprobadoLider: item.aprobadoLider,
@@ -390,9 +253,7 @@ export class GestionRrhhComponent implements OnInit {
   abrirModalValidacion(item: SolicitudRrhhMock): void {
     this.solicitudActiva.set(item);
     this.impactoSeleccionado.set(item.impactoTimeReport);
-    this.observacionesRrhh.set(
-      'Validado conforme a política de Talento Humano. Se procede a generar el PDF definitivo y ajustar horas del período en Time Report.',
-    );
+    this.observacionesRrhh.set('');
     this.modalValidacionAbierto.set(true);
   }
 
@@ -407,10 +268,11 @@ export class GestionRrhhComponent implements OnInit {
 
   obtenerDatosFormulario(sol: SolicitudRrhhMock): DatosFormularioOficial {
     return {
+      idPermiso: sol.id,
       folio: sol.folio,
-      diaSolicitud: sol.fechaInicio.slice(0, 2) || '30',
-      mesSolicitud: sol.fechaInicio.slice(3, 5) || '10',
-      anioSolicitud: sol.fechaInicio.slice(6, 10) || '2026',
+      diaSolicitud: sol.diaSolicitud || sol.fechaInicio.slice(0, 2) || '01',
+      mesSolicitud: sol.mesSolicitud || sol.fechaInicio.slice(3, 5) || '01',
+      anioSolicitud: sol.anioSolicitud || sol.fechaInicio.slice(6, 10) || String(new Date().getFullYear()),
       apellidosNombres: sol.colaborador,
       numeroCedula: sol.cedula,
       cargo: sol.cargo,
@@ -420,6 +282,7 @@ export class GestionRrhhComponent implements OnInit {
       motivos: sol.motivo,
       evidenciaNombre: sol.evidencia,
       evidenciaUrl: sol.evidenciaUrl,
+      evidenciaUrlDescarga: sol.evidenciaUrl,
       fechaInicio: sol.fechaInicio,
       fechaFinalizacion: sol.fechaFin,
       fechaRegreso: sol.fechaRegreso,
@@ -453,10 +316,10 @@ export class GestionRrhhComponent implements OnInit {
           `Se envió un nuevo correo con enlace único a ${item.liderCorreo || item.liderNombre}.`,
         );
       },
-      error: () => {
-        this.toast.exito(
-          'Magic Link reenviado vía Apprise',
-          `Se envió un nuevo correo con enlace único a ${item.liderCorreo || item.liderNombre}.`,
+      error: err => {
+        this.toast.error(
+          'No se pudo reenviar el Magic Link',
+          err?.error?.message || 'Verifica la configuración de correo del líder externo.',
         );
       },
     });
@@ -472,7 +335,7 @@ export class GestionRrhhComponent implements OnInit {
         actual.id,
         'confirmar',
         this.impactoSeleccionado(),
-        this.observacionesRrhh(),
+        this.observacionesRrhh().trim(),
       )
       .subscribe({
         next: res => {
@@ -480,52 +343,35 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update(lista => lista.map(s => (s.id === actual.id ? mapeada : s)));
-          } else {
-            this.aplicarConfirmacionLocal(actual);
           }
           this.modalValidacionAbierto.set(false);
           this.toast.exito(
             'Solicitud confirmada por Talento Humano',
-            `El documento PDF oficial ${actual.folio} quedó generado, se ajustaron ${actual.horasEquivalentes} hrs en Time Report y se notificó vía Apprise.`,
+            `La solicitud ${actual.folio} fue validada definitivamente y notificada al colaborador.`,
           );
         },
-        error: () => {
+        error: err => {
           this.procesandoAccion.set(false);
-          this.aplicarConfirmacionLocal(actual);
-          this.modalValidacionAbierto.set(false);
-          this.toast.exito(
-            'Solicitud confirmada por Talento Humano',
-            `El documento PDF oficial ${actual.folio} quedó generado, se ajustaron ${actual.horasEquivalentes} hrs en Time Report y se notificó vía Apprise.`,
+          this.toast.error(
+            'No se pudo confirmar la solicitud',
+            err?.error?.message || 'Error al procesar la validación en el servidor.',
           );
         },
       });
   }
 
-  private aplicarConfirmacionLocal(actual: SolicitudRrhhMock): void {
-    const hoy = new Date();
-    const fechaHoy = `${String(hoy.getDate()).padStart(2, '0')}/${String(hoy.getMonth() + 1).padStart(2, '0')}/${hoy.getFullYear()}`;
-    this.solicitudes.update(lista =>
-      lista.map(s =>
-        s.id === actual.id
-          ? {
-              ...s,
-              estado: 'APROBADO_RRHH',
-              estadoClase: 'confirmado',
-              estadoTexto: 'Confirmado',
-              impactoTimeReport: this.impactoSeleccionado(),
-              aprobadoLider: true,
-              confirmadoRrhh: true,
-              fechaConfirmacionRrhh: fechaHoy,
-              responsableRrhh: 'Talento Humano ISC',
-            }
-          : s,
-      ),
-    );
-  }
-
   devolverConObservacion(): void {
     const actual = this.solicitudActiva();
     if (!actual) return;
+
+    const obs = this.observacionesRrhh().trim();
+    if (!obs) {
+      this.toast.error(
+        'Observación obligatoria',
+        'Debes detallar el motivo para devolver u observar la solicitud (RF-007).',
+      );
+      return;
+    }
 
     this.procesandoAccion.set(true);
     this.apiService
@@ -533,7 +379,7 @@ export class GestionRrhhComponent implements OnInit {
         actual.id,
         'devolver',
         this.impactoSeleccionado(),
-        this.observacionesRrhh(),
+        obs,
       )
       .subscribe({
         next: res => {
@@ -541,34 +387,18 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update(lista => lista.map(s => (s.id === actual.id ? mapeada : s)));
-          } else {
-            this.solicitudes.update(lista =>
-              lista.map(s =>
-                s.id === actual.id
-                  ? { ...s, estado: 'OBSERVADO_RRHH', estadoClase: 'observado', estadoTexto: 'Observado' }
-                  : s,
-              ),
-            );
           }
           this.modalValidacionAbierto.set(false);
           this.toast.error(
             'Solicitud observada / devuelta',
-            `Se notificó a ${actual.colaborador} y a su líder vía Apprise sobre la observación de Talento Humano.`,
+            `Se notificó a ${actual.colaborador} sobre la observación de Talento Humano.`,
           );
         },
-        error: () => {
+        error: err => {
           this.procesandoAccion.set(false);
-          this.solicitudes.update(lista =>
-            lista.map(s =>
-              s.id === actual.id
-                ? { ...s, estado: 'OBSERVADO_RRHH', estadoClase: 'observado', estadoTexto: 'Observado' }
-                : s,
-            ),
-          );
-          this.modalValidacionAbierto.set(false);
           this.toast.error(
-            'Solicitud observada / devuelta',
-            `Se notificó a ${actual.colaborador} y a su líder vía Apprise sobre la observación de Talento Humano.`,
+            'No se pudo devolver la solicitud',
+            err?.error?.message || 'Error al registrar la observación en el servidor.',
           );
         },
       });

@@ -95,6 +95,17 @@ export interface AvisoColaborador {
 }
 
 /** Un evento leído de un stream SSE: nombre del evento y su data (texto crudo). */
+export interface NotificacionInterna {
+  id: number;
+  idSolicitud: number | null;
+  titulo: string;
+  mensaje: string;
+  urlDestino: string | null;
+  leida: boolean;
+  fechaLectura: string | null;
+  fechaCreacion: string;
+}
+
 interface EventoSse {
   evento: string;
   data: string;
@@ -202,6 +213,32 @@ export class NotificacionesService {
    * Lee un endpoint SSE con fetch: EventSource no permite enviar el header Authorization.
    * Usa el mismo token que JwtInterceptor (sessionStorage, con respaldo en localStorage).
    */
+  /**
+   * Server-Sent Events con las notificaciones internas persistidas (campana RF-010: Solicitudes y Permisos).
+   */
+  streamInternas(): Observable<NotificacionInterna[]> {
+    return new Observable<NotificacionInterna[]>(subscriber => {
+      const sub = this.leerSse(`${this.apiUrl}/internas/stream`).subscribe({
+        next: ({ evento, data }) => {
+          if (evento === 'internas') {
+            subscriber.next(this.parsearJson<NotificacionInterna[]>(data) ?? []);
+          }
+        },
+        error: err => subscriber.error(err),
+        complete: () => subscriber.complete(),
+      });
+      return () => sub.unsubscribe();
+    });
+  }
+
+  marcarInternaLeida(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/internas/${id}/leer`, {});
+  }
+
+  marcarTodasInternasLeidas(): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/internas/leer-todas`, {});
+  }
+
   private leerSse(url: string): Observable<EventoSse> {
     return new Observable<EventoSse>(subscriber => {
       const controller = new AbortController();

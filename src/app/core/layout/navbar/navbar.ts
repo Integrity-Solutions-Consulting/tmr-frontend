@@ -10,10 +10,12 @@ import { UsuariosService } from '../../../features/configuracion/services/usuari
 import { MiPerfilModalComponent, MiPerfilData } from '../../../shared/components/mi-perfil-modal/mi-perfil-modal.component';
 import { ConfiguracionModalComponent } from '../../../shared/components/configuracion-modal/configuracion-modal.component';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DropdownScrollLockService } from '../../../shared/services/dropdown-scroll-lock.service';
 import { describirPeriodo, describirPeriodoCorte, formatoFechaHoraEcuador, ResumenCorteService } from '../../../shared/services/resumen-corte.service';
 import { MisAvisosService } from '../../../shared/services/mis-avisos.service';
-import { AvisoColaborador } from '../../../shared/services/notificaciones.service';
+import { NotificacionesInternasService } from '../../../shared/services/notificaciones-internas.service';
+import { AvisoColaborador, NotificacionInterna } from '../../../shared/services/notificaciones.service';
 
 @Component({
   selector: 'app-navbar',
@@ -24,6 +26,7 @@ import { AvisoColaborador } from '../../../shared/services/notificaciones.servic
 })
 export class Navbar implements OnInit {
   private store = inject(Store);
+  private router = inject(Router);
   private authService = inject(AuthService);
   private usuariosService = inject(UsuariosService);
   private dialog = inject(MatDialog);
@@ -35,6 +38,8 @@ export class Navbar implements OnInit {
   protected readonly describirPeriodoCorte = describirPeriodoCorte;
   // Correos de horas faltantes que le llegaron al usuario (su líder o el corte): solo avisos, no llevan a ningún lado
   protected readonly misAvisos = inject(MisAvisosService);
+  // Notificaciones internas persistidas (SSE RF-010: Solicitudes y Permisos)
+  protected readonly notificacionesInternas = inject(NotificacionesInternasService);
   protected readonly formatoFechaHora = formatoFechaHoraEcuador;
 
   user = {
@@ -118,9 +123,24 @@ export class Navbar implements OnInit {
     }
   }
 
-  /** Punto rojo de la campana: horas propias pendientes, un corte nuevo o un aviso nuevo. */
+  /** Punto rojo de la campana: horas propias pendientes, un corte nuevo, un aviso nuevo o una notificación de solicitud no leída. */
   get campanaConNovedades(): boolean {
-    return this.tieneNotificaciones || this.resumenCorte.campanaPendiente() || this.misAvisos.pendiente();
+    return (
+      this.tieneNotificaciones ||
+      this.resumenCorte.campanaPendiente() ||
+      this.misAvisos.pendiente() ||
+      this.notificacionesInternas.pendiente()
+    );
+  }
+
+  abrirNotificacionInterna(notif: NotificacionInterna): void {
+    if (!notif.leida) {
+      this.notificacionesInternas.marcarLeida(notif.id);
+    }
+    this.notificacionesAbierto = false;
+    if (notif.urlDestino) {
+      this.router.navigateByUrl(notif.urlDestino);
+    }
   }
 
   tituloAviso(aviso: AvisoColaborador): string {

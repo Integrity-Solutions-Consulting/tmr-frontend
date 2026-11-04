@@ -29,6 +29,10 @@ export interface SolicitudEquipoMock {
   cliente: string;
   proyecto: string;
   liderNombre?: string;
+  diaSolicitud?: string;
+  mesSolicitud?: string;
+  anioSolicitud?: string;
+  fechaAprobacion?: string;
   tipo: string;
   tipoOficial: TipoPermisoOficial;
   motivo: string;
@@ -73,116 +77,16 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly estadoFiltro = signal('');
   readonly modalRevisorVisible = signal(false);
   readonly solicitudActiva = signal<SolicitudEquipoMock | null>(null);
-  readonly comentarioLider = signal(
-    'Aprobado. Las tareas del sprint quedan cubiertas por el equipo.',
-  );
+  readonly comentarioLider = signal('');
 
-  readonly solicitudesEquipo = signal<SolicitudEquipoMock[]>([
-    {
-      id: 106,
-      codigo: 'PER-2026-006',
-      colaborador: 'Flores Jonathan',
-      cedula: '1719283746',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      liderNombre: 'Ing. Carlos Méndez',
-      tipo: 'Vacaciones',
-      tipoOficial: 'VACACIONES',
-      motivo: 'Vacaciones anuales programadas con el equipo de desarrollo.',
-      fechas: '04/11/2026 - 06/11/2026',
-      fechaInicio: '04/11/2026',
-      fechaFin: '06/11/2026',
-      fechaRegreso: '09/11/2026',
-      diasSolicitados: '3 días laborables',
-      horario: 'COMPLETA',
-      horasSolicitadas: '24 horas',
-      duracion: '3 días laborables (24 h)',
-      evidencia: null,
-      traslapeAlerta:
-        'Coincide el 05/11 con ausencia aprobada de Silvia Pazmiño en Portal Web ISC',
-      estado: 'Pendiente',
-    },
-    {
-      id: 107,
-      codigo: 'PER-2026-007',
-      colaborador: 'Paredes Harold',
-      cedula: '1720918273',
-      cargo: 'Desarrollador Backend',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Migración Microservicios',
-      liderNombre: 'Ing. Carlos Méndez',
-      tipo: 'Fallecimiento de un familiar',
-      tipoOficial: 'FALLECIMIENTO_FAMILIAR',
-      motivo: 'Licencia por fallecimiento de familiar cercano.',
-      fechas: '30/10/2026 - 31/10/2026',
-      fechaInicio: '30/10/2026',
-      fechaFin: '31/10/2026',
-      fechaRegreso: '04/11/2026',
-      diasSolicitados: '2 días laborables',
-      horario: 'COMPLETA',
-      horasSolicitadas: '16 horas',
-      duracion: '2 días laborables (16 h)',
-      evidencia: 'justificante_calamidad.pdf',
-      traslapeAlerta: null,
-      estado: 'Pendiente',
-    },
-    {
-      id: 104,
-      codigo: 'PER-2026-004',
-      colaborador: 'Erazo Allan',
-      cedula: '1723456789',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Integrity Solutions',
-      proyecto: 'Portal Web ISC',
-      liderNombre: 'Ing. Carlos Méndez',
-      tipo: 'Licencia por enfermedad',
-      tipoOficial: 'LICENCIA_ENFERMEDAD',
-      motivo: 'Cita odontológica e indicación de reposo médico por 48 horas.',
-      fechas: '02/11/2026 - 03/11/2026',
-      fechaInicio: '02/11/2026',
-      fechaFin: '03/11/2026',
-      fechaRegreso: '04/11/2026',
-      diasSolicitados: '2 días laborables',
-      horario: 'COMPLETA',
-      horasSolicitadas: '16 horas',
-      duracion: '2 días laborables (16 h)',
-      evidencia: 'certificado_iess.pdf',
-      traslapeAlerta: null,
-      estado: 'Aprobado',
-    },
-    {
-      id: 103,
-      codigo: 'PER-2026-003',
-      colaborador: 'Vera Cristopher',
-      cedula: '0928374651',
-      cargo: 'Desarrollador Fullstack',
-      cliente: 'Banco Guayaquil',
-      proyecto: 'Migración Microservicios',
-      liderNombre: 'Ing. Carlos Méndez',
-      tipo: 'Otros',
-      tipoOficial: 'OTROS',
-      motivo: 'Permiso personal en semana de salida a producción.',
-      fechas: '20/10/2026 - 22/10/2026',
-      fechaInicio: '20/10/2026',
-      fechaFin: '22/10/2026',
-      fechaRegreso: '23/10/2026',
-      diasSolicitados: '3 días laborables',
-      horario: 'COMPLETA',
-      horasSolicitadas: '24 horas',
-      duracion: '3 días laborables (24 h)',
-      evidencia: null,
-      traslapeAlerta: null,
-      estado: 'Rechazado',
-    },
-  ]);
+  readonly solicitudesEquipo = signal<SolicitudEquipoMock[]>([]);
 
   readonly kpiPendientes = computed(
     () => this.solicitudesEquipo().filter((s) => s.estado === 'Pendiente').length,
   );
-  readonly kpiAusentesHoy = signal(1);
+  readonly kpiAusentesHoy = signal(0);
   readonly kpiAprobados = computed(
-    () => this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado').length + 13,
+    () => this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado').length,
   );
 
   readonly solicitudesFiltradas = computed(() => {
@@ -229,12 +133,15 @@ export class AprobacionesLiderComponent implements OnInit {
   ngOnInit(): void {
     this.permisosApi.obtenerEquipo().subscribe({
       next: (res) => {
-        if (res?.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res?.success && Array.isArray(res.data)) {
           this.solicitudesEquipo.set(res.data.map((i) => this.mapearApiAMock(i)));
         }
       },
-      error: () => {
-        // Mantiene lista inicial
+      error: (err) => {
+        this.toast.error(
+          'No se pudo cargar la bandeja de equipo',
+          err?.error?.message || 'Verifica tus permisos o la conexión con el servidor.',
+        );
       },
     });
   }
@@ -249,6 +156,10 @@ export class AprobacionesLiderComponent implements OnInit {
       cliente: item.cliente,
       proyecto: item.proyecto,
       liderNombre: item.liderNombre,
+      diaSolicitud: item.diaSolicitud,
+      mesSolicitud: item.mesSolicitud,
+      anioSolicitud: item.anioSolicitud,
+      fechaAprobacion: item.fechaAprobacion,
       tipo: item.tipo,
       tipoOficial: item.tipoOficial,
       motivo: item.motivo,
@@ -294,6 +205,7 @@ export class AprobacionesLiderComponent implements OnInit {
 
   abrirRevision(item: SolicitudEquipoMock): void {
     this.solicitudActiva.set(item);
+    this.comentarioLider.set('');
     this.modalRevisorVisible.set(true);
   }
 
@@ -309,14 +221,14 @@ export class AprobacionesLiderComponent implements OnInit {
     return {
       idPermiso: item.id,
       folio: item.codigo,
-      diaSolicitud: '30',
-      mesSolicitud: '10',
-      anioSolicitud: '2026',
+      diaSolicitud: item.diaSolicitud || '01',
+      mesSolicitud: item.mesSolicitud || '01',
+      anioSolicitud: item.anioSolicitud || String(new Date().getFullYear()),
       apellidosNombres: item.colaborador,
       numeroCedula: item.cedula,
       cargo: item.cargo,
       cliente: `${item.cliente} (${item.proyecto})`,
-      jefeInmediato: item.liderNombre || 'Ing. Carlos Méndez',
+      jefeInmediato: item.liderNombre || 'Líder de Proyecto',
       tipoPermiso: item.tipoOficial,
       motivos: item.motivo,
       evidenciaNombre: item.evidencia ?? undefined,
@@ -324,15 +236,15 @@ export class AprobacionesLiderComponent implements OnInit {
       fechaInicio: item.fechaInicio,
       fechaFinalizacion: item.fechaFin,
       fechaRegreso: item.fechaRegreso,
-      fechaAprobacion: aprobadaPorLider ? '30/10/2026' : 'Pendiente',
+      fechaAprobacion: item.fechaAprobacion || 'Pendiente',
       diasSolicitados: item.diasSolicitados,
       horario: item.horario,
       horasSolicitadas: item.horasSolicitadas,
       aprobacionLider: {
         aprobado: aprobadaPorLider,
-        responsable: item.liderNombre || 'Ing. Carlos Méndez',
+        responsable: item.liderNombre || 'Líder de Proyecto',
         metodo: 'Cuenta TMR Líder',
-        fecha: aprobadaPorLider ? '30/10/2026' : undefined,
+        fecha: aprobadaPorLider ? item.fechaAprobacion : undefined,
       },
       aprobacionTalentoHumano: {
         aprobado: false,
@@ -352,42 +264,54 @@ export class AprobacionesLiderComponent implements OnInit {
 
   simularDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
     const actual = this.solicitudActiva();
-    if (!actual) return;
+    if (!actual || !actual.id) return;
 
-    const nuevoEstado: SolicitudEquipoMock['estado'] =
-      accion === 'aprobar' ? 'Aprobado' : accion === 'observar' ? 'Observado' : 'Rechazado';
-
-    if (actual.id) {
-      this.permisosApi.registrarDecisionLider(actual.id, accion, this.comentarioLider()).subscribe({
-        next: () => {},
-        error: () => {},
-      });
-    }
-
-    this.solicitudesEquipo.update((lista) =>
-      lista.map((s) => (s.codigo === actual.codigo ? { ...s, estado: nuevoEstado } : s)),
-    );
-    this.modalRevisorVisible.set(false);
-
-    if (accion === 'aprobar') {
-      this.toast.exito(
-        `Solicitud ${actual.codigo} aprobada`,
-        'Se actualizó el documento PDF oficial y Apprise envió correos personalizados a Talento Humano y al colaborador.',
+    const comentario = this.comentarioLider().trim();
+    if ((accion === 'observar' || accion === 'rechazar') && !comentario) {
+      this.toast.error(
+        'Comentario obligatorio',
+        'Debes indicar el motivo para observar o rechazar la solicitud (RF-007).',
       );
       return;
     }
 
-    if (accion === 'observar') {
-      this.toast.exito(
-        `Solicitud ${actual.codigo} observada`,
-        'El colaborador recibió un aviso vía Apprise para subsanar la solicitud.',
-      );
-      return;
-    }
+    this.permisosApi.registrarDecisionLider(actual.id, accion, comentario).subscribe({
+      next: (res) => {
+        if (res?.success && res.data) {
+          const actualizada = this.mapearApiAMock(res.data);
+          this.solicitudesEquipo.update((lista) =>
+            lista.map((s) => (s.id === actual.id ? actualizada : s)),
+          );
+        }
+        this.modalRevisorVisible.set(false);
 
-    this.toast.error(
-      `Solicitud ${actual.codigo} rechazada`,
-      'Se registró el motivo de rechazo y se notificó al colaborador y a RRHH por Apprise.',
-    );
+        if (accion === 'aprobar') {
+          this.toast.exito(
+            `Solicitud ${actual.codigo} aprobada`,
+            'La solicitud pasó a validación de Talento Humano y se notificó al colaborador.',
+          );
+          return;
+        }
+
+        if (accion === 'observar') {
+          this.toast.exito(
+            `Solicitud ${actual.codigo} observada`,
+            'El colaborador recibió una notificación para subsanar su solicitud.',
+          );
+          return;
+        }
+
+        this.toast.error(
+          `Solicitud ${actual.codigo} rechazada`,
+          'Se registró el motivo de rechazo y se notificó al colaborador.',
+        );
+      },
+      error: (err) => {
+        this.toast.error(
+          'No se pudo registrar la decisión',
+          err?.error?.message || 'Error al comunicarse con el servidor.',
+        );
+      },
+    });
   }
 }
