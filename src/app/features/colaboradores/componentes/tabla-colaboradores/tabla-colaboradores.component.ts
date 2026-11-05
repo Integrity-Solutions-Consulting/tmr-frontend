@@ -9,7 +9,7 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
-type CampoOrdenableColaborador = 'identificacion' | 'tipoIdentificacion' | 'nombreCompleto' | 'numProyectos' | 'correoElectronico' | 'cargo' | 'estado';
+type CampoOrdenableColaborador = 'identificacion' | 'tipoIdentificacion' | 'nombreCompleto' | 'numProyectos' | 'correoPrincipal' | 'cargo' | 'estado';
 
 @Component({
   selector: 'app-tabla-colaboradores',
