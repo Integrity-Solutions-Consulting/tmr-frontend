@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.5.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.4.0...v3.5.0) (2026-11-05)
+
+
+### Features
+
+* **correos:** mostrar institucional o, si no hay, personal ([e6f906e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e6f906e7d8ea5ccef7e6b6363302042908fdaa0d))
+* **correos:** mostrar institucional o, si no hay, personal ([b12c599](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b12c59932385e3af23872bda48f78ddee3ac868a))
+
+
+### Bug Fixes
+
+* **colaboradores:** exigir al menos un correo ([1c3584f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1c3584f0d7f658b2db4f060d75ca77d0be8dd6c3))
+* **colaboradores:** exigir al menos un correo ([e55ebd3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e55ebd3f8d7872de14967bc671f66198dfdd178e))
+
 ## [3.4.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.1...v3.4.0) (2026-11-05)
 
 
