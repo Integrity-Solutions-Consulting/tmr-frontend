@@ -113,7 +113,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: [null],
-      idTipoContrato: [null, Validators.required],
+      idTipoContrato: [null], // TEMPORAL-CONTRATO: al revertir, volver a [null, Validators.required].
       estado: ['', Validators.required],
 
       // ── Datos personales ──────────────────────────────
@@ -745,7 +745,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
 
       // ── Contrato ──────────────────────────────────────
       idEmpresaCatalogo: v.idEmpresaCatalogo ? Number(v.idEmpresaCatalogo) : null,
-      idTipoContrato: Number(v.idTipoContrato),
+      idTipoContrato: v.idTipoContrato ? Number(v.idTipoContrato) : null, // TEMPORAL-CONTRATO: al revertir, Number(v.idTipoContrato).
       activo: v.estado === 'Activo',
 
       // ── Datos laborales ───────────────────────────────
