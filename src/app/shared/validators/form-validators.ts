@@ -29,6 +29,28 @@ export const INTERNAL_USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
 /** Password: minimo 8, mayuscula, minuscula, numero y caracter especial. */
 export const TEMPORARY_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
 
+/** Dominio del correo institucional. */
+export const DOMINIO_CORREO_INSTITUCIONAL = '@integritysolutions.com.ec';
+
+export function esCorreoInstitucional(valor: unknown): boolean {
+  return String(valor ?? '').trim().toLowerCase().endsWith(DOMINIO_CORREO_INSTITUCIONAL);
+}
+
+/** El correo, si se llena, debe ser del dominio institucional. */
+export function correoInstitucionalValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = String(control.value ?? '').trim();
+
+    return !value || esCorreoInstitucional(value) ? null : { correoNoInstitucional: true };
+  };
+}
+
+/** El correo personal no puede ser del dominio institucional. */
+export function correoPersonalValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null =>
+    esCorreoInstitucional(control.value) ? { correoEsInstitucional: true } : null;
+}
+
 export function temporaryPasswordValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = String(control.value ?? '');

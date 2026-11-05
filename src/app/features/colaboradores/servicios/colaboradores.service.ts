@@ -183,6 +183,8 @@ export class ColaboradoresService {
       modalidad: '' as any,
       categoria: '' as any,
       correoElectronico: api.email,
+      emailCorporativo: api.emailCorporativo,
+      correoPrincipal: api.emailCorporativo || api.email,
       fechaNacimiento: '',
       telefono: '',
       genero: '' as any,
@@ -264,6 +266,7 @@ export class ColaboradoresService {
 
       // ── Contacto ───────────────────────────────────────
       correoElectronico: api.email ?? api.Email ?? '',
+      emailCorporativo: api.emailCorporativo ?? api.EmailCorporativo ?? '',
       telefono: api.telefono ?? api.Telefono ?? '',
       direccion: api.direccion ?? api.Direccion ?? '',
 
