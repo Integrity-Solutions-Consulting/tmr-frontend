@@ -86,6 +86,17 @@ describe('ModalEditarColaboradorComponent - correos', () => {
     expect(emitido?.emailCorporativo).toBe('ana@integritysolutions.com.ec');
   });
 
+  // TEMPORAL-CONTRATO: eliminar esta prueba al revertir.
+  it('guarda a un colaborador sin tipo de contrato', async () => {
+    await abrir({ correoElectronico: 'ana@gmail.com' });
+    component.form.get('idTipoContrato')?.setValue(null);
+
+    component.onGuardar();
+
+    expect(emitido?.idTipoContrato).toBeNull();
+    expect(emitido?.email).toBe('ana@gmail.com');
+  });
+
   it('no guarda sin ningún correo y lleva al error', async () => {
     const scrollIntoView = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoView;
