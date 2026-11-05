@@ -105,6 +105,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
+            canActivate: [roleGuard],
             loadComponent: () =>
               import('./features/time-report/permisos/mis-permisos/mis-permisos').then(
                 m => m.MisPermisosComponent
@@ -112,6 +113,7 @@ export const routes: Routes = [
           },
           {
             path: 'equipo',
+            canActivate: [roleGuard],
             loadComponent: () =>
               import('./features/time-report/permisos/aprobaciones-lider/aprobaciones-lider').then(
                 m => m.AprobacionesLiderComponent
@@ -119,6 +121,7 @@ export const routes: Routes = [
           },
           {
             path: 'rrhh',
+            canActivate: [roleGuard],
             loadComponent: () =>
               import('./features/time-report/permisos/gestion-rrhh/gestion-rrhh').then(
                 m => m.GestionRrhhComponent
@@ -126,6 +129,7 @@ export const routes: Routes = [
           },
           {
             path: 'gerencia',
+            canActivate: [roleGuard],
             loadComponent: () =>
               import('./features/time-report/permisos/permisos-gerencia/permisos-gerencia').then(
                 m => m.PermisosGerenciaComponent

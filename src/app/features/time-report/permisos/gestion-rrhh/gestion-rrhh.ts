@@ -20,7 +20,7 @@ import {
 import { PermisosPdfService } from '../permisos-pdf.service';
 import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
 
-export interface SolicitudRrhhMock {
+export interface SolicitudRrhh {
   id: number;
   folio: string;
   diaSolicitud?: string;
@@ -93,13 +93,13 @@ export class GestionRrhhComponent implements OnInit {
 
   readonly modalValidacionAbierto = signal(false);
   readonly modalFormularioAbierto = signal(false);
-  readonly solicitudActiva = signal<SolicitudRrhhMock | null>(null);
+  readonly solicitudActiva = signal<SolicitudRrhh | null>(null);
   readonly procesandoAccion = signal(false);
 
   readonly observacionesRrhh = signal('');
   readonly impactoSeleccionado = signal<'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO'>('RESTA_META');
 
-  readonly solicitudes = signal<SolicitudRrhhMock[]>([]);
+  readonly solicitudes = signal<SolicitudRrhh[]>([]);
 
   ngOnInit(): void {
     this.cargarBandejaDesdeApi();
@@ -121,7 +121,7 @@ export class GestionRrhhComponent implements OnInit {
     });
   }
 
-  private mapearDesdeApi(item: PermisoItemApi): SolicitudRrhhMock {
+  private mapearDesdeApi(item: PermisoItemApi): SolicitudRrhh {
     return {
       id: item.id,
       folio: item.codigo,
@@ -250,23 +250,23 @@ export class GestionRrhhComponent implements OnInit {
     this.periodoPreset.set(!this.fechaDesde() && !valor ? 'TODOS' : 'PERSONALIZADO');
   }
 
-  abrirModalValidacion(item: SolicitudRrhhMock): void {
+  abrirModalValidacion(item: SolicitudRrhh): void {
     this.solicitudActiva.set(item);
     this.impactoSeleccionado.set(item.impactoTimeReport);
     this.observacionesRrhh.set('');
     this.modalValidacionAbierto.set(true);
   }
 
-  abrirVistaFormulario(item: SolicitudRrhhMock): void {
+  abrirVistaFormulario(item: SolicitudRrhh): void {
     this.solicitudActiva.set(item);
     this.modalFormularioAbierto.set(true);
   }
 
-  async descargarPdf(item: SolicitudRrhhMock): Promise<void> {
+  async descargarPdf(item: SolicitudRrhh): Promise<void> {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
   }
 
-  obtenerDatosFormulario(sol: SolicitudRrhhMock): DatosFormularioOficial {
+  obtenerDatosFormulario(sol: SolicitudRrhh): DatosFormularioOficial {
     return {
       idPermiso: sol.id,
       folio: sol.folio,
@@ -308,7 +308,7 @@ export class GestionRrhhComponent implements OnInit {
     };
   }
 
-  reenviarEnlaceExterno(item: SolicitudRrhhMock): void {
+  reenviarEnlaceExterno(item: SolicitudRrhh): void {
     this.apiService.reenviarEnlaceExterno(item.id).subscribe({
       next: () => {
         this.toast.exito(

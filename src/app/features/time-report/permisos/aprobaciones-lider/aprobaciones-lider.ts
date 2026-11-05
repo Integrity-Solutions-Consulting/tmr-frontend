@@ -20,7 +20,7 @@ import {
 import { PermisosPdfService } from '../permisos-pdf.service';
 import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
 
-export interface SolicitudEquipoMock {
+export interface SolicitudEquipo {
   id?: number;
   codigo: string;
   colaborador: string;
@@ -76,10 +76,10 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly proyectoFiltro = signal('');
   readonly estadoFiltro = signal('');
   readonly modalRevisorVisible = signal(false);
-  readonly solicitudActiva = signal<SolicitudEquipoMock | null>(null);
+  readonly solicitudActiva = signal<SolicitudEquipo | null>(null);
   readonly comentarioLider = signal('');
 
-  readonly solicitudesEquipo = signal<SolicitudEquipoMock[]>([]);
+  readonly solicitudesEquipo = signal<SolicitudEquipo[]>([]);
 
   readonly kpiPendientes = computed(
     () => this.solicitudesEquipo().filter((s) => s.estado === 'Pendiente').length,
@@ -134,7 +134,7 @@ export class AprobacionesLiderComponent implements OnInit {
     this.permisosApi.obtenerEquipo().subscribe({
       next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
-          this.solicitudesEquipo.set(res.data.map((i) => this.mapearApiAMock(i)));
+          this.solicitudesEquipo.set(res.data.map((i) => this.mapearDesdeApi(i)));
         }
       },
       error: (err) => {
@@ -146,7 +146,7 @@ export class AprobacionesLiderComponent implements OnInit {
     });
   }
 
-  private mapearApiAMock(item: PermisoItemApi): SolicitudEquipoMock {
+  private mapearDesdeApi(item: PermisoItemApi): SolicitudEquipo {
     return {
       id: item.id,
       codigo: item.codigo,
@@ -203,20 +203,20 @@ export class AprobacionesLiderComponent implements OnInit {
     this.periodoPreset.set(!this.fechaDesde() && !valor ? 'TODOS' : 'PERSONALIZADO');
   }
 
-  abrirRevision(item: SolicitudEquipoMock): void {
+  abrirRevision(item: SolicitudEquipo): void {
     this.solicitudActiva.set(item);
     this.comentarioLider.set('');
     this.modalRevisorVisible.set(true);
   }
 
-  obtenerClaseEstado(estado: SolicitudEquipoMock['estado']): string {
+  obtenerClaseEstado(estado: SolicitudEquipo['estado']): string {
     if (estado === 'Aprobado') return 'status-badge status-badge--confirmado';
     if (estado === 'Rechazado') return 'status-badge status-badge--rechazado';
     if (estado === 'Observado') return 'status-badge status-badge--observado';
     return 'status-badge status-badge--pendiente';
   }
 
-  obtenerDatosFormulario(item: SolicitudEquipoMock): DatosFormularioOficial {
+  obtenerDatosFormulario(item: SolicitudEquipo): DatosFormularioOficial {
     const aprobadaPorLider = item.estado === 'Aprobado';
     return {
       idPermiso: item.id,
@@ -254,7 +254,7 @@ export class AprobacionesLiderComponent implements OnInit {
     };
   }
 
-  async descargarPdf(item: SolicitudEquipoMock): Promise<void> {
+  async descargarPdf(item: SolicitudEquipo): Promise<void> {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
     this.toast.exito(
       `PDF ${item.codigo} descargado`,
@@ -262,7 +262,7 @@ export class AprobacionesLiderComponent implements OnInit {
     );
   }
 
-  simularDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
+  registrarDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
     const actual = this.solicitudActiva();
     if (!actual || !actual.id) return;
 
@@ -278,7 +278,7 @@ export class AprobacionesLiderComponent implements OnInit {
     this.permisosApi.registrarDecisionLider(actual.id, accion, comentario).subscribe({
       next: (res) => {
         if (res?.success && res.data) {
-          const actualizada = this.mapearApiAMock(res.data);
+          const actualizada = this.mapearDesdeApi(res.data);
           this.solicitudesEquipo.update((lista) =>
             lista.map((s) => (s.id === actual.id ? actualizada : s)),
           );
@@ -303,13 +303,13 @@ export class AprobacionesLiderComponent implements OnInit {
 
         this.toast.error(
           `Solicitud ${actual.codigo} rechazada`,
-          'Se registró el motivo de rechazo y se notificó al colaborador.',
+          'La solicitud fue marcada como rechazada y se notificó al colaborador.',
         );
       },
       error: (err) => {
         this.toast.error(
           'No se pudo registrar la decisión',
-          err?.error?.message || 'Error al comunicarse con el servidor.',
+          err?.error?.message || 'Error al procesar la acción en el servidor.',
         );
       },
     });

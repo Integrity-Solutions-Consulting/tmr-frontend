@@ -19,7 +19,6 @@ import {
   calcularSiguienteDiaLaborableIso,
   coincideBusquedaInteligente,
   cumpleRangoFechas,
-  isoADmy,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
@@ -28,7 +27,7 @@ import {
   TipoPermisoCatalogoApi,
 } from '../permisos-api.service';
 
-export interface SolicitudColaboradorMock {
+export interface SolicitudColaborador {
   id?: number;
   codigo: string;
   colaborador?: string;
@@ -114,7 +113,7 @@ export class MisPermisosComponent implements OnInit {
 
   readonly modalNuevaVisible = signal(false);
   readonly modalFormularioVisible = signal(false);
-  readonly solicitudSeleccionada = signal<SolicitudColaboradorMock | null>(null);
+  readonly solicitudSeleccionada = signal<SolicitudColaborador | null>(null);
   readonly guardandoSolicitud = signal(false);
 
   // Datos del colaborador leídos exclusivamente desde PostgreSQL (RF-001)
@@ -206,7 +205,7 @@ export class MisPermisosComponent implements OnInit {
 
   readonly textoHorasForm = computed(() => `${this.horasCalculadasForm()} horas`);
 
-  readonly solicitudes = signal<SolicitudColaboradorMock[]>([]);
+  readonly solicitudes = signal<SolicitudColaborador[]>([]);
 
   readonly kpiDisponibles = signal('0 días');
   readonly kpiEnProceso = computed(
@@ -333,7 +332,7 @@ export class MisPermisosComponent implements OnInit {
     this.permisosApi.obtenerMisPermisos().subscribe({
       next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
-          this.solicitudes.set(res.data.map((item) => this.mapearApiAMock(item)));
+          this.solicitudes.set(res.data.map((item) => this.mapearDesdeApi(item)));
         }
       },
       error: (err) => {
@@ -345,7 +344,7 @@ export class MisPermisosComponent implements OnInit {
     });
   }
 
-  private mapearApiAMock(item: PermisoItemApi): SolicitudColaboradorMock {
+  private mapearDesdeApi(item: PermisoItemApi): SolicitudColaborador {
     return {
       id: item.id,
       codigo: item.codigo,
@@ -566,12 +565,12 @@ export class MisPermisosComponent implements OnInit {
     return this.opcionesLider()[this.indiceLiderForm()]?.idLider ?? null;
   }
 
-  verFormulario(item: SolicitudColaboradorMock): void {
+  verFormulario(item: SolicitudColaborador): void {
     this.solicitudSeleccionada.set(item);
     this.modalFormularioVisible.set(true);
   }
 
-  obtenerDatosFormulario(item: SolicitudColaboradorMock): DatosFormularioOficial {
+  obtenerDatosFormulario(item: SolicitudColaborador): DatosFormularioOficial {
     const etiquetaCliente =
       item.cliente && item.proyecto
         ? `${item.cliente} (${item.proyecto})`
@@ -616,58 +615,11 @@ export class MisPermisosComponent implements OnInit {
     };
   }
 
-  obtenerDatosBorradorFormulario(): DatosFormularioOficial {
-    const clienteOpt = this.clienteActualForm();
-    const liderNombre = this.obtenerNombreLiderActualForm();
-    const liderTipo = this.obtenerTipoLiderActualForm();
-
-    return {
-      folio: `PER-${this.hoyAnio}-NUEVO`,
-      diaSolicitud: this.hoyDia,
-      mesSolicitud: this.hoyMes,
-      anioSolicitud: this.hoyAnio,
-      apellidosNombres: this.colaboradorNombre(),
-      numeroCedula: this.colaboradorCedula(),
-      cargo: this.colaboradorCargo(),
-      cliente: clienteOpt?.etiqueta ?? '',
-      jefeInmediato: liderNombre,
-      tipoPermiso: this.tipoSeleccionado(),
-      motivos: this.motivoForm(),
-      evidenciaNombre: this.archivoEvidencia()?.name,
-      fechaInicio: isoADmy(this.fechaInicioForm()),
-      fechaFinalizacion: isoADmy(this.fechaFinForm()),
-      fechaRegreso: isoADmy(this.fechaRegresoForm()),
-      fechaAprobacion: 'Pendiente',
-      diasSolicitados: this.textoDiasForm(),
-      horario: this.horarioSeleccionado(),
-      detalleHorario: this.detalleHorarioForm(),
-      horasSolicitadas: this.textoHorasForm(),
-      aprobacionLider: {
-        aprobado: false,
-        responsable: liderNombre,
-        metodo: liderTipo === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder',
-      },
-      aprobacionTalentoHumano: {
-        aprobado: false,
-        responsable: 'Talento Humano',
-      },
-      comentarios: 'En espera de aprobación del Jefe Inmediato y confirmación de Talento Humano.',
-    };
-  }
-
-  async descargarPdfSeleccionado(item: SolicitudColaboradorMock): Promise<void> {
+  async descargarPdfSeleccionado(item: SolicitudColaborador): Promise<void> {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
     this.toast.exito(
       `PDF ${item.codigo} descargado`,
       'Se descargó el Formulario Oficial de Solicitud de Permisos, Licencias y Vacaciones.',
-    );
-  }
-
-  async descargarVistaPreviaNuevaSolicitud(): Promise<void> {
-    await this.pdfService.descargarFormularioPdf(this.obtenerDatosBorradorFormulario());
-    this.toast.exito(
-      'Vista previa PDF descargada',
-      'Se generó el documento oficial PDF con los datos ingresados en el formulario.',
     );
   }
 
@@ -726,7 +678,7 @@ export class MisPermisosComponent implements OnInit {
             return;
           }
 
-          const nuevo = this.mapearApiAMock(res.data);
+          const nuevo = this.mapearDesdeApi(res.data);
           this.solicitudes.update((lista) => [nuevo, ...lista]);
           this.archivoEvidencia.set(null);
           this.motivoForm.set('');

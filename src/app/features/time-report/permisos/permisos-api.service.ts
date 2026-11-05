@@ -297,4 +297,14 @@ export class PermisosApiService {
   obtenerUrlPdfBackend(id: number): string {
     return `${this.baseUrl}/${id}/pdf`;
   }
+
+  descargarPdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
+
+  descargarPdfExternoBlob(token: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/externo/${encodeURIComponent(token)}/pdf`, {
+      responseType: 'blob',
+    });
+  }
 }

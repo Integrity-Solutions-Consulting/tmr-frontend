@@ -19,7 +19,7 @@ import {
 import { PermisosPdfService } from '../permisos-pdf.service';
 import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
 
-export interface SolicitudGerenciaMock {
+export interface SolicitudGerencia {
   id: number;
   folio: string;
   anio: string;
@@ -77,9 +77,9 @@ export class PermisosGerenciaComponent implements OnInit {
   readonly filtroEstado = signal('TODOS');
 
   readonly modalPdfVisible = signal(false);
-  readonly solicitudActiva = signal<SolicitudGerenciaMock | null>(null);
+  readonly solicitudActiva = signal<SolicitudGerencia | null>(null);
 
-  readonly solicitudes = signal<SolicitudGerenciaMock[]>([]);
+  readonly solicitudes = signal<SolicitudGerencia[]>([]);
 
   ngOnInit(): void {
     this.cargarHistorialDesdeApi();
@@ -225,16 +225,16 @@ export class PermisosGerenciaComponent implements OnInit {
     this.filtroEstado.set('TODOS');
   }
 
-  verPdf(item: SolicitudGerenciaMock): void {
+  verPdf(item: SolicitudGerencia): void {
     this.solicitudActiva.set(item);
     this.modalPdfVisible.set(true);
   }
 
-  async descargarPdf(item: SolicitudGerenciaMock): Promise<void> {
+  async descargarPdf(item: SolicitudGerencia): Promise<void> {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
   }
 
-  obtenerDatosFormulario(item: SolicitudGerenciaMock): DatosFormularioOficial {
+  obtenerDatosFormulario(item: SolicitudGerencia): DatosFormularioOficial {
     const aprobadoLider = item.estadoClase === 'rrhh' || item.estadoClase === 'confirmado';
     const confirmadoRrhh = item.estadoClase === 'confirmado';
 
