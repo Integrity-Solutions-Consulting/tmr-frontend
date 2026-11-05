@@ -96,7 +96,7 @@ describe('ModalEditarColaboradorComponent - correos', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(emitido).toBeUndefined();
-    expect(fixture.nativeElement.querySelector('.form-field__error')?.textContent).toContain('Campo requerido');
+    expect(fixture.nativeElement.querySelector('.form-field__error')?.textContent).toContain('al menos un correo');
     expect(scrollIntoView).toHaveBeenCalled();
   });
 

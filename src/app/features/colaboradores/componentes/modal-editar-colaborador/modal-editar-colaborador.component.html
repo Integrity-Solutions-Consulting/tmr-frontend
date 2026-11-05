@@ -348,6 +348,9 @@
 
               <label class="float-field__label">
                 Correo institucional
+                @if (!tieneValor('correoElectronico')) {
+                  <span class="req">*</span>
+                }
               </label>
             </div>
 

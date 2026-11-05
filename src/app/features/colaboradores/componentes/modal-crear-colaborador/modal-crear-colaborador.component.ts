@@ -18,6 +18,7 @@ import { Colaborador } from '../../models/colaborador.model';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 import {
   DOMINIO_CORREO_INSTITUCIONAL,
+  alMenosUnCorreoValidator,
   correoInstitucionalValidator,
   correoPersonalValidator
 } from '../../../../shared/validators/form-validators';
@@ -125,7 +126,12 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
       idNacionalidad: [null],
 
       // ── Datos de contacto ─────────────────────────────
-      correoElectronico: ['', [Validators.required, Validators.email, Validators.maxLength(100), correoPersonalValidator()]],
+      correoElectronico: ['', [
+        alMenosUnCorreoValidator('emailCorporativo'),
+        Validators.email,
+        Validators.maxLength(100),
+        correoPersonalValidator()
+      ]],
       emailCorporativo: ['', [Validators.email, Validators.maxLength(100), correoInstitucionalValidator()]],
       telefono: ['', [Validators.maxLength(20), this.validatorTelefono()]],
       direccion: ['', [
@@ -150,6 +156,10 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
       // CAMPO REEMPLAZO
       // ================================================================
       idEmpleadoReemplazo: [null],
+    });
+
+    this.form.get('emailCorporativo')?.valueChanges.subscribe(() => {
+      this.form.get('correoElectronico')?.updateValueAndValidity({ emitEvent: false });
     });
 
     this.configurarValidacionesDinamicas();
@@ -481,6 +491,7 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
     if (errors['soloLetras']) return 'Campo inválido';
     if (errors['maxlength']) return 'Supera el máximo de caracteres';
     if (errors['email']) return 'Ingrese un correo válido';
+    if (errors['correoRequerido']) return 'Ingrese al menos un correo: personal o institucional';
     if (errors['correoNoInstitucional']) return `Debe ser un correo ${DOMINIO_CORREO_INSTITUCIONAL}`;
     if (errors['correoEsInstitucional']) return 'Este correo va en el campo institucional';
     if (errors['telefonoInvalido']) return 'Ingrese un teléfono válido';

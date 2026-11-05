@@ -51,6 +51,16 @@ export function correoPersonalValidator(): ValidatorFn {
     esCorreoInstitucional(control.value) ? { correoEsInstitucional: true } : null;
 }
 
+/** Debe existir este correo o el del otro campo del formulario. */
+export function alMenosUnCorreoValidator(otroCampo: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const este = String(control.value ?? '').trim();
+    const otro = String(control.parent?.get(otroCampo)?.value ?? '').trim();
+
+    return este || otro ? null : { correoRequerido: true };
+  };
+}
+
 export function temporaryPasswordValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = String(control.value ?? '');
