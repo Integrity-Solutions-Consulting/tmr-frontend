@@ -15,6 +15,7 @@ import { Colaborador } from '../../models/colaborador.model';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 import {
   DOMINIO_CORREO_INSTITUCIONAL,
+  alMenosUnCorreoValidator,
   correoInstitucionalValidator,
   correoPersonalValidator
 } from '../../../../shared/validators/form-validators';
@@ -139,7 +140,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
 
       // ── Datos de contacto ─────────────────────────────
       correoElectronico: ['', [
-        this.validatorCorreoRequerido(),
+        alMenosUnCorreoValidator('emailCorporativo'),
         Validators.email,
         Validators.maxLength(100),
         correoPersonalValidator()
@@ -504,16 +505,6 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
     };
   }
 
-  // El correo personal es obligatorio, salvo en colaboradores antiguos que ya tienen el institucional.
-  private validatorCorreoRequerido(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const personal = String(control.value ?? '').trim();
-      const institucional = String(this.form?.get('emailCorporativo')?.value ?? '').trim();
-
-      return personal || institucional ? null : { required: true };
-    };
-  }
-
   private validatorTelefono(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = String(control.value ?? '').trim();
@@ -701,6 +692,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
     if (errors['soloLetras']) return 'Campo inválido';
     if (errors['maxlength']) return 'Supera el máximo de caracteres';
     if (errors['email']) return 'Ingrese un correo válido';
+    if (errors['correoRequerido']) return 'Ingrese al menos un correo: personal o institucional';
     if (errors['correoNoInstitucional']) return `Debe ser un correo ${DOMINIO_CORREO_INSTITUCIONAL}`;
     if (errors['correoEsInstitucional']) return 'Este correo va en el campo institucional';
     if (errors['telefonoInvalido']) return 'Ingrese un teléfono válido';
