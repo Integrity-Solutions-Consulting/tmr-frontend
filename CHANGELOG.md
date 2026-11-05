@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.0...v3.5.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* Desactivación temporal de tipo de contrato obligatorio ([79f90df](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/79f90df2e7ec35dbd03d67f510b2f2726599a531))
+* Desactivación temporal de tipo de contrato obligatorio ([6bfc14d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6bfc14d0593ed1581685a7f65628009a7285040e))
+
 ## [3.5.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.4.0...v3.5.0) (2026-11-05)
 
 
