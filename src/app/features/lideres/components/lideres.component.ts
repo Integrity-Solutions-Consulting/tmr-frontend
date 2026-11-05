@@ -37,7 +37,8 @@ export interface Lider {
   tipo: 'Interno' | 'Externo';
   nombre: string;
   cliente: string;
-  correo: string;
+  correo: string;           // El que se edita y se guarda (persona.email)
+  correoPrincipal: string;  // El que se muestra: institucional o, si no hay, personal
   telefono: string;
   estado: 'Activo' | 'Inactivo';
   proyectos: ProyectoAsignado[];
@@ -258,6 +259,7 @@ export class LideresComponent implements OnInit, OnDestroy {
         nombre: `${l.nombres} ${l.apellidos}`,
         tipo: l.tipoNombre?.toLowerCase().includes('interno') ? 'Interno' : 'Externo',
         correo: l.email,
+        correoPrincipal: l.emailCorporativo || l.email,
         telefono: l.telefono ?? '',
         cliente: Array.from(datos.clientes).join(', '),
         proyectos: Array.from(datos.proyectos.values()),
@@ -340,6 +342,7 @@ export class LideresComponent implements OnInit, OnDestroy {
       const matchTexto =
         coincideBusqueda(l.nombre, texto) ||
         coincideBusqueda(l.correo, texto) ||
+        coincideBusqueda(l.correoPrincipal, texto) ||
         coincideBusqueda(l.cliente, texto);
       const matchTipo = !this.tipoFiltro || l.tipo === this.tipoFiltro;
       const matchEstado = !this.estadoFiltro || l.estado === this.estadoFiltro;
@@ -603,7 +606,7 @@ export class LideresComponent implements OnInit, OnDestroy {
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
         this.obtenerClientesExport(lider),
-        lider.correo || '-',
+        lider.correoPrincipal || '-',
         lider.telefono || '-',
         lider.tipo || '-',
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',
@@ -629,7 +632,7 @@ export class LideresComponent implements OnInit, OnDestroy {
       filas: this.lideresFiltrados.map((lider) => [
         lider.nombre || '-',
         this.obtenerClientesExport(lider),
-        lider.correo || '-',
+        lider.correoPrincipal || '-',
         lider.telefono || '-',
         lider.tipo || '-',
         lider.estado === 'Activo' ? 'Activo' : 'Inactivo',

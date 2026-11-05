@@ -143,7 +143,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       for (const dia of colab.diasIncompletos) {
         filas.push([
           colab.nombreCompleto,
-          colab.correo || 'Sin correo',
+          colab.email || 'Sin correo',
           dia.fecha,
           dia.horasRegistradas,
           dia.horasFaltantes

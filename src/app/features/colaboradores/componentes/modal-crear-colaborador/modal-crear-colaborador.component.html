@@ -301,7 +301,10 @@
                 [class.float-field__input--error]="campoInvalido('correoElectronico')" />
 
               <label class="float-field__label">
-                Correo personal <span class="req">*</span>
+                Correo personal
+                @if (!tieneValor('emailCorporativo')) {
+                  <span class="req">*</span>
+                }
               </label>
             </div>
 
@@ -323,6 +326,9 @@
 
               <label class="float-field__label">
                 Correo institucional
+                @if (!tieneValor('correoElectronico')) {
+                  <span class="req">*</span>
+                }
               </label>
             </div>
 
