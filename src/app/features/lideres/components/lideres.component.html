@@ -96,8 +96,8 @@
             <th class="sortable" (click)="ordenar('cliente')" [attr.aria-sort]="direccionOrden('cliente')">
               <span class="th-inner"><span class="th-label">Cliente</span><mat-icon class="sort-icon">{{ sortField === 'cliente' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
             </th>
-            <th class="sortable" (click)="ordenar('correo')" [attr.aria-sort]="direccionOrden('correo')">
-              <span class="th-inner"><span class="th-label">Correo electrónico</span><mat-icon class="sort-icon">{{ sortField === 'correo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+            <th class="sortable" (click)="ordenar('correoPrincipal')" [attr.aria-sort]="direccionOrden('correoPrincipal')">
+              <span class="th-inner"><span class="th-label">Correo electrónico</span><mat-icon class="sort-icon">{{ sortField === 'correoPrincipal' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
             </th>
             <th class="sortable" (click)="ordenar('telefono')" [attr.aria-sort]="direccionOrden('telefono')">
               <span class="th-inner"><span class="th-label">Teléfono</span><mat-icon class="sort-icon">{{ sortField === 'telefono' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
@@ -138,8 +138,8 @@
 
               <span *ngIf="obtenerClientesList(lider.cliente).length === 0">-</span>
             </td>
-            <td class="td-truncate" [title]="lider.correo">
-              <span class="cell-ellipsis">{{ lider.correo }}</span>
+            <td class="td-truncate" [title]="lider.correoPrincipal">
+              <span class="cell-ellipsis">{{ lider.correoPrincipal }}</span>
             </td>
             <td class="td-truncate" [title]="lider.telefono">
               <span class="cell-ellipsis">{{ lider.telefono }}</span>
