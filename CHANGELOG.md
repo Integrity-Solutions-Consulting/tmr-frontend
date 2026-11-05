@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.4.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.1...v3.4.0) (2026-11-05)
+
+
+### Features
+
+* **colaboradores:** agregar correo institucional y correo personal ([aea2889](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/aea28893153c13ed2de08e46b8216211a15c5e42))
+* **colaboradores:** agregar correo institucional y correo personal ([af60704](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/af60704962b87e5052aa020a719f0d92d2bbd2b1))
+* **colaboradores:** agregar correo institucional y correo personal ([e2f2c68](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e2f2c685bdb222113c9f22925a65426851c39184))
+
 ## [3.3.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.0...v3.3.1) (2026-10-22)
 
 
