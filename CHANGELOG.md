@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.1...v3.5.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **colaboradores:** reactivar tipo de contrato obligatorio ([9adbee3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/9adbee3392f5845051f1d6208eb327dd8054e20a))
+* **colaboradores:** reactivar tipo de contrato obligatorio ([acc26fe](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/acc26fe6703594cd34c69a7e8a3e5b5f25e6ec7c))
+
 ## [3.5.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.0...v3.5.1) (2026-11-05)
 
 
