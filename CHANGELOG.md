@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.2...v3.5.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* Corrección de errores ([1c2e51d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1c2e51db144394bf55e86d339501a9dca79b9baf))
+* **seguimiento:** filtro de cliente solo muestra proyectos de ese cliente ([ba608c1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ba608c10505773b0d3b1f652a3da07774d2137a4))
+
 ## [3.5.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.1...v3.5.2) (2026-11-05)
 
 
