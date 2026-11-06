@@ -77,7 +77,6 @@ export class UserActivityService implements OnDestroy {
       return; // Throttled - ignora evento
     }
 
-    const oldTime = this.lastActivityTime;
     this.lastActivityTime = Date.now();
 
     this.throttleTimeout = setTimeout(() => {

@@ -44,7 +44,6 @@ export const roleGuard: CanActivateFn = (route) => {
     }
     // Si es administrador, tiene acceso a los demás módulos de forma predeterminada.
     if (tokenService.isAdmin()) return true;
-    // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
       // sm - Igual con Seguimiento: Actividades es la pantalla que tienen todos los usuarios.
@@ -57,6 +56,5 @@ export const roleGuard: CanActivateFn = (route) => {
     }
   }
 
-  if (tokenService.isAdmin()) return true;
   return true;
 };

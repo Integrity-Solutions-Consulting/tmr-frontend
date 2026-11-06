@@ -123,21 +123,6 @@ export class AuthEffects {
     { dispatch: false }
   );
 
-  refreshToken$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.refreshToken),
-      switchMap(() =>
-        this.authService.refreshToken().pipe(
-          tap(({ token }) => this.tokenService.setToken(token)),
-          map(({ token }) => AuthActions.refreshTokenSuccess({ token })),
-          catchError((error) =>
-            of(AuthActions.refreshTokenFailure({ error: error.message }))
-          )
-        )
-      )
-    )
-  );
-
   forgotPassword$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.forgotPassword),

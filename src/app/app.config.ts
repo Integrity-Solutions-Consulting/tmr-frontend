@@ -101,7 +101,6 @@ export const appConfig: ApplicationConfig = {
       DashboardEffects,
     ),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
-    // ✅ CAMBIO: Agregar inicializador para precargar módulos al arrancar
     {
       provide: APP_INITIALIZER,
       useFactory: () => loadUserModulesInitializer,

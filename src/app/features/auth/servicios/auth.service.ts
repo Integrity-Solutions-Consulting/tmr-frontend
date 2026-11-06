@@ -100,16 +100,6 @@ export class AuthService {
     this.tokenService.setUser(JSON.stringify({ ...user, debeCambiarPassword: valor }));
   }
 
-  /**
-   * @deprecated Usar refreshTokenRequest() en su lugar
-   */
-  refreshToken(): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(
-      `${this.API_URL}/refresh-token`,
-      { RefreshToken: sessionStorage.getItem('refreshToken') }
-    );
-  }
-
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     const request: ForgotPasswordRequest = { email };
     return this.http.post<ForgotPasswordResponse>(
