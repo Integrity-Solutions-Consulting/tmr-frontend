@@ -116,7 +116,7 @@ export class FormularioPermisoOficialComponent {
           this.descargandoEvidencia = false;
           this.toast.error(
             'No se pudo abrir la evidencia',
-            'Verifica tus permisos de acceso o la conexión con el almacenamiento MinIO.',
+            'No pudimos abrir el documento adjunto en este momento. Inténtalo nuevamente en unos segundos.',
           );
         },
       });

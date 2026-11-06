@@ -18,7 +18,11 @@ import {
   PeriodoPreset,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
-import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
+import {
+  PermisoItemApi,
+  PermisosApiService,
+  obtenerMensajeAmigablePermisos,
+} from '../permisos-api.service';
 
 export interface SolicitudRrhh {
   id: number;
@@ -107,15 +111,18 @@ export class GestionRrhhComponent implements OnInit {
 
   cargarBandejaDesdeApi(): void {
     this.apiService.obtenerBandejaRrhh().subscribe({
-      next: res => {
+      next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
-          this.solicitudes.set(res.data.map(item => this.mapearDesdeApi(item)));
+          this.solicitudes.set(res.data.map((item) => this.mapearDesdeApi(item)));
         }
       },
-      error: err => {
+      error: (err) => {
         this.toast.error(
-          'No se pudo cargar la bandeja de RRHH',
-          err?.error?.message || 'Verifica tus permisos o la conexión con el servidor.',
+          'No se pudo cargar la bandeja de Talento Humano',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'No pudimos consultar las solicitudes en este momento.',
+          ),
         );
       },
     });
@@ -169,15 +176,15 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   readonly totalPorConfirmar = computed(
-    () => this.solicitudes().filter(s => s.estado === 'CONFIRMADO_LIDER').length,
+    () => this.solicitudes().filter((s) => s.estado === 'CONFIRMADO_LIDER').length,
   );
 
   readonly totalPendientesExternos = computed(
-    () => this.solicitudes().filter(s => s.estado === 'PENDIENTE_LIDER_EXT').length,
+    () => this.solicitudes().filter((s) => s.estado === 'PENDIENTE_LIDER_EXT').length,
   );
 
   readonly totalConfirmadasMes = computed(
-    () => this.solicitudes().filter(s => s.estado === 'APROBADO_RRHH').length,
+    () => this.solicitudes().filter((s) => s.estado === 'APROBADO_RRHH').length,
   );
 
   readonly solicitudesFiltradas = computed(() => {
@@ -187,7 +194,7 @@ export class GestionRrhhComponent implements OnInit {
     const hasta = this.fechaHasta();
     const tipo = this.filtroTipo();
 
-    return this.solicitudes().filter(s => {
+    return this.solicitudes().filter((s) => {
       if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
       if (tab === 'POR_CONFIRMAR' && s.estado !== 'CONFIRMADO_LIDER') return false;
       if (tab === 'LIDER_EXTERNO' && s.estado !== 'PENDIENTE_LIDER_EXT') return false;
@@ -310,16 +317,23 @@ export class GestionRrhhComponent implements OnInit {
 
   reenviarEnlaceExterno(item: SolicitudRrhh): void {
     this.apiService.reenviarEnlaceExterno(item.id).subscribe({
-      next: () => {
+      next: (res) => {
+        if (res?.data?.avisoNotificacion) {
+          this.toast.warning('Enlace renovado', res.data.avisoNotificacion);
+          return;
+        }
         this.toast.exito(
-          'Magic Link reenviado vía Apprise',
-          `Se envió un nuevo correo con enlace único a ${item.liderCorreo || item.liderNombre}.`,
+          'Enlace de revisión reenviado',
+          `Enviamos un nuevo correo de aprobación a ${item.liderCorreo || item.liderNombre}.`,
         );
       },
-      error: err => {
+      error: (err) => {
         this.toast.error(
-          'No se pudo reenviar el Magic Link',
-          err?.error?.message || 'Verifica la configuración de correo del líder externo.',
+          'No pudimos reenviar el enlace',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'Revisa que el líder externo tenga su correo electrónico registrado.',
+          ),
         );
       },
     });
@@ -327,7 +341,7 @@ export class GestionRrhhComponent implements OnInit {
 
   confirmarDefinitivamenteRrhh(): void {
     const actual = this.solicitudActiva();
-    if (!actual) return;
+    if (!actual || this.procesandoAccion()) return;
 
     this.procesandoAccion.set(true);
     this.apiService
@@ -338,23 +352,30 @@ export class GestionRrhhComponent implements OnInit {
         this.observacionesRrhh().trim(),
       )
       .subscribe({
-        next: res => {
+        next: (res) => {
           this.procesandoAccion.set(false);
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
-            this.solicitudes.update(lista => lista.map(s => (s.id === actual.id ? mapeada : s)));
+            this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
           }
           this.modalValidacionAbierto.set(false);
+          if (res?.data?.avisoNotificacion) {
+            this.toast.warning(`Solicitud ${actual.folio} confirmada`, res.data.avisoNotificacion);
+            return;
+          }
           this.toast.exito(
             'Solicitud confirmada por Talento Humano',
-            `La solicitud ${actual.folio} fue validada definitivamente y notificada al colaborador.`,
+            `La solicitud ${actual.folio} quedó validada definitivamente y avisamos al colaborador.`,
           );
         },
-        error: err => {
+        error: (err) => {
           this.procesandoAccion.set(false);
           this.toast.error(
-            'No se pudo confirmar la solicitud',
-            err?.error?.message || 'Error al procesar la validación en el servidor.',
+            'No pudimos confirmar la solicitud',
+            obtenerMensajeAmigablePermisos(
+              err,
+              'No pudimos guardar la validación en este momento. Inténtalo nuevamente.',
+            ),
           );
         },
       });
@@ -362,13 +383,13 @@ export class GestionRrhhComponent implements OnInit {
 
   devolverConObservacion(): void {
     const actual = this.solicitudActiva();
-    if (!actual) return;
+    if (!actual || this.procesandoAccion()) return;
 
     const obs = this.observacionesRrhh().trim();
     if (!obs) {
-      this.toast.error(
-        'Observación obligatoria',
-        'Debes detallar el motivo para devolver u observar la solicitud (RF-007).',
+      this.toast.warning(
+        'Observación necesaria',
+        'Por favor detalla la observación para que el colaborador pueda subsanar su solicitud.',
       );
       return;
     }
@@ -382,23 +403,30 @@ export class GestionRrhhComponent implements OnInit {
         obs,
       )
       .subscribe({
-        next: res => {
+        next: (res) => {
           this.procesandoAccion.set(false);
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
-            this.solicitudes.update(lista => lista.map(s => (s.id === actual.id ? mapeada : s)));
+            this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
           }
           this.modalValidacionAbierto.set(false);
-          this.toast.error(
-            'Solicitud observada / devuelta',
-            `Se notificó a ${actual.colaborador} sobre la observación de Talento Humano.`,
+          if (res?.data?.avisoNotificacion) {
+            this.toast.warning(`Observación guardada (${actual.folio})`, res.data.avisoNotificacion);
+            return;
+          }
+          this.toast.warning(
+            'Solicitud devuelta con observaciones',
+            `Avisamos a ${actual.colaborador} sobre la observación de Talento Humano.`,
           );
         },
-        error: err => {
+        error: (err) => {
           this.procesandoAccion.set(false);
           this.toast.error(
-            'No se pudo devolver la solicitud',
-            err?.error?.message || 'Error al registrar la observación en el servidor.',
+            'No pudimos devolver la solicitud',
+            obtenerMensajeAmigablePermisos(
+              err,
+              'No pudimos guardar la observación en este momento. Inténtalo nuevamente.',
+            ),
           );
         },
       });

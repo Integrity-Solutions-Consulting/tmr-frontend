@@ -18,7 +18,11 @@ import {
   cumpleRangoFechas,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
-import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
+import {
+  PermisoItemApi,
+  PermisosApiService,
+  obtenerMensajeAmigablePermisos,
+} from '../permisos-api.service';
 
 export interface SolicitudEquipo {
   id?: number;
@@ -78,6 +82,7 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly modalRevisorVisible = signal(false);
   readonly solicitudActiva = signal<SolicitudEquipo | null>(null);
   readonly comentarioLider = signal('');
+  readonly procesandoDecision = signal(false);
 
   readonly solicitudesEquipo = signal<SolicitudEquipo[]>([]);
 
@@ -140,7 +145,10 @@ export class AprobacionesLiderComponent implements OnInit {
       error: (err) => {
         this.toast.error(
           'No se pudo cargar la bandeja de equipo',
-          err?.error?.message || 'Verifica tus permisos o la conexión con el servidor.',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'No pudimos cargar las solicitudes de tu equipo en este momento.',
+          ),
         );
       },
     });
@@ -264,19 +272,21 @@ export class AprobacionesLiderComponent implements OnInit {
 
   registrarDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
     const actual = this.solicitudActiva();
-    if (!actual || !actual.id) return;
+    if (!actual || !actual.id || this.procesandoDecision()) return;
 
     const comentario = this.comentarioLider().trim();
     if ((accion === 'observar' || accion === 'rechazar') && !comentario) {
-      this.toast.error(
-        'Comentario obligatorio',
-        'Debes indicar el motivo para observar o rechazar la solicitud (RF-007).',
+      this.toast.warning(
+        'Motivo necesario',
+        'Por favor indica el motivo en los comentarios para continuar.',
       );
       return;
     }
 
+    this.procesandoDecision.set(true);
     this.permisosApi.registrarDecisionLider(actual.id, accion, comentario).subscribe({
       next: (res) => {
+        this.procesandoDecision.set(false);
         if (res?.success && res.data) {
           const actualizada = this.mapearDesdeApi(res.data);
           this.solicitudesEquipo.update((lista) =>
@@ -285,31 +295,40 @@ export class AprobacionesLiderComponent implements OnInit {
         }
         this.modalRevisorVisible.set(false);
 
+        if (res?.data?.avisoNotificacion) {
+          this.toast.warning(`Decisión guardada (${actual.codigo})`, res.data.avisoNotificacion);
+          return;
+        }
+
         if (accion === 'aprobar') {
           this.toast.exito(
             `Solicitud ${actual.codigo} aprobada`,
-            'La solicitud pasó a validación de Talento Humano y se notificó al colaborador.',
+            'La solicitud pasó a validación de Talento Humano y ya avisamos al colaborador.',
           );
           return;
         }
 
         if (accion === 'observar') {
-          this.toast.exito(
-            `Solicitud ${actual.codigo} observada`,
-            'El colaborador recibió una notificación para subsanar su solicitud.',
+          this.toast.warning(
+            `Solicitud ${actual.codigo} con observación`,
+            'El colaborador recibió tu comentario para subsanar la solicitud.',
           );
           return;
         }
 
-        this.toast.error(
+        this.toast.info(
           `Solicitud ${actual.codigo} rechazada`,
-          'La solicitud fue marcada como rechazada y se notificó al colaborador.',
+          'Registramos tu decisión y notificamos al colaborador.',
         );
       },
       error: (err) => {
+        this.procesandoDecision.set(false);
         this.toast.error(
-          'No se pudo registrar la decisión',
-          err?.error?.message || 'Error al procesar la acción en el servidor.',
+          'No pudimos guardar tu decisión',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'No pudimos guardar tu decisión en este momento. Inténtalo nuevamente.',
+          ),
         );
       },
     });

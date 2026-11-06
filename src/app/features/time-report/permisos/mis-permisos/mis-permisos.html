@@ -448,7 +448,7 @@
                 </button>
               </span>
             } @else {
-              <span style="font-size: 0.7rem; color: #64748b;">Almacenamiento seguro MinIO / S3</span>
+              <span style="font-size: 0.7rem; color: #64748b;">Formatos PDF, PNG o JPG · Máximo 5 MB</span>
             }
           </div>
         </div>
@@ -608,8 +608,43 @@
                   </div>
                 </td>
                 <td class="isc-table__td-center">
-                  <div><strong>Talento Humano</strong></div>
-                  <div class="isc-schedule-detail">Confirmación final tras aprobación del líder</div>
+                  <div class="isc-rrhh-cell">
+                    <div><strong>{{ obtenerNombreRrhhActualForm() }}</strong></div>
+                    <div class="isc-schedule-detail">{{ obtenerCargoRrhhActualForm() }}</div>
+                    @if (opcionesRrhh().length > 0) {
+                      <button
+                        type="button"
+                        class="isc-rrhh-picker-btn"
+                        (click)="alternarSelectorRrhh()">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">person_check</span>
+                        <span>{{ selectorRrhhAbierto() ? 'Cerrar lista' : 'Elegir responsable RRHH' }}</span>
+                      </button>
+                      @if (selectorRrhhAbierto()) {
+                        <ul class="isc-rrhh-menu" role="listbox" aria-label="Seleccionar responsable de Recursos Humanos">
+                          @for (rrhh of opcionesRrhh(); track rrhh.idUsuario) {
+                            <li
+                              role="option"
+                              class="isc-rrhh-menu__option"
+                              [class.isc-rrhh-menu__option--selected]="obtenerRrhhActualForm()?.idUsuario === rrhh.idUsuario"
+                              [attr.aria-selected]="obtenerRrhhActualForm()?.idUsuario === rrhh.idUsuario"
+                              (click)="elegirResponsableRrhh(rrhh)">
+                              <div class="isc-rrhh-menu__main">
+                                <span>{{ rrhh.nombre }}</span>
+                                @if (rrhh.esPrincipal) {
+                                  <span class="isc-combobox__badge">Líder TH</span>
+                                }
+                              </div>
+                              <div class="isc-rrhh-menu__sub">
+                                {{ rrhh.cargo || 'Talento Humano' }}{{ rrhh.correo ? ' · ' + rrhh.correo : '' }}
+                              </div>
+                            </li>
+                          }
+                        </ul>
+                      }
+                    }
+                  </div>
+
+
                 </td>
               </tr>
             </tbody>

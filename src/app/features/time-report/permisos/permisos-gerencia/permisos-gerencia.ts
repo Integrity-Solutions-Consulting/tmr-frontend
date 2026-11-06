@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
+import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
   FormularioPermisoOficialComponent,
@@ -17,7 +18,11 @@ import {
   PeriodoPreset,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
-import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
+import {
+  PermisoItemApi,
+  PermisosApiService,
+  obtenerMensajeAmigablePermisos,
+} from '../permisos-api.service';
 
 export interface SolicitudGerencia {
   id: number;
@@ -66,6 +71,7 @@ export interface SolicitudGerencia {
   styleUrl: './permisos-gerencia.scss',
 })
 export class PermisosGerenciaComponent implements OnInit {
+  private readonly toast = inject(NotificacionToastService);
   private readonly pdfService = inject(PermisosPdfService);
   private readonly apiService = inject(PermisosApiService);
 
@@ -87,7 +93,7 @@ export class PermisosGerenciaComponent implements OnInit {
 
   cargarHistorialDesdeApi(): void {
     this.apiService.obtenerHistorialGerencia().subscribe({
-      next: res => {
+      next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
           this.solicitudes.set(
             res.data.map((item: PermisoItemApi) => ({
@@ -124,7 +130,15 @@ export class PermisosGerenciaComponent implements OnInit {
           );
         }
       },
-      error: () => {},
+      error: (err) => {
+        this.toast.error(
+          'No se pudo cargar el historial',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'No pudimos consultar el historial general en este momento.',
+          ),
+        );
+      },
     });
   }
 
@@ -135,7 +149,7 @@ export class PermisosGerenciaComponent implements OnInit {
     const tipo = this.filtroTipo();
     const estado = this.filtroEstado();
 
-    return this.solicitudes().filter(s => {
+    return this.solicitudes().filter((s) => {
       if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
       if (tipo !== 'TODOS' && s.tipoOficial !== tipo) return false;
       if (estado !== 'TODOS' && s.estadoClase !== estado) return false;
@@ -169,16 +183,16 @@ export class PermisosGerenciaComponent implements OnInit {
 
   readonly totalHistorico = computed(() => this.solicitudesFiltradas().length);
   readonly totalConfirmados = computed(
-    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'confirmado').length,
+    () => this.solicitudesFiltradas().filter((s) => s.estadoClase === 'confirmado').length,
   );
   readonly totalEnProceso = computed(
     () =>
       this.solicitudesFiltradas().filter(
-        s => s.estadoClase === 'pendiente' || s.estadoClase === 'rrhh' || s.estadoClase === 'observado',
+        (s) => s.estadoClase === 'pendiente' || s.estadoClase === 'rrhh' || s.estadoClase === 'observado',
       ).length,
   );
   readonly totalRechazados = computed(
-    () => this.solicitudesFiltradas().filter(s => s.estadoClase === 'rechazado').length,
+    () => this.solicitudesFiltradas().filter((s) => s.estadoClase === 'rechazado').length,
   );
 
   readonly tieneFiltrosActivos = computed(

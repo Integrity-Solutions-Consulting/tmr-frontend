@@ -148,13 +148,13 @@
             <span class="material-symbols-outlined">download</span>
             Descargar PDF
           </button>
-          <button type="button" class="btn-tmr btn-tmr--warning" (click)="registrarDecisionLider('observar')">
+          <button type="button" class="btn-tmr btn-tmr--warning" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('observar')">
             Observar
           </button>
-          <button type="button" class="btn-tmr btn-tmr--danger" (click)="registrarDecisionLider('rechazar')">
+          <button type="button" class="btn-tmr btn-tmr--danger" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('rechazar')">
             Rechazar
           </button>
-          <button type="button" class="btn-tmr btn-tmr--primary" (click)="registrarDecisionLider('aprobar')">
+          <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('aprobar')">
             Aprobar
           </button>
         </div>

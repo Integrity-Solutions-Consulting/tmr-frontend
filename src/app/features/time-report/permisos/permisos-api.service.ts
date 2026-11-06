@@ -63,6 +63,17 @@ export interface ContextoColaboradorPermisoApi {
   proyectosAsignados: ProyectoAsignadoPermisoApi[];
   lideresDisponibles: LiderDisponiblePermisoApi[];
   tiposPermiso?: TipoPermisoCatalogoApi[];
+  rrhhDisponibles?: RrhhDisponiblePermisoApi[];
+}
+
+export interface RrhhDisponiblePermisoApi {
+  idUsuario: number;
+  nombre: string;
+  cargo?: string | null;
+  correo?: string | null;
+  esPrincipal?: boolean;
+}
+export interface UnusedMarkerRrhh { _?: never;
 }
 
 export interface PermisoItemApi {
@@ -123,6 +134,7 @@ export interface PermisoItemApi {
   comentarios?: string | null;
   traslapeAlerta?: string | null;
   tokenExterno?: string | null;
+  avisoNotificacion?: string | null;
 }
 
 export interface CrearPermisoPayload {
@@ -137,7 +149,64 @@ export interface CrearPermisoPayload {
   detalleHorario?: string;
   totalDias?: number;
   totalHoras?: number;
+  idUsuarioRrhh?: number | null;
   motivo: string;
+}
+
+/**
+ * Traduce cualquier error técnico o código HTTP a un mensaje claro y empático para el usuario,
+ * evitando mostrar errores 500 crudos, jerga de infraestructura o trazas técnicas.
+ */
+export function obtenerMensajeAmigablePermisos(
+  err: unknown,
+  mensajeRespaldo = 'No pudimos completar la acción en este momento. Por favor inténtalo nuevamente.',
+): string {
+  const httpErr = err as {
+    status?: number;
+    message?: string;
+    error?: { message?: string; errors?: string[] } | string | null;
+  } | null;
+
+  const status = typeof httpErr?.status === 'number' ? httpErr.status : undefined;
+
+  if (status === 0) {
+    return 'No pudimos conectarnos en este momento. Revisa tu conexión a internet e inténtalo nuevamente.';
+  }
+  if (status === 401) {
+    return 'Tu sesión expiró por seguridad. Vuelve a iniciar sesión para continuar.';
+  }
+  if (status === 403) {
+    return 'No cuentas con permisos para realizar esta acción.';
+  }
+  if (status === 413) {
+    return 'El archivo adjunto supera el tamaño máximo permitido de 5 MB.';
+  }
+  if (status === 429) {
+    return 'Realizaste varios intentos seguidos. Espera unos segundos antes de volver a intentarlo.';
+  }
+  if (typeof status === 'number' && status >= 500) {
+    return 'El sistema presenta una intermitencia momentánea. Tu información está segura; inténtalo de nuevo en unos segundos.';
+  }
+
+  const cuerpoObj =
+    httpErr?.error && typeof httpErr.error === 'object' ? httpErr.error : undefined;
+  const candidato =
+    cuerpoObj?.message ||
+    (Array.isArray(cuerpoObj?.errors) ? cuerpoObj.errors[0] : undefined) ||
+    (typeof httpErr?.error === 'string' ? httpErr.error : undefined);
+
+  if (candidato && typeof candidato === 'string') {
+    const limpio = candidato.replace(/\s*\((?:RF|RNF)-\d+\)/gi, '').trim();
+    const pareceTecnico =
+      /Http failure response|Exception|Npgsql|StackTrace|MinIO|Apprise|S3|Socket|ECONNREFUSED|500 Internal/i.test(
+        limpio,
+      );
+    if (limpio && !pareceTecnico) {
+      return limpio;
+    }
+  }
+
+  return mensajeRespaldo;
 }
 
 @Injectable({
@@ -200,6 +269,7 @@ export class PermisosApiService {
       if (payload.totalDias !== undefined) formData.append('totalDias', String(payload.totalDias));
       if (payload.totalHoras !== undefined) formData.append('totalHoras', String(payload.totalHoras));
       formData.append('motivo', payload.motivo);
+      if (payload.idUsuarioRrhh) formData.append('idUsuarioRrhh', String(payload.idUsuarioRrhh));
       formData.append('evidencia', archivoEvidencia, archivoEvidencia.name);
       return this.http
         .post<unknown>(`${this.baseUrl}/con-evidencia`, formData)

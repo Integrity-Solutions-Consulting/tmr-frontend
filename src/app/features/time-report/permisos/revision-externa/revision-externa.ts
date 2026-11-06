@@ -8,7 +8,11 @@ import {
   FormularioPermisoOficialComponent,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import { PermisosPdfService } from '../permisos-pdf.service';
-import { PermisoItemApi, PermisosApiService } from '../permisos-api.service';
+import {
+  PermisoItemApi,
+  PermisosApiService,
+  obtenerMensajeAmigablePermisos,
+} from '../permisos-api.service';
 
 @Component({
   selector: 'app-revision-externa',
@@ -27,6 +31,7 @@ export class RevisionExternaComponent implements OnInit {
   readonly solicitudApi = signal<PermisoItemApi | null>(null);
   readonly observacionLider = signal('');
   readonly procesado = signal<'pendiente' | 'confirmado' | 'rechazado'>('pendiente');
+  readonly enviandoDecision = signal(false);
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
@@ -38,7 +43,7 @@ export class RevisionExternaComponent implements OnInit {
 
   private cargarPorToken(token: string): void {
     this.apiService.obtenerPorTokenExterno(token).subscribe({
-      next: res => {
+      next: (res) => {
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
           if (res.data.comentarioLider) {
@@ -51,10 +56,13 @@ export class RevisionExternaComponent implements OnInit {
           }
         }
       },
-      error: err => {
+      error: (err) => {
         this.toast.error(
           'Enlace no disponible',
-          err?.error?.message || 'El enlace externo es inválido o ha expirado.',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'Este enlace de revisión no es válido o ya cumplió su tiempo de vigencia.',
+          ),
         );
       },
     });
@@ -135,25 +143,36 @@ export class RevisionExternaComponent implements OnInit {
   confirmarExterno(): void {
     const token = this.tokenExterno();
     if (!token) {
-      this.toast.error('Token no proporcionado', 'Abre este portal desde el enlace enviado a tu correo.');
+      this.toast.error('Enlace incompleto', 'Abre esta página desde el botón enviado a tu correo electrónico.');
       return;
     }
+    if (this.enviandoDecision()) return;
 
+    this.enviandoDecision.set(true);
     this.apiService.registrarDecisionExterna(token, 'aprobar', this.observacionLider().trim()).subscribe({
-      next: res => {
+      next: (res) => {
+        this.enviandoDecision.set(false);
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
         }
         this.procesado.set('confirmado');
+        if (res?.data?.avisoNotificacion) {
+          this.toast.warning('¡Gracias! Aprobación guardada', res.data.avisoNotificacion);
+          return;
+        }
         this.toast.exito(
-          'Solicitud aprobada vía Magic Link',
-          'Se registró la aprobación y se notificó a Talento Humano y al colaborador.',
+          '¡Gracias! Solicitud aprobada',
+          'Registramos tu aprobación y notificamos a Talento Humano y al colaborador.',
         );
       },
-      error: err => {
+      error: (err) => {
+        this.enviandoDecision.set(false);
         this.toast.error(
-          'No se pudo procesar la aprobación',
-          err?.error?.message || 'El enlace puede haber expirado o ya fue utilizado.',
+          'No pudimos registrar la aprobación',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'El enlace puede haber expirado o ya fue utilizado anteriormente.',
+          ),
         );
       },
     });
@@ -162,34 +181,45 @@ export class RevisionExternaComponent implements OnInit {
   rechazarExterno(): void {
     const token = this.tokenExterno();
     if (!token) {
-      this.toast.error('Token no proporcionado', 'Abre este portal desde el enlace enviado a tu correo.');
+      this.toast.error('Enlace incompleto', 'Abre esta página desde el botón enviado a tu correo electrónico.');
       return;
     }
+    if (this.enviandoDecision()) return;
 
     const comentario = this.observacionLider().trim();
     if (!comentario) {
-      this.toast.error(
-        'Motivo obligatorio',
-        'Por favor ingresa el motivo por el cual rechazas la solicitud (RF-007).',
+      this.toast.warning(
+        'Motivo necesario',
+        'Por favor escribe brevemente el motivo por el cual no apruebas la solicitud.',
       );
       return;
     }
 
+    this.enviandoDecision.set(true);
     this.apiService.registrarDecisionExterna(token, 'rechazar', comentario).subscribe({
-      next: res => {
+      next: (res) => {
+        this.enviandoDecision.set(false);
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
         }
         this.procesado.set('rechazado');
-        this.toast.error(
-          'Solicitud rechazada por Líder Externo',
-          'Se notificó al colaborador y a Talento Humano.',
+        if (res?.data?.avisoNotificacion) {
+          this.toast.warning('Decisión guardada', res.data.avisoNotificacion);
+          return;
+        }
+        this.toast.info(
+          'Decisión registrada',
+          'Registramos tu respuesta y notificamos al colaborador y a Talento Humano.',
         );
       },
-      error: err => {
+      error: (err) => {
+        this.enviandoDecision.set(false);
         this.toast.error(
-          'No se pudo procesar el rechazo',
-          err?.error?.message || 'El enlace puede haber expirado o ya fue utilizado.',
+          'No pudimos registrar tu respuesta',
+          obtenerMensajeAmigablePermisos(
+            err,
+            'El enlace puede haber expirado o ya fue utilizado anteriormente.',
+          ),
         );
       },
     });

@@ -28,7 +28,7 @@ export class PermisosPdfService {
       } else {
         this.toast.error(
           'Solicitud aún no guardada',
-          'Guarda primero la solicitud para descargar el PDF oficial firmado desde el servidor.',
+          'Guarda primero tu solicitud para poder descargar el formulario oficial en PDF.',
         );
         return;
       }
@@ -44,7 +44,7 @@ export class PermisosPdfService {
     } catch {
       this.toast.error(
         'No se pudo descargar el PDF',
-        'Verifica tus permisos de acceso o la conexión con el servidor.',
+        'No pudimos generar la descarga en este momento. Por favor inténtalo nuevamente en unos segundos.',
       );
     }
   }

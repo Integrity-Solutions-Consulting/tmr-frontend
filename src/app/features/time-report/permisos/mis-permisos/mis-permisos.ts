@@ -25,6 +25,8 @@ import {
   PermisoItemApi,
   PermisosApiService,
   TipoPermisoCatalogoApi,
+  RrhhDisponiblePermisoApi,
+  obtenerMensajeAmigablePermisos,
 } from '../permisos-api.service';
 
 export interface SolicitudColaborador {
@@ -125,6 +127,9 @@ export class MisPermisosComponent implements OnInit {
   readonly opcionesCliente = signal<OpcionClienteProyecto[]>([]);
   readonly opcionesLider = signal<OpcionLiderFormulario[]>([]);
   readonly tiposPermisoCatalogo = signal<TipoPermisoCatalogoApi[]>([]);
+  readonly opcionesRrhh = signal<RrhhDisponiblePermisoApi[]>([]);
+  readonly idUsuarioRrhhForm = signal<number | null>(null);
+  readonly selectorRrhhAbierto = signal(false);
 
   // Buscador interactivo de Cliente / Proyecto y autocompletado consiguiente de Jefe Inmediato
   readonly indiceClienteForm = signal(0);
@@ -282,6 +287,14 @@ export class MisPermisosComponent implements OnInit {
         if (Array.isArray(ctx.tiposPermiso) && ctx.tiposPermiso.length > 0) {
           this.tiposPermisoCatalogo.set(ctx.tiposPermiso);
         }
+        if (Array.isArray(ctx.rrhhDisponibles) && ctx.rrhhDisponibles.length > 0) {
+          this.opcionesRrhh.set(ctx.rrhhDisponibles);
+          const principal =
+            ctx.rrhhDisponibles.find((r) => r.esPrincipal) ?? ctx.rrhhDisponibles[0];
+          if (principal && !this.idUsuarioRrhhForm()) {
+            this.idUsuarioRrhhForm.set(principal.idUsuario);
+          }
+        }
 
         if (Array.isArray(ctx.lideresDisponibles)) {
           this.opcionesLider.set(
@@ -324,7 +337,7 @@ export class MisPermisosComponent implements OnInit {
       error: (err) => {
         this.toast.error(
           'No se pudo cargar el contexto',
-          err?.error?.message || 'Verifica tu sesión o la conexión con el backend.',
+          obtenerMensajeAmigablePermisos(err, 'No pudimos cargar tu información en este momento. Recarga la página e inténtalo nuevamente.'),
         );
       },
     });
@@ -338,7 +351,7 @@ export class MisPermisosComponent implements OnInit {
       error: (err) => {
         this.toast.error(
           'Error al consultar tus solicitudes',
-          err?.error?.message || 'No se pudieron obtener tus solicitudes desde el servidor.',
+          obtenerMensajeAmigablePermisos(err, 'No pudimos consultar tus solicitudes en este momento.'),
         );
       },
     });
@@ -411,6 +424,7 @@ export class MisPermisosComponent implements OnInit {
   abrirNuevaSolicitud(): void {
     this.archivoEvidencia.set(null);
     this.comboboxClienteAbierto.set(false);
+    this.selectorRrhhAbierto.set(false);
     this.busquedaClienteProyecto.set('');
     if (this.opcionesCliente().length === 0) {
       this.cargarDatosBackend();
@@ -433,6 +447,7 @@ export class MisPermisosComponent implements OnInit {
   cerrarBuscadorClienteConRetardo(): void {
     setTimeout(() => {
       this.comboboxClienteAbierto.set(false);
+    this.selectorRrhhAbierto.set(false);
       this.busquedaClienteProyecto.set('');
     }, 150);
   }
@@ -440,6 +455,7 @@ export class MisPermisosComponent implements OnInit {
   alTeclaBuscadorCliente(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       this.comboboxClienteAbierto.set(false);
+    this.selectorRrhhAbierto.set(false);
       this.busquedaClienteProyecto.set('');
       return;
     }
@@ -457,6 +473,7 @@ export class MisPermisosComponent implements OnInit {
     event?.preventDefault();
     this.seleccionarClienteForm(String(opt.indiceOriginal));
     this.comboboxClienteAbierto.set(false);
+    this.selectorRrhhAbierto.set(false);
     this.busquedaClienteProyecto.set('');
   }
 
@@ -521,7 +538,7 @@ export class MisPermisosComponent implements OnInit {
     if (!permitidas.includes(ext)) {
       this.toast.error(
         'Formato no permitido',
-        'Solo se aceptan archivos PDF, PNG, JPG o JPEG (RNF-003).',
+        'Puedes adjuntar documentos en formato PDF, PNG, JPG o JPEG.',
       );
       input.value = '';
       return;
@@ -529,7 +546,7 @@ export class MisPermisosComponent implements OnInit {
 
     const maxBytes = 5 * 1024 * 1024;
     if (file.size > maxBytes) {
-      this.toast.error('Archivo demasiado grande', 'El tamaño máximo permitido es 5 MB (RNF-003).');
+      this.toast.error('Archivo demasiado pesado', 'El documento no debe superar los 5 MB.');
       input.value = '';
       return;
     }
@@ -563,6 +580,44 @@ export class MisPermisosComponent implements OnInit {
       return cli.idLider;
     }
     return this.opcionesLider()[this.indiceLiderForm()]?.idLider ?? null;
+  }
+
+  obtenerRrhhActualForm(): RrhhDisponiblePermisoApi | null {
+    const lista = this.opcionesRrhh();
+    if (lista.length === 0) return null;
+    const idSel = this.idUsuarioRrhhForm();
+    return (
+      lista.find((r) => r.idUsuario === idSel) ??
+      lista.find((r) => r.esPrincipal) ??
+      lista[0] ??
+      null
+    );
+  }
+
+  obtenerNombreRrhhActualForm(): string {
+    return this.obtenerRrhhActualForm()?.nombre || 'Talento Humano';
+  }
+
+  obtenerCargoRrhhActualForm(): string {
+    const actual = this.obtenerRrhhActualForm();
+    if (!actual?.cargo) {
+      return 'Confirmación final tras aprobación del líder';
+    }
+    return actual.cargo;
+  }
+
+  alternarSelectorRrhh(): void {
+    this.selectorRrhhAbierto.update((v) => !v);
+  }
+
+  elegirResponsableRrhh(item: RrhhDisponiblePermisoApi): void {
+    this.idUsuarioRrhhForm.set(item.idUsuario);
+    this.selectorRrhhAbierto.set(false);
+    return;
+  }
+
+  private unusedMarkerRrhh(): number | null {
+    return null;
   }
 
   verFormulario(item: SolicitudColaborador): void {
@@ -633,7 +688,7 @@ export class MisPermisosComponent implements OnInit {
     if (!clienteOpt) {
       this.toast.error(
         'Cliente / Proyecto requerido',
-        'Selecciona un Cliente / Proyecto activo desde la base de datos.',
+        'Selecciona un Cliente / Proyecto activo para continuar.',
       );
       return;
     }
@@ -642,7 +697,7 @@ export class MisPermisosComponent implements OnInit {
     if (this.requiereCertificadoMedicoObligatorio() && !archivo) {
       this.toast.error(
         'Certificado médico obligatorio',
-        'Para colaboradores en nómina con licencia por enfermedad mayor a 1 día debes adjuntar el certificado médico (RF-004).',
+        'Para licencias por enfermedad mayores a 1 día es necesario adjuntar el certificado médico.',
       );
       return;
     }
@@ -664,6 +719,7 @@ export class MisPermisosComponent implements OnInit {
           totalDias: this.diasCalculadosForm(),
           totalHoras: this.horasCalculadasForm(),
           motivo: this.motivoForm().trim(),
+          idUsuarioRrhh: this.obtenerRrhhActualForm()?.idUsuario ?? null,
         },
         archivo,
       )
@@ -683,20 +739,27 @@ export class MisPermisosComponent implements OnInit {
           this.archivoEvidencia.set(null);
           this.motivoForm.set('');
           this.modalNuevaVisible.set(false);
+          if (res.data.avisoNotificacion) {
+            this.toast.warning(`Solicitud ${nuevo.codigo} guardada`, res.data.avisoNotificacion);
+            return;
+          }
           this.toast.exito(
             `Solicitud ${nuevo.codigo} registrada`,
             archivo
-              ? 'Tu solicitud y el adjunto en MinIO fueron guardados, y se enviaron las notificaciones correspondientes.'
+              ? 'Tu solicitud y el documento de respaldo quedaron guardados y ya notificamos a tu líder.'
               : 'Tu solicitud fue registrada y notificada a tu Jefe Inmediato y a Talento Humano.',
           );
         },
         error: (err) => {
           this.guardandoSolicitud.set(false);
-          const detalle =
-            err?.error?.message ||
-            (Array.isArray(err?.error?.errors) && err.error.errors[0]) ||
-            'Error al comunicarse con el servidor o el almacenamiento MinIO.';
-          this.toast.error('No se pudo registrar la solicitud', detalle);
+          void err;
+
+
+
+          this.toast.error(
+            'No pudimos guardar tu solicitud',
+            obtenerMensajeAmigablePermisos(err, 'No pudimos guardar tu solicitud en este momento. Por favor inténtalo nuevamente.'),
+          );
         },
       });
   }

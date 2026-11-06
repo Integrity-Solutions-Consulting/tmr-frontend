@@ -9,7 +9,7 @@
             class="portal-banner__logo-img" />
         </div>
         <div>
-          <p>Portal Líder Externo</p>
+          <p>Portal de Revisión Externa</p>
           <h1>Aprobación de Solicitud</h1>
         </div>
       </div>
@@ -29,7 +29,7 @@
               rows="2"
               [ngModel]="observacionLider()"
               (ngModelChange)="observacionLider.set($event)"
-              placeholder="Observaciones..."></textarea>
+              placeholder="Observaciones o motivo (necesario en caso de no aprobar)..."></textarea>
           </div>
 
           <div class="modal-footer" style="justify-content: space-between;">
@@ -41,27 +41,35 @@
                 <span class="material-symbols-outlined">download</span>
                 Descargar PDF
               </button>
-              <button type="button" class="btn-tmr btn-tmr--danger" (click)="rechazarExterno()">
-                Rechazar
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--danger"
+                [disabled]="enviandoDecision()"
+                (click)="rechazarExterno()">
+                {{ enviandoDecision() ? 'Procesando...' : 'Rechazar' }}
               </button>
-              <button type="button" class="btn-tmr btn-tmr--primary" (click)="confirmarExterno()">
-                Aprobar
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--primary"
+                [disabled]="enviandoDecision()"
+                (click)="confirmarExterno()">
+                {{ enviandoDecision() ? 'Guardando...' : 'Aprobar' }}
               </button>
             </div>
           </div>
         </div>
       } @else {
         <div class="modal-footer" style="justify-content: space-between; align-items: center;">
-          <span class="status-badge" [class.status-badge--confirmado]="procesado() === 'confirmado'" [class.status-badge--rechazado]="procesado() !== 'confirmado'">
+          <span
+            class="status-badge"
+            [class.status-badge--confirmado]="procesado() === 'confirmado'"
+            [class.status-badge--rechazado]="procesado() !== 'confirmado'">
             {{ procesado() === 'confirmado' ? 'Solicitud Aprobada' : 'Solicitud Rechazada' }}
           </span>
           <div style="display: flex; gap: 0.5rem;">
             <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="descargarPdf()">
               <span class="material-symbols-outlined">download</span>
-              Descargar PDF
-            </button>
-            <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="procesado.set('pendiente')">
-              Reiniciar
+              Descargar PDF Oficial
             </button>
           </div>
         </div>
