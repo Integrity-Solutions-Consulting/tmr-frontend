@@ -24,14 +24,10 @@ export class FeriadosService {
   }
 
   esFeriado(fecha: Date): boolean {
-    return this.feriados.some(f => 
-      f.getDate() === fecha.getDate() && 
-      f.getMonth() === fecha.getMonth() && 
+    return this.feriados.some(f =>
+      f.getDate() === fecha.getDate() &&
+      f.getMonth() === fecha.getMonth() &&
       f.getFullYear() === fecha.getFullYear()
     );
-  }
-
-  getFeriados(): Date[] {
-    return this.feriados;
   }
 }

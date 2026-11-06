@@ -1,4 +1,3 @@
-// src/app/shared/models/colaborador.model.ts
 // sm - Un proyecto del colaborador en el rango consultado, con sus horas propias (ver Colaborador.proyectos).
 export interface ProyectoResumen {
   idProyecto: number;

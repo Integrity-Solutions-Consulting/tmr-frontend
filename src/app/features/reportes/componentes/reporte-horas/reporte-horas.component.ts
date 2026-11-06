@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, OnDestroy, inject, effect, HostListener } from '@angular/core';
+import { Component, signal, computed, OnDestroy, inject, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReporteHoras } from '../../modelos/reporte-horas.model';

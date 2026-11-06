@@ -248,9 +248,6 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
     this.mostrarLista = true;
   }
 
-  // ================================================================
-  // NUEVO MÉTODO: ABRIR LISTA AL HACER CLIC
-  // ================================================================
   abrirLista(): void {
     // Si no hay búsqueda activa, mostrar los inactivos
     if (!this.busquedaActual || this.busquedaActual === '') {

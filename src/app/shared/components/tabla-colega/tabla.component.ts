@@ -6,12 +6,11 @@ import {
   ContentChild,
   TemplateRef,
   OnInit,
-  signal,
   Signal,
   isSignal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ColumnDefinition, TableConfig, TableEmptyState } from './tabla.types';
+import { ColumnDefinition, TableConfig } from './tabla.types';
 import { PaginacionComponent } from '../paginacion/paginacion.component';
 import { BadgeEstadoComponent } from '../badge-estado/badge-estado.component';
 import { MatIconModule } from '@angular/material/icon';

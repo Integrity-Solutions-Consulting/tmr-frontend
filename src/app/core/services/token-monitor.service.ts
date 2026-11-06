@@ -72,8 +72,6 @@ export class TokenMonitorService {
       return;
     }
 
-    const expirationTime = new Date(decoded.exp * 1000);
-
     // Usar NgZone para no ejecutar en Angular zone y evitar cambios de detección innecesarios
     this.ngZone.runOutsideAngular(() => {
       this.checkInterval = setInterval(() => {

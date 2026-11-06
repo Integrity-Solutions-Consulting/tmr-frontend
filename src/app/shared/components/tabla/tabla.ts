@@ -16,7 +16,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { BadgeEstado } from '../badge-estado/badge-estado';
 import { PaginacionComponent } from '../paginacion/paginacion.component';
 import {
   ActionMenuComponent,

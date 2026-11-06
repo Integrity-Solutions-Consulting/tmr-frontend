@@ -8,20 +8,8 @@ export const ONLY_LETTERS_REGEX = /^[a-zA-ZÀ-ÿ\s]+$/;
 /** Nombre de usuario: letras, numeros, puntos y guiones bajos */
 export const USERNAME_REGEX = /^[a-zA-Z0-9._]+$/;
 
-/** Email estandar */
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 /** Solo numeros positivos */
 export const NUMBERS_ONLY_REGEX = /^\d+$/;
-
-/** Telefono local: exactamente 10 digitos. */
-export const PHONE_10_DIGITS_REGEX = /^\d{10}$/;
-
-/** Letras y numeros, sin simbolos especiales. Permite espacios, guion y guion bajo. */
-export const SAFE_ALPHANUMERIC_REGEX = /^[a-zA-Z0-9\s_-]+$/;
-
-/** Documento internacional: letras, numeros, espacios y guion. */
-export const INTERNATIONAL_DOCUMENT_REGEX = /^[a-zA-Z0-9\s-]+$/;
 
 /** Usuario interno: letras, numeros, punto, guion y guion bajo. */
 export const INTERNAL_USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
@@ -73,22 +61,6 @@ export function temporaryPasswordValidator(): ValidatorFn {
   };
 }
 
-export function cedulaEcuatorianaValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = String(control.value ?? '').trim();
-
-    if (!value) {
-      return null;
-    }
-
-    if (!NUMBERS_ONLY_REGEX.test(value)) {
-      return { numbersOnly: true };
-    }
-
-    return isValidEcuadorianCedula(value) ? null : { cedulaEcuador: true };
-  };
-}
-
 export function rucEcuatorianoValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = String(control.value ?? '').trim();
@@ -102,26 +74,6 @@ export function rucEcuatorianoValidator(): ValidatorFn {
     }
 
     return isValidEcuadorianRuc(value) ? null : { rucEcuador: true };
-  };
-}
-
-export function internationalDocumentValidator(minLength = 4, maxLength = 20): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = String(control.value ?? '').trim();
-
-    if (!value) {
-      return null;
-    }
-
-    if (value.length < minLength) {
-      return { documentMinLength: { requiredLength: minLength } };
-    }
-
-    if (value.length > maxLength) {
-      return { documentMaxLength: { requiredLength: maxLength } };
-    }
-
-    return INTERNATIONAL_DOCUMENT_REGEX.test(value) ? null : { documentCharacters: true };
   };
 }
 
