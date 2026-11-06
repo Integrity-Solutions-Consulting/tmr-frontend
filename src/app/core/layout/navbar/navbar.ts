@@ -138,7 +138,7 @@ export class Navbar implements OnInit {
       this.notificacionesInternas.marcarLeida(notif.id);
     }
     this.notificacionesAbierto = false;
-    if (notif.urlDestino) {
+    if (notif.urlDestino && notif.urlDestino.startsWith('/')) {
       this.router.navigateByUrl(notif.urlDestino);
     }
   }

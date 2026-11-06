@@ -89,7 +89,7 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly kpiPendientes = computed(
     () => this.solicitudesEquipo().filter((s) => s.estado === 'Pendiente').length,
   );
-  readonly kpiAusentesHoy = signal(0);
+  readonly kpiAusentesHoy = computed(() => { const hoy = new Date().toISOString().slice(0, 10); return this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado' && cumpleRangoFechas(s.fechaInicio, s.fechaFin, hoy, hoy)).length; }); readonly proyectosDisponibles = computed(() => Array.from(new Set(this.solicitudesEquipo().map((s) => s.proyecto).filter(Boolean))).sort());
   readonly kpiAprobados = computed(
     () => this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado').length,
   );

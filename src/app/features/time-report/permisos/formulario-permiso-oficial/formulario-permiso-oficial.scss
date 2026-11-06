@@ -6,7 +6,7 @@
   padding: 1.5rem 1.75rem;
   font-family: 'Plus Jakarta Sans', 'Inter', Arial, sans-serif;
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
-  max-width: 860px;
+  max-width: 1080px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
@@ -59,21 +59,32 @@
 
 .isc-table-scroll {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: visible;
   margin-bottom: 0.85rem;
+
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .isc-table {
   width: 100%;
-  min-width: 520px;
+  min-width: 0;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.78rem;
+
+  @media (max-width: 768px) {
+    min-width: 520px;
+    table-layout: auto;
+  }
 
   th,
   td {
     border: 1px solid #334155;
     padding: 0.38rem 0.55rem;
+    word-break: break-word;
   }
 
   &__doc-title {

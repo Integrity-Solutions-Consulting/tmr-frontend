@@ -71,7 +71,7 @@
               <span class="navbar__bell-item-desc">Tienes <strong>{{ horasFaltantes }} horas</strong> pendientes por reportar en este periodo.</span>
             </div>
           </div>
-          <div class="navbar__bell-empty" *ngIf="!tieneNotificaciones && notificacionesInternas.items().length === 0 && misAvisos.avisos().length === 0">
+          <div class="navbar__bell-empty" *ngIf="!tieneNotificaciones && !resumenCorte.resumen() && notificacionesInternas.items().length === 0 && misAvisos.avisos().length === 0">
             <span class="material-symbols-outlined navbar__bell-empty-icon">check_circle</span>
             <span class="navbar__bell-empty-text">¡Estás al día con tus notificaciones!</span>
           </div>

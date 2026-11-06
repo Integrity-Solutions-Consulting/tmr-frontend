@@ -30,7 +30,7 @@ export class RevisionExternaComponent implements OnInit {
   readonly tokenExterno = signal<string | null>(null);
   readonly solicitudApi = signal<PermisoItemApi | null>(null);
   readonly observacionLider = signal('');
-  readonly procesado = signal<'pendiente' | 'confirmado' | 'rechazado'>('pendiente');
+  readonly procesado = signal<'pendiente' | 'confirmado' | 'observado' | 'rechazado'>('pendiente');
   readonly enviandoDecision = signal(false);
 
   ngOnInit(): void {
@@ -51,6 +51,8 @@ export class RevisionExternaComponent implements OnInit {
           }
           if (res.data.estadoClase === 'rechazado') {
             this.procesado.set('rechazado');
+          } else if (res.data.estadoClase === 'observado') {
+            this.procesado.set('observado');
           } else if (res.data.aprobadoLider) {
             this.procesado.set('confirmado');
           }
@@ -178,7 +180,15 @@ export class RevisionExternaComponent implements OnInit {
     });
   }
 
+  observarExterno(): void {
+    this.enviarDecisionExternaConMotivo('observar');
+  }
+
   rechazarExterno(): void {
+    this.enviarDecisionExternaConMotivo('rechazar');
+  }
+
+  private enviarDecisionExternaConMotivo(accion: 'observar' | 'rechazar'): void {
     const token = this.tokenExterno();
     if (!token) {
       this.toast.error('Enlace incompleto', 'Abre esta página desde el botón enviado a tu correo electrónico.');
@@ -190,21 +200,28 @@ export class RevisionExternaComponent implements OnInit {
     if (!comentario) {
       this.toast.warning(
         'Motivo necesario',
-        'Por favor escribe brevemente el motivo por el cual no apruebas la solicitud.',
+        'Por favor escribe brevemente el motivo u observación en el campo de comentarios.',
       );
       return;
     }
 
     this.enviandoDecision.set(true);
-    this.apiService.registrarDecisionExterna(token, 'rechazar', comentario).subscribe({
+    this.apiService.registrarDecisionExterna(token, accion, comentario).subscribe({
       next: (res) => {
         this.enviandoDecision.set(false);
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
         }
-        this.procesado.set('rechazado');
+        this.procesado.set(accion === 'observar' ? 'observado' : 'rechazado');
         if (res?.data?.avisoNotificacion) {
           this.toast.warning('Decisión guardada', res.data.avisoNotificacion);
+          return;
+        }
+        if (accion === 'observar') {
+          this.toast.warning(
+            'Observación registrada',
+            'Enviamos tu observación al colaborador y a Talento Humano.',
+          );
           return;
         }
         this.toast.info(

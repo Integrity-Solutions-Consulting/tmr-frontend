@@ -341,7 +341,7 @@ export class PermisosApiService {
 
   registrarDecisionExterna(
     token: string,
-    accion: 'aprobar' | 'rechazar',
+    accion: 'aprobar' | 'observar' | 'rechazar',
     comentario: string,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
     return this.http

@@ -127,7 +127,7 @@ export function coincideBusquedaInteligente(
  */
 export function calcularRangoPreset(
   preset: PeriodoPreset,
-  base: Date = new Date(2026, 9, 30),
+  base: Date = new Date(),
 ): RangoFechasISO {
   const anio = base.getFullYear();
   const mes = base.getMonth();

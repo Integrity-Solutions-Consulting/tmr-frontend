@@ -53,8 +53,8 @@
       <label class="filter-label">Proyecto</label>
       <select class="filter-control" [ngModel]="proyectoFiltro()" (ngModelChange)="proyectoFiltro.set($event)">
         <option value="">Todos</option>
-        <option value="Portal Web ISC">Portal Web ISC</option>
-        <option value="Migración Microservicios">Migración Microservicios</option>
+        @for (proy of proyectosDisponibles(); track proy) { <option [value]="proy">{{ proy }}</option> }
+
       </select>
     </div>
     <div class="filter-group">

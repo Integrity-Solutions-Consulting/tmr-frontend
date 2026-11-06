@@ -9,7 +9,7 @@
   .isc-inline-select,
   .isc-inline-input,
   .isc-inline-date {
-    width: 100%;
+    width: 100%; min-width: 0; max-width: 100%;
     border: 1px solid #94a3b8;
     border-radius: 4px;
     padding: 4px 6px;
@@ -37,7 +37,7 @@
 
   .isc-combobox {
     position: relative;
-    width: 100%;
+    width: 100%; min-width: 0; max-width: 100%;
 
     &__control {
       position: relative;
@@ -165,7 +165,7 @@
   }
 
   .isc-motivo-textarea {
-    width: 100%;
+    width: 100%; min-width: 0; max-width: 100%;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     padding: 8px 10px;
@@ -304,7 +304,7 @@
   }
 
   .isc-rrhh-menu {
-    width: 100%;
+    width: 100%; min-width: 0; max-width: 100%;
     max-width: 280px;
     max-height: 170px;
     overflow-y: auto;

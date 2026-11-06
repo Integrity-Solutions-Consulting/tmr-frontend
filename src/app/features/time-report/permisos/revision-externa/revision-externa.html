@@ -29,7 +29,7 @@
               rows="2"
               [ngModel]="observacionLider()"
               (ngModelChange)="observacionLider.set($event)"
-              placeholder="Observaciones o motivo (necesario en caso de no aprobar)..."></textarea>
+              placeholder="Observaciones o motivo (necesario en caso de observar o rechazar)..."></textarea>
           </div>
 
           <div class="modal-footer" style="justify-content: space-between;">
@@ -40,6 +40,13 @@
               <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf()">
                 <span class="material-symbols-outlined">download</span>
                 Descargar PDF
+              </button>
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--warning"
+                [disabled]="enviandoDecision()"
+                (click)="observarExterno()">
+                {{ enviandoDecision() ? 'Procesando...' : 'Observar' }}
               </button>
               <button
                 type="button"
@@ -63,8 +70,15 @@
           <span
             class="status-badge"
             [class.status-badge--confirmado]="procesado() === 'confirmado'"
-            [class.status-badge--rechazado]="procesado() !== 'confirmado'">
-            {{ procesado() === 'confirmado' ? 'Solicitud Aprobada' : 'Solicitud Rechazada' }}
+            [class.status-badge--observado]="procesado() === 'observado'"
+            [class.status-badge--rechazado]="procesado() === 'rechazado'">
+            {{
+              procesado() === 'confirmado'
+                ? 'Solicitud Aprobada'
+                : procesado() === 'observado'
+                  ? 'Solicitud Observada'
+                  : 'Solicitud Rechazada'
+            }}
           </span>
           <div style="display: flex; gap: 0.5rem;">
             <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="descargarPdf()">
