@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Actividad } from '../models/actividad.model';
 import { AuthService } from '../../features/auth/servicios/auth.service';
 import { environment } from '../../../environments/environment';
@@ -24,18 +24,7 @@ export class ActividadesService {
   private solicitudCalendario = 0;
   private solicitudResumen = 0;
 
-  // Signals para métricas
-  // sm - Se comentan las métricas anteriores (horas de hoy, semana y mes): Actividades ahora muestra las mismas
-  // métricas que Seguimiento, calculadas por el backend para el mes que muestra el calendario.
-  // private _horasRegistradasHoy = signal<number>(0);
-  // public readonly horasRegistradasHoy = this._horasRegistradasHoy.asReadonly();
-  //
-  // private _horasMesActual = signal<number>(0);
-  // public readonly horasMesActual = this._horasMesActual.asReadonly();
-  //
-  // private _horasSemanaActual = signal<number>(0);
-  // public readonly horasSemanaActual = this._horasSemanaActual.asReadonly();
-
+  // sm - Métricas calculadas por el backend para el mes que muestra el calendario (mismas que Seguimiento).
   private _horasPorRegistrar = signal<number>(0);
   public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
 
@@ -232,7 +221,7 @@ export class ActividadesService {
       };
 
       this.http.post(this.apiUrl, payload).subscribe({
-        next: (res) => {
+        next: () => {
           this.recargarMesActual();
           if (callback) callback();
         },

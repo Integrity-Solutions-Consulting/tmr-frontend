@@ -1,4 +1,3 @@
-// src/app/shared/models/actividad.model.ts
 export interface Actividad {
   id?: string;
   idempleado?: number;

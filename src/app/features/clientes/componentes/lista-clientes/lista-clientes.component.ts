@@ -483,108 +483,11 @@ export class ListaClientesComponent implements OnInit, OnDestroy {
       columnaEstado: 7,
       orientacionPdf: 'landscape',
     }, avance);
-    return;
-
-    const ExcelJS = await import('exceljs');
-    const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
-    const workbook = new Workbook();
-    const ws = workbook.addWorksheet('Clientes');
-
-    ws.columns = [
-      { header: 'Tipo de identificaciÃ³n', key: 'tipoId', width: 22 },
-      { header: 'Identificador', key: 'identificador', width: 18 },
-      { header: 'Nombre comercial', key: 'nombreComercial', width: 34 },
-      { header: 'Nombres', key: 'nombres', width: 24 },
-      { header: 'Apellidos', key: 'apellidos', width: 24 },
-      { header: 'Correo electrÃ³nico', key: 'correoElectronico', width: 34 },
-      { header: 'TelÃ©fono', key: 'telefono', width: 16 },
-      { header: 'Estado', key: 'estado', width: 14 },
-      { header: 'DirecciÃ³n', key: 'direccion', width: 36 },
-      { header: 'Proyectos asignados', key: 'proyectos', width: 48 },
-    ];
-
-    clientes.forEach(c => ws.addRow({
-      tipoId: c.tipoId ?? '-',
-      identificador: c.identificador ?? '-',
-      nombreComercial: c.nombreComercial ?? '-',
-      nombres: c.nombres ?? '-',
-      apellidos: c.apellidos ?? '-',
-      correoElectronico: c.correoElectronico ?? '-',
-      telefono: c.telefono ?? '-',
-      estado: c.estado ?? '-',
-      direccion: c.direccion ?? '-',
-      proyectos: this.formatearProyectosCliente(c),
-    }));
-
-    this.aplicarEstiloExcel(ws, 8);
-    const buffer = await workbook.xlsx.writeBuffer();
-    this.crearDescargaExcel(buffer, 'clientes.xlsx');
-    return;
-    this.clientes$.subscribe(clientes => {
-      const datos = clientes.map(c => ({
-        'Tipo':          c.tipoId,
-        'Identificador':    c.identificador,
-        'Nombre Comercial': c.nombreComercial,
-        'Correo':           c.correoElectronico,
-        'Teléfono':         c.telefono,
-        'Estado':           c.estado,
-      }));
-
-    }).unsubscribe();
-  }
-
-  private aplicarEstiloExcel(ws: any, colEstado: number): void {
-    const header = ws.getRow(1);
-    header.height = 22;
-    header.eachCell((cell: any) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF163572' } };
-      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      cell.border = this.bordeDelgado();
-    });
-
-    ws.eachRow((row: any, rowNumber: number) => {
-      if (rowNumber === 1) return;
-      const fill = rowNumber % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
-      row.height = 22;
-      row.eachCell((cell: any, colNumber: number) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF334155' } };
-        cell.border = this.bordeDelgado('FFE2E8F0');
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-        if (colNumber === colEstado) {
-          const esActivo = String(cell.value ?? '').toLowerCase() === 'activo';
-          cell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: esActivo ? 'FF16A34A' : 'FF6B7280' } };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        }
-      });
-    });
-  }
-
-  private bordeDelgado(color = 'FF163572'): any {
-    const b = { style: 'thin', color: { argb: color } };
-    return { top: b, left: b, bottom: b, right: b };
-  }
-
-  private formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   private formatearProyectosCliente(cliente: Cliente): string {
     const proyectos = cliente.proyectosAsignados ?? [];
     if (!proyectos.length) return '-';
     return proyectos.map(p => `${p.nombre} - ${p.cliente} - ${p.estado}`).join('; ');
-  }
-
-  private crearDescargaExcel(buffer: any, nombreArchivo: string): void {
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = nombreArchivo;
-    link.click();
-    URL.revokeObjectURL(url);
   }
 }

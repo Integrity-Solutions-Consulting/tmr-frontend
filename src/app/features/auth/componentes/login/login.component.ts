@@ -8,7 +8,6 @@ import { RouterLink } from '@angular/router';
 import * as AuthActions from '../../store/auth.actions';
 import * as AuthSelectors from '../../store/auth.selectors';
 import { Actions, ofType } from '@ngrx/effects';
-import { TokenService } from '../../servicios/token.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { inject } from '@angular/core';
 
@@ -37,8 +36,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private store: Store,
     private router: Router,
-    private actions$: Actions,
-    private tokenService: TokenService
+    private actions$: Actions
   ) {
     this.loading$ = this.store.select(AuthSelectors.selectIsLoading);
     this.error$ = this.store.select(AuthSelectors.selectError);
@@ -67,11 +65,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         AuthActions.login({ credentials: this.loginForm.value })
       );
     }
-  }
-
-  onLoginDemo(): void {
-    this.tokenService.setUser(JSON.stringify({ name: 'Usuario Demo', email: 'demo@tmr.com' }));
-    this.router.navigate(['/dashboard']);
   }
 
   get email() {

@@ -632,6 +632,6 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 this.guardadoParcial = guardadas > 0;
             });
         }
-        // this.dialogRef.close(); // sm - ahora se cierra solo cuando el backend confirma que se guardó
+        // sm - El diálogo se cierra solo cuando el backend confirma que se guardó (ver alGuardar arriba).
     }
 }

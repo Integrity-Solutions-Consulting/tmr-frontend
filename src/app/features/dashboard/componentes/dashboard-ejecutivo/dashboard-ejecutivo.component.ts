@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
 import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
@@ -395,8 +395,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       .subscribe({
         next: (h) => {
           this.historico.set(h);
-          // this.umbralRecurrencia.set(h.umbralRecurrencia); // sm - el umbral ya se ajusta en pantalla; si se
-          // tomara de la respuesta, un cambio hecho mientras cargaba volvería al valor anterior.
+          // sm - El umbral no se toma de la respuesta: ya se ajusta en pantalla; si se tomara de ahí,
+          // un cambio hecho mientras cargaba volvería al valor anterior.
           this.cargandoHistorico.set(false);
         },
         error: () => {
@@ -578,7 +578,7 @@ export class DashboardEjecutivoComponent implements OnInit {
     if (!Number.isFinite(n)) return;
     // sm - Umbral en ocasiones (cortes): hay dos cortes por mes en la ventana.
     this.umbralRecurrencia.set(Math.min(this.mesesVentana() * 2, Math.max(1, n)));
-    // this.cargarHistorico(); // sm - ya no hace falta: "recurrente" se recalcula en pantalla con el nuevo umbral.
+    // sm - No recarga el histórico: "recurrente" se recalcula en pantalla con el nuevo umbral.
   }
 
   // sm - Seleccionar un mes del histórico lo convierte en el periodo del dashboard.
