@@ -1207,7 +1207,10 @@ export class SeguimientoComponent implements AfterViewInit {
     // sm - Se eliminaron cambiarPeriodo/ajustarFechasPorPeriodo (ya no existen los botones Quincena/Mes completo) y el
     // cálculo del "periodo" que se enviaba al backend sin usarse. Solo se asegura que "hasta" no sea menor que "desde".
     public onFechaManualChange() {
-        if (this.fechaDesde && this.fechaHasta && this.fechaHasta < this.fechaDesde) {
+        // sm - Con una fecha vacía (borrada o a medio escribir) no se recarga: el backend exige ambas y
+        // respondía error, dejando la tabla con datos de otro rango. Se recarga al completar las dos.
+        if (!this.fechaDesde || !this.fechaHasta) return;
+        if (this.fechaHasta < this.fechaDesde) {
             this.fechaHasta = this.fechaDesde;
         }
         this.aplicarFiltros();
