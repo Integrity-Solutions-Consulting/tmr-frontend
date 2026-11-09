@@ -13,6 +13,9 @@
         actividad.'
         }}
       </p>
+      @if (data?.registroLider; as registro) {
+        <p class="actividad-modal__subtitle">A nombre de {{ registro.nombreColaborador }}</p>
+      }
     </div>
     <div class="actividad-modal__header-actions">
       <button

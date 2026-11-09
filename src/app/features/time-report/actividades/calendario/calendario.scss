@@ -281,6 +281,24 @@
         box-shadow: var(--elevation-card);
     }
 
+    &.no-editable {
+        cursor: default;
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+
+    .act-lider {
+        flex-shrink: 0;
+        width: 12px;
+        height: 12px;
+        margin-left: 3px;
+        font-size: 12px;
+        line-height: 12px;
+    }
+
     .act-hours {
         font-weight: 750;
         margin-right: 3px;

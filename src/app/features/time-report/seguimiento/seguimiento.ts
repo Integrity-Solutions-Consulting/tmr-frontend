@@ -736,8 +736,9 @@ export class SeguimientoComponent implements AfterViewInit {
                 { encabezado: 'Seguimiento', anchoExcel: 18, anchoPdf: 28, alineacion: 'center' },
                 { encabezado: 'Días con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
                 { encabezado: 'Días a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
-                // sm - Datos de salida: los del colaborador solo si está Inactivo; la salida del proyecto, si la tiene.
-                { encabezado: 'Estado colaborador', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
+                // sm - Estado en el proyecto de la fila dentro del rango filtrado (no el estado actual en el sistema).
+                // Datos de salida: los del colaborador solo si está Inactivo; la salida del proyecto, si la tiene.
+                { encabezado: 'Estado en proyecto', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
                 { encabezado: 'Fecha de salida', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
                 { encabezado: 'Tipo de salida', anchoExcel: 18, anchoPdf: 26 },
                 { encabezado: 'Causa de salida', anchoExcel: 24, anchoPdf: 34 },
@@ -753,7 +754,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 colaborador.estado,
                 Number(colaborador.diasConReporte),
                 Number(colaborador.diasACompletar),
-                colaborador.colaboradorActivo === false ? 'Inactivo' : 'Activo',
+                colaborador.estadoEnProyecto || '-',
                 this.formatearFechaSalida(colaborador.fechaSalida),
                 colaborador.tipoSalida || '-',
                 colaborador.causaSalida || '-',
@@ -807,6 +808,8 @@ export class SeguimientoComponent implements AfterViewInit {
             maxHeight: '90vh',
             panelClass: 'tmr-dialog-panel',
             disableClose: true
+        }).afterClosed().subscribe((seCompleto) => {
+            if (seCompleto) this.recargarColaboradores(true);
         });
     }
 
