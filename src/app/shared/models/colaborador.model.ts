@@ -40,4 +40,6 @@ export interface Colaborador {
   causaSalida?: string | null;
   motivoSalida?: string | null;
   salidaProyecto?: string | null;
+  // sm - 'Activo'/'Inactivo' en el proyecto de esta fila dentro del rango filtrado; null en filas "Sin Proyecto".
+  estadoEnProyecto?: string | null;
 }
