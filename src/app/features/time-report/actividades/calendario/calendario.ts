@@ -53,6 +53,8 @@ export class Calendario implements OnInit {
     // sm - Fecha (yyyy-MM-dd) cuyo mes se muestra al abrir. El modal de Seguimiento manda el "Fecha desde" del filtro
     // para que el calendario abra en el mes consultado y no siempre en el mes actual.
     @Input() fechaInicialOverride?: string;
+    // sm - Líder que completa actividades desde Seguimiento: solo puede abrir las que él mismo cargó, no las del colaborador.
+    @Input() idLiderEdicion?: number | null;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -134,8 +136,12 @@ export class Calendario implements OnInit {
     editarActividad(event: MouseEvent, actividad: any) {
         event.stopPropagation();
         // sm - En modo solo lectura no se permite abrir el modal de edición de actividad.
-        if (this.soloLectura) return;
+        if (this.soloLectura || this.chipBloqueado(actividad)) return;
         this.editarActividadEvent.emit(actividad);
+    }
+
+    chipBloqueado(actividad: any): boolean {
+        return this.idLiderEdicion != null && actividad.idLiderRegistro !== this.idLiderEdicion;
     }
 
     getActividadClass(act: any): string {

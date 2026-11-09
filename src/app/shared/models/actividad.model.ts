@@ -10,6 +10,8 @@ export interface Actividad {
   notas?: string;
   esbillable?: boolean;
   aprobadopor?: number;
+  // sm - Líder que la cargó a nombre del colaborador desde Seguimiento; null si la registró el propio colaborador.
+  idLiderRegistro?: number | null;
   fechaaprobacion?: Date | string;
   activo?: boolean;
   usuariocreacion?: string;

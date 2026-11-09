@@ -54,9 +54,12 @@
             @if (dia.esMesActual && dia.actividades && dia.actividades.length > 0) {
             <div class="day-actividades-block">
                 @for (act of dia.actividades; track act.id) {
-                <div class="actividad-chip" [class]="getActividadClass(act)" (click)="editarActividad($event, act)">
+                <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act)" (click)="editarActividad($event, act)">
                     <span class="act-hours">{{ act.cantidadhoras }}h - </span>
                     <span class="act-name">{{ act.proyectoNombre }}</span>
+                    @if (act.idLiderRegistro) {
+                    <mat-icon class="act-lider" matTooltip="Registrado por líder" aria-label="Registrado por líder">supervisor_account</mat-icon>
+                    }
                 </div>
                 }
             </div>
