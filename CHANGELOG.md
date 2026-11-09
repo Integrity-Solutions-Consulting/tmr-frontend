@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.6.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.3...v3.6.0) (2026-11-09)
+
+
+### Features
+
+* Botón para registrar actividades para los líderes ([d410554](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d410554d59a5f0cc876df169d897fac2b140c958))
+* Botón para registrar actividades para los líderes ([4bd1bfa](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/4bd1bfa6462253319e7b2ae5945981beb7b4e06e))
+
 ## [3.5.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.2...v3.5.3) (2026-11-06)
 
 
