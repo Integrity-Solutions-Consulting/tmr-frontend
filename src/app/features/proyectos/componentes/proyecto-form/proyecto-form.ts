@@ -97,7 +97,8 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   recursosExpandidos: boolean[][] = [];
 
   formulario = this.fb.group({
-    codigo: ['', Validators.required],
+    // sm - Lo asigna el servidor al crear; aquí solo se muestra al editar.
+    codigo: [''],
     nombre: ['', Validators.required],
     cliente: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.clientesOpciones)]],
     idCliente: [null as number | null],
