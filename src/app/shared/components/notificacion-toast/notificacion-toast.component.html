@@ -6,8 +6,8 @@
       [class.notif-toast--error]="toast.tipo === 'error'"
       [attr.role]="toast.tipo === 'error' ? 'alert' : 'status'">
       <div class="notif-toast__header">
-        <span class="material-symbols-outlined notif-toast__icon"
-          aria-hidden="true">{{ icono(toast.tipo) }}</span>
+        <span class="material-symbols-outlined notif-toast__icon" [class.notif-toast__icon--girando]="toast.enCurso"
+          aria-hidden="true">{{ toast.enCurso ? 'progress_activity' : icono(toast.tipo) }}</span>
         <div class="notif-toast__text">
           <span class="notif-toast__title">{{ toast.titulo }}</span>
           <span class="notif-toast__detail">{{ toast.detalle }}</span>

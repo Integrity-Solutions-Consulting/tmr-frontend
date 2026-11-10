@@ -1271,24 +1271,56 @@ export class SeguimientoComponent implements AfterViewInit {
         const nombreUnico = esUnaSolaPersona ? filasPorEmpleado.get(idUnico)![0].nombre : '';
         const proyectoUnico = esUnaSolaPersona ? this.proyectoDeFila(filasPorEmpleado.get(idUnico)![0]) : undefined;
 
-        this.toastService.info(
-            esUnaSolaPersona ? `Notificando a ${nombreUnico}` : `Notificando a ${totalPersonas} personas`,
-            'Se envió la solicitud, esperando confirmación...');
+        // Toast que queda visible mientras dure el envío (un envío masivo puede tardar minutos) y muestra el avance
+        const toastEnCurso = this.toastService.enCurso(
+            esUnaSolaPersona ? `Notificando a ${nombreUnico}` : `Enviando notificaciones a ${totalPersonas} personas`,
+            esUnaSolaPersona ? 'Se envió la solicitud, esperando confirmación...' : `0 de ${totalPersonas} procesadas`);
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const mostrarAvance = () => {
+            if (esUnaSolaPersona) return;
+            const procesados = [...resultados.values()].filter(e => e !== null).length;
+            this.toastService.actualizar(toastEnCurso, { detalle: `${procesados} de ${totalPersonas} procesadas` });
+        };
 
         this.isNotifying = true;
         try {
-            const resultados = new Map<number, EstadoEmpleado | null>();
-            await Promise.all([...grupos.entries()].map(async ([idProyecto, ids]) => {
-                const solicitud = await lastValueFrom(this.notificacionesService.notificar({
-                    empleadoIds: ids,
-                    fechaDesde: this.fechaDesde,
-                    fechaHasta: this.fechaHasta,
-                    idProyecto,
-                }));
-                const resultadosGrupo = await this.esperarResultadosNotificacion(ids, solicitud.solicitadoEnMs, idProyecto);
-                for (const [id, estado] of resultadosGrupo) resultados.set(id, estado);
-            }));
+            // 1. Las solicitudes se envían una tras otra (cada una responde al instante con 202): en paralelo, junto
+            //    con las conexiones de espera, podían agotar las conexiones del navegador y quedarse colgadas.
+            const solicitados: number[] = [];
+            let desdeMs = Number.POSITIVE_INFINITY;
+            let primerError: any = null;
+            for (const [idProyecto, ids] of grupos) {
+                try {
+                    const solicitud = await lastValueFrom(this.notificacionesService.notificar({
+                        empleadoIds: ids,
+                        fechaDesde: this.fechaDesde,
+                        fechaHasta: this.fechaHasta,
+                        idProyecto,
+                    }));
+                    solicitados.push(...ids);
+                    desdeMs = Math.min(desdeMs, solicitud.solicitadoEnMs);
+                } catch (err) {
+                    console.error('Error al notificar:', err);
+                    primerError ??= err;
+                    // Ese grupo no quedó en cola: cuenta como fallido en el resumen final
+                    const detalle = this.mensajeErrorSolicitud(err, `${ids.length} personas`);
+                    for (const id of ids) resultados.set(id, { idEmpleado: id, estado: 'Fallido', detalle });
+                    mostrarAvance();
+                }
+            }
+            if (solicitados.length === 0) throw primerError;
 
+            // 2. Una sola espera por todos (cada persona está en un único grupo, así que no hace falta filtrar por
+            //    proyecto salvo que haya uno solo), con el avance en vivo en el toast
+            const idProyectoEspera = grupos.size === 1 ? [...grupos.keys()][0] : undefined;
+            await this.esperarResultadosNotificacion(solicitados, desdeMs, idProyectoEspera, estado => {
+                resultados.set(estado.idEmpleado, estado);
+                mostrarAvance();
+            }).then(finales => {
+                for (const [id, estado] of finales) if (!resultados.get(id)) resultados.set(id, estado);
+            });
+
+            this.toastService.cerrar(toastEnCurso);
             if (esUnaSolaPersona) {
                 this.mostrarResultadoIndividual(nombreUnico, proyectoUnico, resultados.get(idUnico) ?? null);
             } else {
@@ -1296,6 +1328,7 @@ export class SeguimientoComponent implements AfterViewInit {
             }
         } catch (err: any) {
             console.error('Error al notificar:', err);
+            this.toastService.cerrar(toastEnCurso);
             this.toastService.error('No se pudo enviar la notificación',
                 this.mensajeErrorSolicitud(err, esUnaSolaPersona ? nombreUnico : `${totalPersonas} personas`));
         } finally {
@@ -1333,17 +1366,15 @@ export class SeguimientoComponent implements AfterViewInit {
                 default: pendientes++;
             }
         }
-        const partes: string[] = [];
-        if (enviados > 0) partes.push(`${enviados} enviado${enviados > 1 ? 's' : ''}`);
-        if (omitidos > 0) partes.push(`${omitidos} omitido${omitidos > 1 ? 's' : ''}`);
-        if (fallidos > 0) partes.push(`${fallidos} fallido${fallidos > 1 ? 's' : ''}`);
-        if (pendientes > 0) partes.push(`${pendientes} en proceso`);
-        // Solo el agregado: quién y por qué falló se consulta notificando a esa persona sola.
-        const detalle = `De ${totalPersonas} personas: ${partes.join(', ')}.`;
+        // Siempre los tres totales, aunque sean 0. Quién y por qué falló se consulta notificando a esa persona sola.
+        let detalle = `De ${totalPersonas} personas: ${enviados} enviadas, ${omitidos} omitidas y ${fallidos} fallidas.`;
+        if (pendientes > 0) detalle += ` ${pendientes} siguen en cola y se enviarán en breve.`;
 
-        if (fallidos > 0) this.toastService.error('Notificaciones procesadas', detalle);
-        else if (omitidos > 0 || pendientes > 0) this.toastService.warning('Notificaciones procesadas', detalle);
-        else this.toastService.exito('Notificaciones enviadas', detalle);
+        // Más tiempo en pantalla que un toast normal: es el resumen de un proceso largo
+        const duracionMs = 15000;
+        if (fallidos > 0) this.toastService.error('Notificaciones finalizadas con errores', detalle, duracionMs);
+        else if (omitidos > 0 || pendientes > 0) this.toastService.warning('Notificaciones finalizadas', detalle, duracionMs);
+        else this.toastService.exito('Notificaciones enviadas', detalle, duracionMs);
     }
 
     // El detalle técnico del fallo (p. ej. la respuesta de Apprise) puede ser largo: se muestra recortado
@@ -1376,11 +1407,31 @@ export class SeguimientoComponent implements AfterViewInit {
         return `No se pudo registrar la solicitud para ${destinatario}.`;
     }
 
-    // Espera el resultado de varios empleados a la vez por SSE (el backend empuja cada uno en cuanto lo
-    // registra, hasta ~6 min). Si el stream no está disponible o se corta antes de completarse, los que
-    // falten se siguen consultando por GET /estado. Los que sigan en cola al agotarse la espera quedan null.
+    // El backend acepta como máximo 200 empleados por consulta de estado (MaxEmpleadosEstado)
+    private static readonly MAX_EMPLEADOS_POR_ESPERA = 200;
+
+    // Espera el resultado de todos los empleados avisados, en lotes de hasta 200 (uno por conexión).
+    // alRecibir se llama con cada resultado en cuanto llega, para mostrar el avance.
     private async esperarResultadosNotificacion(
         idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const lotes: number[][] = [];
+        for (let i = 0; i < idEmpleados.length; i += SeguimientoComponent.MAX_EMPLEADOS_POR_ESPERA) {
+            lotes.push(idEmpleados.slice(i, i + SeguimientoComponent.MAX_EMPLEADOS_POR_ESPERA));
+        }
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const porLote = await Promise.all(lotes.map(lote => this.esperarLoteNotificacion(lote, desdeMs, idProyecto, alRecibir)));
+        for (const lote of porLote) for (const [id, estado] of lote) resultados.set(id, estado);
+        return resultados;
+    }
+
+    // Espera el resultado de un lote por SSE (el backend empuja cada uno en cuanto lo registra, hasta ~6 min).
+    // Si el stream no está disponible o se corta antes de completarse, los que falten se siguen consultando
+    // por GET /estado. Los que sigan en cola al agotarse la espera quedan null.
+    private async esperarLoteNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
     ): Promise<Map<number, EstadoEmpleado | null>> {
         const resultados = new Map<number, EstadoEmpleado | null>();
         const faltantes = new Set(idEmpleados);
@@ -1393,6 +1444,7 @@ export class SeguimientoComponent implements AfterViewInit {
                     if (evento.tipo === 'estado' && faltantes.has(evento.estado.idEmpleado)) {
                         resultados.set(evento.estado.idEmpleado, evento.estado);
                         faltantes.delete(evento.estado.idEmpleado);
+                        alRecibir?.(evento.estado);
                         if (faltantes.size === 0) { suscripcion.unsubscribe(); resolve(); }
                     } else if (evento.tipo === 'fin') {
                         suscripcion.unsubscribe();
@@ -1408,7 +1460,7 @@ export class SeguimientoComponent implements AfterViewInit {
         });
 
         if (faltantes.size > 0) {
-            const porConsulta = await this.consultarResultadosNotificacion([...faltantes], desdeMs, idProyecto);
+            const porConsulta = await this.consultarResultadosNotificacion([...faltantes], desdeMs, idProyecto, alRecibir);
             for (const [id, estado] of porConsulta) resultados.set(id, estado);
         }
         return resultados;
@@ -1417,6 +1469,7 @@ export class SeguimientoComponent implements AfterViewInit {
     // Respaldo: consulta el estado cada 3 s (máx. ~90 s) de los empleados que no llegaron a tiempo por SSE.
     private async consultarResultadosNotificacion(
         idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
     ): Promise<Map<number, EstadoEmpleado | null>> {
         const resultados = new Map<number, EstadoEmpleado | null>();
         let pendientes = [...idEmpleados];
@@ -1426,7 +1479,10 @@ export class SeguimientoComponent implements AfterViewInit {
             try {
                 const respuesta = await lastValueFrom(this.notificacionesService.getEstado(pendientes, desdeMs, idProyecto));
                 for (const estado of respuesta.empleados) {
-                    if (estado.estado !== 'Pendiente') resultados.set(estado.idEmpleado, estado);
+                    if (estado.estado !== 'Pendiente' && !resultados.has(estado.idEmpleado)) {
+                        resultados.set(estado.idEmpleado, estado);
+                        alRecibir?.(estado);
+                    }
                 }
                 pendientes = pendientes.filter(id => !resultados.has(id));
             } catch (err) {
