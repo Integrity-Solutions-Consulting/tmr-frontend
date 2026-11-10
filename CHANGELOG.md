@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.0...v3.6.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **seguimiento:** toast de progreso y resumen final al notificar a varias personas ([0a0b4b8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0a0b4b82d071f8117dfd8a67c47a83badaa61e02))
+
 ## [3.6.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.3...v3.6.0) (2026-11-09)
 
 
