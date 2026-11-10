@@ -1,0 +1,39 @@
+<section class="resumen" aria-label="Resumen de solicitud">
+ <div class="resumen__principal">
+  <strong>{{ datos.apellidosNombres }}</strong>
+  <p>{{ tipo }} · {{ datos.fechaInicio }}@if(datos.fechaFinalizacion !== datos.fechaInicio) { — {{ datos.fechaFinalizacion }} }</p>
+  <p>{{ datos.diasSolicitados }} · {{ datos.horasSolicitadas }}</p>
+  <p class="motivo">{{ datos.motivos }}</p>
+ </div>
+ <button type="button" class="resumen__detalle" [attr.aria-expanded]="completo()" (click)="completo.set(!completo())">
+  <span class="material-symbols-outlined" aria-hidden="true">{{ completo() ? 'unfold_less' : 'description' }}</span>
+  <span>{{ completo() ? 'Cerrar solicitud completa' : 'Ver solicitud completa' }}</span>
+  <span class="material-symbols-outlined resumen__flecha" aria-hidden="true">{{ completo() ? 'expand_less' : 'expand_more' }}</span>
+ </button>
+ @if(completo()) {
+ <dl>
+  <div><dt>Código</dt><dd>{{ datos.folio }}</dd></div>
+  <div><dt>Estado</dt><dd>{{ estado }}</dd></div>
+  <div><dt>Cédula</dt><dd>{{ datos.numeroCedula }}</dd></div>
+  <div><dt>Cargo</dt><dd>{{ datos.cargo }}</dd></div>
+  <div><dt>Cliente / Proyecto</dt><dd>{{ datos.cliente }} · {{ proyecto }}</dd></div>
+  <div><dt>Jornada</dt><dd>{{ datos.detalleHorario || datos.horario }}</dd></div>
+  <div><dt>Líder</dt><dd>{{ datos.jefeInmediato }}</dd></div>
+  <div><dt>Talento Humano</dt><dd>{{ datos.aprobacionTalentoHumano?.responsable || 'Pendiente' }}</dd></div>
+ </dl>
+ }
+ <div class="respaldos" aria-label="Documentos de respaldo">
+  <div class="respaldos__titulo"><span class="material-symbols-outlined" aria-hidden="true">attach_file</span><strong>Documentos adjuntos</strong></div>
+  <div class="respaldos__archivos">
+   @for(adjunto of adjuntos; track adjunto.id) {
+    <button type="button" class="respaldo-descarga" [disabled]="descargando()" (click)="descargar(adjunto)" [attr.aria-label]="'Descargar respaldo ' + adjunto.nombreOriginal">
+     <span class="material-symbols-outlined" aria-hidden="true">download</span><span>{{ adjunto.nombreOriginal }}</span>
+    </button>
+   } @empty {
+    @if(datos.evidenciaNombre) {
+     <button type="button" class="respaldo-descarga" [disabled]="descargando()" (click)="descargar()"><span class="material-symbols-outlined" aria-hidden="true">download</span><span>{{ datos.evidenciaNombre }}</span></button>
+    } @else {<span class="respaldos__vacio">Sin documentos adjuntos</span>}
+   }
+  </div>
+ </div>
+</section>

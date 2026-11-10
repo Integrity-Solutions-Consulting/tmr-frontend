@@ -12,8 +12,8 @@
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda inteligente</label>
-      <input
+      <label class="filter-label" for="aprobaciones-lider-filter-1">Buscar</label>
+      <input id="aprobaciones-lider-filter-1"
         class="filter-control"
         type="text"
         placeholder="Colaborador, código, tipo, proyecto, cliente, duración, estado..."
@@ -21,95 +21,84 @@
         (ngModelChange)="busqueda.set($event)" />
     </div>
     <div class="filter-group">
-      <label class="filter-label">Período</label>
-      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
-        <option value="TODOS">Todos</option>
-        <option value="HOY">Hoy</option>
-        <option value="ESTA_SEMANA">Esta semana</option>
-        <option value="ESTE_MES">Este mes</option>
-        <option value="MES_ANTERIOR">Mes anterior</option>
+      <label class="filter-label" for="aprobaciones-lider-filter-2">Período</label>
+      <select id="aprobaciones-lider-filter-2" class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todo período</option>
         <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
-        <option value="ANIO_ACTUAL">Este año (2026)</option>
         <option value="PERSONALIZADO">Rango personalizado</option>
       </select>
     </div>
+    @if (periodoPreset() === 'PERSONALIZADO') {
     <div class="filter-group date-group">
-      <label class="filter-label">Desde</label>
-      <input
+      <label class="filter-label" for="aprobaciones-lider-filter-3">Desde</label>
+      <input id="aprobaciones-lider-filter-3"
         type="date"
         class="filter-control"
         [ngModel]="fechaDesde()"
         (ngModelChange)="cambiarFechaDesde($event)" />
     </div>
     <div class="filter-group date-group">
-      <label class="filter-label">Hasta</label>
-      <input
+      <label class="filter-label" for="aprobaciones-lider-filter-4">Hasta</label>
+      <input id="aprobaciones-lider-filter-4"
         type="date"
         class="filter-control"
         [ngModel]="fechaHasta()"
         (ngModelChange)="cambiarFechaHasta($event)" />
     </div>
+    }
     <div class="filter-group">
-      <label class="filter-label">Proyecto</label>
-      <select class="filter-control" [ngModel]="proyectoFiltro()" (ngModelChange)="proyectoFiltro.set($event)">
+      <label class="filter-label" for="aprobaciones-lider-filter-5">Proyecto</label>
+      <select id="aprobaciones-lider-filter-5" class="filter-control" [ngModel]="proyectoFiltro()" (ngModelChange)="proyectoFiltro.set($event)">
         <option value="">Todos</option>
         @for (proy of proyectosDisponibles(); track proy) { <option [value]="proy">{{ proy }}</option> }
 
       </select>
     </div>
     <div class="filter-group">
-      <label class="filter-label">Estado</label>
-      <select class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+      <label class="filter-label" for="aprobaciones-lider-filter-6">Semáforo</label>
+      <select id="aprobaciones-lider-filter-6" class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
         <option value="">Todos</option>
-        <option value="Pendiente">Pendiente</option>
-        <option value="Aprobado">Aprobado</option>
-        <option value="Observado">Observado</option>
-        <option value="Rechazado">Rechazado</option>
+        <option value="proceso">Pendiente de decisión</option>
+        <option value="finalizado">Decididas</option>
       </select>
     </div>
   </div>
 
-  <div class="table-card">
-    <table class="permisos-table">
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table permisos-review-table">
       <colgroup>
-        <col style="width: 11%;" />
-        <col style="width: 17%;" />
-        <col style="width: 16%;" />
-        <col style="width: 16%;" />
-        <col style="width: 14%;" />
-        <col style="width: 11%;" />
-        <col style="width: 8%;" />
-        <col style="width: 7%;" />
+        <col />
+        <col />
+        <col />
+        <col style="width: 150px;" />
+        <col style="width: 100px;" />
       </colgroup>
       <thead>
         <tr>
-          <th>Código</th>
-          <th>Colaborador</th>
-          <th>Proyecto</th>
-          <th>Tipo</th>
-          <th>Fechas</th>
-          <th>Duración</th>
-          <th>Estado</th>
-          <th style="text-align: right;">Acción</th>
+          <th>Colaborador / Código</th>
+          <th>Solicitud / Proyecto</th>
+          <th>Período / Duración</th>
+          <th class="estado-column">Estado</th>
+          <th style="text-align: right;">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for (item of solicitudesFiltradas(); track item.codigo) {
           <tr>
-            <td class="codigo-cell">{{ item.codigo }}</td>
-            <td>{{ item.colaborador }}</td>
-            <td>{{ item.proyecto }}</td>
-            <td>{{ item.tipo }}</td>
-            <td>{{ item.fechas }}</td>
-            <td>{{ item.duracion }}</td>
-            <td>
+            <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.codigo }}</span></td>
+            <td><strong>{{ item.tipo }}</strong><span class="table-secondary">{{ item.proyecto || item.cliente || 'Sin proyecto' }}</span></td>
+            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }} · {{ item.horasSolicitadas }}</span></td>
+            <td class="estado-column">
               <span [class]="obtenerClaseEstado(item.estado)">
                 {{ item.estado }}
               </span>
             </td>
             <td>
               <div class="actions-cell">
-                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" (click)="abrirRevision(item)">
+                @if (item.estado === 'Pendiente') {
+                  <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" [disabled]="procesandoDecision()" (click)="aprobarDesdeTabla(item)">Aprobar</button>
+                }
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" [disabled]="procesandoDecision()" (click)="abrirRevision(item)">
                   Revisar
                 </button>
               </div>
@@ -117,7 +106,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="8" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
+            <td colspan="5" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
       </tbody>
@@ -128,16 +117,27 @@
   <app-modal-base
     [titulo]="'Revisión de Jefe Inmediato — ' + (solicitudActiva()?.codigo ?? '')"
     [visible]="modalRevisorVisible()"
-    [wide]="true"
+    [wide]="false"
     (cerrar)="modalRevisorVisible.set(false)">
     @if (solicitudActiva(); as sel) {
       <div class="modal-form">
-        <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
+        <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estado" [adjuntos]="sel.adjuntos || []" />
+        @if (sel.traslapeAlerta) { <p class="revision-alerta" role="alert">{{ sel.traslapeAlerta }}</p> }
+        @if (verDetalle()) {
+          <dl class="revision-datos">
+            <div><dt>Código</dt><dd>{{ sel.codigo }}</dd></div>
+            <div><dt>Colaborador</dt><dd>{{ sel.colaborador }} · {{ sel.cedula }}</dd></div>
+            <div><dt>Cargo</dt><dd>{{ sel.cargo }}</dd></div>
+            <div><dt>Cliente / Proyecto</dt><dd>{{ sel.cliente }} · {{ sel.proyecto }}</dd></div>
+            <div><dt>Jornada</dt><dd>{{ sel.fechas }}</dd></div>
+            <div><dt>Estado</dt><dd>{{ sel.estado }}</dd></div>
+          </dl>
+        }
 
         <div class="form-field">
-          <label>Comentario de revisión</label>
+          <label for="comentario-revision">Comentario de revisión</label>
           <textarea
-            rows="2"
+            id="comentario-revision" rows="2"
             [ngModel]="comentarioLider()"
             (ngModelChange)="comentarioLider.set($event)"
             placeholder="Comentario u observación..."></textarea>

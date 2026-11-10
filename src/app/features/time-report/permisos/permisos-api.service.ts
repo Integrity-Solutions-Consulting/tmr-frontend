@@ -73,7 +73,13 @@ export interface RrhhDisponiblePermisoApi {
   correo?: string | null;
   esPrincipal?: boolean;
 }
-export interface UnusedMarkerRrhh { _?: never;
+
+export interface AdjuntoPermisoApi {
+  id: number;
+  nombreOriginal: string;
+  contentType: string;
+  tamanoBytes: number;
+  fechaSubida: string;
 }
 
 export interface PermisoItemApi {
@@ -135,6 +141,7 @@ export interface PermisoItemApi {
   traslapeAlerta?: string | null;
   tokenExterno?: string | null;
   avisoNotificacion?: string | null;
+  adjuntos?: AdjuntoPermisoApi[];
 }
 
 export interface CrearPermisoPayload {
@@ -179,7 +186,7 @@ export function obtenerMensajeAmigablePermisos(
     return 'No cuentas con permisos para realizar esta acción.';
   }
   if (status === 413) {
-    return 'El archivo adjunto supera el tamaño máximo permitido de 5 MB.';
+    return 'El archivo adjunto supera el tamaño máximo permitido de 15 MB por documento.';
   }
   if (status === 429) {
     return 'Realizaste varios intentos seguidos. Espera unos segundos antes de volver a intentarlo.';
@@ -253,9 +260,15 @@ export class PermisosApiService {
 
   crearSolicitud(
     payload: CrearPermisoPayload,
-    archivoEvidencia?: File | null,
+    archivosEvidencia?: File | File[] | null,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
-    if (archivoEvidencia) {
+    const listaArchivos = Array.isArray(archivosEvidencia)
+      ? archivosEvidencia.filter(Boolean)
+      : archivosEvidencia
+        ? [archivosEvidencia]
+        : [];
+
+    if (listaArchivos.length > 0) {
       const formData = new FormData();
       if (payload.idProyecto) formData.append('idProyecto', String(payload.idProyecto));
       if (payload.idCliente) formData.append('idCliente', String(payload.idCliente));
@@ -270,7 +283,9 @@ export class PermisosApiService {
       if (payload.totalHoras !== undefined) formData.append('totalHoras', String(payload.totalHoras));
       formData.append('motivo', payload.motivo);
       if (payload.idUsuarioRrhh) formData.append('idUsuarioRrhh', String(payload.idUsuarioRrhh));
-      formData.append('evidencia', archivoEvidencia, archivoEvidencia.name);
+      for (const archivo of listaArchivos) {
+        formData.append('evidencia', archivo, archivo.name);
+      }
       return this.http
         .post<unknown>(`${this.baseUrl}/con-evidencia`, formData)
         .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
@@ -352,16 +367,24 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerUrlEvidencia(id: number): string {
-    return `${this.baseUrl}/${id}/evidencia`;
+  obtenerUrlEvidencia(id: number, adjuntoId?: number): string {
+    return adjuntoId
+      ? `${this.baseUrl}/${id}/evidencia?adjuntoId=${adjuntoId}`
+      : `${this.baseUrl}/${id}/evidencia`;
   }
 
-  descargarEvidenciaBlob(id: number): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/${id}/evidencia`, { responseType: 'blob' });
+  descargarEvidenciaBlob(id: number, adjuntoId?: number): Observable<Blob> {
+    const url = this.obtenerUrlEvidencia(id, adjuntoId);
+    return this.http.get(url, { responseType: 'blob' });
   }
 
-  obtenerUrlEvidenciaExterna(token: string): string {
-    return `${this.baseUrl}/externo/${encodeURIComponent(token)}/evidencia`;
+  obtenerUrlEvidenciaExterna(token: string, adjuntoId?: number): string {
+    const base = `${this.baseUrl}/externo/${encodeURIComponent(token)}/evidencia`;
+    return adjuntoId ? `${base}?adjuntoId=${adjuntoId}` : base;
+  }
+
+  descargarEvidenciaExternaBlob(token: string, adjuntoId?: number): Observable<Blob> {
+    return this.http.get(this.obtenerUrlEvidenciaExterna(token, adjuntoId), { responseType: 'blob' });
   }
 
   obtenerUrlPdfBackend(id: number): string {

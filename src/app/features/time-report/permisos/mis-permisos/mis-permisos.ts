@@ -1,14 +1,13 @@
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
   HorarioPermisoOficial,
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
@@ -22,6 +21,7 @@ import {
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
+  AdjuntoPermisoApi,
   PermisoItemApi,
   PermisosApiService,
   TipoPermisoCatalogoApi,
@@ -59,6 +59,7 @@ export interface SolicitudColaborador {
   responsableRrhh?: string;
   evidencia: string | null;
   evidenciaUrl?: string | null;
+  adjuntos?: AdjuntoPermisoApi[];
   aprobadoLider: boolean;
   confirmadoRrhh: boolean;
   estadoClase: 'pendiente' | 'rrhh' | 'confirmado' | 'observado' | 'rechazado';
@@ -92,11 +93,10 @@ export interface OpcionLiderFormulario {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     HeaderComponent,
     TarjetaResumenComponent,
     ModalBase,
-    FormularioPermisoOficialComponent,
+    ResumenSolicitudComponent,
   ],
   templateUrl: './mis-permisos.html',
   styleUrl: './mis-permisos.scss',
@@ -164,8 +164,17 @@ export class MisPermisosComponent implements OnInit {
   });
 
   readonly tipoSeleccionado = signal<TipoPermisoOficial>('VACACIONES');
+  readonly opcionesHorario: ReadonlyArray<{ codigo: HorarioPermisoOficial; nombre: string }> = [
+    { codigo: 'MANANA', nombre: 'Mañana' },
+    { codigo: 'TARDE', nombre: 'Tarde' },
+    { codigo: 'COMPLETA', nombre: 'Completa' },
+    { codigo: 'OTROS', nombre: 'Otros' },
+  ];
   readonly horarioSeleccionado = signal<HorarioPermisoOficial>('COMPLETA');
   readonly detalleHorarioForm = signal('Jornada completa (08:30 - 17:30)');
+  readonly horaInicioOtrosForm = signal('09:00');
+  readonly horaFinOtrosForm = signal('11:00');
+  readonly diasDisponiblesNumero = signal(15);
   readonly fechaInicioForm = signal(new Date().toISOString().slice(0, 10));
   readonly fechaFinForm = signal(new Date().toISOString().slice(0, 10));
   readonly fechaRegresoForm = signal(
@@ -173,18 +182,73 @@ export class MisPermisosComponent implements OnInit {
       new Date().toISOString().slice(0, 10),
   );
   readonly motivoForm = signal('');
-  readonly archivoEvidencia = signal<File | null>(null);
+  readonly archivosEvidencia = signal<File[]>([]);
+  readonly archivoEvidencia = computed(() => this.archivosEvidencia()[0] ?? null);
 
   readonly hoyDia = String(new Date().getDate()).padStart(2, '0');
   readonly hoyMes = String(new Date().getMonth() + 1).padStart(2, '0');
   readonly hoyAnio = String(new Date().getFullYear());
+  readonly hoyIso = `${this.hoyAnio}-${this.hoyMes}-${this.hoyDia}`;
+  readonly fechaHaceSesentaDiasIso = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 60);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  readonly fechaMinimaInicioForm = computed(() =>
+    this.permiteFechaRetroactiva(this.tipoSeleccionado())
+      ? this.fechaHaceSesentaDiasIso
+      : this.hoyIso,
+  );
+
+  readonly fechaMinimaRegresoForm = computed(
+    () => calcularSiguienteDiaLaborableIso(this.fechaFinForm()) || this.fechaFinForm(),
+  );
+
+  readonly horasPorDiaOtrosForm = computed(() => {
+    const detalle = this.detalleHorarioForm().trim();
+    const match = detalle.match(/(\d{1,2}):(\d{2})\s*(?:[-–—]|a)\s*(\d{1,2}):(\d{2})/i);
+    const iniStr = match ? `${match[1].padStart(2, '0')}:${match[2]}` : this.horaInicioOtrosForm();
+    const finStr = match ? `${match[3].padStart(2, '0')}:${match[4]}` : this.horaFinOtrosForm();
+
+    const [hIni, mIni] = (iniStr || '09:00').split(':').map(Number);
+    const [hFin, mFin] = (finStr || '11:00').split(':').map(Number);
+    if (
+      Number.isNaN(hIni) ||
+      Number.isNaN(mIni) ||
+      Number.isNaN(hFin) ||
+      Number.isNaN(mFin)
+    ) {
+      return 0;
+    }
+
+    const minInicio = hIni * 60 + mIni;
+    const minFin = hFin * 60 + mFin;
+    if (minFin <= minInicio) {
+      return 0;
+    }
+
+    let minutosEfectivos = minFin - minInicio;
+    // Si el rango cruza el horario completo de almuerzo (12:30 - 13:30) y supera 4.5h, descontar 60 min de almuerzo
+    if (minInicio <= 12 * 60 + 30 && minFin >= 13 * 60 + 30 && minutosEfectivos > 270) {
+      minutosEfectivos -= 60;
+    }
+
+    const horas = Math.round((minutosEfectivos / 60) * 100) / 100;
+    return horas >= 0.5 && horas < 8 ? horas : 0;
+  });
 
   readonly diasCalculadosForm = computed(() => {
     const horario = this.horarioSeleccionado();
     if (horario === 'MANANA' || horario === 'TARDE') {
       return 0.5;
     }
-    return calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
+    const diasBase = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
+    if (horario === 'OTROS') {
+      const horasPorDia = this.horasPorDiaOtrosForm();
+      return Math.round(((horasPorDia * diasBase) / 8) * 100) / 100;
+    }
+    return diasBase;
   });
 
   readonly horasCalculadasForm = computed(() => {
@@ -192,8 +256,18 @@ export class MisPermisosComponent implements OnInit {
     if (horario === 'MANANA' || horario === 'TARDE') {
       return 4;
     }
-    return this.diasCalculadosForm() * 8;
+    const diasBase = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
+    if (horario === 'OTROS') {
+      return Math.round(this.horasPorDiaOtrosForm() * diasBase * 100) / 100;
+    }
+    return diasBase * 8;
   });
+
+  readonly excedeSaldoVacacionesForm = computed(
+    () =>
+      this.tipoSeleccionado() === 'VACACIONES' &&
+      this.diasCalculadosForm() > this.diasDisponiblesNumero(),
+  );
 
   // RF-004: Colaborador en nómina con licencia por enfermedad > 1 día requiere certificado médico obligatorio
   readonly requiereCertificadoMedicoObligatorio = computed(
@@ -237,7 +311,8 @@ export class MisPermisosComponent implements OnInit {
     return this.solicitudes().filter((s) => {
       if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
       if (tipo && s.tipoOficial !== tipo) return false;
-      if (estado && s.estadoClase !== estado) return false;
+      if (estado === 'proceso' && !['pendiente', 'rrhh'].includes(s.estadoClase)) return false;
+      if (estado === 'finalizado' && !['confirmado', 'observado', 'rechazado'].includes(s.estadoClase)) return false;
       if (
         !coincideBusquedaInteligente(q, [
           s.codigo,
@@ -281,6 +356,7 @@ export class MisPermisosComponent implements OnInit {
         this.colaboradorCedula.set(ctx.numeroCedula ?? '');
         this.colaboradorCargo.set(ctx.cargo ?? '');
         this.esNomina.set(ctx.esNomina ?? true);
+        this.diasDisponiblesNumero.set(Number(ctx.diasDisponibles ?? 0));
         this.kpiDisponibles.set(`${ctx.diasDisponibles ?? 0} días`);
         this.kpiPorHoras.set(`${ctx.horasAcumuladas ?? 0} h`);
 
@@ -388,6 +464,7 @@ export class MisPermisosComponent implements OnInit {
       responsableRrhh: item.responsableRrhh ?? undefined,
       evidencia: item.evidenciaNombre ?? null,
       evidenciaUrl: item.tieneEvidencia ? this.permisosApi.obtenerUrlEvidencia(item.id) : null,
+      adjuntos: Array.isArray(item.adjuntos) ? item.adjuntos : [],
       aprobadoLider: item.aprobadoLider,
       confirmadoRrhh: item.confirmadoRrhh,
       estadoClase: item.estadoClase,
@@ -421,8 +498,40 @@ export class MisPermisosComponent implements OnInit {
     this.periodoPreset.set(!this.fechaDesde() && !valor ? 'TODOS' : 'PERSONALIZADO');
   }
 
+  readonly tieneFiltrosActivos = computed(
+    () =>
+      Boolean(this.busqueda().trim()) ||
+      this.periodoPreset() !== 'TODOS' ||
+      Boolean(this.fechaDesde()) ||
+      Boolean(this.fechaHasta()) ||
+      Boolean(this.tipoFiltro()) ||
+      Boolean(this.estadoFiltro()),
+  );
+
+  limpiarFiltros(): void {
+    this.busqueda.set('');
+    this.periodoPreset.set('TODOS');
+    this.fechaDesde.set('');
+    this.fechaHasta.set('');
+    this.tipoFiltro.set('');
+    this.estadoFiltro.set('');
+  }
+
+  obtenerRangoFechasLimpio(item: SolicitudColaborador): string {
+    return item.fechaInicio === item.fechaFin
+      ? item.fechaInicio
+      : `${item.fechaInicio} – ${item.fechaFin}`;
+  }
+
+  obtenerEtiquetaHorario(item: SolicitudColaborador): string {
+    if (item.horario === 'MANANA') return 'Media jornada · Mañana';
+    if (item.horario === 'TARDE') return 'Media jornada · Tarde';
+    if (item.horario === 'OTROS') return item.detalleHorario || 'Horario por horas';
+    return 'Jornada completa';
+  }
+
   abrirNuevaSolicitud(): void {
-    this.archivoEvidencia.set(null);
+    this.archivosEvidencia.set([]);
     this.comboboxClienteAbierto.set(false);
     this.selectorRrhhAbierto.set(false);
     this.busquedaClienteProyecto.set('');
@@ -493,22 +602,76 @@ export class MisPermisosComponent implements OnInit {
     }
   }
 
+  permiteFechaRetroactiva(tipo: string = this.tipoSeleccionado()): boolean {
+    const cod = (tipo || '').trim().toUpperCase();
+    return (
+      cod !== 'VACACIONES' &&
+      cod !== 'MATRIMONIO' &&
+      cod !== 'MATERNIDAD' &&
+      cod !== 'PERMISO_ESTUDIOS'
+    );
+  }
+
+  cambiarTipoPermisoForm(tipo: TipoPermisoOficial): void {
+    this.tipoSeleccionado.set(tipo);
+    if (!this.permiteFechaRetroactiva(tipo) && this.fechaInicioForm() < this.hoyIso) {
+      this.cambiarFechaInicioForm(this.hoyIso);
+    }
+  }
+
   cambiarFechaInicioForm(valor: string): void {
-    this.fechaInicioForm.set(valor);
-    if (this.fechaFinForm() < valor) {
-      this.fechaFinForm.set(valor);
+    const minInicio = this.fechaMinimaInicioForm();
+    const inicioValido = valor && valor < minInicio ? minInicio : valor;
+    if (valor && valor < minInicio) {
+      this.toast.warning(
+        'Fecha de inicio ajustada',
+        'Para este tipo de solicitud la fecha de inicio no puede ser anterior a la permitida.',
+      );
+    }
+    this.fechaInicioForm.set(inicioValido);
+    if (
+      this.fechaFinForm() < inicioValido ||
+      this.horarioSeleccionado() === 'MANANA' ||
+      this.horarioSeleccionado() === 'TARDE'
+    ) {
+      this.fechaFinForm.set(inicioValido);
     }
     const regreso = calcularSiguienteDiaLaborableIso(this.fechaFinForm());
     if (regreso) this.fechaRegresoForm.set(regreso);
   }
 
   cambiarFechaFinForm(valor: string): void {
-    this.fechaFinForm.set(valor);
-    if (valor < this.fechaInicioForm()) {
-      this.fechaInicioForm.set(valor);
+    const inicio = this.fechaInicioForm();
+    const esMediaJornada =
+      this.horarioSeleccionado() === 'MANANA' || this.horarioSeleccionado() === 'TARDE';
+    if (esMediaJornada || (valor && valor < inicio)) {
+      if (valor && valor < inicio) {
+        this.toast.warning(
+          'Fecha de fin ajustada',
+          'La fecha de finalización no puede ser anterior a la fecha de inicio.',
+        );
+      }
+      this.fechaFinForm.set(inicio);
+      const regresoAjustado = calcularSiguienteDiaLaborableIso(inicio);
+      if (regresoAjustado) this.fechaRegresoForm.set(regresoAjustado);
+      return;
     }
+    this.fechaFinForm.set(valor);
     const regreso = calcularSiguienteDiaLaborableIso(valor);
     if (regreso) this.fechaRegresoForm.set(regreso);
+  }
+
+  cambiarFechaRegresoForm(valor: string): void {
+    const minRegreso = this.fechaMinimaRegresoForm();
+    if (valor && valor <= this.fechaFinForm()) {
+      this.toast.warning(
+        'Fecha de regreso ajustada',
+        'La fecha de regreso debe ser posterior a la fecha de finalización.',
+      );
+      this.fechaRegresoForm.set(minRegreso);
+      return;
+    }
+    this.fechaRegresoForm.set(valor || minRegreso);
   }
 
   seleccionarHorarioForm(horario: HorarioPermisoOficial): void {
@@ -522,40 +685,105 @@ export class MisPermisosComponent implements OnInit {
     } else if (horario === 'COMPLETA') {
       this.detalleHorarioForm.set('Jornada completa (08:30 - 17:30)');
     } else {
-      this.detalleHorarioForm.set('Horario específico');
+      this.detalleHorarioForm.set(`${this.horaInicioOtrosForm()} - ${this.horaFinOtrosForm()}`);
+      this.fechaFinForm.set(this.fechaInicioForm());
     }
+    if (horario === 'MANANA' || horario === 'TARDE' || horario === 'OTROS') {
+      const regreso = calcularSiguienteDiaLaborableIso(this.fechaFinForm());
+      if (regreso) this.fechaRegresoForm.set(regreso);
+    }
+  }
+
+  cambiarHoraInicioOtros(valor: string): void {
+    const limpio = valor || '09:00';
+    this.horaInicioOtrosForm.set(limpio);
+    this.detalleHorarioForm.set(`${limpio} - ${this.horaFinOtrosForm()}`);
+  }
+
+  cambiarHoraFinOtros(valor: string): void {
+    const limpio = valor || '11:00';
+    this.horaFinOtrosForm.set(limpio);
+    this.detalleHorarioForm.set(`${this.horaInicioOtrosForm()} - ${limpio}`);
   }
 
   alSeleccionarArchivoEvidencia(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0] ?? null;
-    if (!file) return;
+    const seleccionados = input?.files ? Array.from(input.files) : [];
+    if (seleccionados.length === 0) return;
 
-    const ext = file.name.includes('.')
-      ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
-      : '';
     const permitidas = ['.pdf', '.png', '.jpg', '.jpeg'];
-    if (!permitidas.includes(ext)) {
-      this.toast.error(
-        'Formato no permitido',
-        'Puedes adjuntar documentos en formato PDF, PNG, JPG o JPEG.',
+    const maxBytes = 15 * 1024 * 1024; // 15 MB por archivo (certificados médicos, radiografías, etc.)
+    const actuales = [...this.archivosEvidencia()];
+
+    for (const file of seleccionados) {
+      if (actuales.length >= 5) {
+        this.toast.warning(
+          'Límite de archivos alcanzado',
+          'Puedes adjuntar hasta 5 documentos por solicitud.',
+        );
+        break;
+      }
+
+      const ext = file.name.includes('.')
+        ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
+        : '';
+      if (!permitidas.includes(ext)) {
+        this.toast.error(
+          'Formato no permitido',
+          `El archivo "${file.name}" no es válido. Usa PDF, PNG, JPG o JPEG.`,
+        );
+        continue;
+      }
+
+      if (file.size > maxBytes) {
+        this.toast.error(
+          'Archivo demasiado pesado',
+          `El archivo "${file.name}" supera el límite de 15 MB por documento.`,
+        );
+        continue;
+      }
+
+      const yaExiste = actuales.some(
+        (f) => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified,
       );
-      input.value = '';
-      return;
+      if (!yaExiste) {
+        actuales.push(file);
+      }
     }
 
-    const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      this.toast.error('Archivo demasiado pesado', 'El documento no debe superar los 5 MB.');
-      input.value = '';
-      return;
-    }
-
-    this.archivoEvidencia.set(file);
+    this.archivosEvidencia.set(actuales);
+    input.value = '';
   }
 
-  quitarArchivoEvidencia(): void {
-    this.archivoEvidencia.set(null);
+  quitarArchivoEvidencia(index?: number): void {
+    if (index === undefined) {
+      this.archivosEvidencia.set([]);
+      return;
+    }
+    this.archivosEvidencia.update((lista) => lista.filter((_, i) => i !== index));
+  }
+
+  descargarAdjunto(item: SolicitudColaborador, adjunto?: AdjuntoPermisoApi): void {
+    if (!item.id) return;
+    const nombreDescarga = adjunto?.nombreOriginal || item.evidencia || `respaldo_${item.codigo}.pdf`;
+    this.permisosApi.descargarEvidenciaBlob(item.id, adjunto?.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nombreDescarga;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: (err) => {
+        this.toast.error(
+          'No se pudo descargar el adjunto',
+          obtenerMensajeAmigablePermisos(err, 'No pudimos descargar el documento adjunto.'),
+        );
+      },
+    });
   }
 
   obtenerNombreLiderActualForm(): string {
@@ -613,11 +841,6 @@ export class MisPermisosComponent implements OnInit {
   elegirResponsableRrhh(item: RrhhDisponiblePermisoApi): void {
     this.idUsuarioRrhhForm.set(item.idUsuario);
     this.selectorRrhhAbierto.set(false);
-    return;
-  }
-
-  private unusedMarkerRrhh(): number | null {
-    return null;
   }
 
   verFormulario(item: SolicitudColaborador): void {
@@ -684,6 +907,46 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
+    if (!this.permiteFechaRetroactiva() && this.fechaInicioForm() < this.hoyIso) {
+      this.toast.error(
+        'Fecha de inicio no permitida',
+        'Este tipo de permiso debe solicitarse desde la fecha actual en adelante.',
+      );
+      return;
+    }
+
+    if (this.fechaFinForm() < this.fechaInicioForm()) {
+      this.toast.error(
+        'Rango de fechas inválido',
+        'La fecha de finalización no puede ser anterior a la fecha de inicio.',
+      );
+      return;
+    }
+
+    if (this.fechaRegresoForm() <= this.fechaFinForm()) {
+      this.toast.error(
+        'Fecha de regreso inválida',
+        'La fecha de regreso debe ser posterior a la fecha de finalización.',
+      );
+      return;
+    }
+
+    if (this.horarioSeleccionado() === 'OTROS' && this.horasPorDiaOtrosForm() <= 0) {
+      this.toast.error(
+        'Horario por horas inválido',
+        'Para la jornada "Otros", indica un rango de horas válido (entre 0.5 y 7.5 horas, con hora de fin posterior a la de inicio).',
+      );
+      return;
+    }
+
+    if (this.excedeSaldoVacacionesForm()) {
+      this.toast.error(
+        'Saldo de vacaciones insuficiente',
+        `Solicitas ${this.diasCalculadosForm()} día(s), pero tu saldo disponible actual es de ${this.diasDisponiblesNumero()} día(s).`,
+      );
+      return;
+    }
+
     const clienteOpt = this.clienteActualForm();
     if (!clienteOpt) {
       this.toast.error(
@@ -693,8 +956,8 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
-    const archivo = this.archivoEvidencia();
-    if (this.requiereCertificadoMedicoObligatorio() && !archivo) {
+    const archivos = this.archivosEvidencia();
+    if (this.requiereCertificadoMedicoObligatorio() && archivos.length === 0) {
       this.toast.error(
         'Certificado médico obligatorio',
         'Para licencias por enfermedad mayores a 1 día es necesario adjuntar el certificado médico.',
@@ -721,7 +984,7 @@ export class MisPermisosComponent implements OnInit {
           motivo: this.motivoForm().trim(),
           idUsuarioRrhh: this.obtenerRrhhActualForm()?.idUsuario ?? null,
         },
-        archivo,
+        archivos,
       )
       .subscribe({
         next: (res) => {
@@ -736,17 +999,18 @@ export class MisPermisosComponent implements OnInit {
 
           const nuevo = this.mapearDesdeApi(res.data);
           this.solicitudes.update((lista) => [nuevo, ...lista]);
-          this.archivoEvidencia.set(null);
+          this.archivosEvidencia.set([]);
           this.motivoForm.set('');
           this.modalNuevaVisible.set(false);
+          this.cargarDatosBackend();
           if (res.data.avisoNotificacion) {
             this.toast.warning(`Solicitud ${nuevo.codigo} guardada`, res.data.avisoNotificacion);
             return;
           }
           this.toast.exito(
             `Solicitud ${nuevo.codigo} registrada`,
-            archivo
-              ? 'Tu solicitud y el documento de respaldo quedaron guardados y ya notificamos a tu líder.'
+            archivos.length > 0
+              ? `Tu solicitud y ${archivos.length === 1 ? 'el documento de respaldo quedaron guardados' : 'los ' + archivos.length + ' documentos de respaldo quedaron guardados'} y ya notificamos a tu líder.`
               : 'Tu solicitud fue registrada y notificada a tu Jefe Inmediato y a Talento Humano.',
           );
         },

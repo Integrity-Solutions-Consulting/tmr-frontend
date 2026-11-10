@@ -19,7 +19,12 @@
     </header>
 
     <div class="portal-body">
-      <app-formulario-permiso-oficial [datos]="datosFormulario()" />
+      <app-resumen-solicitud
+        [datos]="datosFormulario()"
+        [tipo]="datosFormulario().tipoPermiso"
+        [proyecto]="solicitudApi()?.proyecto || ''"
+        [estado]="solicitudApi()?.estadoTexto || 'Pendiente de decisión'"
+        [adjuntos]="solicitudApi()?.adjuntos || []" />
 
       @if (procesado() === 'pendiente') {
         <div class="modal-form">

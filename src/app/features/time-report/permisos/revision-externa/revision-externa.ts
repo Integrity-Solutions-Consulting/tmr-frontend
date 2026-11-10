@@ -5,8 +5,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
   PermisoItemApi,
@@ -17,7 +17,7 @@ import {
 @Component({
   selector: 'app-revision-externa',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FormularioPermisoOficialComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ResumenSolicitudComponent],
   templateUrl: './revision-externa.html',
   styleUrl: './revision-externa.scss',
 })

@@ -2,10 +2,32 @@
   <app-header
     title="Historial General de Permisos (Gerencia)"
     subtitle="Consulta histórica de todos los permisos y vacaciones solicitados, confirmados y rechazados"
-  />
+  >
+    <div class="header-actions-gerencia">
+      <button
+        type="button"
+        class="btn-tmr btn-tmr--secondary"
+        [disabled]="solicitudesFiltradas().length === 0"
+        (click)="alternarSeleccionarTodos()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ todosSeleccionados() ? 'deselect' : 'select_all' }}
+        </span>
+        {{ todosSeleccionados() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+      </button>
+
+      <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="cantidadSeleccionados() === 0 || exportandoReporte()" [matMenuTriggerFor]="reporteMenu">
+        {{ exportandoReporte() ? 'Generando…' : 'Reporte (' + cantidadSeleccionados() + ')' }}
+      </button>
+      <mat-menu #reporteMenu="matMenu">
+        <button mat-menu-item (click)="generarReporte('xlsx')" [disabled]="exportandoReporte()">Descargar Excel (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('pdf')" [disabled]="exportandoReporte()">Descargar PDF</button>
+      </mat-menu>
+    </div>
+  </app-header>
 
   <section class="kpis-grid">
-    <app-tarjeta-resumen [valor]="totalHistorico()" titulo="Total histórico" icono="folder_shared" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalHistorico()" titulo="Resultados" icono="folder_shared" tono="corporativo" />
     <app-tarjeta-resumen [valor]="totalConfirmados()" titulo="Confirmados" icono="verified" tono="exito" />
     <app-tarjeta-resumen [valor]="totalEnProceso()" titulo="En proceso" icono="pending_actions" tono="advertencia" />
     <app-tarjeta-resumen [valor]="totalRechazados()" titulo="Rechazados" icono="block" tono="peligro" />
@@ -13,8 +35,8 @@
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda inteligente</label>
-      <input
+      <label class="filter-label" for="permisos-gerencia-filter-1">Buscar</label>
+      <input id="permisos-gerencia-filter-1"
         type="text"
         class="filter-control"
         placeholder="Colaborador, código, proyecto, cliente, líder, duración o motivo..."
@@ -24,27 +46,22 @@
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">Período</label>
-      <select
+      <label class="filter-label" for="permisos-gerencia-filter-2">Período</label>
+      <select id="permisos-gerencia-filter-2"
         class="filter-control"
         [ngModel]="periodoPreset()"
         (ngModelChange)="cambiarPresetPeriodo($event)"
       >
-        <option value="TODOS">Todos los tiempos</option>
-        <option value="HOY">Hoy</option>
-        <option value="ESTA_SEMANA">Esta semana</option>
-        <option value="ESTE_MES">Este mes</option>
-        <option value="MES_ANTERIOR">Mes anterior</option>
+        <option value="TODOS">Todo período</option>
         <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
-        <option value="ANIO_ACTUAL">Este año (2026)</option>
-        <option value="ANIO_ANTERIOR">Año anterior (2025)</option>
         <option value="PERSONALIZADO">Rango personalizado</option>
       </select>
     </div>
 
+    @if (periodoPreset() === 'PERSONALIZADO') {
     <div class="filter-group date-group">
-      <label class="filter-label">Desde</label>
-      <input
+      <label class="filter-label" for="permisos-gerencia-filter-3">Desde</label>
+      <input id="permisos-gerencia-filter-3"
         type="date"
         class="filter-control"
         [ngModel]="fechaDesde()"
@@ -53,8 +70,8 @@
     </div>
 
     <div class="filter-group date-group">
-      <label class="filter-label">Hasta</label>
-      <input
+      <label class="filter-label" for="permisos-gerencia-filter-4">Hasta</label>
+      <input id="permisos-gerencia-filter-4"
         type="date"
         class="filter-control"
         [ngModel]="fechaHasta()"
@@ -62,84 +79,100 @@
       />
     </div>
 
+    }
     <div class="filter-group">
-      <label class="filter-label">Tipo</label>
-      <select class="filter-control" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
-        <option value="TODOS">Todos</option>
+      <label class="filter-label" for="permisos-gerencia-filter-5">Tipo</label>
+      <select id="permisos-gerencia-filter-5" class="filter-control" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+        <option value="TODOS">Todo período</option>
         <option value="VACACIONES">Vacaciones</option>
         <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
         <option value="CITAS_MEDICAS">Citas médicas</option>
+        <option value="MATRIMONIO">Matrimonio</option>
+        <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+        <option value="MATERNIDAD">Maternidad</option>
         <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
         <option value="OTROS">Otros</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">Estado</label>
-      <select class="filter-control" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
-        <option value="TODOS">Todos</option>
-        <option value="confirmado">Confirmado</option>
-        <option value="pendiente">Pendiente Jefe</option>
-        <option value="rrhh">En Talento Humano</option>
-        <option value="observado">Observado</option>
-        <option value="rechazado">Rechazado</option>
+      <label class="filter-label" for="permisos-gerencia-filter-6">Semáforo</label>
+      <select id="permisos-gerencia-filter-6" class="filter-control" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="proceso">En proceso</option>
+        <option value="finalizado">Finalizado</option>
       </select>
     </div>
 
-    @if (tieneFiltrosActivos()) {
-      <div class="filter-actions">
+    <div class="filter-actions">
+      @if (tieneFiltrosActivos()) {
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltros()">
           Limpiar
         </button>
-      </div>
-    }
+      }
+    </div>
   </div>
 
-  <div class="table-card">
-    <table class="permisos-table">
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table permisos-review-table">
       <colgroup>
-        <col style="width: 11%;" />
-        <col style="width: 17%;" />
-        <col style="width: 15%;" />
-        <col style="width: 16%;" />
-        <col style="width: 15%;" />
-        <col style="width: 9%;" />
-        <col style="width: 11%;" />
-        <col style="width: 6%;" />
+        <col style="width: 48px;" />
+        <col />
+        <col />
+        <col />
+        <col style="width: 150px;" />
+        <col style="width: 100px;" />
       </colgroup>
       <thead>
         <tr>
-          <th>Folio</th>
-          <th>Colaborador</th>
-          <th>Cliente</th>
-          <th>Tipo</th>
-          <th>Fechas</th>
-          <th>Duración</th>
-          <th>Estado</th>
-          <th style="text-align: right;">PDF</th>
+          <th class="col-check">
+            <input
+              type="checkbox"
+              class="gerencia-checkbox"
+              aria-label="Seleccionar todas las solicitudes visibles"
+              [checked]="todosSeleccionados()"
+              [indeterminate]="algunosSeleccionados()"
+              [disabled]="solicitudesFiltradas().length === 0"
+              (change)="alternarSeleccionarTodos()"
+            />
+          </th>
+          <th>Colaborador / Código</th>
+          <th>Solicitud / Proyecto</th>
+          <th>Período / Duración</th>
+          <th class="estado-column">Estado</th>
+          <th style="text-align: right;">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for (item of solicitudesFiltradas(); track item.id) {
-          <tr>
-            <td class="codigo-cell">{{ item.folio }}</td>
-            <td>{{ item.colaborador }}</td>
-            <td>{{ item.cliente }}</td>
-            <td>{{ item.tipo }}</td>
-            <td>{{ item.fechas }}</td>
-            <td>{{ item.diasSolicitados }} ({{ item.horasSolicitadas }})</td>
-            <td>
-              <span [class]="'status-badge status-badge--' + item.estadoClase">
-                {{ item.estadoTexto }}
+          <tr
+            [class.row-selected]="estaSeleccionado(item.id)"
+          >
+            <td class="col-check" (click)="$event.stopPropagation()">
+              <input
+                type="checkbox"
+                class="gerencia-checkbox"
+                [attr.aria-label]="'Seleccionar solicitud ' + item.folio + ' de ' + item.colaborador"
+                [checked]="estaSeleccionado(item.id)"
+                (change)="alternarSeleccion(item.id, $event)"
+              />
+            </td>
+            <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.folio }}</span></td>
+            <td><strong>{{ item.tipo }}</strong><details class="solicitud-detalle"><summary>Ver detalles</summary><p>{{ item.cliente }} · {{ item.proyecto }}</p><p>Líder: {{ item.liderNombre }}</p><p>{{ item.motivo }}</p></details></td>
+            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }} · {{ item.horasSolicitadas }}</span></td>
+            <td class="estado-column">
+              <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
               </span>
             </td>
-            <td>
+            <td (click)="$event.stopPropagation()">
               <div class="actions-cell">
                 <button
                   type="button"
                   class="btn-tmr btn-tmr--secondary btn-tmr--sm"
                   (click)="verPdf(item)"
-                  title="Ver PDF"
+                  title="Ver solicitud"
+                  [attr.aria-label]="'Ver solicitud de ' + item.folio"
                 >
                   <span class="material-symbols-outlined">picture_as_pdf</span>
                 </button>
@@ -148,7 +181,9 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="8" class="empty-row">No se encontraron permisos en el rango seleccionado.</td>
+            <td colspan="6" class="empty-row">{{ cargando() ? 'Cargando solicitudes…' : errorCarga() ? 'No se pudo cargar el historial.' : 'No se encontraron solicitudes con estos filtros.' }}
+              @if (errorCarga()) { <button type="button" class="btn-tmr btn-tmr--secondary" (click)="cargarHistorialDesdeApi()">Reintentar</button> }
+            </td>
           </tr>
         }
       </tbody>
@@ -158,14 +193,14 @@
 
 <!-- MODAL: VISTA DEL DOCUMENTO PDF -->
 <app-modal-base
-  [titulo]="'Documento PDF — ' + (solicitudActiva()?.folio ?? '')"
+  [titulo]="'Solicitud — ' + (solicitudActiva()?.folio ?? '')"
   [visible]="modalPdfVisible()"
-  [wide]="true"
+  [wide]="false"
   (cerrar)="modalPdfVisible.set(false)"
 >
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
-      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
       <div class="modal-footer">
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalPdfVisible.set(false)">
           Cerrar

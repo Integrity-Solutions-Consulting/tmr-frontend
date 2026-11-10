@@ -1,0 +1,28 @@
+@use '../permisos-shared';
+
+:host { display: block; }
+.resumen { line-height: 1.5; color: var(--text-primary); }
+.resumen__principal { padding-bottom: 14px; }
+.resumen__principal > strong { font-size: 15px; }
+p { margin: 7px 0; overflow-wrap: anywhere; }
+.motivo { white-space: pre-wrap; }
+.resumen__detalle {
+  display: flex; align-items: center; gap: 9px; width: 100%; min-height: 44px;
+  padding: 9px 12px; border: 1px solid var(--border-default); border-radius: 8px;
+  background: var(--surface-subtle, #f6f8fb); color: var(--primary-color);
+  font: inherit; font-size: 13px; font-weight: 650; text-align: left; cursor: pointer;
+}
+.resumen__detalle:hover { background: var(--surface-hover, #edf3fb); border-color: var(--primary-color); }
+.resumen__detalle:focus-visible,.respaldo-descarga:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+.resumen__flecha { margin-left: auto; }
+dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin: 12px 0; padding: 14px; border: 1px solid var(--border-default); border-radius: 8px; }
+dt,.respaldos__vacio { font-size: 12px; color: var(--text-secondary); }
+dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+.respaldos { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border-default); }
+.respaldos__titulo { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); }
+.respaldos__archivos { display: flex; flex-wrap: wrap; gap: 7px; }
+.respaldo-descarga { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 6px 9px; border: 1px solid var(--border-default); border-radius: 6px; background: #fff; color: var(--text-primary); font: inherit; font-size: 12px; cursor: pointer; }
+.respaldo-descarga:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); background: var(--surface-subtle, #f6f8fb); }
+.respaldo-descarga:disabled { opacity: .6; cursor: wait; }
+.respaldo-descarga span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media(max-width:600px) { dl { grid-template-columns: 1fr; } }

@@ -1,3 +1,4 @@
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,6 @@ import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
   HorarioPermisoOficial,
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
@@ -19,6 +19,7 @@ import {
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
+  AdjuntoPermisoApi,
   PermisoItemApi,
   PermisosApiService,
   obtenerMensajeAmigablePermisos,
@@ -56,6 +57,7 @@ export interface SolicitudRrhh {
   fechaConfirmacionLider: string;
   comentarioLider: string;
   motivo: string;
+  adjuntos?: AdjuntoPermisoApi[];
   evidencia?: string;
   evidenciaUrl?: string;
   goceSueldo: string;
@@ -78,7 +80,7 @@ export interface SolicitudRrhh {
     HeaderComponent,
     TarjetaResumenComponent,
     ModalBase,
-    FormularioPermisoOficialComponent,
+    ResumenSolicitudComponent,
   ],
   templateUrl: './gestion-rrhh.html',
   styleUrl: './gestion-rrhh.scss',
@@ -161,6 +163,7 @@ export class GestionRrhhComponent implements OnInit {
       fechaConfirmacionLider: item.fechaAprobacionLider ?? 'Pendiente',
       comentarioLider: item.comentarioLider ?? '',
       motivo: item.motivo,
+      adjuntos: item.adjuntos ?? [],
       evidencia: item.evidenciaNombre ?? undefined,
       evidenciaUrl: item.tieneEvidencia ? this.apiService.obtenerUrlEvidencia(item.id) : undefined,
       goceSueldo: item.tipoOficial === 'VACACIONES' ? 'Con goce de sueldo (Vacaciones)' : 'Con goce de sueldo',

@@ -2,6 +2,12 @@
   <app-header
     title="Mis Permisos"
     subtitle="Solicitud y seguimiento de permisos y vacaciones">
+    <div class="header-actions-permisos">
+      <button type="button" class="btn-tmr btn-tmr--primary" (click)="abrirNuevaSolicitud()">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Nueva Solicitud
+      </button>
+    </div>
   </app-header>
 
   <div class="kpis-grid">
@@ -13,56 +19,55 @@
 
   <div class="filters-card">
     <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda inteligente</label>
-      <input
+      <label class="filter-label" for="mis-permisos-filter-1">Buscar</label>
+      <input id="mis-permisos-filter-1"
         class="filter-control"
         type="text"
         name="busquedaSolicitudes"
         autocorrect="off"
         autocapitalize="off"
         spellcheck="false"
-        placeholder="Código, tipo, cliente, proyecto, líder, días, horas, estado..."
+        placeholder="Buscar por código, tipo, cliente, líder o estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)" />
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">Período</label>
-      <select class="filter-control" name="periodoFiltro" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
-        <option value="TODOS">Todos</option>
-        <option value="HOY">Hoy</option>
-        <option value="ESTA_SEMANA">Esta semana</option>
-        <option value="ESTE_MES">Este mes</option>
-        <option value="MES_ANTERIOR">Mes anterior</option>
+      <label class="filter-label" for="mis-permisos-filter-2">Período</label>
+      <select id="mis-permisos-filter-2" class="filter-control" name="periodoFiltro" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todo período</option>
         <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
-        <option value="ANIO_ACTUAL">Este año (2026)</option>
-        <option value="PERSONALIZADO">Rango personalizado</option>
+        <option value="PERSONALIZADO">Rango personalizado...</option>
       </select>
     </div>
 
+    @if (periodoPreset() === 'PERSONALIZADO') {
+      @if (periodoPreset() === 'PERSONALIZADO') {
     <div class="filter-group date-group">
-      <label class="filter-label">Desde</label>
-      <input
-        type="date"
-        name="fechaDesdeFiltro"
-        class="filter-control"
-        [ngModel]="fechaDesde()"
-        (ngModelChange)="cambiarFechaDesde($event)" />
-    </div>
+        <label class="filter-label" for="mis-permisos-filter-3">Desde</label>
+        <input id="mis-permisos-filter-3"
+          type="date"
+          name="fechaDesdeFiltro"
+          class="filter-control"
+          [ngModel]="fechaDesde()"
+          (ngModelChange)="cambiarFechaDesde($event)" />
+      </div>
 
-    <div class="filter-group date-group">
-      <label class="filter-label">Hasta</label>
-      <input
-        type="date"
-        name="fechaHastaFiltro"
-        class="filter-control"
-        [ngModel]="fechaHasta()"
-        (ngModelChange)="cambiarFechaHasta($event)" />
-    </div>
+      <div class="filter-group date-group">
+        <label class="filter-label" for="mis-permisos-filter-4">Hasta</label>
+        <input id="mis-permisos-filter-4"
+          type="date"
+          name="fechaHastaFiltro"
+          class="filter-control"
+          [ngModel]="fechaHasta()"
+          (ngModelChange)="cambiarFechaHasta($event)" />
+      </div>
+    }
+    }
 
     <div class="filter-group">
-      <label class="filter-label">Tipo</label>
-      <select class="filter-control" name="tipoFiltro" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+      <label class="filter-label" for="mis-permisos-filter-5">Tipo</label>
+      <select id="mis-permisos-filter-5" class="filter-control" name="tipoFiltro" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
         <option value="">Todos</option>
         @if (tiposPermisoCatalogo().length > 0) {
           @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
@@ -82,48 +87,41 @@
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">Estado</label>
-      <select class="filter-control" name="estadoFiltro" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+      <label class="filter-label" for="mis-permisos-filter-6">Semáforo</label>
+      <select id="mis-permisos-filter-6" class="filter-control" name="estadoFiltro" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
         <option value="">Todos</option>
-        <option value="pendiente">Pendiente Jefe</option>
-        <option value="rrhh">En Talento Humano</option>
-        <option value="observado">Observado</option>
-        <option value="confirmado">Confirmado</option>
-        <option value="rechazado">Rechazado</option>
+        <option value="proceso">En proceso</option>
+        <option value="finalizado">Finalizado</option>
       </select>
     </div>
 
-    <div class="filter-actions">
-      <a routerLink="/permisos/revision-externa" class="btn-tmr btn-tmr--secondary">
-        <span class="material-symbols-outlined">open_in_new</span>
-        Vista Externa
-      </a>
-      <button type="button" class="btn-tmr btn-tmr--primary" (click)="abrirNuevaSolicitud()">
-        <span class="material-symbols-outlined">add</span>
-        Nueva Solicitud
-      </button>
-    </div>
+    @if (tieneFiltrosActivos()) {
+      <div class="filter-actions">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+    }
   </div>
 
-  <div class="table-card">
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
     <table class="permisos-table">
       <colgroup>
-        <col style="width: 12%;" />
-        <col style="width: 17%;" />
-        <col style="width: 19%;" />
-        <col style="width: 14%;" />
-        <col style="width: 17%;" />
-        <col style="width: 13%;" />
-        <col style="width: 8%;" />
+        <col />
+        <col />
+        <col />
+        <col />
+        <col style="width: 150px;" />
+        <col style="width: 90px;" />
       </colgroup>
       <thead>
         <tr>
           <th>Código</th>
-          <th>Tipo</th>
-          <th>Fechas</th>
+          <th>Solicitud</th>
+          <th>Fechas y Jornada</th>
           <th>Duración</th>
-          <th>Jefe Inmediato</th>
-          <th>Estado</th>
+
+          <th class="estado-column">Estado</th>
           <th style="text-align: right;">PDF</th>
         </tr>
       </thead>
@@ -131,18 +129,36 @@
         @for (item of solicitudesFiltradas(); track item.codigo) {
           <tr>
             <td class="codigo-cell">{{ item.codigo }}</td>
-            <td>{{ item.tipo }}</td>
-            <td>{{ item.fechas }}</td>
-            <td>{{ item.diasSolicitados }} ({{ item.horasSolicitadas }})</td>
             <td>
-              {{ item.lider }}
-              <span class="tag-lider" [class.tag-lider--int]="item.tipoLider === 'INT'" [class.tag-lider--ext]="item.tipoLider === 'EXT'">
-                {{ item.tipoLider }}
-              </span>
+              <div class="cell-stack">
+                <span class="cell-primary">
+                  {{ item.tipo }}
+                  @if ((item.adjuntos?.length ?? 0) > 0 || item.evidencia) {
+                    <span class="cell-clip-badge" [title]="(item.adjuntos?.length || 1) + ' archivo(s) adjunto(s)'">
+                      <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                      {{ item.adjuntos?.length || 1 }}
+                    </span>
+                  }
+                </span>
+                <details class="solicitud-detalle"><summary>Ver detalles</summary><p>{{ item.cliente }} · {{ item.proyecto }}</p><p>Líder: {{ item.lider }}</p></details>
+              </div>
             </td>
             <td>
-              <span [class]="'status-badge status-badge--' + item.estadoClase">
-                {{ item.estadoTexto }}
+              <div class="cell-stack">
+                <span class="cell-primary">{{ obtenerRangoFechasLimpio(item) }}</span>
+                <span class="cell-sub">{{ obtenerEtiquetaHorario(item) }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="cell-stack">
+                <span class="cell-primary">{{ item.diasSolicitados }}</span>
+                <span class="cell-sub">{{ item.horasSolicitadas }}</span>
+              </div>
+            </td>
+
+            <td class="estado-column">
+              <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
               </span>
             </td>
             <td>
@@ -155,537 +171,360 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
+            <td colspan="6" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
       </tbody>
     </table>
   </div>
 
-  <!-- MODAL 1: NUEVA SOLICITUD CON DISEÑO DE FORMULARIO OFICIAL ISC -->
+  <!-- MODAL 1: SOLICITUD DE PERMISOS -->
   <app-modal-base
-    titulo="Nueva Solicitud — Formulario Oficial de Permisos, Licencias y Vacaciones"
+    titulo="Nueva solicitud"
     [visible]="modalNuevaVisible()"
-    [wide]="true"
-    (cerrar)="modalNuevaVisible.set(false)">
-    <div class="modal-form">
+    [wide]="false"
+    (cerrar)="modalNuevaVisible.set(false)"
+  >
+    <div class="modal-form permiso-form solicitud-compacta">
       <div class="isc-form-sheet isc-form-sheet--interactive">
-        <!-- LOGO SUPERIOR INTEGRITY SOLUTIONS -->
-        <div class="isc-form-sheet__logo-wrap">
-          <img
-            src="assets/img/logo-isc.png"
-            alt="Integrity Solutions"
-            class="isc-form-sheet__logo"
-          />
-          <span class="isc-form-sheet__folio">Nueva Solicitud · Formulario Oficial</span>
-        </div>
 
-        <!-- TABLA 1: TÍTULO Y FECHA DE SOLICITUD -->
-        <div class="isc-table-scroll">
-          <table class="isc-table isc-table--header">
-            <tbody>
-              <tr>
-                <td rowspan="3" class="isc-table__doc-title">
-                  FORMULARIO DE SOLICITUD DE PERMISOS, LICENCIAS<br />Y VACACIONES
-                </td>
-                <th colspan="3" class="isc-table__th-grey">FECHA DE SOLICITUD</th>
-              </tr>
-              <tr>
-                <th class="isc-table__th-sub">Día</th>
-                <th class="isc-table__th-sub">Mes</th>
-                <th class="isc-table__th-sub">Año</th>
-              </tr>
-              <tr>
-                <td class="isc-table__td-center">{{ hoyDia }}</td>
-                <td class="isc-table__td-center">{{ hoyMes }}</td>
-                <td class="isc-table__td-center">{{ hoyAnio }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- TABLA 2: DATOS DEL COLABORADOR (RF-001: Autocompletado desde BD + Buscador Cliente/Proyecto -> Jefe Inmediato) -->
-        <div class="isc-table-scroll isc-table-scroll--overflow-visible">
-          <table class="isc-table">
-            <thead>
-              <tr>
-                <th colspan="5" class="isc-table__th-grey">DATOS DEL COLABORADOR</th>
-              </tr>
-              <tr>
-                <th class="isc-table__th-sub" style="width: 21%;">Apellidos y nombres</th>
-                <th class="isc-table__th-sub" style="width: 13%;">Número de cédula</th>
-                <th class="isc-table__th-sub" style="width: 16%;">Cargo</th>
-                <th class="isc-table__th-sub" style="width: 27%;">Cliente / Proyecto *</th>
-                <th class="isc-table__th-sub" style="width: 23%;">Jefe inmediato *</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="isc-table__td-center">{{ colaboradorNombre() || '—' }}</td>
-                <td class="isc-table__td-center">{{ colaboradorCedula() || '—' }}</td>
-                <td class="isc-table__td-center">{{ colaboradorCargo() || '—' }}</td>
-                <td class="isc-table__td-center isc-combobox-cell">
-                  <div class="isc-combobox">
-                    <div class="isc-combobox__control">
-                      <span class="material-symbols-outlined isc-combobox__icon">search</span>
-                      <input
-                        type="text"
-                        name="clienteProyectoBusqueda"
-                        class="isc-inline-input isc-combobox__input"
-                        placeholder="Buscar cliente o proyecto..."
-                        autocorrect="off"
-                        autocapitalize="off"
-                        spellcheck="false"
-                        role="combobox"
-                        aria-label="Buscar cliente o proyecto"
-                        [attr.aria-expanded]="comboboxClienteAbierto()"
-                        [ngModel]="valorInputClienteProyecto()"
-                        (focus)="abrirBuscadorCliente()"
-                        (click)="abrirBuscadorCliente()"
-                        (ngModelChange)="alEscribirBusquedaCliente($event)"
-                        (keydown)="alTeclaBuscadorCliente($event)"
-                        (blur)="cerrarBuscadorClienteConRetardo()" />
-                    </div>
-
-                    @if (comboboxClienteAbierto()) {
-                      <ul class="isc-combobox__menu" role="listbox">
-                        @for (opt of opcionesClienteFiltradas(); track opt.indiceOriginal) {
-                          <li
-                            role="option"
-                            class="isc-combobox__option"
-                            [class.isc-combobox__option--selected]="opt.indiceOriginal === indiceClienteForm()"
-                            [attr.aria-selected]="opt.indiceOriginal === indiceClienteForm()"
-                            (mousedown)="elegirOpcionCliente(opt, $event)">
-                            <div class="isc-combobox__option-main">
-                              <span>{{ opt.etiqueta }}</span>
-                              @if (opt.esAsignacionPropia) {
-                                <span class="isc-combobox__badge">Asignado</span>
-                              }
-                            </div>
-                            <div class="isc-combobox__option-sub">
-                              Jefe inmediato:
-                              <strong>{{ opt.liderNombre || 'Sin líder en proyecto' }}</strong>
-                              @if (opt.liderNombre) {
-                                <span>({{ opt.tipoLider === 'EXT' ? 'Externo' : 'Interno' }})</span>
-                              }
-                            </div>
-                          </li>
-                        } @empty {
-                          <li class="isc-combobox__empty">
-                            No se encontraron clientes o proyectos activos en BD.
-                          </li>
-                        }
-                      </ul>
+        <div class="permiso-solicitud">
+              <div class="permiso-field">
+                <label for="tipo-permiso">Tipo de permiso <span aria-hidden="true">*</span></label>
+                <select
+                  id="tipo-permiso"
+                  name="tipoPermiso"
+                  class="isc-inline-select"
+                  [ngModel]="tipoSeleccionado()"
+                  (ngModelChange)="cambiarTipoPermisoForm($event)"
+                >
+                  @if (tiposPermisoCatalogo().length > 0) {
+                    @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
+                      <option [value]="tp.codigo">{{ tp.nombre }}</option>
                     }
-                  </div>
-                </td>
-                <td class="isc-table__td-center">
-                  @if (clienteActualForm()?.liderNombre; as liderAuto) {
-                    <div class="isc-lider-autofill" title="Autocompletado según el Cliente / Proyecto seleccionado">
-                      <span class="isc-lider-autofill__name">{{ liderAuto }}</span>
-                      <span
-                        class="tag-lider"
-                        [class.tag-lider--int]="obtenerTipoLiderActualForm() === 'INT'"
-                        [class.tag-lider--ext]="obtenerTipoLiderActualForm() === 'EXT'">
-                        {{ obtenerTipoLiderActualForm() }}
-                      </span>
-                    </div>
                   } @else {
-                    <select
-                      name="liderSeleccionado"
-                      class="isc-inline-select"
-                      [ngModel]="indiceLiderForm()"
-                      (ngModelChange)="indiceLiderForm.set(+$event)">
-                      @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
-                        <option [value]="idx">{{ l.etiqueta }}</option>
-                      } @empty {
-                        <option [value]="0" disabled>Sin líderes activos en BD</option>
-                      }
-                    </select>
+                    <option value="VACACIONES">Vacaciones</option>
+                    <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+                    <option value="CITAS_MEDICAS">Citas médicas</option>
+                    <option value="MATRIMONIO">Matrimonio</option>
+                    <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+                    <option value="MATERNIDAD">Maternidad</option>
+                    <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+                    <option value="OTROS">Otros</option>
                   }
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- SECCIÓN 3: TIPO DE PERMISO DE AUSENCIA DE TRABAJO (LEÍDO DE CATÁLOGO BD RF-002) -->
-        <div class="isc-section-bar">TIPO DE PERMISO DE AUSENCIA DE TRABAJO</div>
-        <div class="isc-section-instruction">
-          Favor marcar con una X el tipo de permiso solicitado (haz clic sobre el tipo):
-        </div>
-
-        <div class="isc-checkbox-grid">
-          @if (tiposPermisoCatalogo().length > 0) {
-            @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
-              <div
-                class="isc-checkbox-item isc-checkbox-item--clickable"
-                [class.isc-checkbox-item--active]="tipoSeleccionado() === tp.codigo"
-                (click)="tipoSeleccionado.set(tp.codigo)">
-                <span class="isc-checkbox-item__label">{{ tp.nombre }}</span>
-                <span
-                  class="isc-checkbox-item__box"
-                  [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === tp.codigo">
-                  {{ tipoSeleccionado() === tp.codigo ? 'X' : '' }}
-                </span>
+                </select>
               </div>
-            }
-            <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
-          } @else {
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'VACACIONES'"
-              (click)="tipoSeleccionado.set('VACACIONES')">
-              <span class="isc-checkbox-item__label">Vacaciones</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'VACACIONES'">
-                {{ tipoSeleccionado() === 'VACACIONES' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'"
-              (click)="tipoSeleccionado.set('LICENCIA_ENFERMEDAD')">
-              <span class="isc-checkbox-item__label">Licencia por enfermedad</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'LICENCIA_ENFERMEDAD'">
-                {{ tipoSeleccionado() === 'LICENCIA_ENFERMEDAD' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'CITAS_MEDICAS'"
-              (click)="tipoSeleccionado.set('CITAS_MEDICAS')">
-              <span class="isc-checkbox-item__label">Citas médicas</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'CITAS_MEDICAS'">
-                {{ tipoSeleccionado() === 'CITAS_MEDICAS' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATRIMONIO'"
-              (click)="tipoSeleccionado.set('MATRIMONIO')">
-              <span class="isc-checkbox-item__label">Matrimonio</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATRIMONIO'">
-                {{ tipoSeleccionado() === 'MATRIMONIO' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'NACIMIENTO_HIJO'"
-              (click)="tipoSeleccionado.set('NACIMIENTO_HIJO')">
-              <span class="isc-checkbox-item__label">Nacimiento de un Hijo/a</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'NACIMIENTO_HIJO'">
-                {{ tipoSeleccionado() === 'NACIMIENTO_HIJO' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'OTROS'"
-              (click)="tipoSeleccionado.set('OTROS')">
-              <span class="isc-checkbox-item__label">Otros</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'OTROS'">
-                {{ tipoSeleccionado() === 'OTROS' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'MATERNIDAD'"
-              (click)="tipoSeleccionado.set('MATERNIDAD')">
-              <span class="isc-checkbox-item__label">Maternidad</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'MATERNIDAD'">
-                {{ tipoSeleccionado() === 'MATERNIDAD' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div
-              class="isc-checkbox-item isc-checkbox-item--clickable"
-              [class.isc-checkbox-item--active]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'"
-              (click)="tipoSeleccionado.set('FALLECIMIENTO_FAMILIAR')">
-              <span class="isc-checkbox-item__label">Fallecimiento de un familiar</span>
-              <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR'">
-                {{ tipoSeleccionado() === 'FALLECIMIENTO_FAMILIAR' ? 'X' : '' }}
-              </span>
-            </div>
-
-            <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
-          }
-        </div>
-
-        <!-- SECCIÓN 4: MOTIVOS Y CARGA DE EVIDENCIA (MINIO / STORAGE) -->
-        <div class="isc-section-bar">MOTIVOS DEL PERMISO LABORAL O VACACIONAL</div>
-        <div class="isc-text-box">
-          <textarea
-            name="motivoSolicitud"
-            class="isc-motivo-textarea"
-            rows="2"
-            placeholder="Describe el motivo detallado de la solicitud y la coordinación de actividades..."
-            [ngModel]="motivoForm()"
-            (ngModelChange)="motivoForm.set($event)"></textarea>
-
-          <div class="isc-upload-bar">
-            <label class="isc-upload-bar__trigger">
-              <input
-                type="file"
-                name="evidencia"
-                accept=".pdf,.jpg,.jpeg,.png"
-                class="isc-upload-bar__input-sr"
-                (change)="alSeleccionarArchivoEvidencia($event)" />
-              <span class="material-symbols-outlined" style="font-size: 17px;">cloud_upload</span>
-              <span>Adjuntar evidencia de respaldo (.pdf, .jpg, .jpeg, .png — máx. 5 MB)@if (requiereCertificadoMedicoObligatorio()) { <strong style="color: #dc2626;">* Obligatorio</strong> }</span>
-            </label>
-
-            @if (archivoEvidencia(); as file) {
-              <span class="isc-upload-bar__file">
-                <span class="material-symbols-outlined" style="font-size: 15px;">attach_file</span>
-                <span>{{ file.name }}</span>
-                <button type="button" class="isc-upload-bar__remove" (click)="quitarArchivoEvidencia()" title="Quitar archivo">
-                  ✕
-                </button>
-              </span>
-            } @else {
-              <span style="font-size: 0.7rem; color: #64748b;">Formatos PDF, PNG o JPG · Máximo 5 MB</span>
-            }
-          </div>
-        </div>
-
-        <!-- TABLA 5: FECHAS Y DÍAS SOLICITADOS -->
-        <div class="isc-table-scroll">
-          <table class="isc-table">
-            <tbody>
-              <tr>
-                <th rowspan="2" class="isc-table__th-side">Fecha de la solicitud</th>
-                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de inicio *</th>
-                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de finalización *</th>
-                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de regreso *</th>
-                <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de aprobación</th>
-              </tr>
-              <tr>
-                <td class="isc-table__td-center isc-table__td-tall">
+          <section class="permiso-section" aria-labelledby="fechas-titulo">
+            <h3 id="fechas-titulo" class="permiso-section__title">Fechas y horario</h3>
+            <div class="permiso-section__body permiso-periodo">
+              <div class="permiso-fechas">
+                <div class="permiso-field">
+                  <label for="fecha-inicio">Inicio <span aria-hidden="true">*</span></label>
                   <input
+                    id="fecha-inicio"
                     type="date"
                     name="fechaInicioSolicitud"
+                    [min]="fechaMinimaInicioForm()"
                     class="isc-inline-date"
                     [ngModel]="fechaInicioForm()"
-                    (ngModelChange)="cambiarFechaInicioForm($event)" />
-                </td>
-                <td class="isc-table__td-center isc-table__td-tall">
+                    (ngModelChange)="cambiarFechaInicioForm($event)"
+                  />
+                </div>
+                <div class="permiso-field">
+                  <label for="fecha-fin">Fin <span aria-hidden="true">*</span></label>
                   <input
+                    id="fecha-fin"
                     type="date"
                     name="fechaFinSolicitud"
                     class="isc-inline-date"
+                    [min]="fechaInicioForm()"
+                    [max]="horarioSeleccionado() === 'MANANA' || horarioSeleccionado() === 'TARDE' ? fechaInicioForm() : null"
                     [ngModel]="fechaFinForm()"
-                    (ngModelChange)="cambiarFechaFinForm($event)" />
-                </td>
-                <td class="isc-table__td-center isc-table__td-tall">
-                  <input
-                    type="date"
-                    name="fechaRegresoSolicitud"
-                    class="isc-inline-date"
-                    [ngModel]="fechaRegresoForm()"
-                    (ngModelChange)="fechaRegresoForm.set($event)" />
-                </td>
-                <td class="isc-table__td-center isc-table__td-tall">Pendiente</td>
-              </tr>
-              <tr>
-                <th class="isc-table__th-side-bottom">Días solicitados</th>
-                <td colspan="4" class="isc-table__td-merged">{{ textoDiasForm() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                    (ngModelChange)="cambiarFechaFinForm($event)"
+                  />
+                </div>
 
-        <!-- TABLA 6: HORARIO Y HORAS SOLICITADAS (INTERACTIVO CON X) -->
-        <div class="isc-table-scroll">
-          <table class="isc-table">
-            <tbody>
-              <tr>
-                <th rowspan="2" class="isc-table__th-side">Horario (clic para marcar)</th>
-                <th
-                  class="isc-table__th-sub isc-horario-cell"
-                  style="width: 20.5%;"
-                  (click)="seleccionarHorarioForm('MANANA')">
-                  Mañana
-                </th>
-                <th
-                  class="isc-table__th-sub isc-horario-cell"
-                  style="width: 20.5%;"
-                  (click)="seleccionarHorarioForm('TARDE')">
-                  Tarde
-                </th>
-                <th
-                  class="isc-table__th-sub isc-horario-cell"
-                  style="width: 20.5%;"
-                  (click)="seleccionarHorarioForm('COMPLETA')">
-                  Completa
-                </th>
-                <th
-                  class="isc-table__th-sub isc-horario-cell"
-                  style="width: 20.5%;"
-                  (click)="seleccionarHorarioForm('OTROS')">
-                  Otros
-                </th>
-              </tr>
-              <tr>
-                <td
-                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
-                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'MANANA'"
-                  (click)="seleccionarHorarioForm('MANANA')">
-                  @if (horarioSeleccionado() === 'MANANA') {
-                    <strong class="isc-mark-x">X</strong>
-                    <div class="isc-schedule-detail">08:30 - 12:30</div>
+              </div>
+              <fieldset class="permiso-jornada">
+                <legend>Jornada</legend>
+                <div class="permiso-jornada__opciones">
+                  @for (opcion of opcionesHorario; track opcion.codigo) {
+                    <label
+                      class="permiso-jornada__opcion"
+                      [class.is-selected]="horarioSeleccionado() === opcion.codigo"
+                    >
+                      <input
+                        type="radio"
+                        name="jornadaSolicitud"
+                        [value]="opcion.codigo"
+                        [ngModel]="horarioSeleccionado()"
+                        (ngModelChange)="seleccionarHorarioForm($event)"
+                      />
+                      <span>{{ opcion.nombre }}</span>
+                    </label>
                   }
-                </td>
-                <td
-                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
-                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'TARDE'"
-                  (click)="seleccionarHorarioForm('TARDE')">
-                  @if (horarioSeleccionado() === 'TARDE') {
-                    <strong class="isc-mark-x">X</strong>
-                    <div class="isc-schedule-detail">13:30 - 17:30</div>
-                  }
-                </td>
-                <td
-                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
-                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'COMPLETA'"
-                  (click)="seleccionarHorarioForm('COMPLETA')">
-                  @if (horarioSeleccionado() === 'COMPLETA') {
-                    <strong class="isc-mark-x">X</strong>
-                    <div class="isc-schedule-detail">Jornada completa</div>
-                  }
-                </td>
-                <td
-                  class="isc-table__td-center isc-table__td-tall isc-horario-cell"
-                  [class.isc-horario-cell--active]="horarioSeleccionado() === 'OTROS'"
-                  (click)="seleccionarHorarioForm('OTROS')">
-                  @if (horarioSeleccionado() === 'OTROS') {
-                    <strong class="isc-mark-x">X</strong>
+                </div>
+              </fieldset>
+              @if (horarioSeleccionado() === 'OTROS') {
+                <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                  <div class="permiso-field">
+                    <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
                     <input
-                      type="text"
-                      name="detalleHorarioOtros"
-                      class="isc-inline-input"
-                      style="margin-top: 3px;"
-                      placeholder="Ej. 10:00 - 12:00"
-                      [ngModel]="detalleHorarioForm()"
-                      (ngModelChange)="detalleHorarioForm.set($event)"
-                      (click)="$event.stopPropagation()" />
-                  }
-                </td>
-              </tr>
-              <tr>
-                <th class="isc-table__th-side-bottom">Horas solicitadas</th>
-                <td colspan="4" class="isc-table__td-merged">{{ textoHorasForm() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- SECCIÓN 7: TRAZABILIDAD DE APROBACIÓN EN SISTEMA -->
-        <div class="isc-section-bar">FLUJO DE APROBACIÓN Y NOTIFICACIÓN</div>
-        <div class="isc-table-scroll" style="margin-bottom: 0;">
-          <table class="isc-table" style="margin-top: -1px;">
-            <thead>
-              <tr>
-                <th class="isc-table__th-sub" style="width: 33%;">1. Solicitante (Colaborador)</th>
-                <th class="isc-table__th-sub" style="width: 34%;">2. Jefe Inmediato / Líder</th>
-                <th class="isc-table__th-sub" style="width: 33%;">3. Talento Humano (RRHH)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="isc-table__td-center">
-                  <div><strong>{{ colaboradorNombre() || '—' }}</strong></div>
-                  <div class="isc-schedule-detail">Notificación de seguimiento por correo</div>
-                </td>
-                <td class="isc-table__td-center">
-                  <div><strong>{{ obtenerNombreLiderActualForm() }}</strong></div>
-                  <div class="isc-schedule-detail">
-                    {{ obtenerTipoLiderActualForm() === 'EXT' ? 'Recibirá Magic Link por correo' : 'Revisará en Aprobación Líder TMR' }}
+                      id="hora-inicio-otros"
+                      type="time"
+                      name="horaInicioOtros"
+                      min="07:00"
+                      max="18:00"
+                      step="900"
+                      class="isc-inline-date"
+                      [ngModel]="horaInicioOtrosForm()"
+                      (ngModelChange)="cambiarHoraInicioOtros($event)"
+                    />
                   </div>
-                </td>
-                <td class="isc-table__td-center">
-                  <div class="isc-rrhh-cell">
-                    <div><strong>{{ obtenerNombreRrhhActualForm() }}</strong></div>
-                    <div class="isc-schedule-detail">{{ obtenerCargoRrhhActualForm() }}</div>
-                    @if (opcionesRrhh().length > 0) {
-                      <button
-                        type="button"
-                        class="isc-rrhh-picker-btn"
-                        (click)="alternarSelectorRrhh()">
-                        <span class="material-symbols-outlined" style="font-size: 14px;">person_check</span>
-                        <span>{{ selectorRrhhAbierto() ? 'Cerrar lista' : 'Elegir responsable RRHH' }}</span>
-                      </button>
-                      @if (selectorRrhhAbierto()) {
-                        <ul class="isc-rrhh-menu" role="listbox" aria-label="Seleccionar responsable de Recursos Humanos">
-                          @for (rrhh of opcionesRrhh(); track rrhh.idUsuario) {
-                            <li
-                              role="option"
-                              class="isc-rrhh-menu__option"
-                              [class.isc-rrhh-menu__option--selected]="obtenerRrhhActualForm()?.idUsuario === rrhh.idUsuario"
-                              [attr.aria-selected]="obtenerRrhhActualForm()?.idUsuario === rrhh.idUsuario"
-                              (click)="elegirResponsableRrhh(rrhh)">
-                              <div class="isc-rrhh-menu__main">
-                                <span>{{ rrhh.nombre }}</span>
-                                @if (rrhh.esPrincipal) {
-                                  <span class="isc-combobox__badge">Líder TH</span>
-                                }
-                              </div>
-                              <div class="isc-rrhh-menu__sub">
-                                {{ rrhh.cargo || 'Talento Humano' }}{{ rrhh.correo ? ' · ' + rrhh.correo : '' }}
-                              </div>
-                            </li>
-                          }
-                        </ul>
-                      }
+                  <div class="permiso-field">
+                    <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
+                    <input
+                      id="hora-fin-otros"
+                      type="time"
+                      name="horaFinOtros"
+                      min="07:30"
+                      max="19:00"
+                      step="900"
+                      class="isc-inline-date"
+                      [ngModel]="horaFinOtrosForm()"
+                      (ngModelChange)="cambiarHoraFinOtros($event)"
+                    />
+                  </div>
+                </div>
+                @if (horasPorDiaOtrosForm() <= 0) {
+                  <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
+                    La hora hasta debe ser posterior a la hora desde (entre 0.5 y 7.5 horas).
+                  </p>
+                } @else {
+                  <p class="permiso-ayuda">Horario específico: {{ detalleHorarioForm() }} ({{ horasPorDiaOtrosForm() }} h/día)</p>
+                }
+              } @else {
+                <p class="permiso-ayuda">{{ detalleHorarioForm() }}</p>
+              }
+              <div class="permiso-duracion" aria-live="polite">
+                <span>
+                  Duración solicitada
+                  @if (tipoSeleccionado() === 'VACACIONES') {
+                    <small style="display: block; font-weight: 500;" [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : '#475569'">
+                      Disponible: {{ diasDisponiblesNumero() }} días
+                    </small>
+                  }
+                </span>
+                <strong [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : null"
+                  >{{ textoDiasForm() }} <span aria-hidden="true">·</span>
+                  {{ textoHorasForm() }}</strong
+                >
+              </div>
+            </div>
+          </section>
+          <section class="permiso-section" aria-labelledby="permiso-titulo">
+            <h3 id="permiso-titulo" class="permiso-section__title">Tipo y motivo del permiso</h3>
+            <div class="permiso-section__body permiso-detalle">
+              <div class="permiso-field">
+                <label for="motivo-solicitud">Motivo <span aria-hidden="true">*</span></label>
+                <textarea
+                  id="motivo-solicitud"
+                  name="motivoSolicitud"
+                  class="isc-motivo-textarea"
+                  rows="2"
+                  maxlength="2000"
+                  placeholder="Describe el motivo de tu solicitud"
+                  [ngModel]="motivoForm()"
+                  (ngModelChange)="motivoForm.set($event)"
+                ></textarea>
+              </div>
+              <div class="isc-upload-bar">
+                <label class="isc-upload-bar__trigger">
+                  <input
+                    type="file"
+                    name="evidencia"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="isc-upload-bar__input-sr"
+                    (change)="alSeleccionarArchivoEvidencia($event)"
+                  />
+                  <span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span>
+                  <span
+                    >Adjuntar respaldos
+                    @if (requiereCertificadoMedicoObligatorio()) {
+                      <strong style="color: #dc2626">* Obligatorio</strong>
+                    }
+                  </span>
+                </label>
+
+                @if (archivosEvidencia().length > 0) {
+                  <div class="isc-upload-bar__files-list">
+                    @for (file of archivosEvidencia(); track file.name + file.size; let idx = $index) {
+                      <span class="isc-upload-bar__file">
+                        <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                        <span [title]="file.name">{{ file.name }}</span>
+                        <button
+                          type="button"
+                          class="isc-upload-bar__remove"
+                          (click)="quitarArchivoEvidencia(idx)"
+                          title="Quitar este archivo"
+                          aria-label="Quitar archivo adjunto"
+                        >
+                          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                      </span>
                     }
                   </div>
+                } @else {
+                  <span class="isc-upload-bar__hint">Hasta 5 archivos (PDF, JPG o PNG · Máx. 15 MB c/u)</span>
+                }
+              </div>
+            </div>
+          </section>
 
 
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
-      </div>
 
+        <div class="solicitud-asignacion">
+
+          <div class="permiso-section__body">
+
+            <div class="permiso-asignacion">
+              <div class="permiso-field">
+                <label for="cliente-proyecto"
+                  >Cliente / Proyecto <span aria-hidden="true">*</span></label
+                >
+                <div class="isc-combobox">
+                  <div class="isc-combobox__control">
+                    <span class="material-symbols-outlined isc-combobox__icon">search</span>
+                    <input
+                      type="text"
+                      id="cliente-proyecto"
+                      name="clienteProyectoBusqueda"
+                      class="isc-inline-input isc-combobox__input"
+                      placeholder="Buscar cliente o proyecto..."
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
+                      role="combobox"
+                      aria-label="Buscar cliente o proyecto"
+                      aria-controls="proyectos-opciones"
+                      [attr.aria-expanded]="comboboxClienteAbierto()"
+                      [ngModel]="valorInputClienteProyecto()"
+                      (focus)="abrirBuscadorCliente()"
+                      (click)="abrirBuscadorCliente()"
+                      (ngModelChange)="alEscribirBusquedaCliente($event)"
+                      (keydown)="alTeclaBuscadorCliente($event)"
+                      (blur)="cerrarBuscadorClienteConRetardo()"
+                    />
+                  </div>
+
+                  @if (comboboxClienteAbierto()) {
+                    <ul
+                      id="proyectos-opciones"
+                      class="isc-combobox__menu"
+                      role="listbox"
+                      aria-label="Clientes y proyectos"
+                    >
+                      @for (opt of opcionesClienteFiltradas(); track opt.indiceOriginal) {
+                        <li
+                          role="option"
+                          class="isc-combobox__option"
+                          [class.isc-combobox__option--selected]="
+                            opt.indiceOriginal === indiceClienteForm()
+                          "
+                          [attr.aria-selected]="opt.indiceOriginal === indiceClienteForm()"
+                          (mousedown)="elegirOpcionCliente(opt, $event)"
+                        >
+                          <div class="isc-combobox__option-main">
+                            <span>{{ opt.etiqueta }}</span>
+                            @if (opt.esAsignacionPropia) {
+                              <span class="isc-combobox__badge">Asignado</span>
+                            }
+                          </div>
+                          <div class="isc-combobox__option-sub">
+                            Jefe inmediato:
+                            <strong>{{ opt.liderNombre || 'Sin líder en proyecto' }}</strong>
+                            @if (opt.liderNombre) {
+                              <span>({{ opt.tipoLider === 'EXT' ? 'Externo' : 'Interno' }})</span>
+                            }
+                          </div>
+                        </li>
+                      } @empty {
+                        <li class="isc-combobox__empty">No se encontraron clientes o proyectos.</li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+              <div class="permiso-field" [hidden]="!!clienteActualForm()?.liderNombre">
+                <span id="jefe-label">Jefe inmediato <span aria-hidden="true">*</span></span>
+                @if (clienteActualForm()?.liderNombre; as liderAuto) {
+                  <div
+                    class="isc-lider-autofill"
+                    title="Autocompletado según el Cliente / Proyecto seleccionado"
+                  >
+                    <span class="isc-lider-autofill__name">{{ liderAuto }}</span>
+                    <span
+                      class="tag-lider"
+                      [class.tag-lider--int]="obtenerTipoLiderActualForm() === 'INT'"
+                      [class.tag-lider--ext]="obtenerTipoLiderActualForm() === 'EXT'"
+                    >
+                      {{ obtenerTipoLiderActualForm() }}
+                    </span>
+                  </div>
+                } @else {
+                  <select
+                    aria-labelledby="jefe-label"
+                    name="liderSeleccionado"
+                    class="isc-inline-select"
+                    [ngModel]="indiceLiderForm()"
+                    (ngModelChange)="indiceLiderForm.set(+$event)"
+                  >
+                    @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
+                      <option [value]="idx">{{ l.etiqueta }}</option>
+                    } @empty {
+                      <option [value]="0" disabled>Sin líderes disponibles</option>
+                    }
+                  </select>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
       <div class="modal-footer">
-        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalNuevaVisible.set(false)">
+        <span class="permiso-required">* Campos obligatorios</span>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="modalNuevaVisible.set(false)"
+        >
           Cancelar
         </button>
         <button
           type="button"
           class="btn-tmr btn-tmr--primary"
           [disabled]="guardandoSolicitud()"
-          (click)="guardarNuevaSolicitud()">
-          <span class="material-symbols-outlined">send</span>
-          {{ guardandoSolicitud() ? 'Enviando...' : 'Guardar y Enviar Solicitud' }}
+          (click)="guardarNuevaSolicitud()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">send</span>
+          {{ guardandoSolicitud() ? 'Enviando...' : 'Enviar solicitud' }}
         </button>
       </div>
     </div>
   </app-modal-base>
 
-  <!-- MODAL 2: VISTA DEL DOCUMENTO PDF -->
-  <app-modal-base
-    [titulo]="'Documento PDF — ' + (solicitudSeleccionada()?.codigo ?? '')"
-    [visible]="modalFormularioVisible()"
-    [wide]="true"
-    (cerrar)="modalFormularioVisible.set(false)">
+  <!-- Consulta compacta de la solicitud -->
+  <app-modal-base [titulo]="'Solicitud — ' + (solicitudSeleccionada()?.codigo ?? '')" [visible]="modalFormularioVisible()" [wide]="false" (cerrar)="modalFormularioVisible.set(false)">
     @if (solicitudSeleccionada(); as sel) {
       <div class="modal-form">
-        <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sel)" />
-
+        <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estadoTexto" [adjuntos]="sel.adjuntos || []" />
         <div class="modal-footer">
-          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">
-            Cerrar
-          </button>
-          <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdfSeleccionado(sel)">
-            <span class="material-symbols-outlined">download</span>
-            Descargar PDF
-          </button>
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="verFormulario(sel)"><span class="material-symbols-outlined">download</span>Descargar PDF oficial</button>
         </div>
       </div>
     }

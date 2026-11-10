@@ -1,3 +1,6 @@
+import { MatMenuModule } from '@angular/material/menu';
+import { exportarReporteExcel, exportarReportePdf, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,9 +9,14 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
-  DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
-  HorarioPermisoOficial,
+  DescargaCanceladaError,
+  DescargaProgresoService,
+} from '../../../../shared/services/descarga-progreso.service';
+import {
+  fechaArchivo,
+} from '../../../../shared/utils/reporte-export.utils';
+import {
+  DatosFormularioOficial,  HorarioPermisoOficial,
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
@@ -19,6 +27,7 @@ import {
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
+  AdjuntoPermisoApi,
   PermisoItemApi,
   PermisosApiService,
   obtenerMensajeAmigablePermisos,
@@ -28,11 +37,13 @@ export interface SolicitudGerencia {
   id: number;
   folio: string;
   anio: string;
+  fechaSolicitud: string;
   diaSolicitud?: string;
   mesSolicitud?: string;
   colaborador: string;
   cedula: string;
   cargo: string;
+  area: string;
   cliente: string;
   proyecto: string;
   liderNombre: string;
@@ -46,11 +57,23 @@ export interface SolicitudGerencia {
   fechaRegreso: string;
   fechaAprobacion: string;
   diasSolicitados: string;
+  totalDiasNumero: number;
   horario: HorarioPermisoOficial;
+  detalleHorario?: string;
   horasSolicitadas: string;
+  totalHorasNumero: number;
   motivo: string;
+  adjuntos?: AdjuntoPermisoApi[];
   evidencia?: string;
   evidenciaUrl?: string;
+  aprobadoLider: boolean;
+  metodoLider: string;
+  fechaAprobacionLider?: string;
+  comentarioLider?: string;
+  confirmadoRrhh: boolean;
+  fechaConfirmacionRrhh?: string;
+  observacionRrhh?: string;
+  impactoTimeReport: string;
   estadoClase: 'confirmado' | 'pendiente' | 'rrhh' | 'observado' | 'rechazado';
   estadoTexto: string;
   comentarios?: string;
@@ -65,8 +88,8 @@ export interface SolicitudGerencia {
     HeaderComponent,
     TarjetaResumenComponent,
     ModalBase,
-    FormularioPermisoOficialComponent,
-  ],
+    MatMenuModule,
+    ResumenSolicitudComponent,  ],
   templateUrl: './permisos-gerencia.html',
   styleUrl: './permisos-gerencia.scss',
 })
@@ -74,6 +97,7 @@ export class PermisosGerenciaComponent implements OnInit {
   private readonly toast = inject(NotificacionToastService);
   private readonly pdfService = inject(PermisosPdfService);
   private readonly apiService = inject(PermisosApiService);
+  private readonly descargas = inject(DescargaProgresoService);
 
   readonly busqueda = signal('');
   readonly periodoPreset = signal<PeriodoPreset>('TODOS');
@@ -86,25 +110,35 @@ export class PermisosGerenciaComponent implements OnInit {
   readonly solicitudActiva = signal<SolicitudGerencia | null>(null);
 
   readonly solicitudes = signal<SolicitudGerencia[]>([]);
+  readonly seleccionadosIds = signal<ReadonlySet<number>>(new Set<number>());
+  readonly exportandoReporte = signal(false);
+  readonly cargando = signal(false);
+  readonly errorCarga = signal(false);
 
   ngOnInit(): void {
     this.cargarHistorialDesdeApi();
   }
 
   cargarHistorialDesdeApi(): void {
+    this.cargando.set(true);
+    this.errorCarga.set(false);
     this.apiService.obtenerHistorialGerencia().subscribe({
       next: (res) => {
+        this.cargando.set(false);
+        this.errorCarga.set(!res?.success || !Array.isArray(res.data));
         if (res?.success && Array.isArray(res.data)) {
           this.solicitudes.set(
             res.data.map((item: PermisoItemApi) => ({
               id: item.id,
               folio: item.codigo,
               anio: item.anioSolicitud,
+              fechaSolicitud: item.fechaSolicitud || `${item.diaSolicitud}/${item.mesSolicitud}/${item.anioSolicitud}`,
               diaSolicitud: item.diaSolicitud,
               mesSolicitud: item.mesSolicitud,
               colaborador: item.colaborador,
               cedula: item.cedula,
               cargo: item.cargo,
+              area: item.area || 'Operaciones / Consultoría',
               cliente: item.cliente,
               proyecto: item.proyecto,
               liderNombre: item.liderNombre,
@@ -118,11 +152,23 @@ export class PermisosGerenciaComponent implements OnInit {
               fechaRegreso: item.fechaRegreso,
               fechaAprobacion: item.fechaAprobacion,
               diasSolicitados: `${item.totalDias} días`,
+              totalDiasNumero: Number(item.totalDias ?? 0),
               horario: item.horario,
+              detalleHorario: item.detalleHorario ?? undefined,
               horasSolicitadas: `${item.totalHoras} h`,
+              totalHorasNumero: Number(item.totalHoras ?? 0),
               motivo: item.motivo,
-              evidencia: item.evidenciaNombre ?? undefined,
+              adjuntos: item.adjuntos ?? [],
+      evidencia: item.evidenciaNombre ?? undefined,
               evidenciaUrl: item.tieneEvidencia ? this.apiService.obtenerUrlEvidencia(item.id) : undefined,
+              aprobadoLider: Boolean(item.aprobadoLider),
+              metodoLider: item.metodoLider || (item.liderTipo === 'EXT' ? 'Magic Link Externo' : 'Cuenta TMR Líder'),
+              fechaAprobacionLider: item.fechaAprobacionLider ?? undefined,
+              comentarioLider: item.comentarioLider ?? undefined,
+              confirmadoRrhh: Boolean(item.confirmadoRrhh),
+              fechaConfirmacionRrhh: item.fechaConfirmacionRrhh ?? undefined,
+              observacionRrhh: item.observacionRrhh ?? undefined,
+              impactoTimeReport: item.impactoTimeReport || 'RESTA_META',
               estadoClase: item.estadoClase,
               estadoTexto: item.estadoTexto,
               comentarios: item.comentarios ?? undefined,
@@ -131,6 +177,8 @@ export class PermisosGerenciaComponent implements OnInit {
         }
       },
       error: (err) => {
+        this.cargando.set(false);
+        this.errorCarga.set(true);
         this.toast.error(
           'No se pudo cargar el historial',
           obtenerMensajeAmigablePermisos(
@@ -152,7 +200,8 @@ export class PermisosGerenciaComponent implements OnInit {
     return this.solicitudes().filter((s) => {
       if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
       if (tipo !== 'TODOS' && s.tipoOficial !== tipo) return false;
-      if (estado !== 'TODOS' && s.estadoClase !== estado) return false;
+      if (estado === 'proceso' && !['pendiente', 'rrhh', 'observado'].includes(s.estadoClase)) return false;
+      if (estado === 'finalizado' && !['confirmado', 'rechazado'].includes(s.estadoClase)) return false;
       if (
         !coincideBusquedaInteligente(q, [
           s.folio,
@@ -181,6 +230,23 @@ export class PermisosGerenciaComponent implements OnInit {
     });
   });
 
+  readonly solicitudesSeleccionadasFiltradas = computed(() => {
+    const ids = this.seleccionadosIds();
+    return this.solicitudesFiltradas().filter((s) => ids.has(s.id));
+  });
+
+  readonly cantidadSeleccionados = computed(() => this.solicitudesSeleccionadasFiltradas().length);
+
+  readonly todosSeleccionados = computed(() => {
+    const visibles = this.solicitudesFiltradas();
+    return visibles.length > 0 && this.cantidadSeleccionados() === visibles.length;
+  });
+
+  readonly algunosSeleccionados = computed(() => {
+    const cant = this.cantidadSeleccionados();
+    return cant > 0 && cant < this.solicitudesFiltradas().length;
+  });
+
   readonly totalHistorico = computed(() => this.solicitudesFiltradas().length);
   readonly totalConfirmados = computed(
     () => this.solicitudesFiltradas().filter((s) => s.estadoClase === 'confirmado').length,
@@ -204,6 +270,38 @@ export class PermisosGerenciaComponent implements OnInit {
       this.filtroTipo() !== 'TODOS' ||
       this.filtroEstado() !== 'TODOS',
   );
+
+  estaSeleccionado(id: number): boolean {
+    return this.seleccionadosIds().has(id);
+  }
+
+  alternarSeleccion(id: number, event?: Event): void {
+    event?.stopPropagation();
+    const copia = new Set(this.seleccionadosIds());
+    if (copia.has(id)) {
+      copia.delete(id);
+    } else {
+      copia.add(id);
+    }
+    this.seleccionadosIds.set(copia);
+  }
+
+  alternarSeleccionarTodos(): void {
+    const visibles = this.solicitudesFiltradas();
+    if (visibles.length === 0) return;
+
+    const copia = new Set(this.seleccionadosIds());
+    if (this.todosSeleccionados()) {
+      for (const item of visibles) {
+        copia.delete(item.id);
+      }
+    } else {
+      for (const item of visibles) {
+        copia.add(item.id);
+      }
+    }
+    this.seleccionadosIds.set(copia);
+  }
 
   cambiarPresetPeriodo(preset: PeriodoPreset): void {
     this.periodoPreset.set(preset);
@@ -248,6 +346,32 @@ export class PermisosGerenciaComponent implements OnInit {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
   }
 
+  async generarReporte(formato: 'xlsx' | 'pdf'): Promise<void> {
+    if (this.exportandoReporte()) return;
+    const registros = [...this.solicitudesSeleccionadasFiltradas()];
+    if (!registros.length) return;
+    const config: ReporteTabularConfig = {
+      titulo: 'Permisos y vacaciones', nombreArchivo: 'Permisos_' + fechaArchivo(), nombreHoja: 'Solicitudes',
+      orientacionPdf: 'landscape', formatoPdf: 'a4',
+      columnas: [
+        {encabezado:'Código',anchoExcel:18}, {encabezado:'Colaborador',anchoExcel:30},
+        {encabezado:'Cliente / Proyecto',anchoExcel:36}, {encabezado:'Tipo',anchoExcel:28},
+        {encabezado:'Período',anchoExcel:25}, {encabezado:'Días',anchoExcel:10,alineacion:'center'},
+        {encabezado:'Horas',anchoExcel:10,alineacion:'center'}, {encabezado:'Estado',anchoExcel:20},
+        {encabezado:'Líder',anchoExcel:26}
+      ],
+      filas: registros.map(s => [s.folio,s.colaborador,[s.cliente,s.proyecto].filter(Boolean).join(' / '),s.tipo,
+        s.fechaInicio === s.fechaFin ? s.fechaInicio : s.fechaInicio + ' — ' + s.fechaFin,
+        s.totalDiasNumero,s.totalHorasNumero,s.estadoTexto,s.liderNombre || '—'])
+    };
+    this.exportandoReporte.set(true);
+    try {
+      await this.descargas.ejecutar(formato, ctx => formato === 'xlsx' ? exportarReporteExcel(config,ctx) : exportarReportePdf(config,ctx));
+    } catch(error) {
+      if (!(error instanceof DescargaCanceladaError)) this.toast.error('No se pudo generar el reporte','Inténtalo nuevamente.');
+    } finally { this.exportandoReporte.set(false); }
+  }
+
   obtenerDatosFormulario(item: SolicitudGerencia): DatosFormularioOficial {
     const aprobadoLider = item.estadoClase === 'rrhh' || item.estadoClase === 'confirmado';
     const confirmadoRrhh = item.estadoClase === 'confirmado';
@@ -274,6 +398,7 @@ export class PermisosGerenciaComponent implements OnInit {
       fechaAprobacion: item.fechaAprobacion,
       diasSolicitados: item.diasSolicitados,
       horario: item.horario,
+      detalleHorario: item.detalleHorario,
       horasSolicitadas: item.horasSolicitadas,
       aprobacionLider: {
         aprobado: aprobadoLider,

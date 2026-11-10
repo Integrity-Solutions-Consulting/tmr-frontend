@@ -6,9 +6,7 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
-  DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
-  HorarioPermisoOficial,
+  DatosFormularioOficial,  HorarioPermisoOficial,
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
@@ -18,7 +16,9 @@ import {
   cumpleRangoFechas,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import {
+  AdjuntoPermisoApi,
   PermisoItemApi,
   PermisosApiService,
   obtenerMensajeAmigablePermisos,
@@ -48,6 +48,7 @@ export interface SolicitudEquipo {
   horario: HorarioPermisoOficial;
   horasSolicitadas: string;
   duracion: string;
+  adjuntos?: AdjuntoPermisoApi[];
   evidencia: string | null;
   evidenciaUrl?: string | null;
   traslapeAlerta: string | null;
@@ -62,8 +63,7 @@ export interface SolicitudEquipo {
     FormsModule,
     HeaderComponent,
     TarjetaResumenComponent,
-    ModalBase,
-    FormularioPermisoOficialComponent,
+    ModalBase,    ResumenSolicitudComponent,
   ],
   templateUrl: './aprobaciones-lider.html',
   styleUrl: './aprobaciones-lider.scss',
@@ -82,6 +82,8 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly modalRevisorVisible = signal(false);
   readonly solicitudActiva = signal<SolicitudEquipo | null>(null);
   readonly comentarioLider = signal('');
+  readonly verDetalle = signal(false);
+  readonly descargandoRespaldo = signal(false);
   readonly procesandoDecision = signal(false);
 
   readonly solicitudesEquipo = signal<SolicitudEquipo[]>([]);
@@ -104,7 +106,8 @@ export class AprobacionesLiderComponent implements OnInit {
     return this.solicitudesEquipo().filter((s) => {
       if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
       if (proy && s.proyecto !== proy) return false;
-      if (est && s.estado !== est) return false;
+      if (est === 'proceso' && s.estado !== 'Pendiente') return false;
+      if (est === 'finalizado' && s.estado === 'Pendiente') return false;
       if (
         !coincideBusquedaInteligente(q, [
           s.codigo,
@@ -179,6 +182,7 @@ export class AprobacionesLiderComponent implements OnInit {
       horario: item.horario,
       horasSolicitadas: item.horasSolicitadas,
       duracion: item.duracion,
+      adjuntos: item.adjuntos ?? [],
       evidencia: item.evidenciaNombre ?? null,
       evidenciaUrl: item.tieneEvidencia ? this.permisosApi.obtenerUrlEvidencia(item.id) : null,
       traslapeAlerta: item.traslapeAlerta ?? null,
@@ -211,7 +215,15 @@ export class AprobacionesLiderComponent implements OnInit {
     this.periodoPreset.set(!this.fechaDesde() && !valor ? 'TODOS' : 'PERSONALIZADO');
   }
 
+  aprobarDesdeTabla(item: SolicitudEquipo): void {
+    if (this.procesandoDecision() || item.estado !== 'Pendiente') return;
+    this.solicitudActiva.set(item);
+    this.comentarioLider.set('');
+    this.registrarDecisionLider('aprobar');
+  }
+
   abrirRevision(item: SolicitudEquipo): void {
+    this.verDetalle.set(false);
     this.solicitudActiva.set(item);
     this.comentarioLider.set('');
     this.modalRevisorVisible.set(true);
@@ -268,6 +280,27 @@ export class AprobacionesLiderComponent implements OnInit {
       `PDF ${item.codigo} descargado`,
       'Se descargó el documento oficial PDF de la solicitud.',
     );
+  }
+
+
+  descargarRespaldo(item: SolicitudEquipo, adjunto?: AdjuntoPermisoApi): void {
+    if (!item.id || this.descargandoRespaldo()) return;
+    this.descargandoRespaldo.set(true);
+    this.permisosApi.descargarEvidenciaBlob(item.id, adjunto?.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = adjunto?.nombreOriginal || item.evidencia || 'respaldo';
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        this.descargandoRespaldo.set(false);
+      },
+      error: () => {
+        this.descargandoRespaldo.set(false);
+        this.toast.error('No se pudo descargar', 'Intenta descargar el respaldo nuevamente.');
+      }
+    });
   }
 
   registrarDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
