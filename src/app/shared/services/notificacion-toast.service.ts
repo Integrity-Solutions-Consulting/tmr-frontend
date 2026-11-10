@@ -8,6 +8,8 @@ export interface ToastNotificacion {
   titulo: string;
   detalle: string;
   cerrando: boolean;
+  /** Proceso en curso: muestra un indicador girando y no se cierra solo (ver enCurso / actualizar). */
+  enCurso?: boolean;
 }
 
 /**
@@ -40,6 +42,21 @@ export class NotificacionToastService {
 
   error(titulo: string, detalle: string, cerrarEnMs = 9000): number {
     return this.mostrar('error', titulo, detalle, cerrarEnMs);
+  }
+
+  /**
+   * Toast de un proceso largo (p. ej. un envío masivo): queda visible con un indicador girando hasta que se
+   * cierre con cerrar(id). Su texto se puede ir cambiando con actualizar(id, ...) para mostrar el avance.
+   */
+  enCurso(titulo: string, detalle: string): number {
+    const id = this.siguienteId++;
+    this.toasts.update(lista => [...lista, { id, tipo: 'info', titulo, detalle, cerrando: false, enCurso: true }]);
+    return id;
+  }
+
+  /** Cambia el título o el detalle de un toast que sigue abierto. */
+  actualizar(id: number, cambios: Partial<Pick<ToastNotificacion, 'titulo' | 'detalle'>>): void {
+    this.toasts.update(lista => lista.map(t => (t.id === id ? { ...t, ...cambios } : t)));
   }
 
   /** Cierra el toast con su animación de salida antes de que expire su temporizador. */
