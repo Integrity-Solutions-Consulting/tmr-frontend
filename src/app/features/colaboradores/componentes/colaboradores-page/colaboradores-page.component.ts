@@ -8,8 +8,6 @@ import { CatalogosService, CargoItem, CatalogoItem } from '../../servicios/catal
 import {
   Colaborador,
   FiltrosColaborador,
-  CrearColaboradorDto,
-  EditarColaboradorDto,
   Notificacion,
 } from '../../models/colaborador.model';
 
@@ -21,7 +19,7 @@ import { PaginacionComponent }             from '../../../../shared/components/p
 import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
-import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';  // ← NUEVO
+import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';
 import { NotificacionColaboradorComponent } from '../notificacion/notificacion.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
@@ -40,7 +38,7 @@ import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
     ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
-    ModalRegistrarSalidaComponent,  // ← NUEVO
+    ModalRegistrarSalidaComponent,
     NotificacionColaboradorComponent,
   ],
   templateUrl: './colaboradores-page.component.html',
@@ -188,9 +186,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         });
     }
 
-  // ================================================================
-  // NUEVO: Registrar salida
-  // ================================================================
   abrirRegistrarSalida(col: Colaborador): void {
     this.svc.getColaboradorById(col.id)
       .pipe(takeUntil(this.destroy$))
@@ -206,7 +201,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   cerrarDetalle(): void { this.modalDetalle = null;  }
   cerrarCrear():   void { this.modalCrear   = false; }
   cerrarEditar():  void { this.modalEditar  = null;  }
-  cerrarRegistrarSalida(): void { this.modalRegistrarSalida = null; }  // ← NUEVO
+  cerrarRegistrarSalida(): void { this.modalRegistrarSalida = null; }
 
   // ── CRUD ─────────────────────────────────────────────────
   onCrear(request: any): void {
@@ -246,9 +241,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
         });
     }
 
-  // ================================================================
-  // NUEVO: Callback cuando se registra la salida
-  // ================================================================
   onSalidaRegistrada(): void {
     this.cerrarRegistrarSalida();
     this.paginaActual = 1;
@@ -391,6 +383,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
       idGenero: colaborador.idGenero ? Number(colaborador.idGenero) : null,
       idNacionalidad: colaborador.idNacionalidad ? Number(colaborador.idNacionalidad) : null,
       email: colaborador.correoElectronico ? String(colaborador.correoElectronico).trim() : null,
+      emailCorporativo: colaborador.emailCorporativo ? String(colaborador.emailCorporativo).trim() : null,
       telefono: colaborador.telefono ? String(colaborador.telefono).trim() : null,
       direccion: colaborador.direccion ? String(colaborador.direccion).trim() : null,
       idEmpresaCatalogo: this.resolverIdCatalogo(
@@ -502,7 +495,8 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
               { encabezado: 'Cargo', anchoPdf: 22 },
               { encabezado: 'Modalidad', anchoPdf: 16 },
               { encabezado: 'Categoría', anchoPdf: 17 },
-              { encabezado: 'Correo', anchoPdf: 28 },
+              { encabezado: 'Correo institucional', anchoPdf: 28 },
+              { encabezado: 'Correo personal', anchoPdf: 28 },
               { encabezado: 'Teléfono', anchoPdf: 17 },
               { encabezado: 'Dirección', anchoPdf: 28 },
               { encabezado: 'Proyectos asignados', anchoPdf: 36 },
@@ -514,10 +508,9 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
               { encabezado: 'Reemplazo', anchoPdf: 24 },
             ],
 
-            // sm - Se comenta el filtro: los inactivos no salían en la tabla principal, solo en "Datos de salida".
-            // Ahora van todos los colaboradores del filtro de la pantalla, con sus datos de salida al final.
+            // sm - Van todos los colaboradores del filtro de la pantalla, con sus datos de salida al final
+            // (antes los inactivos solo salían en la tabla aparte "Datos de salida").
             filas: colaboradores
-              // .filter(c => c.estado === 'Activo')
               .map(c => [
                 c.asociacion ?? '-',
                 c.tipoContrato ?? '-',
@@ -532,35 +525,15 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                 c.cargo ?? '-',
                 c.modalidad ?? '-',
                 c.categoria ?? '-',
-                c.correoElectronico ?? '-',
+                c.emailCorporativo || '-',
+                c.correoElectronico || '-',
                 c.telefono ?? '-',
                 c.direccion ?? '-',
                 this.formatearProyectosColaborador(c),
                 ...this.datosSalidaExportacion(c),
             ]),
 
-            // sm - Se comenta la tabla aparte "Datos de salida": esos datos ahora son columnas de la tabla principal.
-            // columnasSalida: [
-            //   { encabezado: 'Núm. ID', anchoPdf: 20 },
-            //   { encabezado: 'Nombre', anchoPdf: 35 },
-            //   { encabezado: 'Fecha salida', anchoPdf: 20 },
-            //   { encabezado: 'Tipo salida', anchoPdf: 25 },
-            //   { encabezado: 'Causa salida', anchoPdf: 55 },
-            //   { encabezado: 'Reemplazo', anchoPdf: 35 },
-            // ],
-            //
-            // filasSalida: colaboradores
-            //   .filter(c => c.estado === 'Inactivo')
-            //   .map(c => [
-            //     c.numeroIdentificacion ?? c.identificacion ?? '-',
-            //     `${c.nombres ?? ''} ${c.apellidos ?? ''}`.trim(),
-            //     this.formatearFechaValor(c.fechaSalida),
-            //     c.tipoSalida ?? '-',
-            //     c.causaSalida ?? '-',
-            //     c.reemplazoNombre ?? '-',
-            // ]),
-
-
+            // sm - Los datos de salida ahora son columnas de la tabla principal (ya no una tabla aparte).
             columnaEstado: 2,
             orientacionPdf: 'landscape',
             formatoPdf: 'a3',
@@ -599,7 +572,8 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   { encabezado: 'Cargo', anchoExcel: 26 },
                   { encabezado: 'Modalidad', anchoExcel: 16 },
                   { encabezado: 'Categoría', anchoExcel: 18 },
-                  { encabezado: 'Correo electrónico', anchoExcel: 34 },
+                  { encabezado: 'Correo institucional', anchoExcel: 34 },
+                  { encabezado: 'Correo personal', anchoExcel: 34 },
                   { encabezado: 'Teléfono', anchoExcel: 16 },
                   { encabezado: 'Dirección', anchoExcel: 36 },
                   { encabezado: 'Proyectos asignados', anchoExcel: 54 },
@@ -610,9 +584,8 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   { encabezado: 'Motivo de salida', anchoExcel: 36 },
                   { encabezado: 'Reemplazo', anchoExcel: 26 },
                 ],
-                // sm - Se comenta el filtro: los inactivos no salían en la hoja principal, solo en "Datos de salida".
+                // sm - Los inactivos ya salen en la hoja principal (antes solo salían en "Datos de salida").
                 filas: colaboradores
-                  // .filter(c => c.estado === 'Activo')
                   .map(c => [
                     c.asociacion ?? '-',
                     c.tipoContrato ?? '-',
@@ -627,7 +600,8 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                     c.cargo ?? '-',
                     c.modalidad ?? '-',
                     c.categoria ?? '-',
-                    c.correoElectronico ?? '-',
+                    c.emailCorporativo || '-',
+                    c.correoElectronico || '-',
                     c.telefono ?? '-',
                     c.direccion ?? '-',
                     this.formatearProyectosColaborador(c),
@@ -635,37 +609,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
                   ]),
                 columnaEstado: 2,
               },
-
-              // sm - Se comenta la hoja aparte "Datos de salida": esos datos ahora son columnas de la hoja principal.
-              // {
-              //   titulo: 'Datos de salida',
-              //   nombreArchivo: 'DatosSalida',
-              //   nombreHoja: 'Datos de salida',
-              //
-              //   columnas: [
-              //     { encabezado: 'Código', anchoExcel: 15 },
-              //     { encabezado: 'Identificación', anchoExcel: 20 },
-              //     { encabezado: 'Nombres', anchoExcel: 25 },
-              //     { encabezado: 'Apellidos', anchoExcel: 25 },
-              //     { encabezado: 'Fecha salida', anchoExcel: 18 },
-              //     { encabezado: 'Tipo salida', anchoExcel: 22 },
-              //     { encabezado: 'Causa salida', anchoExcel: 35 },
-              //     { encabezado: 'Reemplazo', anchoExcel: 25 },
-              //   ],
-              //
-              //   filas: colaboradores
-              //     .filter(c => c.estado === 'Inactivo')
-              //     .map(c => [
-              //       c.codigoEmpleado ?? '-',
-              //       c.numeroIdentificacion ?? c.identificacion ?? '-',
-              //       c.nombres ?? '-',
-              //       c.apellidos ?? '-',
-              //       this.formatearFechaValor(c.fechaSalida),
-              //       c.tipoSalida ?? '-',
-              //       c.causaSalida ?? '-',
-              //       c.reemplazoNombre ?? '-',
-              //     ]),
-              // },
             ],
             'Colaboradores',
             ctx,

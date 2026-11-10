@@ -182,7 +182,17 @@
             <div class="detalle-field">
               <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
               <div>
-                <p class="detalle-field__label">Correo electrónico</p>
+                <p class="detalle-field__label">Correo institucional</p>
+                <p class="detalle-field__value detalle-field__value--break">
+                  {{ colaborador.emailCorporativo || '—' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="detalle-field">
+              <img src="assets/iconos/correo.svg" alt="correo" class="detalle-field__icon" width="15" height="15" />
+              <div>
+                <p class="detalle-field__label">Correo personal</p>
                 <p class="detalle-field__value detalle-field__value--break">
                   {{ colaborador.correoElectronico || '—' }}
                 </p>

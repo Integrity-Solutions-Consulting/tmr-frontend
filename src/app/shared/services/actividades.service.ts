@@ -1,10 +1,18 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Actividad } from '../models/actividad.model';
 import { AuthService } from '../../features/auth/servicios/auth.service';
 import { environment } from '../../../environments/environment';
 import { FeriadosService } from './feriados.service';
 import { ResumenHorasDto } from '../../core/models/actividades.interface';
+
+// sm - Si el usuario de la sesión puede completar actividades de un colaborador en un proyecto, por ser su líder ahí.
+export interface CompletarLider {
+  puedeCompletar: boolean;
+  idLider?: number | null;
+  proyecto?: any;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
@@ -23,19 +31,11 @@ export class ActividadesService {
   // Esto impide que una respuesta lenta de otro mes reemplace el calendario vigente.
   private solicitudCalendario = 0;
   private solicitudResumen = 0;
+  // sm - Colaborador y proyecto de la última consulta, para recargar lo mismo tras guardar desde el modal de Seguimiento.
+  private idEmpleadoConsultado?: number;
+  private idProyectoResumen?: number;
 
-  // Signals para métricas
-  // sm - Se comentan las métricas anteriores (horas de hoy, semana y mes): Actividades ahora muestra las mismas
-  // métricas que Seguimiento, calculadas por el backend para el mes que muestra el calendario.
-  // private _horasRegistradasHoy = signal<number>(0);
-  // public readonly horasRegistradasHoy = this._horasRegistradasHoy.asReadonly();
-  //
-  // private _horasMesActual = signal<number>(0);
-  // public readonly horasMesActual = this._horasMesActual.asReadonly();
-  //
-  // private _horasSemanaActual = signal<number>(0);
-  // public readonly horasSemanaActual = this._horasSemanaActual.asReadonly();
-
+  // sm - Métricas calculadas por el backend para el mes que muestra el calendario (mismas que Seguimiento).
   private _horasPorRegistrar = signal<number>(0);
   public readonly horasPorRegistrar = this._horasPorRegistrar.asReadonly();
 
@@ -55,6 +55,7 @@ export class ActividadesService {
   // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
   cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number): void {
     const solicitud = ++this.solicitudResumen;
+    this.idProyectoResumen = idProyecto;
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
     if (!empId) {
       // sm - Sin empleado no hay horas que mostrar: las métricas quedan en 0.
@@ -87,6 +88,7 @@ export class ActividadesService {
   // en vez de siempre usar al usuario logueado.
   cargarCalendario(anio: number, mes: number, idEmpleadoOverride?: number): void {
     const solicitud = ++this.solicitudCalendario;
+    this.idEmpleadoConsultado = idEmpleadoOverride;
     this.currentAnio.set(anio);
     this.currentMes.set(mes);
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
@@ -109,7 +111,8 @@ export class ActividadesService {
           cantidadhoras: item.cantidadHoras,
           descripcionactividad: item.descripcionActividad || '',
           notas: item.notas || '',
-          esbillable: item.esBillable ?? true
+          esbillable: item.esBillable ?? true,
+          idLiderRegistro: item.idLiderRegistro ?? null
         } as Actividad));
         this._actividades.set(mapped);
       },
@@ -136,8 +139,9 @@ export class ActividadesService {
 
   // sm - errorCallback: se llama con el mensaje si el backend rechaza el registro, para que la ventana lo muestre.
   agregarActividad(data: any, callback?: () => void, errorCallback?: (mensaje: string, guardadas: number) => void): void {
-    // sm - Solo se registran actividades a nombre del empleado de la sesión (el backend también lo valida).
-    const idEmpleado = this.empleadoObjetivo();
+    // sm - A nombre del empleado de la sesión, o del colaborador que su líder completa desde Seguimiento
+    // (data.idEmpleado). El backend valida que corresponda.
+    const idEmpleado = this.empleadoObjetivo(data.idEmpleado);
     if (!idEmpleado) {
       console.error('El usuario de la sesión no tiene un colaborador asociado; no puede registrar actividades.');
       return;
@@ -232,7 +236,7 @@ export class ActividadesService {
       };
 
       this.http.post(this.apiUrl, payload).subscribe({
-        next: (res) => {
+        next: () => {
           this.recargarMesActual();
           if (callback) callback();
         },
@@ -295,8 +299,12 @@ export class ActividadesService {
     );
   }
 
+  obtenerCompletarLider(idEmpleado: number, idProyecto: number): Observable<CompletarLider> {
+    return this.http.get<CompletarLider>(`${this.apiUrl}/completar-lider?idEmpleado=${idEmpleado}&idProyecto=${idProyecto}`);
+  }
+
   private recargarMesActual(): void {
-    this.cargarResumen(this.currentAnio(), this.currentMes());
-    this.cargarCalendario(this.currentAnio(), this.currentMes());
+    this.cargarResumen(this.currentAnio(), this.currentMes(), this.idEmpleadoConsultado, this.idProyectoResumen);
+    this.cargarCalendario(this.currentAnio(), this.currentMes(), this.idEmpleadoConsultado);
   }
 }

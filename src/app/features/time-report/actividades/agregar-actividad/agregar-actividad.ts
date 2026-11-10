@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
@@ -170,12 +171,17 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
         const act = this.data?.actividad;
         this.esEdicion = !!act;
+        // sm - El líder completa a nombre del colaborador y solo en el proyecto de la fila de Seguimiento.
+        const registroLider = this.data?.registroLider;
 
         const defaultDate = this.parseLocal(act ? act.fechaactividad : (this.data?.fecha || new Date()));
 
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, [Validators.required, this.autocompleteValidator(this.tiposActividad)]],
-            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, [Validators.required, this.autocompleteValidator(this.proyectos)]],
+            proyectoId: [
+                act && act.idproyecto ? String(act.idproyecto) : (registroLider ? String(registroLider.proyecto.id) : null),
+                [Validators.required, this.autocompleteValidator(this.proyectos)]
+            ],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
             fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]],
@@ -189,6 +195,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             notas: [act ? act.notas : ''],
             esbillable: [act ? act.esbillable : true]
         });
+
+        if (registroLider) this.form.get('proyectoId')?.disable({ emitEvent: false });
 
         // Listen for autocomplete search typing/value changes
         this.form.get('proyectoId')?.valueChanges.subscribe(val => {
@@ -447,7 +455,9 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             });
 
         // Proyectos
-        this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`)
+        // sm - El líder no usa la lista de la sesión (sus propios proyectos), sino el proyecto y la vigencia del colaborador.
+        const registroLider = this.data?.registroLider;
+        (registroLider ? of([registroLider.proyecto]) : this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`))
             .subscribe({
                 next: (res) => {
                     if (res) {
@@ -612,7 +622,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             ...rawValue,
             fechaActividad: this.formatFecha(rawValue.fechaActividad),
             fechaInicio: this.formatFecha(rawValue.fechaInicio),
-            fechaFin: this.formatFecha(rawValue.fechaFin)
+            fechaFin: this.formatFecha(rawValue.fechaFin),
+            idEmpleado: this.data?.registroLider?.idEmpleado
         };
         this.errorGuardar = null;
         this.guardando = true;
@@ -632,6 +643,6 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 this.guardadoParcial = guardadas > 0;
             });
         }
-        // this.dialogRef.close(); // sm - ahora se cierra solo cuando el backend confirma que se guardó
+        // sm - El diálogo se cierra solo cuando el backend confirma que se guardó (ver alGuardar arriba).
     }
 }

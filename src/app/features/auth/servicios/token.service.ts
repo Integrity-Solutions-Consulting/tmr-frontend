@@ -168,29 +168,19 @@ export class TokenService {
 
   // Módulos
   getUserModules(): string[] {
-    // ✅ CAMBIO: Obtener módulos del servicio en memoria, no de localStorage
     return this.userModulesService.getModules();
   }
 
   setUserModules(modules: string[]): void {
-    // ✅ CAMBIO: Guardar módulos en el servicio en memoria, no en localStorage
     this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
   }
 
   hasModule(moduleName: string): boolean {
     if (this.isAdmin()) return true;
-    // ✅ CAMBIO: Usar el método del servicio en memoria
     return this.userModulesService.hasModule(moduleName);
   }
 
   removeModules(): void {
-    // ✅ CAMBIO: Limpiar módulos del servicio en memoria, no de localStorage
     this.userModulesService.clearModules();
-  }
-
-  clearToken(): void {
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.USER_KEY);
-    this.removeModules();
   }
 }
