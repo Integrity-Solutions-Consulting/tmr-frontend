@@ -113,8 +113,8 @@
             </td>
             <td>
               <div class="actions-cell">
-                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="abrirVistaFormulario(item)" aria-label="Ver solicitud y notificaciones">Ver</button>
-                @if (item.estado === 'CONFIRMADO_LIDER') {
+                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" (click)="item.estado === 'CONFIRMADO_LIDER' ? abrirModalValidacion(item) : abrirVistaFormulario(item)" aria-label="Revisar solicitud">Revisar</button>
+                @if (false && item.estado === 'CONFIRMADO_LIDER') {
                   <button
                     type="button"
                     class="btn-tmr btn-tmr--primary btn-tmr--sm"
