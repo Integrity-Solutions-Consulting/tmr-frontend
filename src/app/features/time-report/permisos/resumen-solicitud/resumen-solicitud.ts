@@ -9,7 +9,7 @@ export class ResumenSolicitudComponent {
  @Input() proyecto = '';
  @Input() estado = '';
  @Input() adjuntos: AdjuntoPermisoApi[] = [];
- readonly completo = signal(false);
+ readonly completo = signal(true);
  readonly descargando = signal(false);
  private readonly api = inject(PermisosApiService);
  private readonly toast = inject(NotificacionToastService);

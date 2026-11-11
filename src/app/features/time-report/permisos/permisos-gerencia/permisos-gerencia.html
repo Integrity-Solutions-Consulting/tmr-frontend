@@ -160,7 +160,7 @@
               />
             </td>
             <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.folio }}</span></td>
-            <td><strong>{{ item.tipo }}</strong><details class="solicitud-detalle"><summary>Ver detalles</summary><p>{{ item.cliente }} · {{ item.proyecto }}</p><p>Líder: {{ item.liderNombre }}</p><p>{{ item.motivo }}</p></details></td>
+            <td><strong>{{ item.tipo }}</strong><span class="table-secondary">{{ item.proyecto || item.cliente || 'Sin proyecto' }}</span></td>
             <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }} · {{ item.horasSolicitadas }}</span></td>
             <td class="estado-column">
               <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
@@ -176,7 +176,7 @@
                   title="Ver solicitud"
                   [attr.aria-label]="'Ver solicitud de ' + item.folio"
                 >
-                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                  Revisar
                 </button>
               </div>
             </td>

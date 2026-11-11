@@ -124,7 +124,7 @@
           <th>Duración</th>
 
           <th class="estado-column">Estado</th>
-          <th style="text-align: right;">PDF</th>
+          <th style="text-align: right;">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -142,7 +142,7 @@
                     </span>
                   }
                 </span>
-                <details class="solicitud-detalle"><summary>Ver detalles</summary><p>{{ item.cliente }} · {{ item.proyecto }}</p><p>Líder: {{ item.lider }}</p></details>
+
               </div>
             </td>
             <td>
@@ -165,8 +165,8 @@
             </td>
             <td>
               <div class="actions-cell">
-                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="verFormulario(item)" title="Consultar y Descargar PDF">
-                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="verFormulario(item)" title="Revisar detalle de la solicitud">
+                  Revisar
                 </button>
               </div>
             </td>
@@ -497,7 +497,7 @@
         <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estadoTexto" [adjuntos]="sel.adjuntos || []" />
         <div class="modal-footer">
           <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
-          <button type="button" class="btn-tmr btn-tmr--primary" (click)="verFormulario(sel)"><span class="material-symbols-outlined">download</span>Descargar PDF oficial</button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdfSeleccionado(sel)"><span class="material-symbols-outlined">download</span>Descargar PDF oficial</button>
         </div>
       </div>
     }
