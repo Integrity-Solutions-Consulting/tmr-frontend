@@ -405,7 +405,8 @@ export class MisPermisosComponent implements OnInit {
         }
 
         if (Array.isArray(ctx.proyectosAsignados)) {
-          const opciones = ctx.proyectosAsignados.map((p, idx) => {
+          const soloPropios = ctx.proyectosAsignados.filter((p) => p.esAsignacionPropia !== false);
+          const opciones = soloPropios.map((p, idx) => {
             const cli = (p.clienteNombre ?? '').trim();
             const proy = (p.proyectoNombre ?? '').trim();
             const etiqueta =

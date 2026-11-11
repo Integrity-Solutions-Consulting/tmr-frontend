@@ -384,11 +384,13 @@
 
         </div>
 
+        @if (opcionesCliente().length > 1 || (opcionesCliente().length === 1 && !clienteActualForm()?.liderNombre)) {
         <div class="solicitud-asignacion">
 
           <div class="permiso-section__body">
 
             <div class="permiso-asignacion">
+              @if (opcionesCliente().length > 1) {
               <div class="permiso-field">
                 <label for="cliente-proyecto"
                   >Cliente / Proyecto <span aria-hidden="true">*</span></label
@@ -456,6 +458,7 @@
                   }
                 </div>
               </div>
+              }
               <div class="permiso-field" [hidden]="!!clienteActualForm()?.liderNombre">
                 <span id="jefe-label">Jefe inmediato <span aria-hidden="true">*</span></span>
                 @if (clienteActualForm()?.liderNombre; as liderAuto) {
@@ -491,6 +494,7 @@
             </div>
           </div>
         </div>
+        }
 
 
       </div>
