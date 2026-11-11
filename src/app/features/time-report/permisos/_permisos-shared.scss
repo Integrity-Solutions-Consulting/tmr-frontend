@@ -404,7 +404,7 @@
     }
   }
 
-  .form-field {
+  .form-field { &:not(:has(*)) { display: none; }
     display: flex;
     flex-direction: column;
     gap: 5px;

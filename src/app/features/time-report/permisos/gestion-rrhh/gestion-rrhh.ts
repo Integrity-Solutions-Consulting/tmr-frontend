@@ -1,4 +1,4 @@
-import { EnviosPermisoComponent } from '../envios-permiso/envios-permiso';
+
 import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
@@ -83,7 +83,7 @@ export interface SolicitudRrhh {
     TarjetaResumenComponent,
     ModalBase,
     ResumenSolicitudComponent,
-    EnviosPermisoComponent,
+
   ],
   templateUrl: './gestion-rrhh.html',
   styleUrl: './gestion-rrhh.scss',
