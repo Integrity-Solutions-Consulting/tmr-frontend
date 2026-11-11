@@ -218,7 +218,7 @@
                   }
                 </select>
                 @if (esPermisoInformativoForm()) {
-                  <small class="permiso-info-copy">Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa al Líder y a RRHH.</small>
+                  <small class="permiso-info-copy">{{ opcionesCliente().length > 0 ? 'Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa al Líder y a RRHH.' : 'Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa directamente a RRHH.' }}</small>
                 }
               </div>
           <section class="permiso-section" aria-labelledby="fechas-titulo">

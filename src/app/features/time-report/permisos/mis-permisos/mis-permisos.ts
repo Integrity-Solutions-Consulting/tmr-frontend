@@ -844,7 +844,7 @@ export class MisPermisosComponent implements OnInit {
     if (cli?.idLider) {
       return cli.idLider;
     }
-    return this.opcionesLider()[this.indiceLiderForm()]?.idLider ?? null;
+    return this.opcionesCliente().length > 0 ? (this.opcionesLider()[this.indiceLiderForm()]?.idLider ?? null) : null;
   }
 
   obtenerRrhhActualForm(): RrhhDisponiblePermisoApi | null {
@@ -985,7 +985,7 @@ export class MisPermisosComponent implements OnInit {
     }
 
     const clienteOpt = this.clienteActualForm();
-    if (!clienteOpt) {
+    if (this.opcionesCliente().length > 0 && !clienteOpt) {
       this.toast.error(
         'Cliente / Proyecto requerido',
         'Selecciona un Cliente / Proyecto activo para continuar.',
@@ -1007,8 +1007,8 @@ export class MisPermisosComponent implements OnInit {
     this.permisosApi
       .crearSolicitud(
         {
-          idProyecto: clienteOpt.idProyecto,
-          idCliente: clienteOpt.idCliente,
+          idProyecto: clienteOpt?.idProyecto ?? null,
+          idCliente: clienteOpt?.idCliente ?? null,
           idLider: this.obtenerIdLiderActualForm(),
           tipoOficial: this.tipoSeleccionado(),
           fechaInicio: this.fechaInicioForm(),
