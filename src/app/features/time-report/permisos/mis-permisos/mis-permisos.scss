@@ -715,4 +715,22 @@
   .permiso-asignacion { grid-template-columns: 1fr; }
   .modal-footer { margin: 0; padding-top: 12px; position: static; }
   @media(max-width:480px) { .permiso-fechas { grid-template-columns: 1fr 1fr; } }
+  .permiso-info-copy { display: block; margin-top: 2px; padding: 6px 10px; border-radius: 6px; background: #eff6ff; color: #1e40af; font-size: 12px; line-height: 1.35; }
+  .isc-upload-container { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .isc-upload-dropzone {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px;
+    border: 1px dashed #bfcbda; border-radius: 7px; background: #fff; font-size: 12.5px; color: #667085; cursor: pointer;
+    transition: border-color 150ms ease, background-color 150ms ease;
+    &:hover { border-color: #2c63a9; background: #fafcff; }
+    &:focus-within { outline: 2px solid #eef4fc; border-color: #2c63a9; }
+    &__left { display: inline-flex; align-items: center; gap: 6px; min-width: 0; strong { color: #2c63a9; font-weight: 600; } }
+    &__req { color: #dc2626; font-weight: 600; }
+    &__opt { color: #667085; font-weight: 400; }
+    &__right { margin-left: auto; font-size: 12px; color: #667085; white-space: nowrap; }
+  }
+  .isc-upload-bar__files-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0; }
+  .isc-upload-bar__file { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #172c4d; font-size: 12px; max-width: 100%; }
+  .isc-upload-bar__file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
+  .isc-combobox__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; user-select: none; &-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+  .isc-combobox__chevron { color: #667085; }
 }

@@ -124,7 +124,11 @@ export class GestionRrhhComponent implements OnInit {
     this.apiService.obtenerBandejaRrhh().subscribe({
       next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
-          this.solicitudes.set(res.data.map((item) => this.mapearDesdeApi(item)));
+          const mapeadas = res.data.map((item) => this.mapearDesdeApi(item));
+          this.solicitudes.set(mapeadas);
+          if (this.tabActiva() === 'POR_CONFIRMAR' && !mapeadas.some((s) => s.estado === 'CONFIRMADO_LIDER') && mapeadas.some((s) => s.estado !== 'CONFIRMADO_LIDER' && s.estado !== 'PENDIENTE_LIDER_EXT')) {
+            this.tabActiva.set('HISTORIAL');
+          }
         }
       },
       error: (err) => {

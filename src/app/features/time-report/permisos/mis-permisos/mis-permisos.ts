@@ -172,9 +172,9 @@ export class MisPermisosComponent implements OnInit {
     { codigo: 'OTROS', nombre: 'Otros' },
   ];
   readonly horarioSeleccionado = signal<HorarioPermisoOficial>('COMPLETA');
-  readonly detalleHorarioForm = signal('Jornada completa (08:30 - 17:30)');
-  readonly horaInicioOtrosForm = signal('09:00');
-  readonly horaFinOtrosForm = signal('11:00');
+  readonly detalleHorarioForm = signal('08:30 - 17:30');
+  readonly horaInicioOtrosForm = signal('08:30');
+  readonly horaFinOtrosForm = signal('17:30');
   readonly diasDisponiblesNumero = signal(15);
   readonly fechaInicioForm = signal(new Date().toISOString().slice(0, 10));
   readonly fechaFinForm = signal(new Date().toISOString().slice(0, 10));
@@ -212,8 +212,8 @@ export class MisPermisosComponent implements OnInit {
     const iniStr = match ? `${match[1].padStart(2, '0')}:${match[2]}` : this.horaInicioOtrosForm();
     const finStr = match ? `${match[3].padStart(2, '0')}:${match[4]}` : this.horaFinOtrosForm();
 
-    const [hIni, mIni] = (iniStr || '09:00').split(':').map(Number);
-    const [hFin, mFin] = (finStr || '11:00').split(':').map(Number);
+    const [hIni, mIni] = (iniStr || '08:30').split(':').map(Number);
+    const [hFin, mFin] = (finStr || '17:30').split(':').map(Number);
     if (
       Number.isNaN(hIni) ||
       Number.isNaN(mIni) ||
@@ -236,7 +236,7 @@ export class MisPermisosComponent implements OnInit {
     }
 
     const horas = Math.round((minutosEfectivos / 60) * 100) / 100;
-    return horas >= 0.5 && horas < 8 ? horas : 0;
+    return horas >= 0.5 && horas <= 8 ? horas : 0;
   });
 
   readonly diasCalculadosForm = computed(() => {
@@ -245,7 +245,7 @@ export class MisPermisosComponent implements OnInit {
       return 0.5;
     }
     const diasBase = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
-    if (horario === 'OTROS') {
+    if (horario === 'OTROS' || horario === 'COMPLETA') {
       const horasPorDia = this.horasPorDiaOtrosForm();
       return Math.round(((horasPorDia * diasBase) / 8) * 100) / 100;
     }
@@ -258,7 +258,7 @@ export class MisPermisosComponent implements OnInit {
       return 4;
     }
     const diasBase = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
-    if (horario === 'OTROS') {
+    if (horario === 'OTROS' || horario === 'COMPLETA') {
       return Math.round(this.horasPorDiaOtrosForm() * diasBase * 100) / 100;
     }
     return diasBase * 8;
@@ -267,7 +267,12 @@ export class MisPermisosComponent implements OnInit {
   readonly excedeSaldoVacacionesForm = computed(
     () =>
       this.tipoSeleccionado() === 'VACACIONES' &&
-      this.diasCalculadosForm() > this.diasDisponiblesNumero(),
+      (this.diasCalculadosForm() > this.diasDisponiblesNumero() || this.diasCalculadosForm() > 15),
+  );
+  readonly esPermisoInformativoForm = computed(() =>
+    ['CITAS_MEDICAS', 'CALAMIDAD_DOMESTICA', 'ACCIDENTE', 'FALLECIMIENTO_FAMILIAR'].includes(
+      this.tipoSeleccionado(),
+    ),
   );
 
   // RF-004: Colaborador en nómina con licencia por enfermedad > 1 día requiere certificado médico obligatorio
@@ -293,7 +298,7 @@ export class MisPermisosComponent implements OnInit {
     const dias = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
     const horas = this.horasCalculadasForm();
     const textoDias = dias === 1 ? '1 día laborable' : `${dias} días laborables`;
-    if (jornada === 'OTROS') return `${this.formatearDuracionEnHoras(horas)} en ${textoDias}`;
+    if (this.horasPorDiaOtrosForm() > 0 && this.horasPorDiaOtrosForm() < 8) return `${this.formatearDuracionEnHoras(horas)} en ${textoDias}`;
     return `${textoDias} · ${this.formatearDuracionEnHoras(horas)}`;
   });
 
@@ -554,6 +559,10 @@ export class MisPermisosComponent implements OnInit {
 
   abrirNuevaSolicitud(): void {
     this.archivosEvidencia.set([]);
+    this.horaInicioOtrosForm.set('08:30');
+    this.horaFinOtrosForm.set('17:30');
+    this.detalleHorarioForm.set('08:30 - 17:30');
+    this.horarioSeleccionado.set('COMPLETA');
     this.comboboxClienteAbierto.set(false);
     this.selectorRrhhAbierto.set(false);
     this.busquedaClienteProyecto.set('');
@@ -565,13 +574,13 @@ export class MisPermisosComponent implements OnInit {
 
   abrirBuscadorCliente(): void {
     this.busquedaClienteProyecto.set('');
-    this.comboboxClienteAbierto.set(true);
+    this.comboboxClienteAbierto.update((v) => !v);
   }
 
   alEscribirBusquedaCliente(valor: string): void {
     this.busquedaClienteProyecto.set(valor);
     if (!this.comboboxClienteAbierto()) {
-      this.comboboxClienteAbierto.set(true);
+      this.comboboxClienteAbierto.update((v) => !v);
     }
   }
 
@@ -717,15 +726,17 @@ export class MisPermisosComponent implements OnInit {
   }
 
   cambiarHoraInicioOtros(valor: string): void {
-    const limpio = valor || '09:00';
+    const limpio = valor || '08:30';
     this.horaInicioOtrosForm.set(limpio);
     this.detalleHorarioForm.set(`${limpio} - ${this.horaFinOtrosForm()}`);
+    this.horarioSeleccionado.set(this.horasPorDiaOtrosForm() >= 8 ? 'COMPLETA' : 'OTROS');
   }
 
   cambiarHoraFinOtros(valor: string): void {
-    const limpio = valor || '11:00';
+    const limpio = valor || '17:30';
     this.horaFinOtrosForm.set(limpio);
     this.detalleHorarioForm.set(`${this.horaInicioOtrosForm()} - ${limpio}`);
+    this.horarioSeleccionado.set(this.horasPorDiaOtrosForm() >= 8 ? 'COMPLETA' : 'OTROS');
   }
 
   alSeleccionarArchivoEvidencia(event: Event): void {
@@ -780,6 +791,10 @@ export class MisPermisosComponent implements OnInit {
   quitarArchivoEvidencia(index?: number): void {
     if (index === undefined) {
       this.archivosEvidencia.set([]);
+    this.horaInicioOtrosForm.set('08:30');
+    this.horaFinOtrosForm.set('17:30');
+    this.detalleHorarioForm.set('08:30 - 17:30');
+    this.horarioSeleccionado.set('COMPLETA');
       return;
     }
     this.archivosEvidencia.update((lista) => lista.filter((_, i) => i !== index));
@@ -953,10 +968,10 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
-    if (this.horarioSeleccionado() === 'OTROS' && this.horasPorDiaOtrosForm() <= 0) {
+    if (this.horasPorDiaOtrosForm() <= 0) {
       this.toast.error(
         'Horario por horas inválido',
-        'Revisa el horario: elige horas dentro de la jornada laboral, con la hora de fin posterior al inicio. El permiso debe durar entre 30 minutos y 7 horas y 30 minutos.',
+        'Revisa el horario: elige horas dentro de la jornada laboral, con la hora de fin posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.',
       );
       return;
     }
@@ -999,7 +1014,7 @@ export class MisPermisosComponent implements OnInit {
           fechaInicio: this.fechaInicioForm(),
           fechaFin: this.fechaFinForm(),
           fechaRegreso: this.fechaRegresoForm(),
-          horario: this.horarioSeleccionado(),
+          horario: this.horasPorDiaOtrosForm() >= 8 ? 'COMPLETA' : 'OTROS',
           detalleHorario: this.detalleHorarioForm(),
           totalDias: this.diasCalculadosForm(),
           totalHoras: this.horasCalculadasForm(),
@@ -1022,6 +1037,10 @@ export class MisPermisosComponent implements OnInit {
           const nuevo = this.mapearDesdeApi(res.data);
           this.solicitudes.update((lista) => [nuevo, ...lista]);
           this.archivosEvidencia.set([]);
+    this.horaInicioOtrosForm.set('08:30');
+    this.horaFinOtrosForm.set('17:30');
+    this.detalleHorarioForm.set('08:30 - 17:30');
+    this.horarioSeleccionado.set('COMPLETA');
           this.motivoForm.set('');
           this.modalNuevaVisible.set(false);
           this.cargarDatosBackend();

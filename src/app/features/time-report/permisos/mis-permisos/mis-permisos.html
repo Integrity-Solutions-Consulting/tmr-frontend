@@ -81,6 +81,8 @@
           <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
           <option value="MATERNIDAD">Maternidad</option>
           <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+          <option value="CALAMIDAD_DOMESTICA">Calamidad doméstica</option>
+          <option value="ACCIDENTE">Accidente</option>
           <option value="OTROS">Otros</option>
         }
       </select>
@@ -210,9 +212,14 @@
                     <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
                     <option value="MATERNIDAD">Maternidad</option>
                     <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+                    <option value="CALAMIDAD_DOMESTICA">Calamidad doméstica</option>
+                    <option value="ACCIDENTE">Accidente</option>
                     <option value="OTROS">Otros</option>
                   }
                 </select>
+                @if (esPermisoInformativoForm()) {
+                  <small class="permiso-info-copy">Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa al Líder y a RRHH.</small>
+                }
               </div>
           <section class="permiso-section" aria-labelledby="fechas-titulo">
             <h3 id="fechas-titulo" class="permiso-section__title">Fechas y horario</h3>
@@ -238,86 +245,54 @@
                     name="fechaFinSolicitud"
                     class="isc-inline-date"
                     [min]="fechaInicioForm()"
-                    [max]="horarioSeleccionado() === 'MANANA' || horarioSeleccionado() === 'TARDE' ? fechaInicioForm() : null"
                     [ngModel]="fechaFinForm()"
                     (ngModelChange)="cambiarFechaFinForm($event)"
                   />
                 </div>
 
               </div>
-              <fieldset class="permiso-jornada">
-                <legend>Jornada</legend>
-                <div class="permiso-jornada__opciones">
-                  @for (opcion of opcionesHorario; track opcion.codigo) {
-                    <label
-                      class="permiso-jornada__opcion"
-                      [class.is-selected]="horarioSeleccionado() === opcion.codigo"
-                    >
-                      <input
-                        type="radio"
-                        name="jornadaSolicitud"
-                        [value]="opcion.codigo"
-                        [ngModel]="horarioSeleccionado()"
-                        (ngModelChange)="seleccionarHorarioForm($event)"
-                      />
-                      <span>{{ opcion.nombre }}</span>
-                    </label>
-                  }
+              <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                <div class="permiso-field">
+                  <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
+                  <input
+                    id="hora-inicio-otros"
+                    type="time"
+                    name="horaInicioOtros"
+                    min="07:00"
+                    max="18:00"
+                    step="900"
+                    class="isc-inline-date"
+                    [ngModel]="horaInicioOtrosForm()"
+                    (ngModelChange)="cambiarHoraInicioOtros($event)"
+                  />
                 </div>
-              </fieldset>
-              @if (horarioSeleccionado() === 'OTROS') {
-                <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                  <div class="permiso-field">
-                    <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
-                    <input
-                      id="hora-inicio-otros"
-                      type="time"
-                      name="horaInicioOtros"
-                      min="07:00"
-                      max="18:00"
-                      step="900"
-                      class="isc-inline-date"
-                      [ngModel]="horaInicioOtrosForm()"
-                      (ngModelChange)="cambiarHoraInicioOtros($event)"
-                    />
-                  </div>
-                  <div class="permiso-field">
-                    <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
-                    <input
-                      id="hora-fin-otros"
-                      type="time"
-                      name="horaFinOtros"
-                      min="07:30"
-                      max="19:00"
-                      step="900"
-                      class="isc-inline-date"
-                      [ngModel]="horaFinOtrosForm()"
-                      (ngModelChange)="cambiarHoraFinOtros($event)"
-                    />
-                  </div>
+                <div class="permiso-field">
+                  <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
+                  <input
+                    id="hora-fin-otros"
+                    type="time"
+                    name="horaFinOtros"
+                    min="07:30"
+                    max="19:00"
+                    step="900"
+                    class="isc-inline-date"
+                    [ngModel]="horaFinOtrosForm()"
+                    (ngModelChange)="cambiarHoraFinOtros($event)"
+                  />
                 </div>
-                @if (horasPorDiaOtrosForm() <= 0) {
-                  <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
-                    <strong>Revisa el horario:</strong> elige horas dentro de la jornada laboral y asegúrate de que la hora de fin sea posterior al inicio. El permiso debe durar entre 30 minutos y 7 horas y 30 minutos.
-                  </p>
-                } @else {
-                  <p class="permiso-ayuda">Horario elegido: {{ detalleHorarioForm() }} · {{ textoHorasPorDiaOtrosForm() }} por día</p>
-                }
-              } @else {
-                <p class="permiso-ayuda">{{ detalleHorarioForm() }}</p>
+              </div>
+              @if (horasPorDiaOtrosForm() <= 0) {
+                <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
+                  <strong>Revisa el horario:</strong> elige horas dentro de la jornada laboral y asegúrate de que la hora de fin sea posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.
+                </p>
               }
               <div class="permiso-duracion" aria-live="polite">
-                <span>
-                  Duración solicitada
-                  @if (tipoSeleccionado() === 'VACACIONES') {
-                    <small style="display: block; font-weight: 500;" [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : '#475569'">
-                      Disponible: {{ diasDisponiblesNumero() }} días
-                    </small>
-                  }
-                </span>
-                <strong [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : null"
-                  >{{ textoDuracionForm() }}</strong
-                >
+                <strong [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : null">{{ textoDuracionForm() }}</strong>
+                @if (tipoSeleccionado() === 'VACACIONES') {
+                  <span [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : '#475569'" style="font-weight: 500;">
+                    Quedan {{ diasDisponiblesNumero() }} de 15 días ({{ diasDisponiblesNumero() * 8 }} h)
+                  </span>
+                }
               </div>
             </div>
           </section>
@@ -337,8 +312,8 @@
                   (ngModelChange)="motivoForm.set($event)"
                 ></textarea>
               </div>
-              <div class="isc-upload-bar">
-                <label class="isc-upload-bar__trigger">
+              <div class="isc-upload-container">
+                <label class="isc-upload-dropzone">
                   <input
                     type="file"
                     name="evidencia"
@@ -347,13 +322,16 @@
                     class="isc-upload-bar__input-sr"
                     (change)="alSeleccionarArchivoEvidencia($event)"
                   />
-                  <span class="material-symbols-outlined" aria-hidden="true">cloud_upload</span>
-                  <span
-                    >Adjuntar respaldos
+                  <span class="isc-upload-dropzone__left">
+                    <span aria-hidden="true">📎</span>
+                    <strong>Adjuntar documento</strong>
                     @if (requiereCertificadoMedicoObligatorio()) {
-                      <strong style="color: #dc2626">* Obligatorio</strong>
+                      <span class="isc-upload-dropzone__req">· obligatorio</span>
+                    } @else {
+                      <span class="isc-upload-dropzone__opt">· opcional</span>
                     }
                   </span>
+                  <span class="isc-upload-dropzone__right">PDF, JPG o PNG · 5 MB</span>
                 </label>
 
                 @if (archivosEvidencia().length > 0) {
@@ -361,7 +339,7 @@
                     @for (file of archivosEvidencia(); track file.name + file.size; let idx = $index) {
                       <span class="isc-upload-bar__file">
                         <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
-                        <span [title]="file.name">{{ file.name }}</span>
+                        <span class="isc-upload-bar__file-name" [title]="file.name">{{ file.name }}</span>
                         <button
                           type="button"
                           class="isc-upload-bar__remove"
@@ -374,8 +352,6 @@
                       </span>
                     }
                   </div>
-                } @else {
-                  <span class="isc-upload-bar__hint">Hasta 5 archivos (PDF, JPG o PNG · Máx. 15 MB c/u)</span>
                 }
               </div>
             </div>
@@ -397,27 +373,21 @@
                 >
                 <div class="isc-combobox">
                   <div class="isc-combobox__control">
-                    <span class="material-symbols-outlined isc-combobox__icon">search</span>
-                    <input
-                      type="text"
+                    <button
+                      type="button"
                       id="cliente-proyecto"
-                      name="clienteProyectoBusqueda"
-                      class="isc-inline-input isc-combobox__input"
-                      placeholder="Buscar cliente o proyecto..."
-                      autocorrect="off"
-                      autocapitalize="off"
-                      spellcheck="false"
+                      class="isc-inline-input isc-combobox__trigger"
                       role="combobox"
-                      aria-label="Buscar cliente o proyecto"
+                      aria-label="Seleccionar cliente o proyecto"
                       aria-controls="proyectos-opciones"
                       [attr.aria-expanded]="comboboxClienteAbierto()"
-                      [ngModel]="valorInputClienteProyecto()"
-                      (focus)="abrirBuscadorCliente()"
                       (click)="abrirBuscadorCliente()"
-                      (ngModelChange)="alEscribirBusquedaCliente($event)"
                       (keydown)="alTeclaBuscadorCliente($event)"
                       (blur)="cerrarBuscadorClienteConRetardo()"
-                    />
+                    >
+                      <span class="isc-combobox__trigger-text">{{ clienteActualForm()?.etiqueta || 'Seleccionar cliente o proyecto' }}</span>
+                      <span class="material-symbols-outlined isc-combobox__chevron" aria-hidden="true">expand_more</span>
+                    </button>
                   </div>
 
                   @if (comboboxClienteAbierto()) {
