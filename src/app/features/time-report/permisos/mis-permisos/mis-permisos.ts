@@ -298,7 +298,7 @@ export class MisPermisosComponent implements OnInit {
     const dias = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
     const horas = this.horasCalculadasForm();
     const textoDias = dias === 1 ? '1 día laborable' : `${dias} días laborables`;
-    if (this.horasPorDiaOtrosForm() > 0 && this.horasPorDiaOtrosForm() < 8) return `${this.formatearDuracionEnHoras(horas)} en ${textoDias}`;
+    const minTot = Math.round(horas * 60), dEnt = Math.floor(minTot / 480), mRest = minTot % 480; if (dEnt === 0) return this.formatearDuracionEnHoras(horas); if (mRest > 0) return `${dEnt} ${dEnt === 1 ? 'día' : 'días'} y ${this.formatearDuracionEnHoras(mRest / 60)}`;
     return `${textoDias} · ${this.formatearDuracionEnHoras(horas)}`;
   });
 

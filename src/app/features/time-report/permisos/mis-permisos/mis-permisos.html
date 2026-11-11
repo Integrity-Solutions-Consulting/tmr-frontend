@@ -152,7 +152,7 @@
             <td>
               <div class="cell-stack">
                 <span class="cell-primary">{{ item.diasSolicitados }}</span>
-                <span class="cell-sub">{{ item.horasSolicitadas }}</span>
+                @if (!item.diasSolicitados.includes('hora') && !item.diasSolicitados.includes('min')) { <span class="cell-sub">{{ item.horasSolicitadas }}</span> }
               </div>
             </td>
 

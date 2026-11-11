@@ -87,7 +87,7 @@
           <tr>
             <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.codigo }}</span></td>
             <td><strong>{{ item.tipo }}</strong><span class="table-secondary">{{ item.proyecto || item.cliente || 'Sin proyecto' }}</span></td>
-            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }} · {{ item.horasSolicitadas }}</span></td>
+            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }}</span></td>
             <td class="estado-column">
               <span [class]="obtenerClaseEstado(item.estado)">
                 {{ item.estado }}
@@ -123,7 +123,7 @@
       <div class="modal-form">
         <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estado" [adjuntos]="sel.adjuntos || []" />
         @if (sel.traslapeAlerta) { <p class="revision-alerta" role="alert">{{ sel.traslapeAlerta }}</p> }
-        @if (verDetalle()) {
+        @if ( false && verDetalle()) {
           <dl class="revision-datos">
             <div><dt>Código</dt><dd>{{ sel.codigo }}</dd></div>
             <div><dt>Colaborador</dt><dd>{{ sel.colaborador }} · {{ sel.cedula }}</dd></div>

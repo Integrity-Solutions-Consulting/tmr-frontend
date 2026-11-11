@@ -110,7 +110,7 @@
           <tr>
             <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.folio }}</span></td>
             <td><strong>{{ item.tipo }}</strong><span class="table-secondary">{{ item.proyecto || item.cliente || 'Sin proyecto' }}</span></td>
-            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }} · {{ item.horasEquivalentes }} h</span></td>
+            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }}</span></td>
             <td class="estado-column">
               <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
                 {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
