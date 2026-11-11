@@ -118,25 +118,14 @@
             </td>
             <td>
               <div class="actions-cell">
-                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" (click)="item.estado === 'CONFIRMADO_LIDER' ? abrirModalValidacion(item) : abrirVistaFormulario(item)" aria-label="Revisar solicitud">Revisar</button>
-                @if (false && item.estado === 'CONFIRMADO_LIDER') {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--primary btn-tmr--sm"
-                    (click)="abrirModalValidacion(item)"
-                  >
-                    Revisar
-                  </button>
-                } @else if (item.estado === 'PENDIENTE_LIDER_EXT') {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
-                    (click)="reenviarEnlaceExterno(item)"
-                    title="Reenviar Magic Link"
-                  >
-                    Reenviar
-                  </button>
-                }
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--primary btn-tmr--sm"
+                  (click)="item.estado === 'CONFIRMADO_LIDER' ? abrirModalValidacion(item) : abrirVistaFormulario(item)"
+                  aria-label="Revisar solicitud"
+                >
+                  Revisar
+                </button>
               </div>
             </td>
           </tr>
@@ -161,20 +150,7 @@
     <div class="modal-form">
       <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
 
-
       <div class="form-row">
-        <div class="form-field">
-        @if (false) { <div class="form-field"><label>Impacto en Time Report</label>
-          <select
-            [ngModel]="impactoSeleccionado()"
-            (ngModelChange)="impactoSeleccionado.set($event)"
-          >
-            <option value="RESTA_META">Restar {{ sol.horasEquivalentes }} h de la meta del período</option>
-            <option value="SUMA_REPORTADAS">Acreditar {{ sol.horasEquivalentes }} h justificadas</option>
-            <option value="SIN_IMPACTO">Sin impacto en meta de horas</option>
-          </select></div> }
-        </div>
-
         <div class="form-field">
           <label>Observaciones</label>
           <input
@@ -232,7 +208,6 @@
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
       <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
-
       <div class="modal-footer">
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
           Cerrar

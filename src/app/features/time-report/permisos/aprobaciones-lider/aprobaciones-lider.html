@@ -95,9 +95,6 @@
             </td>
             <td>
               <div class="actions-cell">
-                @if (false && item.estado === 'Pendiente') {
-                  <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" [disabled]="procesandoDecision()" (click)="aprobarDesdeTabla(item)">Aprobar</button>
-                }
                 <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" [disabled]="procesandoDecision()" (click)="abrirRevision(item)">
                   Revisar
                 </button>
@@ -123,16 +120,6 @@
       <div class="modal-form">
         <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estado" [adjuntos]="sel.adjuntos || []" />
         @if (sel.traslapeAlerta) { <p class="revision-alerta" role="alert">{{ sel.traslapeAlerta }}</p> }
-        @if ( false && verDetalle()) {
-          <dl class="revision-datos">
-            <div><dt>Código</dt><dd>{{ sel.codigo }}</dd></div>
-            <div><dt>Colaborador</dt><dd>{{ sel.colaborador }} · {{ sel.cedula }}</dd></div>
-            <div><dt>Cargo</dt><dd>{{ sel.cargo }}</dd></div>
-            <div><dt>Cliente / Proyecto</dt><dd>{{ sel.cliente }} · {{ sel.proyecto }}</dd></div>
-            <div><dt>Jornada</dt><dd>{{ sel.fechas }}</dd></div>
-            <div><dt>Estado</dt><dd>{{ sel.estado }}</dd></div>
-          </dl>
-        }
 
         @if (sel.estado === 'Pendiente') {
         <div class="form-field">
