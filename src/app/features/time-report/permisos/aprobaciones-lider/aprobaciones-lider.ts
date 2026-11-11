@@ -1,3 +1,4 @@
+import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -137,6 +138,10 @@ export class AprobacionesLiderComponent implements OnInit {
       return true;
     });
   });
+
+  constructor() {
+    conectarEnlaceSolicitud(item => { this.abrirRevision(this.mapearDesdeApi(item)); });
+  }
 
   ngOnInit(): void {
     this.permisosApi.obtenerEquipo().subscribe({
@@ -351,7 +356,7 @@ export class AprobacionesLiderComponent implements OnInit {
 
         this.toast.info(
           `Solicitud ${actual.codigo} rechazada`,
-          'Registramos tu decisión y notificamos al colaborador.',
+          'Registramos tu decisión. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {

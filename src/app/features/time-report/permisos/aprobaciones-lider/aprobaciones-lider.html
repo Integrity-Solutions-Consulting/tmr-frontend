@@ -134,6 +134,7 @@
           </dl>
         }
 
+        @if (sel.estado === 'Pendiente') {
         <div class="form-field">
           <label for="comentario-revision">Comentario de revisión</label>
           <textarea
@@ -143,11 +144,15 @@
             placeholder="Comentario u observación..."></textarea>
         </div>
 
+        } @else {
+          <p role="status">Esta solicitud ya fue procesada. Puedes consultar el resultado.</p>
+        }
         <div class="modal-footer">
           <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf(sel)">
             <span class="material-symbols-outlined">download</span>
             Descargar PDF
           </button>
+          @if (sel.estado === 'Pendiente') {
           <button type="button" class="btn-tmr btn-tmr--warning" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('observar')">
             Observar
           </button>
@@ -157,6 +162,7 @@
           <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('aprobar')">
             Aprobar
           </button>
+          }
         </div>
       </div>
     }

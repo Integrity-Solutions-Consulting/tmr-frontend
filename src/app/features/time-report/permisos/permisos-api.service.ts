@@ -216,6 +216,15 @@ export function obtenerMensajeAmigablePermisos(
   return mensajeRespaldo;
 }
 
+export interface EnvioPermiso {
+  id: string; canal: string; destinatario: string; fecha: string; estado: string;
+  intentos: number; puedeReintentar: boolean; reintentadoPor?: string; fechaReintento?: string;
+}
+export interface HistorialEnviosPermiso {
+  envios: EnvioPermiso[];
+  campana: { id: number; titulo: string; leida: boolean; fechaCreacion: string }[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -244,6 +253,18 @@ export class PermisosApiService {
       message: 'OK',
       data: raw as T,
     };
+  }
+
+  obtenerSolicitud(id: number): Observable<ApiEnvelope<PermisoItemApi>> {
+    return this.http.get<unknown>(`${this.baseUrl}/${id}`).pipe(map(raw => this.normalizarEnvelope<PermisoItemApi>(raw)));
+  }
+
+  obtenerEnvios(id: number): Observable<ApiEnvelope<HistorialEnviosPermiso>> {
+    return this.http.get<unknown>(`${this.baseUrl}/${id}/envios`).pipe(map(raw => this.normalizarEnvelope<HistorialEnviosPermiso>(raw)));
+  }
+
+  reintentarEnvio(id: number, envio: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/${id}/envios/${encodeURIComponent(envio)}/reintentar`, {});
   }
 
   obtenerContexto(): Observable<ApiEnvelope<ContextoColaboradorPermisoApi>> {

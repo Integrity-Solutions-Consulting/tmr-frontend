@@ -113,6 +113,7 @@
             </td>
             <td>
               <div class="actions-cell">
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="abrirVistaFormulario(item)" aria-label="Ver solicitud y notificaciones">Ver</button>
                 @if (item.estado === 'CONFIRMADO_LIDER') {
                   <button
                     type="button"
@@ -129,15 +130,6 @@
                     title="Reenviar Magic Link"
                   >
                     Reenviar
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
-                    (click)="abrirVistaFormulario(item)"
-                    title="Ver PDF" aria-label="Ver documento PDF"
-                  >
-                    <span class="material-symbols-outlined">picture_as_pdf</span>
                   </button>
                 }
               </div>
@@ -163,6 +155,7 @@
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
       <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
+      <app-envios-permiso [solicitudId]="sol.id" />
 
       <div class="form-row">
         <div class="form-field">
@@ -234,6 +227,7 @@
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
       <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
+      <app-envios-permiso [solicitudId]="sol.id" />
       <div class="modal-footer">
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
           Cerrar

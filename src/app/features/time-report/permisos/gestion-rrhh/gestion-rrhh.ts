@@ -1,3 +1,5 @@
+import { EnviosPermisoComponent } from '../envios-permiso/envios-permiso';
+import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -81,6 +83,7 @@ export interface SolicitudRrhh {
     TarjetaResumenComponent,
     ModalBase,
     ResumenSolicitudComponent,
+    EnviosPermisoComponent,
   ],
   templateUrl: './gestion-rrhh.html',
   styleUrl: './gestion-rrhh.scss',
@@ -106,6 +109,12 @@ export class GestionRrhhComponent implements OnInit {
   readonly impactoSeleccionado = signal<'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO'>('RESTA_META');
 
   readonly solicitudes = signal<SolicitudRrhh[]>([]);
+
+  constructor() {
+    conectarEnlaceSolicitud(item => { const sol = this.mapearDesdeApi(item);
+      if (item.estadoClase === 'rrhh') this.abrirModalValidacion(sol);
+      else this.abrirVistaFormulario(sol); });
+  }
 
   ngOnInit(): void {
     this.cargarBandejaDesdeApi();

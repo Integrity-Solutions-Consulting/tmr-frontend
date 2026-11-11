@@ -164,7 +164,7 @@ export class RevisionExternaComponent implements OnInit {
         }
         this.toast.exito(
           '¡Gracias! Solicitud aprobada',
-          'Registramos tu aprobación y notificamos a Talento Humano y al colaborador.',
+          'Registramos tu aprobación. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {
@@ -226,7 +226,7 @@ export class RevisionExternaComponent implements OnInit {
         }
         this.toast.info(
           'Decisión registrada',
-          'Registramos tu respuesta y notificamos al colaborador y a Talento Humano.',
+          'Registramos tu respuesta. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {

@@ -1,3 +1,4 @@
+import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -277,12 +278,28 @@ export class MisPermisosComponent implements OnInit {
       this.diasCalculadosForm() > 1,
   );
 
-  readonly textoDiasForm = computed(() => {
-    const d = this.diasCalculadosForm();
-    return d === 1 ? '1 día laborable' : `${d} días laborables`;
+  private formatearDuracionEnHoras(horas: number): string {
+    const minutos = Math.round(horas * 60);
+    const horasEnteras = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+    if (horasEnteras === 0) return `${minutosRestantes} minutos`;
+    if (minutosRestantes === 0) return `${horasEnteras} ${horasEnteras === 1 ? 'hora' : 'horas'}`;
+    return `${horasEnteras} ${horasEnteras === 1 ? 'hora' : 'horas'} y ${minutosRestantes} minutos`;
+  }
+
+  readonly textoDuracionForm = computed(() => {
+    const jornada = this.horarioSeleccionado();
+    if (jornada === 'MANANA' || jornada === 'TARDE') return 'Medio día laborable · 4 horas';
+    const dias = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
+    const horas = this.horasCalculadasForm();
+    const textoDias = dias === 1 ? '1 día laborable' : `${dias} días laborables`;
+    if (jornada === 'OTROS') return `${this.formatearDuracionEnHoras(horas)} en ${textoDias}`;
+    return `${textoDias} · ${this.formatearDuracionEnHoras(horas)}`;
   });
 
-  readonly textoHorasForm = computed(() => `${this.horasCalculadasForm()} horas`);
+  readonly textoHorasPorDiaOtrosForm = computed(() =>
+    this.formatearDuracionEnHoras(this.horasPorDiaOtrosForm()),
+  );
 
   readonly solicitudes = signal<SolicitudColaborador[]>([]);
 
@@ -341,6 +358,10 @@ export class MisPermisosComponent implements OnInit {
       return true;
     });
   });
+
+  constructor() {
+    conectarEnlaceSolicitud(item => { this.verFormulario(this.mapearDesdeApi(item)); });
+  }
 
   ngOnInit(): void {
     this.cargarDatosBackend();
@@ -934,7 +955,7 @@ export class MisPermisosComponent implements OnInit {
     if (this.horarioSeleccionado() === 'OTROS' && this.horasPorDiaOtrosForm() <= 0) {
       this.toast.error(
         'Horario por horas inválido',
-        'Para la jornada "Otros", indica un rango de horas válido (entre 0.5 y 7.5 horas, con hora de fin posterior a la de inicio).',
+        'Revisa el horario: elige horas dentro de la jornada laboral, con la hora de fin posterior al inicio. El permiso debe durar entre 30 minutos y 7 horas y 30 minutos.',
       );
       return;
     }
@@ -1010,8 +1031,8 @@ export class MisPermisosComponent implements OnInit {
           this.toast.exito(
             `Solicitud ${nuevo.codigo} registrada`,
             archivos.length > 0
-              ? `Tu solicitud y ${archivos.length === 1 ? 'el documento de respaldo quedaron guardados' : 'los ' + archivos.length + ' documentos de respaldo quedaron guardados'} y ya notificamos a tu líder.`
-              : 'Tu solicitud fue registrada y notificada a tu Jefe Inmediato y a Talento Humano.',
+              ? `Tu solicitud y ${archivos.length === 1 ? 'el documento de respaldo quedaron guardados' : 'los ' + archivos.length + ' documentos de respaldo quedaron guardados'} y los avisos quedaron pendientes de envío.`
+              : 'Tu solicitud fue registrada. Los avisos quedaron pendientes de envío.',
           );
         },
         error: (err) => {

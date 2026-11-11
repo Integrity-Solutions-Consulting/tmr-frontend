@@ -139,7 +139,9 @@ export class Navbar implements OnInit {
     }
     this.notificacionesAbierto = false;
     if (notif.urlDestino && notif.urlDestino.startsWith('/')) {
-      this.router.navigateByUrl(notif.urlDestino);
+      const destino = this.router.parseUrl(notif.urlDestino);
+      if (notif.idSolicitud) destino.queryParams['solicitud'] = notif.idSolicitud;
+      this.router.navigateByUrl(destino);
     }
   }
 
