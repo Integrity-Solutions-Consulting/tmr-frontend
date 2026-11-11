@@ -38,9 +38,9 @@
           </div>
 
           <div class="modal-footer" style="justify-content: space-between;">
-            <a routerLink="/permisos" class="btn-tmr btn-tmr--secondary">
-              Volver
-            </a>
+            <button type="button" class="btn-tmr btn-tmr--secondary" (click)="cerrarVentana()">
+              Cerrar
+            </button>
             <div class="portal-actions">
               <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf()">
                 <span class="material-symbols-outlined">download</span>

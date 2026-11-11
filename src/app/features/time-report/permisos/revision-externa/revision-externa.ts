@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
@@ -17,7 +17,7 @@ import {
 @Component({
   selector: 'app-revision-externa',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ResumenSolicitudComponent],
+  imports: [CommonModule, FormsModule, ResumenSolicitudComponent],
   templateUrl: './revision-externa.html',
   styleUrl: './revision-externa.scss',
 })
@@ -240,5 +240,13 @@ export class RevisionExternaComponent implements OnInit {
         );
       },
     });
+  }
+
+  cerrarVentana(): void {
+    if (window.opener) {
+      window.close();
+    } else {
+      this.toast.info('Ventana finalizada', 'Ya puedes cerrar esta pestaña en tu navegador.');
+    }
   }
 }

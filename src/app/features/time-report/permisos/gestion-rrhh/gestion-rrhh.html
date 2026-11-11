@@ -60,11 +60,16 @@
         [ngModel]="filtroTipo()"
         (ngModelChange)="filtroTipo.set($event)"
       >
-        <option value="TODOS">Todo período</option>
+        <option value="TODOS">Todos los tipos de permiso</option>
         <option value="Vacaciones">Vacaciones</option>
         <option value="Licencia">Licencia por enfermedad</option>
         <option value="Citas">Citas médicas</option>
         <option value="Fallecimiento">Fallecimiento de un familiar</option>
+        <option value="Calamidad">Calamidad doméstica</option>
+        <option value="Accidente">Accidente</option>
+        <option value="Maternidad">Maternidad</option>
+        <option value="Nacimiento">Nacimiento de un Hijo/a</option>
+        <option value="Otros">Otros</option>
       </select>
     </div>
 

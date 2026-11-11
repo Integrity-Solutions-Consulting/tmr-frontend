@@ -42,8 +42,7 @@
     </div>
 
     @if (periodoPreset() === 'PERSONALIZADO') {
-      @if (periodoPreset() === 'PERSONALIZADO') {
-    <div class="filter-group date-group">
+      <div class="filter-group date-group">
         <label class="filter-label" for="mis-permisos-filter-3">Desde</label>
         <input id="mis-permisos-filter-3"
           type="date"
@@ -62,7 +61,6 @@
           [ngModel]="fechaHasta()"
           (ngModelChange)="cambiarFechaHasta($event)" />
       </div>
-    }
     }
 
     <div class="filter-group">

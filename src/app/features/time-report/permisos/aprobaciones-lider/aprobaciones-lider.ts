@@ -222,6 +222,10 @@ export class AprobacionesLiderComponent implements OnInit {
 
   aprobarDesdeTabla(item: SolicitudEquipo): void {
     if (this.procesandoDecision() || item.estado !== 'Pendiente') return;
+    const seguro = window.confirm(
+      `¿Confirmas la aprobación de la solicitud ${item.codigo} de ${item.colaborador} (${item.tipo} - ${item.diasSolicitados})?`,
+    );
+    if (!seguro) return;
     this.solicitudActiva.set(item);
     this.comentarioLider.set('');
     this.registrarDecisionLider('aprobar');
