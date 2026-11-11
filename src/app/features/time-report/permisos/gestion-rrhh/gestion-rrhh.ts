@@ -50,6 +50,7 @@ export interface SolicitudRrhh {
   horario: HorarioPermisoOficial;
   detalleHorario?: string;
   duracion: string;
+  horasSolicitadas: string;
   horasEquivalentes: number;
   liderNombre: string;
   liderTipo: 'Interno' | 'Externo';
@@ -167,6 +168,7 @@ export class GestionRrhhComponent implements OnInit {
       horario: item.horario,
       detalleHorario: item.detalleHorario ?? undefined,
       duracion: item.duracion,
+      horasSolicitadas: item.horasSolicitadas || `${item.totalHoras} horas`,
       horasEquivalentes: item.totalHoras,
       liderNombre: item.liderNombre,
       liderTipo: item.liderTipo === 'EXT' ? 'Externo' : 'Interno',
@@ -313,7 +315,7 @@ export class GestionRrhhComponent implements OnInit {
       diasSolicitados: sol.diasSolicitados,
       horario: sol.horario,
       detalleHorario: sol.detalleHorario,
-      horasSolicitadas: `${sol.horasEquivalentes} horas`,
+      horasSolicitadas: sol.horasSolicitadas || `${sol.horasEquivalentes} horas`,
       aprobacionLider: {
         aprobado: sol.aprobadoLider,
         responsable: sol.liderNombre,
