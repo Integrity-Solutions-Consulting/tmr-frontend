@@ -333,16 +333,28 @@
 .permisos-page > .table-card {
   overflow-x: auto;
   > .permisos-table {
-    min-width: 1050px;
-    table-layout: auto;
-    th, td {
-      white-space: normal;
-      overflow: hidden;
-      overflow-wrap: break-word;
-      text-overflow: clip;
+    min-width: 760px;
+    table-layout: fixed;
+    th {
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 12px 16px;
+      white-space: nowrap;
+      overflow-wrap: normal;
     }
-    th { white-space: nowrap; overflow-wrap: normal; }
-    th:last-child, td:last-child { min-width: 72px; }
+    td {
+      padding: 13px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cell-muted {
+      color: var(--text-secondary);
+    }
+    th:last-child, td:last-child { min-width: 88px; overflow: visible; text-overflow: clip; }
     .codigo-cell { white-space: nowrap; }
     .status-badge {
       white-space: nowrap;
@@ -367,7 +379,7 @@
       &--pendiente::before, &--rrhh::before, &--observado::before { background: #f97316; }
     }
     .estado-column { width: 150px; min-width: 150px; white-space: nowrap; overflow-wrap: normal; }
-    .actions-cell { flex-wrap: wrap; min-width: 48px; }
+    .actions-cell { flex-wrap: nowrap; min-width: 48px; }
     button:focus-visible, input:focus-visible {
       outline: 2px solid var(--primary-color);
       outline-offset: 2px;
@@ -377,9 +389,9 @@
 
 // Same column hierarchy and density for the three review inboxes.
 .permisos-page > .table-card > .permisos-review-table {
-  min-width: 900px;
+  min-width: 780px;
   table-layout: fixed;
-  td { line-height: 1.5; }
+  td { line-height: 1.4; }
   .table-secondary {
     display: block;
     margin-top: 5px;
