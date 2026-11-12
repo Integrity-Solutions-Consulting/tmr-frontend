@@ -1,0 +1,265 @@
+<div class="isc-form-sheet">
+  <!-- LOGO SUPERIOR INTEGRITY SOLUTIONS -->
+  <div class="isc-form-sheet__logo-wrap">
+    <img
+      src="assets/img/logo-isc.png"
+      alt="Integrity Solutions"
+      class="isc-form-sheet__logo"
+    />
+    @if (datos.folio) {
+      <span class="isc-form-sheet__folio">Documento PDF · {{ datos.folio }}</span>
+    }
+  </div>
+
+  <!-- TABLA 1: TÍTULO Y FECHA DE SOLICITUD -->
+  <div class="isc-table-scroll">
+    <table class="isc-table isc-table--header">
+      <tbody>
+        <tr>
+          <td rowspan="3" class="isc-table__doc-title">
+            FORMULARIO DE SOLICITUD DE PERMISOS, LICENCIAS<br />Y VACACIONES
+          </td>
+          <th colspan="3" class="isc-table__th-grey">FECHA DE SOLICITUD</th>
+        </tr>
+        <tr>
+          <th class="isc-table__th-sub">Día</th>
+          <th class="isc-table__th-sub">Mes</th>
+          <th class="isc-table__th-sub">Año</th>
+        </tr>
+        <tr>
+          <td class="isc-table__td-center">{{ datos.diaSolicitud }}</td>
+          <td class="isc-table__td-center">{{ datos.mesSolicitud }}</td>
+          <td class="isc-table__td-center">{{ datos.anioSolicitud }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABLA 2: DATOS DEL COLABORADOR -->
+  <div class="isc-table-scroll">
+    <table class="isc-table">
+      <thead>
+        <tr>
+          <th colspan="5" class="isc-table__th-grey">DATOS DEL COLABORADOR</th>
+        </tr>
+        <tr>
+          <th class="isc-table__th-sub" style="width: 24%;">Apellidos y nombres</th>
+          <th class="isc-table__th-sub" style="width: 16%;">Número de cédula</th>
+          <th class="isc-table__th-sub" style="width: 20%;">Cargo</th>
+          <th class="isc-table__th-sub" style="width: 20%;">Cliente</th>
+          <th class="isc-table__th-sub" style="width: 20%;">Jefe inmediato</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="isc-table__td-center">{{ datos.apellidosNombres }}</td>
+          <td class="isc-table__td-center">{{ datos.numeroCedula }}</td>
+          <td class="isc-table__td-center">{{ datos.cargo }}</td>
+          <td class="isc-table__td-center">{{ datos.cliente }}</td>
+          <td class="isc-table__td-center">{{ datos.jefeInmediato }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 3: TIPO DE PERMISO DE AUSENCIA DE TRABAJO -->
+  <div class="isc-section-bar">TIPO DE PERMISO DE AUSENCIA DE TRABAJO</div>
+  <div class="isc-section-instruction">
+    Favor marcar con una X el tipo de permiso solicitado:
+  </div>
+
+  <div class="isc-checkbox-grid">
+    <!-- Fila 1 -->
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Vacaciones</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('VACACIONES')">
+        {{ esTipo('VACACIONES') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Licencia por enfermedad</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('LICENCIA_ENFERMEDAD')">
+        {{ esTipo('LICENCIA_ENFERMEDAD') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Citas médicas</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('CITAS_MEDICAS')">
+        {{ esTipo('CITAS_MEDICAS') ? 'X' : '' }}
+      </span>
+    </div>
+
+    <!-- Fila 2 -->
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Matrimonio</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('MATRIMONIO')">
+        {{ esTipo('MATRIMONIO') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Nacimiento de un Hijo/a</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('NACIMIENTO_HIJO')">
+        {{ esTipo('NACIMIENTO_HIJO') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Otros</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('OTROS')">
+        {{ esTipo('OTROS') ? 'X' : '' }}
+      </span>
+    </div>
+
+    <!-- Fila 3 -->
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Maternidad</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('MATERNIDAD')">
+        {{ esTipo('MATERNIDAD') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item">
+      <span class="isc-checkbox-item__label">Fallecimiento de un familiar</span>
+      <span class="isc-checkbox-item__box" [class.isc-checkbox-item__box--checked]="esTipo('FALLECIMIENTO_FAMILIAR')">
+        {{ esTipo('FALLECIMIENTO_FAMILIAR') ? 'X' : '' }}
+      </span>
+    </div>
+    <div class="isc-checkbox-item isc-checkbox-item--empty"></div>
+  </div>
+
+  <!-- SECCIÓN 4: MOTIVOS DEL PERMISO LABORAL O VACACIONAL -->
+  <div class="isc-section-bar">MOTIVOS DEL PERMISO LABORAL O VACACIONAL</div>
+  <div class="isc-text-box">
+    <div>{{ datos.motivos }}</div>
+    @if (datos.evidenciaNombre) {
+      <div class="isc-text-box__attachment">
+        <span class="material-symbols-outlined" style="font-size: 16px;">attach_file</span>
+        @if (puedeDescargarEvidencia) {
+          <a href="#" (click)="abrirEvidencia($event)" style="color: inherit; text-decoration: underline;">
+            Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong> {{ descargandoEvidencia ? '(Descargando...)' : '(Ver / Descargar)' }}
+          </a>
+        } @else {
+          <span>Evidencia adjunta: <strong>{{ datos.evidenciaNombre }}</strong></span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- TABLA 5: FECHAS Y DÍAS SOLICITADOS -->
+  <div class="isc-table-scroll">
+    <table class="isc-table">
+      <tbody>
+        <tr>
+          <th rowspan="2" class="isc-table__th-side">Fecha de la solicitud</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de inicio</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de finalización</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de regreso</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Fecha de aprobación</th>
+        </tr>
+        <tr>
+          <td class="isc-table__td-center isc-table__td-tall">{{ datos.fechaInicio }}</td>
+          <td class="isc-table__td-center isc-table__td-tall">{{ datos.fechaFinalizacion }}</td>
+          <td class="isc-table__td-center isc-table__td-tall">{{ datos.fechaRegreso }}</td>
+          <td class="isc-table__td-center isc-table__td-tall">{{ datos.fechaAprobacion || 'Pendiente' }}</td>
+        </tr>
+        <tr>
+          <th class="isc-table__th-side-bottom">Días solicitados</th>
+          <td colspan="4" class="isc-table__td-merged">{{ datos.diasSolicitados }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABLA 6: HORARIO Y HORAS SOLICITADAS -->
+  <div class="isc-table-scroll">
+    <table class="isc-table">
+      <tbody>
+        <tr>
+          <th rowspan="2" class="isc-table__th-side">Horario</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Mañana</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Tarde</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Completa</th>
+          <th class="isc-table__th-sub" style="width: 20.5%;">Otros</th>
+        </tr>
+        <tr>
+          <td class="isc-table__td-center isc-table__td-tall">
+            @if (esHorario('MANANA')) {
+              <strong class="isc-mark-x">X</strong>
+              @if (datos.detalleHorario) {
+                <div class="isc-schedule-detail">{{ datos.detalleHorario }}</div>
+              }
+            }
+          </td>
+          <td class="isc-table__td-center isc-table__td-tall">
+            @if (esHorario('TARDE')) {
+              <strong class="isc-mark-x">X</strong>
+              @if (datos.detalleHorario) {
+                <div class="isc-schedule-detail">{{ datos.detalleHorario }}</div>
+              }
+            }
+          </td>
+          <td class="isc-table__td-center isc-table__td-tall">
+            @if (esHorario('COMPLETA')) {
+              <strong class="isc-mark-x">X</strong>
+              @if (datos.detalleHorario) {
+                <div class="isc-schedule-detail">{{ datos.detalleHorario }}</div>
+              }
+            }
+          </td>
+          <td class="isc-table__td-center isc-table__td-tall">
+            @if (esHorario('OTROS')) {
+              <strong class="isc-mark-x">X</strong>
+              @if (datos.detalleHorario) {
+                <div class="isc-schedule-detail">{{ datos.detalleHorario }}</div>
+              }
+            }
+          </td>
+        </tr>
+        <tr>
+          <th class="isc-table__th-side-bottom">Horas solicitadas</th>
+          <td colspan="4" class="isc-table__td-merged">{{ datos.horasSolicitadas }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECCIÓN 7: TRAZABILIDAD DE APROBACIÓN EN SISTEMA (PARA EL PDF GENERADO) -->
+  @if (datos.aprobacionLider || datos.aprobacionTalentoHumano) {
+    <div class="isc-section-bar">ESTADO DE APROBACIÓN DE LA SOLICITUD</div>
+    <div class="isc-table-scroll">
+      <table class="isc-table" style="margin-top: -1px;">
+        <thead>
+          <tr>
+            <th class="isc-table__th-sub" style="width: 33%;">Solicitante (Cuenta Colaborador)</th>
+            <th class="isc-table__th-sub" style="width: 34%;">Jefe Inmediato / Líder</th>
+            <th class="isc-table__th-sub" style="width: 33%;">Talento Humano (RRHH)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="isc-table__td-center">
+              <div><strong>{{ datos.apellidosNombres }}</strong></div>
+              <div class="isc-schedule-detail">Registrado desde sesión TMR</div>
+            </td>
+            <td class="isc-table__td-center">
+              <div><strong>{{ datos.aprobacionLider?.responsable || datos.jefeInmediato }}</strong></div>
+              <div class="isc-schedule-detail">
+                {{ datos.aprobacionLider?.aprobado ? ('Aprobado · ' + datos.aprobacionLider?.metodo) : 'Pendiente de aprobación' }}
+              </div>
+            </td>
+            <td class="isc-table__td-center">
+              <div><strong>{{ datos.aprobacionTalentoHumano?.responsable || 'Talento Humano ISC' }}</strong></div>
+              <div class="isc-schedule-detail">
+                {{ datos.aprobacionTalentoHumano?.aprobado ? ('Confirmado · ' + (datos.aprobacionTalentoHumano?.fecha || '')) : 'Pendiente de confirmación' }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- SECCIÓN 8: COMENTARIOS -->
+  <div class="isc-section-bar">COMENTARIOS</div>
+  <div class="isc-text-box isc-text-box--comments">
+    {{ datos.comentarios || 'Sin comentarios adicionales.' }}
+  </div>
+</div>

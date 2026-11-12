@@ -6,6 +6,11 @@ import { UserModulesService } from '../../features/auth/servicios/user-modules.s
 /** Guard que protege rutas según el Rol del usuario.
  *  - Configuración: Solo accesible por Administradores.
  *  - Proyectos, Líderes, Colaboradores, Clientes y Reportes: No accesibles por Colaboradores.
+ *  - Permisos:
+ *      * Mis Permisos (/permisos): Todos los roles autenticados.
+ *      * Aprobación Líder (/permisos/equipo): Líder y Administrador.
+ *      * Validación RRHH (/permisos/rrhh): Recursos Humanos y Administrador.
+ *      * Historial Gerencia (/permisos/gerencia): Gerencia/Gerente, Recursos Humanos y Administrador.
  */
 export const roleGuard: CanActivateFn = (route) => {
   const tokenService = inject(TokenService);
@@ -19,6 +24,20 @@ export const roleGuard: CanActivateFn = (route) => {
 
   const path = route.routeConfig?.path;
 
+  // Reglas específicas de visibilidad por rol en el módulo Permisos
+  if (path === 'equipo' && !tokenService.canAccessPermisosLider()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
+  if (path === 'rrhh' && !tokenService.canAccessPermisosRrhh()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
+  if (path === 'gerencia' && !tokenService.canAccessPermisosGerencia()) {
+    router.navigate(['/permisos']);
+    return false;
+  }
+
   // Mapa de rutas de Angular a nombres de módulos en la Base de Datos
   const pathModuleMap: Record<string, string> = {
     'dashboard': 'Dashboard',
@@ -30,7 +49,8 @@ export const roleGuard: CanActivateFn = (route) => {
     'reportes': 'Reportes',
     'configuracion': 'Configuracion',
     // sm - Seguimiento (Time Report): antes cualquier usuario con sesión podía entrar escribiendo la URL.
-    'seguimiento': 'Seguimiento'
+    'seguimiento': 'Seguimiento',
+    'fechas-corte': 'Fechas de Corte'
   };
 
   if (path && pathModuleMap[path]) {
@@ -43,11 +63,10 @@ export const roleGuard: CanActivateFn = (route) => {
     }
     // Si es administrador, tiene acceso a los demás módulos de forma predeterminada.
     if (tokenService.isAdmin()) return true;
-    // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
       // sm - Igual con Seguimiento: Actividades es la pantalla que tienen todos los usuarios.
-      if (path === 'dashboard' || path === 'seguimiento') {
+      if (path === 'dashboard' || path === 'seguimiento' || path === 'fechas-corte') {
         router.navigate(['/time-report/actividades']);
       } else {
         router.navigate(['/dashboard']);
@@ -56,6 +75,5 @@ export const roleGuard: CanActivateFn = (route) => {
     }
   }
 
-  if (tokenService.isAdmin()) return true;
   return true;
 };

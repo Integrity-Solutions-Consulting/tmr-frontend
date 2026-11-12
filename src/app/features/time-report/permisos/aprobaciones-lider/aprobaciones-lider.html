@@ -1,0 +1,160 @@
+<div class="permisos-page">
+  <app-header
+    title="Aprobación de Permisos"
+    subtitle="Solicitudes del equipo asignado">
+  </app-header>
+
+  <div class="kpis-grid">
+    <app-tarjeta-resumen [valor]="kpiPendientes()" titulo="Pendientes" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="kpiAusentesHoy()" titulo="Ausentes hoy" icono="event_busy" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="kpiAprobados()" titulo="Aprobados" icono="task_alt" tono="exito" />
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-1">Buscar</label>
+      <input id="aprobaciones-lider-filter-1"
+        class="filter-control"
+        type="text"
+        placeholder="Colaborador, código, tipo, proyecto, cliente, duración, estado..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-2">Período</label>
+      <select id="aprobaciones-lider-filter-2" class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+    @if (periodoPreset() === 'PERSONALIZADO') {
+    <div class="filter-group date-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-3">Desde</label>
+      <input id="aprobaciones-lider-filter-3"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)" />
+    </div>
+    <div class="filter-group date-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-4">Hasta</label>
+      <input id="aprobaciones-lider-filter-4"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)" />
+    </div>
+    }
+    <div class="filter-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-5">Proyecto</label>
+      <select id="aprobaciones-lider-filter-5" class="filter-control" [ngModel]="proyectoFiltro()" (ngModelChange)="proyectoFiltro.set($event)">
+        <option value="">Todos</option>
+        @for (proy of proyectosDisponibles(); track proy) { <option [value]="proy">{{ proy }}</option> }
+
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="aprobaciones-lider-filter-6">Semáforo</label>
+      <select id="aprobaciones-lider-filter-6" class="filter-control" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="proceso">Pendiente de decisión</option>
+        <option value="finalizado">Decididas</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table permisos-review-table">
+      <colgroup>
+        <col style="width: 24%;" />
+        <col style="width: 24%;" />
+        <col style="width: 18%;" />
+        <col style="width: 12%;" />
+        <col style="width: 150px;" />
+        <col style="width: 96px;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Colaborador</th>
+          <th>Permiso</th>
+          <th>Fecha</th>
+          <th>Duración</th>
+          <th class="estado-column">Estado</th>
+          <th aria-label="Acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.codigo) {
+          <tr>
+            <td><strong>{{ item.colaborador }}</strong></td>
+            <td>{{ item.tipo }}</td>
+            <td class="cell-muted">{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
+            <td class="estado-column">
+              <span [class]="obtenerClaseEstado(item.estado)">
+                {{ item.estado }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" [disabled]="procesandoDecision()" (click)="abrirRevision(item)">
+                  Revisar
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL DE REVISIÓN Y APROBACIÓN DEL LÍDER -->
+  <app-modal-base
+    [titulo]="'Revisión de Jefe Inmediato — ' + (solicitudActiva()?.codigo ?? '')"
+    [visible]="modalRevisorVisible()"
+    [wide]="false"
+    (cerrar)="modalRevisorVisible.set(false)">
+    @if (solicitudActiva(); as sel) {
+      <div class="modal-form">
+        <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estado" [adjuntos]="sel.adjuntos || []" />
+        @if (sel.traslapeAlerta) { <p class="revision-alerta" role="alert">{{ sel.traslapeAlerta }}</p> }
+
+        @if (sel.estado === 'Pendiente') {
+        <div class="form-field">
+          <label for="comentario-revision">Comentario de revisión</label>
+          <textarea
+            id="comentario-revision" rows="2"
+            [ngModel]="comentarioLider()"
+            (ngModelChange)="comentarioLider.set($event)"
+            placeholder="Comentario u observación..."></textarea>
+        </div>
+
+        } @else {
+          <p role="status">Esta solicitud ya fue procesada. Puedes consultar el resultado.</p>
+        }
+        <div class="modal-footer">
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf(sel)">
+            <span class="material-symbols-outlined">download</span>
+            Descargar PDF
+          </button>
+          @if (sel.estado === 'Pendiente') {
+          <button type="button" class="btn-tmr btn-tmr--warning" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('observar')">
+            Observar
+          </button>
+          <button type="button" class="btn-tmr btn-tmr--danger" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('rechazar')">
+            Rechazar
+          </button>
+          <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="procesandoDecision()" (click)="registrarDecisionLider('aprobar')">
+            Aprobar
+          </button>
+          }
+        </div>
+      </div>
+    }
+  </app-modal-base>
+</div>

@@ -1,4 +1,5 @@
-﻿import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect } from '@angular/core';
+import { Component, inject, ViewChild, AfterViewInit, computed, signal, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -9,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -25,7 +27,7 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
 import * as ExcelJS from 'exceljs';
 import JSZip from 'jszip';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable, timeout } from 'rxjs';
 // sm - Toast de progreso de descarga compartido por toda la app (antes vivía solo en Seguimiento).
 import { DescargaCanceladaError, DescargaProgresoService } from '../../../shared/services/descarga-progreso.service';
 import { MetricasSeguimiento } from '../../../shared/models/seguimiento.model';
@@ -34,11 +36,36 @@ import { coincideBusqueda, normalizarTexto } from '../../../shared/utils/texto.u
 import { CalendarioColaboradorModal } from './calendario-colaborador-modal/calendario-colaborador-modal';
 // sm - SweetAlert2 para los pop ups de las descargas (sin actividades, descarga parcial y error).
 import { PopupService } from '../../../shared/services/popup.service';
-import { NotificacionesService } from '../../../shared/services/notificaciones.service';
-import { fechaLocalInputHoy } from '../../../shared/utils/date-range.utils';
+import { NotificacionToastService } from '../../../shared/services/notificacion-toast.service';
+import { EstadoEmpleado, NotificacionesService } from '../../../shared/services/notificaciones.service';
+import { fechaEcuadorInputHoy, primerDiaMesEcuador } from '../../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../../shared/services/fecha-limites.service';
+import { TokenService } from '../../auth/servicios/token.service';
+import { CambiosDatosService } from '../../../shared/services/cambios-datos.service';
 
-// sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generaciÃ³n.
+// sm - Filtros que se recuerdan al salir y volver a Seguimiento. Se guardan en sessionStorage: duran mientras la
+// pestaña esté abierta (también tras F5); al cerrar el navegador se vuelve al rango por defecto.
+const CLAVE_FILTROS = 'tmr.seguimiento.filtros';
+// sm - Al volver a la pestaña solo se recarga si la última carga tiene más de este tiempo (evita llamadas por
+// cambiar de ventana un momento).
+const RECARGA_AL_VOLVER_MS = 60_000;
+
+interface FiltrosGuardados {
+    fechaDesde?: string;
+    fechaHasta?: string;
+    cliente?: string;
+    busqueda?: string;
+}
+
+function leerFiltrosGuardados(): FiltrosGuardados {
+    try {
+        return JSON.parse(sessionStorage.getItem(CLAVE_FILTROS) || '{}') ?? {};
+    } catch {
+        return {};
+    }
+}
+
+// sm - Error propio para distinguir "colaborador sin actividades" de un fallo real de red o de generación.
 class SinActividadesError extends Error {
     constructor(public readonly colaborador: string) {
         super(`No hay actividades registradas para ${colaborador} en este rango.`);
@@ -72,6 +99,7 @@ interface ItemDescarga {
         MatIconModule,
         MatCheckboxModule,
         MatMenuModule,
+        MatTooltipModule,
         MatAutocompleteModule,
         MatDialogModule,
         PaginacionComponent,
@@ -88,8 +116,19 @@ export class SeguimientoComponent implements AfterViewInit {
     private dialog = inject(MatDialog);
     private popup = inject(PopupService);
     private notificacionesService = inject(NotificacionesService);
+    private toastService = inject(NotificacionToastService);
     private fechaLimites = inject(FechaLimitesService);
+    private tokenService = inject(TokenService);
     private descargas = inject(DescargaProgresoService);
+    private cambiosDatos = inject(CambiosDatosService);
+    private destroyRef = inject(DestroyRef);
+    private readonly filtrosGuardados = leerFiltrosGuardados();
+
+    // sm - Recarga automática: hora de la última carga, recarga pendiente (llegó un aviso con la pestaña oculta, un
+    // modal abierto o una descarga en curso) y si la próxima carga debe conservar la selección del usuario.
+    private ultimaCarga = 0;
+    private recargaPendiente = false;
+    private conservarSeleccion = false;
 
     public columnas: string[] = [
         'select', 'nombre', 'proyecto', 'cliente', 'liderTecnico',
@@ -98,14 +137,15 @@ export class SeguimientoComponent implements AfterViewInit {
     public dataSource = new MatTableDataSource<Colaborador>(this.seguimientoService.colaboradores());
     public selection = new SelectionModel<Colaborador>(true, []);
     public isDownloading = false;
+    public isNotifying = false;
     // sm - Fila "Cargando registros..." mientras llega la lista de colaboradores.
     public cargando = this.seguimientoService.cargando;
 
-    // Filtros de bÃºsqueda (Estado Local)
-    public busqueda = '';
-    // sm - clienteSeleccionado es el texto del campo; clienteAplicado es el cliente con el que se filtrÃ³ la tabla.
-    public clienteSeleccionado = '';
-    private clienteAplicado = '';
+    // Filtros de búsqueda (Estado Local)
+    public busqueda = this.filtrosGuardados.busqueda ?? '';
+    // sm - clienteSeleccionado es el texto del campo; clienteAplicado es el cliente con el que se filtró la tabla.
+    public clienteSeleccionado = this.filtrosGuardados.cliente ?? '';
+    private clienteAplicado = this.filtrosGuardados.cliente ?? '';
     public clientes = signal<{ id: number, nombre: string }[]>([]);
     public clienteFilter = signal('');
 
@@ -114,34 +154,25 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!q) return this.clientes();
         return this.clientes().filter(c => c.nombre.toLowerCase().includes(q));
     });
-    public fechaDesde = (() => {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-    })();
-    // sm - Se comenta el valor por defecto anterior (Ãºltimo dÃ­a del mes actual) porque "Fecha hasta" debe iniciar en el dÃ­a de hoy.
-    // public fechaHasta = (() => {
-    //     const d = new Date();
-    //     const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-    //     return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
-    // })();
-    // sm - Nuevo valor por defecto: la fecha de hoy (fecha local del navegador, formato yyyy-MM-dd).
-    public fechaHasta = (() => {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    })();
-    public readonly fechaMaxima = fechaLocalInputHoy();
-    // sm - Fecha más antigua con actividades reales: evita filtrar hacia un rango donde se sabe que no hay datos.
+    // Fechas con la hora de Ecuador (no la del navegador), igual que el backend al calcular y notificar
+    public fechaDesde = this.filtrosGuardados.fechaDesde ?? primerDiaMesEcuador();
+    // sm - "Fecha hasta" inicia en el día de hoy (no en el último día del mes actual).
+    // Recupera la fecha guardada o utiliza la fecha actual de Ecuador.
+    public fechaHasta = this.filtrosGuardados.fechaHasta ?? fechaEcuadorInputHoy();
+
+    // Fecha máxima permitida: hoy en Ecuador.
+    public readonly fechaMaxima = fechaEcuadorInputHoy();
+
+    // Fecha más antigua con actividades registradas.
     public fechaMinima: string | null = null;
 
-    // PaginaciÃ³n (Estado Local para Rango)
+    // Paginación (Estado Local para Rango)
     public pageIndex = 0;
     public pageSize = 5;
 
     @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-    // Reactividad vÃ­a Signals desde el Servicio de Negocio
-    //public metricas = computed(() => this.seguimientoService.getMetricas());
-    //SM - Esto hace que cuando se seleccionen colaboradores, las mÃ©tricas se recalculen con base a los colaboradores seleccionados
+    // sm - Esto hace que cuando se seleccionen colaboradores, las métricas se recalculen con base a los colaboradores seleccionados
     get metricas(): MetricasSeguimiento {
         if (this.selection.hasValue()) {
             return this.seguimientoService.calcularMetricas(this.selection.selected);
@@ -149,13 +180,13 @@ export class SeguimientoComponent implements AfterViewInit {
         return this.seguimientoService.getMetricas();
     }
 
-    // sm - La barra de mÃ©tricas queda "en blanco" (valores con guion) cuando no hay ningÃºn colaborador seleccionado
-    // o cuando estÃ¡n seleccionados todos; solo muestra valores con una selecciÃ³n parcial (uno o varios, no todos).
+    // sm - La barra de métricas queda "en blanco" (valores con guion) cuando no hay ningún colaborador seleccionado
+    // o cuando están seleccionados todos; solo muestra valores con una selección parcial (uno o varios, no todos).
     get metricasEnBlanco(): boolean {
         return !this.selection.hasValue() || this.isAllSelected();
     }
 
-    // OrdenaciÃ³n manual para tabla HTML nativa
+    // Ordenación manual para tabla HTML nativa
     public sortField: keyof Colaborador | '' = '';
     public sortAsc = true;
 
@@ -229,26 +260,76 @@ export class SeguimientoComponent implements AfterViewInit {
                     liderTecnico: this.toTitleCase(p.liderTecnico)
                 }))
             }));
+            // sm - En una recarga automática se vuelven a marcar las filas que el usuario tenía seleccionadas
+            // (mismo colaborador y proyecto) y se mantiene la página, salvo que ya no exista.
+            const clavesSeleccionadas = this.conservarSeleccion
+                ? new Set(this.selection.selected.map(c => this.claveFila(c)))
+                : null;
+            this.conservarSeleccion = false;
             this.dataSource.data = formatted;
             this.aplicarOrdenamiento();
-            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, asÃ­ que cualquier
-            // selecciÃ³n previa queda con referencias huÃ©rfanas (el checkbox del header se veÃ­a
-            // "indeterminado" y el footer de mÃ©tricas podÃ­a mostrar la selecciÃ³n vieja). Se limpia
-            // para que la selecciÃ³n siempre corresponda a la data reciÃ©n cargada/filtrada.
+            if (clavesSeleccionadas) {
+                this.selection.setSelection(...this.dataSource.data.filter(c => clavesSeleccionadas.has(this.claveFila(c))));
+                this.pageIndex = Math.min(this.pageIndex, this.totalPaginas - 1);
+                return;
+            }
+            // sm - Cada recarga reconstruye los colaboradores como objetos nuevos, así que cualquier
+            // selección previa queda con referencias huérfanas (el checkbox del header se veía
+            // "indeterminado" y el footer de métricas podía mostrar la selección vieja). Se limpia
+            // para que la selección siempre corresponda a la data recién cargada/filtrada.
             this.selection.clear();
         });
+
+        // sm - Recarga automática: otra pestaña guardó proyectos/colaboradores/actividades/feriados.
+        this.cambiosDatos.cambios$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.recargarAutomatico(true));
+
+        // sm - Al volver a esta pestaña o ventana: recarga si hubo un aviso mientras estaba oculta o si los datos
+        // tienen más de un minuto (cubre cambios hechos por otras personas).
+        const alVolver = () => {
+            if (document.visibilityState === 'visible') this.recargarAutomatico(false);
+        };
+        document.addEventListener('visibilitychange', alVolver);
+        window.addEventListener('focus', alVolver);
+        this.destroyRef.onDestroy(() => {
+            document.removeEventListener('visibilitychange', alVolver);
+            window.removeEventListener('focus', alVolver);
+        });
+
+        // sm - Si la recarga quedó pendiente por un modal abierto, se hace al cerrarlo.
+        this.dialog.afterAllClosed
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.procesarRecargaPendiente());
+    }
+
+   
+    // sm - porAviso: llegó un aviso de cambios (recarga siempre). Si no, es la vuelta a la pestaña: solo con datos viejos.
+    // Nunca recarga con la pestaña oculta, un modal abierto o una descarga en curso: lo deja pendiente.
+    private recargarAutomatico(porAviso: boolean) {
+        if (porAviso) this.recargaPendiente = true;
+        else if (Date.now() - this.ultimaCarga >= RECARGA_AL_VOLVER_MS) this.recargaPendiente = true;
+        this.procesarRecargaPendiente();
+    }
+
+    private procesarRecargaPendiente() {
+        if (!this.recargaPendiente) return;
+        if (document.visibilityState !== 'visible' || this.dialog.openDialogs.length > 0 || this.isDownloading) return;
+        this.recargaPendiente = false;
+        this.conservarSeleccion = true;
+        this.recargarColaboradores(true);
     }
 
     ngAfterViewInit() {
         this.dataSource.paginator = this.paginator;
-        // sm - La bÃºsqueda es solo por colaborador (nombre completo) y proyecto. Se normaliza el texto (sin tildes,
-        // minÃºsculas y espacios simples) para que "juan  perez" encuentre a "Juan PÃ©rez".
         // sm - La búsqueda es solo por colaborador (nombre completo) y proyecto. Coincide por palabras sueltas
         // (sin tildes, minúsculas y espacios simples) para que "juan perez" o "Jorge Lino" encuentren a
         // "Juan Pérez" o "Jorge Augusto Lino Bermeo" aunque se salte el segundo nombre.
         this.dataSource.filterPredicate = (data: Colaborador, filter: string) =>
             coincideBusqueda(data.nombre, filter)
             || coincideBusqueda(data.proyecto, filter);
+        // sm - Búsqueda recordada de la visita anterior a Seguimiento.
+        if (this.busqueda) this.dataSource.filter = normalizarTexto(this.busqueda);
 
         // Cargar clientes desde lookups
         this.http.get<any>(`${environment.apiUrl}/proyectos/lookups`).subscribe({
@@ -277,7 +358,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     get totalRegistros(): number {
-        // sm - Solo filteredData: antes, si la bÃºsqueda no encontraba nada, mostraba el total sin filtrar.
+        // sm - Solo filteredData: antes, si la búsqueda no encontraba nada, mostraba el total sin filtrar.
         return this.dataSource.filteredData.length;
     }
 
@@ -306,16 +387,17 @@ export class SeguimientoComponent implements AfterViewInit {
         this.recargarColaboradores();
     }
 
-    // sm - BÃºsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
-    // Se limpia la selecciÃ³n para que siempre corresponda a los resultados visibles (igual que al recargar).
+    // sm - Búsqueda por colaborador/proyecto: se aplica sobre los datos ya cargados, sin llamar al servidor en cada tecla.
+    // Se limpia la selección para que siempre corresponda a los resultados visibles (igual que al recargar).
     public aplicarBusqueda() {
+        this.guardarFiltros();
         this.dataSource.filter = normalizarTexto(this.busqueda);
         this.selection.clear();
         this.irAPrimeraPagina();
     }
 
     // sm - Cliente: mientras se escribe solo se filtran las opciones del autocompletado; la tabla se recarga
-    // al elegir una opciÃ³n o al borrar el campo (todos los clientes), no con cada letra.
+    // al elegir una opción o al borrar el campo (todos los clientes), no con cada letra.
     public onClienteInput(event: Event) {
         this.filtrarClientes(event);
         if (!this.clienteSeleccionado.trim() && this.clienteAplicado) {
@@ -329,18 +411,36 @@ export class SeguimientoComponent implements AfterViewInit {
         this.aplicarFiltros();
     }
 
-    // sm - Al cerrar el autocompletado sin elegir una opciÃ³n, el campo vuelve a mostrar el cliente realmente aplicado.
+    // sm - Al cerrar el autocompletado sin elegir una opción, el campo vuelve a mostrar el cliente realmente aplicado.
     public onClientePanelCerrado() {
         this.clienteSeleccionado = this.clienteAplicado;
         this.clienteFilter.set('');
     }
 
-    private recargarColaboradores() {
+    private recargarColaboradores(silencioso = false) {
+        // sm - Una carga pedida por el usuario (filtros) no conserva la selección; la automática sí.
+        if (!silencioso) this.conservarSeleccion = false;
+        this.ultimaCarga = Date.now();
+        this.guardarFiltros();
         this.seguimientoService.cargarColaboradores({
             fechaDesde: this.fechaDesde,
             fechaHasta: this.fechaHasta,
             clienteSeleccionado: this.clienteAplicado
-        });
+        }, silencioso);
+    }
+
+    private guardarFiltros() {
+        const filtros: FiltrosGuardados = {
+            fechaDesde: this.fechaDesde,
+            fechaHasta: this.fechaHasta,
+            cliente: this.clienteAplicado,
+            busqueda: this.busqueda
+        };
+        try {
+            sessionStorage.setItem(CLAVE_FILTROS, JSON.stringify(filtros));
+        } catch {
+            // sm - Sin sessionStorage (modo privado/bloqueado) solo se pierde recordar los filtros.
+        }
     }
 
     private irAPrimeraPagina() {
@@ -348,17 +448,6 @@ export class SeguimientoComponent implements AfterViewInit {
         this.dataSource.paginator?.firstPage();
     }
 
-    private normalizarBusqueda(texto: string): string {
-        return (texto ?? '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/\s+/g, ' ')
-            .trim();
-    }
-
-    // sm - "Seleccionar todos" debe cubrir todas las pÃ¡ginas del resultado ya filtrado
-    // (rango de fechas/cliente del backend + bÃºsqueda de texto del cliente), no solo dataSource.data
-    // (que ignora la bÃºsqueda de texto) ni la pÃ¡gina visible.
     // sm - "Seleccionar todos" debe cubrir todas las páginas del resultado ya filtrado
     // (rango de fechas/cliente del backend + búsqueda de texto del cliente), no solo dataSource.data
     // (que ignora la búsqueda de texto) ni la página visible.
@@ -371,6 +460,12 @@ export class SeguimientoComponent implements AfterViewInit {
         this.isAllSelected()
             ? this.selection.clear()
             : this.dataSource.filteredData.forEach(row => this.selection.select(row));
+    }
+
+    // Para el badge del botón Notificar: cuenta personas, no filas (una persona puede tener varias filas
+    // seleccionadas, una por proyecto, y eso manda un solo aviso general para ella).
+    public personasSeleccionadas(): number {
+        return new Set(this.selection.selected.map(c => c.id)).size;
     }
 
     // sm - Expande los colaboradores seleccionados a un item por archivo a generar: si un colaborador tiene varios
@@ -388,7 +483,7 @@ export class SeguimientoComponent implements AfterViewInit {
         if (!this.selection.hasValue() || this.isDownloading) return;
 
         const seleccionados = [...this.selection.selected];
-        // sm - Un colaborador con varios proyectos genera un archivo por proyecto, asÃ­ que el total de archivos
+        // sm - Un colaborador con varios proyectos genera un archivo por proyecto, así que el total de archivos
         // puede ser mayor que la cantidad de filas seleccionadas.
         const items = this.itemsParaDescarga(seleccionados);
         // sm - El rango se fija al iniciar: si el usuario cambia las fechas durante la descarga,
@@ -412,7 +507,7 @@ export class SeguimientoComponent implements AfterViewInit {
             if (seleccionados.length === 1) {
                 // sm - Un solo colaborador con varios proyectos: se descargan sus archivos directo, sin ZIP
                 // (un ZIP con un solo colaborador adentro no aporta nada, y evita que al seleccionar varios
-                // colaboradores se termine armando un ZIP con otros ZIPs adentro; ese caso sÃ­ usa un Ãºnico
+                // colaboradores se termine armando un ZIP con otros ZIPs adentro; ese caso sí usa un único
                 // ZIP plano con todos los archivos, ver descargarReportesZip).
                 const incluidos = await this.descargarReportesDirecto(items, formato, rango);
                 const sinActividades = items.length - incluidos;
@@ -420,7 +515,7 @@ export class SeguimientoComponent implements AfterViewInit {
                     this.cerrarProgresoDescarga();
                     this.mostrarPopup('event_busy', 'Sin actividades',
                         `<strong>${this.escaparHtml(seleccionados[0].nombre)}</strong> no tiene actividades registradas en ninguno de sus `
-                        + `<strong>${items.length}</strong> proyectos entre ${this.rangoPopup(rango)}. No se generÃ³ ningÃºn archivo.`);
+                        + `<strong>${items.length}</strong> proyectos entre ${this.rangoPopup(rango)}. No se generó ningún archivo.`);
                     return;
                 }
                 await this.finalizarProgresoDescarga();
@@ -434,38 +529,38 @@ export class SeguimientoComponent implements AfterViewInit {
                 return;
             }
 
-            // sm - Varios colaboradores seleccionados: un Ãºnico ZIP plano con todos los reportes (cada colaborador
+            // sm - Varios colaboradores seleccionados: un único ZIP plano con todos los reportes (cada colaborador
             // aporta un archivo por proyecto), sin anidar un ZIP dentro de otro.
             const incluidos = await this.descargarReportesZip(items, formato, rango);
             const sinActividades = items.length - incluidos;
             if (incluidos === 0) {
-                // sm - Todos los seleccionados estÃ¡n vacÃ­os: no se descarga ningÃºn ZIP.
+                // sm - Todos los seleccionados están vacíos: no se descarga ningún ZIP.
                 this.cerrarProgresoDescarga();
                 this.mostrarPopup('event_busy', 'Sin actividades',
                     `Ninguno de los <strong>${items.length}</strong> reportes seleccionados tiene actividades registradas entre `
-                    + `${this.rangoPopup(rango)}. No se generÃ³ ningÃºn archivo.`);
+                    + `${this.rangoPopup(rango)}. No se generó ningún archivo.`);
                 return;
             }
             // sm - Se completa la barra al 100% antes de cerrar el toast.
             await this.finalizarProgresoDescarga();
             if (sinActividades > 0) {
-                // sm - Mezcla de vacÃ­os y llenos: se informa solo el conteo de lo descargado y lo omitido.
+                // sm - Mezcla de vacíos y llenos: se informa solo el conteo de lo descargado y lo omitido.
                 const uno = sinActividades === 1;
                 this.mostrarPopup('rule', 'Descarga parcial',
                     `Se descargaron <strong>${incluidos} de ${items.length}</strong> reportes. `
                     + `<strong>${sinActividades}</strong> ${uno ? 'reporte no tiene' : 'reportes no tienen'} `
-                    + `actividades entre ${this.rangoPopup(rango)} y no se ${uno ? 'incluyÃ³' : 'incluyeron'} en el ZIP.`);
+                    + `actividades entre ${this.rangoPopup(rango)} y no se ${uno ? 'incluyó' : 'incluyeron'} en el ZIP.`);
             }
         } catch (error) {
-            // sm - Cualquier fin anticipado (sin actividades, cancelaciÃ³n o error) cierra el toast de progreso.
+            // sm - Cualquier fin anticipado (sin actividades, cancelación o error) cierra el toast de progreso.
             this.cerrarProgresoDescarga();
-            // sm - Si el Ãºnico colaborador seleccionado no tiene actividades, se muestra el pop up en lugar del error genÃ©rico.
+            // sm - Si el único colaborador seleccionado no tiene actividades, se muestra el pop up en lugar del error genérico.
             if (error instanceof SinActividadesError) {
                 this.mostrarPopup('event_busy', 'Sin actividades',
                     `<strong>${this.escaparHtml(error.colaborador)}</strong> no tiene actividades registradas entre ${this.rangoPopup(rango)}.`);
                 return;
             }
-            // sm - Si el usuario pulsÃ³ "Cancelar" en el toast, no se muestra nada mÃ¡s.
+            // sm - Si el usuario pulsó "Cancelar" en el toast, no se muestra nada más.
             if (error instanceof DescargaCanceladaError) {
                 return;
             }
@@ -473,11 +568,13 @@ export class SeguimientoComponent implements AfterViewInit {
             this.mostrarPopup('error', 'No se pudo descargar', 'No se pudieron preparar los reportes. Intenta nuevamente.');
         } finally {
             this.isDownloading = false;
+            // sm - Si llegó un aviso de cambios durante la descarga, se recarga ahora.
+            this.procesarRecargaPendiente();
         }
     }
 
-    // sm - Muestra el toast de descarga. La descarga mÃºltiple avanza por archivo/reporte (progreso real);
-    // el Excel individual no reporta avance, asÃ­ que usa barra indeterminada.
+    // sm - Muestra el toast de descarga. La descarga múltiple avanza por archivo/reporte (progreso real);
+    // el Excel individual no reporta avance, así que usa barra indeterminada.
     // sm - El toast (título, barra, porcentaje y Cancelar) ahora es el compartido de la app: DescargaProgresoService.
     private iniciarProgresoDescarga(formato: 'xlsx' | 'pdf', cantidad: number): void {
         this.descargas.iniciar(formato, cantidad);
@@ -487,12 +584,12 @@ export class SeguimientoComponent implements AfterViewInit {
         this.descargas.actualizar(progreso, detalle);
     }
 
-    // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animaciÃ³n de salida.
+    // sm - Deja la barra en 100%, espera un instante para que se vea completa y cierra el toast con su animación de salida.
     private async finalizarProgresoDescarga(): Promise<void> {
         await this.descargas.finalizar();
     }
 
-    // sm - Cierra el toast con la animaciÃ³n de salida y luego lo quita del DOM.
+    // sm - Cierra el toast con la animación de salida y luego lo quita del DOM.
     private cerrarProgresoDescarga(): void {
         this.descargas.cerrar();
     }
@@ -501,7 +598,7 @@ export class SeguimientoComponent implements AfterViewInit {
         return this.descargas.esperarCancelable(peticion);
     }
     // sm - Descarga cada reporte directo al navegador (sin ZIP): se usa cuando se selecciona un solo colaborador
-    // con varios proyectos, para no armar un ZIP con un Ãºnico colaborador adentro. Devuelve cuÃ¡ntos se descargaron;
+    // con varios proyectos, para no armar un ZIP con un único colaborador adentro. Devuelve cuántos se descargaron;
     // los que no tengan actividades en el rango se omiten.
     private async descargarReportesDirecto(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         let incluidos = 0;
@@ -529,9 +626,9 @@ export class SeguimientoComponent implements AfterViewInit {
         return incluidos;
     }
 
-    // sm - Arma un Ãºnico ZIP (PDF o Excel) solo con los reportes que tienen actividades en el rango. Un colaborador
+    // sm - Arma un único ZIP (PDF o Excel) solo con los reportes que tienen actividades en el rango. Un colaborador
     // con varios proyectos aporta un item por proyecto (ver itemsParaDescarga), cada uno con su propio archivo.
-    // Devuelve cuÃ¡ntos reportes se incluyeron; si es 0 no se descarga nada.
+    // Devuelve cuántos reportes se incluyeron; si es 0 no se descarga nada.
     private async descargarReportesZip(items: ItemDescarga[], formato: 'xlsx' | 'pdf', rango: RangoDescarga): Promise<number> {
         const zip = new JSZip();
         const nombresUsados = new Set<string>();
@@ -542,7 +639,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 ? await this.generarPdfColaborador(item.colaborador, rango, item.proyecto)
                 : await this.descargarDetalle(item.colaborador, rango, true, item.proyecto);
             if (contenido) {
-                // sm - Nombres repetidos (homÃ³nimos, o el mismo proyecto por alguna razÃ³n) no se sobrescriben: se les agrega un sufijo.
+                // sm - Nombres repetidos (homónimos, o el mismo proyecto por alguna razón) no se sobrescriben: se les agrega un sufijo.
                 const base = this.nombreArchivo(item.colaborador.nombre, item.proyecto?.nombre);
                 let nombre = base;
                 for (let sufijo = 2; nombresUsados.has(nombre.toLowerCase()); sufijo++) nombre = `${base}_${sufijo}`;
@@ -578,7 +675,7 @@ export class SeguimientoComponent implements AfterViewInit {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // sm - Nombre de archivo (sin extensiÃ³n) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez_Proyecto".
+    // sm - Nombre de archivo (sin extensión) igual para Excel y PDF, individual o dentro del ZIP: "Reporte_Juan_Perez_Proyecto".
     // Se agrega el proyecto porque una misma persona puede generar varios archivos (uno por proyecto).
     private nombreArchivo(nombre: string, proyecto?: string): string {
         const limpiar = (texto: string) => texto.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim().replace(/\s+/g, '_').slice(0, 100);
@@ -588,7 +685,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Pop up base de las descargas de Seguimiento. Usa las clases "tmr-swal" (styles/_sweetalert.scss) para verse
-    // igual que los modales de la app: tarjeta blanca, icono en cÃ­rculo azul, tÃ­tulo oscuro, texto gris y botÃ³n primario
+    // igual que los modales de la app: tarjeta blanca, icono en círculo azul, título oscuro, texto gris y botón primario
     // #163572 (con soporte de tema oscuro).
     private mostrarPopup(icono: string, titulo: string, html: string): void {
         void this.popup.show(icono, titulo, html, icono === 'download_done');
@@ -612,8 +709,8 @@ export class SeguimientoComponent implements AfterViewInit {
         return anio && mes && dia ? `${dia}/${mes}/${anio}` : fecha;
     }
 
-    // sm - BotÃ³n "Reporte": exporta la tabla (resultados filtrados) con el formato estÃ¡ndar de reportes de la app.
-    // Se eliminÃ³ la versiÃ³n anterior (ExcelJS/jsPDF manual) que quedaba despuÃ©s de un "return" y nunca se ejecutaba.
+    // sm - Botón "Reporte": exporta la tabla (resultados filtrados) con el formato estándar de reportes de la app.
+    // Se eliminó la versión anterior (ExcelJS/jsPDF manual) que quedaba después de un "return" y nunca se ejecutaba.
     public async exportarExcel() {
         await this.descargas.ejecutar('xlsx', ctx => exportarReporteExcel(this.configuracionReporteTabla(), ctx))
             .catch(error => console.error('Error al exportar el reporte de seguimiento:', error));
@@ -634,11 +731,19 @@ export class SeguimientoComponent implements AfterViewInit {
                 { encabezado: 'Colaborador', anchoExcel: 30, anchoPdf: 48 },
                 { encabezado: 'Proyecto', anchoExcel: 25, anchoPdf: 45 },
                 { encabezado: 'Cliente', anchoExcel: 25, anchoPdf: 42 },
-                { encabezado: 'LÃ­der tÃ©cnico', anchoExcel: 25, anchoPdf: 42 },
+                { encabezado: 'Líder técnico', anchoExcel: 25, anchoPdf: 42 },
                 { encabezado: 'Horas registradas', anchoExcel: 18, anchoPdf: 22, alineacion: 'center' },
                 { encabezado: 'Seguimiento', anchoExcel: 18, anchoPdf: 28, alineacion: 'center' },
-                { encabezado: 'DÃ­as con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
-                { encabezado: 'DÃ­as a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                { encabezado: 'Días con reporte', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                { encabezado: 'Días a completar', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
+                // sm - Estado en el proyecto de la fila dentro del rango filtrado (no el estado actual en el sistema).
+                // Datos de salida: los del colaborador solo si está Inactivo; la salida del proyecto, si la tiene.
+                { encabezado: 'Estado en proyecto', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
+                { encabezado: 'Fecha de salida', anchoExcel: 16, anchoPdf: 22, alineacion: 'center' },
+                { encabezado: 'Tipo de salida', anchoExcel: 18, anchoPdf: 26 },
+                { encabezado: 'Causa de salida', anchoExcel: 24, anchoPdf: 34 },
+                { encabezado: 'Motivo de salida', anchoExcel: 32, anchoPdf: 44 },
+                { encabezado: 'Salida del proyecto', anchoExcel: 18, anchoPdf: 24, alineacion: 'center' },
             ],
             filas: this.dataSource.filteredData.map((colaborador) => [
                 colaborador.nombre,
@@ -649,9 +754,40 @@ export class SeguimientoComponent implements AfterViewInit {
                 colaborador.estado,
                 Number(colaborador.diasConReporte),
                 Number(colaborador.diasACompletar),
+                colaborador.estadoEnProyecto || '-',
+                this.formatearFechaSalida(colaborador.fechaSalida),
+                colaborador.tipoSalida || '-',
+                colaborador.causaSalida || '-',
+                colaborador.motivoSalida?.trim() || '-',
+                this.formatearFechaSalida(colaborador.salidaProyecto),
             ]),
             orientacionPdf: 'landscape',
         };
+    }
+
+    // sm - Fechas de salida del backend (dd-MM-yyyy, o ISO yyyy-MM-dd) a dd/MM/yyyy; '-' si no hay.
+    private formatearFechaSalida(fecha?: string | null): string {
+        if (!fecha) return '-';
+        const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(fecha);
+        if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+        return fecha.replace(/-/g, '/');
+    }
+
+    // sm - Información adicional (fuera de la tabla) del Time Report individual: salida del colaborador si está
+    // Inactivo y salida del proyecto si la tiene. Vacío si no aplica.
+    private infoSalidaReporte(col: Colaborador): string[] {
+        const lineas: string[] = [];
+        if (col.colaboradorActivo === false) {
+            const partes = [`Fecha de salida del colaborador: ${this.formatearFechaSalida(col.fechaSalida)}`];
+            if (col.tipoSalida) partes.push(`Tipo: ${col.tipoSalida}`);
+            if (col.causaSalida) partes.push(`Causa: ${col.causaSalida}`);
+            if (col.motivoSalida?.trim()) partes.push(`Motivo: ${col.motivoSalida.trim()}`);
+            lineas.push(partes.join('  |  '));
+        }
+        if (col.salidaProyecto) {
+            lineas.push(`Salida del proyecto: ${this.formatearFechaSalida(col.salidaProyecto)}`);
+        }
+        return lineas;
     }
 
     public filtrarClientes(event: any) {
@@ -659,14 +795,21 @@ export class SeguimientoComponent implements AfterViewInit {
         this.clienteFilter.set(val || '');
     }
 
-    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de pÃ¡gina) y solo lectura.
+    // sm - Abre el calendario del colaborador en un modal (encima de Seguimiento, sin navegar de página) y solo lectura.
     public verCalendarioColaborador(col: Colaborador): void {
         this.dialog.open(CalendarioColaboradorModal, {
             data: { colaborador: col, fechaDesde: this.fechaDesde },
-            width: '900px',
+            // sm - 1400px: punto medio entre que las celdas trunquen el texto de horas (pasaba con menos)
+            // y que el modal ocupe toda la pantalla (pasaba con más) (ver calendario-colaborador-modal.scss
+            // --modal-max-width). maxWidth: 'none' porque Angular Material limita el diálogo a 80vw por
+            // defecto si no se indica.
+            width: '1400px',
+            maxWidth: 'none',
             maxHeight: '90vh',
             panelClass: 'tmr-dialog-panel',
             disableClose: true
+        }).afterClosed().subscribe((seCompleto) => {
+            if (seCompleto) this.recargarColaboradores(true);
         });
     }
 
@@ -676,7 +819,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private obtenerActividadesColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<DatosSeguimientoPdf> {
         const params: Record<string, string> = { fechaDesde: rango.desde, fechaHasta: rango.hasta };
         // sm - Ahora cada fila de Seguimiento es un colaborador+proyecto puntual (ya no una fila por colaborador
-        // con todos sus proyectos mezclados), asÃ­ que siempre se filtra por el proyecto de la fila para no mezclar
+        // con todos sus proyectos mezclados), así que siempre se filtra por el proyecto de la fila para no mezclar
         // horas de otro proyecto del mismo colaborador en el reporte.
         if (proyecto) params['idProyecto'] = String(proyecto.idProyecto);
         return this.esperarCancelable(this.http.get<DatosSeguimientoPdf>(
@@ -689,7 +832,7 @@ export class SeguimientoComponent implements AfterViewInit {
     private async generarPdfColaborador(col: Colaborador, rango: RangoDescarga, proyecto?: ProyectoResumen): Promise<ArrayBuffer | undefined> {
         const respuesta = await this.obtenerActividadesColaborador(col, rango, proyecto);
         if (!respuesta.actividades || respuesta.actividades.length === 0) return undefined;
-        const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta);
+        const contenido = await crearReporteSeguimientoPdf(col.nombre, rango.desde, rango.hasta, respuesta, '', this.infoSalidaReporte(col));
         this.descargas.verificarCancelacion();
         return contenido;
     }
@@ -701,7 +844,7 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Genera el Excel de un colaborador (o de uno de sus proyectos). Con devolverBuffer devuelve el contenido
-    // (para el ZIP) o undefined si no tiene actividades; sin Ã©l lo descarga directamente o lanza SinActividadesError
+    // (para el ZIP) o undefined si no tiene actividades; sin él lo descarga directamente o lanza SinActividadesError
     // para mostrar el pop up.
     private async descargarDetalle(col: Colaborador, rango: RangoDescarga, devolverBuffer = false, proyecto?: ProyectoResumen) {
         const res = await this.obtenerActividadesColaborador(col, rango, proyecto);
@@ -714,7 +857,7 @@ export class SeguimientoComponent implements AfterViewInit {
             throw new SinActividadesError(proyecto ? `${col.nombre} (${proyecto.nombre})` : col.nombre);
         }
 
-        // AgrupaciÃ³n de actividades por Cliente
+        // Agrupación de actividades por Cliente
         const groupsByClient: { [clientName: string]: any[] } = {};
         rawActividades.forEach(act => {
             const client = act.clienteProyecto || 'Sin Cliente';
@@ -733,7 +876,7 @@ export class SeguimientoComponent implements AfterViewInit {
             cur.setDate(cur.getDate() + 1);
         }
         const totalDays = listDates.length;
-        const totalCols = 6 + totalDays + 1; // NÂ° + Tipo + LÃ­der + Req + Desc + TotalAct + DÃ­as + TotalActFinal
+        const totalCols = 6 + totalDays + 1; // N° + Tipo + Líder + Req + Desc + TotalAct + Días + TotalActFinal
 
         const workbook = new ExcelJS.Workbook();
 
@@ -742,15 +885,15 @@ export class SeguimientoComponent implements AfterViewInit {
             const clientName = clientNames[clientIdx];
             const clientActividades = groupsByClient[clientName];
 
-            // Limpiar nombre de hoja para que sea vÃ¡lido en Excel
+            // Limpiar nombre de hoja para que sea válido en Excel
             let sheetName = `Reporte_${clientName}`.replace(/[*?:\\/\[\]]/g, '').substring(0, 31);
             if (sheetName.length === 0) sheetName = `Reporte_${clientIdx + 1}`;
             const worksheet = workbook.addWorksheet(sheetName);
 
             // Configurar anchos de columna
-            const colWidths = [5, 20, 25, 25, 60, 15]; // NÂ°, Tipo, LÃ­der, Req, Desc, Total
+            const colWidths = [5, 20, 25, 25, 60, 15]; // N°, Tipo, Líder, Req, Desc, Total
             for (let i = 0; i < totalDays; i++) {
-                colWidths.push(4.5); // DÃ­as
+                colWidths.push(4.5); // Días
             }
             colWidths.push(15); // Total Final
             worksheet.columns = colWidths.map((w, idx) => ({
@@ -771,7 +914,7 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(5, 3).font = { name: 'Arial', size: 11, bold: true };
 
             // Fila 6: Encabezados de tabla
-            worksheet.getCell(6, 1).value = 'NÂ°';
+            worksheet.getCell(6, 1).value = 'N°';
             worksheet.getCell(6, 2).value = 'TIPO DE ACTIVIDAD';
             worksheet.getCell(6, 3).value = 'LIDER DE PROYECTO';
             worksheet.getCell(6, 4).value = 'CODIGO REQUERIMIENTO / INCIDENTE';
@@ -781,22 +924,22 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(6, totalCols).value = 'TOTAL HORAS POR ACT.';
 
             // Combinaciones de encabezado
-            worksheet.mergeCells(6, 1, 8, 1); // NÂ°
+            worksheet.mergeCells(6, 1, 8, 1); // N°
             worksheet.mergeCells(6, 2, 8, 2); // Tipo
-            worksheet.mergeCells(6, 3, 8, 3); // LÃ­der
+            worksheet.mergeCells(6, 3, 8, 3); // Líder
             worksheet.mergeCells(6, 4, 8, 4); // Req
             worksheet.mergeCells(6, 5, 8, 5); // Desc
             worksheet.mergeCells(6, 6, 8, 6); // Total
-            worksheet.mergeCells(6, 7, 6, 6 + totalDays); // DistribuciÃ³n del tiempo
+            worksheet.mergeCells(6, 7, 6, 6 + totalDays); // Distribución del tiempo
             worksheet.mergeCells(6, totalCols, 8, totalCols); // Total Final
 
-            // Fila 7: NÃºmeros de dÃ­a (01..31)
+            // Fila 7: Números de día (01..31)
             listDates.forEach((date, dateIdx) => {
                 const dayNum = String(date.getDate()).padStart(2, '0');
                 worksheet.getCell(7, 7 + dateIdx).value = dayNum;
             });
 
-            // Fila 8: Iniciales de dÃ­a de la semana (L, M, M, J, V, S, D)
+            // Fila 8: Iniciales de día de la semana (L, M, M, J, V, S, D)
             const weekdays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
             listDates.forEach((date, dateIdx) => {
                 const dayName = weekdays[date.getDay()];
@@ -825,7 +968,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 }
             }
 
-            // Agrupar actividades por combinaciÃ³n Ãºnica
+            // Agrupar actividades por combinación única
             const groupedRows: { [key: string]: {
                 tipo: string,
                 lider: string,
@@ -875,7 +1018,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 worksheet.getCell(currentRow, 4).value = group.req;
                 worksheet.getCell(currentRow, 5).value = group.desc;
 
-                // DÃ­as
+                // Días
                 listDates.forEach((date, dateIdx) => {
                     const dateStr = this.formatDate(date);
                     const hrs = group.hoursByDay[dateStr];
@@ -884,7 +1027,7 @@ export class SeguimientoComponent implements AfterViewInit {
                     }
                 });
 
-                // FÃ³rmulas
+                // Fórmulas
                 const startAddr = worksheet.getCell(currentRow, 7).address.replace(/[0-9]/g, '');
                 const endAddr = worksheet.getCell(currentRow, 6 + totalDays).address.replace(/[0-9]/g, '');
                 worksheet.getCell(currentRow, 6).value = { formula: `SUM(${startAddr}${currentRow}:${endAddr}${currentRow})` } as any;
@@ -976,6 +1119,13 @@ export class SeguimientoComponent implements AfterViewInit {
                 }
             }
 
+            // sm - Información adicional de salida (fuera de la tabla), entre los totales y las firmas.
+            this.infoSalidaReporte(col).forEach((linea, i) => {
+                const celda = worksheet.getCell(totalRow + 2 + i, 2);
+                celda.value = linea;
+                celda.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF163572' } };
+            });
+
             // Firmas
             const sigRow1 = totalRow + 5;
             const sigRow2 = totalRow + 6;
@@ -986,7 +1136,7 @@ export class SeguimientoComponent implements AfterViewInit {
             worksheet.getCell(sigRow2, 2).font = { name: 'Arial', size: 10, bold: true };
 
             const distinctLeaders = Array.from(new Set(clientActividades.map(act => act.liderProyecto).filter(Boolean)));
-            const leaderName = distinctLeaders.length > 0 ? distinctLeaders.join(', ') : 'Sin LÃ­der';
+            const leaderName = distinctLeaders.length > 0 ? distinctLeaders.join(', ') : 'Sin Líder';
             worksheet.getCell(sigRow1, 8).value = `Revisado y Aprobado por: ${leaderName}`;
             worksheet.getCell(sigRow1, 8).font = { name: 'Arial', size: 10, italic: true };
             worksheet.getCell(sigRow2, 8).value = `Empresa: ${clientName}`;
@@ -1025,7 +1175,7 @@ export class SeguimientoComponent implements AfterViewInit {
                 };
             });
 
-            // Llamar a la estandarizaciÃ³n de cabeceras corporativas
+            // Llamar a la estandarización de cabeceras corporativas
             const currentMonthName = startDate.toLocaleString('es-EC', { month: 'long' }).toUpperCase();
             await estandarizarCabeceraExcelExistente(
                 workbook,
@@ -1058,34 +1208,289 @@ export class SeguimientoComponent implements AfterViewInit {
     }
 
     // sm - Se eliminaron cambiarPeriodo/ajustarFechasPorPeriodo (ya no existen los botones Quincena/Mes completo) y el
-    // cÃ¡lculo del "periodo" que se enviaba al backend sin usarse. Solo se asegura que "hasta" no sea menor que "desde".
+    // cálculo del "periodo" que se enviaba al backend sin usarse. Solo se asegura que "hasta" no sea menor que "desde".
     public onFechaManualChange() {
-        if (this.fechaDesde && this.fechaHasta && this.fechaHasta < this.fechaDesde) {
+        // sm - Con una fecha vacía (borrada o a medio escribir) no se recarga: el backend exige ambas y
+        // respondía error, dejando la tabla con datos de otro rango. Se recarga al completar las dos.
+        if (!this.fechaDesde || !this.fechaHasta) return;
+        if (this.fechaHasta < this.fechaDesde) {
             this.fechaHasta = this.fechaDesde;
         }
         this.aplicarFiltros();
     }
-    //notificacaiones mock hay que cambiar la logica cuando ya se encuentre realizado el backend
 
-    notificarColaborador(colaborador: Colaborador) {
-        this.popup.loading('Enviando...', 'Espera un momento');
-
-        this.notificacionesService.notificar({ empleadoIds: [+colaborador.id] })
-          .subscribe({
-            next: (response) => {
-              console.log('Respuesta del endpoint de notificar:', response);
-              this.popup.show(
-                'check_circle',
-                'Notificación Enviada',
-                response.mensaje || `Se ha enviado un recordatorio a <b>${colaborador.nombre}</b>.`, 
-                true
-              );
-            },
-            error: (err) => {
-              console.error('Error al notificar:', err);
-              this.popup.show('error', 'Error', 'No se pudo enviar la notificación');
-            }
-          });
+    // Aviso manual: el POST solo encola la solicitud (202); el resultado real (enviado / fallido / omitido)
+    // se consulta con GET /notificaciones/estado hasta que el backend lo registre. Se agrupa por colaborador:
+    // si tiene varias filas seleccionadas (varios proyectos) se manda un aviso general (sin idProyecto); si
+    // tiene una sola fila seleccionada, el aviso queda filtrado a ese proyecto puntual.
+    private claveFila(colaborador: Colaborador): string {
+        return `${colaborador.id}:${this.proyectoDeFila(colaborador)?.idProyecto ?? 'sin-proyecto'}`;
     }
 
+    // Undefined en la fila "Sin Proyecto" (el aviso usa todas sus horas, igual que esa fila)
+    private proyectoDeFila(colaborador: Colaborador) {
+        return colaborador.proyectos?.[0];
+    }
+
+    // El permiso NOTIFICACIONES_EJECUTAR se asigna a Administrador y Líder (script 14); el backend lo valida igual.
+    public readonly puedeNotificar = this.tokenService.hasRole('ADMINISTRADOR') || this.tokenService.isLider();
+
+    async notificarSeleccionados() {
+        if (!this.puedeNotificar || this.isNotifying || !this.selection.hasValue()) return;
+
+        // Sin rango el backend no sabría qué horas informar
+        if (!this.fechaDesde || !this.fechaHasta) {
+            this.toastService.error('Faltan las fechas',
+                'Selecciona la fecha desde y la fecha hasta del filtro antes de notificar.');
+            return;
+        }
+
+        // Una persona puede tener varias filas seleccionadas (una por proyecto): si tiene 2+, el aviso es
+        // general para esa persona (sin idProyecto); si tiene solo 1, queda filtrado a ese proyecto.
+        const filasPorEmpleado = new Map<number, Colaborador[]>();
+        for (const fila of this.selection.selected) {
+            const id = +fila.id;
+            const filas = filasPorEmpleado.get(id);
+            if (filas) filas.push(fila); else filasPorEmpleado.set(id, [fila]);
+        }
+        const idProyectoPorEmpleado = new Map<number, number | undefined>();
+        for (const [id, filas] of filasPorEmpleado) {
+            idProyectoPorEmpleado.set(id, filas.length === 1 ? this.proyectoDeFila(filas[0])?.idProyecto : undefined);
+        }
+
+        // Se agrupan las personas por el idProyecto resultante: una sola llamada al backend por grupo.
+        const grupos = new Map<number | undefined, number[]>();
+        for (const [id, idProyecto] of idProyectoPorEmpleado) {
+            const ids = grupos.get(idProyecto);
+            if (ids) ids.push(id); else grupos.set(idProyecto, [id]);
+        }
+
+        const totalPersonas = filasPorEmpleado.size;
+        const [idUnico] = filasPorEmpleado.keys();
+        const esUnaSolaPersona = totalPersonas === 1;
+        const nombreUnico = esUnaSolaPersona ? filasPorEmpleado.get(idUnico)![0].nombre : '';
+        const proyectoUnico = esUnaSolaPersona ? this.proyectoDeFila(filasPorEmpleado.get(idUnico)![0]) : undefined;
+
+        // Toast que queda visible mientras dure el envío (un envío masivo puede tardar minutos) y muestra el avance
+        const toastEnCurso = this.toastService.enCurso(
+            esUnaSolaPersona ? `Notificando a ${nombreUnico}` : `Enviando notificaciones a ${totalPersonas} personas`,
+            esUnaSolaPersona ? 'Se envió la solicitud, esperando confirmación...' : `0 de ${totalPersonas} procesadas`);
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const mostrarAvance = () => {
+            if (esUnaSolaPersona) return;
+            const procesados = [...resultados.values()].filter(e => e !== null).length;
+            this.toastService.actualizar(toastEnCurso, { detalle: `${procesados} de ${totalPersonas} procesadas` });
+        };
+
+        this.isNotifying = true;
+        try {
+            // 1. Las solicitudes se envían una tras otra (cada una responde al instante con 202): en paralelo, junto
+            //    con las conexiones de espera, podían agotar las conexiones del navegador y quedarse colgadas.
+            const solicitados: number[] = [];
+            let desdeMs = Number.POSITIVE_INFINITY;
+            let primerError: any = null;
+            for (const [idProyecto, ids] of grupos) {
+                try {
+                    const solicitud = await lastValueFrom(this.notificacionesService.notificar({
+                        empleadoIds: ids,
+                        fechaDesde: this.fechaDesde,
+                        fechaHasta: this.fechaHasta,
+                        idProyecto,
+                    }));
+                    solicitados.push(...ids);
+                    desdeMs = Math.min(desdeMs, solicitud.solicitadoEnMs);
+                } catch (err) {
+                    console.error('Error al notificar:', err);
+                    primerError ??= err;
+                    // Ese grupo no quedó en cola: cuenta como fallido en el resumen final
+                    const detalle = this.mensajeErrorSolicitud(err, `${ids.length} personas`);
+                    for (const id of ids) resultados.set(id, { idEmpleado: id, estado: 'Fallido', detalle });
+                    mostrarAvance();
+                }
+            }
+            if (solicitados.length === 0) throw primerError;
+
+            // 2. Una sola espera por todos (cada persona está en un único grupo, así que no hace falta filtrar por
+            //    proyecto salvo que haya uno solo), con el avance en vivo en el toast
+            const idProyectoEspera = grupos.size === 1 ? [...grupos.keys()][0] : undefined;
+            await this.esperarResultadosNotificacion(solicitados, desdeMs, idProyectoEspera, estado => {
+                resultados.set(estado.idEmpleado, estado);
+                mostrarAvance();
+            }).then(finales => {
+                for (const [id, estado] of finales) if (!resultados.get(id)) resultados.set(id, estado);
+            });
+
+            this.toastService.cerrar(toastEnCurso);
+            if (esUnaSolaPersona) {
+                this.mostrarResultadoIndividual(nombreUnico, proyectoUnico, resultados.get(idUnico) ?? null);
+            } else {
+                this.mostrarResultadoMasivo(totalPersonas, resultados);
+            }
+        } catch (err: any) {
+            console.error('Error al notificar:', err);
+            this.toastService.cerrar(toastEnCurso);
+            this.toastService.error('No se pudo enviar la notificación',
+                this.mensajeErrorSolicitud(err, esUnaSolaPersona ? nombreUnico : `${totalPersonas} personas`));
+        } finally {
+            this.isNotifying = false;
+        }
+    }
+
+    private mostrarResultadoIndividual(nombre: string, proyecto: ProyectoResumen | undefined, estado: EstadoEmpleado | null) {
+        switch (estado?.estado) {
+            case 'Enviado':
+                this.toastService.exito('Notificación enviada',
+                    `Se envió un recordatorio a ${nombre}${proyecto ? ` por el proyecto ${proyecto.nombre}` : ''}.`);
+                break;
+            case 'Omitido':
+                this.toastService.warning('Notificación no enviada',
+                    `${nombre}: ${estado.detalle ?? 'no corresponde avisar en este momento'}.`);
+                break;
+            case 'Fallido':
+                this.toastService.error('No se pudo enviar',
+                    `El correo para ${nombre} no pudo enviarse${this.motivoFallo(estado.detalle)}. Intenta nuevamente en unos minutos.`);
+                break;
+            default:
+                this.toastService.warning('Envío en proceso',
+                    `El recordatorio para ${nombre} sigue en cola; se enviará en breve.`);
+        }
+    }
+
+    private mostrarResultadoMasivo(totalPersonas: number, resultados: Map<number, EstadoEmpleado | null>) {
+        let enviados = 0, omitidos = 0, fallidos = 0, pendientes = 0;
+        for (const estado of resultados.values()) {
+            switch (estado?.estado) {
+                case 'Enviado': enviados++; break;
+                case 'Omitido': omitidos++; break;
+                case 'Fallido': fallidos++; break;
+                default: pendientes++;
+            }
+        }
+        // Siempre los tres totales, aunque sean 0. Quién y por qué falló se consulta notificando a esa persona sola.
+        let detalle = `De ${totalPersonas} personas: ${enviados} enviadas, ${omitidos} omitidas y ${fallidos} fallidas.`;
+        if (pendientes > 0) detalle += ` ${pendientes} siguen en cola y se enviarán en breve.`;
+
+        // Más tiempo en pantalla que un toast normal: es el resumen de un proceso largo
+        const duracionMs = 15000;
+        if (fallidos > 0) this.toastService.error('Notificaciones finalizadas con errores', detalle, duracionMs);
+        else if (omitidos > 0 || pendientes > 0) this.toastService.warning('Notificaciones finalizadas', detalle, duracionMs);
+        else this.toastService.exito('Notificaciones enviadas', detalle, duracionMs);
+    }
+
+    // El detalle técnico del fallo (p. ej. la respuesta de Apprise) puede ser largo: se muestra recortado
+    private motivoFallo(detalle: string | null): string {
+        const texto = detalle?.replace(/\s+/g, ' ').trim();
+        if (!texto) return '';
+        return ` (motivo: ${texto.length > 160 ? texto.slice(0, 157) + '...' : texto})`;
+    }
+
+    // Mensaje legible para el error del POST /notificar, venga como { mensaje }, ProblemDetails o validación
+    private mensajeErrorSolicitud(err: any, destinatario: string): string {
+        if (err?.status === 403) return 'No tienes permiso para enviar notificaciones.';
+        if (err?.status === 401) return 'Tu sesión expiró. Vuelve a iniciar sesión e intenta de nuevo.';
+        if (err?.status === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.';
+
+        const cuerpo = err?.error;
+        if (err?.status === 400) {
+            const errores = cuerpo?.errors;
+            const primerError = Array.isArray(errores)
+                ? (errores[0]?.message ?? errores[0]?.mensaje ?? errores[0])
+                : errores && typeof errores === 'object'
+                    ? (Object.values(errores).flat()[0] as string | undefined)
+                    : undefined;
+            const texto = cuerpo?.mensaje ?? cuerpo?.message ?? cuerpo?.detail ?? primerError ?? cuerpo?.title;
+            return typeof texto === 'string' && texto.trim()
+                ? texto
+                : 'Los datos de la solicitud no son válidos. Revisa las fechas del filtro.';
+        }
+        if (err?.status >= 500) return 'El servidor no pudo registrar la solicitud. Intenta nuevamente en unos minutos.';
+        return `No se pudo registrar la solicitud para ${destinatario}.`;
+    }
+
+    // El backend acepta como máximo 200 empleados por consulta de estado (MaxEmpleadosEstado)
+    private static readonly MAX_EMPLEADOS_POR_ESPERA = 200;
+
+    // Espera el resultado de todos los empleados avisados, en lotes de hasta 200 (uno por conexión).
+    // alRecibir se llama con cada resultado en cuanto llega, para mostrar el avance.
+    private async esperarResultadosNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const lotes: number[][] = [];
+        for (let i = 0; i < idEmpleados.length; i += SeguimientoComponent.MAX_EMPLEADOS_POR_ESPERA) {
+            lotes.push(idEmpleados.slice(i, i + SeguimientoComponent.MAX_EMPLEADOS_POR_ESPERA));
+        }
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const porLote = await Promise.all(lotes.map(lote => this.esperarLoteNotificacion(lote, desdeMs, idProyecto, alRecibir)));
+        for (const lote of porLote) for (const [id, estado] of lote) resultados.set(id, estado);
+        return resultados;
+    }
+
+    // Espera el resultado de un lote por SSE (el backend empuja cada uno en cuanto lo registra, hasta ~6 min).
+    // Si el stream no está disponible o se corta antes de completarse, los que falten se siguen consultando
+    // por GET /estado. Los que sigan en cola al agotarse la espera quedan null.
+    private async esperarLoteNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        const faltantes = new Set(idEmpleados);
+
+        await new Promise<void>(resolve => {
+            const suscripcion = this.notificacionesService.streamEstado(idEmpleados, desdeMs, idProyecto).pipe(
+                timeout(6 * 60 * 1000),
+            ).subscribe({
+                next: evento => {
+                    if (evento.tipo === 'estado' && faltantes.has(evento.estado.idEmpleado)) {
+                        resultados.set(evento.estado.idEmpleado, evento.estado);
+                        faltantes.delete(evento.estado.idEmpleado);
+                        alRecibir?.(evento.estado);
+                        if (faltantes.size === 0) { suscripcion.unsubscribe(); resolve(); }
+                    } else if (evento.tipo === 'fin') {
+                        suscripcion.unsubscribe();
+                        resolve();
+                    }
+                },
+                error: err => {
+                    console.warn('Stream de estado no disponible; se consulta el estado periódicamente:', err);
+                    resolve();
+                },
+                complete: () => resolve(),
+            });
+        });
+
+        if (faltantes.size > 0) {
+            const porConsulta = await this.consultarResultadosNotificacion([...faltantes], desdeMs, idProyecto, alRecibir);
+            for (const [id, estado] of porConsulta) resultados.set(id, estado);
+        }
+        return resultados;
+    }
+
+    // Respaldo: consulta el estado cada 3 s (máx. ~90 s) de los empleados que no llegaron a tiempo por SSE.
+    private async consultarResultadosNotificacion(
+        idEmpleados: number[], desdeMs: number, idProyecto?: number,
+        alRecibir?: (estado: EstadoEmpleado) => void,
+    ): Promise<Map<number, EstadoEmpleado | null>> {
+        const resultados = new Map<number, EstadoEmpleado | null>();
+        let pendientes = [...idEmpleados];
+        const intentos = 30;
+        for (let i = 0; i < intentos && pendientes.length > 0; i++) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            try {
+                const respuesta = await lastValueFrom(this.notificacionesService.getEstado(pendientes, desdeMs, idProyecto));
+                for (const estado of respuesta.empleados) {
+                    if (estado.estado !== 'Pendiente' && !resultados.has(estado.idEmpleado)) {
+                        resultados.set(estado.idEmpleado, estado);
+                        alRecibir?.(estado);
+                    }
+                }
+                pendientes = pendientes.filter(id => !resultados.has(id));
+            } catch (err) {
+                console.error('Error al consultar el estado de la notificación:', err);
+                break;
+            }
+        }
+        for (const id of pendientes) resultados.set(id, null);
+        return resultados;
+    }
 }

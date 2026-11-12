@@ -34,7 +34,9 @@ export class SeguimientoService {
     return this._metricas();
   }
 
-  cargarColaboradores(filtros: SeguimientoFiltros): void {
+  // sm - silencioso: recarga automática (otra pestaña guardó, o se volvió a la pestaña). No muestra
+  // "Cargando registros..." ni vacía la tabla: los datos se reemplazan cuando llegan.
+  cargarColaboradores(filtros: SeguimientoFiltros, silencioso = false): void {
     let params = new HttpParams()
       .set('fechaDesde', filtros.fechaDesde || '')
       .set('fechaHasta', filtros.fechaHasta || '');
@@ -44,7 +46,7 @@ export class SeguimientoService {
     // sm - Se cancela la carga anterior si sigue en curso: así una respuesta vieja que llegue tarde
     // no pisa los datos del último filtro aplicado.
     this.cargaEnCurso?.unsubscribe();
-    this._cargando.set(true);
+    if (!silencioso) this._cargando.set(true);
     this.cargaEnCurso = this.http.get<Colaborador[]>(this.apiUrl, { params }).subscribe({
       next: (data) => {
         this._colaboradores.set(data || []);
@@ -57,32 +59,22 @@ export class SeguimientoService {
       }
     });
   }
-  //SM -Extraer la lógica de cálculo de métricas a un método separado para poder reutilizarlo en otros lugares
-  //SM - Arreglar el cálculo de promedio para que se calcule sobre los días con reporte
   calcularMetricas(colaboradores: Colaborador[]): MetricasSeguimiento {
     const totalRegistradas = (colaboradores || []).reduce((acc, c) => acc + Number(c.nroHoras || 0), 0);
-    // sm - Se comenta el cálculo anterior porque usaba 8 h para todos (también pasantes) y contaba días sin reporte
-    // en lugar de horas faltantes (un día con 2 h registradas contaba como completo).
-    // const totalPendientes = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasACompletar || 0) * 8, 0);
-    // sm - Nuevo cálculo: suma las "horas por registrar" que calcula el backend por colaborador (jornada 8 h o 6 h
-    // para pasantes, solo días laborables del rango sin feriados y solo los días que trabajó).
-    // Si el backend aún no envía el campo, se usa el cálculo anterior como respaldo para no mostrar 0.
+    // sm - "Horas por registrar" la calcula el backend por colaborador (jornada 8 h, o 6 h para pasantes, solo días
+    // laborables del rango sin feriados y solo los días que trabajó). Si aún no envía el campo, se respalda en
+    // días a completar × 8 h para no mostrar 0.
     const totalPendientes = (colaboradores || []).reduce((acc, c) =>
       acc + (c.horasPorRegistrar != null ? Number(c.horasPorRegistrar) : Number(c.diasACompletar || 0) * 8), 0);
     const totalDiasConReporte = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasConReporte || 0), 0);
-    // sm - Se comenta el promedio anterior: dividía entre "días con reporte", que ahora son solo los días que cumplen
-    // la jornada mínima, así que el promedio saldría inflado.
-    // const promedio = totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0;
-    // sm - Nuevo promedio: horas registradas en días laborables ÷ días laborables del periodo (hasta hoy, sin fines
-    // de semana ni feriados, y solo los días que trabajó cada colaborador). Se suman los de todos los seleccionados.
-    // Si el backend aún no envía estos campos, se usa el cálculo anterior como respaldo.
+    // sm - Promedio: horas registradas en días laborables ÷ días laborables del periodo (hasta hoy, sin fines de
+    // semana ni feriados, y solo los días que trabajó cada colaborador). Si el backend aún no envía estos campos,
+    // se respalda en horas registradas ÷ días con reporte.
     const tieneDatosPromedio = (colaboradores || []).some(c => c.diasLaborables != null);
     const totalDiasLaborables = (colaboradores || []).reduce((acc, c) => acc + Number(c.diasLaborables || 0), 0);
     const promedio = tieneDatosPromedio
       ? (totalDiasLaborables > 0 ? totalRegistradas / totalDiasLaborables : 0)
       : (totalDiasConReporte > 0 ? (totalRegistradas / totalDiasConReporte) : 0);
-    //Se actualizo calculo de promedio, para que para que el promedio sea calculado sobre los días con reporte, no sobre todos los colaboradores
-    //por lo cual se agrego una nueva variable totalDiasConReporte que suma los días con reporte de todos los colaboradores
     const activos = (colaboradores || []).filter(c => Number(c.nroHoras || 0) > 0).length;
 
     const proyectosSet = new Set<string>();
@@ -98,17 +90,4 @@ export class SeguimientoService {
       proyectosUnicos: proyectosSet.size
     };
   }
-
-  // sm - Se comenta: la funcionalidad de aprobar horas se retira de Seguimiento (el estado ahora es automático).
-  // aprobarColaboradores(ids: (number | string)[]): void {
-  //   const idsNum = ids.map(id => Number(id));
-  //   this.http.post(`${this.apiUrl}/aprobar`, { ids: idsNum }).subscribe({
-  //     next: () => {
-  //       this._colaboradores.update(prev =>
-  //         prev.map(c => idsNum.includes(Number(c.id)) ? { ...c, estado: 'Completo' } : c)
-  //       );
-  //     },
-  //     error: (err) => console.error('Error al aprobar', err)
-  //   });
-  // }
 }

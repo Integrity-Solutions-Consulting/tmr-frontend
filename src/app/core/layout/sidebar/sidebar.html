@@ -18,7 +18,7 @@
   </a>
 
   <!-- ══ Time Report ══ -->
-  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento')">
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="trOpen" *ngIf="hasModule('Time Report') || hasModule('Actividades') || hasModule('Seguimiento') || hasModule('Fechas de Corte')">
     <button type="button" class="sidebar__link sidebar__link--parent" title="Time Report" (click)="toggleGroup('timeReport')" [attr.aria-expanded]="trOpen">
       <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/time-report.svg')"></span>
       <span>Time Report</span>
@@ -32,6 +32,37 @@
       <a routerLink="/time-report/seguimiento" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Seguimiento')">
         <span class="sidebar__svg sidebar__svg--sm" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Time-Report/seguimiento.svg')"></span>
         <span>Seguimiento</span>
+      </a>
+      <a routerLink="/time-report/fechas-corte" routerLinkActive="active" class="sidebar__sublink" *ngIf="hasModule('Fechas de Corte')">
+        <span class="material-symbols-outlined sidebar__sublink-icon">event_repeat</span>
+        <span>Fechas de Corte</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ Permisos ══ -->
+  <div class="sidebar__group" routerLinkActive="sidebar__group--active" [class.sidebar__group--open]="permOpen" *ngIf="canAccessMisPermisos()">
+    <button type="button" class="sidebar__link sidebar__link--parent" title="Permisos" (click)="toggleGroup('permisos')" [attr.aria-expanded]="permOpen">
+      <span class="material-symbols-outlined sidebar__supplier-icon">beach_access</span>
+      <span>Permisos</span>
+      <span class="sidebar__chevron" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/chevron-sidebar.svg')"></span>
+    </button>
+    <div class="sidebar__submenu" [class.sidebar__submenu--visible]="permOpen">
+      <a routerLink="/permisos" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="sidebar__sublink" *ngIf="canAccessMisPermisos()">
+        <span class="material-symbols-outlined sidebar__sublink-icon">beach_access</span>
+        <span>Mis Permisos</span>
+      </a>
+      <a routerLink="/permisos/equipo" routerLinkActive="active" class="sidebar__sublink" *ngIf="canAccessPermisosLider()">
+        <span class="material-symbols-outlined sidebar__sublink-icon">fact_check</span>
+        <span>Aprobación Líder</span>
+      </a>
+      <a routerLink="/permisos/rrhh" routerLinkActive="active" class="sidebar__sublink" *ngIf="canAccessPermisosRrhh()">
+        <span class="material-symbols-outlined sidebar__sublink-icon">verified_user</span>
+        <span>Validación RRHH</span>
+      </a>
+      <a routerLink="/permisos/gerencia" routerLinkActive="active" class="sidebar__sublink" *ngIf="canAccessPermisosGerencia()">
+        <span class="material-symbols-outlined sidebar__sublink-icon">manage_search</span>
+        <span>Historial Gerencia</span>
       </a>
     </div>
   </div>

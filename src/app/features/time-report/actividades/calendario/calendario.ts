@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActividadesService } from '../../../../shared/services/actividades.service';
 import { FeriadosService } from '../../../../shared/services/feriados.service';
 import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
@@ -29,6 +30,7 @@ interface DiaCalendario {
         MatIconModule,
         MatSelectModule,
         MatFormFieldModule,
+        MatTooltipModule,
         HorasFormatPipe
     ],
     templateUrl: './calendario.html',
@@ -51,6 +53,8 @@ export class Calendario implements OnInit {
     // sm - Fecha (yyyy-MM-dd) cuyo mes se muestra al abrir. El modal de Seguimiento manda el "Fecha desde" del filtro
     // para que el calendario abra en el mes consultado y no siempre en el mes actual.
     @Input() fechaInicialOverride?: string;
+    // sm - Líder que completa actividades desde Seguimiento: solo puede abrir las que él mismo cargó, no las del colaborador.
+    @Input() idLiderEdicion?: number | null;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -132,8 +136,12 @@ export class Calendario implements OnInit {
     editarActividad(event: MouseEvent, actividad: any) {
         event.stopPropagation();
         // sm - En modo solo lectura no se permite abrir el modal de edición de actividad.
-        if (this.soloLectura) return;
+        if (this.soloLectura || this.chipBloqueado(actividad)) return;
         this.editarActividadEvent.emit(actividad);
+    }
+
+    chipBloqueado(actividad: any): boolean {
+        return this.idLiderEdicion != null && actividad.idLiderRegistro !== this.idLiderEdicion;
     }
 
     getActividadClass(act: any): string {

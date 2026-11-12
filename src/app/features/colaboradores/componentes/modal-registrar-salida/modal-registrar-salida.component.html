@@ -109,6 +109,9 @@
             <span class="form-field__hint">Máximo 500 caracteres</span>
           </div>
         </div>
+        @if (errorMensaje) {
+          <span class="form-field__error form-field__error--general" role="alert">{{ errorMensaje }}</span>
+        }
       </div>
 
     </div>

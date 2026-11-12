@@ -1,0 +1,98 @@
+<div class="portal-externo-wrapper">
+  <div class="portal-externo-card">
+    <header class="portal-banner">
+      <div class="portal-banner__brand">
+        <div class="portal-banner__logo-box">
+          <img
+            src="assets/img/logo-isc.png"
+            alt="Integrity Solutions"
+            class="portal-banner__logo-img" />
+        </div>
+        <div>
+          <p>Portal de Revisión Externa</p>
+          <h1>Aprobación de Solicitud</h1>
+        </div>
+      </div>
+      <div class="portal-banner__meta">
+        <strong>{{ datosFormulario().folio }}</strong>
+      </div>
+    </header>
+
+    <div class="portal-body">
+      <app-resumen-solicitud
+        [datos]="datosFormulario()"
+        [tipo]="datosFormulario().tipoPermiso"
+        [proyecto]="solicitudApi()?.proyecto || ''"
+        [estado]="solicitudApi()?.estadoTexto || 'Pendiente de decisión'"
+        [adjuntos]="solicitudApi()?.adjuntos || []" />
+
+      @if (procesado() === 'pendiente') {
+        <div class="modal-form">
+          <div class="form-field">
+            <label>Comentarios</label>
+            <textarea
+              rows="2"
+              [ngModel]="observacionLider()"
+              (ngModelChange)="observacionLider.set($event)"
+              placeholder="Observaciones o motivo (necesario en caso de observar o rechazar)..."></textarea>
+          </div>
+
+          <div class="modal-footer" style="justify-content: space-between;">
+            <button type="button" class="btn-tmr btn-tmr--secondary" (click)="cerrarVentana()">
+              Cerrar
+            </button>
+            <div class="portal-actions">
+              <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf()">
+                <span class="material-symbols-outlined">download</span>
+                Descargar PDF
+              </button>
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--warning"
+                [disabled]="enviandoDecision()"
+                (click)="observarExterno()">
+                {{ enviandoDecision() ? 'Procesando...' : 'Observar' }}
+              </button>
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--danger"
+                [disabled]="enviandoDecision()"
+                (click)="rechazarExterno()">
+                {{ enviandoDecision() ? 'Procesando...' : 'Rechazar' }}
+              </button>
+              <button
+                type="button"
+                class="btn-tmr btn-tmr--primary"
+                [disabled]="enviandoDecision()"
+                (click)="confirmarExterno()">
+                {{ enviandoDecision() ? 'Guardando...' : 'Aprobar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+          <span
+            class="status-badge"
+            [class.status-badge--confirmado]="procesado() === 'confirmado'"
+            [class.status-badge--observado]="procesado() === 'observado'"
+            [class.status-badge--rechazado]="procesado() === 'rechazado'">
+            {{
+              procesado() === 'confirmado'
+                ? 'Solicitud Aprobada'
+                : procesado() === 'observado'
+                  ? 'Solicitud Observada'
+                  : 'Solicitud Rechazada'
+            }}
+          </span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="descargarPdf()">
+              <span class="material-symbols-outlined">download</span>
+              Descargar PDF Oficial
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

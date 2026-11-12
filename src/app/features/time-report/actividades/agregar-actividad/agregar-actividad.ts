@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
@@ -21,6 +22,14 @@ import { FeriadosService } from '../../../../shared/services/feriados.service';
 import { TourService } from '../../../../shared/services/tour.service';
 import { ModalEliminarActividadComponent } from './modal-eliminar-actividad/modal-eliminar-actividad.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { HorasFormatPipe } from '../../../../shared/pipes/horas-format.pipe';
+
+// sm - Progreso de horas registradas en el proyecto+día que se está editando, contra la jornada completa
+// exigida (ver CalculoHorasPeriodo en el backend).
+export interface ProgresoProyectoDia {
+    horas: number;
+    horasJornada: number;
+}
 
 @Component({
     selector: 'app-agregar-actividad',
@@ -40,7 +49,8 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
         MatNativeDateModule,
         MatAutocompleteModule,
         ModalEliminarActividadComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        HorasFormatPipe
     ],
     templateUrl: './agregar-actividad.html',
     styleUrls: ['./agregar-actividad.scss']
@@ -67,9 +77,19 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     public guardadoParcial = false;
     public mostrarConfirmacionHoras = false;
 
+    // sm - Progreso de actividades y horas ya registradas en el proyecto+día seleccionados, para que el
+    // colaborador sepa si le faltan actividades u horas antes de guardar (el mínimo lo exige Seguimiento, no
+    // este guardado: ver respuesta del usuario sobre "dónde se bloquea"). Null si no aplica (recurrente, o
+    // todavía no se elige proyecto/fecha).
+    public progreso = signal<ProgresoProyectoDia | null>(null);
+
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
-    public proyectos = signal<{ id: string, nombre: string, codigo?: string | null }[]>([]);
+    // sm - fechaEntrada/fechaSalida: vigencia de la asignación; salidaColaborador: su salida de la empresa si está Inactivo.
+    public proyectos = signal<{
+        id: string, nombre: string, codigo?: string | null,
+        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null
+    }[]>([]);
 
     // Autocomplete filter signals
     public proyectoFilter = signal('');
@@ -138,6 +158,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             const [dia, mes, anio] = str.split('/').map(Number);
             return new Date(anio, mes - 1, dia);
         }
+        // sm - Formato en que el backend serializa DateOnly (dd-MM-yyyy).
+        if (/^\d{2}-\d{2}-\d{4}$/.test(str)) {
+            const [dia, mes, anio] = str.split('-').map(Number);
+            return new Date(anio, mes - 1, dia);
+        }
         return new Date(d);
     }
 
@@ -146,15 +171,20 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
         const act = this.data?.actividad;
         this.esEdicion = !!act;
+        // sm - El líder completa a nombre del colaborador y solo en el proyecto de la fila de Seguimiento.
+        const registroLider = this.data?.registroLider;
 
         const defaultDate = this.parseLocal(act ? act.fechaactividad : (this.data?.fecha || new Date()));
 
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, [Validators.required, this.autocompleteValidator(this.tiposActividad)]],
-            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, [Validators.required, this.autocompleteValidator(this.proyectos)]],
+            proyectoId: [
+                act && act.idproyecto ? String(act.idproyecto) : (registroLider ? String(registroLider.proyecto.id) : null),
+                [Validators.required, this.autocompleteValidator(this.proyectos)]
+            ],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
-            fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator()]],
+            fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]],
             numeroHoras: [act ? act.cantidadhoras : 4, [Validators.required, Validators.min(0.5), Validators.max(24)]],
             esRecurrente: [false],
             fechaInicio: [defaultDate, [this.formatoFechaValidator()]],
@@ -166,8 +196,12 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             esbillable: [act ? act.esbillable : true]
         });
 
+        if (registroLider) this.form.get('proyectoId')?.disable({ emitEvent: false });
+
         // Listen for autocomplete search typing/value changes
         this.form.get('proyectoId')?.valueChanges.subscribe(val => {
+            // sm - La vigencia depende del proyecto: al cambiarlo se vuelven a validar las fechas.
+            queueMicrotask(() => this.revalidarFechas());
             const selectedProy = this.proyectos().find(p => String(p.id) === String(val));
             if (!selectedProy) {
                 this.proyectoFilter.set(val || '');
@@ -199,8 +233,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             if (isRecurrent) {
                 fechaActividadCtrl?.clearValidators();
                 numeroHorasCtrl?.clearValidators();
-                fechaInicioCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
-                fechaFinCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
+                fechaInicioCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
+                fechaFinCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
                 horasPorDiaCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
 
                 // Asigna por defecto 4 días después si fechaFin no tiene valor
@@ -214,7 +248,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                     }
                 }
             } else {
-                fechaActividadCtrl?.setValidators([Validators.required, this.formatoFechaValidator()]);
+                fechaActividadCtrl?.setValidators([Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]);
                 numeroHorasCtrl?.setValidators([Validators.required, Validators.min(0.5), Validators.max(24)]);
                 fechaInicioCtrl?.clearValidators();
                 fechaFinCtrl?.clearValidators();
@@ -245,6 +279,84 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 }
             }
         });
+
+        // sm - Progreso de actividades/horas del proyecto+día elegidos (ver this.progreso). Se recalcula con
+        // cada cambio relevante del formulario.
+        ['proyectoId', 'fechaActividad', 'numeroHoras', 'esRecurrente'].forEach(nombre =>
+            this.form.get(nombre)?.valueChanges.subscribe(() => this.recalcularProgreso()));
+        this.recalcularProgreso();
+    }
+
+    // sm - Actividades ya guardadas ese día para ese proyecto (de las cargadas en el calendario del mes visible),
+    // sin contar la propia actividad si se está editando.
+    private existentesProyectoDia(proyectoId: string, fecha: Date): any[] {
+        const idActual = this.esEdicion ? String(this.data.actividad.id) : null;
+        return this.actividadesService.getActividadesPorFecha(fecha)
+            .filter(a => String(a.idproyecto) === String(proyectoId) && String(a.id) !== idActual);
+    }
+
+    // sm - Suma la actividad que se está llenando (aunque no se haya guardado) a las horas ya registradas ese
+    // día para ese proyecto, contra la jornada completa (8h/6h) que exige Seguimiento (ver CalculoHorasPeriodo).
+    // Solo aplica a la actividad simple (no a la recurrente, que crea una sola actividad por día en el rango).
+    private recalcularProgreso(): void {
+        const v = this.form?.getRawValue();
+        if (!v || v.esRecurrente) { this.progreso.set(null); return; }
+
+        const proyectoId = v.proyectoId;
+        const fecha = this.parseLocal(v.fechaActividad);
+        if (!proyectoId || isNaN(fecha.getTime())) { this.progreso.set(null); return; }
+
+        const existentes = this.existentesProyectoDia(proyectoId, fecha);
+        const horasExistentes = existentes.reduce((acc, a) => acc + (Number(a.cantidadhoras) || 0), 0);
+        const horasNueva = Number(v.numeroHoras) || 0;
+
+        this.progreso.set({
+            horas: horasExistentes + horasNueva,
+            horasJornada: this.actividadesService.horasJornada()
+        });
+    }
+
+    // sm - Valida al elegir la fecha (no recién al guardar) que esté dentro de la vigencia del colaborador en el proyecto
+    // elegido: no antes de su entrada ni después de su salida del proyecto o de la empresa (la más temprana).
+    // Al editar, si no cambian la fecha ni el proyecto se permite (hay actividades antiguas que deben poder corregirse).
+    private vigenciaValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const proyecto = this.proyectos().find(p => String(p.id) === String(this.form?.get('proyectoId')?.value));
+        if (!proyecto || !control.value) return null;
+        const fecha = this.parseLocal(control.value);
+        if (isNaN(fecha.getTime())) return null;
+
+        const act = this.data?.actividad;
+        if (this.esEdicion && act && String(act.idproyecto) === proyecto.id
+            && this.claveDia(this.parseLocal(act.fechaactividad)) === this.claveDia(fecha)) return null;
+
+        const dia = this.claveDia(fecha);
+        if (proyecto.fechaEntrada && dia < this.claveDia(proyecto.fechaEntrada)) {
+            return { vigencia: `Su asignación al proyecto ${proyecto.nombre} inicia el ${this.textoFecha(proyecto.fechaEntrada)}. No puede registrar actividades anteriores a esa fecha.` };
+        }
+        const salidaEmpresaPrimero = !!proyecto.salidaColaborador
+            && (!proyecto.fechaSalida || this.claveDia(proyecto.salidaColaborador) <= this.claveDia(proyecto.fechaSalida));
+        const salida = salidaEmpresaPrimero ? proyecto.salidaColaborador : proyecto.fechaSalida;
+        if (salida && dia > this.claveDia(salida)) {
+            return {
+                vigencia: salidaEmpresaPrimero
+                    ? `Su fecha de salida es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
+                    : `Su salida del proyecto ${proyecto.nombre} es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
+            };
+        }
+        return null;
+    };
+
+    private revalidarFechas(): void {
+        ['fechaActividad', 'fechaInicio', 'fechaFin'].forEach(nombre =>
+            this.form?.get(nombre)?.updateValueAndValidity({ emitEvent: false }));
+    }
+
+    private claveDia(d: Date): string {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    private textoFecha(d: Date): string {
+        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
     }
 
     private formatoFechaValidator(): ValidatorFn {
@@ -343,11 +455,21 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             });
 
         // Proyectos
-        this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`)
+        // sm - El líder no usa la lista de la sesión (sus propios proyectos), sino el proyecto y la vigencia del colaborador.
+        const registroLider = this.data?.registroLider;
+        (registroLider ? of([registroLider.proyecto]) : this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`))
             .subscribe({
                 next: (res) => {
                     if (res) {
-                        const mapped = res.map(p => ({ id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo }));
+                        const fecha = (f: any) => {
+                            if (!f) return null;
+                            const d = this.parseLocal(f);
+                            return isNaN(d.getTime()) ? null : d;
+                        };
+                        const mapped = res.map(p => ({
+                            id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo,
+                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador)
+                        }));
                         const unique: typeof mapped = [];
                         const seen = new Set<string>();
                         for (const item of mapped) {
@@ -366,7 +488,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                                 unique.push({
                                     id: String(act.idproyecto),
                                     nombre: act.proyectoNombre || 'Sin Proyecto',
-                                    codigo: act.codigorequerimiento
+                                    codigo: act.codigorequerimiento,
+                                    // sm - Proyecto que ya no está en sus asignaciones: sin vigencia conocida (valida el backend).
+                                    fechaEntrada: null,
+                                    fechaSalida: null,
+                                    salidaColaborador: null
                                 });
                             }
                         }
@@ -382,6 +508,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                         this.proyectos.set([]);
                     }
                     this.form?.get('proyectoId')?.updateValueAndValidity();
+                    this.revalidarFechas();
                 },
                 error: (err) => console.error('Error al cargar proyectos disponibles', err)
             });
@@ -495,7 +622,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             ...rawValue,
             fechaActividad: this.formatFecha(rawValue.fechaActividad),
             fechaInicio: this.formatFecha(rawValue.fechaInicio),
-            fechaFin: this.formatFecha(rawValue.fechaFin)
+            fechaFin: this.formatFecha(rawValue.fechaFin),
+            idEmpleado: this.data?.registroLider?.idEmpleado
         };
         this.errorGuardar = null;
         this.guardando = true;
@@ -515,6 +643,6 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 this.guardadoParcial = guardadas > 0;
             });
         }
-        // this.dialogRef.close(); // sm - ahora se cierra solo cuando el backend confirma que se guardó
+        // sm - El diálogo se cierra solo cuando el backend confirma que se guardó (ver alGuardar arriba).
     }
 }

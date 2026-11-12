@@ -15,8 +15,8 @@
         <th class="tabla__th tabla__th--center sortable" (click)="ordenar('numProyectos')" [attr.aria-sort]="direccionOrden('numProyectos')">
           <span class="th-inner"><span class="th-label">N&uacute;m. Proyectos</span><mat-icon class="sort-icon">{{ sortField === 'numProyectos' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
         </th>
-        <th class="tabla__th sortable" (click)="ordenar('correoElectronico')" [attr.aria-sort]="direccionOrden('correoElectronico')">
-          <span class="th-inner"><span class="th-label">Correo electr&oacute;nico</span><mat-icon class="sort-icon">{{ sortField === 'correoElectronico' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
+        <th class="tabla__th sortable" (click)="ordenar('correoPrincipal')" [attr.aria-sort]="direccionOrden('correoPrincipal')">
+          <span class="th-inner"><span class="th-label">Correo electr&oacute;nico</span><mat-icon class="sort-icon">{{ sortField === 'correoPrincipal' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
         </th>
         <th class="tabla__th sortable" (click)="ordenar('cargo')" [attr.aria-sort]="direccionOrden('cargo')">
           <span class="th-inner"><span class="th-label">Cargo</span><mat-icon class="sort-icon">{{ sortField === 'cargo' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></span>
@@ -64,7 +64,7 @@
             <td class="tabla__td tabla__td--center">{{ col.numProyectos }}</td>
 
             <td class="tabla__td tabla__td--email">
-              {{ col.correoElectronico | truncate:32 }}
+              {{ col.correoPrincipal | truncate:32 }}
             </td>
 
             <td class="tabla__td tabla__td--cargo">

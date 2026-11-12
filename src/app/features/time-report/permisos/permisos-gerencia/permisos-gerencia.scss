@@ -1,0 +1,33 @@
+@use '../permisos-shared';
+
+.header-actions-gerencia {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.col-check {
+  text-align: center !important;
+  padding-inline: 8px !important;
+  width: 42px;
+}
+
+.gerencia-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color, #163572);
+  cursor: pointer;
+  vertical-align: middle;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.permisos-table tbody tr {
+  &.row-selected td {
+    background: rgba(22, 53, 114, 0.055);
+  }
+}

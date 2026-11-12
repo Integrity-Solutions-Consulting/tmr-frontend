@@ -32,11 +32,11 @@
   flex-direction: column;
 }
 
-.modal--wide {
-  width: min(95vw, 680px);
+.modal:has(app-resumen-solicitud) { width: min(95vw, 540px); .modal__body { padding: 18px 24px 22px; } } .modal--wide {
+  width: min(96vw, 1140px);
 
   .modal__body {
-    padding: 28px 32px;
+    padding: 24px 32px 28px;
   }
 }
 

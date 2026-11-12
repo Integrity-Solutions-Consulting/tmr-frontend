@@ -1,11 +1,11 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal, HostListener } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, effect, inject, signal, untracked, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
 import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
@@ -38,9 +38,10 @@ import { BrechaColaborador, BrechaHistoricoComponent } from './brecha-historico/
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
 import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
+import { describirPeriodoCorte, formatoFechaHoraEcuador, ResumenCorteService } from '../../../../shared/services/resumen-corte.service';
 
 // sm - Columna de las tablas de detalle (panel lateral y descarga a Excel).
-type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero';
+type TipoColumna = 'texto' | 'fecha' | 'horas' | 'porcentaje' | 'semaforo' | 'numero' | 'resultado';
 interface ColumnaDetalle {
   clave: string;
   titulo: string;
@@ -51,6 +52,8 @@ interface ColumnaDetalle {
 interface DetalleAbierto {
   clave: string;
   titulo: string;
+  // Línea sobre el título; sin ella se muestra el periodo de los filtros (el corte no depende de ellos)
+  subtitulo?: string;
   definicion: string;
   columnas: ColumnaDetalle[];
   filas: any[];
@@ -100,6 +103,18 @@ export class DashboardEjecutivoComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
   private descargas = inject(DescargaProgresoService);
+  // Aviso informativo del último corte de horas (a la derecha del resumen); su "Ver más" abre el panel de detalle
+  protected readonly resumenCorte = inject(ResumenCorteService);
+  protected readonly describirPeriodoCorte = describirPeriodoCorte;
+
+  // El corte avanza en vivo por SSE: si su detalle está abierto, se rearma con cada actualización
+  private readonly refrescoDetalleCorte = effect(() => {
+    const corte = this.resumenCorte.resumen();
+    untracked(() => {
+      if (this.detalle()?.clave !== 'corteHoras') return;
+      corte ? this.abrirDetalleCorte() : this.cerrarDetalle();
+    });
+  });
 
   readonly meses = MESES;
   readonly formatoFecha = formatoFecha;
@@ -380,8 +395,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       .subscribe({
         next: (h) => {
           this.historico.set(h);
-          // this.umbralRecurrencia.set(h.umbralRecurrencia); // sm - el umbral ya se ajusta en pantalla; si se
-          // tomara de la respuesta, un cambio hecho mientras cargaba volvería al valor anterior.
+          // sm - El umbral no se toma de la respuesta: ya se ajusta en pantalla; si se tomara de ahí,
+          // un cambio hecho mientras cargaba volvería al valor anterior.
           this.cargandoHistorico.set(false);
         },
         error: () => {
@@ -563,7 +578,7 @@ export class DashboardEjecutivoComponent implements OnInit {
     if (!Number.isFinite(n)) return;
     // sm - Umbral en ocasiones (cortes): hay dos cortes por mes en la ventana.
     this.umbralRecurrencia.set(Math.min(this.mesesVentana() * 2, Math.max(1, n)));
-    // this.cargarHistorico(); // sm - ya no hace falta: "recurrente" se recalcula en pantalla con el nuevo umbral.
+    // sm - No recarga el histórico: "recurrente" se recalcula en pantalla con el nuevo umbral.
   }
 
   // sm - Seleccionar un mes del histórico lo convierte en el periodo del dashboard.
@@ -788,6 +803,36 @@ export class DashboardEjecutivoComponent implements OnInit {
     });
   }
 
+  // Igual que las tarjetas: "Ver más" del aviso abre el panel de detalle con cada colaborador y su resultado.
+  // Al abrirlo el corte deja de contar como nuevo (también se apaga el punto de la campana).
+  abrirDetalleCorte(): void {
+    const corte = this.resumenCorte.resumen();
+    if (!corte) return;
+    this.resumenCorte.marcarCampanaVista();
+
+    const pendientes = corte.enProceso ? `, ${corte.pendientes} pendientes (en proceso)` : '';
+    this.abrirDetalle({
+      clave: 'corteHoras',
+      titulo: 'Último corte de horas',
+      subtitulo: `${describirPeriodoCorte(corte)} · Corte ${formatoFechaHoraEcuador(corte.fechaCorte)}`,
+      definicion:
+        `Aviso automático de horas faltantes: ${corte.enviados} enviados, ${corte.fallidos} fallidos y ` +
+        `${corte.omitidos} omitidos${pendientes}. No depende de los filtros del Dashboard.`,
+      columnas: [
+        { clave: 'nombre', titulo: 'Colaborador' },
+        { clave: 'estado', titulo: 'Resultado', tipo: 'resultado' },
+        { clave: 'horasFaltantes', titulo: 'Horas faltantes', tipo: 'horas' },
+        { clave: 'detalle', titulo: 'Detalle' },
+        { clave: 'fechaTexto', titulo: 'Fecha' },
+      ],
+      filas: corte.empleados.map((e) => ({
+        ...e,
+        detalle: e.detalle ?? (e.estado === 'Enviado' ? 'Correo enviado' : null),
+        fechaTexto: e.fecha ? formatoFechaHoraEcuador(e.fecha) : null,
+      })),
+    });
+  }
+
   private columnasCumplimiento(): ColumnaDetalle[] {
     return [
       { clave: 'colaborador', titulo: 'Colaborador' },
@@ -823,6 +868,8 @@ export class DashboardEjecutivoComponent implements OnInit {
       this.abrirTodoIncumplimiento();
     } else if (tipo === 'fueraAsignacion') {
       this.abrirFueraDeAsignacion();
+    } else if (tipo === 'corteHoras') {
+      this.resumenCorte.resumen() ? this.abrirDetalleCorte() : this.cerrarDetalle();
     } else {
       this.abrirTarjeta(actual.clave);
     }

@@ -13,12 +13,13 @@
         <mat-error *ngIf="campoInvalido('tipo')">Este campo es obligatorio</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="proyecto-form__field">
-        <mat-label>Código</mat-label>
-        <input matInput formControlName="codigo" [readonly]="!!proyecto">
-        @if (proyecto) { <mat-hint>El código no se puede modificar al editar</mat-hint> }
-        <mat-error *ngIf="campoInvalido('codigo')">Este campo es obligatorio</mat-error>
-      </mat-form-field>
+      @if (proyecto) {
+        <mat-form-field appearance="outline" class="proyecto-form__field">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="codigo" readonly>
+          <mat-hint>El código no se puede modificar al editar</mat-hint>
+        </mat-form-field>
+      }
 
       <mat-form-field appearance="outline" class="proyecto-form__field">
         <mat-label>Cliente</mat-label>

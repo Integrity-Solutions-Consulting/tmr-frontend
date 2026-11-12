@@ -14,6 +14,15 @@ export const routes: Routes = [
   // ── Reset Password (standalone route for email links) ───
   { path: 'reset', redirectTo: 'auth/reset', pathMatch: 'full' },
 
+  // ── Portal Público Seguro de Líder Externo (Magic Link sin sesión TMR) ───
+  {
+    path: 'permisos/revision-externa',
+    loadComponent: () =>
+      import('./features/time-report/permisos/revision-externa/revision-externa').then(
+        m => m.RevisionExternaComponent
+      ),
+  },
+
   // ── App principal (sidebar + navbar) — requiere auth ─────
   {
     path: '',
@@ -93,6 +102,45 @@ export const routes: Routes = [
         path: 'time-report',
         loadChildren: () =>
           import('./features/time-report/time-report.routes').then(m => m.TIME_REPORT_ROUTES),
+      },
+
+      // Permisos y Vacaciones (Colaborador, Líder Interno, RRHH y Gerencia)
+      {
+        path: 'permisos',
+        children: [
+          {
+            path: '',
+            canActivate: [roleGuard],
+            loadComponent: () =>
+              import('./features/time-report/permisos/mis-permisos/mis-permisos').then(
+                m => m.MisPermisosComponent
+              ),
+          },
+          {
+            path: 'equipo',
+            canActivate: [roleGuard],
+            loadComponent: () =>
+              import('./features/time-report/permisos/aprobaciones-lider/aprobaciones-lider').then(
+                m => m.AprobacionesLiderComponent
+              ),
+          },
+          {
+            path: 'rrhh',
+            canActivate: [roleGuard],
+            loadComponent: () =>
+              import('./features/time-report/permisos/gestion-rrhh/gestion-rrhh').then(
+                m => m.GestionRrhhComponent
+              ),
+          },
+          {
+            path: 'gerencia',
+            canActivate: [roleGuard],
+            loadComponent: () =>
+              import('./features/time-report/permisos/permisos-gerencia/permisos-gerencia').then(
+                m => m.PermisosGerenciaComponent
+              ),
+          },
+        ],
       },
 
       // Carga de Actividades por Excel

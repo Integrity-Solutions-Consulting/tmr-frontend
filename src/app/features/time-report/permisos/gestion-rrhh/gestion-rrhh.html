@@ -1,0 +1,225 @@
+<div class="permisos-page">
+  <app-header
+    title="Validación Talento Humano"
+    subtitle="Confirmación final de permisos y vacaciones"
+  />
+
+  <section class="kpis-grid">
+    <app-tarjeta-resumen [valor]="totalPorConfirmar()" titulo="Por confirmar" icono="verified" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="totalPendientesExternos()" titulo="Pendientes líder" icono="forward_to_inbox" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalConfirmadasMes()" titulo="Confirmados" icono="task_alt" tono="exito" />
+  </section>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label" for="gestion-rrhh-filter-1">Buscar</label>
+      <input id="gestion-rrhh-filter-1"
+        type="text"
+        class="filter-control"
+        placeholder="Colaborador, código, proyecto, cliente, líder, duración o estado..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="gestion-rrhh-filter-2">Período</label>
+      <select id="gestion-rrhh-filter-2" class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+
+    @if (periodoPreset() === 'PERSONALIZADO') {
+    <div class="filter-group date-group">
+      <label class="filter-label" for="gestion-rrhh-filter-3">Desde</label>
+      <input id="gestion-rrhh-filter-3"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)"
+      />
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label" for="gestion-rrhh-filter-4">Hasta</label>
+      <input id="gestion-rrhh-filter-4"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)"
+      />
+    </div>
+    }
+
+    <div class="filter-group">
+      <label class="filter-label" for="gestion-rrhh-filter-5">Tipo</label>
+      <select id="gestion-rrhh-filter-5"
+        class="filter-control"
+        [ngModel]="filtroTipo()"
+        (ngModelChange)="filtroTipo.set($event)"
+      >
+        <option value="TODOS">Todos los tipos de permiso</option>
+        <option value="Vacaciones">Vacaciones</option>
+        <option value="Licencia">Licencia por enfermedad</option>
+        <option value="Citas">Citas médicas</option>
+        <option value="Fallecimiento">Fallecimiento de un familiar</option>
+        <option value="Calamidad">Calamidad doméstica</option>
+        <option value="Accidente">Accidente</option>
+        <option value="Maternidad">Maternidad</option>
+        <option value="Nacimiento">Nacimiento de un Hijo/a</option>
+        <option value="Otros">Otros</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="gestion-rrhh-filter-6">Bandeja</label>
+      <select id="gestion-rrhh-filter-6"
+        class="filter-control"
+        [ngModel]="tabActiva()"
+        (ngModelChange)="tabActiva.set($event)"
+      >
+        <option value="POR_CONFIRMAR">Por confirmar ({{ totalPorConfirmar() }})</option>
+        <option value="LIDER_EXTERNO">Pendientes líder ({{ totalPendientesExternos() }})</option>
+        <option value="HISTORIAL">Confirmados / Historial</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table permisos-review-table">
+      <colgroup>
+        <col style="width: 24%;" />
+        <col style="width: 24%;" />
+        <col style="width: 18%;" />
+        <col style="width: 12%;" />
+        <col style="width: 150px;" />
+        <col style="width: 96px;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Colaborador</th>
+          <th>Permiso</th>
+          <th>Fecha</th>
+          <th>Duración</th>
+          <th class="estado-column">Estado</th>
+          <th aria-label="Acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.id) {
+          <tr>
+            <td><strong>{{ item.colaborador }}</strong></td>
+            <td>{{ item.tipo }}</td>
+            <td class="cell-muted">{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
+            <td class="estado-column">
+              <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--primary btn-tmr--sm"
+                  (click)="item.estado === 'CONFIRMADO_LIDER' ? abrirModalValidacion(item) : abrirVistaFormulario(item)"
+                  aria-label="Revisar solicitud"
+                >
+                  Revisar
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL 1: VALIDACIÓN FINAL (REVISAR Y CONFIRMAR DENTRO DEL POPUP) -->
+<app-modal-base
+  titulo="Revisión y Confirmación de Talento Humano"
+  [visible]="modalValidacionAbierto()"
+  [wide]="false"
+  (cerrar)="modalValidacionAbierto.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Observaciones</label>
+          <input
+            type="text"
+            [ngModel]="observacionesRrhh()"
+            (ngModelChange)="observacionesRrhh.set($event)"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="descargarPdf(sol)"
+        >
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--danger"
+          [disabled]="procesandoAccion()"
+          (click)="devolverConObservacion()"
+        >
+          Devolver
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="modalValidacionAbierto.set(false)"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--primary"
+          [disabled]="procesandoAccion()"
+          (click)="confirmarDefinitivamenteRrhh()"
+        >
+          Confirmar
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>
+
+<!-- MODAL 2: VISTA DEL DOCUMENTO PDF -->
+<app-modal-base
+  titulo="Solicitud"
+  [visible]="modalFormularioAbierto()"
+  [wide]="false"
+  (cerrar)="modalFormularioAbierto.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
+          Cerrar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>

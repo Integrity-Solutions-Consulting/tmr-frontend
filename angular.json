@@ -67,7 +67,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "10kB",
-                  "maximumError": "20kB"
+                  "maximumError": "30kB"
                 }
               ],
               "outputHashing": "all",
@@ -91,6 +91,10 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": { "runner": "vitest", "tsConfig": "tsconfig.spec.json" }
         },
         "serve": {
           "options": {

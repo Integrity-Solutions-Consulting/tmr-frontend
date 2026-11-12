@@ -23,6 +23,7 @@ import { MAT_AUTOCOMPLETE_DEFAULT_OPTIONS } from '@angular/material/autocomplete
 import { routes } from './app.routes';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
+import { CambiosDatosInterceptor } from './core/interceptors/cambios-datos.interceptor';
 import { loadUserModulesInitializer } from './core/initializers/load-user-modules.initializer';
 import { ChunkErrorHandler } from './core/handlers/chunk-error.handler';
 
@@ -79,6 +80,12 @@ export const appConfig: ApplicationConfig = {
       useClass: TokenInterceptor,
       multi: true,
     },
+    // sm - Avisa a las otras pestañas cuando se guardan datos que cambian las horas (ver CambiosDatosService).
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CambiosDatosInterceptor,
+      multi: true,
+    },
     provideStore({
       auth: authReducer,
       clientes: clientesReducer,
@@ -94,7 +101,6 @@ export const appConfig: ApplicationConfig = {
       DashboardEffects,
     ),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
-    // ✅ CAMBIO: Agregar inicializador para precargar módulos al arrancar
     {
       provide: APP_INITIALIZER,
       useFactory: () => loadUserModulesInitializer,

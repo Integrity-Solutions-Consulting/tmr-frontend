@@ -10,6 +10,7 @@ const MODULOS_DISPONIBLES = [
   'Proyectos',
   'Actividades',
   'Seguimiento',
+  'Fechas de Corte',
   'Colaboradores',
   'Clientes',
   'Lideres',
@@ -102,6 +103,7 @@ export class RolesFormModal {
       'proyectos': 'folder_open',
       'actividades': 'task_alt',
       'seguimiento': 'track_changes',
+      'fechas de corte': 'event_repeat',
       'colaboradores': 'group',
       'clientes': 'business',
       // Variantes con y sin tilde — normalizeModuleName quita tildes antes de buscar

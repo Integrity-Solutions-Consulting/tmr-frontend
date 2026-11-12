@@ -1,0 +1,483 @@
+<div class="permisos-page">
+  <app-header
+    title="Mis Permisos"
+    subtitle="Solicitud y seguimiento de permisos y vacaciones">
+    <div class="header-actions-permisos">
+      <button type="button" class="btn-tmr btn-tmr--primary" (click)="abrirNuevaSolicitud()">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Nueva Solicitud
+      </button>
+    </div>
+  </app-header>
+
+  <div class="kpis-grid">
+    <app-tarjeta-resumen [valor]="kpiDisponibles()" titulo="Disponibles" icono="beach_access" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="kpiEnProceso()" titulo="En proceso" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="kpiAprobados()" titulo="Aprobados" icono="verified" tono="exito" />
+    <app-tarjeta-resumen [valor]="kpiPorHoras()" titulo="Por horas" icono="schedule" tono="cian" />
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label" for="mis-permisos-filter-1">Buscar</label>
+      <input id="mis-permisos-filter-1"
+        class="filter-control"
+        type="text"
+        name="busquedaSolicitudes"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="Buscar por código, tipo, cliente, líder o estado..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)" />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="mis-permisos-filter-2">Período</label>
+      <select id="mis-permisos-filter-2" class="filter-control" name="periodoFiltro" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="PERSONALIZADO">Rango personalizado...</option>
+      </select>
+    </div>
+
+    @if (periodoPreset() === 'PERSONALIZADO') {
+      <div class="filter-group date-group">
+        <label class="filter-label" for="mis-permisos-filter-3">Desde</label>
+        <input id="mis-permisos-filter-3"
+          type="date"
+          name="fechaDesdeFiltro"
+          class="filter-control"
+          [ngModel]="fechaDesde()"
+          (ngModelChange)="cambiarFechaDesde($event)" />
+      </div>
+
+      <div class="filter-group date-group">
+        <label class="filter-label" for="mis-permisos-filter-4">Hasta</label>
+        <input id="mis-permisos-filter-4"
+          type="date"
+          name="fechaHastaFiltro"
+          class="filter-control"
+          [ngModel]="fechaHasta()"
+          (ngModelChange)="cambiarFechaHasta($event)" />
+      </div>
+    }
+
+    <div class="filter-group">
+      <label class="filter-label" for="mis-permisos-filter-5">Tipo</label>
+      <select id="mis-permisos-filter-5" class="filter-control" name="tipoFiltro" [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+        <option value="">Todos</option>
+        @if (tiposPermisoCatalogo().length > 0) {
+          @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
+            <option [value]="tp.codigo">{{ tp.nombre }}</option>
+          }
+        } @else {
+          <option value="VACACIONES">Vacaciones</option>
+          <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+          <option value="CITAS_MEDICAS">Citas médicas</option>
+          <option value="MATRIMONIO">Matrimonio</option>
+          <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+          <option value="MATERNIDAD">Maternidad</option>
+          <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+          <option value="CALAMIDAD_DOMESTICA">Calamidad doméstica</option>
+          <option value="ACCIDENTE">Accidente</option>
+          <option value="OTROS">Otros</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="mis-permisos-filter-6">Semáforo</label>
+      <select id="mis-permisos-filter-6" class="filter-control" name="estadoFiltro" [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+        <option value="">Todos</option>
+        <option value="proceso">En proceso</option>
+        <option value="finalizado">Finalizado</option>
+      </select>
+    </div>
+
+    @if (tieneFiltrosActivos()) {
+      <div class="filter-actions">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table">
+      <colgroup>
+        <col style="width: 30%;" />
+        <col style="width: 22%;" />
+        <col style="width: 18%;" />
+        <col style="width: 150px;" />
+        <col style="width: 96px;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Permiso</th>
+          <th>Fecha</th>
+          <th>Duración</th>
+          <th class="estado-column">Estado</th>
+          <th aria-label="Acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.codigo) {
+          <tr>
+            <td>
+              <strong>{{ item.tipo }}</strong>
+              @if ((item.adjuntos?.length ?? 0) > 0 || item.evidencia) {
+                <span class="cell-clip-badge" [title]="(item.adjuntos?.length || 1) + ' archivo(s) adjunto(s)'">
+                  <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                  {{ item.adjuntos?.length || 1 }}
+                </span>
+              }
+            </td>
+            <td class="cell-muted">{{ obtenerRangoFechasLimpio(item) }}</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
+            <td class="estado-column">
+              <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button type="button" class="btn-tmr btn-tmr--primary btn-tmr--sm" (click)="verFormulario(item)" title="Revisar detalle de la solicitud">
+                  Revisar
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL 1: SOLICITUD DE PERMISOS -->
+  <app-modal-base
+    titulo="Nueva solicitud"
+    [visible]="modalNuevaVisible()"
+    [wide]="false"
+    (cerrar)="modalNuevaVisible.set(false)"
+  >
+    <div class="modal-form permiso-form solicitud-compacta">
+      <div class="isc-form-sheet isc-form-sheet--interactive">
+
+        <div class="permiso-solicitud">
+              <div class="permiso-field">
+                <label for="tipo-permiso">Tipo de permiso <span aria-hidden="true">*</span></label>
+                <select
+                  id="tipo-permiso"
+                  name="tipoPermiso"
+                  class="isc-inline-select"
+                  [ngModel]="tipoSeleccionado()"
+                  (ngModelChange)="cambiarTipoPermisoForm($event)"
+                >
+                  @if (tiposPermisoCatalogo().length > 0) {
+                    @for (tp of tiposPermisoCatalogo(); track tp.codigo) {
+                      <option [value]="tp.codigo">{{ tp.nombre }}</option>
+                    }
+                  } @else {
+                    <option value="VACACIONES">Vacaciones</option>
+                    <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+                    <option value="CITAS_MEDICAS">Citas médicas</option>
+                    <option value="MATRIMONIO">Matrimonio</option>
+                    <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+                    <option value="MATERNIDAD">Maternidad</option>
+                    <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+                    <option value="CALAMIDAD_DOMESTICA">Calamidad doméstica</option>
+                    <option value="ACCIDENTE">Accidente</option>
+                    <option value="OTROS">Otros</option>
+                  }
+                </select>
+                @if (esPermisoInformativoForm()) {
+                  <small class="permiso-info-copy">{{ opcionesCliente().length > 0 ? 'Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa al Líder y a RRHH.' : 'Este permiso no descuenta días de vacaciones ni requiere aprobación: se envía copia informativa directamente a RRHH.' }}</small>
+                }
+              </div>
+          <section class="permiso-section" aria-labelledby="fechas-titulo">
+            <h3 id="fechas-titulo" class="permiso-section__title">Fechas y horario</h3>
+            <div class="permiso-section__body permiso-periodo">
+              <div class="permiso-fechas">
+                <div class="permiso-field">
+                  <label for="fecha-inicio">Inicio <span aria-hidden="true">*</span></label>
+                  <input
+                    id="fecha-inicio"
+                    type="date"
+                    name="fechaInicioSolicitud"
+                    [min]="fechaMinimaInicioForm()"
+                    class="isc-inline-date"
+                    [ngModel]="fechaInicioForm()"
+                    (ngModelChange)="cambiarFechaInicioForm($event)"
+                  />
+                </div>
+                <div class="permiso-field">
+                  <label for="fecha-fin">Fin <span aria-hidden="true">*</span></label>
+                  <input
+                    id="fecha-fin"
+                    type="date"
+                    name="fechaFinSolicitud"
+                    class="isc-inline-date"
+                    [min]="fechaInicioForm()"
+                    [ngModel]="fechaFinForm()"
+                    (ngModelChange)="cambiarFechaFinForm($event)"
+                  />
+                </div>
+
+              </div>
+              <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                <div class="permiso-field">
+                  <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
+                  <input
+                    id="hora-inicio-otros"
+                    type="time"
+                    name="horaInicioOtros"
+                    min="07:00"
+                    max="18:00"
+                    step="900"
+                    class="isc-inline-date"
+                    [ngModel]="horaInicioOtrosForm()"
+                    (ngModelChange)="cambiarHoraInicioOtros($event)"
+                  />
+                </div>
+                <div class="permiso-field">
+                  <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
+                  <input
+                    id="hora-fin-otros"
+                    type="time"
+                    name="horaFinOtros"
+                    min="07:30"
+                    max="19:00"
+                    step="900"
+                    class="isc-inline-date"
+                    [ngModel]="horaFinOtrosForm()"
+                    (ngModelChange)="cambiarHoraFinOtros($event)"
+                  />
+                </div>
+              </div>
+              @if (horasPorDiaOtrosForm() <= 0) {
+                <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
+                  <strong>Revisa el horario:</strong> elige horas dentro de la jornada laboral y asegúrate de que la hora de fin sea posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.
+                </p>
+              }
+              <div class="permiso-duracion" aria-live="polite">
+                <strong [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : null">{{ textoDuracionForm() }}</strong>
+                @if (tipoSeleccionado() === 'VACACIONES') {
+                  <span [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : '#475569'" style="font-weight: 500;">
+                    Quedan {{ diasDisponiblesNumero() }} de 15 días ({{ diasDisponiblesNumero() * 8 }} h)
+                  </span>
+                }
+              </div>
+            </div>
+          </section>
+          <section class="permiso-section" aria-labelledby="permiso-titulo">
+            <h3 id="permiso-titulo" class="permiso-section__title">Tipo y motivo del permiso</h3>
+            <div class="permiso-section__body permiso-detalle">
+              <div class="permiso-field">
+                <label for="motivo-solicitud">Motivo <span aria-hidden="true">*</span></label>
+                <textarea
+                  id="motivo-solicitud"
+                  name="motivoSolicitud"
+                  class="isc-motivo-textarea"
+                  rows="2"
+                  maxlength="2000"
+                  placeholder="Describe el motivo de tu solicitud"
+                  [ngModel]="motivoForm()"
+                  (ngModelChange)="motivoForm.set($event)"
+                ></textarea>
+              </div>
+              <div class="isc-upload-container">
+                <label class="isc-upload-dropzone">
+                  <input
+                    type="file"
+                    name="evidencia"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="isc-upload-bar__input-sr"
+                    (change)="alSeleccionarArchivoEvidencia($event)"
+                  />
+                  <span class="isc-upload-dropzone__left">
+                    <span aria-hidden="true">📎</span>
+                    <strong>Adjuntar documento</strong>
+                    @if (requiereCertificadoMedicoObligatorio()) {
+                      <span class="isc-upload-dropzone__req">· obligatorio</span>
+                    } @else {
+                      <span class="isc-upload-dropzone__opt">· opcional</span>
+                    }
+                  </span>
+                  <span class="isc-upload-dropzone__right">PDF, JPG o PNG · 5 MB</span>
+                </label>
+
+                @if (archivosEvidencia().length > 0) {
+                  <div class="isc-upload-bar__files-list">
+                    @for (file of archivosEvidencia(); track file.name + file.size; let idx = $index) {
+                      <span class="isc-upload-bar__file">
+                        <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                        <span class="isc-upload-bar__file-name" [title]="file.name">{{ file.name }}</span>
+                        <button
+                          type="button"
+                          class="isc-upload-bar__remove"
+                          (click)="quitarArchivoEvidencia(idx)"
+                          title="Quitar este archivo"
+                          aria-label="Quitar archivo adjunto"
+                        >
+                          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+
+        </div>
+
+        @if (opcionesCliente().length > 1 || (opcionesCliente().length === 1 && !clienteActualForm()?.liderNombre)) {
+        <div class="solicitud-asignacion">
+
+          <div class="permiso-section__body">
+
+            <div class="permiso-asignacion">
+              @if (opcionesCliente().length > 1) {
+              <div class="permiso-field">
+                <label for="cliente-proyecto"
+                  >Cliente / Proyecto <span aria-hidden="true">*</span></label
+                >
+                <div class="isc-combobox">
+                  <div class="isc-combobox__control">
+                    <button
+                      type="button"
+                      id="cliente-proyecto"
+                      class="isc-inline-input isc-combobox__trigger"
+                      role="combobox"
+                      aria-label="Seleccionar cliente o proyecto"
+                      aria-controls="proyectos-opciones"
+                      [attr.aria-expanded]="comboboxClienteAbierto()"
+                      (click)="abrirBuscadorCliente()"
+                      (keydown)="alTeclaBuscadorCliente($event)"
+                      (blur)="cerrarBuscadorClienteConRetardo()"
+                    >
+                      <span class="isc-combobox__trigger-text">{{ clienteActualForm()?.etiqueta || 'Seleccionar cliente o proyecto' }}</span>
+                      <span class="material-symbols-outlined isc-combobox__chevron" aria-hidden="true">expand_more</span>
+                    </button>
+                  </div>
+
+                  @if (comboboxClienteAbierto()) {
+                    <ul
+                      id="proyectos-opciones"
+                      class="isc-combobox__menu"
+                      role="listbox"
+                      aria-label="Clientes y proyectos"
+                    >
+                      @for (opt of opcionesClienteFiltradas(); track opt.indiceOriginal) {
+                        <li
+                          role="option"
+                          class="isc-combobox__option"
+                          [class.isc-combobox__option--selected]="
+                            opt.indiceOriginal === indiceClienteForm()
+                          "
+                          [attr.aria-selected]="opt.indiceOriginal === indiceClienteForm()"
+                          (mousedown)="elegirOpcionCliente(opt, $event)"
+                        >
+                          <div class="isc-combobox__option-main">
+                            <span>{{ opt.etiqueta }}</span>
+                            @if (opt.esAsignacionPropia) {
+                              <span class="isc-combobox__badge">Asignado</span>
+                            }
+                          </div>
+                          <div class="isc-combobox__option-sub">
+                            Jefe inmediato:
+                            <strong>{{ opt.liderNombre || 'Sin líder en proyecto' }}</strong>
+                            @if (opt.liderNombre) {
+                              <span>({{ opt.tipoLider === 'EXT' ? 'Externo' : 'Interno' }})</span>
+                            }
+                          </div>
+                        </li>
+                      } @empty {
+                        <li class="isc-combobox__empty">No se encontraron clientes o proyectos.</li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
+              }
+              <div class="permiso-field" [hidden]="!!clienteActualForm()?.liderNombre">
+                <span id="jefe-label">Jefe inmediato <span aria-hidden="true">*</span></span>
+                @if (clienteActualForm()?.liderNombre; as liderAuto) {
+                  <div
+                    class="isc-lider-autofill"
+                    title="Autocompletado según el Cliente / Proyecto seleccionado"
+                  >
+                    <span class="isc-lider-autofill__name">{{ liderAuto }}</span>
+                    <span
+                      class="tag-lider"
+                      [class.tag-lider--int]="obtenerTipoLiderActualForm() === 'INT'"
+                      [class.tag-lider--ext]="obtenerTipoLiderActualForm() === 'EXT'"
+                    >
+                      {{ obtenerTipoLiderActualForm() }}
+                    </span>
+                  </div>
+                } @else {
+                  <select
+                    aria-labelledby="jefe-label"
+                    name="liderSeleccionado"
+                    class="isc-inline-select"
+                    [ngModel]="indiceLiderForm()"
+                    (ngModelChange)="indiceLiderForm.set(+$event)"
+                  >
+                    @for (l of opcionesLider(); track l.etiqueta; let idx = $index) {
+                      <option [value]="idx">{{ l.etiqueta }}</option>
+                    } @empty {
+                      <option [value]="0" disabled>Sin líderes disponibles</option>
+                    }
+                  </select>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+
+
+      </div>
+      <div class="modal-footer">
+        <span class="permiso-required">* Campos obligatorios</span>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          (click)="modalNuevaVisible.set(false)"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--primary"
+          [disabled]="guardandoSolicitud()"
+          (click)="guardarNuevaSolicitud()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">send</span>
+          {{ guardandoSolicitud() ? 'Enviando...' : 'Enviar solicitud' }}
+        </button>
+      </div>
+    </div>
+  </app-modal-base>
+
+  <!-- Consulta compacta de la solicitud -->
+  <app-modal-base [titulo]="'Solicitud — ' + (solicitudSeleccionada()?.codigo ?? '')" [visible]="modalFormularioVisible()" [wide]="false" (cerrar)="modalFormularioVisible.set(false)">
+    @if (solicitudSeleccionada(); as sel) {
+      <div class="modal-form">
+        <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estadoTexto" [adjuntos]="sel.adjuntos || []" />
+        <div class="modal-footer">
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdfSeleccionado(sel)"><span class="material-symbols-outlined">download</span>Descargar PDF oficial</button>
+        </div>
+      </div>
+    }
+  </app-modal-base>
+</div>

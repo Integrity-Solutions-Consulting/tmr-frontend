@@ -183,6 +183,8 @@ export class ColaboradoresService {
       modalidad: '' as any,
       categoria: '' as any,
       correoElectronico: api.email,
+      emailCorporativo: api.emailCorporativo,
+      correoPrincipal: api.emailCorporativo || api.email,
       fechaNacimiento: '',
       telefono: '',
       genero: '' as any,
@@ -264,6 +266,7 @@ export class ColaboradoresService {
 
       // ── Contacto ───────────────────────────────────────
       correoElectronico: api.email ?? api.Email ?? '',
+      emailCorporativo: api.emailCorporativo ?? api.EmailCorporativo ?? '',
       telefono: api.telefono ?? api.Telefono ?? '',
       direccion: api.direccion ?? api.Direccion ?? '',
 
@@ -281,21 +284,14 @@ export class ColaboradoresService {
       numProyectos: (api.proyectos ?? api.Proyectos ?? [])
         .filter((p: any) => (p.estadoAsignacion ?? p.EstadoAsignacion ?? true) !== false).length,
 
-      // ================================================================
-      // NUEVOS CAMPOS PARA SALIDA DE COLABORADORES
-      // ================================================================
+      // sm - Datos de salida del colaborador.
       fechaSalida: api.fechaSalida ?? null,
       tipoSalida: api.tipoSalida ?? null,
       causaSalida: api.causaSalida ?? null,
       comentarioSalida: api.comentarioSalida ?? null,
       reemplazoNombre: api.reemplazoNombre ?? null,
       tieneDatosSalida: !!(api.fechaSalida || api.tipoSalida || api.causaSalida),
-
-      // ================================================================
-      // NUEVO: A QUIÉN REEMPLAZA
-      // ================================================================
       reemplazaANombre: api.reemplazaANombre ?? null,
-
     };
   }
 

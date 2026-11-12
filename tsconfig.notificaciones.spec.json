@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": ["src/**/*.d.ts", "src/app/features/time-report/permisos/envios-permiso/envios-permiso.spec.ts"]
+}

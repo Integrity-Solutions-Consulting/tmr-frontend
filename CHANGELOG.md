@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.2.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.0...v3.2.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* Mejoras en exportación Excel/PDF, seguimiento y gestión de actividades y bajas de colaboradores ([8a29af4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/8a29af4b8021aa0d889dcc30e593a69eb0f9bb41))
+
+## [3.2.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.2...v3.2.0) (2026-10-15)
+
+
+### Features
+
+* agregar botón para notificar colaboradores y servicio de notificacion ([e36d3fb](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e36d3fbd527780eca852d554943846bf8b999a7e))
+
+
+### Bug Fixes
+
+* metodos de seguimiento ([897b8e5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/897b8e5787ba35cf4d6327d367cdc9c9ac299881))
+* metodos de seguimiento ([b0afa86](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b0afa86df9ec670e022808734ce8d46f8382b026))
+* resolver conflicto de seguimiento tras merge ([20ae5d3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/20ae5d3e81e7397ca824cd3dbfcfdd655177785d))
+* vuelta de despliegue ([46d0121](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/46d01213d1866d6b2fc561dd78fc01434f8f4a03))
+* vuelta de despliegue ([d8f3d7f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d8f3d7f138406a44ce2e928c2f9b7f0b7f719dbc))
+
+
+### Performance Improvements
+
+* optimiza tiempos de carga, consultas y rendimiento general de la aplicación ([f4b6fc7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f4b6fc722819dc6eb86df9fa9b49911a5ea36ae7))
+
 ## [3.1.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.1.1...v3.1.2) (2026-10-13)
 
 

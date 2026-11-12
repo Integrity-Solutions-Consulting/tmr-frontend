@@ -170,6 +170,33 @@
   align-items: center;
 }
 
+// Notificación clickeable (p. ej. el último corte de horas): solo su nombre; el clic abre el detalle completo
+.navbar__bell-item--accion {
+  width: 100%;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid var(--border-default);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navbar__bell-item-icon--info {
+  color: var(--primary-color);
+}
+
+// Aviso recibido (correo de horas faltantes): solo informativo, sin cursor de clic
+.navbar__bell-item--aviso {
+  border-bottom: 1px solid var(--border-default);
+  cursor: default;
+}
+
+.navbar__bell-item-fecha {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .navbar__bell-item-content {
   display: flex;
   flex-direction: column;

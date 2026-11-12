@@ -10,7 +10,12 @@ import { UsuariosService } from '../../../features/configuracion/services/usuari
 import { MiPerfilModalComponent, MiPerfilData } from '../../../shared/components/mi-perfil-modal/mi-perfil-modal.component';
 import { ConfiguracionModalComponent } from '../../../shared/components/configuracion-modal/configuracion-modal.component';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DropdownScrollLockService } from '../../../shared/services/dropdown-scroll-lock.service';
+import { describirPeriodo, describirPeriodoCorte, formatoFechaHoraEcuador, ResumenCorteService } from '../../../shared/services/resumen-corte.service';
+import { MisAvisosService } from '../../../shared/services/mis-avisos.service';
+import { NotificacionesInternasService } from '../../../shared/services/notificaciones-internas.service';
+import { AvisoColaborador, NotificacionInterna } from '../../../shared/services/notificaciones.service';
 
 @Component({
   selector: 'app-navbar',
@@ -21,12 +26,21 @@ import { DropdownScrollLockService } from '../../../shared/services/dropdown-scr
 })
 export class Navbar implements OnInit {
   private store = inject(Store);
+  private router = inject(Router);
   private authService = inject(AuthService);
   private usuariosService = inject(UsuariosService);
   private dialog = inject(MatDialog);
   private dashboardService = inject(DashboardService);
   private elementRef = inject(ElementRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
+  // Resultado del corte de horas (SSE, solo Administrador y Líder): aviso en la campana además del popup
+  protected readonly resumenCorte = inject(ResumenCorteService);
+  protected readonly describirPeriodoCorte = describirPeriodoCorte;
+  // Correos de horas faltantes que le llegaron al usuario (su líder o el corte): solo avisos, no llevan a ningún lado
+  protected readonly misAvisos = inject(MisAvisosService);
+  // Notificaciones internas persistidas (SSE RF-010: Solicitudes y Permisos)
+  protected readonly notificacionesInternas = inject(NotificacionesInternasService);
+  protected readonly formatoFechaHora = formatoFechaHoraEcuador;
 
   user = {
     name: 'Usuario',
@@ -104,7 +118,52 @@ export class Navbar implements OnInit {
     if (this.notificacionesAbierto) {
       this.perfilAbierto = false;
       this.consultarHorasIncompletas();
+      this.resumenCorte.marcarCampanaVista();
+      this.misAvisos.marcarVistos();
     }
+  }
+
+  /** Punto rojo de la campana: horas propias pendientes, un corte nuevo, un aviso nuevo o una notificación de solicitud no leída. */
+  get campanaConNovedades(): boolean {
+    return (
+      this.tieneNotificaciones ||
+      this.resumenCorte.campanaPendiente() ||
+      this.misAvisos.pendiente() ||
+      this.notificacionesInternas.pendiente()
+    );
+  }
+
+  abrirNotificacionInterna(notif: NotificacionInterna): void {
+    if (!notif.leida) {
+      this.notificacionesInternas.marcarLeida(notif.id);
+    }
+    this.notificacionesAbierto = false;
+    if (notif.urlDestino && notif.urlDestino.startsWith('/')) {
+      const destino = this.router.parseUrl(notif.urlDestino);
+      if (notif.idSolicitud) destino.queryParams['solicitud'] = notif.idSolicitud;
+      this.router.navigateByUrl(destino);
+    }
+  }
+
+  tituloAviso(aviso: AvisoColaborador): string {
+    return aviso.origen === 'Manual'
+      ? 'Tu líder te recuerda registrar tus horas'
+      : `Corte de horas ${describirPeriodo(aviso.inicioPeriodo, aviso.finPeriodo)}`;
+  }
+
+  descripcionAviso(aviso: AvisoColaborador): string {
+    const horas = `${aviso.horasFaltantes.toLocaleString('es-EC', { maximumFractionDigits: 2 })} h pendientes`;
+    if (aviso.origen === 'Manual') {
+      const proyecto = aviso.proyecto ? ` en ${aviso.proyecto}` : '';
+      return `${horas}${proyecto} · ${describirPeriodo(aviso.inicioPeriodo, aviso.finPeriodo)}`;
+    }
+    return aviso.detalle ? `${horas}: ${aviso.detalle}` : horas;
+  }
+
+  /** Clic en el aviso del corte: abre directo la lista de colaboradores con su resultado ("Ver más"). */
+  abrirDetalleCorte(): void {
+    this.notificacionesAbierto = false;
+    this.resumenCorte.verDetalle();
   }
 
   @HostListener('document:click', ['$event'])

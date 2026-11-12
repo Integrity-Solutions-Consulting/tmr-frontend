@@ -96,6 +96,16 @@
                 Descargar PDF
             </button>
         </mat-menu>
+
+        <!-- Notificar: mismo patrón que Descargar, agrupado por colaborador (ver notificarSeleccionados). -->
+        @if (puedeNotificar) {
+        <button class="btn-descargar" [class.enabled]="selection.hasValue()"
+            [class.loading]="isNotifying" [disabled]="!selection.hasValue() || isNotifying"
+            [attr.aria-busy]="isNotifying" (click)="notificarSeleccionados()">
+            {{ isNotifying ? 'Notificando...' : 'Notificar' }}{{ !isNotifying && personasSeleccionadas() > 1 ? ' (' + personasSeleccionadas() + ')' : '' }}
+            <span *ngIf="!isNotifying" class="material-symbols-outlined download-icon">notifications_active</span>
+        </button>
+        }
     </div>
 
     <!-- sm - El toast de progreso de descarga ahora es global: <app-descarga-progreso> en el AppComponent. -->
@@ -169,10 +179,6 @@
                             <button class="action-btn" type="button" (click)="verCalendarioColaborador(el)"
                                 title="Ver detalle" aria-label="Ver detalle">
                                 <mat-icon>visibility</mat-icon>
-                            </button>
-                            <button class="action-btn" type="button" (click)="notificarColaborador(el)"
-                                title="Notificar Colaborador" aria-label="Notificar colaborador">
-                                <mat-icon>notifications_active</mat-icon>
                             </button>
                         </td>
                     </tr>

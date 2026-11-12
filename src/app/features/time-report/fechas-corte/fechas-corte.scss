@@ -1,0 +1,332 @@
+// Mismo contenedor y encabezado que las demás páginas (ver Feriados)
+
+.page {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  box-shadow: var(--elevation-card);
+  padding: 28px 28px 22px;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-title {
+  font-size: clamp(24px, 2.5vw, 30px);
+  font-weight: 800;
+  color: var(--primary-color);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.page-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 760px;
+}
+
+// ── Avisos ────────────────────────────────────────────────────────────────
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid;
+
+  code {
+    font-size: 12px;
+  }
+
+  .btn {
+    margin-left: auto;
+  }
+
+  &--warning {
+    background: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+  }
+
+  &--error {
+    background: var(--status-danger-bg-soft);
+    border-color: var(--status-danger-border);
+    color: var(--status-danger-text);
+  }
+}
+
+.estado-carga {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+// ── Próximo corte ─────────────────────────────────────────────────────────
+
+.proximo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+
+  &__icono {
+    font-size: 32px;
+    color: var(--primary-color);
+  }
+
+  &__titulo {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  &__fecha {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-title);
+    text-transform: capitalize;
+  }
+
+  &__detalle {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+}
+
+// ── Meses y cortes ────────────────────────────────────────────────────────
+
+.mes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__titulo {
+    margin: 4px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-title);
+  }
+}
+
+.corte {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, 2fr) auto minmax(200px, auto);
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--bg-card);
+
+  &--editando {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+  }
+
+  &__tipo {
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  &__periodo,
+  &__fecha-nota {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  &__fecha-valor {
+    font-weight: 600;
+    color: var(--text-body);
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  &__editor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  &__input {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--border-input);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 14px;
+
+    &--error {
+      border-color: var(--status-danger-border);
+      box-shadow: 0 0 0 1px var(--status-danger-border);
+    }
+  }
+
+  &__ayuda {
+    flex-basis: 100%;
+    font-size: 12px;
+    color: var(--text-muted);
+
+    &--error {
+      color: var(--status-danger-text);
+      font-weight: 600;
+    }
+
+    &--aviso {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--status-warning-bg-soft);
+      border: 1px solid var(--status-warning-border);
+      color: var(--status-warning-text);
+
+      .material-icons {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// ── Estado ────────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-flex;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid;
+
+  &--Programado {
+    background: var(--status-info-bg-soft);
+    border-color: var(--status-info-border);
+    color: var(--status-info-text);
+  }
+
+  &--EnProceso {
+    background: var(--status-warning-bg-soft);
+    border-color: var(--status-warning-border);
+    color: var(--status-warning-text);
+  }
+
+  &--Ejecutado {
+    background: var(--status-success-bg-soft);
+    border-color: var(--status-success-border);
+    color: var(--status-success-text);
+  }
+
+  &--NoEjecutado {
+    background: var(--status-danger-bg-soft);
+    border-color: var(--status-danger-border);
+    color: var(--status-danger-text);
+  }
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  .material-icons {
+    font-size: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primario {
+    background: var(--primary-color);
+    color: var(--text-inverse);
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+  }
+
+  &--secundario {
+    background: var(--bg-card);
+    border-color: var(--border-default);
+    color: var(--text-main);
+
+    &:hover:not(:disabled) {
+      background: var(--bg-hover);
+    }
+  }
+
+  &--texto {
+    background: transparent;
+    color: var(--primary-color);
+
+    &:hover:not(:disabled) {
+      background: var(--bg-hover);
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 20px 16px;
+  }
+
+  .corte {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .corte__acciones {
+    justify-content: flex-start;
+  }
+
+  .badge {
+    justify-self: start;
+  }
+}

@@ -81,23 +81,6 @@ import { TOKEN_CONFIG } from '../../config/token.config';
     }
 
 
-    .time {
-      font-size: 56px;
-      font-weight: bold;
-      color: #ff9800;
-      line-height: 1;
-    }
-
-    .label {
-      font-size: 12px;
-      color: #999;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 8px;
-      font-weight: 500;
-    }
-
-
     .actions {
       display: flex;
       flex-direction: column;

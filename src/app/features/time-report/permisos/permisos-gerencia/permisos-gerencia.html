@@ -1,0 +1,220 @@
+<div class="permisos-page">
+  <app-header
+    title="Historial General de Permisos (Gerencia)"
+    subtitle="Consulta histórica de todos los permisos y vacaciones solicitados, confirmados y rechazados"
+  >
+    <div class="header-actions-gerencia">
+      <button
+        type="button"
+        class="btn-tmr btn-tmr--secondary"
+        [disabled]="solicitudesFiltradas().length === 0"
+        (click)="alternarSeleccionarTodos()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ todosSeleccionados() ? 'deselect' : 'select_all' }}
+        </span>
+        {{ todosSeleccionados() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+      </button>
+
+      <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="cantidadSeleccionados() === 0 || exportandoReporte()" [matMenuTriggerFor]="reporteMenu">
+        {{ exportandoReporte() ? 'Generando…' : 'Reporte (' + cantidadSeleccionados() + ')' }}
+      </button>
+      <mat-menu #reporteMenu="matMenu">
+        <button mat-menu-item (click)="generarReporte('xlsx')" [disabled]="exportandoReporte()">Descargar Excel (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('pdf')" [disabled]="exportandoReporte()">Descargar PDF</button>
+      </mat-menu>
+    </div>
+  </app-header>
+
+  <section class="kpis-grid">
+    <app-tarjeta-resumen [valor]="totalHistorico()" titulo="Resultados" icono="folder_shared" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalConfirmados()" titulo="Confirmados" icono="verified" tono="exito" />
+    <app-tarjeta-resumen [valor]="totalEnProceso()" titulo="En aprobación" icono="pending_actions" tono="advertencia" />
+    <app-tarjeta-resumen [valor]="totalRechazados()" titulo="Rechazados" icono="block" tono="peligro" />
+  </section>
+
+  <div class="filters-card">
+    <div class="filter-group search-group">
+      <label class="filter-label" for="permisos-gerencia-filter-1">Buscar</label>
+      <input id="permisos-gerencia-filter-1"
+        type="text"
+        class="filter-control"
+        placeholder="Colaborador, código, proyecto, cliente, líder, duración o motivo..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="permisos-gerencia-filter-2">Período</label>
+      <select id="permisos-gerencia-filter-2"
+        class="filter-control"
+        [ngModel]="periodoPreset()"
+        (ngModelChange)="cambiarPresetPeriodo($event)"
+      >
+        <option value="TODOS">Todo período</option>
+        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+        <option value="PERSONALIZADO">Rango personalizado</option>
+      </select>
+    </div>
+
+    @if (periodoPreset() === 'PERSONALIZADO') {
+    <div class="filter-group date-group">
+      <label class="filter-label" for="permisos-gerencia-filter-3">Desde</label>
+      <input id="permisos-gerencia-filter-3"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaDesde()"
+        (ngModelChange)="cambiarFechaDesde($event)"
+      />
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label" for="permisos-gerencia-filter-4">Hasta</label>
+      <input id="permisos-gerencia-filter-4"
+        type="date"
+        class="filter-control"
+        [ngModel]="fechaHasta()"
+        (ngModelChange)="cambiarFechaHasta($event)"
+      />
+    </div>
+
+    }
+    <div class="filter-group">
+      <label class="filter-label" for="permisos-gerencia-filter-5">Tipo</label>
+      <select id="permisos-gerencia-filter-5" class="filter-control" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="VACACIONES">Vacaciones</option>
+        <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
+        <option value="CITAS_MEDICAS">Citas médicas</option>
+        <option value="MATRIMONIO">Matrimonio</option>
+        <option value="NACIMIENTO_HIJO">Nacimiento de un Hijo/a</option>
+        <option value="MATERNIDAD">Maternidad</option>
+        <option value="FALLECIMIENTO_FAMILIAR">Fallecimiento de un familiar</option>
+        <option value="CALAMIDAD_DOMESTICA">Calamidad doméstica</option>
+        <option value="ACCIDENTE">Accidente</option>
+        <option value="OTROS">Otros</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="permisos-gerencia-filter-6">Semáforo</label>
+      <select id="permisos-gerencia-filter-6" class="filter-control" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+        <option value="TODOS">Todo período</option>
+        <option value="proceso">En proceso</option>
+        <option value="finalizado">Finalizado</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      @if (tieneFiltrosActivos()) {
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
+    <table class="permisos-table permisos-review-table">
+      <colgroup>
+        <col style="width: 48px;" />
+        <col style="width: 22%;" />
+        <col style="width: 22%;" />
+        <col style="width: 18%;" />
+        <col style="width: 12%;" />
+        <col style="width: 150px;" />
+        <col style="width: 96px;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-check">
+            <input
+              type="checkbox"
+              class="gerencia-checkbox"
+              aria-label="Seleccionar todas las solicitudes visibles"
+              [checked]="todosSeleccionados()"
+              [indeterminate]="algunosSeleccionados()"
+              [disabled]="solicitudesFiltradas().length === 0"
+              (change)="alternarSeleccionarTodos()"
+            />
+          </th>
+          <th>Colaborador</th>
+          <th>Permiso</th>
+          <th>Fecha</th>
+          <th>Duración</th>
+          <th class="estado-column">Estado</th>
+          <th aria-label="Acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of solicitudesFiltradas(); track item.id) {
+          <tr
+            [class.row-selected]="estaSeleccionado(item.id)"
+          >
+            <td class="col-check" (click)="$event.stopPropagation()">
+              <input
+                type="checkbox"
+                class="gerencia-checkbox"
+                [attr.aria-label]="'Seleccionar solicitud ' + item.folio + ' de ' + item.colaborador"
+                [checked]="estaSeleccionado(item.id)"
+                (change)="alternarSeleccion(item.id, $event)"
+              />
+            </td>
+            <td><strong>{{ item.colaborador }}</strong></td>
+            <td>{{ item.tipo }}</td>
+            <td class="cell-muted">{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
+            <td class="estado-column">
+              <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
+              </span>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <div class="actions-cell">
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--primary btn-tmr--sm"
+                  (click)="verPdf(item)"
+                  title="Ver solicitud"
+                  [attr.aria-label]="'Ver solicitud de ' + item.folio"
+                >
+                  Revisar
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty-row">{{ cargando() ? 'Cargando solicitudes…' : errorCarga() ? 'No se pudo cargar el historial.' : 'No se encontraron solicitudes con estos filtros.' }}
+              @if (errorCarga()) { <button type="button" class="btn-tmr btn-tmr--secondary" (click)="cargarHistorialDesdeApi()">Reintentar</button> }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: VISTA DEL DOCUMENTO PDF -->
+<app-modal-base
+  [titulo]="'Solicitud — ' + (solicitudActiva()?.folio ?? '')"
+  [visible]="modalPdfVisible()"
+  [wide]="false"
+  (cerrar)="modalPdfVisible.set(false)"
+>
+  @if (solicitudActiva(); as sol) {
+    <div class="modal-form">
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalPdfVisible.set(false)">
+          Cerrar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
+          <span class="material-symbols-outlined">download</span>
+          Descargar PDF
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>
