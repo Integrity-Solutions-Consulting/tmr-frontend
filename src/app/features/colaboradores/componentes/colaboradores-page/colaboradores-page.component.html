@@ -55,14 +55,6 @@
   </div>
 </div>
 
-@if (modalDetalle) {
-  <app-modal-detalle-colaborador
-    [colaborador]="modalDetalle"
-    (cerrar)="cerrarDetalle()"
-    (editar)="abrirEditar($event)"
-  />
-}
-
 @if (modalCrear) {
   <app-modal-crear-colaborador
     (cerrar)="cerrarCrear()"

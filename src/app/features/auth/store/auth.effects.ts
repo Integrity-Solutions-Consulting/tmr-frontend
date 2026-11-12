@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, forkJoin } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as AuthActions from './auth.actions';
@@ -49,10 +49,11 @@ export class AuthEffects {
             // Guardar tokens en localStorage (incluye accessToken, refreshToken y expiresAt)
             this.authService.updateTokens(response);
 
-            return this.authService.getUserModules().pipe(
-              tap((modules) => {
+            return forkJoin({ modules: this.authService.getUserModules(), permissions: this.authService.getUserPermissions() }).pipe(
+              tap(({ modules, permissions }) => {
                 //console.log("Módulos recibidos desde backend:", modules);
                 this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
+                this.userModulesService.setPermissions(Array.isArray(permissions) ? permissions : []);
               }),
               tap(() => {
                 //console.log('🔄 Iniciando monitoreo de token...');
