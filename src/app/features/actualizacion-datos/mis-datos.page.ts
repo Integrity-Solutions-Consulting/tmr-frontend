@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ActualizacionDatosService } from './actualizacion-datos.service';
 import { Boton } from '../../shared/components/boton/boton';
 import { AppSelectComponent, AppSelectOption } from '../../shared/components/select/select.component';
@@ -20,9 +21,13 @@ type ConditionKind = 'children' | 'ownDisability' | 'partner' | 'childDisability
 export class MisDatosPage {
   private fb = inject(FormBuilder);
   private api = inject(ActualizacionDatosService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   data: any = null;
   loading = true; loadFailed = false; saving = false; uploading = false; message = ''; error = ''; notificacion: Notificacion | null = null;
   tab = 'personal'; dirty = false; solicitudSaving = false; solicitudId?: number;
+  private readonly validTabs = new Set(['personal', 'familia', 'formacion', 'certificaciones', 'solicitudes']);
+  private lastTab = 'personal';
   deletingId?: number;
   deleteTarget?: { id: number; nombre: string; solicitudId?: number };
   conditionTarget?: { kind: ConditionKind; previous: string; next: string; row?: AbstractControl };
@@ -53,7 +58,7 @@ export class MisDatosPage {
       estadoCivil: [''], tieneHijos: ['NoInformado'], limpiarHijos: [false], limpiarPareja: [false],
       pareja: this.fb.group({
         id: [null], clave: [crypto.randomUUID().replaceAll('-', '')], tipoRelacion: ['Conyuge'],
-        nombres: [''], apellidos: [''], identificacion: [''], fechaNacimiento: [''],
+        nombres: [''], apellidos: [''], identificacion: ['', Validators.pattern(/^\d{0,10}$/)], fechaNacimiento: [''],
         tieneDiscapacidad: ['NoInformado'], tipoDiscapacidad: [''], porcentajeDiscapacidad: [''], archivos: [[] as any[]]
       }),
       familiares: this.fb.array([])
@@ -72,7 +77,27 @@ export class MisDatosPage {
   cerrarNotificacion() { this.notificacion = null; }
   abrirArchivo(input: HTMLInputElement) { input.click(); }
 
-  ngOnInit() { this.form.valueChanges.subscribe(() => this.dirty = true); this.load(); }
+  ngOnInit() {
+    this.form.valueChanges.subscribe(() => this.dirty = true);
+    this.route.queryParamMap.subscribe(params => {
+      const requested = params.get('tab');
+      this.tab = requested && this.validTabs.has(requested) ? requested : 'personal';
+      this.lastTab = this.tab;
+    });
+    this.load();
+  }
+
+  setTab(tab: string) {
+    const next = this.validTabs.has(tab) ? tab : 'personal';
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab: next }, queryParamsHandling: 'merge' });
+  }
+
+  ngDoCheck() {
+    if (this.tab !== this.lastTab && this.validTabs.has(this.tab)) {
+      this.lastTab = this.tab;
+      this.router.navigate([], { relativeTo: this.route, queryParams: { tab: this.tab }, queryParamsHandling: 'merge' });
+    }
+  }
 
   load() {
     this.loading = true; this.loadFailed = false; this.error = '';
@@ -111,7 +136,7 @@ export class MisDatosPage {
     this.familiares.push(this.fb.group({
       id: [v.id || null], clave: [key], tipoRelacion: ['Hijo', Validators.required],
       nombres: [v.nombres || '', Validators.required], apellidos: [v.apellidos || '', Validators.required],
-      identificacion: [v.identificacion || ''], fechaNacimiento: [v.fechaNacimiento || ''],
+      identificacion: [v.identificacion || '', Validators.pattern(/^\d{0,10}$/)], fechaNacimiento: [v.fechaNacimiento || ''],
       tieneDiscapacidad: [v.tieneDiscapacidad || 'NoInformado'], tipoDiscapacidad: [v.tipoDiscapacidad || ''],
       porcentajeDiscapacidad: [v.porcentajeDiscapacidad ?? ''], limpiarDiscapacidad: [false], archivos: [v.archivos || []]
     }));
@@ -254,7 +279,41 @@ export class MisDatosPage {
   download(id: number) { this.api.downloadMine(id).subscribe(x => { const u = URL.createObjectURL(x); const a = document.createElement('a'); a.href = u; a.download = 'documento'; a.click(); URL.revokeObjectURL(u); }); }
   askDelete(file: any, solicitudId?: number) { if (this.deletingId) return; this.deleteTarget = { id: file.id, nombre: file.nombreOriginal, solicitudId }; }
   cancelDelete() { if (!this.deletingId) this.deleteTarget = undefined; }
-  confirmDelete() { const target = this.deleteTarget; if (!target || this.deletingId) return; this.deletingId = target.id; this.error = ''; const request$ = target.solicitudId ? this.api.deleteSolicitudDocument(target.solicitudId, target.id) : this.api.deleteMineDocument(target.id); request$.subscribe({ next: () => { this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Documento eliminado correctamente.' }); this.deletingId = undefined; this.deleteTarget = undefined; this.load(); }, error: e => { this.deletingId = undefined; this.error = e.error?.detail || e.error?.message || 'No fue posible eliminar el documento. Intenta nuevamente.'; } }); }
+  confirmDelete() {
+    const target = this.deleteTarget;
+    if (!target || this.deletingId) return;
+    this.deletingId = target.id;
+    this.error = '';
+    const request$ = target.solicitudId ? this.api.deleteSolicitudDocument(target.solicitudId, target.id) : this.api.deleteMineDocument(target.id);
+    request$.subscribe({
+      next: () => {
+        this.removeDocumentFromView(target.id, target.solicitudId);
+        this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Documento eliminado correctamente.' });
+        this.deletingId = undefined;
+        this.deleteTarget = undefined;
+      },
+      error: e => {
+        this.deletingId = undefined;
+        this.deleteTarget = undefined;
+        this.error = e.error?.detail || e.error?.message || 'No fue posible eliminar el documento. Intenta nuevamente.';
+      }
+    });
+  }
+
+  private removeDocumentFromView(id: number, solicitudId?: number) {
+    if (solicitudId) {
+      const request = this.data?.solicitudes?.find((item: any) => item.id === solicitudId);
+      if (request) request.archivos = (request.archivos || []).filter((file: any) => file.id !== id);
+      return;
+    }
+    if (this.data?.archivos) this.data.archivos = this.data.archivos.filter((file: any) => file.id !== id);
+    const partnerFiles = (this.pareja.get('archivos')?.value as any[] | null) || [];
+    (this.pareja.get('archivos') as any)?.setValue(partnerFiles.filter((file: any) => file.id !== id), { emitEvent: false });
+    for (const row of [...this.familiares.controls, ...this.formaciones.controls, ...this.certificaciones.controls]) {
+      const archivos = row.get('archivos')?.value || [];
+      row.get('archivos')?.setValue(archivos.filter((file: any) => file.id !== id), { emitEvent: false });
+    }
+  }
   downloadSolicitud(id: number, fileId: number) { this.api.downloadSolicitud(id, fileId).subscribe(x => { const u = URL.createObjectURL(x); const a = document.createElement('a'); a.href = u; a.download = 'documento'; a.click(); URL.revokeObjectURL(u); }); }
   crearSolicitud() { if (this.solicitudForm.invalid) { this.solicitudForm.markAllAsTouched(); return; } this.solicitudSaving = true; this.api.crearSolicitud(this.solicitudForm.getRawValue()).subscribe({ next: x => { this.solicitudId = x.id; this.solicitudSaving = false; this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Solicitud creada correctamente.' }); this.solicitudForm.reset({ enviar: true }); this.load(); }, error: e => { this.solicitudSaving = false; this.error = e.error?.message || 'No fue posible crear la solicitud.'; } }); }
   uploadSolicitud(event: any) {

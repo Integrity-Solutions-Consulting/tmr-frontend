@@ -6,7 +6,7 @@
   <div *ngIf="!loading && loadFailed" class="error-state"><p>{{ error }}</p><app-boton label="Reintentar" icon="refresh" type="secondary" (clicked)="load()"></app-boton></div>
   <ng-container *ngIf="!loading && !loadFailed">
     <nav class="tabs" aria-label="Secciones de mis datos"><button [class.active]="tab==='personal'" (click)="tab='personal'">Información personal</button><button [class.active]="tab==='familia'" (click)="tab='familia'">Información familiar</button><button [class.active]="tab==='formacion'" (click)="tab='formacion'">Formación académica</button><button [class.active]="tab==='certificaciones'" (click)="tab='certificaciones'">Certificaciones</button><button [class.active]="tab==='solicitudes'" (click)="tab='solicitudes'">Solicitudes</button></nav>
-    <form [formGroup]="form" class="content">
+    <form [formGroup]="form" class="content" (submit)="$event.preventDefault()">
       <section class="card" *ngIf="tab==='personal'" formGroupName="persona">
         <div class="section-head"><div><h2>Información personal</h2><p class="muted">Los datos laborales y administrativos son de solo lectura.</p></div></div>
         <div class="field-grid">
