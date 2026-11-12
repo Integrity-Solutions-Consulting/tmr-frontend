@@ -28,6 +28,7 @@ import {
 } from '../permisos-api.service';
 
 export interface SolicitudRrhh {
+  versionSolicitud?: string | null;
   id: number;
   folio: string;
   diaSolicitud?: string;
@@ -147,6 +148,7 @@ export class GestionRrhhComponent implements OnInit {
   private mapearDesdeApi(item: PermisoItemApi): SolicitudRrhh {
     return {
       id: item.id,
+      versionSolicitud: item.versionSolicitud,
       folio: item.codigo,
       diaSolicitud: item.diaSolicitud,
       mesSolicitud: item.mesSolicitud,
@@ -368,6 +370,7 @@ export class GestionRrhhComponent implements OnInit {
         'confirmar',
         this.impactoSeleccionado(),
         this.observacionesRrhh().trim(),
+        actual.versionSolicitud,
       )
       .subscribe({
         next: (res) => {
@@ -419,6 +422,7 @@ export class GestionRrhhComponent implements OnInit {
         'devolver',
         this.impactoSeleccionado(),
         obs,
+        actual.versionSolicitud,
       )
       .subscribe({
         next: (res) => {

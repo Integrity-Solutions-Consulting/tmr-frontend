@@ -180,7 +180,7 @@
 
   <!-- MODAL 1: SOLICITUD DE PERMISOS -->
   <app-modal-base
-    titulo="Nueva solicitud"
+    [titulo]="editandoSolicitud() ? 'Corregir solicitud — ' + editandoSolicitud()?.codigo : 'Nueva solicitud'"
     [visible]="modalNuevaVisible()"
     [wide]="false"
     (cerrar)="modalNuevaVisible.set(false)"
@@ -482,7 +482,7 @@
           (click)="guardarNuevaSolicitud()"
         >
           <span class="material-symbols-outlined" aria-hidden="true">send</span>
-          {{ guardandoSolicitud() ? 'Enviando...' : 'Enviar solicitud' }}
+          {{ guardandoSolicitud() ? 'Enviando...' : (editandoSolicitud() ? 'Reenviar solicitud corregida' : 'Enviar solicitud') }}
         </button>
       </div>
     </div>
@@ -492,6 +492,11 @@
   <app-modal-base [titulo]="'Solicitud — ' + (solicitudSeleccionada()?.codigo ?? '')" [visible]="modalFormularioVisible()" [wide]="false" (cerrar)="modalFormularioVisible.set(false)">
     @if (solicitudSeleccionada(); as sel) {
       <div class="modal-form">
+        @if (sel.estadoClase === 'observado') {
+          <p role="status">Tu solicitud tiene observaciones. Corrige los datos y vuelve a enviarla.</p>
+          <p>{{ sel.comentarios }}</p>
+          <button type="button" class="btn-tmr btn-tmr--primary" (click)="editarObservada(sel)">Corregir y reenviar</button>
+        }
         <app-resumen-solicitud [datos]="obtenerDatosFormulario(sel)" [tipo]="sel.tipo" [proyecto]="sel.proyecto" [estado]="sel.estadoTexto" [adjuntos]="sel.adjuntos || []" />
         <div class="modal-footer">
           <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioVisible.set(false)">Cerrar</button>
