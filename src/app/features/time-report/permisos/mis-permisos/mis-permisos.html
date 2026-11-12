@@ -107,55 +107,35 @@
   <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
     <table class="permisos-table">
       <colgroup>
-        <col />
-        <col />
-        <col />
-        <col />
+        <col style="width: 30%;" />
+        <col style="width: 22%;" />
+        <col style="width: 18%;" />
         <col style="width: 150px;" />
-        <col style="width: 90px;" />
+        <col style="width: 96px;" />
       </colgroup>
       <thead>
         <tr>
-          <th>Código</th>
-          <th>Solicitud</th>
-          <th>Fechas y Jornada</th>
+          <th>Permiso</th>
+          <th>Fecha</th>
           <th>Duración</th>
-
           <th class="estado-column">Estado</th>
-          <th style="text-align: right;">Acciones</th>
+          <th aria-label="Acciones"></th>
         </tr>
       </thead>
       <tbody>
         @for (item of solicitudesFiltradas(); track item.codigo) {
           <tr>
-            <td class="codigo-cell">{{ item.codigo }}</td>
             <td>
-              <div class="cell-stack">
-                <span class="cell-primary">
-                  {{ item.tipo }}
-                  @if ((item.adjuntos?.length ?? 0) > 0 || item.evidencia) {
-                    <span class="cell-clip-badge" [title]="(item.adjuntos?.length || 1) + ' archivo(s) adjunto(s)'">
-                      <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
-                      {{ item.adjuntos?.length || 1 }}
-                    </span>
-                  }
+              <strong>{{ item.tipo }}</strong>
+              @if ((item.adjuntos?.length ?? 0) > 0 || item.evidencia) {
+                <span class="cell-clip-badge" [title]="(item.adjuntos?.length || 1) + ' archivo(s) adjunto(s)'">
+                  <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                  {{ item.adjuntos?.length || 1 }}
                 </span>
-
-              </div>
+              }
             </td>
-            <td>
-              <div class="cell-stack">
-                <span class="cell-primary">{{ obtenerRangoFechasLimpio(item) }}</span>
-                <span class="cell-sub">{{ obtenerEtiquetaHorario(item) }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-stack">
-                <span class="cell-primary">{{ item.diasSolicitados }}</span>
-                @if (!item.diasSolicitados.includes('hora') && !item.diasSolicitados.includes('min')) { <span class="cell-sub">{{ item.horasSolicitadas }}</span> }
-              </div>
-            </td>
-
+            <td class="cell-muted">{{ obtenerRangoFechasLimpio(item) }}</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
             <td class="estado-column">
               <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
                 {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
@@ -171,7 +151,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
+            <td colspan="5" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
       </tbody>

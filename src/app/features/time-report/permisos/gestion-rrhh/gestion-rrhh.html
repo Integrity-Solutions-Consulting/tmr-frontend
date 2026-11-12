@@ -90,27 +90,30 @@
   <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes; desplázate horizontalmente para ver todas las columnas">
     <table class="permisos-table permisos-review-table">
       <colgroup>
-        <col />
-        <col />
-        <col />
+        <col style="width: 24%;" />
+        <col style="width: 24%;" />
+        <col style="width: 18%;" />
+        <col style="width: 12%;" />
         <col style="width: 150px;" />
-        <col style="width: 100px;" />
+        <col style="width: 96px;" />
       </colgroup>
       <thead>
         <tr>
-          <th>Colaborador / Código</th>
-          <th>Solicitud / Proyecto</th>
-          <th>Período / Duración</th>
+          <th>Colaborador</th>
+          <th>Permiso</th>
+          <th>Fecha</th>
+          <th>Duración</th>
           <th class="estado-column">Estado</th>
-          <th style="text-align: right;">Acciones</th>
+          <th aria-label="Acciones"></th>
         </tr>
       </thead>
       <tbody>
         @for (item of solicitudesFiltradas(); track item.id) {
           <tr>
-            <td><strong>{{ item.colaborador }}</strong><span class="table-secondary">{{ item.folio }}</span></td>
-            <td><strong>{{ item.tipo }}</strong><span class="table-secondary">{{ item.proyecto || item.cliente || 'Sin proyecto' }}</span></td>
-            <td>{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }<span class="table-secondary">{{ item.diasSolicitados }}</span></td>
+            <td><strong>{{ item.colaborador }}</strong></td>
+            <td>{{ item.tipo }}</td>
+            <td class="cell-muted">{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }</td>
+            <td class="cell-muted">{{ item.diasSolicitados }}</td>
             <td class="estado-column">
               <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
                 {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
@@ -131,7 +134,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="5" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+            <td colspan="6" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
           </tr>
         }
       </tbody>
