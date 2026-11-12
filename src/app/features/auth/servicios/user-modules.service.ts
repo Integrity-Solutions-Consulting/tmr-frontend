@@ -16,6 +16,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class UserModulesService {
   private readonly modules$ = new BehaviorSubject<string[]>([]);
+  private readonly permissions$ = new BehaviorSubject<string[]>([]);
 
   constructor() {}
 
@@ -56,5 +57,9 @@ export class UserModulesService {
    */
   clearModules(): void {
     this.modules$.next([]);
+    this.permissions$.next([]);
   }
+
+  setPermissions(permissions: string[]): void { this.permissions$.next(Array.isArray(permissions) ? permissions : []); }
+  hasPermission(permission: string): boolean { return this.permissions$.value.some(x => x.toUpperCase() === permission.toUpperCase()); }
 }

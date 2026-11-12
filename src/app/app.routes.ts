@@ -58,6 +58,11 @@ export const routes: Routes = [
           ),
       },
 
+      {
+        path: 'mis-datos',
+        loadComponent: () => import('./features/actualizacion-datos/mis-datos.page').then(m => m.MisDatosPage),
+      },
+
       // Clientes
       {
         path: 'clientes',

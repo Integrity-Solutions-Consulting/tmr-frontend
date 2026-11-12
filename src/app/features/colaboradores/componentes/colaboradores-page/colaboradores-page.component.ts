@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { forkJoin, of, Subject, switchMap, takeUntil, catchError, map } from 'rxjs';
 import { exportarReporteExcelMultihoja, exportarReportePdf } from '../../../../shared/utils/reporte-export.utils';
@@ -18,7 +19,6 @@ import { FiltrosColaboradoresComponent }    from '../filtros-colaboradores/filtr
 import { DescargarMenuComponent }           from '../descargar-menu/descargar-menu.component';
 import { TablaColaboradoresComponent }      from '../tabla-colaboradores/tabla-colaboradores.component';
 import { PaginacionComponent }             from '../../../../shared/components/paginacion/paginacion.component';
-import { ModalDetalleColaboradorComponent } from '../modal-detalle-colaborador/modal-detalle-colaborador.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
 import { ModalRegistrarSalidaComponent }    from '../modal-registrar-salida/modal-registrar-salida.component';  // ← NUEVO
@@ -37,7 +37,6 @@ import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
     DescargarMenuComponent,
     TablaColaboradoresComponent,
     PaginacionComponent,
-    ModalDetalleColaboradorComponent,
     ModalCrearColaboradorComponent,
     ModalEditarColaboradorComponent,
     ModalRegistrarSalidaComponent,  // ← NUEVO
@@ -74,7 +73,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   get totalColaboradores(): number { return this.activos + this.inactivos; }
 
   // ── Modales ──────────────────────────────────────────────
-  modalDetalle: Colaborador | null = null;
   modalCrear   = false;
   modalEditar: Colaborador | null = null;
   modalRegistrarSalida: Colaborador | null = null;  
@@ -87,6 +85,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private descargas = inject(DescargaProgresoService);
+  private router = inject(Router);
 
   constructor(
     private svc:         ColaboradoresService,
@@ -170,16 +169,17 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
 
   // ── Modales abrir ────────────────────────────────────────
   abrirDetalle(col: Colaborador): void {
-    this.svc.getColaboradorById(col.id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: detalle => this.modalDetalle = detalle,
-        error: () => console.error('Error al cargar el detalle'),
-      });
+    this.router.navigate(['/colaboradores', col.id, 'detalle'], {
+      queryParams: {
+        busqueda: this.filtros.busqueda || null,
+        estado: this.filtros.estado !== 'Todos' ? this.filtros.estado : null,
+        pagina: this.paginaActual,
+        porPagina: this.porPagina,
+      },
+    });
   }
   abrirCrear():                   void { this.modalCrear   = true; }
   abrirEditar(col: Colaborador): void {
-      this.modalDetalle = null;
       this.svc.getColaboradorById(col.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -203,7 +203,6 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   }
 
   // ── Modales cerrar ───────────────────────────────────────
-  cerrarDetalle(): void { this.modalDetalle = null;  }
   cerrarCrear():   void { this.modalCrear   = false; }
   cerrarEditar():  void { this.modalEditar  = null;  }
   cerrarRegistrarSalida(): void { this.modalRegistrarSalida = null; }  // ← NUEVO

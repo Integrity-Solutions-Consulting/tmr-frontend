@@ -133,6 +133,10 @@ export class AuthService {
     return this.http.get<string[]>(`${this.API_URL}/modules`);
   }
 
+  getUserPermissions(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.API_URL}/permissions`);
+  }
+
   changePassword(payload: ChangePasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.API_URL}/change-password`, payload);
   }
