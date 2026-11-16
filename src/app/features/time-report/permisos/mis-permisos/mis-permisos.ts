@@ -81,6 +81,7 @@ export interface OpcionClienteProyecto {
   idLider: number | null;
   liderNombre: string;
   tipoLider: 'INT' | 'EXT';
+  liderCorreo?: string | null;
   esAsignacionPropia: boolean;
 }
 
@@ -88,6 +89,7 @@ export interface OpcionLiderFormulario {
   idLider: number | null;
   nombre: string;
   tipo: 'INT' | 'EXT';
+  correo?: string | null;
   etiqueta: string;
 }
 
@@ -408,6 +410,7 @@ export class MisPermisosComponent implements OnInit {
               idLider: l.idLider,
               nombre: l.nombre,
               tipo: l.tipo,
+              correo: l.correo ?? null,
               etiqueta: `${l.nombre} (${l.tipo === 'EXT' ? 'Líder Externo' : 'Líder Interno'})`,
             })),
           );
@@ -431,6 +434,7 @@ export class MisPermisosComponent implements OnInit {
               idLider: p.idLider,
               liderNombre: (p.liderNombre ?? '').trim(),
               tipoLider: p.liderTipo,
+              liderCorreo: p.liderCorreo ?? null,
               esAsignacionPropia: !!p.esAsignacionPropia,
             } satisfies OpcionClienteProyecto;
           });
@@ -603,6 +607,9 @@ export class MisPermisosComponent implements OnInit {
     this.busquedaClienteProyecto.set('');
     if (this.opcionesCliente().length === 0) {
       this.cargarDatosBackend();
+    } else {
+      const cli = this.clienteActualForm();
+      this.notificarSiLiderExternoSinCorreo(cli?.tipoLider, cli?.liderNombre, cli?.liderCorreo);
     }
     this.modalNuevaVisible.set(true);
   }
@@ -665,6 +672,23 @@ export class MisPermisosComponent implements OnInit {
       if (liderIdx >= 0) {
         this.indiceLiderForm.set(liderIdx);
       }
+      if (this.modalNuevaVisible()) {
+        this.notificarSiLiderExternoSinCorreo(clienteOpt.tipoLider, clienteOpt.liderNombre, clienteOpt.liderCorreo);
+      }
+    }
+  }
+
+  private notificarSiLiderExternoSinCorreo(
+    tipoLider?: 'INT' | 'EXT' | null,
+    liderNombre?: string | null,
+    liderCorreo?: string | null,
+  ): void {
+    if (tipoLider === 'EXT' && liderNombre?.trim() && !liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${liderNombre.trim()} no tiene un correo registrado.`,
+        7000,
+      );
     }
   }
 
@@ -1096,6 +1120,7 @@ export class MisPermisosComponent implements OnInit {
               ? `Tu solicitud y ${archivos.length === 1 ? 'el documento de respaldo quedaron guardados' : 'los ' + archivos.length + ' documentos de respaldo quedaron guardados'} y los avisos quedaron pendientes de envío.`
               : 'Tu solicitud fue registrada. Los avisos quedaron pendientes de envío.',
           );
+          this.notificarSiLiderExternoSinCorreo(res.data.liderTipo, res.data.liderNombre, res.data.liderCorreo);
         },
         error: (err) => {
           this.guardandoSolicitud.set(false);

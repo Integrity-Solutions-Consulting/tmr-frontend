@@ -287,6 +287,13 @@ export class GestionRrhhComponent implements OnInit {
   abrirVistaFormulario(item: SolicitudRrhh): void {
     this.solicitudActiva.set(item);
     this.modalFormularioAbierto.set(true);
+    if (item.estado === 'PENDIENTE_LIDER_EXT' && !item.liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${item.liderNombre || 'asignado'} no tiene un correo registrado.`,
+        7000,
+      );
+    }
   }
 
   async descargarPdf(item: SolicitudRrhh): Promise<void> {
@@ -336,6 +343,14 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   reenviarEnlaceExterno(item: SolicitudRrhh): void {
+    if (!item.liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${item.liderNombre || 'asignado'} no tiene un correo registrado.`,
+        7000,
+      );
+      return;
+    }
     this.apiService.reenviarEnlaceExterno(item.id).subscribe({
       next: (res) => {
         if (res?.data?.avisoNotificacion) {

@@ -1,6 +1,6 @@
 <div class="permisos-page">
   <app-header
-    title="Historial General de Permisos (Gerencia)"
+    title="Historial General de Permisos"
     subtitle="Consulta histórica de todos los permisos y vacaciones solicitados, confirmados y rechazados"
   >
     <div class="header-actions-gerencia">
@@ -39,7 +39,7 @@
       <input id="permisos-gerencia-filter-1"
         type="text"
         class="filter-control"
-        placeholder="Colaborador, código, proyecto, cliente, líder, duración o motivo..."
+        placeholder="Buscar"
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
