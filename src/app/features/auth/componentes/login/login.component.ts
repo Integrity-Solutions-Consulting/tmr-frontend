@@ -10,7 +10,6 @@ import * as AuthSelectors from '../../store/auth.selectors';
 import { Actions, ofType } from '@ngrx/effects';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { inject } from '@angular/core';
-import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +20,6 @@ import { environment } from '../../../../../environments/environment';
 })
 export class LoginComponent implements OnInit, OnDestroy {
   private themeService = inject(ThemeService);
-  readonly loginSnowEnabled = environment.loginSnowEnabled;
 
   get logoSrc(): string {
     return this.themeService.activeTheme() === 'dark'
