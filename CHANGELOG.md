@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.1...v3.7.0) (2026-11-17)
+
+
+### Features
+
+* add lightweight Christmas snow to login ([44008cd](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/44008cd8c6e1b044e48a643219291d64982d5a14))
+
 ## [3.6.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.0...v3.6.1) (2026-11-10)
 
 
