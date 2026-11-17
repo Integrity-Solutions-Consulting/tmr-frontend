@@ -22,6 +22,7 @@ import {
   correoInstitucionalValidator,
   correoPersonalValidator
 } from '../../../../shared/validators/form-validators';
+import { NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../../../shared/validators/nombre-persona.validator';
 import { ModalScrollLockService } from '../../../../shared/services/modal-scroll-lock.service';
 import { DropdownScrollLockService } from '../../../../shared/services/dropdown-scroll-lock.service';
 
@@ -112,14 +113,10 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
         this.validatorIdentificacionPorTipo()
       ]],
       nombres: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       apellidos: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       fechaNacimiento: [''],
       idGenero: [null],
@@ -496,6 +493,13 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
     return 'Campo inválido';
   }
 
+  mensajeErrorNombre(campo: string): string {
+    const errors = this.form.get(campo)?.errors;
+    if (!errors) return '';
+    if (errors['required']) return 'Campo requerido';
+    return NOMBRE_PERSONA_MENSAJE;
+  }
+
   tieneValor(campo: string): boolean {
     const val = this.form.get(campo)?.value;
     return val !== null && val !== undefined && val !== '';
@@ -525,8 +529,8 @@ export class ModalCrearColaboradorComponent implements OnInit, OnDestroy {
       tipoPersona: v.tipoPersona,
       idGenero: v.idGenero ? Number(v.idGenero) : null,
       idNacionalidad: v.idNacionalidad ? Number(v.idNacionalidad) : null,
-      nombres: String(v.nombres).trim(),
-      apellidos: String(v.apellidos).trim(),
+      nombres: normalizarNombrePersona(v.nombres),
+      apellidos: normalizarNombrePersona(v.apellidos),
       fechaNacimiento: v.fechaNacimiento || null,
 
       // ── Datos de contacto ─────────────────────────────
