@@ -211,7 +211,7 @@
             </div>
 
             @if (campoInvalido('nombres')) {
-              <span class="form-field__error">{{ mensajeErrorTexto('nombres') }}</span>
+         <span class="form-field__error">{{ mensajeErrorNombre('nombres') }}</span>
             }
           </div>
 
@@ -237,7 +237,7 @@
             </div>
 
             @if (campoInvalido('apellidos')) {
-              <span class="form-field__error">{{ mensajeErrorTexto('apellidos') }}</span>
+       <span class="form-field__error">{{ mensajeErrorNombre('apellidos') }}</span>
             }
           </div>
 

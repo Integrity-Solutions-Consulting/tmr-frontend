@@ -19,6 +19,7 @@ import {
   correoInstitucionalValidator,
   correoPersonalValidator
 } from '../../../../shared/validators/form-validators';
+import { NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../../../shared/validators/nombre-persona.validator';
 import {
   CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
@@ -125,14 +126,10 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
         this.validatorIdentificacionPorTipo()
       ]],
       nombres: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       apellidos: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       fechaNacimiento: [''],
       idGenero: [null],
@@ -700,6 +697,13 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
     return 'Campo inválido';
   }
 
+  mensajeErrorNombre(campo: string): string {
+    const errors = this.form.get(campo)?.errors;
+    if (!errors) return '';
+    if (errors['required']) return 'Campo requerido';
+    return NOMBRE_PERSONA_MENSAJE;
+  }
+
   tieneValor(campo: string): boolean {
     const val = this.form.get(campo)?.value;
     return val !== null && val !== undefined && val !== '';
@@ -731,8 +735,8 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
       tipoPersona: v.tipoPersona,
       idTipoIdentificacion: v.idTipoIdentificacion ? Number(v.idTipoIdentificacion) : null,
       numeroIdentificacion: v.identificacion ? String(v.identificacion).trim() : null,
-      nombres: v.nombres ? String(v.nombres).trim() : null,
-      apellidos: v.apellidos ? String(v.apellidos).trim() : null,
+      nombres: v.nombres ? normalizarNombrePersona(v.nombres) : null,
+      apellidos: v.apellidos ? normalizarNombrePersona(v.apellidos) : null,
       fechaNacimiento: this.normalizarFechaInput(v.fechaNacimiento) || null,
       idGenero: v.idGenero ? Number(v.idGenero) : null,
       idNacionalidad: v.idNacionalidad ? Number(v.idNacionalidad) : null,

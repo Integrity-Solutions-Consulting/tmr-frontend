@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActualizacionDatosService } from './actualizacion-datos.service';
 import { Boton } from '../../shared/components/boton/boton';
@@ -8,13 +9,17 @@ import { AppSelectComponent, AppSelectOption } from '../../shared/components/sel
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { NotificacionComponent } from '../clientes/componentes/notificacion/notificacion.component';
 import { Notificacion } from '../clientes/modelos/cliente.model';
+import { nombrePersonaValidator, normalizarNombrePersona } from '../../shared/validators/nombre-persona.validator';
+import { telefonoValidator, TELEFONO_MENSAJE } from '../../shared/validators/telefono.validator';
+import { MatIconModule } from '@angular/material/icon';
 
 type ConditionKind = 'children' | 'ownDisability' | 'partner' | 'childDisability';
+type ValidationSummaryItem = { path: string; label: string; message: string };
 
 @Component({
   selector: 'app-mis-datos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Boton, AppSelectComponent, ConfirmDialogComponent, NotificacionComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, Boton, AppSelectComponent, ConfirmDialogComponent, NotificacionComponent],
   templateUrl: './mis-datos.page.html',
   styleUrl: './mis-datos.page.scss'
 })
@@ -24,7 +29,9 @@ export class MisDatosPage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   data: any = null;
-  loading = true; loadFailed = false; saving = false; uploading = false; message = ''; error = ''; notificacion: Notificacion | null = null;
+  loading = true; loadFailed = false; saving = false; message = ''; error = ''; saveAttempted = false; notificacion: Notificacion | null = null;
+  private backendErrors: Record<string, string> = {};
+  validationSummary: ValidationSummaryItem[] = [];
   tab = 'personal'; dirty = false; solicitudSaving = false; solicitudId?: number;
   private readonly validTabs = new Set(['personal', 'familia', 'formacion', 'certificaciones', 'solicitudes']);
   private lastTab = 'personal';
@@ -37,6 +44,7 @@ export class MisDatosPage {
   private previousChildDisability = new Map<string, string>();
   private removedChildKeys: string[] = [];
   private removedPartnerKey?: string;
+  private readonly uploadingDocuments = new Set<string>();
 
   readonly estadoCivilOptions: AppSelectOption[] = [
     { value: 'Soltero', label: 'Soltero' }, { value: 'Casado', label: 'Casado' },
@@ -49,8 +57,8 @@ export class MisDatosPage {
 
   form = this.fb.group({
     persona: this.fb.group({
-      nombres: ['', Validators.required], apellidos: ['', Validators.required],
-      email: ['', Validators.email], telefono: [''], direccion: [''],
+      nombres: ['', nombrePersonaValidator()], apellidos: ['', nombrePersonaValidator()],
+      email: ['', Validators.email], telefono: ['', telefonoValidator()], direccion: [''],
       tieneDiscapacidad: ['NoInformado'], tipoDiscapacidad: [''], porcentajeDiscapacidad: [''],
       limpiarDiscapacidad: [false]
     }),
@@ -58,7 +66,7 @@ export class MisDatosPage {
       estadoCivil: [''], tieneHijos: ['NoInformado'], limpiarHijos: [false], limpiarPareja: [false],
       pareja: this.fb.group({
         id: [null], clave: [crypto.randomUUID().replaceAll('-', '')], tipoRelacion: ['Conyuge'],
-        nombres: [''], apellidos: [''], identificacion: ['', Validators.pattern(/^\d{0,10}$/)], fechaNacimiento: [''],
+        nombres: ['', nombrePersonaValidator(false)], apellidos: ['', nombrePersonaValidator(false)], identificacion: ['', Validators.pattern(/^\d{0,10}$/)], fechaNacimiento: [''],
         tieneDiscapacidad: ['NoInformado'], tipoDiscapacidad: [''], porcentajeDiscapacidad: [''], archivos: [[] as any[]]
       }),
       familiares: this.fb.array([])
@@ -78,7 +86,7 @@ export class MisDatosPage {
   abrirArchivo(input: HTMLInputElement) { input.click(); }
 
   ngOnInit() {
-    this.form.valueChanges.subscribe(() => this.dirty = true);
+    this.form.valueChanges.subscribe(() => { this.dirty = true; this.clearBackendErrors(); if (this.saveAttempted) this.refreshValidationSummary(); });
     this.route.queryParamMap.subscribe(params => {
       const requested = params.get('tab');
       this.tab = requested && this.validTabs.has(requested) ? requested : 'personal';
@@ -90,6 +98,107 @@ export class MisDatosPage {
   setTab(tab: string) {
     const next = this.validTabs.has(tab) ? tab : 'personal';
     this.router.navigate([], { relativeTo: this.route, queryParams: { tab: next }, queryParamsHandling: 'merge' });
+  }
+
+  control(path: string): AbstractControl | null { return this.form.get(path); }
+  controlInvalido(path: string): boolean {
+    const ctrl = this.control(path);
+    return !!ctrl && ctrl.invalid && !ctrl.disabled && (ctrl.touched || this.saveAttempted);
+  }
+  mensajeError(path: string): string {
+    const ctrl = this.control(path);
+    if (!ctrl?.errors) return '';
+    if (ctrl.errors['backend']) return ctrl.errors['backend'];
+    if (ctrl.errors['required']) return 'Este campo es obligatorio';
+    if (ctrl.errors['email']) return path.endsWith('.email') ? 'Ingresa un correo electrónico válido' : 'Ingresa un valor válido';
+    if (ctrl.errors['telefonoCaracteres'] || ctrl.errors['telefonoLongitud']) return TELEFONO_MENSAJE;
+    if (ctrl.errors['maxlength']) return `Máximo ${ctrl.errors['maxlength'].requiredLength} caracteres`;
+    if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres`;
+    if (ctrl.errors['min']) return `El valor mínimo es ${ctrl.errors['min'].min}`;
+    if (ctrl.errors['max']) return `El valor máximo es ${ctrl.errors['max'].max}`;
+    if (ctrl.errors['pattern'] || ctrl.errors['soloLetras']) return 'Ingresa un valor con el formato permitido';
+    return 'Revisa este campo';
+  }
+  private clearBackendErrors() {
+    if (!Object.keys(this.backendErrors).length) return;
+    for (const path of Object.keys(this.backendErrors)) {
+      const ctrl = this.control(path);
+      if (!ctrl) continue;
+      const errors = { ...(ctrl.errors || {}) };
+      delete errors['backend'];
+      ctrl.setErrors(Object.keys(errors).length ? errors : null, { emitEvent: false });
+    }
+    this.backendErrors = {};
+  }
+  private invalidPaths(control: AbstractControl = this.form, path = ''): string[] {
+    const nested = (control as any).controls;
+    if (!nested) return control.invalid && !control.disabled ? [path] : [];
+    return Object.entries(nested as Record<string, AbstractControl>).flatMap(([key, child]) => this.invalidPaths(child, path ? `${path}.${key}` : key));
+  }
+  private fieldLabel(path: string): string {
+    const labels: Record<string, string> = { nombres: 'Nombres', apellidos: 'Apellidos', email: 'Correo electrónico', telefono: 'Teléfono', identificacion: 'Identificación', fechaNacimiento: 'Fecha de nacimiento', porcentajeDiscapacidad: 'Porcentaje', nivel: 'Nivel', institucion: 'Institución', titulo: 'Título', nombre: 'Nombre', entidadEmisora: 'Entidad emisora', fechaEmision: 'Fecha de emisión', fechaVencimiento: 'Fecha de vencimiento', asunto: 'Asunto', descripcion: 'Descripción' };
+    const child = path.match(/^familia\.familiares\.(\d+)\.(.+)$/);
+    if (child) return `Hijo ${Number(child[1]) + 1} → ${labels[child[2]] || child[2]}`;
+    const partner = path.match(/^familia\.pareja\.(.+)$/);
+    if (partner) return `Cónyuge → ${labels[partner[1]] || partner[1]}`;
+    const formation = path.match(/^formaciones\.(\d+)\.(.+)$/);
+    if (formation) return `Formación ${Number(formation[1]) + 1} → ${labels[formation[2]] || formation[2]}`;
+    const certification = path.match(/^certificaciones\.(\d+)\.(.+)$/);
+    if (certification) return `Certificación ${Number(certification[1]) + 1} → ${labels[certification[2]] || certification[2]}`;
+    const field = path.split('.').pop() || path;
+    return labels[field] || field;
+  }
+  private refreshValidationSummary(paths = this.invalidPaths()) {
+    this.validationSummary = [...new Set(paths)].map(path => ({ path, label: this.fieldLabel(path), message: this.mensajeError(path) })).filter(item => item.message);
+  }
+  focusError(path: string) { this.focusPath(path); }
+  private focusPath(path: string) {
+    const root = path.split('.')[0];
+    const tabByRoot: Record<string, string> = { persona: 'personal', familia: 'familia', formaciones: 'formacion', certificaciones: 'certificaciones', solicitudes: 'solicitudes' };
+    if (tabByRoot[root] && this.tab !== tabByRoot[root]) this.setTab(tabByRoot[root]);
+    setTimeout(() => Array.from(document.querySelectorAll<HTMLElement>('[data-control-path]')).find(el => el.dataset['controlPath'] === path)?.focus());
+  }
+  private applyBackendErrors(error: any): string[] {
+    const source = error?.error?.errors || error?.error?.data?.errors || error?.error?.validationErrors || error?.error?.fieldErrors;
+    if (!source || typeof source !== 'object') return [];
+    const entries = Array.isArray(source)
+      ? source.map(item => [item.field || item.Field, item.message || item.Message] as [string, unknown])
+      : Object.entries(source).flatMap(([field, value]) => (Array.isArray(value) ? value.map(message => [field, message] as [string, unknown]) : [[field, value] as [string, unknown]]));
+    const applied: string[] = [];
+    for (const [rawPath, rawMessage] of entries) {
+      if (!rawPath) continue;
+      const path = this.normalizeErrorPath(rawPath);
+      const ctrl = this.control(path);
+      if (!ctrl) continue;
+      const message = Array.isArray(rawMessage) ? String(rawMessage[0] || 'Revisa este campo') : String(rawMessage || 'Revisa este campo');
+      ctrl.setErrors({ ...(ctrl.errors || {}), backend: message });
+      this.backendErrors[path] = message;
+      applied.push(path);
+    }
+    if (applied.length) this.refreshValidationSummary(applied);
+    return applied;
+  }
+  private normalizeErrorPath(path: string): string {
+    const clean = path.replace(/^\$\./, '').replace(/\[(\d+)\]/g, '.$1');
+    const parts = clean.split(/[./]/).filter(Boolean);
+    const map: Record<string, string> = { Persona: 'persona', Familia: 'familia', Pareja: 'pareja', Familiares: 'familiares', Formaciones: 'formaciones', Certificaciones: 'certificaciones', Nombres: 'nombres', Apellidos: 'apellidos', Email: 'email', CorreoElectronico: 'email', Telefono: 'telefono', Asunto: 'asunto', Descripcion: 'descripcion' };
+    const normalized = parts.map(part => map[part] || part.charAt(0).toLowerCase() + part.slice(1)).join('.');
+    return normalized === 'telefono' ? 'persona.telefono' : normalized;
+  }
+  private focusFirstInvalid() {
+    const path = this.firstInvalidPath(this.form);
+    if (!path) return;
+    this.focusPath(path);
+  }
+  private firstInvalidPath(control: AbstractControl, path = ''): string | null {
+    const nested = (control as any).controls;
+    if (!nested) return control.invalid && !control.disabled ? path : null;
+    for (const [key, child] of Object.entries(nested as Record<string, AbstractControl>)) {
+      const childPath = path ? `${path}.${key}` : key;
+      const found = this.firstInvalidPath(child, childPath);
+      if (found) return found;
+    }
+    return null;
   }
 
   ngDoCheck() {
@@ -135,7 +244,7 @@ export class MisDatosPage {
     const key = v.clave || crypto.randomUUID().replaceAll('-', '');
     this.familiares.push(this.fb.group({
       id: [v.id || null], clave: [key], tipoRelacion: ['Hijo', Validators.required],
-      nombres: [v.nombres || '', Validators.required], apellidos: [v.apellidos || '', Validators.required],
+      nombres: [v.nombres || '', nombrePersonaValidator()], apellidos: [v.apellidos || '', nombrePersonaValidator()],
       identificacion: [v.identificacion || '', Validators.pattern(/^\d{0,10}$/)], fechaNacimiento: [v.fechaNacimiento || ''],
       tieneDiscapacidad: [v.tieneDiscapacidad || 'NoInformado'], tipoDiscapacidad: [v.tipoDiscapacidad || ''],
       porcentajeDiscapacidad: [v.porcentajeDiscapacidad ?? ''], limpiarDiscapacidad: [false], archivos: [v.archivos || []]
@@ -246,34 +355,51 @@ export class MisDatosPage {
 
   save() {
     if (this.loadFailed || !this.data) { this.error = 'Carga los datos oficiales antes de guardar.'; return; }
-    if (this.form.invalid) { this.form.markAllAsTouched(); this.error = 'Completa los campos obligatorios.'; return; }
-    const raw: any = this.form.getRawValue(); const ownYes = this.isYes(raw.persona.tieneDiscapacidad); const childrenYes = this.isYes(raw.familia.tieneHijos); const partnerYes = this.requiresPartner(raw.familia.estadoCivil);
+    this.saveAttempted = true;
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.refreshValidationSummary(); this.error = 'Revisa los campos señalados'; this.focusFirstInvalid(); return; }
+    const raw: any = this.form.getRawValue(); raw.persona.nombres = normalizarNombrePersona(raw.persona.nombres); raw.persona.apellidos = normalizarNombrePersona(raw.persona.apellidos); raw.persona.telefono = String(raw.persona.telefono ?? '').trim() || null; const ownYes = this.isYes(raw.persona.tieneDiscapacidad); const childrenYes = this.isYes(raw.familia.tieneHijos); const partnerYes = this.requiresPartner(raw.familia.estadoCivil);
     raw.persona.limpiarDiscapacidad = raw.persona.limpiarDiscapacidad || !ownYes;
     if (!ownYes) { raw.persona.tipoDiscapacidad = null; raw.persona.porcentajeDiscapacidad = null; }
     raw.controlVersion = this.data.controlVersion;
     raw.familia.limpiarHijos = raw.familia.limpiarHijos || !childrenYes; raw.familia.clavesHijosAEliminar = this.removedChildKeys;
     raw.familia.limpiarPareja = raw.familia.limpiarPareja || !partnerYes; raw.familia.claveParejaAEliminar = this.removedPartnerKey;
-    raw.familia.familiares = childrenYes ? raw.familia.familiares.map((x: any) => ({ ...x, tipoRelacion: 'Hijo', tipoDiscapacidad: this.isYes(x.tieneDiscapacidad) ? x.tipoDiscapacidad : null, porcentajeDiscapacidad: this.isYes(x.tieneDiscapacidad) ? x.porcentajeDiscapacidad : null, limpiarDiscapacidad: x.limpiarDiscapacidad || !this.isYes(x.tieneDiscapacidad), archivos: undefined })) : [];
-    raw.familia.pareja = partnerYes && (raw.familia.pareja?.nombres || raw.familia.pareja?.apellidos) ? { ...raw.familia.pareja, archivos: undefined } : null;
+    raw.familia.familiares = childrenYes ? raw.familia.familiares.map((x: any) => ({ ...x, nombres: normalizarNombrePersona(x.nombres), apellidos: normalizarNombrePersona(x.apellidos), tipoRelacion: 'Hijo', tipoDiscapacidad: this.isYes(x.tieneDiscapacidad) ? x.tipoDiscapacidad : null, porcentajeDiscapacidad: this.isYes(x.tieneDiscapacidad) ? x.porcentajeDiscapacidad : null, limpiarDiscapacidad: x.limpiarDiscapacidad || !this.isYes(x.tieneDiscapacidad), archivos: undefined })) : [];
+    raw.familia.pareja = partnerYes && (raw.familia.pareja?.nombres || raw.familia.pareja?.apellidos) ? { ...raw.familia.pareja, nombres: normalizarNombrePersona(raw.familia.pareja.nombres), apellidos: normalizarNombrePersona(raw.familia.pareja.apellidos), archivos: undefined } : null;
     this.saving = true; this.error = ''; this.message = '';
-    this.api.save(raw).subscribe({ next: () => { this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' }); this.saving = false; this.dirty = false; this.load(); }, error: e => { this.error = e.status === 409 ? (e.error?.detail || 'Los datos cambiaron. Recarga antes de guardar.') : (e.error?.detail || 'No fue posible guardar los cambios.'); this.saving = false; } });
+    this.api.save(raw).subscribe({ next: () => { this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' }); this.saving = false; this.dirty = false; this.validationSummary = []; this.load(); }, error: e => { const applied = this.applyBackendErrors(e); this.error = applied.length ? '' : this.mensajeErrorGuardado(e); this.saving = false; if (applied.length) this.focusFirstInvalid(); } });
   }
+  private mensajeErrorGuardado(error: any): string {
+    if (error?.status === 0) return 'No fue posible conectar con el servidor. Revisa tu conexión e inténtalo nuevamente.';
+    if (error?.status === 409) return error?.error?.detail || 'Los datos cambiaron desde que los cargaste. Recarga la página antes de guardar.';
+    if (error?.status >= 500) return 'El servidor no pudo guardar los cambios. Inténtalo nuevamente más tarde.';
+    if (error?.status === 400 || error?.status === 422) return error?.error?.message || error?.error?.title || 'Revisa los campos señalados';
+    return 'No fue posible guardar los cambios. Inténtalo nuevamente.';
+  }
+
+  private uploadKey(section: string, row: any) {
+    const value = row?.value ?? row;
+    const identity = section === 'Discapacidad' ? 'own' : value?.clave || value?.id || 'unknown';
+    return `${section}:${identity}`;
+  }
+  isUploading(section: string, row: any) { return this.uploadingDocuments.has(this.uploadKey(section, row)); }
+  isSolicitudUploading(id: number) { return this.uploadingDocuments.has(this.uploadKey('Solicitud', { id })); }
 
   upload(event: any, section: string, row: any) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';
-    if (!file || this.uploading) return;
+    if (!file) return;
+    const key = this.uploadKey(section, row);
+    if (this.uploadingDocuments.has(key)) return;
     const value = row.value;
-    this.uploading = true; this.error = '';
-    this.api.uploadDirect(file, section, value.id || undefined, value.clave).subscribe({
+    this.uploadingDocuments.add(key); this.error = '';
+    this.api.uploadDirect(file, section, value.id || undefined, value.clave).pipe(finalize(() => this.uploadingDocuments.delete(key))).subscribe({
       next: (documento: any) => {
         if (section === 'Discapacidad') this.data.archivos = [...(this.data.archivos || []), documento];
         else row.get('archivos')?.setValue([...(row.get('archivos')?.value || []), documento], { emitEvent: false });
-        this.uploading = false;
         this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Documento adjuntado correctamente.' });
       },
-      error: e => { this.uploading = false; this.error = e.error?.message || e.error?.detail || 'No fue posible guardar el documento. Intenta nuevamente.'; }
+      error: e => { this.error = e.error?.message || e.error?.detail || 'No fue posible guardar el documento. Intenta nuevamente.'; }
     });
   }
   download(id: number) { this.api.downloadMine(id).subscribe(x => { const u = URL.createObjectURL(x); const a = document.createElement('a'); a.href = u; a.download = 'documento'; a.click(); URL.revokeObjectURL(u); }); }
@@ -321,17 +447,18 @@ export class MisDatosPage {
     const file = input.files?.[0];
     const solicitudId = this.solicitudId;
     input.value = '';
-    if (!file || !solicitudId) { this.error = 'Crea primero la solicitud para asociar el documento.'; return; }
-    if (this.uploading) return;
-    this.uploading = true; this.error = '';
-    this.api.uploadSolicitud(solicitudId, file).subscribe({
+    if (!file) return;
+    if (!solicitudId) { this.error = 'Crea primero la solicitud para asociar el documento.'; return; }
+    const key = this.uploadKey('Solicitud', { id: solicitudId });
+    if (this.uploadingDocuments.has(key)) return;
+    this.uploadingDocuments.add(key); this.error = '';
+    this.api.uploadSolicitud(solicitudId, file).pipe(finalize(() => this.uploadingDocuments.delete(key))).subscribe({
       next: (documento: any) => {
         const solicitud = this.data?.solicitudes?.find((item: any) => item.id === solicitudId);
         if (solicitud) solicitud.archivos = [...(solicitud.archivos || []), documento];
-        this.uploading = false;
         this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Documento de solicitud adjuntado.' });
       },
-      error: e => { this.uploading = false; this.error = e.error?.message || e.error?.detail || 'No fue posible adjuntar el documento. Intenta nuevamente.'; }
+      error: e => { this.error = e.error?.message || e.error?.detail || 'No fue posible adjuntar el documento. Intenta nuevamente.'; }
     });
   }
 }
