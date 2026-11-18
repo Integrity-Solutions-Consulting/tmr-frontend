@@ -23,8 +23,13 @@ export const roleGuard: CanActivateFn = (route) => {
   }
 
   const path = route.routeConfig?.path;
+  const parentPath = route.parent?.routeConfig?.path;
 
-  // Reglas específicas de visibilidad por rol en el módulo Permisos
+  // Reglas específicas de visibilidad por rol en el módulo Permisos (exclusivo Administrador)
+  if ((parentPath === 'permisos' || path === 'permisos') && !tokenService.canAccessMisPermisos()) {
+    router.navigate([tokenService.isColaborador() ? '/time-report/actividades' : '/dashboard']);
+    return false;
+  }
   if (path === 'equipo' && !tokenService.canAccessPermisosLider()) {
     router.navigate(['/permisos']);
     return false;

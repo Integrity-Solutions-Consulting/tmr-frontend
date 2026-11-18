@@ -129,34 +129,21 @@ export class TokenService {
     );
   }
 
-  // Visibilidad por roles para las 4 pantallas de Permisos
+  // Visibilidad por roles para las 4 pantallas de Permisos (exclusivo Administrador)
   canAccessMisPermisos(): boolean {
-    return this.isTokenValid();
+    return this.isAdminStrict();
   }
 
   canAccessPermisosLider(): boolean {
-    return (
-      this.isAdminStrict() ||
-      this.isLider() ||
-      this.userModulesService.hasModule('Aprobacion Lider')
-    );
+    return this.isAdminStrict();
   }
 
   canAccessPermisosRrhh(): boolean {
-    return (
-      this.isAdminStrict() ||
-      this.isRrhh() ||
-      this.userModulesService.hasModule('Validacion RRHH')
-    );
+    return this.isAdminStrict();
   }
 
   canAccessPermisosGerencia(): boolean {
-    return (
-      this.isAdminStrict() ||
-      this.isGerente() ||
-      this.isRrhh() ||
-      this.userModulesService.hasModule('Historial Gerencia')
-    );
+    return this.isAdminStrict();
   }
 
   isColaborador(): boolean {
