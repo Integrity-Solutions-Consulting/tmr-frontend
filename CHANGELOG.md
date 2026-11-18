@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.0...v3.7.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* correcciones de testeo TimeReport (fechas, orden, búsqueda y teléfono) ([3092d82](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/3092d82078343a32fa9c22f6da8ef2398d9b798c))
+* **permisos:** ocultar modulo de permisos para todos los roles excepto administrador ([2348559](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/23485599fabb51b0dad40702e7ee7c1e7514798f))
+
 ## [3.7.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.1...v3.7.0) (2026-11-17)
 
 
