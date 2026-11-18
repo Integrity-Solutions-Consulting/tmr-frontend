@@ -48,7 +48,7 @@
       </mat-form-field>
 
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input #fechaInicioInput class="proyecto-form__date-control" type="date"
+        <input #fechaInicioInput class="proyecto-form__date-control" type="date" max="9999-12-31"
           autocomplete="off" formControlName="fechaInicio">
         <label class="proyecto-form__date-label">Fecha de inicio <span>*</span></label>
         <div class="proyecto-form__date-error"
@@ -62,7 +62,7 @@
       </div>
 
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input #fechaFinInput class="proyecto-form__date-control" type="date"
+        <input #fechaFinInput class="proyecto-form__date-control" type="date" max="9999-12-31"
           autocomplete="off" formControlName="fechaFin">
         <label class="proyecto-form__date-label">Fecha de fin <span>*</span></label>
         <div class="proyecto-form__date-error" *ngIf="fechaFinInvalida()">
@@ -131,7 +131,7 @@
     @if (proyecto) {
       <div class="proyecto-form__grid" style="margin-top: 8px;">
         <div class="proyecto-form__field proyecto-form__date-field">
-          <input class="proyecto-form__date-control" type="date"
+          <input class="proyecto-form__date-control" type="date" max="9999-12-31"
                  formControlName="fechaInicioReal">
           <label class="proyecto-form__date-label">Fecha inicio real</label>
           <div class="proyecto-form__date-error"
@@ -140,7 +140,7 @@
           </div>
         </div>
         <div class="proyecto-form__field proyecto-form__date-field">
-          <input class="proyecto-form__date-control" type="date"
+          <input class="proyecto-form__date-control" type="date" max="9999-12-31"
                  formControlName="fechaFinReal">
           <label class="proyecto-form__date-label">Fecha fin real</label>
           <div class="proyecto-form__date-error" *ngIf="fechaFinRealInvalida()">
@@ -157,7 +157,7 @@
     <!-- ── Campos de Espera (solo edición y cuando estado = En espera) ── -->
     <div *ngIf="mostrarCamposEspera" class="proyecto-form__grid" style="margin-top: 16px;">
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input class="proyecto-form__date-control" type="date"
+        <input class="proyecto-form__date-control" type="date" max="9999-12-31"
                formControlName="fechaInicioEspera">
         <label class="proyecto-form__date-label">Fecha inicio espera</label>
         <div class="proyecto-form__date-error"
@@ -166,7 +166,7 @@
         </div>
       </div>
       <div class="proyecto-form__field proyecto-form__date-field">
-        <input class="proyecto-form__date-control" type="date"
+        <input class="proyecto-form__date-control" type="date" max="9999-12-31"
                formControlName="fechaFinEspera">
         <label class="proyecto-form__date-label">Fecha fin espera</label>
         <div class="proyecto-form__date-error" *ngIf="fechaFinEsperaInvalida()">
@@ -351,7 +351,7 @@
 
                       <div class="proyecto-form__resource-bottom">
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                          <input #entradaInput class="proyecto-form__date-control" type="date"
+                          <input #entradaInput class="proyecto-form__date-control" type="date" max="9999-12-31"
                             autocomplete="off" formControlName="entrada" [attr.min]="formulario.get('fechaInicio')?.value || null">
                           <label class="proyecto-form__date-label">Entrada</label>
                           <div class="proyecto-form__date-error" *ngIf="recursoEntradaSinInicioProyecto(li, ri)">
@@ -368,7 +368,7 @@
                         </div>
 
                         <div class="proyecto-form__resource-fecha proyecto-form__date-field">
-                          <input #salidaInput class="proyecto-form__date-control" type="date"
+                          <input #salidaInput class="proyecto-form__date-control" type="date" max="9999-12-31"
                             autocomplete="off" formControlName="salida">
                           <label class="proyecto-form__date-label">Salida</label>
                           <div class="proyecto-form__date-error" *ngIf="recursoSalidaRequerida(li, ri)">

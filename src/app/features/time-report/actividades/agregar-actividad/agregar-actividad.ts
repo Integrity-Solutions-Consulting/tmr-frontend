@@ -10,7 +10,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
@@ -46,7 +45,8 @@ export interface ProgresoProyectoDia {
         MatIconModule,
         MatTooltipModule,
         MatDatepickerModule,
-        MatNativeDateModule,
+        // El DateAdapter (dd/mm/aaaa estricto) viene de app.config; no importar MatNativeDateModule
+        // aquí porque registraría de nuevo el NativeDateAdapter y lo anularía.
         MatAutocompleteModule,
         ModalEliminarActividadComponent,
         ConfirmDialogComponent,
@@ -86,9 +86,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
     // sm - fechaEntrada/fechaSalida: vigencia de la asignación; salidaColaborador: su salida de la empresa si está Inactivo.
+    // finProyecto: fecha fin del proyecto (real o planificada); no se registran horas después de ella.
     public proyectos = signal<{
         id: string, nombre: string, codigo?: string | null,
-        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null
+        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null,
+        finProyecto?: Date | null
     }[]>([]);
 
     // Autocomplete filter signals
@@ -343,6 +345,10 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                     : `Su salida del proyecto ${proyecto.nombre} es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
             };
         }
+        // TC-007/TC-009: tampoco después de la fecha fin del proyecto, aunque siga activo o la asignación no tenga salida.
+        if (proyecto.finProyecto && dia > this.claveDia(proyecto.finProyecto)) {
+            return { vigencia: `El proyecto ${proyecto.nombre} finalizó el ${this.textoFecha(proyecto.finProyecto)}. No puede registrar actividades posteriores a esa fecha.` };
+        }
         return null;
     };
 
@@ -468,7 +474,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                         };
                         const mapped = res.map(p => ({
                             id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo,
-                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador)
+                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador),
+                            finProyecto: fecha(p.fechaFinProyecto)
                         }));
                         const unique: typeof mapped = [];
                         const seen = new Set<string>();
@@ -492,7 +499,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                                     // sm - Proyecto que ya no está en sus asignaciones: sin vigencia conocida (valida el backend).
                                     fechaEntrada: null,
                                     fechaSalida: null,
-                                    salidaColaborador: null
+                                    salidaColaborador: null,
+                                    finProyecto: null
                                 });
                             }
                         }

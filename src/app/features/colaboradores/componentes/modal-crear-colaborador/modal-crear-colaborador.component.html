@@ -224,7 +224,7 @@
             <div class="float-field">
               <input
                 class="float-field__input float-field__input--date"
-                type="date"
+                type="date" max="9999-12-31"
                 formControlName="fechaNacimiento"
                 placeholder=" " />
 
@@ -424,7 +424,7 @@
             <div class="float-field">
               <input
                 class="float-field__input float-field__input--date"
-                type="date"
+                type="date" max="9999-12-31"
                 formControlName="fechaContratacion"
                 placeholder=" "
                 [class.float-field__input--error]="campoInvalido('fechaContratacion')" />

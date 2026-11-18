@@ -503,7 +503,7 @@
                         @if (f.pendientes > 0) {
                           <button type="button" class="btn-icono" (click)="enviarCorreo(f)"
                             [disabled]="enviandoCorreo[claveCorreo(f)]"
-                            [matTooltip]="resultadoCorreo[claveCorreo(f)] === 'ok' ? 'Correo enviado' : resultadoCorreo[claveCorreo(f)] === 'error' ? 'No se pudo enviar. Reintentar' : 'Enviar recordatorio por correo'"
+                            [matTooltip]="resultadoCorreo[claveCorreo(f)] === 'ok' ? 'Correo enviado' : resultadoCorreo[claveCorreo(f)] === 'error' ? (mensajeErrorCorreo[claveCorreo(f)] || 'No se pudo enviar') + '. Reintentar' :'Enviar recordatorio por correo'"
                             [class.ok]="resultadoCorreo[claveCorreo(f)] === 'ok'"
                             [class.error]="resultadoCorreo[claveCorreo(f)] === 'error'">
                             <mat-icon [class.girando]="enviandoCorreo[claveCorreo(f)]">

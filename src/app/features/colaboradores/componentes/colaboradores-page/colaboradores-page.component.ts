@@ -15,7 +15,11 @@ import {
 import { CardsMetricasComponent }           from '../cards-metricas/cards-metricas.component';
 import { FiltrosColaboradoresComponent }    from '../filtros-colaboradores/filtros-colaboradores.component';
 import { DescargarMenuComponent }           from '../descargar-menu/descargar-menu.component';
-import { TablaColaboradoresComponent }      from '../tabla-colaboradores/tabla-colaboradores.component';
+import {
+  TablaColaboradoresComponent,
+  OrdenColaboradores,
+  ordenarColaboradores,
+} from '../tabla-colaboradores/tabla-colaboradores.component';
 import { PaginacionComponent }             from '../../../../shared/components/paginacion/paginacion.component';
 import { ModalCrearColaboradorComponent }   from '../modal-crear-colaborador/modal-crear-colaborador.component';
 import { ModalEditarColaboradorComponent }  from '../modal-editar-colaborador/modal-editar-colaborador.component';
@@ -59,6 +63,7 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
   // ── Paginación ───────────────────────────────────────────
   paginaActual = 1;
   porPagina    = 10;
+  private orden: OrdenColaboradores | null = null;
 
   // ── Filtros ──────────────────────────────────────────────
   filtros: FiltrosColaborador = { busqueda: '', estado: 'Todos' };
@@ -128,10 +133,19 @@ export class ColaboradoresPageComponent implements OnInit, OnDestroy {
       coincideBusqueda(c.codigoEmpleado, busqueda)
     );
 
-    this.total = filtrados.length;
+    // Se ordena la lista completa ANTES de paginar; si no, cada página se ordena por separado.
+    const ordenados = ordenarColaboradores(filtrados, this.orden);
+
+    this.total = ordenados.length;
     this.totalPaginas = Math.ceil(this.total / this.porPagina) || 1;
     const inicio = (this.paginaActual - 1) * this.porPagina;
-    this.colaboradores = filtrados.slice(inicio, inicio + this.porPagina);
+    this.colaboradores = ordenados.slice(inicio, inicio + this.porPagina);
+  }
+
+  onOrdenCambia(orden: OrdenColaboradores): void {
+    this.orden = orden;
+    this.paginaActual = 1;
+    this.aplicarBusqueda();
   }
 
   cargarMetricas(): void {
