@@ -118,7 +118,7 @@ export class ModalEditarComponent implements OnChanges, OnInit, OnDestroy {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = String(control.value ?? '').trim();
       if (!valor) return null;
-      return /^\+?\d+$/.test(valor) ? null : { invalido: true };
+      return /^(\+\d{1,15}|\d{1,10})$/.test(valor) ? null : { invalido: true };
     };
   }
 
@@ -171,7 +171,8 @@ export class ModalEditarComponent implements OnChanges, OnInit, OnDestroy {
     const tieneMasInicial = valor.trim().startsWith('+');
     const digitos = valor.replace(/\D/g, '');
 
-    ctrl?.setValue(tieneMasInicial ? `+${digitos}` : digitos, { emitEvent: false });
+    // Nacional: máximo 10 dígitos. Internacional (+): máximo 15 dígitos (E.164).
+    ctrl?.setValue(tieneMasInicial ? `+${digitos.slice(0, 15)}` : digitos.slice(0, 10), { emitEvent: false });
   }
 
   campoInvalido(campo: string): boolean {

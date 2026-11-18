@@ -40,6 +40,7 @@ export interface Lider {
   correo: string;           // El que se edita y se guarda (persona.email)
   correoPrincipal: string;  // El que se muestra: institucional o, si no hay, personal
   telefono: string;
+  numeroIdentificacion?: string | null;
   estado: 'Activo' | 'Inactivo';
   proyectos: ProyectoAsignado[];
 }
@@ -261,6 +262,7 @@ export class LideresComponent implements OnInit, OnDestroy {
         correo: l.email,
         correoPrincipal: l.emailCorporativo || l.email,
         telefono: l.telefono ?? '',
+        numeroIdentificacion: l.numeroIdentificacion ?? null,
         cliente: Array.from(datos.clientes).join(', '),
         proyectos: Array.from(datos.proyectos.values()),
         estado: l.activo ? 'Activo' : 'Inactivo'
@@ -343,7 +345,8 @@ export class LideresComponent implements OnInit, OnDestroy {
         coincideBusqueda(l.nombre, texto) ||
         coincideBusqueda(l.correo, texto) ||
         coincideBusqueda(l.correoPrincipal, texto) ||
-        coincideBusqueda(l.cliente, texto);
+        coincideBusqueda(l.cliente, texto) ||
+        coincideBusqueda(l.numeroIdentificacion ?? '', texto);
       const matchTipo = !this.tipoFiltro || l.tipo === this.tipoFiltro;
       const matchEstado = !this.estadoFiltro || l.estado === this.estadoFiltro;
       return matchTexto && matchTipo && matchEstado;
