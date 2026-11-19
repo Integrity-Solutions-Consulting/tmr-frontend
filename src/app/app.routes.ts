@@ -172,6 +172,20 @@ export const routes: Routes = [
                 m => m.ReporteFechasComponent
               ),
           },
+          {
+            path: 'colaboradores',
+            loadComponent: () =>
+              import('./features/reportes/componentes/reporte-colaboradores/reporte-colaboradores.component').then(
+                m => m.ReporteColaboradoresComponent
+              ),
+          },
+          {
+            path: 'clientes',
+            loadComponent: () =>
+              import('./features/reportes/componentes/reporte-clientes/reporte-clientes.component').then(
+                m => m.ReporteClientesComponent
+              ),
+          },
         ],
       },
 
