@@ -2,14 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-export interface Persona { nombres:string; apellidos:string; email?:string; telefono?:string; direccion?:string; }
+export interface Persona { nombres:string; apellidos:string; email?:string; telefono?:string; direccion?:string; tieneDiscapacidad?:string | null; tipoDiscapacidad?:string | null; }
 export interface Formacion { nivel:string; institucion:string; titulo:string; fechaInicio?:string; fechaFin?:string; }
 export interface Certificacion { nombre:string; entidadEmisora:string; fechaEmision:string; fechaVencimiento?:string; }
-export interface MisDatos { solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:any[]; familia?:any; }
+export interface MisDatos { solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:any[]; familia?:any; cedula?:string | null; conocimientos?: { area: string; porcentaje: number }[]; }
 @Injectable({providedIn:'root'}) export class ActualizacionDatosService {
  private http=inject(HttpClient); private base=`${environment.apiUrl}`;
  getMine():Observable<MisDatos>{return this.http.get<MisDatos>(`${this.base}/mis-datos`);}
- save(data:any){return this.http.put(`${this.base}/mis-datos`,{...data,enviar:false});}
+ save(data:any){return this.http.put<{ version: number; validacionEnviada: boolean }>(`${this.base}/mis-datos`,{...data,enviar:false});}
  uploadDirect(file:File,seccion:string,referenciaId?:number,referenciaClave?:string,replaceId?:number){const fd=new FormData();fd.append('file',file,file.name);let params=new HttpParams().set('seccion',seccion);if(referenciaId)params=params.set('referenciaId',referenciaId);if(referenciaClave)params=params.set('referenciaClave',referenciaClave);if(replaceId)params=params.set('replaceId',replaceId);return this.http.post(`${this.base}/mis-datos/archivos`,fd,{params});}
  downloadMine(id:number){return this.http.get(`${this.base}/mis-datos/archivos/${id}`,{responseType:'blob'});}
  deleteMineDocument(id:number){return this.http.delete(`${this.base}/mis-datos/archivos/${id}`);}
