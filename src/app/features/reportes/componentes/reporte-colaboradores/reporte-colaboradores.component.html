@@ -67,14 +67,11 @@
       <span class="contador">{{ historialFiltrado().length }}</span>
     </button>
   </div>
+  @if (vista() !== 'resumen') {
   <p class="vista-ayuda">
-    @if (vista() === 'resumen') {
-      Una fila por colaborador y cliente. El tiempo se calcula con las fechas de asignación (sin contar dos veces los
-      periodos superpuestos). Haga clic en una fila para ver sus asignaciones.
-    } @else {
       Cada asignación del colaborador a un proyecto, con sus fechas y las horas registradas dentro de ese periodo.
-    }
   </p>
+  }
 
   @if (error()) {
     <div class="mensaje-error">
