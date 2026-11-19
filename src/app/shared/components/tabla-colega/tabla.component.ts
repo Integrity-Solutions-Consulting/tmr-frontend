@@ -102,6 +102,15 @@ export class TablaComponent<T = any> implements OnInit {
   @Output() emptyStateAction = new EventEmitter<void>();
 
   /**
+   * Si es true, la tabla NO ordena las filas: solo emite `ordenCambia` para que la página ordene la lista
+   * COMPLETA antes de paginar (si no, cada página se ordenaría por separado). Por defecto false (comportamiento anterior).
+   */
+  @Input() ordenExterno = false;
+
+  /** Cambio de orden pedido por el usuario (útil con ordenExterno). */
+  @Output() ordenCambia = new EventEmitter<{ campo: string; asc: boolean }>();
+
+  /**
    * Template personalizado para filas
    */
   @ContentChild('rowTemplate') rowTemplate?: TemplateRef<{ $implicit: T; index: number }>;
@@ -130,6 +139,7 @@ export class TablaComponent<T = any> implements OnInit {
       this.sortField = property;
       this.sortAsc = true;
     }
+    this.ordenCambia.emit({ campo: property, asc: this.sortAsc });
   }
 
   /**
@@ -144,7 +154,7 @@ export class TablaComponent<T = any> implements OnInit {
    * Filas a renderizar, ordenadas si corresponde
    */
   get datosPaginadosOrdenados(): T[] {
-    if (!this.sortField) return this.datosPaginados;
+    if (!this.sortField || this.ordenExterno) return this.datosPaginados;
 
     const campo = this.sortField;
     const factor = this.sortAsc ? 1 : -1;
