@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.7.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.1...v3.7.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* Añadir filtrado en Actividades ([579e04e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/579e04e4091acf8dab4f517c6f17e621fd7c3c61))
+* Añadir filtrado en Actividades ([bac5bfa](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/bac5bfa598b31929a9265453db8bce506bfc8447))
+* Añadir filtrado en Actividades ([810f09e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/810f09e1130ccf292e1538bb227c02200c453b73))
+* Historial ([0b6ad69](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b6ad69e0a26a7c170ebb12e424b8952a830eeb8))
+
 ## [3.7.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.0...v3.7.1) (2026-11-18)
 
 
