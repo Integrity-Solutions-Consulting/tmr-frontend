@@ -43,11 +43,11 @@
 
     <!-- ===== CALENDAR CARD ===== -->
     <main class="calendar-card">
-        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)" (editarActividadEvent)="onEditarActividad($event)"></app-calendario>
+        <app-calendario (diaSeleccionado)="onDiaSeleccionado($event)"></app-calendario>
     </main>
 
 
-    <!-- ===== MOBILE ACTIVIDADES DETALLE ===== -->
+    <!-- ===== MOBILE ACTIVIDADES DETALLE =====
     <section class="mobile-actividades-seccion" *ngIf="fechaSeleccionada">
         <div class="seccion-header">
             <h2>Actividades: {{ fechaFormateada }}</h2>
@@ -78,6 +78,6 @@
                 <span>No hay actividades registradas en este día.</span>
             </div>
         </ng-template>
-    </section>
+    </section> -->
 
 </div>

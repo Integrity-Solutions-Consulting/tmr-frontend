@@ -50,7 +50,6 @@ interface DiaCalendario {
 })
 export class Calendario implements OnInit, OnDestroy {
     @Output() diaSeleccionado = new EventEmitter<Date>();
-    @Output() editarActividadEvent = new EventEmitter<any>();
 
     // sm - Nuevos inputs para poder incrustar este mismo calendario dentro del modal de "Ver calendario" de Seguimiento:
     // idEmpleadoOverride carga las actividades de OTRO colaborador (en vez del usuario logueado) y soloLectura bloquea
@@ -230,7 +229,7 @@ export class Calendario implements OnInit, OnDestroy {
         event.stopPropagation();
         // sm - En modo solo lectura no se permite abrir el modal de edición de actividad.
         if (this.soloLectura || this.chipBloqueado(actividad)) return;
-        this.editarActividadEvent.emit(actividad);
+        // La edición se inicia únicamente desde el resumen diario.
     }
 
     chipBloqueado(actividad: any): boolean {
@@ -270,7 +269,6 @@ export class Calendario implements OnInit, OnDestroy {
 
     seleccionarDia(fecha: Date) {
         // sm - En modo solo lectura no se permite abrir el modal de agregar actividad al hacer clic en un día.
-        if (this.soloLectura) return;
         this.diaSeleccionado.emit(fecha);
     }
 }
