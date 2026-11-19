@@ -56,8 +56,8 @@
             </button>
         </div>
 
-        <div class="actividades-list" *ngIf="actividadesService.getActividadesPorFecha(fechaSeleccionada).length > 0; else noActividades">
-            <div class="actividad-card" *ngFor="let act of actividadesService.getActividadesPorFecha(fechaSeleccionada)" (click)="onEditarActividad(act)">
+        <div class="actividades-list" *ngIf="actividadesService.getActividadesVisiblesPorFecha(fechaSeleccionada).length > 0; else noActividades">
+            <div class="actividad-card" *ngFor="let act of actividadesService.getActividadesVisiblesPorFecha(fechaSeleccionada)" (click)="onEditarActividad(act)">
                 <div class="actividad-card-header">
                     <span class="actividad-proyecto">{{ act.proyectoNombre }}</span>
                     <span class="actividad-horas-badge">{{ act.cantidadhoras | horasFormat }}</span>
