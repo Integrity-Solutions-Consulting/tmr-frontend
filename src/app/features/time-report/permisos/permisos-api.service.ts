@@ -141,6 +141,7 @@ export interface PermisoItemApi {
   traslapeAlerta?: string | null;
   tokenExterno?: string | null;
   avisoNotificacion?: string | null;
+  versionSolicitud?: string | null;
   adjuntos?: AdjuntoPermisoApi[];
 }
 
@@ -282,6 +283,8 @@ export class PermisosApiService {
   crearSolicitud(
     payload: CrearPermisoPayload,
     archivosEvidencia?: File | File[] | null,
+    idSolicitudObservada?: number,
+    versionSolicitud?: string | null,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
     const listaArchivos = Array.isArray(archivosEvidencia)
       ? archivosEvidencia.filter(Boolean)
@@ -291,6 +294,8 @@ export class PermisosApiService {
 
     if (listaArchivos.length > 0) {
       const formData = new FormData();
+      if (versionSolicitud) formData.append("versionSolicitud", versionSolicitud);
+      if (idSolicitudObservada) formData.append("idSolicitudObservada", String(idSolicitudObservada));
       if (payload.idProyecto) formData.append('idProyecto', String(payload.idProyecto));
       if (payload.idCliente) formData.append('idCliente', String(payload.idCliente));
       if (payload.idLider) formData.append('idLider', String(payload.idLider));
@@ -313,7 +318,7 @@ export class PermisosApiService {
     }
 
     return this.http
-      .post<unknown>(this.baseUrl, payload)
+      .post<unknown>(this.baseUrl, { ...payload, idSolicitudObservada, versionSolicitud })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
@@ -327,11 +332,13 @@ export class PermisosApiService {
     id: number,
     accion: 'aprobar' | 'observar' | 'rechazar',
     comentario: string,
+    versionSolicitud?: string | null,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
     return this.http
       .post<unknown>(`${this.baseUrl}/${id}/decision-lider`, {
         accion,
         comentario,
+        versionSolicitud,
       })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
@@ -347,12 +354,14 @@ export class PermisosApiService {
     accion: 'confirmar' | 'devolver',
     impactoTimeReport: 'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO',
     observacion: string,
+    versionSolicitud?: string | null,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
     return this.http
       .post<unknown>(`${this.baseUrl}/${id}/decision-rrhh`, {
         accion,
         impactoTimeReport,
         observacion,
+        versionSolicitud,
       })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
@@ -379,11 +388,13 @@ export class PermisosApiService {
     token: string,
     accion: 'aprobar' | 'observar' | 'rechazar',
     comentario: string,
+    versionSolicitud?: string | null,
   ): Observable<ApiEnvelope<PermisoItemApi>> {
     return this.http
       .post<unknown>(`${this.baseUrl}/externo/${encodeURIComponent(token)}/decision`, {
         accion,
         comentario,
+        versionSolicitud,
       })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }

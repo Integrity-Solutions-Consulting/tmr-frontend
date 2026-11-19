@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Actividad } from '../models/actividad.model';
@@ -8,6 +8,9 @@ import { FeriadosService } from './feriados.service';
 import { ResumenHorasDto } from '../../core/models/actividades.interface';
 
 // sm - Si el usuario de la sesión puede completar actividades de un colaborador en un proyecto, por ser su líder ahí.
+// sm - Opción "Sin proyecto" del filtro de proyectos del calendario (actividades/novedades sin proyecto).
+export const FILTRO_SIN_PROYECTO = 'sin-proyecto';
+
 export interface CompletarLider {
   puedeCompletar: boolean;
   idLider?: number | null;
@@ -34,6 +37,22 @@ export class ActividadesService {
   // sm - Colaborador y proyecto de la última consulta, para recargar lo mismo tras guardar desde el modal de Seguimiento.
   private idEmpleadoConsultado?: number;
   private idProyectoResumen?: number;
+  private filtroResumen: string[] = [];
+
+  // sm - Filtro de proyectos del calendario de Actividades: claves de los proyectos elegidos (id del proyecto como
+  // texto, o FILTRO_SIN_PROYECTO). Vacío = todos los proyectos. Filtra las actividades que se ven en el calendario y
+  // las métricas del resumen. No se guarda: el calendario lo reinicia al entrar y al salir de la pantalla.
+  private _filtroProyectos = signal<string[]>([]);
+  public readonly filtroProyectos = this._filtroProyectos.asReadonly();
+
+  // sm - Actividades del mes que pasan el filtro de proyectos (las que se muestran en el calendario).
+  public readonly actividadesFiltradas = computed(() => {
+    const filtro = this._filtroProyectos();
+    const todas = this._actividades();
+    if (filtro.length === 0) return todas;
+    const claves = new Set(filtro);
+    return todas.filter(a => claves.has(this.claveProyecto(a)));
+  });
 
   // sm - Métricas calculadas por el backend para el mes que muestra el calendario (mismas que Seguimiento).
   private _horasPorRegistrar = signal<number>(0);
@@ -53,9 +72,11 @@ export class ActividadesService {
   // sm - idEmpleadoOverride permite pedir el resumen de OTRO colaborador (usado por el modal de solo-lectura de Seguimiento),
   // en vez de siempre usar al usuario logueado. idProyecto (mismo caso de uso) limita el cumplimiento a UN proyecto
   // puntual (la fila de Seguimiento desde la que se abrió el modal), en vez del total de todos sus proyectos.
-  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number): void {
+  // sm - filtroProyectos (opcional): proyectos elegidos en el filtro del calendario de Actividades (ver _filtroProyectos).
+  cargarResumen(anio?: number, mes?: number, idEmpleadoOverride?: number, idProyecto?: number, filtroProyectos: string[] = []): void {
     const solicitud = ++this.solicitudResumen;
     this.idProyectoResumen = idProyecto;
+    this.filtroResumen = filtroProyectos;
     const empId = this.empleadoObjetivo(idEmpleadoOverride);
     if (!empId) {
       // sm - Sin empleado no hay horas que mostrar: las métricas quedan en 0.
@@ -70,6 +91,11 @@ export class ActividadesService {
     }
     if (idProyecto) {
       url += `&idProyecto=${idProyecto}`;
+    } else {
+      for (const clave of filtroProyectos) {
+        if (clave === FILTRO_SIN_PROYECTO) url += `&incluirSinProyecto=true`;
+        else url += `&idsProyecto=${encodeURIComponent(clave)}`;
+      }
     }
     this.http.get<ResumenHorasDto>(url).subscribe({
       next: (res) => {
@@ -128,6 +154,21 @@ export class ActividadesService {
 
   getActividadesPorFecha(fecha: Date): any[] {
     return this._actividades().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
+  }
+
+  // sm - Igual que getActividadesPorFecha, pero solo las que pasan el filtro de proyectos (lo que se ve en el calendario).
+  // getActividadesPorFecha sigue devolviendo todas: "Agregar actividad" las necesita para calcular el progreso del día.
+  getActividadesVisiblesPorFecha(fecha: Date): any[] {
+    return this.actividadesFiltradas().filter((a: any) => this.mismaFecha(a.fechaactividad, fecha));
+  }
+
+  setFiltroProyectos(claves: string[]): void {
+    this._filtroProyectos.set([...claves]);
+  }
+
+  // sm - Clave de la actividad para el filtro de proyectos: el id del proyecto, o FILTRO_SIN_PROYECTO si no tiene.
+  claveProyecto(actividad: any): string {
+    return actividad?.idproyecto != null ? String(actividad.idproyecto) : FILTRO_SIN_PROYECTO;
   }
 
   // sm - Mensaje del backend para mostrarlo en pantalla (ej. "No está asignado a este proyecto...").
@@ -304,7 +345,7 @@ export class ActividadesService {
   }
 
   private recargarMesActual(): void {
-    this.cargarResumen(this.currentAnio(), this.currentMes(), this.idEmpleadoConsultado, this.idProyectoResumen);
+    this.cargarResumen(this.currentAnio(), this.currentMes(), this.idEmpleadoConsultado, this.idProyectoResumen, this.filtroResumen);
     this.cargarCalendario(this.currentAnio(), this.currentMes(), this.idEmpleadoConsultado);
   }
 }

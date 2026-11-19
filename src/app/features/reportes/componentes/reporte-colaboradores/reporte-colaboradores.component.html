@@ -1,0 +1,117 @@
+<div class="report-wrapper">
+
+  <app-header title="Reporte Por Colaborador"
+    subtitle="Historial de asignaciones de cada colaborador: clientes, proyectos y tiempo trabajado.">
+    <app-descargar-menu
+      [disabled]="cargando() || totalFilas() === 0"
+      (descargarPDF)="exportarPDF()"
+      (descargarExcel)="exportarExcel()">
+    </app-descargar-menu>
+  </app-header>
+
+  @if (!cargando() && !error() && totalFilas() > 0) {
+    <div class="tarjetas-resumen">
+      <app-tarjeta-resumen titulo="Colaboradores" icono="groups" tono="destacado" [valor]="totalColaboradores()" />
+      <app-tarjeta-resumen titulo="Clientes" icono="business" tono="corporativo" [valor]="totalClientes()" />
+      <app-tarjeta-resumen titulo="Asignaciones" icono="assignment" tono="corporativo" [valor]="totalAsignaciones()" />
+      <app-tarjeta-resumen titulo="Horas registradas" icono="schedule" tono="cian" [valor]="totalHoras()" />
+    </div>
+  }
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Colaborador</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar por nombre o identificación..."
+          [ngModel]="busquedaColaborador()" (ngModelChange)="onTexto('colaborador', $event)">
+        @if (busquedaColaborador()) {
+          <button type="button" class="filter-clear" (click)="onTexto('colaborador', '')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Cliente</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar cliente..."
+          [ngModel]="busquedaCliente()" (ngModelChange)="onTexto('cliente', $event)">
+        @if (busquedaCliente()) {
+          <button type="button" class="filter-clear" (click)="onTexto('cliente', '')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Estado del colaborador</label>
+      <select class="filter-select" [ngModel]="estado()" (ngModelChange)="onEstado($event)">
+        @for (opcion of opcionesEstado; track opcion) {
+          <option [value]="opcion">{{ opcion }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="vista() === 'resumen'" [attr.aria-selected]="vista() === 'resumen'"
+      (click)="cambiarVista('resumen')">
+      <mat-icon>business</mat-icon>
+      Tiempo por cliente
+      <span class="contador">{{ resumenFiltrado().length }}</span>
+    </button>
+    <button type="button" role="tab" [class.activa]="vista() === 'historial'" [attr.aria-selected]="vista() === 'historial'"
+      (click)="cambiarVista('historial')">
+      <mat-icon>history</mat-icon>
+      Historial de asignaciones
+      <span class="contador">{{ historialFiltrado().length }}</span>
+    </button>
+  </div>
+  @if (vista() !== 'resumen') {
+  <p class="vista-ayuda">
+      Cada asignación del colaborador a un proyecto, con sus fechas y las horas registradas dentro de ese periodo.
+  </p>
+  }
+
+  @if (error()) {
+    <div class="mensaje-error">
+      No se pudo cargar el reporte.
+      <button type="button" class="btn-link" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (vista() === 'resumen') {
+    <!-- Una tabla por vista: así cada una arranca sin el orden de la otra. -->
+    <div class="filas-clicables">
+      <app-tabla
+        [datosPaginados]="filasPaginadas()"
+        [columnas]="columnasResumen"
+        [paginaActual]="paginaActual"
+        [totalPaginas]="totalPaginas"
+        [total]="totalFilas()"
+        [porPagina]="porPagina"
+        [mostrarDatos]="true"
+        [cargando]="cargando()"
+        [ordenExterno]="true"
+        textoCargando="Cargando reporte por colaborador..."
+        (ordenCambia)="onOrden($event)"
+        (rowClick)="verHistorial($event)"
+        (paginaCambia)="paginaActual.set($event)">
+      </app-tabla>
+    </div>
+  } @else {
+    <app-tabla
+      [datosPaginados]="filasPaginadas()"
+      [columnas]="columnasHistorial"
+      [paginaActual]="paginaActual"
+      [totalPaginas]="totalPaginas"
+      [total]="totalFilas()"
+      [porPagina]="porPagina"
+      [mostrarDatos]="true"
+      [cargando]="cargando()"
+      [ordenExterno]="true"
+      textoCargando="Cargando reporte por colaborador..."
+      (ordenCambia)="onOrden($event)"
+      (paginaCambia)="paginaActual.set($event)">
+    </app-tabla>
+  }
+
+</div>

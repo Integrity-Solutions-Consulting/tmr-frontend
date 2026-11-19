@@ -28,6 +28,7 @@ import {
 } from '../permisos-api.service';
 
 export interface SolicitudRrhh {
+  versionSolicitud?: string | null;
   id: number;
   folio: string;
   diaSolicitud?: string;
@@ -147,6 +148,7 @@ export class GestionRrhhComponent implements OnInit {
   private mapearDesdeApi(item: PermisoItemApi): SolicitudRrhh {
     return {
       id: item.id,
+      versionSolicitud: item.versionSolicitud,
       folio: item.codigo,
       diaSolicitud: item.diaSolicitud,
       mesSolicitud: item.mesSolicitud,
@@ -285,6 +287,13 @@ export class GestionRrhhComponent implements OnInit {
   abrirVistaFormulario(item: SolicitudRrhh): void {
     this.solicitudActiva.set(item);
     this.modalFormularioAbierto.set(true);
+    if (item.estado === 'PENDIENTE_LIDER_EXT' && !item.liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${item.liderNombre || 'asignado'} no tiene un correo registrado.`,
+        7000,
+      );
+    }
   }
 
   async descargarPdf(item: SolicitudRrhh): Promise<void> {
@@ -334,6 +343,14 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   reenviarEnlaceExterno(item: SolicitudRrhh): void {
+    if (!item.liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${item.liderNombre || 'asignado'} no tiene un correo registrado.`,
+        7000,
+      );
+      return;
+    }
     this.apiService.reenviarEnlaceExterno(item.id).subscribe({
       next: (res) => {
         if (res?.data?.avisoNotificacion) {
@@ -368,6 +385,7 @@ export class GestionRrhhComponent implements OnInit {
         'confirmar',
         this.impactoSeleccionado(),
         this.observacionesRrhh().trim(),
+        actual.versionSolicitud,
       )
       .subscribe({
         next: (res) => {
@@ -419,6 +437,7 @@ export class GestionRrhhComponent implements OnInit {
         'devolver',
         this.impactoSeleccionado(),
         obs,
+        actual.versionSolicitud,
       )
       .subscribe({
         next: (res) => {

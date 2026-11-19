@@ -107,6 +107,74 @@
     }
 }
 
+// sm - Filtro de proyectos (tercera columna de la barra del calendario).
+.proyecto-filtro {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 6px 0 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    background: var(--bg-card);
+    width: 240px;
+    max-width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &.activo {
+        border-color: var(--primary-color);
+
+        .proyecto-filtro-icon {
+            color: var(--primary-color);
+        }
+    }
+
+    .proyecto-filtro-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+
+    .proyecto-filtro-select {
+        flex: 1;
+        min-width: 0;
+        font-size: 13px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        color: var(--text-body);
+    }
+
+    .proyecto-filtro-clear {
+        width: 22px;
+        height: 22px;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        padding: 0;
+        flex-shrink: 0;
+
+        &:hover {
+            background: var(--bg-soft);
+        }
+
+        mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+        }
+    }
+}
+
 .legend {
     display: flex;
     gap: 20px;
@@ -413,6 +481,11 @@
         }
 
         
+    }
+
+    .proyecto-filtro {
+        width: 100%;
+        max-width: 320px;
     }
 
     .legend {

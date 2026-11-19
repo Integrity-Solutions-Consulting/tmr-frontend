@@ -16,7 +16,7 @@
       <input id="gestion-rrhh-filter-1"
         type="text"
         class="filter-control"
-        placeholder="Colaborador, código, proyecto, cliente, líder, duración o estado..."
+        placeholder="Buscar"
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)"
       />
@@ -215,6 +215,11 @@
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
           Cerrar
         </button>
+        @if (sol.estado === 'PENDIENTE_LIDER_EXT') {
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="reenviarEnlaceExterno(sol)">
+            Reenviar enlace
+          </button>
+        }
         <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
           <span class="material-symbols-outlined">download</span>
           Descargar PDF

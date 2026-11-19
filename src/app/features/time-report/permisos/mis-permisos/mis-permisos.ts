@@ -31,6 +31,9 @@ import {
 } from '../permisos-api.service';
 
 export interface SolicitudColaborador {
+  idProyecto?: number | null;
+  idLider?: number | null;
+  versionSolicitud?: string | null;
   id?: number;
   codigo: string;
   colaborador?: string;
@@ -78,6 +81,7 @@ export interface OpcionClienteProyecto {
   idLider: number | null;
   liderNombre: string;
   tipoLider: 'INT' | 'EXT';
+  liderCorreo?: string | null;
   esAsignacionPropia: boolean;
 }
 
@@ -85,6 +89,7 @@ export interface OpcionLiderFormulario {
   idLider: number | null;
   nombre: string;
   tipo: 'INT' | 'EXT';
+  correo?: string | null;
   etiqueta: string;
 }
 
@@ -114,6 +119,7 @@ export class MisPermisosComponent implements OnInit {
   readonly tipoFiltro = signal('');
   readonly estadoFiltro = signal('');
 
+  readonly editandoSolicitud = signal<SolicitudColaborador | null>(null);
   readonly modalNuevaVisible = signal(false);
   readonly modalFormularioVisible = signal(false);
   readonly solicitudSeleccionada = signal<SolicitudColaborador | null>(null);
@@ -404,6 +410,7 @@ export class MisPermisosComponent implements OnInit {
               idLider: l.idLider,
               nombre: l.nombre,
               tipo: l.tipo,
+              correo: l.correo ?? null,
               etiqueta: `${l.nombre} (${l.tipo === 'EXT' ? 'Líder Externo' : 'Líder Interno'})`,
             })),
           );
@@ -427,6 +434,7 @@ export class MisPermisosComponent implements OnInit {
               idLider: p.idLider,
               liderNombre: (p.liderNombre ?? '').trim(),
               tipoLider: p.liderTipo,
+              liderCorreo: p.liderCorreo ?? null,
               esAsignacionPropia: !!p.esAsignacionPropia,
             } satisfies OpcionClienteProyecto;
           });
@@ -463,6 +471,9 @@ export class MisPermisosComponent implements OnInit {
   private mapearDesdeApi(item: PermisoItemApi): SolicitudColaborador {
     return {
       id: item.id,
+      idProyecto: item.idProyecto,
+      idLider: item.idLider,
+      versionSolicitud: item.versionSolicitud,
       codigo: item.codigo,
       colaborador: item.colaborador,
       cedula: item.cedula,
@@ -557,7 +568,35 @@ export class MisPermisosComponent implements OnInit {
     return 'Jornada completa';
   }
 
+  editarObservada(item: SolicitudColaborador): void {
+    if (item.estadoClase !== 'observado' || !item.id) {
+      this.toast.error('Edición no permitida', 'Solo puedes corregir solicitudes observadas.');
+      return;
+    }
+    this.abrirNuevaSolicitud();
+    this.editandoSolicitud.set(item);
+    this.tipoSeleccionado.set(item.tipoOficial);
+    this.motivoForm.set(item.motivo);
+    this.fechaInicioForm.set(item.fechaInicio);
+    this.fechaFinForm.set(item.fechaFin);
+    this.fechaRegresoForm.set(item.fechaRegreso);
+    this.horarioSeleccionado.set(item.horario);
+    const detalle = item.horario === 'MANANA' ? '08:30 - 12:30' : item.horario === 'TARDE' ? '13:30 - 17:30' : item.detalleHorario || '08:30 - 17:30';
+    this.detalleHorarioForm.set(detalle);
+    const horas = detalle.match(/\d{2}:\d{2}/g);
+    if (horas?.length === 2) {
+      this.horaInicioOtrosForm.set(horas[0]);
+      this.horaFinOtrosForm.set(horas[1]);
+    }
+    const proyecto = this.opcionesCliente().findIndex(o => o.idProyecto === item.idProyecto);
+    this.indiceClienteForm.set(proyecto);
+    const lider = this.opcionesLider().findIndex(o => o.idLider === item.idLider);
+    this.indiceLiderForm.set(lider);
+    this.modalFormularioVisible.set(false);
+  }
+
   abrirNuevaSolicitud(): void {
+    this.editandoSolicitud.set(null);
     this.archivosEvidencia.set([]);
     this.horaInicioOtrosForm.set('08:30');
     this.horaFinOtrosForm.set('17:30');
@@ -568,6 +607,9 @@ export class MisPermisosComponent implements OnInit {
     this.busquedaClienteProyecto.set('');
     if (this.opcionesCliente().length === 0) {
       this.cargarDatosBackend();
+    } else {
+      const cli = this.clienteActualForm();
+      this.notificarSiLiderExternoSinCorreo(cli?.tipoLider, cli?.liderNombre, cli?.liderCorreo);
     }
     this.modalNuevaVisible.set(true);
   }
@@ -630,6 +672,23 @@ export class MisPermisosComponent implements OnInit {
       if (liderIdx >= 0) {
         this.indiceLiderForm.set(liderIdx);
       }
+      if (this.modalNuevaVisible()) {
+        this.notificarSiLiderExternoSinCorreo(clienteOpt.tipoLider, clienteOpt.liderNombre, clienteOpt.liderCorreo);
+      }
+    }
+  }
+
+  private notificarSiLiderExternoSinCorreo(
+    tipoLider?: 'INT' | 'EXT' | null,
+    liderNombre?: string | null,
+    liderCorreo?: string | null,
+  ): void {
+    if (tipoLider === 'EXT' && liderNombre?.trim() && !liderCorreo?.trim()) {
+      this.toast.info(
+        'Líder sin correo registrado',
+        `El líder externo ${liderNombre.trim()} no tiene un correo registrado.`,
+        7000,
+      );
     }
   }
 
@@ -939,6 +998,11 @@ export class MisPermisosComponent implements OnInit {
   }
 
   guardarNuevaSolicitud(): void {
+    if (this.guardandoSolicitud()) return;
+    if (this.editandoSolicitud() && this.editandoSolicitud()?.estadoClase !== 'observado') {
+      this.toast.error('Edición no permitida', 'Solo puedes corregir solicitudes observadas.');
+      return;
+    }
     if (!this.motivoForm().trim()) {
       this.toast.error('Campo requerido', 'Por favor ingresa el motivo del permiso o vacación.');
       return;
@@ -994,7 +1058,7 @@ export class MisPermisosComponent implements OnInit {
     }
 
     const archivos = this.archivosEvidencia();
-    if (this.requiereCertificadoMedicoObligatorio() && archivos.length === 0) {
+    if (this.requiereCertificadoMedicoObligatorio() && archivos.length === 0 && !this.editandoSolicitud()?.adjuntos?.length) {
       this.toast.error(
         'Certificado médico obligatorio',
         'Para licencias por enfermedad mayores a 1 día es necesario adjuntar el certificado médico.',
@@ -1014,7 +1078,7 @@ export class MisPermisosComponent implements OnInit {
           fechaInicio: this.fechaInicioForm(),
           fechaFin: this.fechaFinForm(),
           fechaRegreso: this.fechaRegresoForm(),
-          horario: this.horasPorDiaOtrosForm() >= 8 ? 'COMPLETA' : 'OTROS',
+          horario: this.horarioSeleccionado() === 'MANANA' || this.horarioSeleccionado() === 'TARDE' ? this.horarioSeleccionado() : this.horasPorDiaOtrosForm() >= 8 ? 'COMPLETA' : 'OTROS',
           detalleHorario: this.detalleHorarioForm(),
           totalDias: this.diasCalculadosForm(),
           totalHoras: this.horasCalculadasForm(),
@@ -1022,6 +1086,8 @@ export class MisPermisosComponent implements OnInit {
           idUsuarioRrhh: this.obtenerRrhhActualForm()?.idUsuario ?? null,
         },
         archivos,
+        this.editandoSolicitud()?.id,
+        this.editandoSolicitud()?.versionSolicitud,
       )
       .subscribe({
         next: (res) => {
@@ -1035,7 +1101,7 @@ export class MisPermisosComponent implements OnInit {
           }
 
           const nuevo = this.mapearDesdeApi(res.data);
-          this.solicitudes.update((lista) => [nuevo, ...lista]);
+          this.solicitudes.update((lista) => [nuevo, ...lista.filter(s => s.id !== nuevo.id)]);
           this.archivosEvidencia.set([]);
     this.horaInicioOtrosForm.set('08:30');
     this.horaFinOtrosForm.set('17:30');
@@ -1054,6 +1120,7 @@ export class MisPermisosComponent implements OnInit {
               ? `Tu solicitud y ${archivos.length === 1 ? 'el documento de respaldo quedaron guardados' : 'los ' + archivos.length + ' documentos de respaldo quedaron guardados'} y los avisos quedaron pendientes de envío.`
               : 'Tu solicitud fue registrada. Los avisos quedaron pendientes de envío.',
           );
+          this.notificarSiLiderExternoSinCorreo(res.data.liderTipo, res.data.liderNombre, res.data.liderCorreo);
         },
         error: (err) => {
           this.guardandoSolicitud.set(false);

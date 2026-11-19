@@ -24,6 +24,29 @@
             <mat-icon class="dropdown-chevron">expand_more</mat-icon>
         </div>
 
+        <!-- sm - Filtro de proyectos: "Todos" o uno/varios de sus proyectos (y "Sin proyecto"). Filtra las actividades
+             del calendario y las métricas de arriba. No aparece en el modal de solo lectura de Seguimiento. -->
+        @if (!soloLectura) {
+        <div class="proyecto-filtro" [class.activo]="filtroProyectos().length > 0">
+            <mat-icon class="proyecto-filtro-icon">filter_list</mat-icon>
+            <mat-select class="proyecto-filtro-select" multiple panelClass="proyecto-filtro-panel"
+                [value]="valorSelectorProyectos()" (selectionChange)="onFiltroProyectosChange($event)"
+                aria-label="Filtrar por proyecto">
+                <mat-select-trigger>{{ textoFiltro() }}</mat-select-trigger>
+                <mat-option [value]="opcionTodos">Todos los proyectos</mat-option>
+                @for (op of opcionesProyecto(); track op.clave) {
+                <mat-option [value]="op.clave">{{ op.nombre }}</mat-option>
+                }
+            </mat-select>
+            @if (filtroProyectos().length > 0) {
+            <button type="button" class="proyecto-filtro-clear" (click)="limpiarFiltroProyectos($event)"
+                matTooltip="Ver todos los proyectos" aria-label="Ver todos los proyectos">
+                <mat-icon>close</mat-icon>
+            </button>
+            }
+        </div>
+        }
+
     </div>
 
     <!-- ===== CALENDAR GRID ===== -->

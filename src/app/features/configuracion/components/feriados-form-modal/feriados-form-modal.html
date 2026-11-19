@@ -88,7 +88,7 @@
           <div class="float-field">
             <input
               class="float-field__input float-field__input--date"
-              type="date"
+              type="date" max="9999-12-31"
               formControlName="fecha"
               placeholder=" "
               [class.float-field__input--error]="form.controls.fecha.invalid && form.controls.fecha.touched"

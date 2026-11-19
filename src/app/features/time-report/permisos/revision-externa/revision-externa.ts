@@ -32,18 +32,25 @@ export class RevisionExternaComponent implements OnInit {
   readonly observacionLider = signal('');
   readonly procesado = signal<'pendiente' | 'confirmado' | 'observado' | 'rechazado'>('pendiente');
   readonly enviandoDecision = signal(false);
+  readonly cargando = signal(false);
+  readonly errorEnlace = signal('');
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
     if (token) {
       this.tokenExterno.set(token);
       this.cargarPorToken(token);
+    } else {
+      this.errorEnlace.set('El enlace de revisión está incompleto. Ábrelo desde el correo enviado.');
     }
   }
 
   private cargarPorToken(token: string): void {
+    this.cargando.set(true);
+    this.errorEnlace.set('');
     this.apiService.obtenerPorTokenExterno(token).subscribe({
       next: (res) => {
+        this.cargando.set(false);
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
           if (res.data.comentarioLider) {
@@ -53,19 +60,19 @@ export class RevisionExternaComponent implements OnInit {
             this.procesado.set('rechazado');
           } else if (res.data.estadoClase === 'observado') {
             this.procesado.set('observado');
-          } else if (res.data.aprobadoLider) {
+          } else if (res.data.aprobadoLider || res.data.estadoClase === 'confirmado') {
             this.procesado.set('confirmado');
           }
         }
       },
       error: (err) => {
-        this.toast.error(
-          'Enlace no disponible',
-          obtenerMensajeAmigablePermisos(
-            err,
-            'Este enlace de revisión no es válido o ya cumplió su tiempo de vigencia.',
-          ),
+        this.cargando.set(false);
+        const mensaje = obtenerMensajeAmigablePermisos(
+          err,
+          'Este enlace de revisión no es válido o ya cumplió su tiempo de vigencia.',
         );
+        this.errorEnlace.set(mensaje);
+        this.toast.error('Enlace no disponible', mensaje);
       },
     });
   }

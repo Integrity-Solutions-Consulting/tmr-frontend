@@ -26,6 +26,7 @@ import {
 } from '../permisos-api.service';
 
 export interface SolicitudEquipo {
+  versionSolicitud?: string | null;
   id?: number;
   codigo: string;
   colaborador: string;
@@ -165,6 +166,7 @@ export class AprobacionesLiderComponent implements OnInit {
   private mapearDesdeApi(item: PermisoItemApi): SolicitudEquipo {
     return {
       id: item.id,
+      versionSolicitud: item.versionSolicitud,
       codigo: item.codigo,
       colaborador: item.colaborador,
       cedula: item.cedula,
@@ -326,7 +328,7 @@ export class AprobacionesLiderComponent implements OnInit {
     }
 
     this.procesandoDecision.set(true);
-    this.permisosApi.registrarDecisionLider(actual.id, accion, comentario).subscribe({
+    this.permisosApi.registrarDecisionLider(actual.id, accion, comentario, actual.versionSolicitud).subscribe({
       next: (res) => {
         this.procesandoDecision.set(false);
         if (res?.success && res.data) {

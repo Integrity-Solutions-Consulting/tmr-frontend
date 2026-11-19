@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { exportarReporteExcelMultihoja, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
 import { DescargaProgresoService } from '../../../../shared/services/descarga-progreso.service';
+import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import { DashboardEjecutivoService } from '../../servicios/dashboard-ejecutivo.service';
 import { DashboardService } from '../../servicios/dashboard.service';
 import {
@@ -103,6 +104,7 @@ export class DashboardEjecutivoComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private dropdownScrollLock = inject(DropdownScrollLockService);
   private descargas = inject(DescargaProgresoService);
+  private toast = inject(NotificacionToastService);
   // Aviso informativo del último corte de horas (a la derecha del resumen); su "Ver más" abre el panel de detalle
   protected readonly resumenCorte = inject(ResumenCorteService);
   protected readonly describirPeriodoCorte = describirPeriodoCorte;
@@ -147,6 +149,8 @@ export class DashboardEjecutivoComponent implements OnInit {
   detalle = signal<DetalleAbierto | null>(null);
   enviandoCorreo: Record<string, boolean> = {};
   resultadoCorreo: Record<string, 'ok' | 'error'> = {};
+  /** Motivo devuelto por el backend cuando el correo no se pudo enviar (p. ej. el colaborador no tiene correo). */
+  mensajeErrorCorreo: Record<string, string> = {};
 
   // ── Derivados ──
   // sm - Proyectos del filtro en cascada: solo los del cliente y estado elegidos.
@@ -906,16 +910,23 @@ export class DashboardEjecutivoComponent implements OnInit {
     if (this.enviandoCorreo[clave]) return;
     this.enviandoCorreo[clave] = true;
     delete this.resultadoCorreo[clave];
+    delete this.mensajeErrorCorreo[clave];
     this.dashboardService
       .enviarNotificacionEmail(fila.idEmpleado, fila.colaborador, fila.proyecto, fila.pendientes)
       .subscribe({
         next: () => {
           this.enviandoCorreo[clave] = false;
           this.resultadoCorreo[clave] = 'ok';
+          this.toast.exito('Recordatorio enviado', `Se envió el correo de horas pendientes a ${fila.colaborador}.`);
         },
-        error: () => {
+        error: (err) => {
+          // TC-002: antes solo se pintaba el ícono en rojo y no se sabía por qué no salió el correo.
+          const motivo = err?.error?.mensaje ?? err?.error?.Mensaje ?? err?.error?.message
+            ?? 'No se pudo enviar el correo. Intente nuevamente.';
           this.enviandoCorreo[clave] = false;
           this.resultadoCorreo[clave] = 'error';
+          this.mensajeErrorCorreo[clave] = motivo;
+          this.toast.error(`No se envió el recordatorio a ${fila.colaborador}`, motivo);
         },
       });
   }

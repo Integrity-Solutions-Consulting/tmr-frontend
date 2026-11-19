@@ -1,0 +1,120 @@
+<div class="report-wrapper">
+
+  <app-header title="Reporte Por Cliente"
+    subtitle="Proyectos de cada cliente y los colaboradores que trabajan o trabajaron en ellos.">
+    <app-descargar-menu
+      [disabled]="cargando() || totalFilas() === 0"
+      (descargarPDF)="exportarPDF()"
+      (descargarExcel)="exportarExcel()">
+    </app-descargar-menu>
+  </app-header>
+
+  @if (!cargando() && !error()) {
+    <div class="tarjetas-resumen">
+      <app-tarjeta-resumen titulo="Clientes con proyectos" icono="business" tono="destacado" [valor]="totalClientes()" />
+      <app-tarjeta-resumen titulo="Proyectos" icono="folder" tono="corporativo" [valor]="totalProyectos()" />
+      <app-tarjeta-resumen titulo="Proyectos activos" icono="task_alt" tono="corporativo" [valor]="totalProyectosActivos()" />
+      <app-tarjeta-resumen titulo="Colaboradores" icono="groups" tono="cian" [valor]="totalColaboradores()" />
+    </div>
+  }
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label class="filter-label">Cliente</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar cliente..."
+          [ngModel]="busquedaCliente()" (ngModelChange)="onTexto('cliente', $event)">
+        @if (busquedaCliente()) {
+          <button type="button" class="filter-clear" (click)="onTexto('cliente', '')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Proyecto o colaborador</label>
+      <div class="filter-input-wrapper">
+        <span class="material-symbols-outlined filter-icon">search</span>
+        <input type="text" class="filter-input" placeholder="Buscar proyecto, código o colaborador..."
+          [ngModel]="busquedaTexto()" (ngModelChange)="onTexto('texto', $event)">
+        @if (busquedaTexto()) {
+          <button type="button" class="filter-clear" (click)="onTexto('texto', '')" aria-label="Limpiar filtro" title="Limpiar filtro"><span class="material-icons">close</span></button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-group date-group">
+      <label class="filter-label">Estado del proyecto</label>
+      <select class="filter-select" [ngModel]="estado()" (ngModelChange)="onEstado($event)">
+        @for (opcion of opcionesEstado; track opcion) {
+          <option [value]="opcion">{{ opcion }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="vista() === 'clientes'" [attr.aria-selected]="vista() === 'clientes'"
+      (click)="cambiarVista('clientes')">
+      <mat-icon>business</mat-icon>
+      Clientes
+      <span class="contador">{{ clientesFiltrados().length }}</span>
+    </button>
+    <button type="button" role="tab" [class.activa]="vista() === 'proyectos'" [attr.aria-selected]="vista() === 'proyectos'"
+      (click)="cambiarVista('proyectos')">
+      <mat-icon>folder</mat-icon>
+      Proyectos
+      <span class="contador">{{ proyectosFiltrados().length }}</span>
+    </button>
+    <button type="button" role="tab" [class.activa]="vista() === 'colaboradores'" [attr.aria-selected]="vista() === 'colaboradores'"
+      (click)="cambiarVista('colaboradores')">
+      <mat-icon>groups</mat-icon>
+      Colaboradores en proyectos
+      <span class="contador">{{ colaboradoresFiltrados().length }}</span>
+    </button>
+  </div>
+  <p class="vista-ayuda">
+    @switch (vista()) {
+      @case ('clientes') { Cuántos proyectos tiene cada cliente y cuántos colaboradores han estado en ellos. Haga clic en un cliente para ver sus proyectos. }
+      @case ('proyectos') { Cada proyecto con su número de colaboradores (total y vigentes hoy). Haga clic en un proyecto para ver quiénes son. }
+      @default { Colaboradores asignados a cada proyecto, con sus fechas, tiempo y horas registradas. }
+    }
+  </p>
+
+  @if (error()) {
+    <div class="mensaje-error">
+      No se pudo cargar el reporte.
+      <button type="button" class="btn-link" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <!-- Una tabla por vista: así cada una arranca sin el orden de la otra. -->
+    @switch (vista()) {
+      @case ('clientes') {
+        <div class="filas-clicables">
+          <app-tabla [datosPaginados]="filasPaginadas()" [columnas]="columnasClientes"
+            [paginaActual]="paginaActual" [totalPaginas]="totalPaginas" [total]="totalFilas()" [porPagina]="porPagina"
+            [mostrarDatos]="true" [cargando]="cargando()" [ordenExterno]="true" textoCargando="Cargando reporte por cliente..."
+            (ordenCambia)="onOrden($event)" (rowClick)="verProyectosDe($event)" (paginaCambia)="paginaActual.set($event)">
+          </app-tabla>
+        </div>
+      }
+      @case ('proyectos') {
+        <div class="filas-clicables">
+          <app-tabla [datosPaginados]="filasPaginadas()" [columnas]="columnasProyectos"
+            [paginaActual]="paginaActual" [totalPaginas]="totalPaginas" [total]="totalFilas()" [porPagina]="porPagina"
+            [mostrarDatos]="true" [cargando]="cargando()" [ordenExterno]="true" textoCargando="Cargando reporte por cliente..."
+            (ordenCambia)="onOrden($event)" (rowClick)="verColaboradoresDe($event)" (paginaCambia)="paginaActual.set($event)">
+          </app-tabla>
+        </div>
+      }
+      @default {
+        <app-tabla [datosPaginados]="filasPaginadas()" [columnas]="columnasColaboradores"
+          [paginaActual]="paginaActual" [totalPaginas]="totalPaginas" [total]="totalFilas()" [porPagina]="porPagina"
+          [mostrarDatos]="true" [cargando]="cargando()" [ordenExterno]="true" textoCargando="Cargando reporte por cliente..."
+          (ordenCambia)="onOrden($event)" (paginaCambia)="paginaActual.set($event)">
+        </app-tabla>
+      }
+    }
+  }
+
+</div>
