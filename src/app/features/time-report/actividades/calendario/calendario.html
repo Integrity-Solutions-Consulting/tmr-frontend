@@ -77,7 +77,7 @@
             @if (dia.esMesActual && dia.actividades && dia.actividades.length > 0) {
             <div class="day-actividades-block">
                 @for (act of dia.actividades; track act.id) {
-                <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act)" (click)="editarActividad($event, act)">
+                <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act)" (click)="$event.stopPropagation(); seleccionarDia(dia.fecha)">
                     <span class="act-hours">{{ act.cantidadhoras }}h - </span>
                     <span class="act-name">{{ act.proyectoNombre }}</span>
                     @if (act.idLiderRegistro) {
