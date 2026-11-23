@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.5...v3.7.6) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejoras en logica ([54bb055](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/54bb0556d58e69e2171840f5782b0120bca055da))
+* Mejoras en logica ([96d2897](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/96d28979337cae98975db0481bec7352279f7c36))
+
 ## [3.7.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.4...v3.7.5) (2026-11-23)
 
 
