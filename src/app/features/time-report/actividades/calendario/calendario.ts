@@ -68,10 +68,13 @@ export class Calendario implements OnInit, OnDestroy {
     // sm - Fecha (yyyy-MM-dd) cuyo mes se muestra al abrir. El modal de Seguimiento manda el "Fecha desde" del filtro
     // para que el calendario abra en el mes consultado y no siempre en el mes actual.
     @Input() fechaInicialOverride?: string;
-    // sm - Líder que completa actividades desde Seguimiento: solo puede abrir las que él mismo cargó, no las del colaborador.
+    // sm - Líder que completa actividades desde Seguimiento (ver chipBloqueado: qué actividades puede modificar).
     @Input() idLiderEdicion?: number | null;
     // sm - Permite abrir el detalle (solo ver) de las actividades que no se pueden editar.
     @Input() permitirVerDetalle = false;
+    // sm - Botón "Agregar actividad" junto al mes. Solo en el modal de Seguimiento: la página de Actividades ya tiene
+    // su propio botón arriba.
+    @Input() mostrarBotonAgregar = false;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -241,8 +244,13 @@ export class Calendario implements OnInit, OnDestroy {
         this.editarActividadEvent.emit(actividad);
     }
 
+    // sm - El líder que completa desde Seguimiento puede modificar las actividades del colaborador en el proyecto de esa
+    // fila (donde es su líder), sin importar quién las cargó, y las que él mismo cargó. Las de otros proyectos o sin
+    // proyecto (novedades) quedan solo para ver.
     chipBloqueado(actividad: any): boolean {
-        return this.idLiderEdicion != null && actividad.idLiderRegistro !== this.idLiderEdicion;
+        if (this.idLiderEdicion == null) return false;
+        if (actividad.idLiderRegistro === this.idLiderEdicion) return false;
+        return this.idProyectoOverride == null || Number(actividad.idproyecto) !== Number(this.idProyectoOverride);
     }
 
     getActividadClass(act: any): string {
@@ -274,6 +282,15 @@ export class Calendario implements OnInit, OnDestroy {
         const hoy = new Date();
         this._fechaActual.set(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
         this.mesSeleccionado = hoy.getMonth();
+    }
+
+    // sm - Botón "Agregar actividad" de la barra: hoy si se está viendo el mes actual; si no, el 1 del mes visible.
+    agregarDesdeBarra() {
+        const visible = this._fechaActual();
+        const hoy = new Date();
+        const esMesActual = visible.getFullYear() === hoy.getFullYear() && visible.getMonth() === hoy.getMonth();
+        this.seleccionarDia(esMesActual ? new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+            : new Date(visible.getFullYear(), visible.getMonth(), 1));
     }
 
     agregarEnDia(event: MouseEvent, fecha: Date) {
