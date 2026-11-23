@@ -28,11 +28,12 @@
     <!-- sm - idProyectoOverride: limita el resumen de cumplimiento (horas por registrar/promedio) al proyecto de
          esta fila, no al total de todos los proyectos del colaborador (ver Calendario.idProyectoOverride). -->
     <!-- sm - soloLectura: bloquea agregar/editar actividades; la navegación entre meses sigue disponible. -->
-    <!-- sm - idLiderEdicion: al completar, el líder solo abre las actividades que él mismo cargó. -->
+    <!-- sm - idLiderEdicion: al completar, el líder modifica las actividades del colaborador en este proyecto (las de
+         otros proyectos solo las ve). -->
     <div class="calcol-modal__body">
         <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="!completando()"
             [idLiderEdicion]="completando() ? completar()?.idLider : null" [fechaInicialOverride]="data.fechaDesde"
             (diaSeleccionado)="abrirAgregar($event)" (editarActividadEvent)="abrirEditar($event)"
-            [permitirVerDetalle]="true" (verActividadEvent)="abrirDetalle($event)"></app-calendario>
+            [permitirVerDetalle]="true" [mostrarBotonAgregar]="true" (verActividadEvent)="abrirDetalle($event)"></app-calendario>
     </div>
 </div>

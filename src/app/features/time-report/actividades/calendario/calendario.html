@@ -14,6 +14,9 @@
             </button>
         </div>
 
+        <!-- sm - Mes + botón "Agregar actividad" juntos en la columna central (el botón no puede ir dentro de
+             month-title-wrap: el <select> invisible que cubre esa caja se comería el clic). -->
+        <div class="month-center">
         <div class="month-title-wrap">
             <select class="month-select" [(ngModel)]="mesSeleccionado" (change)="onMesChange()">
                 @for (m of mesesNombres; track m; let i = $index) {
@@ -22,6 +25,13 @@
             </select>
             <span class="month-year-label">{{ mesLabel }} de {{ anioActual }}</span>
             <mat-icon class="dropdown-chevron">expand_more</mat-icon>
+        </div>
+        @if (mostrarBotonAgregar && !soloLectura) {
+        <button type="button" class="agregar-btn" (click)="agregarDesdeBarra()">
+            <mat-icon>add</mat-icon>
+            Agregar actividad
+        </button>
+        }
         </div>
 
         <!-- sm - Filtro de proyectos: "Todos" o uno/varios de sus proyectos (y "Sin proyecto"). Filtra las actividades
@@ -69,14 +79,6 @@
                     </span>
                 </div>
                 <div class="day-number-group">
-                    <!-- sm - Botón "+" para agregar: cuando el día tiene muchas actividades, las pastillas ocupan toda la
-                         celda y ya no queda espacio libre donde hacer clic para agregar otra. -->
-                    @if (dia.esMesActual && !soloLectura) {
-                    <button type="button" class="day-add-btn" (click)="agregarEnDia($event, dia.fecha)"
-                        matTooltip="Agregar actividad" aria-label="Agregar actividad">
-                        <mat-icon>add</mat-icon>
-                    </button>
-                    }
                     <span class="day-number">{{ dia.fecha.getDate() }}</span>
                 </div>
             </div>
@@ -94,6 +96,14 @@
                     <mat-icon class="act-lider" matTooltip="Registrado por líder" aria-label="Registrado por líder">supervisor_account</mat-icon>
                     }
                 </div>
+                }
+                <!-- sm - Agregar al final de la lista del día: cuando hay muchas actividades ocupan toda la celda y ya
+                     no queda espacio libre donde hacer clic. -->
+                @if (!soloLectura) {
+                <button type="button" class="day-add-link" (click)="agregarEnDia($event, dia.fecha)">
+                    <mat-icon>add</mat-icon>
+                    Agregar
+                </button>
                 }
             </div>
             }

@@ -67,7 +67,7 @@ export class CalendarioColaboradorModal implements OnInit {
     }
 
     // sm - Detalle de solo lectura de una actividad que el líder no puede modificar (fuera del modo completar, o
-    // cargada por el propio colaborador).
+    // de otro proyecto o sin proyecto).
     abrirDetalle(actividad: any): void {
         this.abrirActividad({ actividad, soloVer: true });
     }
