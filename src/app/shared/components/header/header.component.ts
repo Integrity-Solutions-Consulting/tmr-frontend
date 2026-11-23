@@ -6,10 +6,10 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="header-container">
+    <div class="header-container" [class.header-container--compact]="compact()">
       <div>
         <h1 class="header-title">{{ title() }}</h1>
-        <p class="header-subtitle">{{ subtitle() }}</p>
+        <p *ngIf="subtitle()" class="header-subtitle">{{ subtitle() }}</p>
       </div>
       <ng-content></ng-content>
     </div>
@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
           gap: 16px;
         }
       }
+      .header-container--compact { padding-bottom: 0; }
       .header-title {
         font-size: 28px;
         font-weight: 800;
@@ -49,5 +50,6 @@ import { CommonModule } from '@angular/common';
 })
 export class HeaderComponent {
   title = input<string>('');
+  compact = input(false);
   subtitle = input<string>('');
 }

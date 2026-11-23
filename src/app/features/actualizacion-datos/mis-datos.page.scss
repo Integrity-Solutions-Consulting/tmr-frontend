@@ -2,6 +2,7 @@
 
 .page {
   @include ui.page-shell;
+  gap: 12px;
   max-width: 1240px;
   margin: 0 auto;
   color: var(--text-main);
@@ -27,13 +28,17 @@ footer { display: flex; justify-content: space-between; align-items: center; gap
 .ficha-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
 .documents-inline + .ficha-acciones { margin-top: 16px; }
 .field-grid + .conocimiento-acciones { margin-top: 16px; }
-.tabs { @include ui.tab-list; }
+.tabs {
+  @include ui.tab-list;
+  margin: 0;
+}
 .tabs button { @include ui.tab-button; }
 
 .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
 .field-wide { grid-column: 1 / -1; }
+.campos-pareados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .form-field { display: flex; flex-direction: column; gap: 4px; min-height: 58px; }
-.select-field { display: grid; align-content: start; gap: 7px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }
+.select-field { display: grid; align-content: start; gap: 7px; color: var(--text-secondary); font-size: 13px; font-weight: 400; }
 .discapacidad-opciones { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; border: 1px solid var(--border-soft); border-radius: 12px; }
 .discapacidad-opciones label { display: flex; align-items: center; gap: 5px; }
 .field-label { color: var(--text-secondary); font-size: 13px; }
@@ -71,10 +76,39 @@ footer { position: sticky; bottom: 0; justify-content: flex-end; padding: 16px 0
 @media (max-width: 900px) {
   .page { padding: 20px 16px; }
   .page-header, footer { align-items: stretch; flex-direction: column; }
-  .field-grid { grid-template-columns: 1fr; }
+  .field-grid, .campos-pareados { grid-template-columns: 1fr; }
   .field-wide { grid-column: auto; }
   .card, .record-card { padding: 18px; }
   .document, .document-actions { align-items: stretch; flex-direction: column; }
   .document { width: 100%; }
   .document-actions, .document-actions app-boton { width: 100%; }
+}
+
+.aviso-revision,
+.aviso-correccion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .5rem .75rem;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: .5rem;
+
+  button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+}
+
+.aviso-revision {
+  align-items: center;
+  background: var(--status-success-bg-soft);
+  color: var(--status-success-text);
+  border-color: currentColor;
 }

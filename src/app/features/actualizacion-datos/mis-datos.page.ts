@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -9,20 +9,18 @@ import { AppSelectComponent, AppSelectOption } from '../../shared/components/sel
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { NotificacionComponent } from '../clientes/componentes/notificacion/notificacion.component';
 import { Notificacion } from '../clientes/modelos/cliente.model';
-import { NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../shared/validators/nombre-persona.validator';
-import Swal from 'sweetalert2';
-import { CountryCode, getCountries, getCountryCallingCode, parsePhoneNumberFromString } from 'libphonenumber-js/max';
+import { capitalizarInicialNombre, NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../shared/validators/nombre-persona.validator';
+import { CountryCode, getCountries, getCountryCallingCode, parsePhoneNumberFromString, validatePhoneNumberLength } from 'libphonenumber-js/max';
 import { TIPOS_DISCAPACIDAD, tiposDiscapacidadRegistrados } from '../../shared/validators/tipo-discapacidad';
 
 type ConditionKind = 'children' | 'ownDisability' | 'partner' | 'childDisability';
 const controlPorSeccion = { personal: 'persona', familia: 'familia', formacion: 'formaciones', certificaciones: 'certificaciones', conocimientos: 'conocimientos' } as const;
 type SeccionPerfil = keyof typeof controlPorSeccion;
 type PersonalInput = 'email' | 'telefono' | 'direccion' | 'porcentajeDiscapacidad';
-type FormatoEntrada = 'email' | 'telefono' | 'direccion' | 'porcentaje' | 'nombrePersona' | 'nombreCertificado' | 'entidadEmisora';
+type FormatoEntrada = 'email' | 'direccion' | 'porcentaje' | 'nombrePersona' | 'nombreCertificado' | 'entidadEmisora';
 
 const caracteresNoPermitidos: Record<FormatoEntrada, RegExp> = {
   email: /[^a-zA-Z0-9._%+@-]/g,
-  telefono: /[^0-9+ ().-]/g,
   direccion: /[^\p{L}0-9 /".;]/gu,
   porcentaje: /[^0-9]/g,
   nombrePersona: /[^\p{L}\p{M} ]/gu,
@@ -30,6 +28,17 @@ const caracteresNoPermitidos: Record<FormatoEntrada, RegExp> = {
   entidadEmisora: /[^\p{L}\p{M}0-9 .&()'–—-]/gu
 };
 const validadoresPorcentaje = [Validators.pattern(/^\d+$/), Validators.min(0), Validators.max(100)];
+const MAX_DIGITOS_E164 = 15;
+
+function discapacidadObligatoria(grupo: AbstractControl) {
+  const tiene = grupo.get('tieneDiscapacidad')?.value;
+  if (tiene !== 'Si' && tiene !== 'Sí') return null;
+
+  const porcentaje = grupo.get('porcentajeDiscapacidad')?.value;
+  const faltaPorcentaje = porcentaje == null || porcentaje === '';
+  const faltaTipo = !tiposDiscapacidadRegistrados(grupo.get('tipoDiscapacidad')?.value).length;
+  return faltaPorcentaje || faltaTipo ? { discapacidadObligatoria: { porcentajeDiscapacidad: faltaPorcentaje, tipoDiscapacidad: faltaTipo } } : null;
+}
 
 function porcentajeNumerico(value: string | number | null | undefined): number | null {
   return value === '' || value == null ? null : Number(value);
@@ -88,6 +97,7 @@ export class MisDatosPage {
 
   form = this.fb.group({
     persona: this.fb.group({
+      fechaNacimiento: [''],
       nombres: [{ value: '', disabled: true }], apellidos: [{ value: '', disabled: true }],
       email: ['', [Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9-]+$/)]],
       telefono: ['', (control: AbstractControl<string | null>) =>
@@ -96,14 +106,14 @@ export class MisDatosPage {
       tieneDiscapacidad: ['NoInformado'], tipoDiscapacidad: [''],
       porcentajeDiscapacidad: this.fb.control<string | number | null>('', validadoresPorcentaje),
       limpiarDiscapacidad: [false]
-    }),
+    }, { validators: discapacidadObligatoria }),
     familia: this.fb.group({
       estadoCivil: [''], tieneHijos: ['NoInformado'], limpiarHijos: [false], limpiarPareja: [false],
       pareja: this.fb.group({
         id: [null], clave: [crypto.randomUUID().replaceAll('-', '')], tipoRelacion: ['Conyuge'],
         nombres: ['', nombrePersonaValidator(false)], apellidos: ['', nombrePersonaValidator(false)], identificacion: ['', Validators.pattern(/^\d{10}$/)], fechaNacimiento: [''],
         tieneDiscapacidad: ['NoInformado'], tipoDiscapacidad: [''], porcentajeDiscapacidad: [''], archivos: [[] as any[]]
-      }),
+      }, { validators: discapacidadObligatoria }),
       familiares: this.fb.array([])
     }),
     formaciones: this.fb.array([]), certificaciones: this.fb.array([]), conocimientos: this.fb.array([])
@@ -173,10 +183,17 @@ export class MisDatosPage {
       return;
     }
     if (this.conocimientoEnEdicion === null) {
-      const registro = this.conocimientos.at(index);
       this.conocimientos.removeAt(index);
-      this.save('conocimientos', () => this.conocimientos.insert(index, registro));
     }
+  }
+
+  guardarConocimiento(index: number) {
+    if (this.saving || this.conocimientoEnEdicion !== index) return;
+    const ficha = this.conocimientos.at(index);
+    ficha.markAllAsTouched();
+    if (ficha.invalid) return;
+    this.conocimientoOriginal = undefined;
+    this.conocimientoEnEdicion = null;
   }
 
   filtrarAreaConocimiento(row: AbstractControl, event: Event) {
@@ -191,7 +208,29 @@ export class MisDatosPage {
   abrirArchivo(input: HTMLInputElement) { input.click(); }
 
   filtrarEntradaPersonal(campo: PersonalInput, event: Event) {
+    if (campo === 'telefono') { this.filtrarTelefono(event); return; }
     this.filtrarEntrada(this.form.controls.persona.controls[campo], campo === 'porcentajeDiscapacidad' ? 'porcentaje' : campo, event);
+  }
+
+  private filtrarTelefono(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const original = input.value;
+    const prefijo = '+' + getCountryCallingCode(this.paisTelefono);
+    const sinPrefijo = original.startsWith(prefijo) ? original.slice(prefijo.length) : original;
+    let numero = sinPrefijo.replace(/[^0-9]/g, '');
+    const cerosIniciales = this.paisTelefono === 'EC' ? numero.match(/^0+/)?.[0].length ?? 0 : 0;
+    const maxDigitos = this.paisTelefono === 'EC' ? 9 : MAX_DIGITOS_E164 - (prefijo.length - 1);
+    numero = numero.slice(cerosIniciales, cerosIniciales + maxDigitos);
+    while (validatePhoneNumberLength(prefijo + numero) === 'TOO_LONG') numero = numero.slice(0, -1);
+    if (this.paisTelefono === 'EC' && /^[2-7]/.test(numero)) numero = numero.slice(0, 8);
+    if (numero === original) return;
+
+    const cursor = input.selectionStart ?? original.length;
+    const inicio = original.length - sinPrefijo.length;
+    const digitosAntes = original.slice(inicio, cursor).replace(/[^0-9]/g, '').length;
+    const posicion = Math.max(0, Math.min(numero.length, digitosAntes - cerosIniciales));
+    this.form.controls.persona.controls.telefono.setValue(numero);
+    input.setSelectionRange(posicion, posicion);
   }
 
   filtrarEntrada(control: AbstractControl | null, formato: FormatoEntrada, event: Event) {
@@ -200,7 +239,7 @@ export class MisDatosPage {
     const original = input.value;
     const filtro = caracteresNoPermitidos[formato];
     let valor = original.replace(filtro, '');
-    if (formato === 'telefono') valor = valor.replace(/(?!^)\+/g, '');
+    if (formato === 'nombrePersona') valor = capitalizarInicialNombre(valor);
     if (formato === 'porcentaje' && Number(valor) > 100) valor = '100';
     if (valor === original) return;
 
@@ -211,18 +250,78 @@ export class MisDatosPage {
   }
 
   private numeroInternacional(telefono: string) {
-    return parsePhoneNumberFromString(telefono, { defaultCountry: this.paisTelefono, extract: false });
+    if (!/^[0-9]+$/.test(telefono)) return undefined;
+    const numero = '+' + getCountryCallingCode(this.paisTelefono) + telefono;
+    const resultado = parsePhoneNumberFromString(numero, { extract: false });
+    return resultado?.number === numero ? resultado : undefined;
   }
 
   cambiarPaisTelefono(pais: CountryCode) {
     this.paisTelefono = pais;
-    this.form.controls.persona.controls.telefono.updateValueAndValidity();
+    const ctrl = this.form.controls.persona.controls.telefono;
+    ctrl.setValue('');
+    ctrl.markAsDirty();
+    ctrl.updateValueAndValidity();
+  }
+
+  revisiones: any[] = [];
+
+  readonly avisoVisible = signal(false);
+  private temporizadorAviso?: ReturnType<typeof setTimeout>;
+
+  ocultarAviso() {
+    clearTimeout(this.temporizadorAviso);
+    this.avisoVisible.set(false);
+  }
+
+  private mostrarAvisoRevision() {
+    this.ocultarAviso();
+    const estado = this.revisionActual?.estado;
+    if (estado !== 'EnRevision' && estado !== 'RequiereCorreccion') return;
+    this.avisoVisible.set(true);
+    this.temporizadorAviso = setTimeout(() => this.ocultarAviso(), 8000);
+  }
+
+  ngOnDestroy() {
+    clearTimeout(this.temporizadorAviso);
+  }
+  get revisionActual() { return this.revisiones.find(x => x.seccion === this.tab); }
+  private cargarPropuesta(seccion: SeccionPerfil) {
+    const revision = this.revisiones.find(x => x.seccion === seccion);
+    if (!revision?.propuesta) return;
+    const propuesta = revision.propuesta;
+    const vista = { ...this.data };
+    const documentos = revision.documentos ?? [];
+    const conArchivos = (fila: any) => !fila ? null : ({ ...fila, archivos: documentos.filter((doc: any) =>
+      (fila.clave && doc.referenciaClave === fila.clave) || (fila.id && doc.referenciaId === fila.id)) });
+    if (seccion === 'personal') { vista.persona = { ...vista.persona, ...propuesta.persona, nombres: vista.persona.nombres, apellidos: vista.persona.apellidos }; vista.archivos = documentos; }
+    if (seccion === 'familia') vista.familia = { ...propuesta.familia, pareja: conArchivos(propuesta.familia?.pareja), familiares: propuesta.familia?.familiares.map(conArchivos) };
+    if (seccion === 'formacion') vista.formaciones = propuesta.formaciones.map(conArchivos);
+    if (seccion === 'certificaciones') vista.certificaciones = propuesta.certificaciones.map(conArchivos);
+    if (seccion === 'conocimientos') vista.conocimientos = propuesta.conocimientos;
+    if (seccion === 'personal') this.data.archivos = documentos;
+    this.cargarSeccion(seccion, vista);
+  }
+
+  private cargarRevisiones(recuperarPropuestas = false) {
+    this.api.misRevisiones().subscribe({ next: rows => {
+      const estadoAnterior = this.revisionActual?.estado;
+      this.revisiones = rows.filter(x => x.seccion !== 'conocimientos');
+      if (estadoAnterior !== this.revisionActual?.estado) this.mostrarAvisoRevision();
+      if (recuperarPropuestas) for (const seccion of Object.keys(controlPorSeccion) as SeccionPerfil[]) this.cargarPropuesta(seccion);
+    }, error: () => {
+      this.error = 'No fue posible consultar el estado de revisión.';
+    } });
   }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
       const requested = params.get('tab');
-      this.tab = requested && this.validTabs.has(requested) ? requested : 'personal';
+      const tab = requested && this.validTabs.has(requested) ? requested : 'personal';
+      if (this.tab !== tab) {
+        this.tab = tab;
+        this.mostrarAvisoRevision();
+      }
       this.lastTab = this.tab;
     });
     this.load();
@@ -239,7 +338,7 @@ export class MisDatosPage {
     const rangoInvalido = this.rangoFechasInvalido(path, ctrl);
     return !!ctrl && !ctrl.disabled && (
       !!ctrl.errors?.['backend'] ||
-      (ctrl.invalid && ctrl.touched) ||
+      (ctrl.touched && (ctrl.invalid || this.faltaDatoDiscapacidad(path))) ||
       (rangoInvalido && !!ctrl.parent?.touched)
     );
   }
@@ -248,7 +347,16 @@ export class MisDatosPage {
     return /^(?:formaciones\.\d+\.fecha(?:Inicio|Fin)|certificaciones\.\d+\.fecha(?:Emision|Vencimiento))$/.test(path)
       && !!ctrl?.parent?.hasError('ordenFechas');
   }
+  private faltaDatoDiscapacidad(path: string): boolean {
+    const campo = path.split('.').at(-1);
+    return (campo === 'tipoDiscapacidad' || campo === 'porcentajeDiscapacidad')
+      && !!this.control(path)?.parent?.getError('discapacidadObligatoria')?.[campo];
+  }
+
   mensajeError(path: string): string {
+    if (this.faltaDatoDiscapacidad(path)) return path.endsWith('.tipoDiscapacidad')
+      ? 'Selecciona al menos un tipo de discapacidad.'
+      : 'Ingresa el porcentaje de discapacidad.';
     const ctrl = this.control(path);
     if (this.rangoFechasInvalido(path, ctrl)) {
       if (path.startsWith('certificaciones.')) return path.endsWith('.fechaEmision')
@@ -262,6 +370,7 @@ export class MisDatosPage {
     if (ctrl.errors['backend']) return ctrl.errors['backend'];
     if (ctrl.errors['required']) return 'Este campo es obligatorio';
     if (ctrl.errors['nivelEducativo']) return 'Selecciona uno de los niveles educativos de la lista.';
+    if (path.startsWith('formaciones.') && path.endsWith('.titulo') && ctrl.errors['pattern']) return 'Ingresa solo letras y espacios en el t\u00edtulo.';
     if (path.endsWith('.entidadEmisora') && ctrl.errors['pattern']) return 'Usa letras, números, espacios o signos como punto, guion, apóstrofo, & y paréntesis.';
     if (path.startsWith('certificaciones.') && path.endsWith('.nombre') && ctrl.errors['pattern']) return 'Usa letras, números, espacios y puntuación habitual en el nombre del certificado.';
     if (path === 'persona.email' && (ctrl.errors['email'] || ctrl.errors['pattern'])) return 'Ingresa un correo electrónico válido';
@@ -314,6 +423,7 @@ export class MisDatosPage {
     return normalized === 'telefono' ? 'persona.telefono' : normalized;
   }
   private firstInvalidPath(control: AbstractControl, path = ''): string | null {
+    if (this.faltaDatoDiscapacidad(path)) return path;
     const nested = (control as any).controls;
     if (!nested) return !control.disabled && (control.invalid || this.rangoFechasInvalido(path, control)) ? path : null;
     for (const [key, child] of Object.entries(nested as Record<string, AbstractControl>)) {
@@ -339,6 +449,7 @@ export class MisDatosPage {
       next: datos => {
         this.data = datos;
         for (const seccion of Object.keys(controlPorSeccion) as SeccionPerfil[]) this.cargarSeccion(seccion, datos);
+        this.cargarRevisiones(true);
         this.loading = false;
       },
       error: e => {
@@ -355,11 +466,19 @@ export class MisDatosPage {
 
   private cargarSeccion(seccion: SeccionPerfil, datos: MisDatos) {
     switch (seccion) {
-      case 'personal':
-        this.paisTelefono = parsePhoneNumberFromString(datos.persona.telefono ?? '')?.country ?? 'EC';
-        this.form.controls.persona.patchValue({ ...datos.persona, limpiarDiscapacidad: false }, { emitEvent: false });
+      case 'personal': {
+        const telefonoGuardado = datos.persona.telefono ?? '';
+        const telefono = parsePhoneNumberFromString(telefonoGuardado, 'EC');
+        this.paisTelefono = telefono?.country ?? 'EC';
+        this.form.controls.persona.patchValue({
+          ...datos.persona,
+          fechaNacimiento: datos.persona.fechaNacimiento ?? datos.fechaNacimiento ?? '',
+          telefono: telefono?.nationalNumber ?? telefonoGuardado,
+          limpiarDiscapacidad: false
+        }, { emitEvent: false });
         this.previousOwnDisability = datos.persona.tieneDiscapacidad ?? 'NoInformado';
         break;
+      }
       case 'familia':
         this.fichasEnEdicion.delete(this.familiares);
         this.familiares.clear();
@@ -402,7 +521,7 @@ export class MisDatosPage {
       nivel: [v.nivel || '', [Validators.required, (control: AbstractControl<string>) =>
         !control.value || this.nivelesEducativos.includes(control.value) ? null : { nivelEducativo: true }]],
       institucion: [v.institucion || '', Validators.required],
-      titulo: [v.titulo || '', Validators.required],
+      titulo: [v.titulo || '', [Validators.required, Validators.pattern(/^(?=.*\p{L})[\p{L}\p{M} ]+$/u)]],
       fechaInicio: [v.fechaInicio || ''],
       fechaFin: [v.fechaFin || ''],
       archivos: [v.archivos || []]
@@ -442,7 +561,7 @@ export class MisDatosPage {
       identificacion: [v.identificacion || '', Validators.pattern(/^\d{10}$/)], fechaNacimiento: [v.fechaNacimiento || ''],
       tieneDiscapacidad: [v.tieneDiscapacidad || 'NoInformado'], tipoDiscapacidad: [v.tipoDiscapacidad || ''],
       porcentajeDiscapacidad: [v.porcentajeDiscapacidad ?? '', validadoresPorcentaje], limpiarDiscapacidad: [false], archivos: [v.archivos || []]
-    }), !valor);
+    }, { validators: discapacidadObligatoria }), !valor);
     this.previousChildDisability.set(key, v.tieneDiscapacidad || 'NoInformado');
   }
 
@@ -473,12 +592,16 @@ export class MisDatosPage {
   guardarFicha(registros: FormArray, row: AbstractControl) {
     row.markAllAsTouched();
     const tipo = registros === this.familiares ? 'PartidaNacimiento' : registros === this.formaciones ? 'Formacion' : 'Certificacion';
-    if (this.validarRespaldo(row, tipo) && row.valid && !this.uploadingDocuments.size) this.fichasEnEdicion.delete(registros);
+    const tieneDocumento = this.validarRespaldo(row, tipo);
+    const requiereCarnet = registros === this.familiares && this.isYes(row.value.tieneDiscapacidad);
+    const tieneCarnet = !requiereCarnet || this.validarRespaldo(row, 'Familiar');
+    if (tieneDocumento && tieneCarnet && row.valid && !this.uploadingDocuments.size) this.fichasEnEdicion.delete(registros);
   }
 
   private tieneRespaldo(row: AbstractControl, tipo: string): boolean {
+    if (tipo === 'Discapacidad') return !!this.data?.archivos?.length;
     return (row.get('archivos')?.value ?? []).some((archivo: { seccion?: string }) =>
-      tipo === 'PartidaNacimiento' ? archivo.seccion === tipo : !archivo.seccion || archivo.seccion === tipo
+      tipo === 'PartidaNacimiento' || tipo === 'Familiar' ? archivo.seccion === tipo : !archivo.seccion || archivo.seccion === tipo
     );
   }
 
@@ -492,6 +615,9 @@ export class MisDatosPage {
   }
 
   private revisarRespaldos(seccion: SeccionPerfil): string | null {
+    const persona = this.form.controls.persona;
+    if (seccion === 'personal' && this.isYes(persona.controls.tieneDiscapacidad.value)
+      && !this.validarRespaldo(persona, 'Discapacidad')) return 'persona.archivos';
     if (seccion === 'familia' && this.canAddChild() && !this.familiares.length) {
       this.form.controls.familia.controls.tieneHijos.setErrors({ backend: 'Agrega al menos un hijo y sube los archivos solicitados.' });
       return 'familia.tieneHijos';
@@ -506,7 +632,13 @@ export class MisDatosPage {
       : null;
     if (!datos) return null;
     const indice = datos.filas.controls.findIndex(row => !this.validarRespaldo(row, datos.tipo));
-    return indice < 0 ? null : `${datos.ruta}.${indice}.archivos`;
+    if (indice >= 0) return `${datos.ruta}.${indice}.archivos`;
+    if (seccion === 'familia') {
+      const sinCarnet = this.familiares.controls.findIndex(row => this.isYes(row.value.tieneDiscapacidad)
+        && !this.validarRespaldo(row, 'Familiar'));
+      if (sinCarnet >= 0) return `familia.familiares.${sinCarnet}.carnetDiscapacidad`;
+    }
+    return null;
   }
 
   canAddChild() { return this.isYes(this.form.controls.familia.controls.tieneHijos.value); }
@@ -616,7 +748,7 @@ export class MisDatosPage {
 
   save(seccion = this.tab as SeccionPerfil, alFallar?: () => void) {
     if (this.loadFailed || !this.data) { this.error = 'Carga los datos oficiales antes de guardar.'; return; }
-    if (this.saving) return;
+    if (this.saving || this.revisiones.some(x => x.seccion === seccion && x.estado === 'EnRevision')) return;
     this.error = '';
     const root = controlPorSeccion[seccion];
     const sectionControl = this.form.controls[root];
@@ -634,6 +766,7 @@ export class MisDatosPage {
     }
     const raw: any = this.form.getRawValue();
     raw.conocimientos = raw.conocimientos.map(({ area, porcentaje }: { area: string; porcentaje: string }) => ({ area: area.trim(), porcentaje: Number(porcentaje) }));
+    raw.persona.fechaNacimiento = raw.persona.fechaNacimiento || null;
     raw.persona.telefono = this.numeroInternacional(raw.persona.telefono ?? '')?.number ?? null;
     const ownYes = this.isYes(raw.persona.tieneDiscapacidad);
     const childrenYes = this.isYes(raw.familia.tieneHijos);
@@ -689,18 +822,16 @@ export class MisDatosPage {
           this.conocimientoOriginal = undefined;
         }
         if (result.validacionEnviada) {
-          void Swal.fire({
-            icon: 'success',
-            text: 'Registro enviado a revisión por Recursos Humanos',
-            confirmButtonText: 'Aceptar'
-          });
+          this.revisiones = [...this.revisiones.filter(x => x.seccion !== seccion), { seccion, estado: 'EnRevision' }];
+          if (this.tab === seccion) this.mostrarAvisoRevision();
+          this.cargarRevisiones();
         } else {
           this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' });
         }
         this.api.getMine().subscribe({
           next: datos => {
             this.data = datos;
-            this.cargarSeccion(seccion, datos);
+            if (!result.validacionEnviada) this.cargarSeccion(seccion, datos);
             this.saving = false;
           },
           error: () => {

@@ -3,8 +3,14 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 export const NOMBRE_PERSONA_MAX_LENGTH = 100;
 export const NOMBRE_PERSONA_MENSAJE = 'Ingresa solo letras y espacios. Se permiten tildes y ñ. Máximo 100 caracteres.';
 
+export function capitalizarInicialNombre(valor: string): string {
+  return valor.replace(/^(\s*)(\p{L})/u, (_coincidencia, espacios: string, inicial: string) =>
+    espacios + inicial.toLocaleUpperCase('es')
+  );
+}
+
 export function normalizarNombrePersona(value: unknown): string {
-  return String(value ?? '').normalize('NFC').trim();
+  return capitalizarInicialNombre(String(value ?? '').normalize('NFC').trim());
 }
 
 export function nombrePersonaValidator(obligatorio = true): ValidatorFn {

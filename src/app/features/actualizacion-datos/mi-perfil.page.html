@@ -1,0 +1,287 @@
+<div class="perfil">
+  <header class="introduccion">
+    <h1>Mi perfil</h1>
+    <p>Consulta y administra tu información personal y familiar.</p>
+  </header>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (cargando()) {
+    <p role="status">Cargando perfil…</p>
+  } @else if (perfil(); as datos) {
+    <div class="cabecera">
+      <div class="identidad">
+        <div class="avatar" aria-hidden="true">
+          {{ iniciales(datos.persona.nombres, datos.persona.apellidos) }}
+        </div>
+        <p>{{ datos.persona.nombres }} {{ datos.persona.apellidos }}</p>
+      </div>
+      <a class="editar" routerLink="/mis-datos">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>Editar
+      </a>
+    </div>
+    <section>
+      <h2>
+        <span class="icono-seccion material-symbols-outlined" aria-hidden="true">person</span
+        >Información personal
+      </h2>
+      <div class="personal">
+        <dl class="fichas">
+          <div class="campo">
+            <dt>Cédula</dt>
+            <dd>{{ datos.cedula || 'Sin registrar' }}</dd>
+          </div>
+          @if (datos.fechaNacimiento) {
+            <div class="campo">
+              <dt>Fecha de nacimiento</dt>
+              <dd>{{ datos.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+            </div>
+            @let anios = edad(datos.fechaNacimiento);
+            @if (anios !== null) {
+              <div class="campo">
+                <dt>Edad</dt>
+                <dd>{{ anios }} {{ anios === 1 ? 'año' : 'años' }}</dd>
+              </div>
+            }
+          }
+          <div class="campo">
+            <dt>Correo electrónico</dt>
+            <dd>{{ datos.persona.email || 'Sin registrar' }}</dd>
+          </div>
+          <div class="campo">
+            <dt>Teléfono</dt>
+            <dd>{{ datos.persona.telefono || 'Sin registrar' }}</dd>
+          </div>
+          <div class="campo">
+            <dt>Dirección</dt>
+            <dd>{{ datos.persona.direccion || 'Sin registrar' }}</dd>
+          </div>
+        </dl>
+        <aside class="discapacidad-personal" aria-label="Información sobre discapacidad">
+          <dl>
+            <ng-container
+              *ngTemplateOutlet="datosDiscapacidad; context: { $implicit: datos.persona }"
+            ></ng-container>
+          </dl>
+        </aside>
+      </div>
+      <ng-container
+        *ngTemplateOutlet="archivos; context: { $implicit: datos.archivos }"
+      ></ng-container>
+    </section>
+
+    <section>
+      <h2>
+        <span class="icono-seccion material-symbols-outlined" aria-hidden="true"
+          >family_restroom</span
+        >Información familiar
+      </h2>
+      <div class="familia">
+        <dl class="fichas">
+          <div class="campo">
+            <dt>Estado civil</dt>
+            <dd>{{ datos.familia?.estadoCivil || 'Sin registrar' }}</dd>
+          </div>
+          <div class="campo">
+            <dt>Tiene hijos</dt>
+            <dd>
+              {{
+                datos.familia?.tieneHijos === 'NoInformado'
+                  ? 'Sin registrar'
+                  : datos.familia?.tieneHijos || 'Sin registrar'
+              }}
+            </dd>
+          </div>
+        </dl>
+        <div class="familiares">
+          @if (datos.familia?.pareja; as pareja) {
+            <ng-container
+              *ngTemplateOutlet="
+                familiar;
+                context: { $implicit: pareja, relacion: 'Cónyuge o pareja' }
+              "
+            ></ng-container>
+          }
+          @for (hijo of datos.familia?.familiares ?? []; track hijo) {
+            <ng-container
+              *ngTemplateOutlet="familiar; context: { $implicit: hijo, relacion: 'Hijo' }"
+            ></ng-container>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>
+        <span class="icono-seccion material-symbols-outlined" aria-hidden="true">school</span
+        >Formación académica
+      </h2>
+      @for (estudio of datos.formaciones; track estudio) {
+        <article>
+          <h3>{{ estudio.titulo }}</h3>
+          <p>{{ estudio.nivel }} · {{ estudio.institucion }}</p>
+          <dl>
+            @if (estudio.fechaInicio) {
+              <div>
+                <dt>Inicio</dt>
+                <dd>{{ estudio.fechaInicio | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+              </div>
+            }
+            @if (estudio.fechaFin) {
+              <div>
+                <dt>Fin</dt>
+                <dd>{{ estudio.fechaFin | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+              </div>
+            }
+          </dl>
+          <ng-container
+            *ngTemplateOutlet="archivos; context: { $implicit: estudio.archivos }"
+          ></ng-container>
+        </article>
+      } @empty {
+        <p class="muted">Sin estudios registrados.</p>
+      }
+    </section>
+
+    <section>
+      <h2>
+        <span class="icono-seccion material-symbols-outlined" aria-hidden="true"
+          >workspace_premium</span
+        >Certificaciones
+      </h2>
+      @for (certificado of datos.certificaciones; track certificado) {
+        <article>
+          <h3>{{ certificado.nombre }}</h3>
+          <p>{{ certificado.entidadEmisora }}</p>
+          <dl>
+            <div>
+              <dt>Emisión</dt>
+              <dd>{{ certificado.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+            </div>
+            @if (certificado.fechaVencimiento) {
+              <div>
+                <dt>Vencimiento</dt>
+                <dd>{{ certificado.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+              </div>
+            }
+          </dl>
+          <ng-container
+            *ngTemplateOutlet="archivos; context: { $implicit: certificado.archivos }"
+          ></ng-container>
+        </article>
+      } @empty {
+        <p class="muted">Sin certificaciones registradas.</p>
+      }
+    </section>
+
+    <section>
+      <h2>
+        <span class="icono-seccion material-symbols-outlined" aria-hidden="true">psychology</span
+        >Conocimientos
+      </h2>
+      <ul class="conocimientos">
+        @for (conocimiento of datos.conocimientos ?? []; track conocimiento) {
+          <li>
+            <span>{{ conocimiento.area }}</span
+            ><span>{{ conocimiento.porcentaje }}%</span>
+          </li>
+        } @empty {
+          <li class="muted">Sin conocimientos registrados.</li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <button type="button" class="documento" (click)="cargar()">Reintentar</button>
+  }
+</div>
+
+<ng-template #familiar let-persona let-relacion="relacion">
+  <article class="familiar">
+    <header class="familiar-identidad">
+      <div>
+        <p class="muted">{{ relacion }}</p>
+        <h3>{{ persona.nombres }} {{ persona.apellidos }}</h3>
+      </div>
+    </header>
+    <dl>
+      @if (persona.identificacion) {
+        <div class="campo">
+          <dt>Identificación</dt>
+          <dd>{{ persona.identificacion }}</dd>
+        </div>
+      }
+      @if (persona.fechaNacimiento) {
+        <div class="campo">
+          <dt>Fecha de nacimiento</dt>
+          <dd>{{ persona.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+        </div>
+        @let anios = edad(persona.fechaNacimiento);
+        @if (anios !== null) {
+          <div class="campo">
+            <dt>Edad</dt>
+            <dd>{{ anios }} {{ anios === 1 ? 'año' : 'años' }}</dd>
+          </div>
+        }
+      }
+      <ng-container
+        *ngTemplateOutlet="datosDiscapacidad; context: { $implicit: persona }"
+      ></ng-container>
+    </dl>
+    <ng-container
+      *ngTemplateOutlet="archivos; context: { $implicit: persona.archivos }"
+    ></ng-container>
+  </article>
+</ng-template>
+
+<ng-template #datosDiscapacidad let-persona>
+  <div class="campo">
+    <dt>Discapacidad</dt>
+    <dd>
+      {{
+        discapacidad(persona.tieneDiscapacidad)
+          ? 'Sí'
+          : persona.tieneDiscapacidad === 'No'
+            ? 'No'
+            : 'Sin registrar'
+      }}
+    </dd>
+  </div>
+  @if (discapacidad(persona.tieneDiscapacidad)) {
+    @if (persona.tipoDiscapacidad) {
+      <div>
+        <dt>Tipos de discapacidad</dt>
+        <dd>{{ persona.tipoDiscapacidad }}</dd>
+      </div>
+    }
+    @if (persona.porcentajeDiscapacidad != null) {
+      <div>
+        <dt>Porcentaje de discapacidad</dt>
+        <dd class="porcentaje">{{ persona.porcentajeDiscapacidad }}%</dd>
+      </div>
+    }
+  }
+</ng-template>
+
+<ng-template #archivos let-documentos>
+  @if (documentos?.length) {
+    <div class="documentos">
+      @for (archivo of documentos; track archivo.id) {
+        <div class="adjunto">
+          <div class="adjunto-nombre">
+            <span class="muted">Documento adjunto</span
+            ><strong>{{ archivo.nombreOriginal }}</strong>
+          </div>
+          <button
+            class="documento"
+            type="button"
+            (click)="descargar(archivo)"
+            [attr.aria-label]="'Descargar ' + archivo.nombreOriginal"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>Descargar
+          </button>
+        </div>
+      }
+    </div>
+  }
+</ng-template>
