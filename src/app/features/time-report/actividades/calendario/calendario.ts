@@ -245,11 +245,10 @@ export class Calendario implements OnInit, OnDestroy {
     }
 
     // sm - El líder que completa desde Seguimiento puede modificar las actividades del colaborador en el proyecto de esa
-    // fila (donde es su líder), sin importar quién las cargó, y las que él mismo cargó. Las de otros proyectos o sin
-    // proyecto (novedades) quedan solo para ver.
+    // fila (donde hoy es su líder), sin importar quién las cargó (el colaborador, él u otro líder anterior). Las de
+    // otros proyectos o sin proyecto (novedades) quedan solo para ver.
     chipBloqueado(actividad: any): boolean {
         if (this.idLiderEdicion == null) return false;
-        if (actividad.idLiderRegistro === this.idLiderEdicion) return false;
         return this.idProyectoOverride == null || Number(actividad.idproyecto) !== Number(this.idProyectoOverride);
     }
 
