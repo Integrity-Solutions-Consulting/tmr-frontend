@@ -393,6 +393,8 @@
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
+    // sm - Sin esto, cuando el día tiene muchas actividades se aplastan para caber en la celda en vez de hacer scroll.
+    flex-shrink: 0;
 
     &:hover {
         transform: translateY(-1px);
