@@ -51,6 +51,9 @@ interface DiaCalendario {
 export class Calendario implements OnInit, OnDestroy {
     @Output() diaSeleccionado = new EventEmitter<Date>();
     @Output() editarActividadEvent = new EventEmitter<any>();
+    // sm - Se emite al hacer clic en una actividad que no se puede editar (solo lectura o cargada por otra persona)
+    // cuando permitirVerDetalle está activo: el modal de Seguimiento abre su detalle sin permitir cambios.
+    @Output() verActividadEvent = new EventEmitter<any>();
 
     // sm - Nuevos inputs para poder incrustar este mismo calendario dentro del modal de "Ver calendario" de Seguimiento:
     // idEmpleadoOverride carga las actividades de OTRO colaborador (en vez del usuario logueado) y soloLectura bloquea
@@ -67,6 +70,8 @@ export class Calendario implements OnInit, OnDestroy {
     @Input() fechaInicialOverride?: string;
     // sm - Líder que completa actividades desde Seguimiento: solo puede abrir las que él mismo cargó, no las del colaborador.
     @Input() idLiderEdicion?: number | null;
+    // sm - Permite abrir el detalle (solo ver) de las actividades que no se pueden editar.
+    @Input() permitirVerDetalle = false;
 
     private actividadesService = inject(ActividadesService);
     private feriadosService = inject(FeriadosService);
@@ -228,8 +233,11 @@ export class Calendario implements OnInit, OnDestroy {
 
     editarActividad(event: MouseEvent, actividad: any) {
         event.stopPropagation();
-        // sm - En modo solo lectura no se permite abrir el modal de edición de actividad.
-        if (this.soloLectura || this.chipBloqueado(actividad)) return;
+        // sm - En modo solo lectura (o si la cargó otra persona) no se edita: a lo sumo se abre su detalle.
+        if (this.soloLectura || this.chipBloqueado(actividad)) {
+            if (this.permitirVerDetalle) this.verActividadEvent.emit(actividad);
+            return;
+        }
         this.editarActividadEvent.emit(actividad);
     }
 
@@ -266,6 +274,11 @@ export class Calendario implements OnInit, OnDestroy {
         const hoy = new Date();
         this._fechaActual.set(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
         this.mesSeleccionado = hoy.getMonth();
+    }
+
+    agregarEnDia(event: MouseEvent, fecha: Date) {
+        event.stopPropagation();
+        this.seleccionarDia(fecha);
     }
 
     seleccionarDia(fecha: Date) {

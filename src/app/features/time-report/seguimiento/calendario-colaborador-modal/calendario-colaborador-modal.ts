@@ -66,9 +66,15 @@ export class CalendarioColaboradorModal implements OnInit {
         this.abrirActividad({ actividad });
     }
 
+    // sm - Detalle de solo lectura de una actividad que el líder no puede modificar (fuera del modo completar, o
+    // cargada por el propio colaborador).
+    abrirDetalle(actividad: any): void {
+        this.abrirActividad({ actividad, soloVer: true });
+    }
+
     // sm - injector: la ventana usa el ActividadesService de este modal, para validar y recargar el calendario del
     // colaborador y no el del líder.
-    private abrirActividad(datos: { fecha?: Date; actividad?: any }): void {
+    private abrirActividad(datos: { fecha?: Date; actividad?: any; soloVer?: boolean }): void {
         this.dialog.open(AgregarActividad, {
             injector: this.injector,
             width: '560px',

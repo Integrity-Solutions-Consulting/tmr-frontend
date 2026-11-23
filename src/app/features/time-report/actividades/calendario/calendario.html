@@ -69,6 +69,14 @@
                     </span>
                 </div>
                 <div class="day-number-group">
+                    <!-- sm - Botón "+" para agregar: cuando el día tiene muchas actividades, las pastillas ocupan toda la
+                         celda y ya no queda espacio libre donde hacer clic para agregar otra. -->
+                    @if (dia.esMesActual && !soloLectura) {
+                    <button type="button" class="day-add-btn" (click)="agregarEnDia($event, dia.fecha)"
+                        matTooltip="Agregar actividad" aria-label="Agregar actividad">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                    }
                     <span class="day-number">{{ dia.fecha.getDate() }}</span>
                 </div>
             </div>
@@ -77,7 +85,9 @@
             @if (dia.esMesActual && dia.actividades && dia.actividades.length > 0) {
             <div class="day-actividades-block">
                 @for (act of dia.actividades; track act.id) {
-                <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act)" (click)="editarActividad($event, act)">
+                <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act) && !permitirVerDetalle"
+                    [class.ver-detalle]="permitirVerDetalle && (soloLectura || chipBloqueado(act))"
+                    (click)="editarActividad($event, act)">
                     <span class="act-hours">{{ act.cantidadhoras }}h - </span>
                     <span class="act-name">{{ act.proyectoNombre }}</span>
                     @if (act.idLiderRegistro) {
