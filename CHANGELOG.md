@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.4...v3.7.5) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([0b8d66d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b8d66d21a6171a7c978c17abfc3d40a941ad2c5))
+* Mejora UX/UI ([aaba484](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/aaba484b93ab4d99779e7bf49cc1917a2ceafd45))
+
 ## [3.7.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.3...v3.7.4) (2026-11-23)
 
 
