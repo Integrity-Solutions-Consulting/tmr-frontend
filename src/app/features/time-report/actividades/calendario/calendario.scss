@@ -294,6 +294,10 @@
 
         .actividad-chip {
             cursor: default;
+
+            &.ver-detalle {
+                cursor: pointer;
+            }
         }
 
         
@@ -321,12 +325,58 @@
     gap: 4px;
     width: 100%;
     flex: 1;
+    // sm - min-height: 0 deja que el bloque se achique dentro de la celda (alto fijo) y haga scroll; sin esto
+    // crecía con las actividades y la celda (overflow: hidden) cortaba las de abajo sin poder bajar.
+    min-height: 0;
     overflow-y: auto;
-    scrollbar-width: none;
+    overscroll-behavior: contain;
+    // sm - Barra fina visible para que se note que hay más actividades abajo.
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-default) transparent;
 
     &::-webkit-scrollbar {
-        display: none;
+        width: 4px;
     }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--border-default);
+        border-radius: 4px;
+    }
+}
+
+// sm - Botón "+" del día: tenue siempre, resaltado al pasar por la celda.
+.day-add-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.55;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+
+    mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+
+    &:hover,
+    &:focus-visible {
+        opacity: 1;
+        background: var(--bg-soft);
+        color: var(--primary-color);
+    }
+}
+
+.day-cell:hover .day-add-btn {
+    opacity: 1;
+    color: var(--primary-color);
 }
 
 .actividad-chip {
@@ -546,5 +596,9 @@
 
     .day-actividades-block {
         display: none !important;
+    }
+
+    .day-add-btn {
+        display: none;
     }
 }

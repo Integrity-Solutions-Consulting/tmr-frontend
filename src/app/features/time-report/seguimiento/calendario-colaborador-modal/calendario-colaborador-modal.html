@@ -32,6 +32,7 @@
     <div class="calcol-modal__body">
         <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="!completando()"
             [idLiderEdicion]="completando() ? completar()?.idLider : null" [fechaInicialOverride]="data.fechaDesde"
-            (diaSeleccionado)="abrirAgregar($event)" (editarActividadEvent)="abrirEditar($event)"></app-calendario>
+            (diaSeleccionado)="abrirAgregar($event)" (editarActividadEvent)="abrirEditar($event)"
+            [permitirVerDetalle]="true" (verActividadEvent)="abrirDetalle($event)"></app-calendario>
     </div>
 </div>
