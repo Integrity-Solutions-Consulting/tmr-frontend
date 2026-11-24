@@ -185,7 +185,8 @@ export class GestionRrhhComponent implements OnInit {
   // Modal Ajuste de Saldo / Excepción Factura
   readonly modalAjusteAbierto = signal(false);
   readonly colaboradorSaldoActivo = signal<SaldoVacacionesColaboradorApi | null>(null);
-  readonly ajusteTipo = signal<'AJUSTE_DIAS' | 'EXCEPCION_FACTURA'>('AJUSTE_DIAS');
+  readonly ajusteTipo = signal<'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION'>('AJUSTE_DIAS');
+  readonly ajusteFechaAfiliacion = signal('');
   readonly ajusteDias = signal<number>(0);
   readonly ajustePermiteVacaciones = signal<boolean>(true);
   readonly ajusteMotivo = signal('');
@@ -711,6 +712,7 @@ export class GestionRrhhComponent implements OnInit {
     this.ajusteTipo.set(col.regimen === 'FACTURA' ? 'EXCEPCION_FACTURA' : 'AJUSTE_DIAS');
     this.ajusteDias.set(0);
     this.ajustePermiteVacaciones.set(!col.excepcionFacturaActiva);
+    this.ajusteFechaAfiliacion.set(dmyAIso(col.fechaInicioVacaciones ?? col.fechaIngresoOriginal ?? ''));
     this.ajusteMotivo.set('');
     this.modalAjusteAbierto.set(true);
   }
@@ -730,6 +732,12 @@ export class GestionRrhhComponent implements OnInit {
       return;
     }
 
+    const fechaAfiliacion = this.ajusteFechaAfiliacion().trim();
+    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^d{4}-d{2}-d{2}$/.test(fechaAfiliacion)) {
+      this.toast.warning('Fecha requerida', 'Ingresa la fecha real de afiliación al IESS.');
+      return;
+    }
+
     this.guardandoAjuste.set(true);
     this.apiService
       .crearAjusteVacacionesRrhh(col.idEmpleado, {
@@ -738,6 +746,7 @@ export class GestionRrhhComponent implements OnInit {
         permiteVacaciones:
           this.ajusteTipo() === 'EXCEPCION_FACTURA' ? this.ajustePermiteVacaciones() : null,
         motivo,
+        fechaAfiliacionBase: this.ajusteTipo() === 'FECHA_AFILIACION' ? fechaAfiliacion : null,
       })
       .subscribe({
         next: () => {

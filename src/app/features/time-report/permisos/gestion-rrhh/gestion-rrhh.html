@@ -326,7 +326,10 @@
                 </td>
                 <td>
                   <div class="rrhh-cell-stack">
-                    <span>{{ col.fechaInicioVacaciones || 'N/A' }}</span>
+                    <span>Afiliación: {{ col.fechaInicioVacaciones || 'N/A' }}</span>
+                    @if (col.fechaIngresoOriginal && col.fechaIngresoOriginal !== col.fechaInicioVacaciones) {
+                      <span class="cell-muted">Ingreso gral.: {{ col.fechaIngresoOriginal }}</span>
+                    }
                     <span class="cell-muted">
                       {{ col.aniosAntiguedad }} año(s) · Prop. ciclo: {{ col.diasProporcionalesCiclo }} d
                     </span>
@@ -766,6 +769,7 @@
           <select id="ajuste-tipo" [ngModel]="ajusteTipo()" (ngModelChange)="ajusteTipo.set($event)">
             <option value="AJUSTE_DIAS">Ajuste manual de días (+/-)</option>
             <option value="EXCEPCION_FACTURA">Excepción de vacaciones (personal Factura)</option>
+            <option value="FECHA_AFILIACION">Corregir fecha de afiliación IESS (base vacaciones)</option>
           </select>
         </div>
 
@@ -778,6 +782,16 @@
               step="0.5"
               [ngModel]="ajusteDias()"
               (ngModelChange)="ajusteDias.set(+$event)"
+            />
+          </div>
+        } @else if (ajusteTipo() === 'FECHA_AFILIACION') {
+          <div class="form-field">
+            <label for="ajuste-fecha-afil">Fecha real de afiliación IESS *</label>
+            <input
+              id="ajuste-fecha-afil"
+              type="date"
+              [ngModel]="ajusteFechaAfiliacion()"
+              (ngModelChange)="ajusteFechaAfiliacion.set($event)"
             />
           </div>
         } @else {
@@ -815,6 +829,8 @@
                 <strong>
                   @if (aj.tipoAjuste === 'EXCEPCION_FACTURA') {
                     Excepción Factura: {{ aj.permiteVacaciones ? 'Habilitada' : 'Revocada' }}
+                  } @else if (aj.tipoAjuste === 'FECHA_AFILIACION') {
+                    Fecha afiliación: {{ aj.fechaAfiliacionBase }}
                   } @else {
                     Ajuste: {{ aj.diasAjuste >= 0 ? '+' + aj.diasAjuste : aj.diasAjuste }} día(s)
                   }

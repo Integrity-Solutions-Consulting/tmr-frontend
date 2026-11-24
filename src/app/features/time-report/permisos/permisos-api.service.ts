@@ -192,12 +192,14 @@ export interface GuardarPermisoRrhhPayload {
 
 export interface AjusteVacacionesItemApi {
   id: number;
-  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA';
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION';
   diasAjuste: number;
   permiteVacaciones?: boolean | null;
   motivo: string;
   usuarioCreacion: string;
   fechaCreacion: string;
+  /** dd/MM/yyyy, solo para FECHA_AFILIACION */
+  fechaAfiliacionBase?: string | null;
 }
 
 export interface SaldoVacacionesColaboradorApi {
@@ -225,10 +227,12 @@ export interface SaldoVacacionesColaboradorApi {
 }
 
 export interface CrearAjusteVacacionesPayload {
-  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA';
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION';
   diasAjuste: number;
   permiteVacaciones?: boolean | null;
   motivo: string;
+  /** YYYY-MM-DD, requerido para FECHA_AFILIACION */
+  fechaAfiliacionBase?: string | null;
 }
 
 export interface CrearPermisoPayload {
