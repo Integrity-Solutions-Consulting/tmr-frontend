@@ -4,6 +4,8 @@ import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validator
 import { finalize } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActualizacionDatosService, MisDatos } from './actualizacion-datos.service';
+import { normalizarFechaPerfil } from './edad-perfil.util';
+import { FechaPerfilDirective } from './fecha-perfil.directive';
 import { Boton } from '../../shared/components/boton/boton';
 import { AppSelectComponent, AppSelectOption } from '../../shared/components/select/select.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -47,7 +49,7 @@ function porcentajeNumerico(value: string | number | null | undefined): number |
 @Component({
   selector: 'app-mis-datos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Boton, AppSelectComponent, ConfirmDialogComponent, NotificacionComponent],
+  imports: [CommonModule, ReactiveFormsModule, Boton, AppSelectComponent, ConfirmDialogComponent, NotificacionComponent, FechaPerfilDirective],
   templateUrl: './mis-datos.page.html',
   styleUrl: './mis-datos.page.scss'
 })
@@ -304,7 +306,9 @@ export class MisDatosPage {
   }
 
   private cargarRevisiones(recuperarPropuestas = false) {
-    this.api.misRevisiones().subscribe({ next: rows => {
+    this.api.misRevisiones().pipe(finalize(() => {
+      if (recuperarPropuestas) this.loading = false;
+    })).subscribe({ next: rows => {
       const estadoAnterior = this.revisionActual?.estado;
       this.revisiones = rows.filter(x => x.seccion !== 'conocimientos');
       if (estadoAnterior !== this.revisionActual?.estado) this.mostrarAvisoRevision();
@@ -383,6 +387,7 @@ export class MisDatosPage {
     if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres`;
     if (ctrl.errors['min']) return `El valor mínimo es ${ctrl.errors['min'].min}`;
     if (ctrl.errors['max']) return `El valor máximo es ${ctrl.errors['max'].max}`;
+    if (ctrl.errors['fechaPerfil']) return 'Ingresa una fecha válida en formato dd/MM/yyyy.';
     if (ctrl.errors['pattern'] || ctrl.errors['soloLetras']) return 'Ingresa un valor con el formato permitido';
     return 'Revisa este campo';
   }
@@ -450,7 +455,6 @@ export class MisDatosPage {
         this.data = datos;
         for (const seccion of Object.keys(controlPorSeccion) as SeccionPerfil[]) this.cargarSeccion(seccion, datos);
         this.cargarRevisiones(true);
-        this.loading = false;
       },
       error: e => {
         this.data = null;
@@ -472,7 +476,9 @@ export class MisDatosPage {
         this.paisTelefono = telefono?.country ?? 'EC';
         this.form.controls.persona.patchValue({
           ...datos.persona,
-          fechaNacimiento: datos.persona.fechaNacimiento ?? datos.fechaNacimiento ?? '',
+          fechaNacimiento: normalizarFechaPerfil(datos.persona.fechaNacimiento)
+            ?? normalizarFechaPerfil(datos.fechaNacimiento)
+            ?? '',
           telefono: telefono?.nationalNumber ?? telefonoGuardado,
           limpiarDiscapacidad: false
         }, { emitEvent: false });
@@ -486,7 +492,13 @@ export class MisDatosPage {
         this.removedPartnerKey = undefined;
         this.previousChildDisability.clear();
         this.form.controls.familia.patchValue({ ...(datos.familia || {}), limpiarHijos: false, limpiarPareja: false }, { emitEvent: false });
-        if (datos.familia?.pareja) this.pareja.patchValue(datos.familia.pareja, { emitEvent: false });
+        if (datos.familia?.pareja) {
+          const pareja = datos.familia.pareja;
+          this.pareja.patchValue({
+            ...pareja,
+            fechaNacimiento: normalizarFechaPerfil(pareja.fechaNacimiento) ?? '',
+          }, { emitEvent: false });
+        }
         (datos.familia?.familiares ?? []).forEach((value: any) => this.addFamiliar(value));
         this.previousChildren = datos.familia?.tieneHijos || 'NoInformado';
         this.previousCivil = datos.familia?.estadoCivil || '';
@@ -522,8 +534,8 @@ export class MisDatosPage {
         !control.value || this.nivelesEducativos.includes(control.value) ? null : { nivelEducativo: true }]],
       institucion: [v.institucion || '', Validators.required],
       titulo: [v.titulo || '', [Validators.required, Validators.pattern(/^(?=.*\p{L})[\p{L}\p{M} ]+$/u)]],
-      fechaInicio: [v.fechaInicio || ''],
-      fechaFin: [v.fechaFin || ''],
+      fechaInicio: [normalizarFechaPerfil(v.fechaInicio) ?? ''],
+      fechaFin: [normalizarFechaPerfil(v.fechaFin) ?? ''],
       archivos: [v.archivos || []]
     }, {
       validators: row => {
@@ -540,8 +552,8 @@ export class MisDatosPage {
       clave: [v.clave || crypto.randomUUID().replaceAll('-', '')],
       nombre: [v.nombre || '', [Validators.required, Validators.pattern(/^(?=.*[\p{L}0-9])[\p{L}\p{M}0-9 .,:/+#&()'–—-]+$/u)]],
       entidadEmisora: [v.entidadEmisora || '', [Validators.required, Validators.pattern(/^(?=.*\p{L})[\p{L}\p{M}0-9 .&()'–—-]+$/u)]],
-      fechaEmision: [v.fechaEmision || '', Validators.required],
-      fechaVencimiento: [v.fechaVencimiento || ''],
+      fechaEmision: [normalizarFechaPerfil(v.fechaEmision) ?? '', Validators.required],
+      fechaVencimiento: [normalizarFechaPerfil(v.fechaVencimiento) ?? ''],
       archivos: [v.archivos || []]
     }, {
       validators: row => {
@@ -558,7 +570,7 @@ export class MisDatosPage {
     this.agregarFicha(this.familiares, this.fb.group({
       id: [v.id || null], clave: [key], tipoRelacion: ['Hijo', Validators.required],
       nombres: [v.nombres || '', nombrePersonaValidator()], apellidos: [v.apellidos || '', nombrePersonaValidator()],
-      identificacion: [v.identificacion || '', Validators.pattern(/^\d{10}$/)], fechaNacimiento: [v.fechaNacimiento || ''],
+      identificacion: [v.identificacion || '', Validators.pattern(/^\d{10}$/)], fechaNacimiento: [normalizarFechaPerfil(v.fechaNacimiento) ?? ''],
       tieneDiscapacidad: [v.tieneDiscapacidad || 'NoInformado'], tipoDiscapacidad: [v.tipoDiscapacidad || ''],
       porcentajeDiscapacidad: [v.porcentajeDiscapacidad ?? '', validadoresPorcentaje], limpiarDiscapacidad: [false], archivos: [v.archivos || []]
     }, { validators: discapacidadObligatoria }), !valor);

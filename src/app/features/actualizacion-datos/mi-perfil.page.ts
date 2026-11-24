@@ -1,8 +1,11 @@
 ﻿import { DatePipe, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { EMPTY, switchMap, timer } from 'rxjs';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ActualizacionDatosService, MisDatos } from './actualizacion-datos.service';
+import { calcularEdad, normalizarFechaPerfil } from './edad-perfil.util';
 
 @Component({
   standalone: true,
@@ -12,15 +15,33 @@ import { ActualizacionDatosService, MisDatos } from './actualizacion-datos.servi
 })
 export class MiPerfilPage {
   private readonly api = inject(ActualizacionDatosService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly perfil = signal<MisDatos | null>(null);
   readonly cargando = signal(false);
   readonly error = signal('');
+  readonly cambiosEnRevision = signal(false);
+  readonly avisoCorreccion = signal(false);
 
   ngOnInit() { this.cargar(); }
 
   cargar() {
     this.cargando.set(true);
     this.error.set('');
+    this.api.misRevisiones().pipe(
+      switchMap(revisiones => {
+        this.cambiosEnRevision.set(revisiones.some(revision => revision.estado === 'EnRevision'));
+        const requiereCorreccion = revisiones.some(revision => revision.estado === 'RequiereCorreccion');
+        this.avisoCorreccion.set(requiereCorreccion);
+        return requiereCorreccion ? timer(5000) : EMPTY;
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: () => this.avisoCorreccion.set(false),
+      error: () => {
+        this.cambiosEnRevision.set(false);
+        this.avisoCorreccion.set(false);
+      },
+    });
     this.api.getMine().subscribe({
       next: perfil => { this.perfil.set(perfil); this.cargando.set(false); },
       error: e => {
@@ -30,14 +51,8 @@ export class MiPerfilPage {
     });
   }
 
-  edad(fecha?: string | null): number | null {
-    if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return null;
-    const [anio, mes, dia] = fecha.split('-').map(Number);
-    const hoy = new Date();
-    const cumplePendiente = hoy.getMonth() + 1 < mes || (hoy.getMonth() + 1 === mes && hoy.getDate() < dia);
-    const edad = hoy.getFullYear() - anio - Number(cumplePendiente);
-    return edad < 0 ? null : edad;
-  }
+  readonly edad = calcularEdad;
+  readonly fechaIso = normalizarFechaPerfil;
 
   discapacidad(valor: string | null | undefined) {
     return valor === 'Si' || valor === 'Sí';
