@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.10.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.0...v3.10.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **permisos:** restaurar diseño de Gestión Talento Humano y simplificar el historial ([adb9cac](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/adb9cac1becbaa8a642b1a558f2932ebd2208852))
+* **permisos:** restaurar diseño de Gestión Talento Humano y simplificar el historial ([028b953](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/028b9532d40135313e92babed5f20b1adc9f3b93))
+
 ## [3.10.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.9.0...v3.10.0) (2026-11-24)
 
 
