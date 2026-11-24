@@ -172,6 +172,8 @@ export class GestionRrhhComponent implements OnInit {
   readonly formEsAnticipada = signal(false);
   readonly formEsHistorico = signal(true);
   readonly formVerificadoRrhh = signal(true);
+  /** El registro abierto en el popup estaba pendiente de verificación al abrirlo. */
+  readonly registroPendienteVerificar = signal(false);
   readonly formEstadoCodigo = signal('APROBADA');
   readonly formObservacionMigracion = signal('');
 
@@ -215,16 +217,6 @@ export class GestionRrhhComponent implements OnInit {
     } else if (vista === 'SALDOS' && this.saldosColaboradores().length === 0) {
       this.cargarSaldosVacaciones();
     }
-  }
-
-  /** Marcas de control del registro resumidas en una sola línea (sin pastillas de color). */
-  marcasRegistro(item: SolicitudRrhh): string {
-    const marcas: string[] = [];
-    if (item.descuentaVacaciones) marcas.push('Descuenta vacaciones');
-    if (item.esRecuperable) marcas.push('Recuperable');
-    if (item.esAnticipada) marcas.push('Anticipada');
-    if (item.esHistorico) marcas.push('Histórico');
-    return marcas.join(' · ');
   }
 
   cargarBandejaDesdeApi(): void {
@@ -531,7 +523,14 @@ export class GestionRrhhComponent implements OnInit {
     this.formVerificadoRrhh.set(item.verificadoRrhh);
     this.formEstadoCodigo.set(this.mapearEstadoACodigoBd(item.estadoCodigo));
     this.formObservacionMigracion.set(item.observacionMigracion ?? '');
+    this.registroPendienteVerificar.set(!item.verificadoRrhh);
     this.modalEdicionAbierto.set(true);
+  }
+
+  /** Verificación desde el mismo popup de edición: marca el registro como verificado y guarda. */
+  verificarYGuardarRegistro(): void {
+    this.formVerificadoRrhh.set(true);
+    this.guardarRegistroHistorial();
   }
 
   private mapearEstadoACodigoBd(codigoCorto: string): string {
