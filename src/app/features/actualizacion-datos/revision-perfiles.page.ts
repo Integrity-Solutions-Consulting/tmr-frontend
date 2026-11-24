@@ -206,7 +206,8 @@ export class RevisionPerfilesPage {
       case 'familia':
         return [
           { titulo: '', datos: { estadoCivil: datos?.estadoCivil, tieneHijos: datos?.tieneHijos }, archivos: [] },
-          ...filas('Pareja', datos?.pareja ? [datos.pareja] : [], ['Pareja']),
+          ...filas('Pareja', datos?.pareja ? [datos.pareja] : [], ['Pareja'])
+            .map(pareja => ({ ...pareja, titulo: '' })),
           ...filas('Hijo', datos?.familiares ?? [], ['Familiar', 'PartidaNacimiento'])
         ];
       case 'formacion': return filas('Estudio', datos ?? [], ['Formacion']);
