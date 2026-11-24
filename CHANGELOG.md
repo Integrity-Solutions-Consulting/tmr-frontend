@@ -1,5 +1,55 @@
 # Changelog
 
+## [3.7.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.5...v3.7.6) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejoras en logica ([54bb055](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/54bb0556d58e69e2171840f5782b0120bca055da))
+* Mejoras en logica ([96d2897](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/96d28979337cae98975db0481bec7352279f7c36))
+
+## [3.7.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.4...v3.7.5) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([0b8d66d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b8d66d21a6171a7c978c17abfc3d40a941ad2c5))
+* Mejora UX/UI ([aaba484](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/aaba484b93ab4d99779e7bf49cc1917a2ceafd45))
+
+## [3.7.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.3...v3.7.4) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([ac5aa34](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ac5aa3468cb1fe065ca847f27ebf8c98c4e68a97))
+* Mejora UX/UI ([d993b01](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d993b017952a7fe173028bd11824d0822d524aca))
+
+## [3.7.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.2...v3.7.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([780f6b3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/780f6b327504de802ee5a43cafe29861433ccf20))
+* Mejora UX/UI ([161d469](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/161d469d67c5f731f2e9022118c3c3f3498051e4))
+
+## [3.7.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.1...v3.7.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* Añadir filtrado en Actividades ([579e04e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/579e04e4091acf8dab4f517c6f17e621fd7c3c61))
+* Añadir filtrado en Actividades ([bac5bfa](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/bac5bfa598b31929a9265453db8bce506bfc8447))
+* Añadir filtrado en Actividades ([810f09e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/810f09e1130ccf292e1538bb227c02200c453b73))
+* Historial ([0b6ad69](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b6ad69e0a26a7c170ebb12e424b8952a830eeb8))
+
+## [3.7.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.0...v3.7.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* correcciones de testeo TimeReport (fechas, orden, búsqueda y teléfono) ([3092d82](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/3092d82078343a32fa9c22f6da8ef2398d9b798c))
+* **permisos:** ocultar modulo de permisos para todos los roles excepto administrador ([2348559](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/23485599fabb51b0dad40702e7ee7c1e7514798f))
+
 ## [3.7.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.1...v3.7.0) (2026-11-17)
 
 

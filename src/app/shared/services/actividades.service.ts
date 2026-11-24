@@ -1,5 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Actividad } from '../models/actividad.model';
 import { AuthService } from '../../features/auth/servicios/auth.service';
 import { environment } from '../../../environments/environment';
@@ -9,6 +10,12 @@ import { ResumenHorasDto } from '../../core/models/actividades.interface';
 // sm - Si el usuario de la sesión puede completar actividades de un colaborador en un proyecto, por ser su líder ahí.
 // sm - Opción "Sin proyecto" del filtro de proyectos del calendario (actividades/novedades sin proyecto).
 export const FILTRO_SIN_PROYECTO = 'sin-proyecto';
+
+export interface CompletarLider {
+  puedeCompletar: boolean;
+  idLider?: number | null;
+  proyecto?: any;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ActividadesService {
@@ -331,6 +338,10 @@ export class ActividadesService {
       dateA.getMonth() === b.getMonth() &&
       dateA.getFullYear() === b.getFullYear()
     );
+  }
+
+  obtenerCompletarLider(idEmpleado: number, idProyecto: number): Observable<CompletarLider> {
+    return this.http.get<CompletarLider>(`${this.apiUrl}/completar-lider?idEmpleado=${idEmpleado}&idProyecto=${idProyecto}`);
   }
 
   private recargarMesActual(): void {
