@@ -223,3 +223,24 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
 }
+
+.rrhh-paginacion { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem; margin-block: 1rem; }
+
+.permisos-page > .table-card > .rrhh-historial {
+  min-width: 640px;
+  th:nth-child(2) { width: 23%; }
+  .estado-column { width: 9rem; min-width: 0; }
+  th:last-child { width: 10rem; }
+  td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+  .rrhh-linea { display: block; margin-top: .2rem; color: var(--text-secondary); }
+}
+
+.rrhh-acciones {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: .4rem;
+  summary { cursor: pointer; color: var(--primary-color); padding-block: .3rem; }
+  summary:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+  details[open] button { margin: .25rem .25rem 0 0; }
+}

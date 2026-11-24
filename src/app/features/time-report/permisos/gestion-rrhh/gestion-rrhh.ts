@@ -1,6 +1,8 @@
 import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Subscription, switchMap, timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -148,6 +150,21 @@ export class GestionRrhhComponent implements OnInit {
 
   // --- Estado vista HISTORIAL EDITABLE ---
   readonly historialRegistros = signal<SolicitudRrhh[]>([]);
+  private readonly destroyRef = inject(DestroyRef);
+  private peticionHistorial?: Subscription;
+  private peticionSaldos?: Subscription;
+  private peticionBandeja?: Subscription;
+  private selectorCargado = false;
+  private cargandoSelector = false;
+  readonly paginaHistorial = signal(1);
+  readonly totalFiltrado = signal(0);
+  readonly totalPaginas = computed(() => Math.max(1, Math.ceil(this.totalFiltrado() / 25)));
+  readonly aniosDisponiblesHistorial = signal<number[]>([]);
+  readonly totalHistorialRegistros = signal(0);
+  readonly totalPorVerificar = signal(0);
+  readonly totalPorConfirmar = signal(0);
+  readonly totalConfirmadasMes = signal(0);
+  readonly errorHistorial = signal(false);
   readonly cargandoHistorial = signal(false);
   readonly colaboradoresSelector = signal<ColaboradorSelectorPermisoApi[]>([]);
   readonly busquedaHistorial = signal('');
@@ -197,34 +214,34 @@ export class GestionRrhhComponent implements OnInit {
   constructor() {
     conectarEnlaceSolicitud((item) => {
       const sol = this.mapearDesdeApi(item);
-      this.vistaActiva.set('VALIDACION');
+      this.cambiarVista('VALIDACION');
       if (item.estadoClase === 'rrhh') this.abrirModalValidacion(sol);
       else this.abrirVistaFormulario(sol);
     });
   }
 
   ngOnInit(): void {
-    this.cargarBandejaDesdeApi();
-    this.cargarHistorialEditable();
-    this.cargarColaboradoresSelector();
-    this.cargarSaldosVacaciones();
+    this.cambiarVista(this.vistaActiva());
   }
 
   cambiarVista(vista: VistaRrhh): void {
     this.vistaActiva.set(vista);
-    if (vista === 'HISTORIAL_EDITABLE' && this.historialRegistros().length === 0) {
-      this.cargarHistorialEditable();
-    } else if (vista === 'SALDOS' && this.saldosColaboradores().length === 0) {
-      this.cargarSaldosVacaciones();
-    }
+    if (vista === 'HISTORIAL_EDITABLE') this.cargarHistorialEditable();
+    if (vista === 'SALDOS') this.cargarSaldosVacaciones();
+    if (vista === 'VALIDACION') this.cargarBandejaDesdeApi();
   }
 
   cargarBandejaDesdeApi(): void {
-    this.apiService.obtenerBandejaRrhh().subscribe({
+    this.peticionBandeja?.unsubscribe();
+    this.peticionBandeja = this.apiService.obtenerBandejaRrhh().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         if (res?.success && Array.isArray(res.data)) {
           const mapeadas = res.data.map((item) => this.mapearDesdeApi(item));
           this.solicitudes.set(mapeadas);
+          this.totalPorConfirmar.set(mapeadas.filter(s => s.estado === 'CONFIRMADO_LIDER').length);
+          this.totalConfirmadasMes.set(mapeadas.filter(s => s.estado === 'APROBADO_RRHH').length);
+          this.totalHistorialRegistros.set(mapeadas.length);
+          this.totalPorVerificar.set(mapeadas.filter(s => !s.verificadoRrhh).length);
           if (
             this.tabActiva() === 'POR_CONFIRMAR' &&
             !mapeadas.some((s) => s.estado === 'CONFIRMADO_LIDER') &&
@@ -243,38 +260,66 @@ export class GestionRrhhComponent implements OnInit {
     });
   }
 
-  cargarHistorialEditable(): void {
+  cargarHistorialEditable(pagina = this.paginaHistorial(), demora = 0): void {
+    this.peticionHistorial?.unsubscribe();
+    this.paginaHistorial.set(pagina);
+    this.errorHistorial.set(false);
     this.cargandoHistorial.set(true);
-    this.apiService.obtenerHistorialEditableRrhh().subscribe({
-      next: (res) => {
+    const params: Record<string, string | number | boolean> = { pagina };
+    if (this.busquedaHistorial().trim()) params['buscar'] = this.busquedaHistorial().trim();
+    if (this.filtroEmpleadoHistorial() !== 'TODOS') params['idEmpleado'] = this.filtroEmpleadoHistorial();
+    if (this.filtroTipoHistorial() !== 'TODOS') params['tipo'] = this.filtroTipoHistorial();
+    if (this.filtroAnioHistorial() !== 'TODOS') params['anio'] = this.filtroAnioHistorial();
+    if (this.soloPendientesVerificar()) params['soloPendientesVerificar'] = true;
+    this.peticionHistorial = timer(demora).pipe(
+      switchMap(() => this.apiService.obtenerPaginaHistorialRrhh(params)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: ({ data }) => {
         this.cargandoHistorial.set(false);
-        if (res?.success && Array.isArray(res.data)) {
-          this.historialRegistros.set(res.data.map((item) => this.mapearDesdeApi(item)));
+        if (!data) { this.errorHistorial.set(true); return; }
+        this.totalFiltrado.set(data.total);
+        this.totalHistorialRegistros.set(data.resumen?.registros ?? 0);
+        this.totalPorVerificar.set(data.resumen?.porVerificar ?? 0);
+        this.totalPorConfirmar.set(data.resumen?.porConfirmar ?? 0);
+        this.totalConfirmadasMes.set(data.resumen?.confirmados ?? 0);
+        this.aniosDisponiblesHistorial.set(data.anios);
+        if (pagina > this.totalPaginas()) {
+          this.cargarHistorialEditable(this.totalPaginas());
+          return;
         }
+        this.historialRegistros.set(data.items.map(item => this.mapearDesdeApi(item)));
       },
       error: (err) => {
         this.cargandoHistorial.set(false);
-        this.toast.error(
-          'No se pudo cargar el historial de permisos',
-          obtenerMensajeAmigablePermisos(err, 'Inténtalo nuevamente en unos segundos.'),
-        );
+        this.errorHistorial.set(true);
+        this.toast.error('No se pudo cargar el historial', obtenerMensajeAmigablePermisos(err));
       },
     });
   }
 
   cargarColaboradoresSelector(): void {
-    this.apiService.obtenerColaboradoresRrhh().subscribe({
-      next: (res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          this.colaboradoresSelector.set(res.data);
+    if (this.selectorCargado || this.cargandoSelector) return;
+    this.cargandoSelector = true;
+    this.apiService.obtenerColaboradoresRrhh().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ data }) => {
+        this.cargandoSelector = false;
+        if (data) {
+          this.colaboradoresSelector.set(data);
+          this.selectorCargado = true;
         }
+      },
+      error: err => {
+        this.cargandoSelector = false;
+        this.toast.error('No se pudo cargar el selector de colaboradores', obtenerMensajeAmigablePermisos(err));
       },
     });
   }
 
   cargarSaldosVacaciones(): void {
     this.cargandoSaldos.set(true);
-    this.apiService.obtenerSaldosVacacionesRrhh().subscribe({
+    this.peticionSaldos?.unsubscribe();
+    this.peticionSaldos = this.apiService.obtenerSaldosVacacionesRrhh().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.cargandoSaldos.set(false);
         if (res?.success && Array.isArray(res.data)) {
@@ -356,62 +401,9 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   // --- KPIs ---
-  readonly totalPorConfirmar = computed(
-    () => this.solicitudes().filter((s) => s.estado === 'CONFIRMADO_LIDER').length,
-  );
   readonly totalPendientesExternos = computed(
     () => this.solicitudes().filter((s) => s.estado === 'PENDIENTE_LIDER_EXT').length,
   );
-  readonly totalConfirmadasMes = computed(
-    () => this.solicitudes().filter((s) => s.estado === 'APROBADO_RRHH').length,
-  );
-  readonly totalHistorialRegistros = computed(() => this.historialRegistros().length);
-  readonly totalPorVerificar = computed(
-    () => this.historialRegistros().filter((s) => !s.verificadoRrhh).length,
-  );
-
-  // --- Filtros Historial Editable ---
-  readonly aniosDisponiblesHistorial = computed(() => {
-    const set = new Set<string>();
-    for (const r of this.historialRegistros()) {
-      const anio = r.fechaInicio?.slice(6, 10);
-      if (anio && /^\d{4}$/.test(anio)) set.add(anio);
-    }
-    return Array.from(set).sort((a, b) => Number(b) - Number(a));
-  });
-
-  readonly historialFiltrado = computed(() => {
-    const q = this.busquedaHistorial();
-    const anio = this.filtroAnioHistorial();
-    const tipo = this.filtroTipoHistorial();
-    const emp = this.filtroEmpleadoHistorial();
-    const soloPend = this.soloPendientesVerificar();
-
-    return this.historialRegistros().filter((s) => {
-      if (soloPend && s.verificadoRrhh) return false;
-      if (anio !== 'TODOS' && !s.fechaInicio.endsWith(anio) && !s.fechaFin.endsWith(anio)) return false;
-      if (tipo !== 'TODOS' && s.tipoOficial !== tipo) return false;
-      if (emp !== 'TODOS' && String(s.idEmpleado) !== emp) return false;
-      if (
-        !coincideBusquedaInteligente(q, [
-          s.folio,
-          s.colaborador,
-          s.cedula,
-          s.codigoColaborador,
-          s.tipo,
-          s.fechaInicio,
-          s.fechaFin,
-          s.motivo,
-          s.observacionMigracion,
-          s.estadoTexto,
-        ])
-      ) {
-        return false;
-      }
-      return true;
-    });
-  });
-
   // --- Filtros Saldos ---
   readonly saldosFiltrados = computed(() => {
     const q = this.busquedaSaldos();
@@ -486,11 +478,11 @@ export class GestionRrhhComponent implements OnInit {
 
   // --- Acciones CRUD del Historial Editable ---
   abrirNuevoRegistroHistorial(idEmpleadoPreseleccionado?: number): void {
+    this.registroPendienteVerificar.set(false);
+    this.cargarColaboradoresSelector();
     const hoyIso = new Date().toISOString().slice(0, 10);
     this.editandoId.set(null);
-    this.formIdEmpleado.set(
-      idEmpleadoPreseleccionado ?? this.colaboradoresSelector()[0]?.idEmpleado ?? 0,
-    );
+    this.formIdEmpleado.set(idEmpleadoPreseleccionado ?? 0);
     this.formTipoOficial.set('VACACIONES');
     this.formFechaInicio.set(hoyIso);
     this.formFechaFin.set(hoyIso);
@@ -508,6 +500,7 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   abrirEditarRegistro(item: SolicitudRrhh): void {
+    this.cargarColaboradoresSelector();
     this.editandoId.set(item.id);
     this.formIdEmpleado.set(item.idEmpleado);
     this.formTipoOficial.set(item.tipoOficial);
@@ -625,14 +618,7 @@ export class GestionRrhhComponent implements OnInit {
         this.guardandoEdicion.set(false);
         this.modalEdicionAbierto.set(false);
         if (res?.success && res.data) {
-          const mapeado = this.mapearDesdeApi(res.data);
-          if (idEdit) {
-            this.historialRegistros.update((list) => list.map((x) => (x.id === idEdit ? mapeado : x)));
-            this.solicitudes.update((list) => list.map((x) => (x.id === idEdit ? mapeado : x)));
-          } else {
-            this.historialRegistros.update((list) => [mapeado, ...list]);
-          }
-          this.cargarSaldosVacaciones();
+          this.cambiarVista(this.vistaActiva());
         }
         this.toast.exito(
           idEdit ? 'Registro actualizado' : 'Registro creado',
@@ -651,42 +637,6 @@ export class GestionRrhhComponent implements OnInit {
     });
   }
 
-  marcarVerificadoRapido(item: SolicitudRrhh): void {
-    const payload: GuardarPermisoRrhhPayload = {
-      idEmpleado: item.idEmpleado,
-      tipoOficial: item.tipoOficial,
-      fechaInicio: dmyAIso(item.fechaInicio),
-      fechaFin: dmyAIso(item.fechaFin),
-      fechaRegreso: dmyAIso(item.fechaRegreso),
-      totalDias: item.totalDias,
-      horario: item.horario,
-      detalleHorario: item.detalleHorario ?? null,
-      motivo: item.motivo,
-      descuentaVacaciones: item.descuentaVacaciones,
-      esRecuperable: item.esRecuperable,
-      esAnticipada: item.esAnticipada,
-      esHistorico: item.esHistorico,
-      verificadoRrhh: true,
-      observacionMigracion: item.observacionMigracion ?? null,
-      estadoCodigo: this.mapearEstadoACodigoBd(item.estadoCodigo),
-      impactoTimeReport: item.impactoTimeReport,
-    };
-
-    this.apiService.actualizarRegistroRrhh(item.id, payload).subscribe({
-      next: (res) => {
-        if (res?.success && res.data) {
-          const mapeado = this.mapearDesdeApi(res.data);
-          this.historialRegistros.update((list) => list.map((x) => (x.id === item.id ? mapeado : x)));
-          this.cargarSaldosVacaciones();
-        }
-        this.toast.exito('Registro verificado', `${item.folio} marcado como verificado por Talento Humano.`);
-      },
-      error: (err) => {
-        this.toast.error('Error al verificar', obtenerMensajeAmigablePermisos(err));
-      },
-    });
-  }
-
   anularRegistroHistorial(item: SolicitudRrhh): void {
     const ok = window.confirm(
       `¿Seguro que deseas anular el registro ${item.folio} (${item.colaborador}, ${item.fechaInicio} - ${item.fechaFin})? Esto recalculará su saldo de vacaciones.`,
@@ -695,9 +645,7 @@ export class GestionRrhhComponent implements OnInit {
 
     this.apiService.anularRegistroRrhh(item.id).subscribe({
       next: () => {
-        this.historialRegistros.update((list) => list.filter((x) => x.id !== item.id));
-        this.solicitudes.update((list) => list.filter((x) => x.id !== item.id));
-        this.cargarSaldosVacaciones();
+        this.cambiarVista(this.vistaActiva());
         this.toast.exito('Registro anulado', `${item.folio} fue anulado y los saldos fueron recalculados.`);
       },
       error: (err) => {
@@ -713,6 +661,8 @@ export class GestionRrhhComponent implements OnInit {
     this.soloPendientesVerificar.set(false);
     this.busquedaHistorial.set('');
     this.vistaActiva.set('HISTORIAL_EDITABLE');
+    this.cargarColaboradoresSelector();
+    this.cargarHistorialEditable(1);
   }
 
   // --- Acciones Modal Ajuste / Excepción Factura ---
@@ -721,7 +671,8 @@ export class GestionRrhhComponent implements OnInit {
     this.ajusteTipo.set(col.regimen === 'FACTURA' ? 'EXCEPCION_FACTURA' : 'AJUSTE_DIAS');
     this.ajusteDias.set(0);
     this.ajustePermiteVacaciones.set(!col.excepcionFacturaActiva);
-    this.ajusteFechaAfiliacion.set(dmyAIso(col.fechaInicioVacaciones ?? col.fechaIngresoOriginal ?? ''));
+    const fechaRegistrada = col.ajustes.find(a => a.tipoAjuste === 'FECHA_AFILIACION' && a.fechaAfiliacionBase);
+    this.ajusteFechaAfiliacion.set(dmyAIso(fechaRegistrada?.fechaAfiliacionBase ?? ''));
     this.ajusteMotivo.set('');
     this.modalAjusteAbierto.set(true);
   }
@@ -742,7 +693,7 @@ export class GestionRrhhComponent implements OnInit {
     }
 
     const fechaAfiliacion = this.ajusteFechaAfiliacion().trim();
-    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^d{4}-d{2}-d{2}$/.test(fechaAfiliacion)) {
+    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^\d{4}-\d{2}-\d{2}$/.test(fechaAfiliacion)) {
       this.toast.warning('Fecha requerida', 'Ingresa la fecha real de afiliación al IESS.');
       return;
     }
@@ -929,8 +880,7 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
-            this.cargarHistorialEditable();
-            this.cargarSaldosVacaciones();
+            this.cambiarVista(this.vistaActiva());
           }
           this.modalValidacionAbierto.set(false);
           if (res?.data?.avisoNotificacion) {
@@ -983,8 +933,7 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
-            this.cargarHistorialEditable();
-            this.cargarSaldosVacaciones();
+            this.cambiarVista(this.vistaActiva());
           }
           this.modalValidacionAbierto.set(false);
           if (res?.data?.avisoNotificacion) {

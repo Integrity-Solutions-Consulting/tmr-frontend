@@ -190,6 +190,15 @@ export interface GuardarPermisoRrhhPayload {
   impactoTimeReport?: 'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO' | null;
 }
 
+export interface PaginaHistorialRrhh {
+  items: PermisoItemApi[];
+  pagina: number;
+  tamano: number;
+  total: number;
+  anios: number[];
+  resumen: { registros: number; porVerificar: number; porConfirmar: number; confirmados: number } | null;
+}
+
 export interface AjusteVacacionesItemApi {
   id: number;
   tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION';
@@ -214,6 +223,7 @@ export interface SaldoVacacionesColaboradorApi {
   tieneDerechoVacaciones: boolean;
   excepcionFacturaActiva: boolean;
   fechaIngresoOriginal?: string | null;
+  origenFechaInicioVacaciones?: string | null;
   fechaInicioVacaciones?: string | null;
   aniosAntiguedad: number;
   diasGanadosAcumulados: number;
@@ -445,20 +455,10 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<ColaboradorSelectorPermisoApi[]>(raw)));
   }
 
-  obtenerHistorialEditableRrhh(filtros?: {
-    idEmpleado?: number | null;
-    anio?: number | null;
-    soloPendientesVerificar?: boolean;
-    soloHistoricos?: boolean;
-  }): Observable<ApiEnvelope<PermisoItemApi[]>> {
-    const params: Record<string, string> = {};
-    if (filtros?.idEmpleado) params['idEmpleado'] = String(filtros.idEmpleado);
-    if (filtros?.anio) params['anio'] = String(filtros.anio);
-    if (filtros?.soloPendientesVerificar) params['soloPendientesVerificar'] = 'true';
-    if (filtros?.soloHistoricos) params['soloHistoricos'] = 'true';
-    return this.http
-      .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
-      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+  obtenerPaginaHistorialRrhh(params: Record<string, string | number | boolean>): Observable<ApiEnvelope<PaginaHistorialRrhh>> {
+    return this.http.get<unknown>(`${this.baseUrl}/rrhh/historial/pagina`, { params }).pipe(
+      map(raw => this.normalizarEnvelope<PaginaHistorialRrhh>(raw)),
+    );
   }
 
   crearRegistroRrhh(payload: GuardarPermisoRrhhPayload): Observable<ApiEnvelope<PermisoItemApi>> {

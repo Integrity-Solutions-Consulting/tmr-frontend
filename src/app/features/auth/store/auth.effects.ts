@@ -60,10 +60,9 @@ export class AuthEffects {
                 this.tokenMonitor.startMonitoring();
               }),
               switchMap(() => {
-                // El endpoint de login NO devuelve debeCambiarPassword.
-                // Lo obtenemos de /configuracion/usuarios/{id} que sí lo incluye.
-                const userId = (response.user as any)?.id as number | undefined;
-                if (!userId) {
+                // Un backend anterior requiere la consulta del perfil durante el despliegue.
+                const userId = Number(response.user?.id);
+                if (typeof response.user?.debeCambiarPassword === 'boolean' || !userId) {
                   return of(AuthActions.loginSuccess({ response }));
                 }
                 return this.authService.getUserProfileById(userId).pipe(
