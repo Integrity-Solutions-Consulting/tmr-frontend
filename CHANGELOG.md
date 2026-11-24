@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.9.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.8.0...v3.9.0) (2026-11-24)
+
+
+### Features
+
+* **permisos:** corregir fecha de afiliacion IESS desde saldos de vac… ([11fb71b](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/11fb71b0a8d9a8c173d13b9324ee34cecbf2e324))
+* **permisos:** corregir fecha de afiliacion IESS desde saldos de vacaciones RRHH ([d429fe7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d429fe7b9706f57fb593c03561f3b610240db578))
+
 ## [3.8.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.6...v3.8.0) (2026-11-24)
 
 
