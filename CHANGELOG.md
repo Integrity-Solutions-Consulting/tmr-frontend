@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.8.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.6...v3.8.0) (2026-11-24)
+
+
+### Features
+
+* **permisos:** ventana de historial editable, saldos de vacaciones RRHH y días calendario ([739645e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/739645e4715f1edae616c561f447f594ad6fadbd))
+* **permisos:** ventana de historial editable, tablero de saldos RRHH y vacaciones en dias calendario ([788a7a6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/788a7a601dc107e91d77dfc7573983631218fac4))
+
 ## [3.7.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.5...v3.7.6) (2026-11-23)
 
 
