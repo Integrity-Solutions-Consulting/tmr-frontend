@@ -1,3 +1,4 @@
+import { UserModulesService } from '../../../features/auth/servicios/user-modules.service';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -83,6 +84,12 @@ export class Sidebar {
 
   get isAdministrativo(): boolean {
     return this.tokenService.isAdministrativo();
+  }
+
+  private readonly permissions = inject(UserModulesService);
+
+  canReviewProfiles(): boolean {
+    return this.permissions.hasPermission('COLABORADORES_DATOS_REVISAR');
   }
 
   hasModule(moduleName: string): boolean {
