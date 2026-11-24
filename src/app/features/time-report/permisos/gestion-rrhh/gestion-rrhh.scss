@@ -1,170 +1,389 @@
 @use '../permisos-shared';
+@use '../../../../../styles/ui-patterns' as ui;
 
-.rrhh-mode-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+// Texto de "atención" legible en ambos temas: el tono de advertencia mezclado con el color de texto
+// principal (oscurece en claro, aclara en oscuro) para superar 4.5:1 en tamaños pequeños.
+$rrhh-attention: color-mix(in srgb, var(--status-warning-text) 72%, var(--text-main));
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.rrhh-mode-tab {
+/* ---------------------------------------------------------------------------
+   Pestañas: patrón subrayado de la app, etiquetas cortas y contadores discretos
+   --------------------------------------------------------------------------- */
+.rrhh-tabs {
+  @include ui.tab-list;
+  margin: 4px 0 0;
+  gap: 2px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.rrhh-tab {
+  @include ui.tab-button;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  border: 1px solid #d5dde8;
-  background: #ffffff;
-  color: #334155;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  gap: 8px;
+  padding: 11px 14px;
+  margin-bottom: -1px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out;
 
-  .material-symbols-outlined {
-    font-size: 1.15rem;
+  &.active {
+    font-weight: 600;
   }
 
-  &:hover {
-    border-color: #94a3b8;
-    background: #f8fafc;
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
   }
 
-  &--active {
-    background: #0f3d75;
-    border-color: #0f3d75;
-    color: #ffffff;
+  &__count {
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
 
-    &:hover {
-      background: #0c3261;
+    &--attention {
+      background: var(--status-warning-bg-soft);
+      color: $rrhh-attention;
     }
   }
 }
 
-.rrhh-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-
-  &--warn {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  &--info {
-    background: #dbeafe;
-    color: #1e40af;
+/* ---------------------------------------------------------------------------
+   Filtros
+   --------------------------------------------------------------------------- */
+@media (min-width: 641px) {
+  .filters-card .rrhh-filter-narrow {
+    flex: 0.6;
+    min-width: 100px;
   }
 }
 
 .rrhh-check-filter {
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: 0.45rem;
+  align-self: flex-end;
+  height: 36px;
 }
 
 .rrhh-inline-check {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.85rem;
-  color: #334155;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-main);
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--primary-color);
+  }
 }
 
-.rrhh-cell-stack {
+/* ---------------------------------------------------------------------------
+   Tablas: jerarquía con peso y tono, no con pastillas de color
+   --------------------------------------------------------------------------- */
+.permisos-page > .table-card:has(> .rrhh-table) {
+  container: rrhh-tabla / inline-size;
+}
+
+.permisos-page > .table-card > .permisos-table.rrhh-table {
+  min-width: 860px;
+
+  .rrhh-col-permiso { width: 27%; }
+  .rrhh-col-fechas { width: 170px; }
+  .rrhh-col-num { width: 92px; }
+  .rrhh-col-estado { width: 160px; }
+  .rrhh-col-regimen { width: 120px; }
+  .rrhh-col-base { width: 190px; }
+  .rrhh-col-acciones { width: 112px; }
+  .rrhh-col-acciones-lg { width: 196px; }
+
+  th {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  td {
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rrhh-cell-actions {
+    vertical-align: middle;
+  }
+
+  .status-badge {
+    min-width: 0;
+  }
+}
+
+.rrhh-cell-primary,
+.rrhh-cell-text {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 2px;
+  min-width: 0;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-.rrhh-migration-note {
-  display: inline-block;
-  margin-top: 0.2rem;
-  padding: 0.18rem 0.45rem;
-  border-radius: 6px;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #92400e;
-  font-size: 0.76rem;
+.rrhh-cell-text {
+  align-items: flex-start;
 }
 
-.rrhh-row-unverified {
-  background: #fffdf5;
-}
-
-.rrhh-tags-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.rrhh-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.12rem 0.45rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
+.rrhh-strong {
   font-weight: 600;
+  color: var(--text-main);
+}
 
-  &--blue {
-    background: #e0f2fe;
-    color: #0369a1;
-  }
+.rrhh-sub,
+.rrhh-muted {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
 
-  &--ok {
-    background: #dcfce7;
-    color: #166534;
-  }
+.rrhh-muted {
+  font-size: inherit;
+}
 
-  &--warn {
-    background: #fef3c7;
-    color: #92400e;
-  }
+.rrhh-note {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
 
-  &--purple {
-    background: #f3e8ff;
-    color: #6b21a8;
-  }
+.rrhh-attention {
+  color: $rrhh-attention;
+  font-size: 12px;
+  font-weight: 600;
+}
 
-  &--neutral {
-    background: #f1f5f9;
-    color: #475569;
+.permisos-page > .table-card > .permisos-table tbody tr.rrhh-row-unverified {
+  background: color-mix(in srgb, var(--status-warning-bg-solid) 5%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--status-warning-bg-solid) 9%, transparent);
   }
 }
 
-.rrhh-actions-inline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.rrhh-saldo-value {
-  font-size: 0.95rem;
-
-  &--pos {
-    color: #15803d;
-  }
+.rrhh-saldo {
+  font-weight: 600;
+  color: var(--text-main);
 
   &--neg {
-    color: #dc2626;
+    color: var(--status-danger-text);
   }
 }
 
+/* Acciones de fila: una acción textual como máximo, el resto como iconos */
+.rrhh-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.rrhh-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s ease-out, background-color 0.15s ease-out;
+
+  .material-symbols-outlined {
+    font-size: 19px;
+  }
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+  }
+
+  &--danger:hover {
+    background: var(--status-danger-bg-soft);
+    color: var(--status-danger-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+  }
+}
+
+.rrhh-link-btn {
+  padding: 6px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-color);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+  }
+}
+
+html[data-theme='dark'] {
+  .rrhh-link-btn {
+    color: var(--status-info-text);
+  }
+
+  .rrhh-tab.active {
+    color: var(--text-main);
+    border-bottom-color: var(--status-info-text);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Responsive: cuando la tabla no cabe, cada fila pasa a ser una ficha con
+   etiquetas (se mide el contenedor, no la ventana, para respetar el sidebar)
+   --------------------------------------------------------------------------- */
+@container rrhh-tabla (max-width: 880px) {
+  .permisos-page > .table-card > .permisos-table.rrhh-table {
+    min-width: 0;
+    table-layout: auto;
+
+    colgroup,
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 16px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-table);
+    }
+
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+
+    td {
+      display: block;
+      padding: 0;
+      border: 0;
+      white-space: normal;
+      overflow: visible;
+      min-width: 0;
+    }
+
+    td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 2px;
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+
+    .num {
+      text-align: left;
+    }
+
+    .rrhh-cell-primary,
+    td[data-label='Permiso'],
+    .rrhh-cell-actions,
+    .rrhh-row-message td {
+      grid-column: 1 / -1;
+    }
+
+    .rrhh-cell-primary > span,
+    .rrhh-cell-text > span {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .rrhh-cell-primary .rrhh-strong {
+      font-size: 14px;
+    }
+
+    .rrhh-actions {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .rrhh-icon-btn {
+      width: 40px;
+      height: 40px;
+    }
+
+    .btn-tmr--sm {
+      min-height: 40px;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Modales de edición y ajuste
+   --------------------------------------------------------------------------- */
 .rrhh-edit-form {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 16px;
 }
 
 .rrhh-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 14px;
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
@@ -174,11 +393,11 @@
 .rrhh-checks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 0.6rem;
-  padding: 0.75rem;
+  gap: 10px 16px;
+  padding: 12px 14px;
   border-radius: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
 }
 
 .rrhh-saldo-summary {
@@ -186,30 +405,43 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-main);
+
+  .cell-muted {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+  }
 
   &__nums {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.88rem;
+    gap: 6px 18px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
   }
 }
 
 .rrhh-ajustes-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
+  gap: 8px;
 
   h4 {
-    margin: 0;
-    font-size: 0.86rem;
-    color: #334155;
+    margin: 4px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
   }
 }
 
@@ -217,9 +449,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  color: var(--text-main);
+
+  .cell-muted {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
