@@ -671,7 +671,8 @@ export class GestionRrhhComponent implements OnInit {
     this.ajusteTipo.set(col.regimen === 'FACTURA' ? 'EXCEPCION_FACTURA' : 'AJUSTE_DIAS');
     this.ajusteDias.set(0);
     this.ajustePermiteVacaciones.set(!col.excepcionFacturaActiva);
-    this.ajusteFechaAfiliacion.set(dmyAIso(col.fechaInicioVacaciones ?? col.fechaIngresoOriginal ?? ''));
+    const fechaRegistrada = col.ajustes.find(a => a.tipoAjuste === 'FECHA_AFILIACION' && a.fechaAfiliacionBase);
+    this.ajusteFechaAfiliacion.set(dmyAIso(fechaRegistrada?.fechaAfiliacionBase ?? ''));
     this.ajusteMotivo.set('');
     this.modalAjusteAbierto.set(true);
   }

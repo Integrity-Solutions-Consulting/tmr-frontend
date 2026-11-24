@@ -223,6 +223,7 @@ export interface SaldoVacacionesColaboradorApi {
   tieneDerechoVacaciones: boolean;
   excepcionFacturaActiva: boolean;
   fechaIngresoOriginal?: string | null;
+  origenFechaInicioVacaciones?: string | null;
   fechaInicioVacaciones?: string | null;
   aniosAntiguedad: number;
   diasGanadosAcumulados: number;
