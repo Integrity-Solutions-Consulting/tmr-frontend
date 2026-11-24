@@ -217,6 +217,16 @@ export class GestionRrhhComponent implements OnInit {
     }
   }
 
+  /** Marcas de control del registro resumidas en una sola línea (sin pastillas de color). */
+  marcasRegistro(item: SolicitudRrhh): string {
+    const marcas: string[] = [];
+    if (item.descuentaVacaciones) marcas.push('Descuenta vacaciones');
+    if (item.esRecuperable) marcas.push('Recuperable');
+    if (item.esAnticipada) marcas.push('Anticipada');
+    if (item.esHistorico) marcas.push('Histórico');
+    return marcas.join(' · ');
+  }
+
   cargarBandejaDesdeApi(): void {
     this.apiService.obtenerBandejaRrhh().subscribe({
       next: (res) => {

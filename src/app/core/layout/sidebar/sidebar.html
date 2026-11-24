@@ -113,6 +113,11 @@
   </a>
 
   <!-- ══ Clientes ══ -->
+  <a routerLink="/revision-perfiles" routerLinkActive="active" class="sidebar__link" title="Revisi&oacute;n" *ngIf="canReviewProfiles()">
+    <span class="sidebar__svg" aria-hidden="true" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Reportes/reportes.svg')"></span>
+    <span>Revisi&oacute;n</span>
+  </a>
+
   <a routerLink="/clientes" routerLinkActive="active" class="sidebar__link" title="Clientes" *ngIf="hasModule('Clientes')">
     <span class="sidebar__svg" style="--icon: url('assets/iconos/Iconos-Sidebar&Cards/Clientes/clientes.svg')"></span>
     <span>Clientes</span>

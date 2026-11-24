@@ -38,20 +38,18 @@
 
 .navbar__profile-btn {
   @include ui.flex-center;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border: 0;
-  background: transparent;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  font: 700 13px / 1 Inter, sans-serif;
   cursor: pointer;
-}
 
-.navbar__profile-btn-icon {
-  font-size: 28px;
-  color: var(--primary-color);
-  transition: opacity 0.15s ease;
-}
-
-.navbar__profile-btn:hover .navbar__profile-btn-icon {
-  opacity: 0.8;
+  &:hover { background: var(--primary-hover); }
+  &:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
 }
 
 /* Desktop hamburger (oculto) */
