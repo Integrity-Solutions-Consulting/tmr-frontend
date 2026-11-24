@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.9.0...v3.10.0) (2026-11-24)
+
+
+### Features
+
+* enhance collaborator detail page with loading state and badge component ([0a6ca91](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0a6ca91cf1008ae9306ea7c000dc938bd88a55ab))
+
 ## [3.9.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.8.0...v3.9.0) (2026-11-24)
 
 
