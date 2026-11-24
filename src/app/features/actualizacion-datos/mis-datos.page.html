@@ -22,7 +22,9 @@
     <span><strong>Correcci&oacute;n solicitada:</strong> {{ revisionActual.observacion }}</span>
     <button type="button" aria-label="Cerrar observaci&oacute;n" (click)="ocultarAviso()"><span aria-hidden="true">&times;</span></button>
   </div>
-  <p *ngIf="loading" class="muted">Cargando información…</p>
+  @if (loading) {
+    <div class="tabla-cargando" role="status" aria-label="Cargando datos del perfil"><span class="tabla-cargando__spinner" aria-hidden="true"></span></div>
+  }
   <div *ngIf="!loading && loadFailed" class="error-state"><p>{{ error }}</p><app-boton label="Reintentar" icon="refresh" type="secondary" (clicked)="load()"></app-boton></div>
   <ng-container *ngIf="!loading && !loadFailed">
     <nav class="tabs" aria-label="Secciones de mis datos"><button [class.active]="tab==='personal'" (click)="setTab('personal')">Información personal</button><button [class.active]="tab==='familia'" (click)="setTab('familia')">Información familiar</button><button [class.active]="tab==='formacion'" (click)="setTab('formacion')">Formación académica</button><button [class.active]="tab==='certificaciones'" (click)="setTab('certificaciones')">Certificaciones</button><button [class.active]="tab==='conocimientos'" (click)="setTab('conocimientos')">Conocimientos</button></nav>

@@ -1,11 +1,12 @@
-﻿import { CommonModule } from '@angular/common';
+﻿import { DatePipe, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ActualizacionDatosService, MisDatos } from './actualizacion-datos.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [DatePipe, NgTemplateOutlet, TitleCasePipe, RouterLink, HeaderComponent],
   templateUrl: './mi-perfil.page.html',
   styleUrl: './mi-perfil.page.scss'
 })
@@ -27,10 +28,6 @@ export class MiPerfilPage {
         this.cargando.set(false);
       }
     });
-  }
-
-  iniciales(nombres: string, apellidos: string): string {
-    return [nombres, apellidos].map(valor => Array.from((valor ?? '').trim())[0] ?? '').join('').toLocaleUpperCase('es');
   }
 
   edad(fecha?: string | null): number | null {

@@ -1,26 +1,28 @@
 <div class="perfil">
-  <header class="introduccion">
-    <h1>Mi perfil</h1>
-    <p>Consulta y administra tu información personal y familiar.</p>
+  @let datos = cargando() ? null : perfil();
+  <header class="cabecera">
+    <div class="identidad">
+      <app-header title="Mi perfil" [compact]="true" />
+      @if (datos) {
+        <p>{{ datos.persona.nombres | titlecase }} {{ datos.persona.apellidos | titlecase }}</p>
+      }
+    </div>
+    @if (datos) {
+      <a class="editar" routerLink="/mis-datos">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+        Editar perfil
+      </a>
+    }
   </header>
 
   @if (error()) {
     <p class="error" role="alert">{{ error() }}</p>
   }
   @if (cargando()) {
-    <p role="status">Cargando perfil…</p>
-  } @else if (perfil(); as datos) {
-    <div class="cabecera">
-      <div class="identidad">
-        <div class="avatar" aria-hidden="true">
-          {{ iniciales(datos.persona.nombres, datos.persona.apellidos) }}
-        </div>
-        <p>{{ datos.persona.nombres }} {{ datos.persona.apellidos }}</p>
-      </div>
-      <a class="editar" routerLink="/mis-datos">
-        <span class="material-symbols-outlined" aria-hidden="true">edit</span>Editar
-      </a>
+    <div class="tabla-cargando" role="status" aria-label="Cargando perfil">
+      <span class="tabla-cargando__spinner" aria-hidden="true"></span>
     </div>
+  } @else if (datos) {
     <section>
       <h2>
         <span class="icono-seccion material-symbols-outlined" aria-hidden="true">person</span
@@ -95,14 +97,6 @@
           </div>
         </dl>
         <div class="familiares">
-          @if (datos.familia?.pareja; as pareja) {
-            <ng-container
-              *ngTemplateOutlet="
-                familiar;
-                context: { $implicit: pareja, relacion: 'Cónyuge o pareja' }
-              "
-            ></ng-container>
-          }
           @for (hijo of datos.familia?.familiares ?? []; track hijo) {
             <ng-container
               *ngTemplateOutlet="familiar; context: { $implicit: hijo, relacion: 'Hijo' }"
@@ -110,6 +104,14 @@
           }
         </div>
       </div>
+      @if (datos.familia?.pareja; as pareja) {
+        <ng-container
+          *ngTemplateOutlet="
+            familiar;
+            context: { $implicit: pareja, relacion: 'Cónyuge o pareja', esPareja: true }
+          "
+        ></ng-container>
+      }
     </section>
 
     <section>
@@ -118,22 +120,30 @@
         >Formación académica
       </h2>
       @for (estudio of datos.formaciones; track estudio) {
-        <article>
-          <h3>{{ estudio.titulo }}</h3>
-          <p>{{ estudio.nivel }} · {{ estudio.institucion }}</p>
-          <dl>
+        <article class="ficha-detalle">
+          <dl class="ficha-detalle__campos">
+            <div>
+              <dt>Título</dt>
+              <dd>{{ estudio.titulo || 'Sin registrar' }}</dd>
+            </div>
+            <div>
+              <dt>Nivel de estudios</dt>
+              <dd>{{ estudio.nivel || 'Sin registrar' }}</dd>
+            </div>
+            <div>
+              <dt>Institución</dt>
+              <dd>{{ estudio.institucion || 'Sin registrar' }}</dd>
+            </div>
             @if (estudio.fechaInicio) {
               <div>
                 <dt>Inicio</dt>
                 <dd>{{ estudio.fechaInicio | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
               </div>
             }
-            @if (estudio.fechaFin) {
-              <div>
-                <dt>Fin</dt>
-                <dd>{{ estudio.fechaFin | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
-              </div>
-            }
+            <div>
+              <dt>Fin</dt>
+              <dd>{{ (estudio.fechaFin | date: 'dd/MM/yyyy' : 'UTC') || 'no especificado' }}</dd>
+            </div>
           </dl>
           <ng-container
             *ngTemplateOutlet="archivos; context: { $implicit: estudio.archivos }"
@@ -144,67 +154,79 @@
       }
     </section>
 
-    <section>
-      <h2>
-        <span class="icono-seccion material-symbols-outlined" aria-hidden="true"
-          >workspace_premium</span
-        >Certificaciones
-      </h2>
-      @for (certificado of datos.certificaciones; track certificado) {
-        <article>
-          <h3>{{ certificado.nombre }}</h3>
-          <p>{{ certificado.entidadEmisora }}</p>
-          <dl>
-            <div>
-              <dt>Emisión</dt>
-              <dd>{{ certificado.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
-            </div>
-            @if (certificado.fechaVencimiento) {
-              <div>
-                <dt>Vencimiento</dt>
-                <dd>{{ certificado.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
-              </div>
-            }
-          </dl>
-          <ng-container
-            *ngTemplateOutlet="archivos; context: { $implicit: certificado.archivos }"
-          ></ng-container>
-        </article>
-      } @empty {
-        <p class="muted">Sin certificaciones registradas.</p>
+    <div class="perfil-competencias">
+      @if (datos.certificaciones.length) {
+        <section>
+          <h2>
+            <span class="icono-seccion material-symbols-outlined" aria-hidden="true"
+              >workspace_premium</span
+            >Certificaciones
+          </h2>
+          @for (certificado of datos.certificaciones; track certificado) {
+            <article>
+              <h3>{{ certificado.nombre }}</h3>
+              <p>{{ certificado.entidadEmisora }}</p>
+              <dl>
+                <div>
+                  <dt>Emisión</dt>
+                  <dd>{{ certificado.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+                </div>
+                @if (certificado.fechaVencimiento) {
+                  <div>
+                    <dt>Vencimiento</dt>
+                    <dd>{{ certificado.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+                  </div>
+                }
+              </dl>
+              <ng-container
+                *ngTemplateOutlet="archivos; context: { $implicit: certificado.archivos }"
+              ></ng-container>
+            </article>
+          }
+        </section>
       }
-    </section>
 
-    <section>
-      <h2>
-        <span class="icono-seccion material-symbols-outlined" aria-hidden="true">psychology</span
-        >Conocimientos
-      </h2>
-      <ul class="conocimientos">
-        @for (conocimiento of datos.conocimientos ?? []; track conocimiento) {
-          <li>
-            <span>{{ conocimiento.area }}</span
-            ><span>{{ conocimiento.porcentaje }}%</span>
-          </li>
-        } @empty {
-          <li class="muted">Sin conocimientos registrados.</li>
-        }
-      </ul>
-    </section>
+      <section>
+        <h2>
+          <span class="icono-seccion material-symbols-outlined" aria-hidden="true">psychology</span
+          >Conocimientos
+        </h2>
+        <ul class="conocimientos">
+          @for (conocimiento of datos.conocimientos ?? []; track conocimiento) {
+            <li>
+              <span>{{ conocimiento.area }}</span
+              ><span class="conocimientos__porcentaje">{{ conocimiento.porcentaje }}%</span>
+            </li>
+          } @empty {
+            <li class="muted">Sin conocimientos registrados.</li>
+          }
+        </ul>
+      </section>
+    </div>
   } @else {
     <button type="button" class="documento" (click)="cargar()">Reintentar</button>
   }
 </div>
 
-<ng-template #familiar let-persona let-relacion="relacion">
-  <article class="familiar">
-    <header class="familiar-identidad">
-      <div>
-        <p class="muted">{{ relacion }}</p>
-        <h3>{{ persona.nombres }} {{ persona.apellidos }}</h3>
-      </div>
-    </header>
-    <dl>
+<ng-template #familiar let-persona let-relacion="relacion" let-esPareja="esPareja">
+  <article [class.familiar]="!esPareja" [class.ficha-detalle]="esPareja">
+    @if (esPareja) {
+      <h3 class="ficha-detalle__titulo">{{ relacion }}</h3>
+    } @else {
+      <header class="familiar-identidad">
+        <div>
+          <p class="muted">{{ relacion }}</p>
+          <h3>{{ persona.nombres }} {{ persona.apellidos }}</h3>
+        </div>
+      </header>
+    }
+    <dl [class.ficha-detalle__campos]="esPareja">
+      @if (esPareja) {
+        <div>
+          <dt>Nombre</dt>
+          <dd>{{ persona.nombres | titlecase }} {{ persona.apellidos | titlecase }}</dd>
+        </div>
+      }
       @if (persona.identificacion) {
         <div class="campo">
           <dt>Identificación</dt>

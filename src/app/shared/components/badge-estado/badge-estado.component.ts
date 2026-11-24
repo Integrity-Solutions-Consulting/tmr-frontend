@@ -1,6 +1,8 @@
 import { Component, Input, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+export type TonoBadgeEstado = 'completed' | 'progress' | 'cancelled';
+
 @Component({
   selector: 'app-badge-estado',
   standalone: true,
@@ -13,7 +15,11 @@ import { CommonModule } from '@angular/common';
 export class BadgeEstadoComponent {
   @Input() estado: string = 'Activo';
 
+  @Input() tono?: TonoBadgeEstado;
+
   get statusClass(): string {
+    if (this.tono) return this.tono;
+
     const norm = (this.estado || '')
       .trim()
       .toLowerCase()
