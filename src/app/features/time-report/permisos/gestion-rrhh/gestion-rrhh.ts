@@ -742,7 +742,7 @@ export class GestionRrhhComponent implements OnInit {
     }
 
     const fechaAfiliacion = this.ajusteFechaAfiliacion().trim();
-    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^d{4}-d{2}-d{2}$/.test(fechaAfiliacion)) {
+    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^\d{4}-\d{2}-\d{2}$/.test(fechaAfiliacion)) {
       this.toast.warning('Fecha requerida', 'Ingresa la fecha real de afiliación al IESS.');
       return;
     }
