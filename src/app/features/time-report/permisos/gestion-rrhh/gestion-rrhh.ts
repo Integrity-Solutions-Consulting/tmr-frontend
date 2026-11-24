@@ -1,4 +1,3 @@
-
 import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
@@ -14,22 +13,29 @@ import {
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
+  calcularDiasCalendarioIso,
   calcularRangoPreset,
+  calcularSiguienteDiaLaborableIso,
   coincideBusquedaInteligente,
   cumpleRangoFechas,
+  dmyAIso,
   PeriodoPreset,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
   AdjuntoPermisoApi,
+  ColaboradorSelectorPermisoApi,
+  GuardarPermisoRrhhPayload,
   PermisoItemApi,
   PermisosApiService,
+  SaldoVacacionesColaboradorApi,
   obtenerMensajeAmigablePermisos,
 } from '../permisos-api.service';
 
 export interface SolicitudRrhh {
   versionSolicitud?: string | null;
   id: number;
+  idEmpleado: number;
   folio: string;
   diaSolicitud?: string;
   mesSolicitud?: string;
@@ -48,6 +54,7 @@ export interface SolicitudRrhh {
   fechaFin: string;
   fechaRegreso: string;
   diasSolicitados: string;
+  totalDias: number;
   horario: HorarioPermisoOficial;
   detalleHorario?: string;
   duracion: string;
@@ -69,11 +76,33 @@ export interface SolicitudRrhh {
   aprobadoLider: boolean;
   confirmadoRrhh: boolean;
   estado: 'CONFIRMADO_LIDER' | 'PENDIENTE_LIDER_EXT' | 'APROBADO_RRHH' | 'OBSERVADO_RRHH' | 'RECHAZADO';
+  estadoCodigo: string;
   estadoClase: 'confirmado' | 'pendiente' | 'rrhh' | 'observado' | 'rechazado';
   estadoTexto: string;
   fechaConfirmacionRrhh?: string;
   responsableRrhh?: string;
+  descuentaVacaciones: boolean;
+  esRecuperable: boolean;
+  esAnticipada: boolean;
+  esHistorico: boolean;
+  verificadoRrhh: boolean;
+  observacionMigracion?: string;
 }
+
+export type VistaRrhh = 'VALIDACION' | 'HISTORIAL_EDITABLE' | 'SALDOS';
+
+const TIPOS_PERMISO_OPCIONES: ReadonlyArray<{ codigo: TipoPermisoOficial; nombre: string }> = [
+  { codigo: 'VACACIONES', nombre: 'Vacaciones' },
+  { codigo: 'LICENCIA_ENFERMEDAD', nombre: 'Licencia por enfermedad' },
+  { codigo: 'CITAS_MEDICAS', nombre: 'Citas médicas' },
+  { codigo: 'MATRIMONIO', nombre: 'Matrimonio' },
+  { codigo: 'NACIMIENTO_HIJO', nombre: 'Nacimiento de un Hijo/a' },
+  { codigo: 'MATERNIDAD', nombre: 'Maternidad' },
+  { codigo: 'FALLECIMIENTO_FAMILIAR', nombre: 'Fallecimiento de un familiar' },
+  { codigo: 'CALAMIDAD_DOMESTICA', nombre: 'Calamidad doméstica' },
+  { codigo: 'ACCIDENTE', nombre: 'Accidente' },
+  { codigo: 'OTROS', nombre: 'Otros' },
+];
 
 @Component({
   selector: 'app-gestion-rrhh',
@@ -85,7 +114,6 @@ export interface SolicitudRrhh {
     TarjetaResumenComponent,
     ModalBase,
     ResumenSolicitudComponent,
-
   ],
   templateUrl: './gestion-rrhh.html',
   styleUrl: './gestion-rrhh.scss',
@@ -95,6 +123,12 @@ export class GestionRrhhComponent implements OnInit {
   private readonly pdfService = inject(PermisosPdfService);
   private readonly apiService = inject(PermisosApiService);
 
+  readonly tiposPermisoOpciones = TIPOS_PERMISO_OPCIONES;
+
+  // Navegación principal del módulo RRHH
+  readonly vistaActiva = signal<VistaRrhh>('HISTORIAL_EDITABLE');
+
+  // --- Estado vista VALIDACION ---
   readonly tabActiva = signal<'POR_CONFIRMAR' | 'LIDER_EXTERNO' | 'HISTORIAL'>('POR_CONFIRMAR');
   readonly busqueda = signal('');
   readonly periodoPreset = signal<PeriodoPreset>('TODOS');
@@ -112,14 +146,74 @@ export class GestionRrhhComponent implements OnInit {
 
   readonly solicitudes = signal<SolicitudRrhh[]>([]);
 
+  // --- Estado vista HISTORIAL EDITABLE ---
+  readonly historialRegistros = signal<SolicitudRrhh[]>([]);
+  readonly cargandoHistorial = signal(false);
+  readonly colaboradoresSelector = signal<ColaboradorSelectorPermisoApi[]>([]);
+  readonly busquedaHistorial = signal('');
+  readonly filtroAnioHistorial = signal('TODOS');
+  readonly filtroTipoHistorial = signal('TODOS');
+  readonly filtroEmpleadoHistorial = signal('TODOS');
+  readonly soloPendientesVerificar = signal(false);
+
+  // Modal Crear / Editar registro del historial
+  readonly modalEdicionAbierto = signal(false);
+  readonly editandoId = signal<number | null>(null);
+  readonly guardandoEdicion = signal(false);
+  readonly formIdEmpleado = signal<number>(0);
+  readonly formTipoOficial = signal<TipoPermisoOficial>('VACACIONES');
+  readonly formFechaInicio = signal('');
+  readonly formFechaFin = signal('');
+  readonly formFechaRegreso = signal('');
+  readonly formTotalDias = signal<number>(1);
+  readonly formMotivo = signal('');
+  readonly formDescuentaVacaciones = signal(true);
+  readonly formEsRecuperable = signal(false);
+  readonly formEsAnticipada = signal(false);
+  readonly formEsHistorico = signal(true);
+  readonly formVerificadoRrhh = signal(true);
+  readonly formEstadoCodigo = signal('APROBADA');
+  readonly formObservacionMigracion = signal('');
+
+  // --- Estado vista SALDOS DE VACACIONES ---
+  readonly saldosColaboradores = signal<SaldoVacacionesColaboradorApi[]>([]);
+  readonly cargandoSaldos = signal(false);
+  readonly busquedaSaldos = signal('');
+  readonly filtroRegimenSaldos = signal<'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA'>('TODOS');
+  readonly soloSaldoNegativo = signal(false);
+
+  // Modal Ajuste de Saldo / Excepción Factura
+  readonly modalAjusteAbierto = signal(false);
+  readonly colaboradorSaldoActivo = signal<SaldoVacacionesColaboradorApi | null>(null);
+  readonly ajusteTipo = signal<'AJUSTE_DIAS' | 'EXCEPCION_FACTURA'>('AJUSTE_DIAS');
+  readonly ajusteDias = signal<number>(0);
+  readonly ajustePermiteVacaciones = signal<boolean>(true);
+  readonly ajusteMotivo = signal('');
+  readonly guardandoAjuste = signal(false);
+
   constructor() {
-    conectarEnlaceSolicitud(item => { const sol = this.mapearDesdeApi(item);
+    conectarEnlaceSolicitud((item) => {
+      const sol = this.mapearDesdeApi(item);
+      this.vistaActiva.set('VALIDACION');
       if (item.estadoClase === 'rrhh') this.abrirModalValidacion(sol);
-      else this.abrirVistaFormulario(sol); });
+      else this.abrirVistaFormulario(sol);
+    });
   }
 
   ngOnInit(): void {
     this.cargarBandejaDesdeApi();
+    this.cargarHistorialEditable();
+    this.cargarColaboradoresSelector();
+    this.cargarSaldosVacaciones();
+  }
+
+  cambiarVista(vista: VistaRrhh): void {
+    this.vistaActiva.set(vista);
+    if (vista === 'HISTORIAL_EDITABLE' && this.historialRegistros().length === 0) {
+      this.cargarHistorialEditable();
+    } else if (vista === 'SALDOS' && this.saldosColaboradores().length === 0) {
+      this.cargarSaldosVacaciones();
+    }
   }
 
   cargarBandejaDesdeApi(): void {
@@ -128,7 +222,11 @@ export class GestionRrhhComponent implements OnInit {
         if (res?.success && Array.isArray(res.data)) {
           const mapeadas = res.data.map((item) => this.mapearDesdeApi(item));
           this.solicitudes.set(mapeadas);
-          if (this.tabActiva() === 'POR_CONFIRMAR' && !mapeadas.some((s) => s.estado === 'CONFIRMADO_LIDER') && mapeadas.some((s) => s.estado !== 'CONFIRMADO_LIDER' && s.estado !== 'PENDIENTE_LIDER_EXT')) {
+          if (
+            this.tabActiva() === 'POR_CONFIRMAR' &&
+            !mapeadas.some((s) => s.estado === 'CONFIRMADO_LIDER') &&
+            mapeadas.some((s) => s.estado !== 'CONFIRMADO_LIDER' && s.estado !== 'PENDIENTE_LIDER_EXT')
+          ) {
             this.tabActiva.set('HISTORIAL');
           }
         }
@@ -136,10 +234,60 @@ export class GestionRrhhComponent implements OnInit {
       error: (err) => {
         this.toast.error(
           'No se pudo cargar la bandeja de Talento Humano',
-          obtenerMensajeAmigablePermisos(
-            err,
-            'No pudimos consultar las solicitudes en este momento.',
-          ),
+          obtenerMensajeAmigablePermisos(err, 'No pudimos consultar las solicitudes en este momento.'),
+        );
+      },
+    });
+  }
+
+  cargarHistorialEditable(): void {
+    this.cargandoHistorial.set(true);
+    this.apiService.obtenerHistorialEditableRrhh().subscribe({
+      next: (res) => {
+        this.cargandoHistorial.set(false);
+        if (res?.success && Array.isArray(res.data)) {
+          this.historialRegistros.set(res.data.map((item) => this.mapearDesdeApi(item)));
+        }
+      },
+      error: (err) => {
+        this.cargandoHistorial.set(false);
+        this.toast.error(
+          'No se pudo cargar el historial de permisos',
+          obtenerMensajeAmigablePermisos(err, 'Inténtalo nuevamente en unos segundos.'),
+        );
+      },
+    });
+  }
+
+  cargarColaboradoresSelector(): void {
+    this.apiService.obtenerColaboradoresRrhh().subscribe({
+      next: (res) => {
+        if (res?.success && Array.isArray(res.data)) {
+          this.colaboradoresSelector.set(res.data);
+        }
+      },
+    });
+  }
+
+  cargarSaldosVacaciones(): void {
+    this.cargandoSaldos.set(true);
+    this.apiService.obtenerSaldosVacacionesRrhh().subscribe({
+      next: (res) => {
+        this.cargandoSaldos.set(false);
+        if (res?.success && Array.isArray(res.data)) {
+          this.saldosColaboradores.set(res.data);
+          const activo = this.colaboradorSaldoActivo();
+          if (activo) {
+            const actualizado = res.data.find((x) => x.idEmpleado === activo.idEmpleado) ?? null;
+            this.colaboradorSaldoActivo.set(actualizado);
+          }
+        }
+      },
+      error: (err) => {
+        this.cargandoSaldos.set(false);
+        this.toast.error(
+          'No se pudieron cargar los saldos de vacaciones',
+          obtenerMensajeAmigablePermisos(err, 'Inténtalo nuevamente en unos segundos.'),
         );
       },
     });
@@ -148,6 +296,7 @@ export class GestionRrhhComponent implements OnInit {
   private mapearDesdeApi(item: PermisoItemApi): SolicitudRrhh {
     return {
       id: item.id,
+      idEmpleado: item.idEmpleado,
       versionSolicitud: item.versionSolicitud,
       folio: item.codigo,
       diaSolicitud: item.diaSolicitud,
@@ -167,6 +316,7 @@ export class GestionRrhhComponent implements OnInit {
       fechaFin: item.fechaFin,
       fechaRegreso: item.fechaRegreso,
       diasSolicitados: item.diasSolicitados,
+      totalDias: Number(item.totalDias ?? 0),
       horario: item.horario,
       detalleHorario: item.detalleHorario ?? undefined,
       duracion: item.duracion,
@@ -188,25 +338,104 @@ export class GestionRrhhComponent implements OnInit {
       aprobadoLider: item.aprobadoLider,
       confirmadoRrhh: item.confirmadoRrhh,
       estado: item.estadoRrhh,
+      estadoCodigo: item.estadoCodigo,
       estadoClase: item.estadoClase,
       estadoTexto: item.estadoTexto,
       fechaConfirmacionRrhh: item.fechaConfirmacionRrhh ?? undefined,
       responsableRrhh: item.responsableRrhh ?? undefined,
+      descuentaVacaciones: item.descuentaVacaciones ?? item.tipoOficial === 'VACACIONES',
+      esRecuperable: item.esRecuperable ?? false,
+      esAnticipada: item.esAnticipada ?? false,
+      esHistorico: item.esHistorico ?? false,
+      verificadoRrhh: item.verificadoRrhh ?? true,
+      observacionMigracion: item.observacionMigracion ?? undefined,
     };
   }
 
+  // --- KPIs ---
   readonly totalPorConfirmar = computed(
     () => this.solicitudes().filter((s) => s.estado === 'CONFIRMADO_LIDER').length,
   );
-
   readonly totalPendientesExternos = computed(
     () => this.solicitudes().filter((s) => s.estado === 'PENDIENTE_LIDER_EXT').length,
   );
-
   readonly totalConfirmadasMes = computed(
     () => this.solicitudes().filter((s) => s.estado === 'APROBADO_RRHH').length,
   );
+  readonly totalHistorialRegistros = computed(() => this.historialRegistros().length);
+  readonly totalPorVerificar = computed(
+    () => this.historialRegistros().filter((s) => !s.verificadoRrhh).length,
+  );
 
+  // --- Filtros Historial Editable ---
+  readonly aniosDisponiblesHistorial = computed(() => {
+    const set = new Set<string>();
+    for (const r of this.historialRegistros()) {
+      const anio = r.fechaInicio?.slice(6, 10);
+      if (anio && /^\d{4}$/.test(anio)) set.add(anio);
+    }
+    return Array.from(set).sort((a, b) => Number(b) - Number(a));
+  });
+
+  readonly historialFiltrado = computed(() => {
+    const q = this.busquedaHistorial();
+    const anio = this.filtroAnioHistorial();
+    const tipo = this.filtroTipoHistorial();
+    const emp = this.filtroEmpleadoHistorial();
+    const soloPend = this.soloPendientesVerificar();
+
+    return this.historialRegistros().filter((s) => {
+      if (soloPend && s.verificadoRrhh) return false;
+      if (anio !== 'TODOS' && !s.fechaInicio.endsWith(anio) && !s.fechaFin.endsWith(anio)) return false;
+      if (tipo !== 'TODOS' && s.tipoOficial !== tipo) return false;
+      if (emp !== 'TODOS' && String(s.idEmpleado) !== emp) return false;
+      if (
+        !coincideBusquedaInteligente(q, [
+          s.folio,
+          s.colaborador,
+          s.cedula,
+          s.codigoColaborador,
+          s.tipo,
+          s.fechaInicio,
+          s.fechaFin,
+          s.motivo,
+          s.observacionMigracion,
+          s.estadoTexto,
+        ])
+      ) {
+        return false;
+      }
+      return true;
+    });
+  });
+
+  // --- Filtros Saldos ---
+  readonly saldosFiltrados = computed(() => {
+    const q = this.busquedaSaldos();
+    const reg = this.filtroRegimenSaldos();
+    const soloNeg = this.soloSaldoNegativo();
+
+    return this.saldosColaboradores().filter((c) => {
+      if (reg !== 'TODOS' && c.regimen !== reg) return false;
+      if (soloNeg && c.saldoDisponible >= 0) return false;
+      if (
+        !coincideBusquedaInteligente(q, [
+          c.apellidosNombres,
+          c.cedula,
+          c.codigoEmpleado,
+          c.cargo,
+          c.empresa,
+          c.tipoContrato,
+          c.regimen,
+        ])
+      ) {
+        return false;
+      }
+      return true;
+    });
+  });
+
+  // --- Filtros Bandeja Validación ---
   readonly solicitudesFiltradas = computed(() => {
     const tab = this.tabActiva();
     const q = this.busqueda();
@@ -252,6 +481,295 @@ export class GestionRrhhComponent implements OnInit {
     });
   });
 
+  // --- Acciones CRUD del Historial Editable ---
+  abrirNuevoRegistroHistorial(idEmpleadoPreseleccionado?: number): void {
+    const hoyIso = new Date().toISOString().slice(0, 10);
+    this.editandoId.set(null);
+    this.formIdEmpleado.set(
+      idEmpleadoPreseleccionado ?? this.colaboradoresSelector()[0]?.idEmpleado ?? 0,
+    );
+    this.formTipoOficial.set('VACACIONES');
+    this.formFechaInicio.set(hoyIso);
+    this.formFechaFin.set(hoyIso);
+    this.formFechaRegreso.set(calcularSiguienteDiaLaborableIso(hoyIso));
+    this.formTotalDias.set(1);
+    this.formMotivo.set('VACACIONES');
+    this.formDescuentaVacaciones.set(true);
+    this.formEsRecuperable.set(false);
+    this.formEsAnticipada.set(false);
+    this.formEsHistorico.set(true);
+    this.formVerificadoRrhh.set(true);
+    this.formEstadoCodigo.set('APROBADA');
+    this.formObservacionMigracion.set('');
+    this.modalEdicionAbierto.set(true);
+  }
+
+  abrirEditarRegistro(item: SolicitudRrhh): void {
+    this.editandoId.set(item.id);
+    this.formIdEmpleado.set(item.idEmpleado);
+    this.formTipoOficial.set(item.tipoOficial);
+    this.formFechaInicio.set(dmyAIso(item.fechaInicio));
+    this.formFechaFin.set(dmyAIso(item.fechaFin));
+    this.formFechaRegreso.set(dmyAIso(item.fechaRegreso));
+    this.formTotalDias.set(item.totalDias || 1);
+    this.formMotivo.set(item.motivo);
+    this.formDescuentaVacaciones.set(item.descuentaVacaciones);
+    this.formEsRecuperable.set(item.esRecuperable);
+    this.formEsAnticipada.set(item.esAnticipada);
+    this.formEsHistorico.set(item.esHistorico);
+    this.formVerificadoRrhh.set(item.verificadoRrhh);
+    this.formEstadoCodigo.set(this.mapearEstadoACodigoBd(item.estadoCodigo));
+    this.formObservacionMigracion.set(item.observacionMigracion ?? '');
+    this.modalEdicionAbierto.set(true);
+  }
+
+  private mapearEstadoACodigoBd(codigoCorto: string): string {
+    switch (codigoCorto) {
+      case 'PEN':
+        return 'PENDIENTE_JEFE';
+      case 'RRH':
+        return 'PENDIENTE_TH';
+      case 'OBS':
+        return 'OBSERVADA';
+      case 'REC':
+        return 'RECHAZADA';
+      default:
+        return 'APROBADA';
+    }
+  }
+
+  alCambiarTipoEnModal(tipo: TipoPermisoOficial): void {
+    this.formTipoOficial.set(tipo);
+    if (tipo === 'VACACIONES') {
+      this.formDescuentaVacaciones.set(true);
+      this.formEsRecuperable.set(false);
+    } else if (tipo === 'CITAS_MEDICAS' || tipo === 'OTROS') {
+      this.formDescuentaVacaciones.set(false);
+      this.formEsRecuperable.set(true);
+    } else {
+      this.formDescuentaVacaciones.set(false);
+    }
+    this.recalcularDiasEnModal();
+  }
+
+  alCambiarFechasEnModal(inicio: string, fin: string): void {
+    this.formFechaInicio.set(inicio);
+    const finEfectivo = fin && fin >= inicio ? fin : inicio;
+    this.formFechaFin.set(finEfectivo);
+    if (finEfectivo) {
+      this.formFechaRegreso.set(calcularSiguienteDiaLaborableIso(finEfectivo));
+    }
+    this.recalcularDiasEnModal();
+  }
+
+  private recalcularDiasEnModal(): void {
+    const ini = this.formFechaInicio();
+    const fin = this.formFechaFin();
+    if (!ini || !fin) return;
+    this.formTotalDias.set(calcularDiasCalendarioIso(ini, fin));
+  }
+
+  guardarRegistroHistorial(): void {
+    if (this.guardandoEdicion()) return;
+    if (!this.formIdEmpleado()) {
+      this.toast.warning('Colaborador requerido', 'Selecciona un colaborador para guardar el registro.');
+      return;
+    }
+    if (!this.formFechaInicio() || !this.formFechaFin()) {
+      this.toast.warning('Fechas requeridas', 'Debes indicar fecha de inicio y fecha de fin.');
+      return;
+    }
+    if (!this.formMotivo().trim()) {
+      this.toast.warning('Motivo requerido', 'Escribe el motivo del permiso o vacación.');
+      return;
+    }
+
+    const payload: GuardarPermisoRrhhPayload = {
+      idEmpleado: Number(this.formIdEmpleado()),
+      tipoOficial: this.formTipoOficial(),
+      fechaInicio: this.formFechaInicio(),
+      fechaFin: this.formFechaFin(),
+      fechaRegreso: this.formFechaRegreso() || null,
+      totalDias: Number(this.formTotalDias()) > 0 ? Number(this.formTotalDias()) : null,
+      horario: 'COMPLETA',
+      detalleHorario: this.formTipoOficial() === 'VACACIONES' ? 'Días calendario' : '08:30 - 17:30',
+      motivo: this.formMotivo().trim(),
+      descuentaVacaciones: this.formDescuentaVacaciones(),
+      esRecuperable: this.formEsRecuperable(),
+      esAnticipada: this.formEsAnticipada(),
+      esHistorico: this.formEsHistorico(),
+      verificadoRrhh: this.formVerificadoRrhh(),
+      observacionMigracion: this.formObservacionMigracion().trim() || null,
+      estadoCodigo: this.formEstadoCodigo(),
+      impactoTimeReport: this.formEsHistorico() ? 'SIN_IMPACTO' : 'RESTA_META',
+    };
+
+    this.guardandoEdicion.set(true);
+    const idEdit = this.editandoId();
+    const req$ = idEdit
+      ? this.apiService.actualizarRegistroRrhh(idEdit, payload)
+      : this.apiService.crearRegistroRrhh(payload);
+
+    req$.subscribe({
+      next: (res) => {
+        this.guardandoEdicion.set(false);
+        this.modalEdicionAbierto.set(false);
+        if (res?.success && res.data) {
+          const mapeado = this.mapearDesdeApi(res.data);
+          if (idEdit) {
+            this.historialRegistros.update((list) => list.map((x) => (x.id === idEdit ? mapeado : x)));
+            this.solicitudes.update((list) => list.map((x) => (x.id === idEdit ? mapeado : x)));
+          } else {
+            this.historialRegistros.update((list) => [mapeado, ...list]);
+          }
+          this.cargarSaldosVacaciones();
+        }
+        this.toast.exito(
+          idEdit ? 'Registro actualizado' : 'Registro creado',
+          idEdit
+            ? 'Los cambios fueron guardados y el saldo de vacaciones se actualizó automáticamente.'
+            : 'El permiso quedó registrado en el historial y el saldo fue recalculado.',
+        );
+      },
+      error: (err) => {
+        this.guardandoEdicion.set(false);
+        this.toast.error(
+          'No se pudo guardar el registro',
+          obtenerMensajeAmigablePermisos(err, 'Revisa los datos ingresados e inténtalo nuevamente.'),
+        );
+      },
+    });
+  }
+
+  marcarVerificadoRapido(item: SolicitudRrhh): void {
+    const payload: GuardarPermisoRrhhPayload = {
+      idEmpleado: item.idEmpleado,
+      tipoOficial: item.tipoOficial,
+      fechaInicio: dmyAIso(item.fechaInicio),
+      fechaFin: dmyAIso(item.fechaFin),
+      fechaRegreso: dmyAIso(item.fechaRegreso),
+      totalDias: item.totalDias,
+      horario: item.horario,
+      detalleHorario: item.detalleHorario ?? null,
+      motivo: item.motivo,
+      descuentaVacaciones: item.descuentaVacaciones,
+      esRecuperable: item.esRecuperable,
+      esAnticipada: item.esAnticipada,
+      esHistorico: item.esHistorico,
+      verificadoRrhh: true,
+      observacionMigracion: item.observacionMigracion ?? null,
+      estadoCodigo: this.mapearEstadoACodigoBd(item.estadoCodigo),
+      impactoTimeReport: item.impactoTimeReport,
+    };
+
+    this.apiService.actualizarRegistroRrhh(item.id, payload).subscribe({
+      next: (res) => {
+        if (res?.success && res.data) {
+          const mapeado = this.mapearDesdeApi(res.data);
+          this.historialRegistros.update((list) => list.map((x) => (x.id === item.id ? mapeado : x)));
+          this.cargarSaldosVacaciones();
+        }
+        this.toast.exito('Registro verificado', `${item.folio} marcado como verificado por Talento Humano.`);
+      },
+      error: (err) => {
+        this.toast.error('Error al verificar', obtenerMensajeAmigablePermisos(err));
+      },
+    });
+  }
+
+  anularRegistroHistorial(item: SolicitudRrhh): void {
+    const ok = window.confirm(
+      `¿Seguro que deseas anular el registro ${item.folio} (${item.colaborador}, ${item.fechaInicio} - ${item.fechaFin})? Esto recalculará su saldo de vacaciones.`,
+    );
+    if (!ok) return;
+
+    this.apiService.anularRegistroRrhh(item.id).subscribe({
+      next: () => {
+        this.historialRegistros.update((list) => list.filter((x) => x.id !== item.id));
+        this.solicitudes.update((list) => list.filter((x) => x.id !== item.id));
+        this.cargarSaldosVacaciones();
+        this.toast.exito('Registro anulado', `${item.folio} fue anulado y los saldos fueron recalculados.`);
+      },
+      error: (err) => {
+        this.toast.error('No se pudo anular el registro', obtenerMensajeAmigablePermisos(err));
+      },
+    });
+  }
+
+  verHistorialDeColaborador(col: SaldoVacacionesColaboradorApi): void {
+    this.filtroEmpleadoHistorial.set(String(col.idEmpleado));
+    this.filtroAnioHistorial.set('TODOS');
+    this.filtroTipoHistorial.set('TODOS');
+    this.soloPendientesVerificar.set(false);
+    this.busquedaHistorial.set('');
+    this.vistaActiva.set('HISTORIAL_EDITABLE');
+  }
+
+  // --- Acciones Modal Ajuste / Excepción Factura ---
+  abrirModalAjusteSaldo(col: SaldoVacacionesColaboradorApi): void {
+    this.colaboradorSaldoActivo.set(col);
+    this.ajusteTipo.set(col.regimen === 'FACTURA' ? 'EXCEPCION_FACTURA' : 'AJUSTE_DIAS');
+    this.ajusteDias.set(0);
+    this.ajustePermiteVacaciones.set(!col.excepcionFacturaActiva);
+    this.ajusteMotivo.set('');
+    this.modalAjusteAbierto.set(true);
+  }
+
+  guardarAjusteSaldo(): void {
+    const col = this.colaboradorSaldoActivo();
+    if (!col || this.guardandoAjuste()) return;
+
+    const motivo = this.ajusteMotivo().trim();
+    if (!motivo) {
+      this.toast.warning('Motivo obligatorio', 'Debes escribir el motivo del ajuste o excepción.');
+      return;
+    }
+
+    if (this.ajusteTipo() === 'AJUSTE_DIAS' && Number(this.ajusteDias()) === 0) {
+      this.toast.warning('Días requeridos', 'Ingresa una cantidad de días distinta de 0 (positiva para sumar o negativa para descontar).');
+      return;
+    }
+
+    this.guardandoAjuste.set(true);
+    this.apiService
+      .crearAjusteVacacionesRrhh(col.idEmpleado, {
+        tipoAjuste: this.ajusteTipo(),
+        diasAjuste: this.ajusteTipo() === 'AJUSTE_DIAS' ? Number(this.ajusteDias()) : 0,
+        permiteVacaciones:
+          this.ajusteTipo() === 'EXCEPCION_FACTURA' ? this.ajustePermiteVacaciones() : null,
+        motivo,
+      })
+      .subscribe({
+        next: () => {
+          this.guardandoAjuste.set(false);
+          this.ajusteDias.set(0);
+          this.ajusteMotivo.set('');
+          this.cargarSaldosVacaciones();
+          this.toast.exito(
+            'Ajuste aplicado',
+            `Se actualizó la configuración de vacaciones de ${col.apellidosNombres}.`,
+          );
+        },
+        error: (err) => {
+          this.guardandoAjuste.set(false);
+          this.toast.error('No se pudo guardar el ajuste', obtenerMensajeAmigablePermisos(err));
+        },
+      });
+  }
+
+  anularAjusteSaldo(idAjuste: number): void {
+    this.apiService.anularAjusteVacacionesRrhh(idAjuste).subscribe({
+      next: () => {
+        this.cargarSaldosVacaciones();
+        this.toast.exito('Ajuste anulado', 'El ajuste fue revertido y el saldo recalculado.');
+      },
+      error: (err) => {
+        this.toast.error('Error al anular ajuste', obtenerMensajeAmigablePermisos(err));
+      },
+    });
+  }
+
+  // --- Métodos existentes de la bandeja de Validación RRHH ---
   cambiarPresetPeriodo(preset: PeriodoPreset): void {
     this.periodoPreset.set(preset);
     if (preset !== 'PERSONALIZADO') {
@@ -393,6 +911,8 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
+            this.cargarHistorialEditable();
+            this.cargarSaldosVacaciones();
           }
           this.modalValidacionAbierto.set(false);
           if (res?.data?.avisoNotificacion) {
@@ -445,6 +965,8 @@ export class GestionRrhhComponent implements OnInit {
           if (res?.success && res.data) {
             const mapeada = this.mapearDesdeApi(res.data);
             this.solicitudes.update((lista) => lista.map((s) => (s.id === actual.id ? mapeada : s)));
+            this.cargarHistorialEditable();
+            this.cargarSaldosVacaciones();
           }
           this.modalValidacionAbierto.set(false);
           if (res?.data?.avisoNotificacion) {

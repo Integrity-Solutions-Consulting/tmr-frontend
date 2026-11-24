@@ -14,6 +14,7 @@ import {
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
   PeriodoPreset,
+  calcularDiasCalendarioIso,
   calcularDiasLaborablesIso,
   calcularRangoPreset,
   calcularSiguienteDiaLaborableIso,
@@ -181,7 +182,10 @@ export class MisPermisosComponent implements OnInit {
   readonly detalleHorarioForm = signal('08:30 - 17:30');
   readonly horaInicioOtrosForm = signal('08:30');
   readonly horaFinOtrosForm = signal('17:30');
-  readonly diasDisponiblesNumero = signal(15);
+  readonly diasDisponiblesNumero = signal(0);
+  readonly regimenVacaciones = signal<'AFILIADO' | 'MIXTO' | 'FACTURA'>('AFILIADO');
+  readonly tieneDerechoVacaciones = signal(true);
+  readonly maximoAnticipoDias = signal(15);
   readonly fechaInicioForm = signal(new Date().toISOString().slice(0, 10));
   readonly fechaFinForm = signal(new Date().toISOString().slice(0, 10));
   readonly fechaRegresoForm = signal(
@@ -246,6 +250,9 @@ export class MisPermisosComponent implements OnInit {
   });
 
   readonly diasCalculadosForm = computed(() => {
+    if (this.tipoSeleccionado() === 'VACACIONES') {
+      return calcularDiasCalendarioIso(this.fechaInicioForm(), this.fechaFinForm());
+    }
     const horario = this.horarioSeleccionado();
     if (horario === 'MANANA' || horario === 'TARDE') {
       return 0.5;
@@ -259,6 +266,9 @@ export class MisPermisosComponent implements OnInit {
   });
 
   readonly horasCalculadasForm = computed(() => {
+    if (this.tipoSeleccionado() === 'VACACIONES') {
+      return this.diasCalculadosForm() * 8;
+    }
     const horario = this.horarioSeleccionado();
     if (horario === 'MANANA' || horario === 'TARDE') {
       return 4;
@@ -270,10 +280,23 @@ export class MisPermisosComponent implements OnInit {
     return diasBase * 8;
   });
 
+  readonly sinDerechoVacacionesForm = computed(
+    () => this.tipoSeleccionado() === 'VACACIONES' && !this.tieneDerechoVacaciones(),
+  );
+
+  readonly esVacacionAnticipadaForm = computed(
+    () =>
+      this.tipoSeleccionado() === 'VACACIONES' &&
+      this.tieneDerechoVacaciones() &&
+      this.diasCalculadosForm() > this.diasDisponiblesNumero(),
+  );
+
   readonly excedeSaldoVacacionesForm = computed(
     () =>
       this.tipoSeleccionado() === 'VACACIONES' &&
-      (this.diasCalculadosForm() > this.diasDisponiblesNumero() || this.diasCalculadosForm() > 15),
+      (!this.tieneDerechoVacaciones() ||
+        this.diasCalculadosForm() > 30 ||
+        this.diasDisponiblesNumero() - this.diasCalculadosForm() < -this.maximoAnticipoDias()),
   );
   readonly esPermisoInformativoForm = computed(() =>
     ['CITAS_MEDICAS', 'CALAMIDAD_DOMESTICA', 'ACCIDENTE', 'FALLECIMIENTO_FAMILIAR'].includes(
@@ -299,6 +322,10 @@ export class MisPermisosComponent implements OnInit {
   }
 
   readonly textoDuracionForm = computed(() => {
+    if (this.tipoSeleccionado() === 'VACACIONES') {
+      const diasCal = this.diasCalculadosForm();
+      return diasCal === 1 ? '1 día calendario' : `${diasCal} días calendario`;
+    }
     const jornada = this.horarioSeleccionado();
     if (jornada === 'MANANA' || jornada === 'TARDE') return 'Medio día laborable · 4 horas';
     const dias = calcularDiasLaborablesIso(this.fechaInicioForm(), this.fechaFinForm());
@@ -388,8 +415,15 @@ export class MisPermisosComponent implements OnInit {
         this.colaboradorCedula.set(ctx.numeroCedula ?? '');
         this.colaboradorCargo.set(ctx.cargo ?? '');
         this.esNomina.set(ctx.esNomina ?? true);
+        this.regimenVacaciones.set(ctx.regimenVacaciones ?? 'AFILIADO');
+        this.tieneDerechoVacaciones.set(ctx.tieneDerechoVacaciones ?? true);
+        this.maximoAnticipoDias.set(Number(ctx.maximoAnticipoDias ?? 15));
         this.diasDisponiblesNumero.set(Number(ctx.diasDisponibles ?? 0));
-        this.kpiDisponibles.set(`${ctx.diasDisponibles ?? 0} días`);
+        this.kpiDisponibles.set(
+          ctx.tieneDerechoVacaciones === false
+            ? 'N/A (Factura)'
+            : `${ctx.diasDisponibles ?? 0} días`,
+        );
         this.kpiPorHoras.set(`${ctx.horasAcumuladas ?? 0} h`);
 
         if (Array.isArray(ctx.tiposPermiso) && ctx.tiposPermiso.length > 0) {
@@ -1032,7 +1066,7 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
-    if (this.horasPorDiaOtrosForm() <= 0) {
+    if (this.tipoSeleccionado() !== 'VACACIONES' && this.horasPorDiaOtrosForm() <= 0) {
       this.toast.error(
         'Horario por horas inválido',
         'Revisa el horario: elige horas dentro de la jornada laboral, con la hora de fin posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.',
@@ -1040,10 +1074,19 @@ export class MisPermisosComponent implements OnInit {
       return;
     }
 
-    if (this.excedeSaldoVacacionesForm()) {
+    if (this.sinDerechoVacacionesForm()) {
       this.toast.error(
-        'Saldo de vacaciones insuficiente',
-        `Solicitas ${this.diasCalculadosForm()} día(s), pero tu saldo disponible actual es de ${this.diasDisponiblesNumero()} día(s).`,
+        'Régimen sin derecho a vacaciones',
+        'Tu régimen actual (Factura / Prestación de servicios) no incluye vacaciones salvo excepción habilitada por Talento Humano.',
+      );
+      return;
+    }
+
+    if (this.excedeSaldoVacacionesForm()) {
+      const maxSol = Math.max(0, this.diasDisponiblesNumero() + this.maximoAnticipoDias());
+      this.toast.error(
+        'Límite de vacaciones anticipadas excedido',
+        `Solicitas ${this.diasCalculadosForm()} día(s) calendario. Con tu saldo actual (${this.diasDisponiblesNumero()} d) y el tope de anticipo (${this.maximoAnticipoDias()} d), puedes solicitar hasta ${Math.min(30, maxSol)} día(s).`,
       );
       return;
     }
