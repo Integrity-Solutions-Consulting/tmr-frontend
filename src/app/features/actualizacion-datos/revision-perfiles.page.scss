@@ -453,6 +453,12 @@ textarea {
   margin-top: 0.65rem;
 }
 
+.titulo-familiar {
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .informacion-personal {
   display: grid;
   grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);

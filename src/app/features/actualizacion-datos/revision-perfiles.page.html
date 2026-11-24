@@ -246,10 +246,16 @@
                 @for (apartado of apartados(envio); track $index) {
                   <div class="apartado" [class.apartado--formacion]="envio.seccion === 'formacion'">
                     @if (apartado.titulo && envio.seccion !== 'formacion') {
-                      <h4>{{ apartado.titulo }}</h4>
+                      <h4 [class.titulo-familiar]="envio.seccion === 'familia'">
+                        {{ apartado.titulo }}
+                      </h4>
                     }
                     @if (envio.seccion === 'personal' && esObjeto(apartado.datos)) {
-                      @let grupos = agruparDatosPersonales(apartado.datos);
+                      @let grupos = agruparDatosPersonales(
+                        apartado.datos,
+                        envio.vigente?.persona?.fechaNacimiento ?? envio.vigente?.fechaNacimiento,
+                        envio.estado
+                      );
                       <div class="informacion-personal">
                         <ng-container
                           *ngTemplateOutlet="datos; context: { $implicit: grupos.informacion }"
@@ -384,7 +390,10 @@
           <div class="campo-dato">
             <dt>{{ tituloCampo(campo[0]) }}</dt>
             <dd>
-              @if (campo[0] === 'porcentajeDiscapacidad') {
+              @let fecha = fechaCampo(campo[0], campo[1]);
+              @if (fecha) {
+                {{ fecha }}
+              } @else if (campo[0] === 'porcentajeDiscapacidad') {
                 {{ campo[1] }}%
               } @else {
                 <ng-container

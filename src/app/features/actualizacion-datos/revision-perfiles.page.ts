@@ -10,6 +10,7 @@ import { TarjetaResumenComponent } from '../../shared/components/tarjeta-resumen
 import { BadgeEstadoComponent, type TonoBadgeEstado } from '../../shared/components/badge-estado/badge-estado.component';
 import { Boton } from '../../shared/components/boton/boton';
 import { ActualizacionDatosService } from './actualizacion-datos.service';
+import { calcularEdad, formatearFechaPerfil, normalizarFechaPerfil } from './edad-perfil.util';
 
 type ColumnaRevision = 'nombre' | 'cedula' | 'correo' | 'estado' | 'fecha';
 
@@ -92,6 +93,7 @@ export class RevisionPerfilesPage {
   envios: Record<string, any> = {};
   decisiones: Partial<Record<number, DecisionSeccion>> = {};
   cargandoSecciones = false;
+  private versionCargaSecciones = 0;
   faltanSecciones = false;
   error = '';
   loading = false;
@@ -115,7 +117,13 @@ export class RevisionPerfilesPage {
     else this.error = 'No se encontraron solicitudes para este colaborador.';
   }
 
-  cargar() {
+  cargar(seccionActualizada?: string) {
+    const idEmpleado = this.persona?.idEmpleado;
+    const actualizarDetalle = () => {
+      if (!seccionActualizada || this.persona?.idEmpleado !== idEmpleado) return;
+      delete this.envios[seccionActualizada];
+      this.cargarSecciones();
+    };
     this.loading = true;
     this.api.colaPerfil().subscribe({
       next: filas => {
@@ -123,11 +131,13 @@ export class RevisionPerfilesPage {
         if (this.persona) this.persona = filas.find(x => x.idEmpleado === this.persona.idEmpleado) ?? this.persona;
         this.loading = false;
         this.abrirDesdeRuta();
+        actualizarDetalle();
         this.changeDetector.markForCheck();
       },
       error: e => {
         this.loading = false;
         this.error = e.status === 403 ? 'Tu usuario no tiene permiso para revisar perfiles.' : 'No fue posible cargar las solicitudes.';
+        actualizarDetalle();
         this.changeDetector.markForCheck();
       }
     });
@@ -156,15 +166,17 @@ export class RevisionPerfilesPage {
     const idEmpleado = this.persona.idEmpleado;
     const recientes = new Map<string, number>();
     for (const solicitud of this.persona.solicitudes) {
-      if (!recientes.has(solicitud.seccion) && !this.envios[solicitud.seccion])
+      if (!recientes.has(solicitud.seccion))
         recientes.set(solicitud.seccion, solicitud.id);
     }
-    if (!recientes.size) return;
+    const pendientes = [...recientes].filter(([seccion, id]) => this.envios[seccion]?.id !== id);
+    if (!pendientes.length) return;
 
+    const version = ++this.versionCargaSecciones;
     this.cargandoSecciones = true;
     this.faltanSecciones = false;
-    forkJoin([...recientes.values()].map(id => this.api.detallePerfil(id).pipe(catchError(() => of(null))))).subscribe(envios => {
-      if (this.persona?.idEmpleado !== idEmpleado) return;
+    forkJoin(pendientes.map(([, id]) => this.api.detallePerfil(id).pipe(catchError(() => of(null))))).subscribe(envios => {
+      if (version !== this.versionCargaSecciones || this.persona?.idEmpleado !== idEmpleado) return;
       for (const envio of envios) {
         if (envio?.vigente && envio.propuesta) this.envios[envio.seccion] = envio;
         else this.faltanSecciones = true;
@@ -207,8 +219,9 @@ export class RevisionPerfilesPage {
         return [
           { titulo: '', datos: { estadoCivil: datos?.estadoCivil, tieneHijos: datos?.tieneHijos }, archivos: [] },
           ...filas('Pareja', datos?.pareja ? [datos.pareja] : [], ['Pareja'])
-            .map(pareja => ({ ...pareja, titulo: '' })),
+            .map(pareja => ({ ...pareja, titulo: 'Datos de la pareja' })),
           ...filas('Hijo', datos?.familiares ?? [], ['Familiar', 'PartidaNacimiento'])
+            .map(hijo => ({ ...hijo, titulo: 'Datos de hijos' })),
         ];
       case 'formacion': return filas('Estudio', datos ?? [], ['Formacion']);
       case 'certificaciones': return filas('Certificación', datos ?? [], ['Certificacion']);
@@ -230,20 +243,50 @@ export class RevisionPerfilesPage {
     return Object.entries(valor).filter(([campo, contenido]) => contenido != null && contenido !== '' && (!Array.isArray(contenido) || contenido.length > 0) && !/^(id|clave|seccion|archivos|solicitud|controlVersion|tipoRelacion|limpiar|claves?\w+AEliminar)/i.test(campo));
   }
 
-  agruparDatosPersonales(valor: object) {
+  agruparDatosPersonales(
+    valor: object,
+    fechaNacimientoVigente: string | null | undefined,
+    estado: string,
+  ) {
     const campos = this.entradas(valor);
     const esDiscapacidad = (campo: string) =>
       ['tieneDiscapacidad', 'tipoDiscapacidad', 'porcentajeDiscapacidad'].includes(campo);
+    const informacion = campos.filter(([campo]) => !esDiscapacidad(campo));
+    const posicionPropuesta = informacion.findIndex(([campo]) => campo === 'fechaNacimiento');
+    const fechaPropuesta = informacion[posicionPropuesta]?.[1];
+    const fechaVigente = normalizarFechaPerfil(fechaNacimientoVigente);
+    const fechaPropuestaIso = typeof fechaPropuesta === 'string' ? normalizarFechaPerfil(fechaPropuesta) : null;
+    const propuestaEnRevision = estado === 'EnRevision' || estado === 'RequiereCorreccion';
+    const fechaMostrada = propuestaEnRevision ? fechaPropuestaIso ?? fechaVigente : fechaVigente;
+    const edad = calcularEdad(fechaMostrada);
+    const camposNacimiento: [string, unknown][] = [
+      ['fechaNacimiento', formatearFechaPerfil(fechaMostrada) ?? 'Sin registrar'],
+      ['edad', edad ?? 'Sin registrar'],
+    ];
+    if (propuestaEnRevision && fechaVigente && fechaMostrada !== fechaVigente) {
+      camposNacimiento.push(['fechaNacimientoVigente', formatearFechaPerfil(fechaVigente)]);
+    } else if (!propuestaEnRevision && fechaPropuestaIso && fechaPropuestaIso !== fechaVigente) {
+      camposNacimiento.push(['fechaNacimientoPropuesta', formatearFechaPerfil(fechaPropuestaIso)]);
+    }
+    if (posicionPropuesta === -1) informacion.push(...camposNacimiento);
+    else informacion.splice(posicionPropuesta, 1, ...camposNacimiento);
     return {
-      informacion: Object.fromEntries(campos.filter(([campo]) => !esDiscapacidad(campo))),
+      informacion: Object.fromEntries(informacion),
       discapacidad: Object.fromEntries(campos.filter(([campo]) => esDiscapacidad(campo))),
     };
   }
   tituloCampo(campo: string) {
+    if (campo === 'fechaNacimiento') return 'Fecha de nacimiento';
+    if (campo === 'fechaNacimientoVigente') return 'Fecha de nacimiento vigente';
+    if (campo === 'fechaNacimientoPropuesta') return 'Fecha de nacimiento propuesta';
     if (campo === 'tieneDiscapacidad') return 'Tiene discapacidad';
     if (campo === 'tipoDiscapacidad') return 'Tipos de discapacidad';
     if (campo === 'porcentajeDiscapacidad') return 'Porcentaje de discapacidad';
     return campo.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase());
+  }
+
+  fechaCampo(campo: string, valor: unknown): string | null {
+    return campo.startsWith('fecha') && typeof valor === 'string' ? formatearFechaPerfil(valor) : null;
   }
 
   guardar(envio: any, decision: DecisionSeccion) {
@@ -258,7 +301,7 @@ export class RevisionPerfilesPage {
         envio.observacion = observacion.trim();
         delete this.decisiones[envio.id];
         this.saving = false;
-        this.cargar();
+        this.cargar(envio.seccion);
         this.changeDetector.markForCheck();
       },
       error: e => {

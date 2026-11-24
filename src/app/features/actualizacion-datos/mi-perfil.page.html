@@ -15,6 +15,11 @@
     }
   </header>
 
+  @if (avisoCorreccion()) {
+    <p class="aviso-revision aviso-correccion" role="status">
+      Tienes pendiente realizar cambios en tu perfil.
+    </p>
+  }
   @if (error()) {
     <p class="error" role="alert">{{ error() }}</p>
   }
@@ -23,6 +28,12 @@
       <span class="tabla-cargando__spinner" aria-hidden="true"></span>
     </div>
   } @else if (datos) {
+    @if (cambiosEnRevision()) {
+      <p class="aviso-revision" role="status">
+        Hay cambios pendientes de aprobación por Recursos Humanos. Aquí se muestran los datos
+        vigentes.
+      </p>
+    }
     <section>
       <h2>
         <span class="icono-seccion material-symbols-outlined" aria-hidden="true">person</span
@@ -34,16 +45,19 @@
             <dt>Cédula</dt>
             <dd>{{ datos.cedula || 'Sin registrar' }}</dd>
           </div>
-          @if (datos.fechaNacimiento) {
+          @if (
+            fechaIso(datos.persona.fechaNacimiento ?? datos.fechaNacimiento);
+            as fechaNacimiento
+          ) {
             <div class="campo">
               <dt>Fecha de nacimiento</dt>
-              <dd>{{ datos.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+              <dd>{{ fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
             </div>
-            @let anios = edad(datos.fechaNacimiento);
+            @let anios = edad(fechaNacimiento);
             @if (anios !== null) {
               <div class="campo">
                 <dt>Edad</dt>
-                <dd>{{ anios }} {{ anios === 1 ? 'año' : 'años' }}</dd>
+                <dd>{{ anios }}</dd>
               </div>
             }
           }
@@ -96,20 +110,18 @@
             </dd>
           </div>
         </dl>
-        <div class="familiares">
-          @for (hijo of datos.familia?.familiares ?? []; track hijo) {
-            <ng-container
-              *ngTemplateOutlet="familiar; context: { $implicit: hijo, relacion: 'Hijo' }"
-            ></ng-container>
-          }
-        </div>
       </div>
       @if (datos.familia?.pareja; as pareja) {
         <ng-container
           *ngTemplateOutlet="
             familiar;
-            context: { $implicit: pareja, relacion: 'Cónyuge o pareja', esPareja: true }
+            context: { $implicit: pareja, relacion: 'Datos de la pareja' }
           "
+        ></ng-container>
+      }
+      @for (hijo of datos.familia?.familiares ?? []; track hijo) {
+        <ng-container
+          *ngTemplateOutlet="familiar; context: { $implicit: hijo, relacion: 'Datos de hijos' }"
         ></ng-container>
       }
     </section>
@@ -137,12 +149,14 @@
             @if (estudio.fechaInicio) {
               <div>
                 <dt>Inicio</dt>
-                <dd>{{ estudio.fechaInicio | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+                <dd>{{ fechaIso(estudio.fechaInicio) | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
               </div>
             }
             <div>
               <dt>Fin</dt>
-              <dd>{{ (estudio.fechaFin | date: 'dd/MM/yyyy' : 'UTC') || 'no especificado' }}</dd>
+              <dd>
+                {{ (fechaIso(estudio.fechaFin) | date: 'dd/MM/yyyy' : 'UTC') || 'no especificado' }}
+              </dd>
             </div>
           </dl>
           <ng-container
@@ -169,12 +183,14 @@
               <dl>
                 <div>
                   <dt>Emisión</dt>
-                  <dd>{{ certificado.fechaEmision | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+                  <dd>{{ fechaIso(certificado.fechaEmision) | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
                 </div>
                 @if (certificado.fechaVencimiento) {
                   <div>
                     <dt>Vencimiento</dt>
-                    <dd>{{ certificado.fechaVencimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+                    <dd>
+                      {{ fechaIso(certificado.fechaVencimiento) | date: 'dd/MM/yyyy' : 'UTC' }}
+                    </dd>
                   </div>
                 }
               </dl>
@@ -208,25 +224,14 @@
   }
 </div>
 
-<ng-template #familiar let-persona let-relacion="relacion" let-esPareja="esPareja">
-  <article [class.familiar]="!esPareja" [class.ficha-detalle]="esPareja">
-    @if (esPareja) {
-      <h3 class="ficha-detalle__titulo">{{ relacion }}</h3>
-    } @else {
-      <header class="familiar-identidad">
-        <div>
-          <p class="muted">{{ relacion }}</p>
-          <h3>{{ persona.nombres }} {{ persona.apellidos }}</h3>
-        </div>
-      </header>
-    }
-    <dl [class.ficha-detalle__campos]="esPareja">
-      @if (esPareja) {
-        <div>
-          <dt>Nombre</dt>
-          <dd>{{ persona.nombres | titlecase }} {{ persona.apellidos | titlecase }}</dd>
-        </div>
-      }
+<ng-template #familiar let-persona let-relacion="relacion">
+  <article class="ficha-detalle">
+    <h3 class="ficha-detalle__titulo">{{ relacion }}</h3>
+    <dl class="ficha-detalle__campos">
+      <div>
+        <dt>Nombre</dt>
+        <dd>{{ persona.nombres | titlecase }} {{ persona.apellidos | titlecase }}</dd>
+      </div>
       @if (persona.identificacion) {
         <div class="campo">
           <dt>Identificación</dt>
@@ -236,13 +241,13 @@
       @if (persona.fechaNacimiento) {
         <div class="campo">
           <dt>Fecha de nacimiento</dt>
-          <dd>{{ persona.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
+          <dd>{{ fechaIso(persona.fechaNacimiento) | date: 'dd/MM/yyyy' : 'UTC' }}</dd>
         </div>
         @let anios = edad(persona.fechaNacimiento);
         @if (anios !== null) {
           <div class="campo">
             <dt>Edad</dt>
-            <dd>{{ anios }} {{ anios === 1 ? 'año' : 'años' }}</dd>
+            <dd>{{ anios }}</dd>
           </div>
         }
       }
