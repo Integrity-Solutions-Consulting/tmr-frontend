@@ -81,8 +81,8 @@
 
     <span class="navbar__profile-text">Hola, {{ user.name.split(' ')[0] }}</span>
 
-    <button type="button" class="navbar__profile-btn" (click)="togglePerfil()" aria-label="Menú de usuario">
-      <span class="material-symbols-outlined navbar__profile-btn-icon">account_circle</span>
+    <button type="button" class="navbar__profile-btn" (click)="togglePerfil()" [attr.aria-expanded]="perfilAbierto" aria-label="Menú de usuario">
+      <span aria-hidden="true">{{ inicialesUsuario }}</span>
     </button>
 
     <app-profile-popover

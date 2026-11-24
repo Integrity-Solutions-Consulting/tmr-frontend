@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActualizacionDatosService } from '../../../actualizacion-datos/actualizacion-datos.service';
 import { UserModulesService } from '../../../auth/servicios/user-modules.service';
+import { BadgeEstadoComponent } from '../../../../shared/components/badge-estado/badge-estado.component';
 import { Boton } from '../../../../shared/components/boton/boton';
 
-@Component({ selector: 'app-detalle-colaborador-page', standalone: true, imports: [CommonModule, Boton], templateUrl: './detalle-colaborador-page.component.html', styleUrl: './detalle-colaborador-page.component.scss' })
+@Component({ selector: 'app-detalle-colaborador-page', standalone: true, imports: [CommonModule, Boton, BadgeEstadoComponent], templateUrl: './detalle-colaborador-page.component.html', styleUrl: './detalle-colaborador-page.component.scss' })
 export class DetalleColaboradorPageComponent {
   private route = inject(ActivatedRoute); private router = inject(Router); private api = inject(ActualizacionDatosService); private permissions = inject(UserModulesService);
   expediente: any; tab: 'general' | 'familia' | 'formacion' | 'certificaciones' | 'historial' = 'general'; loading = true; error = ''; canReadRestricted = false; private id = 0; selectedRequest: any;
