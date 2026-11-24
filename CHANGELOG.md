@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.11.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.1...v3.11.0) (2026-11-24)
+
+
+### Features
+
+* implement date normalization and formatting for profile data ([e8820ef](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e8820ef2a04787a694c4536b71a537c86f369d30))
+* **permisos:** ordenar acciones y mostrar procedencia de fecha base ([70b1e3c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/70b1e3c709a80adb3ebec7051944b098e1c98656))
+
+
+### Bug Fixes
+
+* **permisos:** validar formato ISO de afiliación ([c2673f4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/c2673f4e4ea84602a5bb14abafc93115ed437c84))
+* problemitas de carga masiva, paginacion y diseño del front ([ee3c5c9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ee3c5c9b5e617bdc695dab6b87c587d481e2df08))
+
+
+### Performance Improvements
+
+* **auth:** reutilizar indicador de cambio de contraseña del login ([2edade9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/2edade9b425e5b5a665b02a1c0fdf21b5ebe2ddb))
+* **permisos:** paginar historial RRHH y consultar por demanda ([7d55540](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/7d555402f30cef6bf10d060e3c19dcd96e48ebc7))
+
 ## [3.10.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.0...v3.10.1) (2026-11-24)
 
 
