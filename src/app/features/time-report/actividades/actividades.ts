@@ -9,9 +9,9 @@ import { AgregarActividad } from './agregar-actividad/agregar-actividad';
 import { GenerarReporte } from './generar-reporte/generar-reporte';
 
 import { ActividadesService } from '../../../shared/services/actividades.service';
-import { HorasFormatPipe } from '../../../shared/pipes/horas-format.pipe';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { MetricasHorasComponent } from '../../../shared/components/metricas-horas/metricas-horas.component';
+import { ResumenDiaActividadesComponent } from '../../../shared/components/resumen-dia-actividades/resumen-dia-actividades.component';
 
 @Component({
     selector: 'app-actividades',
@@ -22,7 +22,6 @@ import { MetricasHorasComponent } from '../../../shared/components/metricas-hora
         MatIconModule,
         MatDialogModule,
         Calendario,
-        HorasFormatPipe,
         HeaderComponent,
         MetricasHorasComponent
     ],
@@ -66,17 +65,11 @@ export class Actividades implements OnInit {
      */
     onDiaSeleccionado(fecha: Date) {
         this.fechaSeleccionada = fecha;
-        if (window.innerWidth > 1024) {
-            this.dialog.open(AgregarActividad, {
-                width: '560px',
-                maxHeight: '90vh',
-                data: { fecha },
-                disableClose: true,
-                autoFocus: false,
-                restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
-                panelClass: 'tmr-dialog-panel'
-            });
-        }
+        this.dialog.open(ResumenDiaActividadesComponent, {
+            width: '720px', maxWidth: '95vw', maxHeight: '90vh',
+            data: { fecha, editable: true, titulo: 'Mis actividades' },
+            panelClass: 'tmr-dialog-panel'
+        });
     }
 
     /**
@@ -97,18 +90,6 @@ export class Actividades implements OnInit {
     /**
      * Al seleccionar una actividad específica para editarla
      */
-    onEditarActividad(actividad: any) {
-        this.dialog.open(AgregarActividad, {
-            width: '560px',
-            maxHeight: '90vh',
-            data: { actividad },
-            disableClose: true,
-            autoFocus: false,
-            restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
-            panelClass: 'tmr-dialog-panel'
-        });
-    }
-
     /**
      * Devuelve la clase correspondiente según el tipo de actividad para aplicar estilos en mobile
      */

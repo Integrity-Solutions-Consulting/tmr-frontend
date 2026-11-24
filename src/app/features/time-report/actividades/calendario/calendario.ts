@@ -234,14 +234,18 @@ export class Calendario implements OnInit, OnDestroy {
         };
     }
 
-    editarActividad(event: MouseEvent, actividad: any) {
+    editarActividad(event: MouseEvent, actividad: any, fechaDia?: Date) {
         event.stopPropagation();
         // sm - En modo solo lectura (o si la cargó otra persona) no se edita: a lo sumo se abre su detalle.
         if (this.soloLectura || this.chipBloqueado(actividad)) {
             if (this.permitirVerDetalle) this.verActividadEvent.emit(actividad);
             return;
         }
-        this.editarActividadEvent.emit(actividad);
+        if (this.editarActividadEvent.observed) {
+            this.editarActividadEvent.emit(actividad);
+        } else if (fechaDia) {
+            this.seleccionarDia(fechaDia);
+        }
     }
 
     // sm - El líder que completa desde Seguimiento puede modificar las actividades del colaborador en el proyecto de esa

@@ -64,6 +64,14 @@ export interface ContextoColaboradorPermisoApi {
   lideresDisponibles: LiderDisponiblePermisoApi[];
   tiposPermiso?: TipoPermisoCatalogoApi[];
   rrhhDisponibles?: RrhhDisponiblePermisoApi[];
+  regimenVacaciones?: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tieneDerechoVacaciones?: boolean;
+  fechaInicioVacaciones?: string | null;
+  diasGanadosAcumulados?: number;
+  diasConsumidosVacaciones?: number;
+  diasAjusteVacaciones?: number;
+  diasProporcionalesCiclo?: number;
+  maximoAnticipoDias?: number;
 }
 
 export interface RrhhDisponiblePermisoApi {
@@ -143,6 +151,84 @@ export interface PermisoItemApi {
   avisoNotificacion?: string | null;
   versionSolicitud?: string | null;
   adjuntos?: AdjuntoPermisoApi[];
+  descuentaVacaciones?: boolean;
+  esRecuperable?: boolean;
+  esAnticipada?: boolean;
+  esHistorico?: boolean;
+  verificadoRrhh?: boolean;
+  observacionMigracion?: string | null;
+}
+
+export interface ColaboradorSelectorPermisoApi {
+  idEmpleado: number;
+  codigoEmpleado: string;
+  cedula: string;
+  apellidosNombres: string;
+  regimen: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tipoContrato: string;
+  empresa?: string | null;
+  activo: boolean;
+}
+
+export interface GuardarPermisoRrhhPayload {
+  idEmpleado: number;
+  tipoOficial: TipoPermisoOficial;
+  fechaInicio: string;
+  fechaFin: string;
+  fechaRegreso?: string | null;
+  totalDias?: number | null;
+  horario?: HorarioPermisoOficial;
+  detalleHorario?: string | null;
+  motivo: string;
+  descuentaVacaciones: boolean;
+  esRecuperable: boolean;
+  esAnticipada: boolean;
+  esHistorico: boolean;
+  verificadoRrhh: boolean;
+  observacionMigracion?: string | null;
+  estadoCodigo?: string | null;
+  impactoTimeReport?: 'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO' | null;
+}
+
+export interface AjusteVacacionesItemApi {
+  id: number;
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA';
+  diasAjuste: number;
+  permiteVacaciones?: boolean | null;
+  motivo: string;
+  usuarioCreacion: string;
+  fechaCreacion: string;
+}
+
+export interface SaldoVacacionesColaboradorApi {
+  idEmpleado: number;
+  codigoEmpleado: string;
+  cedula: string;
+  apellidosNombres: string;
+  cargo: string;
+  empresa?: string | null;
+  tipoContrato: string;
+  regimen: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tieneDerechoVacaciones: boolean;
+  excepcionFacturaActiva: boolean;
+  fechaIngresoOriginal?: string | null;
+  fechaInicioVacaciones?: string | null;
+  aniosAntiguedad: number;
+  diasGanadosAcumulados: number;
+  diasProporcionalesCiclo: number;
+  diasConsumidos: number;
+  diasAjuste: number;
+  saldoDisponible: number;
+  totalRegistrosHistorial: number;
+  registrosPorVerificar: number;
+  ajustes: AjusteVacacionesItemApi[];
+}
+
+export interface CrearAjusteVacacionesPayload {
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA';
+  diasAjuste: number;
+  permiteVacaciones?: boolean | null;
+  motivo: string;
 }
 
 export interface CrearPermisoPayload {
@@ -347,6 +433,70 @@ export class PermisosApiService {
     return this.http
       .get<unknown>(`${this.baseUrl}/rrhh`)
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+  }
+
+  obtenerColaboradoresRrhh(): Observable<ApiEnvelope<ColaboradorSelectorPermisoApi[]>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/colaboradores`)
+      .pipe(map((raw) => this.normalizarEnvelope<ColaboradorSelectorPermisoApi[]>(raw)));
+  }
+
+  obtenerHistorialEditableRrhh(filtros?: {
+    idEmpleado?: number | null;
+    anio?: number | null;
+    soloPendientesVerificar?: boolean;
+    soloHistoricos?: boolean;
+  }): Observable<ApiEnvelope<PermisoItemApi[]>> {
+    const params: Record<string, string> = {};
+    if (filtros?.idEmpleado) params['idEmpleado'] = String(filtros.idEmpleado);
+    if (filtros?.anio) params['anio'] = String(filtros.anio);
+    if (filtros?.soloPendientesVerificar) params['soloPendientesVerificar'] = 'true';
+    if (filtros?.soloHistoricos) params['soloHistoricos'] = 'true';
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+  }
+
+  crearRegistroRrhh(payload: GuardarPermisoRrhhPayload): Observable<ApiEnvelope<PermisoItemApi>> {
+    return this.http
+      .post<unknown>(`${this.baseUrl}/rrhh/registro`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
+  }
+
+  actualizarRegistroRrhh(
+    id: number,
+    payload: GuardarPermisoRrhhPayload,
+  ): Observable<ApiEnvelope<PermisoItemApi>> {
+    return this.http
+      .put<unknown>(`${this.baseUrl}/rrhh/${id}`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
+  }
+
+  anularRegistroRrhh(id: number): Observable<ApiEnvelope<{ id: number }>> {
+    return this.http
+      .delete<unknown>(`${this.baseUrl}/rrhh/${id}`)
+      .pipe(map((raw) => this.normalizarEnvelope<{ id: number }>(raw)));
+  }
+
+  obtenerSaldosVacacionesRrhh(): Observable<ApiEnvelope<SaldoVacacionesColaboradorApi[]>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/saldos`)
+      .pipe(map((raw) => this.normalizarEnvelope<SaldoVacacionesColaboradorApi[]>(raw)));
+  }
+
+  crearAjusteVacacionesRrhh(
+    idEmpleado: number,
+    payload: CrearAjusteVacacionesPayload,
+  ): Observable<ApiEnvelope<AjusteVacacionesItemApi>> {
+    return this.http
+      .post<unknown>(`${this.baseUrl}/rrhh/saldos/${idEmpleado}/ajuste`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<AjusteVacacionesItemApi>(raw)));
+  }
+
+  anularAjusteVacacionesRrhh(idAjuste: number): Observable<ApiEnvelope<{ id: number }>> {
+    return this.http
+      .delete<unknown>(`${this.baseUrl}/rrhh/saldos/ajustes/${idAjuste}`)
+      .pipe(map((raw) => this.normalizarEnvelope<{ id: number }>(raw)));
   }
 
   registrarDecisionRrhh(

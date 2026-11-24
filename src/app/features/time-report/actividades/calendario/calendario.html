@@ -89,7 +89,7 @@
                 @for (act of dia.actividades; track act.id) {
                 <div class="actividad-chip" [class]="getActividadClass(act)" [class.no-editable]="chipBloqueado(act) && !permitirVerDetalle"
                     [class.ver-detalle]="permitirVerDetalle && (soloLectura || chipBloqueado(act))"
-                    (click)="editarActividad($event, act)">
+                    (click)="editarActividad($event, act, dia.fecha)">
                     <span class="act-hours">{{ act.cantidadhoras }}h - </span>
                     <span class="act-name">{{ act.proyectoNombre }}</span>
                     @if (act.idLiderRegistro) {
