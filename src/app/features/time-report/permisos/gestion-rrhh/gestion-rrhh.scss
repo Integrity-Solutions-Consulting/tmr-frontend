@@ -331,3 +331,122 @@
 .modal-footer .rrhh-footer-izq {
   margin-right: auto;
 }
+
+// Popup "Ajustar saldo" (diseño minimalista 3E-1)
+.rrhh-ajuste-min {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  p {
+    margin: 0;
+  }
+
+  &__nombre {
+    font-size: 14px;
+    color: var(--text-main);
+  }
+
+  &__colab .cell-muted {
+    margin-top: 0.15rem;
+    font-size: 12px;
+  }
+
+  &__saldo-valor {
+    font-size: 2.1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+
+    span {
+      margin-left: 0.25rem;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__saldo .cell-muted {
+    margin-top: 0.5rem;
+    font-size: 12px;
+  }
+
+  &__campos {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // Campo de días corto, con el número centrado
+  &__dias {
+    width: 160px;
+    max-width: 100%;
+    text-align: center;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .modal-footer {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .modal-footer .btn-tmr--secondary {
+    border-color: transparent;
+    background: transparent;
+  }
+}
+
+// Ajustes aplicados: cerrado por defecto, se abre con un clic
+.rrhh-ajustes-plegado {
+  margin-top: -0.6rem;
+
+  > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      margin-right: 4px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.15s ease;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  &[open] > summary::after {
+    transform: rotate(-135deg);
+  }
+
+  .rrhh-ajuste-row {
+    background: #f5f7fa;
+    border-color: transparent;
+  }
+
+  .rrhh-ajuste-row__titulo {
+    font-size: 13px;
+    color: var(--text-main);
+  }
+}

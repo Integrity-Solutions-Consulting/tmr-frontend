@@ -736,27 +736,38 @@
 
 <!-- MODAL 4: AJUSTE DE SALDO / EXCEPCIÓN FACTURA -->
 <app-modal-base
-  titulo="Ajuste de Saldo y Excepciones de Vacaciones"
+  titulo="Ajustar saldo"
   [visible]="modalAjusteAbierto()"
-  [wide]="true"
   (cerrar)="modalAjusteAbierto.set(false)"
 >
   @if (colaboradorSaldoActivo(); as col) {
-    <div class="modal-form rrhh-edit-form">
-      <div class="rrhh-saldo-summary">
-        <div>
-          <strong>{{ col.apellidosNombres }}</strong>
-          <div class="cell-muted">{{ col.cedula }} · {{ col.tipoContrato }} ({{ col.regimen }})</div>
-        </div>
-        <div class="rrhh-saldo-summary__nums">
-          <span>Ganados: <strong>{{ col.diasGanadosAcumulados }} d</strong></span>
-          <span>Tomados: <strong>{{ col.diasConsumidos }} d</strong></span>
-          <span>Ajustes: <strong>{{ col.diasAjuste }} d</strong></span>
-          <span>Saldo: <strong>{{ col.saldoDisponible }} d</strong></span>
-        </div>
+    <div class="modal-form rrhh-ajuste-min">
+      <div class="rrhh-ajuste-min__colab">
+        <p class="rrhh-ajuste-min__nombre">{{ col.apellidosNombres }}</p>
+        <p class="cell-muted">
+          {{ col.cedula }} · {{ col.regimen === 'AFILIADO' ? 'Afiliado' : col.regimen === 'MIXTO' ? 'Mixto' : 'Factura' }}
+        </p>
       </div>
 
-      <div class="rrhh-form-grid">
+      <div class="rrhh-ajuste-min__saldo">
+        <p
+          class="rrhh-ajuste-min__saldo-valor"
+          [class.rrhh-saldo-value--neg]="col.saldoDisponible < 0"
+          [class.rrhh-saldo-value--pos]="col.tieneDerechoVacaciones && col.saldoDisponible >= 0"
+        >
+          @if (!col.tieneDerechoVacaciones && col.saldoDisponible === 0) {
+            N/A
+          } @else {
+            {{ col.saldoDisponible }} d
+          }
+          <span>disponibles</span>
+        </p>
+        <p class="cell-muted">
+          {{ col.diasGanadosAcumulados }} ganados · {{ col.diasConsumidos }} tomados · {{ col.diasAjuste }} de ajustes
+        </p>
+      </div>
+
+      <div class="rrhh-ajuste-min__campos">
         <div class="form-field">
           <label for="ajuste-tipo">Tipo de operación</label>
           <select id="ajuste-tipo" [ngModel]="ajusteTipo()" (ngModelChange)="ajusteTipo.set($event)">
@@ -771,6 +782,7 @@
             <label for="ajuste-dias">Días a sumar (+) o descontar (-)</label>
             <input
               id="ajuste-dias"
+              class="rrhh-ajuste-min__dias"
               type="number"
               step="0.5"
               [ngModel]="ajusteDias()"
@@ -800,46 +812,48 @@
             </select>
           </div>
         }
-      </div>
 
-      <div class="form-field">
-        <label for="ajuste-motivo">Motivo / Respaldo *</label>
-        <input
-          id="ajuste-motivo"
-          type="text"
-          placeholder="Ej. Cuadre histórico inicial, autorización gerencial por cambio de proyecto..."
-          [ngModel]="ajusteMotivo()"
-          (ngModelChange)="ajusteMotivo.set($event)"
-        />
+        <div class="form-field">
+          <label for="ajuste-motivo">Motivo / Respaldo *</label>
+          <input
+            id="ajuste-motivo"
+            type="text"
+            placeholder="Ej. Cuadre histórico inicial, autorización gerencial..."
+            [ngModel]="ajusteMotivo()"
+            (ngModelChange)="ajusteMotivo.set($event)"
+          />
+        </div>
       </div>
 
       @if (col.ajustes.length > 0) {
-        <div class="rrhh-ajustes-list">
-          <h4>Historial de ajustes aplicados</h4>
-          @for (aj of col.ajustes; track aj.id) {
-            <div class="rrhh-ajuste-row">
-              <div>
-                <strong>
-                  @if (aj.tipoAjuste === 'EXCEPCION_FACTURA') {
-                    Excepción Factura: {{ aj.permiteVacaciones ? 'Habilitada' : 'Revocada' }}
-                  } @else if (aj.tipoAjuste === 'FECHA_AFILIACION') {
-                    Fecha afiliación: {{ aj.fechaAfiliacionBase }}
-                  } @else {
-                    Ajuste: {{ aj.diasAjuste >= 0 ? '+' + aj.diasAjuste : aj.diasAjuste }} día(s)
-                  }
-                </strong>
-                <div class="cell-muted">{{ aj.motivo }} · {{ aj.usuarioCreacion }} ({{ aj.fechaCreacion }})</div>
+        <details class="rrhh-ajustes-plegado">
+          <summary>Ajustes aplicados ({{ col.ajustes.length }})</summary>
+          <div class="rrhh-ajustes-list">
+            @for (aj of col.ajustes; track aj.id) {
+              <div class="rrhh-ajuste-row">
+                <div>
+                  <span class="rrhh-ajuste-row__titulo">
+                    @if (aj.tipoAjuste === 'EXCEPCION_FACTURA') {
+                      Excepción Factura: {{ aj.permiteVacaciones ? 'Habilitada' : 'Revocada' }}
+                    } @else if (aj.tipoAjuste === 'FECHA_AFILIACION') {
+                      Fecha afiliación: {{ aj.fechaAfiliacionBase }}
+                    } @else {
+                      Ajuste: {{ aj.diasAjuste >= 0 ? '+' + aj.diasAjuste : aj.diasAjuste }} día(s)
+                    }
+                  </span>
+                  <div class="cell-muted">{{ aj.motivo }} · {{ aj.usuarioCreacion }} ({{ aj.fechaCreacion }})</div>
+                </div>
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--danger btn-tmr--sm"
+                  (click)="anularAjusteSaldo(aj.id)"
+                >
+                  Revertir
+                </button>
               </div>
-              <button
-                type="button"
-                class="btn-tmr btn-tmr--danger btn-tmr--sm"
-                (click)="anularAjusteSaldo(aj.id)"
-              >
-                Revertir
-              </button>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        </details>
       }
 
       <div class="modal-footer">
