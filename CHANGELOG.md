@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.13.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.12.0...v3.13.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** paginación en servidor para Mis permisos, Aprobaciones del líder e Historial de gerencia ([e79645a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e79645a3f21b7c4d7117afc5096cc4b6fdc3d555))
+* **permisos:** paginación en servidor para Mis permisos, Aprobaciones del líder e Historial de gerencia ([500e7c1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/500e7c1f004f7e621fd5adb00796da1caa096485))
+
 ## [3.12.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.11.0...v3.12.0) (2026-11-25)
 
 
