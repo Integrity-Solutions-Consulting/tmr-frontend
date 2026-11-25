@@ -15,11 +15,6 @@
     }
   </header>
 
-  @if (avisoCorreccion()) {
-    <p class="aviso-revision aviso-correccion" role="status">
-      Tienes pendiente realizar cambios en tu perfil.
-    </p>
-  }
   @if (error()) {
     <p class="error" role="alert">{{ error() }}</p>
   }
@@ -28,12 +23,6 @@
       <span class="tabla-cargando__spinner" aria-hidden="true"></span>
     </div>
   } @else if (datos) {
-    @if (cambiosEnRevision()) {
-      <p class="aviso-revision" role="status">
-        Hay cambios pendientes de aprobación por Recursos Humanos. Aquí se muestran los datos
-        vigentes.
-      </p>
-    }
     <section>
       <h2>
         <span class="icono-seccion material-symbols-outlined" aria-hidden="true">person</span

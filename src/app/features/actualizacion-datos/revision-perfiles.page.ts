@@ -9,6 +9,7 @@ import { HeaderComponent } from '../../shared/components/header/header.component
 import { TarjetaResumenComponent } from '../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { BadgeEstadoComponent, type TonoBadgeEstado } from '../../shared/components/badge-estado/badge-estado.component';
 import { Boton } from '../../shared/components/boton/boton';
+import { PopupService } from '../../shared/services/popup.service';
 import { ActualizacionDatosService } from './actualizacion-datos.service';
 import { calcularEdad, formatearFechaPerfil, normalizarFechaPerfil } from './edad-perfil.util';
 
@@ -31,6 +32,7 @@ export class RevisionPerfilesPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(ActualizacionDatosService);
+  private readonly popup = inject(PopupService);
   readonly secciones: Record<string,string> = { personal: 'Información personal', familia: 'Información familiar', formacion: 'Formación académica', certificaciones: 'Certificaciones', conocimientos: 'Conocimientos' };
   readonly iconosSeccion: Record<string, string> = {
     personal: 'person', familia: 'family_restroom', formacion: 'school',
@@ -299,6 +301,8 @@ export class RevisionPerfilesPage {
       next: () => {
         envio.estado = estado;
         envio.observacion = observacion.trim();
+        void this.popup.showText('check_circle', 'Estado actualizado',
+          `${this.secciones[envio.seccion]} · ${this.estados[estado]}`, true);
         delete this.decisiones[envio.id];
         this.saving = false;
         this.cargar(envio.seccion);
