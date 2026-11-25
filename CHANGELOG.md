@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.15.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.14.0...v3.15.0) (2026-11-25)
+
+
+### Features
+
+* **validacion rrhh:** popup Ajustar saldo minimalista ([4931769](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/4931769d4f35050de4b72037675a76c1b221d8d6))
+
+
+### Bug Fixes
+
+* exportar vacaciones y permisos en libros separados con colores por mes ([b340a1a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b340a1a22200dd587365d735e812ee22524007fc))
+* **permisos:** ajustar anchos, centrado y desbordes en tabla de historial RRHH ([03d766c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/03d766cd050fed76ab46c8977f8730912bed38df))
+
 ## [3.14.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.13.0...v3.14.0) (2026-11-25)
 
 
