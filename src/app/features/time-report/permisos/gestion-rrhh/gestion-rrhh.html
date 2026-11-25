@@ -124,7 +124,7 @@
             <th>Fechas</th>
             <th>Días</th>
             <th class="estado-column">Estado</th>
-            <th aria-label="Acciones">Acciones</th>
+            <th class="rrhh-acciones-column" aria-label="Acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -144,9 +144,7 @@
           } @else {
             @for (item of historialRegistros(); track item.id) {
               <tr [class.rrhh-row-unverified]="!item.verificadoRrhh">
-                <td>
-                  <strong>{{ item.colaborador }}</strong>
-                </td>
+                <td>{{ item.colaborador }}</td>
                 <td>{{ item.tipo }}</td>
                 <td class="cell-muted">
                   {{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }
@@ -159,7 +157,7 @@
                     {{ item.estadoTexto }}
                   </span>
                 </td>
-                <td>
+                <td class="rrhh-acciones-column">
                   <div class="actions-cell rrhh-actions-inline">
                     <button
                       type="button"
@@ -243,12 +241,12 @@
           <tr>
             <th>Colaborador</th>
             <th>Régimen</th>
-            <th>Base Vacaciones</th>
+            <th>Fecha base</th>
             <th>Ganados</th>
             <th>Tomados</th>
             <th>Ajustes</th>
             <th>Saldo</th>
-            <th aria-label="Acciones">Acciones</th>
+            <th class="rrhh-acciones-column" aria-label="Acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -261,7 +259,7 @@
               <tr>
                 <td>
                   <div class="rrhh-cell-stack">
-                    <strong>{{ col.apellidosNombres }}</strong>
+                    <span>{{ col.apellidosNombres }}</span>
                     <span class="cell-muted">{{ col.cedula }} · {{ col.cargo || col.codigoEmpleado }}</span>
                   </div>
                 </td>
@@ -280,20 +278,7 @@
                     }
                   </div>
                 </td>
-                <td>
-                  <div class="rrhh-cell-stack">
-                    <span>Fecha base: {{ col.fechaInicioVacaciones || 'Sin fecha' }}</span>
-                    @if (col.fechaInicioVacaciones) {
-                      <small class="cell-muted">{{ col.origenFechaInicioVacaciones || 'Origen pendiente de confirmar' }}</small>
-                    }
-                    @if (col.fechaIngresoOriginal && col.fechaIngresoOriginal !== col.fechaInicioVacaciones) {
-                      <span class="cell-muted">Ingreso gral.: {{ col.fechaIngresoOriginal }}</span>
-                    }
-                    <span class="cell-muted">
-                      {{ col.aniosAntiguedad }} año(s) · Prop. ciclo: {{ col.diasProporcionalesCiclo }} d
-                    </span>
-                  </div>
-                </td>
+                <td [class.cell-muted]="!col.fechaInicioVacaciones">{{ col.fechaInicioVacaciones || 'Sin fecha' }}</td>
                 <td><strong>{{ col.diasGanadosAcumulados }} d</strong></td>
                 <td>
                   <div class="rrhh-cell-stack">
@@ -317,23 +302,14 @@
                     }
                   </strong>
                 </td>
-                <td>
-                  <div class="actions-cell rrhh-actions-inline">
-                    <button
-                      type="button"
-                      class="btn-tmr btn-tmr--secondary btn-tmr--sm"
-                      (click)="verHistorialDeColaborador(col)"
-                    >
-                      Historial ({{ col.totalRegistrosHistorial }})
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-tmr btn-tmr--primary btn-tmr--sm"
-                      (click)="abrirModalAjusteSaldo(col)"
-                    >
-                      Ajustar
-                    </button>
-                  </div>
+                <td class="rrhh-acciones-column" (click)="$event.stopPropagation()">
+                  <app-action-menu
+                    [itemId]="'saldo-' + col.idEmpleado"
+                    [menuAbierto]="menuSaldoAbierto()"
+                    [acciones]="accionesSaldo(col)"
+                    (toggleMenu)="toggleMenuSaldo($event)"
+                    (accionSeleccionada)="onAccionSaldo($event, col)"
+                  ></app-action-menu>
                 </td>
               </tr>
             } @empty {

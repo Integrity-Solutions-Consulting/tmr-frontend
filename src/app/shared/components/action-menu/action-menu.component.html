@@ -40,6 +40,10 @@
           <mat-icon aria-hidden="true">block</mat-icon>
         } @else if (accion.id === 'activar') {
           <mat-icon aria-hidden="true">check_circle</mat-icon>
+        } @else if (accion.id === 'ver-historial') {
+          <mat-icon aria-hidden="true">history</mat-icon>
+        } @else if (accion.id === 'ajustar-saldo') {
+          <mat-icon aria-hidden="true">tune</mat-icon>
         }
 
         <span>{{ accion.label }}</span>

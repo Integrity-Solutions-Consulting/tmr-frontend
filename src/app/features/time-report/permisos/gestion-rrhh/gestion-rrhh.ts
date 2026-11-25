@@ -8,6 +8,7 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
+import { ActionMenuComponent, ActionMenuItem } from '../../../../shared/components/action-menu/action-menu.component';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
@@ -118,6 +119,7 @@ const TIPOS_PERMISO_OPCIONES: ReadonlyArray<{ codigo: TipoPermisoOficial; nombre
     ModalBase,
     ResumenSolicitudComponent,
     PaginacionComponent,
+    ActionMenuComponent,
   ],
   templateUrl: './gestion-rrhh.html',
   styleUrl: './gestion-rrhh.scss',
@@ -207,6 +209,8 @@ export class GestionRrhhComponent implements OnInit {
   readonly busquedaSaldos = signal('');
   readonly filtroRegimenSaldos = signal<'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA'>('TODOS');
   readonly soloSaldoNegativo = signal(false);
+  /** Fila de saldos con el menú de acciones (⋮) abierto. */
+  readonly menuSaldoAbierto = signal<string | null>(null);
 
   // Modal Ajuste de Saldo / Excepción Factura
   readonly modalAjusteAbierto = signal(false);
@@ -723,6 +727,27 @@ export class GestionRrhhComponent implements OnInit {
         this.toast.error('No se pudo anular el registro', obtenerMensajeAmigablePermisos(err));
       },
     });
+  }
+
+  accionesSaldo(col: SaldoVacacionesColaboradorApi): ActionMenuItem[] {
+    return [
+      { id: 'ver-historial', label: `Ver historial (${col.totalRegistrosHistorial})` },
+      { id: 'ajustar-saldo', label: 'Ajustar saldo' },
+    ];
+  }
+
+  toggleMenuSaldo(payload: { id: string; event: Event }): void {
+    payload.event.stopPropagation();
+    this.menuSaldoAbierto.update((actual) => (actual === payload.id ? null : payload.id));
+  }
+
+  onAccionSaldo(accion: ActionMenuItem, col: SaldoVacacionesColaboradorApi): void {
+    this.menuSaldoAbierto.set(null);
+    if (accion.id === 'ver-historial') {
+      this.verHistorialDeColaborador(col);
+    } else if (accion.id === 'ajustar-saldo') {
+      this.abrirModalAjusteSaldo(col);
+    }
   }
 
   verHistorialDeColaborador(col: SaldoVacacionesColaboradorApi): void {
