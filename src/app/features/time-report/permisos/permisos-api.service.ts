@@ -210,6 +210,7 @@ export interface PermisoItemApi {
   esHistorico?: boolean;
   verificadoRrhh?: boolean;
   observacionMigracion?: string | null;
+  regimen?: 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
 }
 
 export interface ColaboradorSelectorPermisoApi {
@@ -527,6 +528,9 @@ export class PermisosApiService {
   obtenerHistorialEditableRrhh(filtros: PaginaConsultaRrhh & {
     idEmpleado?: number | null;
     anio?: number | string | null;
+    desde?: string | null;
+    hasta?: string | null;
+    regimen?: 'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
     tipo?: string | null;
     soloPendientesVerificar?: boolean;
     soloHistoricos?: boolean;
@@ -535,6 +539,24 @@ export class PermisosApiService {
     return this.http
       .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
       .pipe(map((raw) => this.normalizarEnvelope<PaginaApi<PermisoItemApi>>(raw)));
+  }
+
+  /** Historial completo con los filtros vigentes (para exportación Excel y PDF). */
+  obtenerHistorialEditableRrhhCompleto(filtros: {
+    buscar?: string | null;
+    idEmpleado?: number | null;
+    anio?: number | string | null;
+    desde?: string | null;
+    hasta?: string | null;
+    regimen?: 'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
+    tipo?: string | null;
+    soloPendientesVerificar?: boolean;
+    soloHistoricos?: boolean;
+  }): Observable<ApiEnvelope<PermisoItemApi[]>> {
+    const params = this.construirParams({ ...filtros });
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
   crearRegistroRrhh(payload: GuardarPermisoRrhhPayload): Observable<ApiEnvelope<PermisoItemApi>> {
