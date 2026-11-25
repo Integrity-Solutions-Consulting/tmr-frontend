@@ -25,10 +25,15 @@ export type EstadoProyecto =
   | 'En espera';
 
 export interface ProyectoAsignado {
+  idAsignacion?: number;
   id: string;
-  nombre: string;
-  cliente: string;
-  estado: EstadoProyecto;
+  codigo?: string | null;
+  nombre?: string | null;
+  cliente?: string | null;
+  rol?: string | null;
+  fechaAsignacion?: string | null;
+  fechaFinAsignacion?: string | null;
+  estado?: EstadoProyecto | string | null;
   // sm - Estado de asignación del colaborador en el proyecto (true = Activo, false = Inactivo).
   estadoAsignacion: boolean;
 }

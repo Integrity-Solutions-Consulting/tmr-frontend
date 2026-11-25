@@ -274,15 +274,20 @@ export class ColaboradoresService {
       estado: (api.activo ?? api.Activo) ? 'Activo' : 'Inactivo',
       activo: api.activo ?? api.Activo ?? false,
       proyectosAsignados: (api.proyectos ?? api.Proyectos ?? []).map((p: any) => ({
+        idAsignacion: p.idAsignacion ?? p.IdAsignacion,
         id: p.id?.toString() ?? p.Id?.toString() ?? '',
-        nombre: p.nombre ?? p.Nombre ?? '',
-        cliente: p.cliente ?? p.Cliente ?? '',
-        estado: (p.estado ?? p.Estado ?? '') as any,
-        estadoAsignacion: p.estadoAsignacion ?? p.EstadoAsignacion ?? true,
+        codigo: p.codigo ?? p.Codigo ?? null,
+        nombre: p.nombre ?? p.Nombre ?? null,
+        cliente: p.cliente ?? p.Cliente ?? null,
+        rol: p.rol ?? p.Rol ?? null,
+        fechaAsignacion: p.fechaAsignacion ?? p.FechaAsignacion ?? null,
+        fechaFinAsignacion: p.fechaFinAsignacion ?? p.FechaFinAsignacion ?? null,
+        estado: (p.estadoProyecto ?? p.EstadoProyecto ?? p.estado ?? p.Estado ?? null) as any,
+        estadoAsignacion: p.asignacionActiva ?? p.AsignacionActiva ?? p.estadoAsignacion ?? p.EstadoAsignacion ?? false,
       })),
       // sm - Solo cuentan los proyectos con estado de asignación Activo.
       numProyectos: (api.proyectos ?? api.Proyectos ?? [])
-        .filter((p: any) => (p.estadoAsignacion ?? p.EstadoAsignacion ?? true) !== false).length,
+        .filter((p: any) => (p.asignacionActiva ?? p.AsignacionActiva ?? p.estadoAsignacion ?? p.EstadoAsignacion) === true).length,
 
       // sm - Datos de salida del colaborador.
       fechaSalida: api.fechaSalida ?? null,

@@ -29,12 +29,25 @@
 .link:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
 .proposal { margin-top: 22px; padding-top: 4px; border-top: 1px solid var(--border-default); }
 .error { padding: 14px; border-radius: 8px; background: var(--status-danger-bg); color: var(--status-danger-text); }
+.section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.project-count { min-width: 32px; padding: 4px 9px; border-radius: 999px; background: var(--pattern-table-header-bg); color: var(--text-main); text-align: center; font-weight: 700; }
+.project-error { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.projects-table-wrap { overflow-x: auto; margin-top: 16px; border: 1px solid var(--border-default); border-radius: 10px; }
+.projects-table { width: 100%; min-width: 850px; border-collapse: collapse; }
+.projects-table th, .projects-table td { padding: 13px 12px; border-bottom: 1px solid var(--border-default); text-align: left; vertical-align: top; }
+.projects-table th { background: var(--pattern-table-header-bg); color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+.projects-table tr:last-child td { border-bottom: 0; }
+.projects-table td:first-child { display: grid; gap: 4px; }
+.projects-table td:first-child small { color: var(--text-secondary); }
+.status-label { display: inline-flex; width: fit-content; padding: 4px 8px; border-radius: 999px; background: var(--status-success-bg); color: var(--status-success-text); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-label--inactive { background: var(--status-warning-bg); color: var(--status-warning-text); }
 
 @media (max-width: 900px) {
   .expediente-page { padding: 20px 16px; }
   .hero { align-items: flex-start; flex-direction: column; }
   .grid { grid-template-columns: 1fr; }
   .card { padding: 18px; }
+  .section-heading { align-items: flex-start; }
   .list-row { align-items: stretch; flex-direction: column; }
   .list-row app-boton { width: 100%; }
 }
