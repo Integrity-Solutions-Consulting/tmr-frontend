@@ -330,7 +330,8 @@
 
 /* Modal form layouts */
 // List surfaces only: official documents and creation forms keep their own layout.
-.permisos-page > .table-card {
+.permisos-page > .table-card,
+.permisos-page > .rrhh-vista-panel > .table-card {
   overflow-x: auto;
   > .permisos-table {
     min-width: 760px;
@@ -388,7 +389,8 @@
 }
 
 // Same column hierarchy and density for the three review inboxes.
-.permisos-page > .table-card > .permisos-review-table {
+.permisos-page > .table-card > .permisos-review-table,
+.permisos-page > .rrhh-vista-panel > .table-card > .permisos-review-table {
   min-width: 780px;
   table-layout: fixed;
   td { line-height: 1.4; }
