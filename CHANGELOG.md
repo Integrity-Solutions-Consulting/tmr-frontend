@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.12.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.11.0...v3.12.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** paginación en las pestañas de RRHH y edición centralizada en el popup ([d1cc10c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d1cc10c0028e8e37adfe45cb090ae7ff27c2d174))
+* **permisos:** paginación en las pestañas de RRHH y edición centralizada en el popup ([0b5a31c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b5a31c76e9d862736f08bfef5aa3366cbec8af9))
+
 ## [3.11.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.1...v3.11.0) (2026-11-24)
 
 
