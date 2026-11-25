@@ -313,24 +313,24 @@
   }
 }
 
-// Tabla de Historial: Días compacto para maximizar visibilidad del nombre de colaborador en cualquier pantalla
+// Tabla de Historial: Días compacto, fechas y estado sin desbordes ni puntos suspensivos, alineación centrada
 .permisos-page > .rrhh-vista-panel > .table-card > .rrhh-historial-table {
-  min-width: 820px;
+  min-width: 960px;
 
   .col-hist-colaborador {
     width: auto;
   }
 
   .col-hist-afiliacion {
-    width: 104px;
+    width: 100px;
   }
 
   .col-hist-permiso {
-    width: 19%;
+    width: 16%;
   }
 
   .col-hist-fechas {
-    width: 172px;
+    width: 204px;
   }
 
   .col-hist-dias {
@@ -338,20 +338,16 @@
   }
 
   .col-hist-estado {
-    width: 148px;
+    width: 164px;
   }
 
   .col-hist-acciones {
-    width: 76px;
+    width: 80px;
   }
 
-  th.rrhh-dias-column,
-  td.rrhh-dias-column {
-    width: 68px;
-    padding-left: 8px;
-    padding-right: 8px;
-    text-align: center;
-    white-space: nowrap;
+  th.rrhh-col-nombre,
+  td.rrhh-col-nombre {
+    text-align: left;
   }
 
   td.rrhh-col-nombre {
@@ -363,23 +359,79 @@
     font-weight: 500;
   }
 
+  th.rrhh-col-afiliacion,
+  td.rrhh-col-afiliacion {
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  th.rrhh-col-permiso,
+  td.rrhh-col-permiso {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   td.rrhh-col-permiso {
     white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
     overflow-wrap: break-word;
     line-height: 1.3;
   }
 
+  th.rrhh-col-fechas,
   td.rrhh-col-fechas {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
     white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
     font-variant-numeric: tabular-nums;
   }
 
+  th.rrhh-dias-column,
+  td.rrhh-dias-column {
+    width: 68px;
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  th.estado-column,
+  td.estado-column {
+    width: 164px;
+    min-width: 164px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  th.rrhh-acciones-column,
+  td.rrhh-acciones-column,
   th:last-child,
   td:last-child {
-    min-width: 72px;
-    width: 76px;
+    min-width: 80px;
+    width: 80px;
     padding-left: 8px;
     padding-right: 8px;
+    text-align: center;
+    overflow: visible;
+    text-overflow: clip;
+
+    app-action-menu {
+      display: inline-flex;
+      justify-content: center;
+    }
   }
 }
 

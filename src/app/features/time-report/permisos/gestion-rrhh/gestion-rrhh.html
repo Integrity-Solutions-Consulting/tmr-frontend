@@ -384,10 +384,10 @@
           </colgroup>
           <thead>
             <tr>
-              <th>Colaborador</th>
-              <th>Afiliación</th>
-              <th>Permiso</th>
-              <th>Fechas</th>
+              <th class="rrhh-col-nombre">Colaborador</th>
+              <th class="rrhh-col-afiliacion">Afiliación</th>
+              <th class="rrhh-col-permiso">Permiso</th>
+              <th class="rrhh-col-fechas">Fechas</th>
               <th class="rrhh-dias-column">Días</th>
               <th class="estado-column">Estado</th>
               <th class="rrhh-acciones-column" aria-label="Acciones">Acciones</th>
@@ -411,7 +411,7 @@
               @for (item of historialRegistros(); track item.id) {
                 <tr [class.rrhh-row-unverified]="!item.verificadoRrhh">
                   <td class="rrhh-col-nombre" [attr.title]="item.colaborador">{{ item.colaborador }}</td>
-                  <td>
+                  <td class="rrhh-col-afiliacion">
                     @if (item.regimen) {
                       <span
                         class="rrhh-tag"
@@ -433,8 +433,8 @@
                     <strong>{{ item.totalDias }} d</strong>
                   </td>
                   <td class="estado-column">
-                    <span [class]="'status-badge status-badge--' + item.estadoClase">
-                      {{ item.estadoTexto }}
+                    <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                      {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
                     </span>
                   </td>
                   <td class="rrhh-acciones-column" (click)="$event.stopPropagation()">
