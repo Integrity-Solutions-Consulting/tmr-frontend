@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.15.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.15.0...v3.15.1) (2026-11-25)
+
+
+### Bug Fixes
+
+* recuperar cliente, líder y tipo y mostrar los colores mensuales en Excel ([5e9a524](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/5e9a5240ca9e52021cb6eeaa79d1988aef9df711))
+
 ## [3.15.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.14.0...v3.15.0) (2026-11-25)
 
 
