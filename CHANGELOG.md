@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.14.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.13.0...v3.14.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** mejoras en historial RRHH, afiliacion, buscador y exportaciones ([2cf3f97](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/2cf3f9789e7985d606c00a913d6ccdd0228e890b))
+
 ## [3.13.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.12.0...v3.13.0) (2026-11-25)
 
 
