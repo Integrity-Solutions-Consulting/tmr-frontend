@@ -149,6 +149,69 @@
   gap: 0.35rem;
 }
 
+// Saldos: el nombre despliega hacia abajo la cédula y el cargo (otro clic lo contrae)
+.rrhh-colab-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    color: var(--primary-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  &__icono {
+    flex: none;
+    color: var(--text-secondary);
+    transition: transform 0.15s ease;
+  }
+
+  &--abierto &__icono {
+    transform: rotate(90deg);
+  }
+}
+
+.rrhh-colab-detalle {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.75rem;
+  row-gap: 0.2rem;
+  margin: 0.35rem 0 0 1.35rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: #f5f7fa;
+  font-size: 12px;
+
+  dt {
+    color: var(--text-secondary);
+  }
+
+  dd {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 // Columna de acciones (Historial Editable y Saldos): ancho fijo y contenido centrado bajo su título
 .permisos-table .rrhh-acciones-column {
   width: 110px;
