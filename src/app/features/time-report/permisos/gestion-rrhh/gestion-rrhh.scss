@@ -149,6 +149,16 @@
   gap: 0.35rem;
 }
 
+// Columna de acciones (Historial Editable y Saldos): ancho fijo y contenido centrado bajo su título
+.permisos-table .rrhh-acciones-column {
+  width: 110px;
+  text-align: center;
+
+  .actions-cell {
+    justify-content: center;
+  }
+}
+
 .rrhh-saldo-value {
   font-size: 0.95rem;
 

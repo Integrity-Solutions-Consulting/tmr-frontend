@@ -40,6 +40,34 @@ export interface PaginaConsultaRrhh {
   buscar?: string | null;
 }
 
+/** Indicadores de Mis permisos, Aprobaciones del líder e Historial de gerencia. */
+export interface ResumenListadoPermisosApi {
+  total: number;
+  enProceso: number;
+  confirmados: number;
+  rechazados: number;
+  pendientesLider: number;
+  aprobadosLider: number;
+  ausentesHoy: number;
+  proyectos: string[];
+}
+
+export interface PaginaPermisosApi extends PaginaApi<PermisoItemApi> {
+  resumen: ResumenListadoPermisosApi;
+}
+
+/** Filtros comunes de los listados de solicitudes; sin page/pageSize se recibe la lista completa filtrada. */
+export interface ConsultaListadoPermisos {
+  page?: number;
+  pageSize?: number;
+  buscar?: string | null;
+  tipo?: string | null;
+  estado?: string | null;
+  desde?: string | null;
+  hasta?: string | null;
+  proyecto?: string | null;
+}
+
 export interface ProyectoAsignadoPermisoApi {
   idProyecto: number;
   proyectoNombre: string;
@@ -391,10 +419,10 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<ContextoColaboradorPermisoApi>(raw)));
   }
 
-  obtenerMisPermisos(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerMisPermisos(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/mis-permisos`)
-      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+      .get<unknown>(`${this.baseUrl}/mis-permisos`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
   }
 
   crearSolicitud(
@@ -439,10 +467,10 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerEquipo(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerEquipo(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/equipo`)
-      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+      .get<unknown>(`${this.baseUrl}/equipo`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
   }
 
   registrarDecisionLider(
@@ -580,9 +608,16 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerHistorialGerencia(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerHistorialGerencia(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/gerencia`)
+      .get<unknown>(`${this.baseUrl}/gerencia`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
+  }
+
+  /** Historial de gerencia completo con los filtros vigentes (selección masiva para reportes). */
+  obtenerHistorialGerenciaCompleto(consulta: Omit<ConsultaListadoPermisos, 'page' | 'pageSize'>): Observable<ApiEnvelope<PermisoItemApi[]>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/gerencia`, { params: this.construirParams({ ...consulta }) })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 
