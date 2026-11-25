@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -9,6 +10,8 @@ import { FechaPerfilDirective } from './fecha-perfil.directive';
 import { Boton } from '../../shared/components/boton/boton';
 import { AppSelectComponent, AppSelectOption } from '../../shared/components/select/select.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PopupService } from '../../shared/services/popup.service';
+import { NotificacionesInternasService } from '../../shared/services/notificaciones-internas.service';
 import { NotificacionComponent } from '../clientes/componentes/notificacion/notificacion.component';
 import { Notificacion } from '../clientes/modelos/cliente.model';
 import { capitalizarInicialNombre, NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../shared/validators/nombre-persona.validator';
@@ -18,6 +21,13 @@ import { TIPOS_DISCAPACIDAD, tiposDiscapacidadRegistrados } from '../../shared/v
 type ConditionKind = 'children' | 'ownDisability' | 'partner' | 'childDisability';
 const controlPorSeccion = { personal: 'persona', familia: 'familia', formacion: 'formaciones', certificaciones: 'certificaciones', conocimientos: 'conocimientos' } as const;
 type SeccionPerfil = keyof typeof controlPorSeccion;
+const nombreSeccion: Record<SeccionPerfil, string> = {
+  personal: 'Información personal',
+  familia: 'Información familiar',
+  formacion: 'Formación académica',
+  certificaciones: 'Certificaciones',
+  conocimientos: 'Conocimientos',
+};
 type PersonalInput = 'email' | 'telefono' | 'direccion' | 'porcentajeDiscapacidad';
 type FormatoEntrada = 'email' | 'direccion' | 'porcentaje' | 'nombrePersona' | 'nombreCertificado' | 'entidadEmisora';
 
@@ -51,15 +61,23 @@ function porcentajeNumerico(value: string | number | null | undefined): number |
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, Boton, AppSelectComponent, ConfirmDialogComponent, NotificacionComponent, FechaPerfilDirective],
   templateUrl: './mis-datos.page.html',
-  styleUrl: './mis-datos.page.scss'
+  styleUrl: './mis-datos.page.scss',
+  host: { '(window:focus)': 'actualizarEstadoRevision()' },
 })
 export class MisDatosPage {
   private fb = inject(FormBuilder);
   private api = inject(ActualizacionDatosService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private readonly popup = inject(PopupService);
+  private readonly avisosInternos = inject(NotificacionesInternasService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly avisoRevisionAbierto = signal(false);
+  private readonly correccionPendiente = signal<SeccionPerfil | null>(null);
+  private readonly avisosCorreccionRecibidos = new Set<number>();
   data: any = null;
-  loading = true; loadFailed = false; saving = false; message = ''; error = ''; notificacion: Notificacion | null = null;
+  loading = true; loadFailed = false; saving = false; message = ''; error = '';
+  readonly notificacion = signal<Notificacion | null>(null);
   tab = 'personal';
   private readonly validTabs = new Set(['personal', 'familia', 'formacion', 'certificaciones', 'conocimientos']);
   private lastTab = 'personal';
@@ -205,8 +223,8 @@ export class MisDatosPage {
   }
   isYes(value: unknown) { return value === 'Si' || value === 'Sí'; }
   requiresPartner(value: unknown) { return value === 'Casado' || value === 'UnionLibre'; }
-  mostrarNotificacion(notificacion: Notificacion) { this.notificacion = null; queueMicrotask(() => this.notificacion = notificacion); }
-  cerrarNotificacion() { this.notificacion = null; }
+  mostrarNotificacion(notificacion: Notificacion) { this.notificacion.set(notificacion); }
+  cerrarNotificacion() { this.notificacion.set(null); }
   abrirArchivo(input: HTMLInputElement) { input.click(); }
 
   filtrarEntradaPersonal(campo: PersonalInput, event: Event) {
@@ -268,24 +286,50 @@ export class MisDatosPage {
 
   revisiones: any[] = [];
 
-  readonly avisoVisible = signal(false);
-  private temporizadorAviso?: ReturnType<typeof setTimeout>;
+  constructor() {
+    effect(() => {
+      const nuevos = this.avisosInternos.items().filter(aviso =>
+        aviso.titulo === 'Corrección de perfil solicitada' && !this.avisosCorreccionRecibidos.has(aviso.id));
+      if (!nuevos.length) return;
+      for (const aviso of nuevos) this.avisosCorreccionRecibidos.add(aviso.id);
+      this.actualizarEstadoRevision();
+    });
 
-  ocultarAviso() {
-    clearTimeout(this.temporizadorAviso);
-    this.avisoVisible.set(false);
+    effect(() => {
+      if (this.avisoRevisionAbierto()) return;
+      const seccion = this.correccionPendiente();
+      if (seccion) {
+        this.correccionPendiente.set(null);
+        const revision = this.revisionActual;
+        if (this.tab !== seccion || revision?.estado !== 'RequiereCorreccion') return;
+        const observacion = revision.observacion?.trim();
+        this.avisoRevisionAbierto.set(true);
+        void this.popup.showText('edit_note', 'Corrección solicitada',
+          observacion ? `${nombreSeccion[seccion]}: ${observacion}` : nombreSeccion[seccion])
+          .finally(() => this.avisoRevisionAbierto.set(false));
+        return;
+      }
+
+      const aprobacion = this.avisosInternos.items().find(aviso =>
+        !aviso.leida && aviso.titulo === 'Cambios de perfil aprobados');
+      if (!aprobacion) return;
+
+      this.avisoRevisionAbierto.set(true);
+      void this.popup.showText('check_circle', aprobacion.titulo, aprobacion.mensaje, true)
+        .then(resultado => {
+          if (!this.destroyRef.destroyed && (resultado.isConfirmed || resultado.isDismissed)) {
+            this.avisosInternos.marcarLeida(aprobacion.id);
+          }
+        })
+        .finally(() => this.avisoRevisionAbierto.set(false));
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.avisoRevisionAbierto()) this.popup.close();
+    });
   }
 
-  private mostrarAvisoRevision() {
-    this.ocultarAviso();
-    const estado = this.revisionActual?.estado;
-    if (estado !== 'EnRevision' && estado !== 'RequiereCorreccion') return;
-    this.avisoVisible.set(true);
-    this.temporizadorAviso = setTimeout(() => this.ocultarAviso(), 8000);
-  }
-
-  ngOnDestroy() {
-    clearTimeout(this.temporizadorAviso);
+  actualizarEstadoRevision() {
+    if (!this.loading && !this.loadFailed && !this.saving) this.cargarRevisiones();
   }
   get revisionActual() { return this.revisiones.find(x => x.seccion === this.tab); }
   private cargarPropuesta(seccion: SeccionPerfil) {
@@ -306,12 +350,16 @@ export class MisDatosPage {
   }
 
   private cargarRevisiones(recuperarPropuestas = false) {
-    this.api.misRevisiones().pipe(finalize(() => {
+    this.api.misRevisiones().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
       if (recuperarPropuestas) this.loading = false;
     })).subscribe({ next: rows => {
-      const estadoAnterior = this.revisionActual?.estado;
-      this.revisiones = rows.filter(x => x.seccion !== 'conocimientos');
-      if (estadoAnterior !== this.revisionActual?.estado) this.mostrarAvisoRevision();
+      const anterior = this.revisionActual;
+      this.revisiones = rows;
+      const actual = this.revisionActual;
+      if (actual?.estado === 'RequiereCorreccion' &&
+          (anterior?.estado !== actual.estado || anterior?.observacion !== actual.observacion)) {
+        this.correccionPendiente.set(actual.seccion as SeccionPerfil);
+      }
       if (recuperarPropuestas) for (const seccion of Object.keys(controlPorSeccion) as SeccionPerfil[]) this.cargarPropuesta(seccion);
     }, error: () => {
       this.error = 'No fue posible consultar el estado de revisión.';
@@ -324,7 +372,7 @@ export class MisDatosPage {
       const tab = requested && this.validTabs.has(requested) ? requested : 'personal';
       if (this.tab !== tab) {
         this.tab = tab;
-        this.mostrarAvisoRevision();
+        this.correccionPendiente.set(this.revisionActual?.estado === 'RequiereCorreccion' ? tab as SeccionPerfil : null);
       }
       this.lastTab = this.tab;
     });
@@ -835,7 +883,8 @@ export class MisDatosPage {
         }
         if (result.validacionEnviada) {
           this.revisiones = [...this.revisiones.filter(x => x.seccion !== seccion), { seccion, estado: 'EnRevision' }];
-          if (this.tab === seccion) this.mostrarAvisoRevision();
+          void this.popup.showText('check_circle', 'Enviado a revisión',
+            `Se envió a revisión la sección ${nombreSeccion[seccion]}.`, true);
           this.cargarRevisiones();
         } else {
           this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' });

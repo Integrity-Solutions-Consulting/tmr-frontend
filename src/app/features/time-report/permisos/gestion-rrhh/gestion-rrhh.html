@@ -32,7 +32,6 @@
 
   <section class="kpis-grid">
     <app-tarjeta-resumen [valor]="totalPorConfirmar()" titulo="Por confirmar" icono="verified" tono="advertencia" />
-    <app-tarjeta-resumen [valor]="totalPorVerificar()" titulo="Históricos por verificar" icono="fact_check" tono="advertencia" />
     <app-tarjeta-resumen [valor]="totalHistorialRegistros()" titulo="Registros totales" icono="history" tono="corporativo" />
     <app-tarjeta-resumen [valor]="totalConfirmadasMes()" titulo="Confirmados" icono="task_alt" tono="exito" />
   </section>
@@ -59,9 +58,6 @@
     >
       <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
       Historial
-      @if (totalPorVerificar() > 0) {
-        <span class="rrhh-pill rrhh-pill--warn">{{ totalPorVerificar() }} por verificar</span>
-      }
     </button>
     <button
       type="button"
@@ -351,17 +347,6 @@
           </select>
         </div>
 
-        <div class="filter-group rrhh-check-filter">
-          <label class="rrhh-inline-check">
-            <input
-              type="checkbox"
-              [ngModel]="soloPendientesVerificar()"
-              (ngModelChange)="soloPendientesVerificar.set($event)"
-            />
-            <span>Solo pendientes de verificar ({{ totalPorVerificar() }})</span>
-          </label>
-        </div>
-
         @if (tieneFiltrosHistorialActivos()) {
           <div class="filter-actions">
             <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltrosHistorial()">
@@ -409,7 +394,7 @@
               </tr>
             } @else {
               @for (item of historialRegistros(); track item.id) {
-                <tr [class.rrhh-row-unverified]="!item.verificadoRrhh">
+                <tr>
                   <td class="rrhh-col-nombre" [attr.title]="item.colaborador">{{ item.colaborador }}</td>
                   <td class="rrhh-col-afiliacion">
                     @if (item.regimen) {
@@ -567,14 +552,7 @@
                   </td>
                   <td [class.cell-muted]="!col.fechaInicioVacaciones">{{ col.fechaInicioVacaciones || 'Sin fecha' }}</td>
                   <td><strong>{{ col.diasGanadosAcumulados }} d</strong></td>
-                  <td>
-                    <div class="rrhh-cell-stack">
-                      <span>{{ col.diasConsumidos }} d</span>
-                      @if (col.registrosPorVerificar > 0) {
-                        <span class="rrhh-tag rrhh-tag--warn">{{ col.registrosPorVerificar }} por verificar</span>
-                      }
-                    </div>
-                  </td>
+                  <td>{{ col.diasConsumidos }} d</td>
                   <td class="cell-muted">{{ col.diasAjuste >= 0 ? '+' + col.diasAjuste : col.diasAjuste }} d</td>
                   <td>
                     <strong
@@ -875,19 +853,15 @@
         <input type="checkbox" [ngModel]="formEsAnticipada()" (ngModelChange)="formEsAnticipada.set($event)" />
         <span>Vacaciones anticipadas</span>
       </label>
-      <label class="rrhh-inline-check">
-        <input type="checkbox" [ngModel]="formVerificadoRrhh()" (ngModelChange)="formVerificadoRrhh.set($event)" />
-        <span><strong>Verificado por Talento Humano</strong></span>
-      </label>
     </div>
 
     <div class="form-field">
-      <label for="edit-obs">Observación / Nota de auditoría (migración)</label>
+      <label for="edit-obs">Observación / Nota interna</label>
       <textarea
         id="edit-obs"
         class="rrhh-obs-field"
         rows="3"
-        placeholder="Ej. Falta documentación, fecha verificada contra respaldo..."
+        placeholder="Ej. Falta documentación, respaldo adjunto..."
         [ngModel]="formObservacionMigracion()"
         (ngModelChange)="formObservacionMigracion.set($event)"
       ></textarea>
@@ -908,18 +882,9 @@
       <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalEdicionAbierto.set(false)">
         Cancelar
       </button>
-      @if (editandoId() && registroPendienteVerificar()) {
-        <button type="button" class="btn-tmr btn-tmr--secondary" [disabled]="guardandoEdicion()" (click)="guardarRegistroHistorial()">
-          Guardar sin verificar
-        </button>
-        <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="guardandoEdicion()" (click)="verificarYGuardarRegistro()">
-          {{ guardandoEdicion() ? 'Guardando...' : 'Verificar y guardar' }}
-        </button>
-      } @else {
-        <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="guardandoEdicion()" (click)="guardarRegistroHistorial()">
-          {{ guardandoEdicion() ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      }
+      <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="guardandoEdicion()" (click)="guardarRegistroHistorial()">
+        {{ guardandoEdicion() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
     </div>
   </div>
 </app-modal-base>

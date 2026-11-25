@@ -83,32 +83,3 @@ footer { position: sticky; bottom: 0; justify-content: flex-end; padding: 16px 0
   .document { width: 100%; }
   .document-actions, .document-actions app-boton { width: 100%; }
 }
-
-.aviso-revision,
-.aviso-correccion {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: .75rem;
-  padding: .5rem .75rem;
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-  border-radius: .5rem;
-
-  button {
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font-size: 1.25rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-}
-
-.aviso-revision {
-  align-items: center;
-  background: var(--status-success-bg-soft);
-  color: var(--status-success-text);
-  border-color: currentColor;
-}

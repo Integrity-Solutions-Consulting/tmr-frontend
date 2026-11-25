@@ -1,8 +1,6 @@
 ﻿import { DatePipe, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { EMPTY, switchMap, timer } from 'rxjs';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ActualizacionDatosService, MisDatos } from './actualizacion-datos.service';
 import { calcularEdad, normalizarFechaPerfil } from './edad-perfil.util';
@@ -15,33 +13,15 @@ import { calcularEdad, normalizarFechaPerfil } from './edad-perfil.util';
 })
 export class MiPerfilPage {
   private readonly api = inject(ActualizacionDatosService);
-  private readonly destroyRef = inject(DestroyRef);
   readonly perfil = signal<MisDatos | null>(null);
   readonly cargando = signal(false);
   readonly error = signal('');
-  readonly cambiosEnRevision = signal(false);
-  readonly avisoCorreccion = signal(false);
 
   ngOnInit() { this.cargar(); }
 
   cargar() {
     this.cargando.set(true);
     this.error.set('');
-    this.api.misRevisiones().pipe(
-      switchMap(revisiones => {
-        this.cambiosEnRevision.set(revisiones.some(revision => revision.estado === 'EnRevision'));
-        const requiereCorreccion = revisiones.some(revision => revision.estado === 'RequiereCorreccion');
-        this.avisoCorreccion.set(requiereCorreccion);
-        return requiereCorreccion ? timer(5000) : EMPTY;
-      }),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: () => this.avisoCorreccion.set(false),
-      error: () => {
-        this.cambiosEnRevision.set(false);
-        this.avisoCorreccion.set(false);
-      },
-    });
     this.api.getMine().subscribe({
       next: perfil => { this.perfil.set(perfil); this.cargando.set(false); },
       error: e => {

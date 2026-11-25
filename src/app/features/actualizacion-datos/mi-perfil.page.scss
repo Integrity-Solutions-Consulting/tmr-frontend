@@ -15,19 +15,6 @@
 
 h1, h2, h3, p { margin: 0; }
 
-.aviso-revision {
-  padding: .75rem 1rem;
-  border-radius: 8px;
-  background: var(--status-info-bg-soft);
-  color: var(--status-info-text);
-}
-
-.aviso-correccion {
-  background: var(--status-danger-bg-soft);
-  color: var(--status-danger-text);
-  border: 1px solid var(--status-danger-border);
-}
-
 article {
   display: flex;
   flex-direction: column;
