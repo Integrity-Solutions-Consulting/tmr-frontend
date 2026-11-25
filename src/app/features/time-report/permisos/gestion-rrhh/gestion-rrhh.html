@@ -39,7 +39,7 @@
       (click)="cambiarVista('SALDOS')"
     >
       <span class="material-symbols-outlined" aria-hidden="true">beach_access</span>
-      Saldos de Vacaciones ({{ saldosColaboradores().length }})
+      Saldos de Vacaciones ({{ totalColaboradoresSaldos() }})
     </button>
     <button
       type="button"
@@ -70,21 +70,6 @@
           [ngModel]="busquedaHistorial()"
           (ngModelChange)="busquedaHistorial.set($event)"
         />
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label" for="hist-empleado">Colaborador</label>
-        <select
-          id="hist-empleado"
-          class="filter-control"
-          [ngModel]="filtroEmpleadoHistorial()"
-          (ngModelChange)="filtroEmpleadoHistorial.set($event)"
-        >
-          <option value="TODOS">Todos los colaboradores</option>
-          @for (col of colaboradoresSelector(); track col.idEmpleado) {
-            <option [value]="col.idEmpleado">{{ col.apellidosNombres }}</option>
-          }
-        </select>
       </div>
 
       <div class="filter-group">
@@ -133,6 +118,7 @@
       <table class="permisos-table">
         <thead>
           <tr>
+            <th>Colaborador</th>
             <th>Permiso</th>
             <th>Fechas</th>
             <th>Días</th>
@@ -143,14 +129,15 @@
         <tbody>
           @if (cargandoHistorial()) {
             <tr>
-              <td colspan="5" class="empty-row">Cargando historial de permisos...</td>
+              <td colspan="6" class="empty-row">Cargando historial de permisos...</td>
             </tr>
           } @else {
-            @for (item of historialFiltrado(); track item.id) {
+            @for (item of historialRegistros(); track item.id) {
               <tr [class.rrhh-row-unverified]="!item.verificadoRrhh">
                 <td>
-                  <strong>{{ item.tipo }}</strong>
+                  <strong>{{ item.colaborador }}</strong>
                 </td>
+                <td>{{ item.tipo }}</td>
                 <td class="cell-muted">
                   {{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }
                 </td>
@@ -166,34 +153,33 @@
                   <div class="actions-cell rrhh-actions-inline">
                     <button
                       type="button"
-                      class="btn-tmr btn-tmr--sm"
-                      [class.btn-tmr--primary]="!item.verificadoRrhh"
-                      [class.btn-tmr--secondary]="item.verificadoRrhh"
+                      class="btn-tmr btn-tmr--secondary btn-tmr--sm"
                       (click)="abrirEditarRegistro(item)"
-                      [title]="item.verificadoRrhh ? 'Editar registro' : 'Revisar, editar y verificar el registro'"
+                      title="Editar, verificar o anular el registro"
                     >
-                      {{ item.verificadoRrhh ? 'Editar' : 'Verificar / Editar' }}
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-tmr btn-tmr--danger btn-tmr--sm"
-                      (click)="anularRegistroHistorial(item)"
-                      title="Anular registro duplicado o erróneo"
-                    >
-                      Anular
+                      Editar
                     </button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="empty-row">No se encontraron registros con los filtros actuales.</td>
+                <td colspan="6" class="empty-row">No se encontraron registros con los filtros actuales.</td>
               </tr>
             }
           }
         </tbody>
       </table>
     </div>
+
+    <app-paginacion
+      [paginaActual]="paginaHistorial()"
+      [totalPaginas]="totalPaginasHistorial()"
+      [total]="totalHistorialFiltrado()"
+      [porPagina]="porPagina"
+      etiquetaRegistros="registros"
+      (paginaCambia)="paginaHistorial.set($event)"
+    />
   }
 
   <!-- ======================================================================= -->
@@ -260,7 +246,7 @@
               <td colspan="8" class="empty-row">Calculando saldos de vacaciones...</td>
             </tr>
           } @else {
-            @for (col of saldosFiltrados(); track col.idEmpleado) {
+            @for (col of saldosColaboradores(); track col.idEmpleado) {
               <tr>
                 <td>
                   <div class="rrhh-cell-stack">
@@ -345,6 +331,15 @@
         </tbody>
       </table>
     </div>
+
+    <app-paginacion
+      [paginaActual]="paginaSaldos()"
+      [totalPaginas]="totalPaginasSaldos()"
+      [total]="totalSaldosFiltrado()"
+      [porPagina]="porPagina"
+      etiquetaRegistros="colaboradores"
+      (paginaCambia)="paginaSaldos.set($event)"
+    />
   }
 
   <!-- ======================================================================= -->
@@ -449,7 +444,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of solicitudesFiltradas(); track item.id) {
+          @for (item of solicitudes(); track item.id) {
             <tr>
               <td><strong>{{ item.colaborador }}</strong></td>
               <td>
@@ -480,12 +475,23 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
+              <td colspan="6" class="empty-row">
+                {{ cargandoBandeja() ? 'Cargando solicitudes...' : 'No se encontraron solicitudes en el rango seleccionado.' }}
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+
+    <app-paginacion
+      [paginaActual]="paginaBandeja()"
+      [totalPaginas]="totalPaginasBandeja()"
+      [total]="totalBandejaFiltrada()"
+      [porPagina]="porPagina"
+      etiquetaRegistros="solicitudes"
+      (paginaCambia)="paginaBandeja.set($event)"
+    />
   }
 </div>
 
@@ -562,7 +568,7 @@
 <app-modal-base
   [titulo]="editandoId() ? 'Editar registro de permiso / vacaciones' : 'Nuevo registro en historial de permisos'"
   [visible]="modalEdicionAbierto()"
-  [wide]="true"
+  [wide]="false"
   (cerrar)="modalEdicionAbierto.set(false)"
 >
   <div class="modal-form rrhh-edit-form">
@@ -669,10 +675,6 @@
         <span>Vacaciones anticipadas</span>
       </label>
       <label class="rrhh-inline-check">
-        <input type="checkbox" [ngModel]="formEsHistorico()" (ngModelChange)="formEsHistorico.set($event)" />
-        <span>Registro histórico</span>
-      </label>
-      <label class="rrhh-inline-check">
         <input type="checkbox" [ngModel]="formVerificadoRrhh()" (ngModelChange)="formVerificadoRrhh.set($event)" />
         <span><strong>Verificado por Talento Humano</strong></span>
       </label>
@@ -680,16 +682,22 @@
 
     <div class="form-field">
       <label for="edit-obs">Observación / Nota de auditoría (migración)</label>
-      <input
+      <textarea
         id="edit-obs"
-        type="text"
+        class="rrhh-obs-field"
+        rows="3"
         placeholder="Ej. Falta documentación, fecha verificada contra respaldo..."
         [ngModel]="formObservacionMigracion()"
         (ngModelChange)="formObservacionMigracion.set($event)"
-      />
+      ></textarea>
     </div>
 
     <div class="modal-footer">
+      @if (editandoId()) {
+        <button type="button" class="btn-tmr btn-tmr--danger rrhh-footer-izq" [disabled]="guardandoEdicion()" (click)="anularDesdePopup()">
+          Anular registro
+        </button>
+      }
       <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalEdicionAbierto.set(false)">
         Cancelar
       </button>

@@ -71,7 +71,7 @@
   align-items: center;
   gap: 0.45rem;
   font-size: 0.85rem;
-  color: #334155;
+  color: var(--text-main, #334155);
   cursor: pointer;
   user-select: none;
 }
@@ -177,8 +177,8 @@
   gap: 0.6rem;
   padding: 0.75rem;
   border-radius: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface, #f8fafc);
+  border: 1px solid var(--border-default, #e2e8f0);
 }
 
 .rrhh-saldo-summary {
@@ -222,4 +222,15 @@
   border-radius: 8px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
+}
+
+// Popup de edición: nota de observación más amplia y "Anular" separado de las acciones principales
+.rrhh-obs-field {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+}
+
+.modal-footer .rrhh-footer-izq {
+  margin-right: auto;
 }
