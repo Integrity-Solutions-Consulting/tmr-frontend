@@ -222,6 +222,87 @@
   gap: 0.35rem;
 }
 
+// Saldos: el nombre despliega hacia abajo la cédula y el cargo (otro clic lo contrae)
+.rrhh-colab-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  > span {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  &:hover {
+    color: var(--primary-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  &__icono {
+    flex: none;
+    color: var(--text-secondary);
+    transition: transform 0.15s ease;
+  }
+
+  &--abierto &__icono {
+    transform: rotate(90deg);
+  }
+}
+
+// Columna del nombre un poco más ancha (el nombre baja de línea en vez de cortarse)
+.permisos-table .rrhh-colaborador-column {
+  width: 26%;
+}
+
+// Fila abierta: sin línea divisoria entre la fila y su detalle
+.permisos-table tr.rrhh-fila-expandida > td {
+  border-bottom: none;
+}
+
+// Detalle desplegado: franja a todo el ancho de la tabla, cédula y debajo el cargo
+.table-card > .permisos-table tr.rrhh-fila-detalle > td {
+  padding-top: 0;
+  padding-left: 2.35rem;
+  white-space: normal;
+  overflow: visible;
+}
+
+.rrhh-colab-detalle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.9rem;
+  row-gap: 0.25rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: #f5f7fa;
+  font-size: 13px;
+  line-height: 1.5;
+
+  dt {
+    color: var(--text-secondary);
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
 // Columna de acciones (Historial y Saldos): ancho compacto y contenido centrado bajo su título
 .permisos-table .rrhh-acciones-column {
   width: 84px;

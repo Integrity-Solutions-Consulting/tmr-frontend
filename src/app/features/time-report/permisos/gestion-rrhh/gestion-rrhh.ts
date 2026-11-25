@@ -264,6 +264,8 @@ export class GestionRrhhComponent implements OnInit {
   readonly soloSaldoNegativo = signal(false);
   /** Fila de saldos con el menú de acciones (⋮) abierto. */
   readonly menuSaldoAbierto = signal<string | null>(null);
+  /** Colaboradores de Saldos con el detalle (cédula y cargo) desplegado. */
+  readonly saldosExpandidos = signal<ReadonlySet<number>>(new Set());
 
   // Modal Ajuste de Saldo / Excepción Factura
   readonly modalAjusteAbierto = signal(false);
@@ -1152,6 +1154,22 @@ export class GestionRrhhComponent implements OnInit {
       { id: 'ver-historial', label: `Ver historial (${col.totalRegistrosHistorial})` },
       { id: 'ajustar-saldo', label: 'Ajustar saldo' },
     ];
+  }
+
+  saldoExpandido(idEmpleado: number): boolean {
+    return this.saldosExpandidos().has(idEmpleado);
+  }
+
+  toggleDetalleSaldo(idEmpleado: number): void {
+    this.saldosExpandidos.update((actual) => {
+      const siguiente = new Set(actual);
+      if (siguiente.has(idEmpleado)) {
+        siguiente.delete(idEmpleado);
+      } else {
+        siguiente.add(idEmpleado);
+      }
+      return siguiente;
+    });
   }
 
   toggleMenuSaldo(payload: { id: string; event: Event }): void {

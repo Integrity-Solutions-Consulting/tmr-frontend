@@ -518,7 +518,7 @@
         <table class="permisos-table">
           <thead>
             <tr>
-              <th>Colaborador</th>
+              <th class="rrhh-colaborador-column">Colaborador</th>
               <th>Régimen</th>
               <th>Fecha base</th>
               <th>Ganados</th>
@@ -535,12 +535,20 @@
               </tr>
             } @else {
               @for (col of saldosColaboradores(); track col.idEmpleado) {
-                <tr>
+                <tr [class.rrhh-fila-expandida]="saldoExpandido(col.idEmpleado)">
                   <td>
-                    <div class="rrhh-cell-stack">
+                    <button
+                      type="button"
+                      class="rrhh-colab-toggle"
+                      [class.rrhh-colab-toggle--abierto]="saldoExpandido(col.idEmpleado)"
+                      [attr.aria-expanded]="saldoExpandido(col.idEmpleado)"
+                      (click)="toggleDetalleSaldo(col.idEmpleado)"
+                    >
+                      <svg class="rrhh-colab-toggle__icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M9 6l6 6-6 6"></path>
+                      </svg>
                       <span>{{ col.apellidosNombres }}</span>
-                      <span class="cell-muted">{{ col.cedula }} · {{ col.cargo || col.codigoEmpleado }}</span>
-                    </div>
+                    </button>
                   </td>
                   <td>
                     <div class="rrhh-tags-wrap">
@@ -591,6 +599,23 @@
                     ></app-action-menu>
                   </td>
                 </tr>
+                @if (saldoExpandido(col.idEmpleado)) {
+                  <tr class="rrhh-fila-detalle">
+                    <td colspan="8">
+                      <dl class="rrhh-colab-detalle">
+                        <dt>Cédula</dt>
+                        <dd>{{ col.cedula }}</dd>
+                        @if (col.cargo) {
+                          <dt>Cargo</dt>
+                          <dd>{{ col.cargo }}</dd>
+                        } @else {
+                          <dt>Código</dt>
+                          <dd>{{ col.codigoEmpleado }}</dd>
+                        }
+                      </dl>
+                    </td>
+                  </tr>
+                }
               } @empty {
                 <tr>
                   <td colspan="8" class="empty-row">No se encontraron colaboradores con los filtros actuales.</td>
