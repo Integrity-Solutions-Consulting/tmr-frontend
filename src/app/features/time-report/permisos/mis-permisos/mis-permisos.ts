@@ -1,6 +1,10 @@
 import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
+import { observarListadoPaginado } from '../listado-paginado.util';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -19,7 +23,6 @@ import {
   calcularRangoPreset,
   calcularSiguienteDiaLaborableIso,
   coincideBusquedaInteligente,
-  cumpleRangoFechas,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
@@ -28,6 +31,7 @@ import {
   PermisosApiService,
   TipoPermisoCatalogoApi,
   RrhhDisponiblePermisoApi,
+  ResumenListadoPermisosApi,
   obtenerMensajeAmigablePermisos,
 } from '../permisos-api.service';
 
@@ -104,6 +108,7 @@ export interface OpcionLiderFormulario {
     TarjetaResumenComponent,
     ModalBase,
     ResumenSolicitudComponent,
+    PaginacionComponent,
   ],
   templateUrl: './mis-permisos.html',
   styleUrl: './mis-permisos.scss',
@@ -342,62 +347,26 @@ export class MisPermisosComponent implements OnInit {
   readonly solicitudes = signal<SolicitudColaborador[]>([]);
 
   readonly kpiDisponibles = signal('0 días');
-  readonly kpiEnProceso = computed(
-    () =>
-      this.solicitudes().filter(
-        (s) =>
-          s.estadoClase === 'pendiente' ||
-          s.estadoClase === 'rrhh' ||
-          s.estadoClase === 'observado',
-      ).length,
-  );
-  readonly kpiAprobados = computed(
-    () => this.solicitudes().filter((s) => s.estadoClase === 'confirmado').length,
-  );
+  /** Indicadores de todas mis solicitudes (no dependen de los filtros). */
+  readonly resumen = signal<ResumenListadoPermisosApi | null>(null);
+  readonly kpiEnProceso = computed(() => this.resumen()?.enProceso ?? 0);
+  readonly kpiAprobados = computed(() => this.resumen()?.confirmados ?? 0);
   readonly kpiPorHoras = signal('0 h');
 
-  readonly solicitudesFiltradas = computed(() => {
-    const q = this.busqueda();
-    const desde = this.fechaDesde();
-    const hasta = this.fechaHasta();
-    const tipo = this.tipoFiltro();
-    const estado = this.estadoFiltro();
-
-    return this.solicitudes().filter((s) => {
-      if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
-      if (tipo && s.tipoOficial !== tipo) return false;
-      if (estado === 'proceso' && !['pendiente', 'rrhh'].includes(s.estadoClase)) return false;
-      if (estado === 'finalizado' && !['confirmado', 'observado', 'rechazado'].includes(s.estadoClase)) return false;
-      if (
-        !coincideBusquedaInteligente(q, [
-          s.codigo,
-          s.tipo,
-          s.tipoOficial,
-          s.cliente,
-          s.proyecto,
-          s.lider,
-          s.tipoLider === 'EXT' ? 'Externo EXT' : 'Interno INT',
-          s.fechas,
-          s.fechaInicio,
-          s.fechaFin,
-          s.fechaRegreso,
-          s.diasSolicitados,
-          s.horasSolicitadas,
-          s.duracion,
-          s.horario,
-          s.estadoTexto,
-          s.motivo,
-          s.evidencia,
-          s.comentarios,
-        ])
-      ) {
-        return false;
-      }
-      return true;
-    });
-  });
+  readonly porPagina = 10;
+  readonly pagina = signal(1);
+  readonly totalPaginas = signal(0);
+  readonly totalFiltrado = signal(0);
+  readonly cargandoSolicitudes = signal(false);
+  private readonly destroyRef = inject(DestroyRef);
+  private consultaSolicitudes?: Subscription;
 
   constructor() {
+    observarListadoPaginado(
+      () => [this.busqueda().trim(), this.fechaDesde(), this.fechaHasta(), this.tipoFiltro(), this.estadoFiltro()],
+      this.pagina,
+      () => this.cargarSolicitudes(),
+    );
     conectarEnlaceSolicitud(item => { this.verFormulario(this.mapearDesdeApi(item)); });
   }
 
@@ -487,19 +456,42 @@ export class MisPermisosComponent implements OnInit {
       },
     });
 
-    this.permisosApi.obtenerMisPermisos().subscribe({
-      next: (res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          this.solicitudes.set(res.data.map((item) => this.mapearDesdeApi(item)));
-        }
-      },
-      error: (err) => {
-        this.toast.error(
-          'Error al consultar tus solicitudes',
-          obtenerMensajeAmigablePermisos(err, 'No pudimos consultar tus solicitudes en este momento.'),
-        );
-      },
-    });
+  }
+
+  /** Página actual de mis solicitudes con los filtros vigentes (filtrado y paginado en el servidor). */
+  cargarSolicitudes(): void {
+    this.consultaSolicitudes?.unsubscribe();
+    this.cargandoSolicitudes.set(true);
+    this.consultaSolicitudes = this.permisosApi
+      .obtenerMisPermisos({
+        page: this.pagina(),
+        pageSize: this.porPagina,
+        buscar: this.busqueda().trim(),
+        tipo: this.tipoFiltro(),
+        estado: this.estadoFiltro(),
+        desde: this.fechaDesde(),
+        hasta: this.fechaHasta(),
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.cargandoSolicitudes.set(false);
+          const pagina = res?.data;
+          if (!res?.success || !pagina || !Array.isArray(pagina.items)) return;
+          this.solicitudes.set(pagina.items.map((item) => this.mapearDesdeApi(item)));
+          this.totalFiltrado.set(pagina.totalCount);
+          this.totalPaginas.set(pagina.totalPages);
+          this.resumen.set(pagina.resumen ?? null);
+          if (pagina.totalPages > 0 && this.pagina() > pagina.totalPages) this.pagina.set(pagina.totalPages);
+        },
+        error: (err) => {
+          this.cargandoSolicitudes.set(false);
+          this.toast.error(
+            'Error al consultar tus solicitudes',
+            obtenerMensajeAmigablePermisos(err, 'No pudimos consultar tus solicitudes en este momento.'),
+          );
+        },
+      });
   }
 
   private mapearDesdeApi(item: PermisoItemApi): SolicitudColaborador {
@@ -1144,7 +1136,7 @@ export class MisPermisosComponent implements OnInit {
           }
 
           const nuevo = this.mapearDesdeApi(res.data);
-          this.solicitudes.update((lista) => [nuevo, ...lista.filter(s => s.id !== nuevo.id)]);
+          this.cargarSolicitudes();
           this.archivosEvidencia.set([]);
     this.horaInicioOtrosForm.set('08:30');
     this.horaFinOtrosForm.set('17:30');

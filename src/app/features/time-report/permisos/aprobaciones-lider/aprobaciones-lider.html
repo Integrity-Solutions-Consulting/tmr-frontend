@@ -14,6 +14,7 @@
     <div class="filter-group search-group">
       <label class="filter-label" for="aprobaciones-lider-filter-1">Buscar</label>
       <input id="aprobaciones-lider-filter-1"
+        maxlength="200"
         class="filter-control"
         type="text"
         placeholder="Buscar"
@@ -85,7 +86,12 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of solicitudesFiltradas(); track item.codigo) {
+        @if (cargando() && solicitudesEquipo().length === 0) {
+          <tr>
+            <td colspan="6" class="empty-row">Cargando solicitudes del equipo...</td>
+          </tr>
+        } @else {
+        @for (item of solicitudesEquipo(); track item.codigo) {
           <tr>
             <td><strong>{{ item.colaborador }}</strong></td>
             <td>{{ item.tipo }}</td>
@@ -109,9 +115,19 @@
             <td colspan="6" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
+        }
       </tbody>
     </table>
   </div>
+
+  <app-paginacion
+    [paginaActual]="pagina()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalFiltrado()"
+    [porPagina]="porPagina"
+    etiquetaRegistros="solicitudes"
+    (paginaCambia)="pagina.set($event)"
+  />
 
   <!-- MODAL DE REVISIÓN Y APROBACIÓN DEL LÍDER -->
   <app-modal-base
