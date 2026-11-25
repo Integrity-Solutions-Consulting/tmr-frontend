@@ -206,7 +206,6 @@ export class GestionRrhhComponent implements OnInit {
   private selectorCargado = false;
   private cargandoSelector = false;
   readonly errorHistorial = signal(false);
-  readonly soloPendientesVerificar = signal(false);
 
   // Modal Crear / Editar registro del historial
   readonly modalEdicionAbierto = signal(false);
@@ -250,9 +249,6 @@ export class GestionRrhhComponent implements OnInit {
   readonly formEsRecuperable = signal(false);
   readonly formEsAnticipada = signal(false);
   readonly formEsHistorico = signal(true);
-  readonly formVerificadoRrhh = signal(true);
-  /** El registro abierto en el popup estaba pendiente de verificación al abrirlo. */
-  readonly registroPendienteVerificar = signal(false);
   readonly formEstadoCodigo = signal('APROBADA');
   readonly formObservacionMigracion = signal('');
 
@@ -295,7 +291,6 @@ export class GestionRrhhComponent implements OnInit {
         this.fechaHastaHistorial(),
         this.filtroTipoHistorial(),
         this.filtroRegimenHistorial(),
-        this.soloPendientesVerificar(),
       ],
       this.paginaHistorial,
       () => this.cargarHistorialEditable(),
@@ -423,7 +418,6 @@ export class GestionRrhhComponent implements OnInit {
       hasta: this.fechaHastaHistorial(),
       regimen: this.filtroRegimenHistorial(),
       tipo: this.filtroTipoHistorial(),
-      soloPendientesVerificar: this.soloPendientesVerificar(),
     };
   }
 
@@ -587,7 +581,6 @@ export class GestionRrhhComponent implements OnInit {
   readonly totalPendientesExternos = computed(() => this.resumen()?.pendientesLiderExterno ?? 0);
   readonly totalConfirmadasMes = computed(() => this.resumen()?.confirmadas ?? 0);
   readonly totalHistorialRegistros = computed(() => this.resumen()?.totalHistorial ?? 0);
-  readonly totalPorVerificar = computed(() => this.resumen()?.porVerificar ?? 0);
   readonly totalColaboradoresSaldos = computed(() => this.resumen()?.totalColaboradores ?? 0);
   readonly aniosDisponiblesHistorial = computed(() =>
     (this.resumen()?.aniosDisponibles ?? []).map((a) => String(a)),
@@ -595,7 +588,6 @@ export class GestionRrhhComponent implements OnInit {
 
   // --- Acciones CRUD del Historial ---
   abrirNuevoRegistroHistorial(idEmpleadoPreseleccionado?: number): void {
-    this.registroPendienteVerificar.set(false);
     this.registroEditandoActual.set(null);
     this.cargarColaboradoresSelector();
     const hoyIso = new Date().toISOString().slice(0, 10);
@@ -617,7 +609,6 @@ export class GestionRrhhComponent implements OnInit {
     this.formEsRecuperable.set(false);
     this.formEsAnticipada.set(false);
     this.formEsHistorico.set(true);
-    this.formVerificadoRrhh.set(true);
     this.formEstadoCodigo.set('APROBADA');
     this.formObservacionMigracion.set('');
     this.modalEdicionAbierto.set(true);
@@ -641,10 +632,8 @@ export class GestionRrhhComponent implements OnInit {
     this.formEsRecuperable.set(item.esRecuperable);
     this.formEsAnticipada.set(item.esAnticipada);
     this.formEsHistorico.set(item.esHistorico);
-    this.formVerificadoRrhh.set(item.verificadoRrhh);
     this.formEstadoCodigo.set(this.mapearEstadoACodigoBd(item.estadoCodigo));
     this.formObservacionMigracion.set(item.observacionMigracion ?? '');
-    this.registroPendienteVerificar.set(!item.verificadoRrhh);
     this.modalEdicionAbierto.set(true);
   }
 
@@ -719,12 +708,6 @@ export class GestionRrhhComponent implements OnInit {
     const id = this.editandoId();
     const item = id ? this.historialRegistros().find((x) => x.id === id) : undefined;
     if (item) this.anularRegistroHistorial(item);
-  }
-
-  /** Verificación desde el mismo popup de edición: marca el registro como verificado y guarda. */
-  verificarYGuardarRegistro(): void {
-    this.formVerificadoRrhh.set(true);
-    this.guardarRegistroHistorial();
   }
 
   private mapearEstadoACodigoBd(codigoCorto: string): string {
@@ -802,7 +785,7 @@ export class GestionRrhhComponent implements OnInit {
       esRecuperable: this.formEsRecuperable(),
       esAnticipada: this.formEsAnticipada(),
       esHistorico: this.formEsHistorico(),
-      verificadoRrhh: this.formVerificadoRrhh(),
+      verificadoRrhh: true,
       observacionMigracion: this.formObservacionMigracion().trim() || null,
       estadoCodigo: this.formEstadoCodigo(),
       impactoTimeReport: this.formEsHistorico() ? 'SIN_IMPACTO' : 'RESTA_META',
@@ -834,40 +817,6 @@ export class GestionRrhhComponent implements OnInit {
           'No se pudo guardar el registro',
           obtenerMensajeAmigablePermisos(err, 'Revisa los datos ingresados e inténtalo nuevamente.'),
         );
-      },
-    });
-  }
-
-  marcarVerificadoRapido(item: SolicitudRrhh): void {
-    const payload: GuardarPermisoRrhhPayload = {
-      idEmpleado: item.idEmpleado,
-      tipoOficial: item.tipoOficial,
-      fechaInicio: dmyAIso(item.fechaInicio),
-      fechaFin: dmyAIso(item.fechaFin),
-      fechaRegreso: dmyAIso(item.fechaRegreso),
-      totalDias: item.totalDias,
-      horario: item.horario,
-      detalleHorario: item.detalleHorario ?? null,
-      motivo: item.motivo,
-      descuentaVacaciones: item.descuentaVacaciones,
-      esRecuperable: item.esRecuperable,
-      esAnticipada: item.esAnticipada,
-      esHistorico: item.esHistorico,
-      verificadoRrhh: true,
-      observacionMigracion: item.observacionMigracion ?? null,
-      estadoCodigo: this.mapearEstadoACodigoBd(item.estadoCodigo),
-      impactoTimeReport: item.impactoTimeReport,
-    };
-
-    this.apiService.actualizarRegistroRrhh(item.id, payload).subscribe({
-      next: (res) => {
-        if (res?.success && res.data) {
-          this.refrescarDatos();
-        }
-        this.toast.exito('Registro verificado', `${item.folio} marcado como verificado por Talento Humano.`);
-      },
-      error: (err) => {
-        this.toast.error('Error al verificar', obtenerMensajeAmigablePermisos(err));
       },
     });
   }
@@ -923,8 +872,7 @@ export class GestionRrhhComponent implements OnInit {
       Boolean(this.fechaDesdeHistorial()) ||
       Boolean(this.fechaHastaHistorial()) ||
       this.filtroTipoHistorial() !== 'TODOS' ||
-      this.filtroRegimenHistorial() !== 'TODOS' ||
-      this.soloPendientesVerificar(),
+      this.filtroRegimenHistorial() !== 'TODOS',
   );
 
   cambiarAnioHistorial(anio: string): void {
@@ -982,7 +930,6 @@ export class GestionRrhhComponent implements OnInit {
     this.fechaHastaHistorial.set('');
     this.filtroTipoHistorial.set('TODOS');
     this.filtroRegimenHistorial.set('TODOS');
-    this.soloPendientesVerificar.set(false);
   }
 
   async exportarHistorial(formato: 'xlsx' | 'pdf'): Promise<void> {
@@ -1012,7 +959,6 @@ export class GestionRrhhComponent implements OnInit {
             { encabezado: 'Fecha fin', anchoExcel: 14, alineacion: 'center' },
             { encabezado: 'Días', anchoExcel: 10, alineacion: 'center' },
             { encabezado: 'Estado', anchoExcel: 18 },
-            { encabezado: 'Verificado', anchoExcel: 13, alineacion: 'center' },
             { encabezado: 'Motivo', anchoExcel: 36 },
             { encabezado: 'Observación', anchoExcel: 30 },
           ];
@@ -1051,7 +997,6 @@ export class GestionRrhhComponent implements OnInit {
                 r.fechaFin,
                 r.totalDias,
                 r.estadoTexto,
-                r.verificadoRrhh ? 'Sí' : 'Pendiente',
                 r.motivo || '—',
                 r.observacionMigracion || '—',
               ]),
@@ -1144,7 +1089,6 @@ export class GestionRrhhComponent implements OnInit {
     if (this.filtroRegimenHistorial() !== 'TODOS') {
       partes.push(`Afiliación: ${this.etiquetaRegimen(this.filtroRegimenHistorial())}`);
     }
-    if (this.soloPendientesVerificar()) partes.push('Solo pendientes de verificar');
     if (this.busquedaHistorial().trim()) partes.push(`Búsqueda: "${this.busquedaHistorial().trim()}"`);
     return partes.join(' · ');
   }
@@ -1197,7 +1141,6 @@ export class GestionRrhhComponent implements OnInit {
     this.fechaHastaHistorial.set('');
     this.filtroTipoHistorial.set('TODOS');
     this.filtroRegimenHistorial.set('TODOS');
-    this.soloPendientesVerificar.set(false);
     this.busquedaHistorial.set('');
     this.colaboradorFiltroHistorial.set({
       idEmpleado: col.idEmpleado,
