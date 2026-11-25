@@ -239,6 +239,8 @@ export interface SaldoVacacionesColaboradorApi {
   tieneDerechoVacaciones: boolean;
   excepcionFacturaActiva: boolean;
   fechaIngresoOriginal?: string | null;
+  /** Procedencia de la fecha base: Contrato, Afiliación registrada en HC / por RR. HH. o Ingreso general. */
+  origenFechaInicioVacaciones?: string | null;
   fechaInicioVacaciones?: string | null;
   aniosAntiguedad: number;
   diasGanadosAcumulados: number;

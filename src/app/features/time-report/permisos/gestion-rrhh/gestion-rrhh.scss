@@ -80,6 +80,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+
+  // Las líneas secundarias (fecha base, origen, ingreso) se ajustan en vez de cortarse
+  > * {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .rrhh-migration-note {

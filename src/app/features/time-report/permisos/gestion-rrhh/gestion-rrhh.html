@@ -64,6 +64,7 @@
         <label class="filter-label" for="hist-buscar">Buscar</label>
         <input
           id="hist-buscar"
+          maxlength="200"
           type="text"
           class="filter-control"
           placeholder="Colaborador, cédula, código HIST/PER, motivo o nota..."
@@ -131,6 +132,15 @@
             <tr>
               <td colspan="6" class="empty-row">Cargando historial de permisos...</td>
             </tr>
+          } @else if (errorHistorial()) {
+            <tr>
+              <td colspan="6" class="empty-row">
+                El historial no está disponible.
+                <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="cargarHistorialEditable()">
+                  Reintentar
+                </button>
+              </td>
+            </tr>
           } @else {
             @for (item of historialRegistros(); track item.id) {
               <tr [class.rrhh-row-unverified]="!item.verificadoRrhh">
@@ -191,6 +201,7 @@
         <label class="filter-label" for="saldos-buscar">Buscar colaborador</label>
         <input
           id="saldos-buscar"
+          maxlength="200"
           type="text"
           class="filter-control"
           placeholder="Nombre, cédula, código, cargo o empresa..."
@@ -271,7 +282,10 @@
                 </td>
                 <td>
                   <div class="rrhh-cell-stack">
-                    <span>Afiliación: {{ col.fechaInicioVacaciones || 'N/A' }}</span>
+                    <span>Fecha base: {{ col.fechaInicioVacaciones || 'Sin fecha' }}</span>
+                    @if (col.fechaInicioVacaciones) {
+                      <small class="cell-muted">{{ col.origenFechaInicioVacaciones || 'Origen pendiente de confirmar' }}</small>
+                    }
                     @if (col.fechaIngresoOriginal && col.fechaIngresoOriginal !== col.fechaInicioVacaciones) {
                       <span class="cell-muted">Ingreso gral.: {{ col.fechaIngresoOriginal }}</span>
                     }
@@ -350,6 +364,7 @@
       <div class="filter-group search-group">
         <label class="filter-label" for="gestion-rrhh-filter-1">Buscar</label>
         <input id="gestion-rrhh-filter-1"
+          maxlength="200"
           type="text"
           class="filter-control"
           placeholder="Buscar"
@@ -580,6 +595,7 @@
           [ngModel]="formIdEmpleado()"
           (ngModelChange)="formIdEmpleado.set(+$event)"
         >
+          <option [value]="0" disabled>Selecciona un colaborador</option>
           @for (col of colaboradoresSelector(); track col.idEmpleado) {
             <option [value]="col.idEmpleado">
               {{ col.apellidosNombres }} ({{ col.regimen }})

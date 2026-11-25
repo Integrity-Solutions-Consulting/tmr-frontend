@@ -1,6 +1,7 @@
 import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
-import { Component, OnInit, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, OnInit, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -171,6 +172,12 @@ export class GestionRrhhComponent implements OnInit {
   readonly totalPaginasBandeja = computed(() => Math.max(1, Math.ceil(this.totalBandejaFiltrada() / this.porPagina)));
   private readonly temporizadores: Partial<Record<VistaRrhh, ReturnType<typeof setTimeout>>> = {};
   private readonly secuencias: Record<VistaRrhh, number> = { VALIDACION: 0, HISTORIAL_EDITABLE: 0, SALDOS: 0 };
+  /** Se incrementa tras guardar/anular/decidir: la pestaña visible recarga y las demás al abrirse. */
+  private readonly versionDatos = signal(0);
+  private readonly destroyRef = inject(DestroyRef);
+  private selectorCargado = false;
+  private cargandoSelector = false;
+  readonly errorHistorial = signal(false);
   readonly soloPendientesVerificar = signal(false);
 
   // Modal Crear / Editar registro del historial
@@ -250,18 +257,25 @@ export class GestionRrhhComponent implements OnInit {
     pagina: WritableSignal<number>,
     cargar: () => void,
   ): void {
-    let claveAnterior: string | null = null;
+    let filtrosAnteriores: string | null = null;
+    let claveCargada: string | null = null;
     effect(() => {
-      const clave = JSON.stringify(leerFiltros());
+      const filtros = JSON.stringify(leerFiltros());
       const paginaActual = pagina();
+      const activa = this.vistaActiva() === vista;
+      const version = this.versionDatos();
       untracked(() => {
-        const primeraCarga = claveAnterior === null;
-        const cambiaronFiltros = !primeraCarga && clave !== claveAnterior;
-        claveAnterior = clave;
+        const cambiaronFiltros = filtrosAnteriores !== null && filtros !== filtrosAnteriores;
+        filtrosAnteriores = filtros;
         if (cambiaronFiltros && paginaActual !== 1) {
           pagina.set(1);
           return;
         }
+        // Las pestañas ocultas no consultan: se cargan al abrirlas con sus filtros vigentes.
+        if (!activa) return;
+        const clave = `${filtros}|${paginaActual}|${version}`;
+        if (clave === claveCargada) return;
+        claveCargada = clave;
         clearTimeout(this.temporizadores[vista]);
         if (cambiaronFiltros) {
           this.temporizadores[vista] = setTimeout(cargar, 300);
@@ -274,7 +288,6 @@ export class GestionRrhhComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarResumen();
-    this.cargarColaboradoresSelector();
   }
 
   cambiarVista(vista: VistaRrhh): void {
@@ -284,13 +297,11 @@ export class GestionRrhhComponent implements OnInit {
   /** Recarga contadores y las páginas visibles tras crear, editar, anular o decidir. */
   refrescarDatos(): void {
     this.cargarResumen();
-    this.cargarHistorialEditable();
-    this.cargarSaldosVacaciones();
-    this.cargarBandejaDesdeApi();
+    this.versionDatos.update((v) => v + 1);
   }
 
   cargarResumen(): void {
-    this.apiService.obtenerResumenRrhh().subscribe({
+    this.apiService.obtenerResumenRrhh().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         if (res?.success && res.data) this.resumen.set(res.data);
       },
@@ -310,6 +321,7 @@ export class GestionRrhhComponent implements OnInit {
         desde: this.fechaDesde(),
         hasta: this.fechaHasta(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (secuencia !== this.secuencias.VALIDACION) return;
@@ -332,6 +344,7 @@ export class GestionRrhhComponent implements OnInit {
 
   cargarHistorialEditable(): void {
     const secuencia = ++this.secuencias.HISTORIAL_EDITABLE;
+    this.errorHistorial.set(false);
     this.cargandoHistorial.set(true);
     this.apiService
       .obtenerHistorialEditableRrhh({
@@ -342,6 +355,7 @@ export class GestionRrhhComponent implements OnInit {
         tipo: this.filtroTipoHistorial(),
         soloPendientesVerificar: this.soloPendientesVerificar(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (secuencia !== this.secuencias.HISTORIAL_EDITABLE) return;
@@ -354,6 +368,7 @@ export class GestionRrhhComponent implements OnInit {
         error: (err) => {
           if (secuencia !== this.secuencias.HISTORIAL_EDITABLE) return;
           this.cargandoHistorial.set(false);
+          this.errorHistorial.set(true);
           this.toast.error(
             'No se pudo cargar el historial de permisos',
             obtenerMensajeAmigablePermisos(err, 'Inténtalo nuevamente en unos segundos.'),
@@ -363,13 +378,24 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   cargarColaboradoresSelector(): void {
-    this.apiService.obtenerColaboradoresRrhh().subscribe({
-      next: (res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          this.colaboradoresSelector.set(res.data);
-        }
-      },
-    });
+    if (this.selectorCargado || this.cargandoSelector) return;
+    this.cargandoSelector = true;
+    this.apiService
+      .obtenerColaboradoresRrhh()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.cargandoSelector = false;
+          if (res?.success && Array.isArray(res.data)) {
+            this.colaboradoresSelector.set(res.data);
+            this.selectorCargado = true;
+          }
+        },
+        error: (err) => {
+          this.cargandoSelector = false;
+          this.toast.error('No se pudo cargar el selector de colaboradores', obtenerMensajeAmigablePermisos(err));
+        },
+      });
   }
 
   cargarSaldosVacaciones(): void {
@@ -383,6 +409,7 @@ export class GestionRrhhComponent implements OnInit {
         regimen: this.filtroRegimenSaldos(),
         soloSaldoNegativo: this.soloSaldoNegativo(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (secuencia !== this.secuencias.SALDOS) return;
@@ -480,11 +507,11 @@ export class GestionRrhhComponent implements OnInit {
 
   // --- Acciones CRUD del Historial Editable ---
   abrirNuevoRegistroHistorial(idEmpleadoPreseleccionado?: number): void {
+    this.registroPendienteVerificar.set(false);
+    this.cargarColaboradoresSelector();
     const hoyIso = new Date().toISOString().slice(0, 10);
     this.editandoId.set(null);
-    this.formIdEmpleado.set(
-      idEmpleadoPreseleccionado ?? this.colaboradoresSelector()[0]?.idEmpleado ?? 0,
-    );
+    this.formIdEmpleado.set(idEmpleadoPreseleccionado ?? 0);
     this.formTipoOficial.set('VACACIONES');
     this.formFechaInicio.set(hoyIso);
     this.formFechaFin.set(hoyIso);
@@ -502,6 +529,7 @@ export class GestionRrhhComponent implements OnInit {
   }
 
   abrirEditarRegistro(item: SolicitudRrhh): void {
+    this.cargarColaboradoresSelector();
     this.editandoId.set(item.id);
     this.formIdEmpleado.set(item.idEmpleado);
     this.formTipoOficial.set(item.tipoOficial);
@@ -711,7 +739,8 @@ export class GestionRrhhComponent implements OnInit {
     this.ajusteTipo.set(col.regimen === 'FACTURA' ? 'EXCEPCION_FACTURA' : 'AJUSTE_DIAS');
     this.ajusteDias.set(0);
     this.ajustePermiteVacaciones.set(!col.excepcionFacturaActiva);
-    this.ajusteFechaAfiliacion.set(dmyAIso(col.fechaInicioVacaciones ?? col.fechaIngresoOriginal ?? ''));
+    const fechaRegistrada = col.ajustes.find((a) => a.tipoAjuste === 'FECHA_AFILIACION' && a.fechaAfiliacionBase);
+    this.ajusteFechaAfiliacion.set(dmyAIso(fechaRegistrada?.fechaAfiliacionBase ?? ''));
     this.ajusteMotivo.set('');
     this.modalAjusteAbierto.set(true);
   }
@@ -732,7 +761,7 @@ export class GestionRrhhComponent implements OnInit {
     }
 
     const fechaAfiliacion = this.ajusteFechaAfiliacion().trim();
-    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^d{4}-d{2}-d{2}$/.test(fechaAfiliacion)) {
+    if (this.ajusteTipo() === 'FECHA_AFILIACION' && !/^\d{4}-\d{2}-\d{2}$/.test(fechaAfiliacion)) {
       this.toast.warning('Fecha requerida', 'Ingresa la fecha real de afiliación al IESS.');
       return;
     }
