@@ -20,7 +20,8 @@
         {{ exportandoReporte() ? 'Generando…' : 'Reporte (' + cantidadSeleccionados() + ')' }}
       </button>
       <mat-menu #reporteMenu="matMenu">
-        <button mat-menu-item (click)="generarReporte('xlsx')" [disabled]="exportandoReporte()">Descargar Excel (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('vacaciones')" [disabled]="exportandoReporte()">Detalle vacaciones (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('permisos')" [disabled]="exportandoReporte()">Permisos y faltas (.xlsx)</button>
         <button mat-menu-item (click)="generarReporte('pdf')" [disabled]="exportandoReporte()">Descargar PDF</button>
       </mat-menu>
     </div>

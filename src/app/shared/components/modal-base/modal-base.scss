@@ -32,7 +32,20 @@
   flex-direction: column;
 }
 
-.modal:has(app-resumen-solicitud) { width: min(95vw, 540px); .modal__body { padding: 18px 24px 22px; } } .modal--wide {
+.modal:has(app-resumen-solicitud) { width: min(95vw, 540px); .modal__body { padding: 18px 24px 22px; } }
+.modal:has(.rrhh-ajuste-min) {
+  width: min(95vw, 480px);
+
+  .modal__header {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .modal__body {
+    padding: 14px 28px 22px;
+  }
+}
+ .modal--wide {
   width: min(96vw, 1140px);
 
   .modal__body {

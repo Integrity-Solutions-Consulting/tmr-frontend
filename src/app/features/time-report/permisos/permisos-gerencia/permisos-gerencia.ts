@@ -1,5 +1,6 @@
 import { MatMenuModule } from '@angular/material/menu';
-import { exportarReporteExcel, exportarReportePdf, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
+import { descargarLibroPermisos, type LibroPermisos } from '../libros-permisos';
+import { exportarReportePdf, ReporteTabularConfig } from '../../../../shared/utils/reporte-export.utils';
 import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -61,6 +62,7 @@ export interface SolicitudGerencia {
   fechaRegreso: string;
   fechaAprobacion: string;
   diasSolicitados: string;
+  descuentaVacaciones?: boolean;
   totalDiasNumero: number;
   horario: HorarioPermisoOficial;
   detalleHorario?: string;
@@ -215,6 +217,7 @@ export class PermisosGerenciaComponent {
       fechaRegreso: item.fechaRegreso,
       fechaAprobacion: item.fechaAprobacion,
       diasSolicitados: item.diasSolicitados || `${item.totalDias} días`,
+      descuentaVacaciones: item.descuentaVacaciones,
       totalDiasNumero: Number(item.totalDias ?? 0),
       horario: item.horario,
       detalleHorario: item.detalleHorario ?? undefined,
@@ -370,10 +373,14 @@ export class PermisosGerenciaComponent {
     await this.pdfService.descargarFormularioPdf(this.obtenerDatosFormulario(item));
   }
 
-  async generarReporte(formato: 'xlsx' | 'pdf'): Promise<void> {
+  async generarReporte(formato: LibroPermisos | 'pdf'): Promise<void> {
     if (this.exportandoReporte()) return;
     const registros = [...this.seleccionados().values()];
     if (!registros.length) return;
+    if (formato !== 'pdf' && !registros.some(s => (s.tipoOficial === 'VACACIONES') === (formato === 'vacaciones'))) {
+      this.toast.info('Selección sin registros para este libro', 'Selecciona solicitudes del tipo correspondiente.');
+      return;
+    }
     const config: ReporteTabularConfig = {
       titulo: 'Permisos y vacaciones', nombreArchivo: 'Permisos_' + fechaArchivo(), nombreHoja: 'Solicitudes',
       orientacionPdf: 'landscape', formatoPdf: 'a4',
@@ -390,7 +397,8 @@ export class PermisosGerenciaComponent {
     };
     this.exportandoReporte.set(true);
     try {
-      await this.descargas.ejecutar(formato, ctx => formato === 'xlsx' ? exportarReporteExcel(config,ctx) : exportarReportePdf(config,ctx));
+      await this.descargas.ejecutar(formato === 'pdf' ? 'pdf' : 'xlsx', ctx => formato === 'pdf'
+        ? exportarReportePdf(config, ctx) : descargarLibroPermisos(formato, registros, ctx));
     } catch(error) {
       if (!(error instanceof DescargaCanceladaError)) this.toast.error('No se pudo generar el reporte','Inténtalo nuevamente.');
     } finally { this.exportandoReporte.set(false); }
