@@ -229,8 +229,12 @@
     <h3 class="ficha-detalle__titulo">{{ relacion }}</h3>
     <dl class="ficha-detalle__campos">
       <div>
-        <dt>Nombre</dt>
-        <dd>{{ persona.nombres | titlecase }} {{ persona.apellidos | titlecase }}</dd>
+        <dt>Nombres</dt>
+        <dd>{{ persona.nombres | titlecase }}</dd>
+      </div>
+      <div>
+        <dt>Apellidos</dt>
+        <dd>{{ persona.apellidos | titlecase }}</dd>
       </div>
       @if (persona.identificacion) {
         <div class="campo">
