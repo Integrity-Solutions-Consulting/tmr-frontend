@@ -239,7 +239,7 @@
       <table class="permisos-table">
         <thead>
           <tr>
-            <th>Colaborador</th>
+            <th class="rrhh-colaborador-column">Colaborador</th>
             <th>Régimen</th>
             <th>Fecha base</th>
             <th>Ganados</th>
@@ -256,7 +256,7 @@
             </tr>
           } @else {
             @for (col of saldosColaboradores(); track col.idEmpleado) {
-              <tr>
+              <tr [class.rrhh-fila-expandida]="saldoExpandido(col.idEmpleado)">
                 <td>
                   <button
                     type="button"
@@ -270,19 +270,6 @@
                     </svg>
                     <span>{{ col.apellidosNombres }}</span>
                   </button>
-                  @if (saldoExpandido(col.idEmpleado)) {
-                    <dl class="rrhh-colab-detalle">
-                      <dt>Cédula</dt>
-                      <dd>{{ col.cedula }}</dd>
-                      @if (col.cargo) {
-                        <dt>Cargo</dt>
-                        <dd>{{ col.cargo }}</dd>
-                      } @else {
-                        <dt>Código</dt>
-                        <dd>{{ col.codigoEmpleado }}</dd>
-                      }
-                    </dl>
-                  }
                 </td>
                 <td>
                   <div class="rrhh-tags-wrap">
@@ -333,6 +320,23 @@
                   ></app-action-menu>
                 </td>
               </tr>
+              @if (saldoExpandido(col.idEmpleado)) {
+                <tr class="rrhh-fila-detalle">
+                  <td colspan="8">
+                    <dl class="rrhh-colab-detalle">
+                      <dt>Cédula</dt>
+                      <dd>{{ col.cedula }}</dd>
+                      @if (col.cargo) {
+                        <dt>Cargo</dt>
+                        <dd>{{ col.cargo }}</dd>
+                      } @else {
+                        <dt>Código</dt>
+                        <dd>{{ col.codigoEmpleado }}</dd>
+                      }
+                    </dl>
+                  </td>
+                </tr>
+              }
             } @empty {
               <tr>
                 <td colspan="8" class="empty-row">No se encontraron colaboradores con los filtros actuales.</td>

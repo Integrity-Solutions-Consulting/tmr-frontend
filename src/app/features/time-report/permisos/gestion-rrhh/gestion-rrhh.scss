@@ -165,8 +165,8 @@
   cursor: pointer;
 
   > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   &:hover {
@@ -190,16 +190,35 @@
   }
 }
 
+// Columna del nombre un poco más ancha (el nombre baja de línea en vez de cortarse)
+.permisos-table .rrhh-colaborador-column {
+  width: 26%;
+}
+
+// Fila abierta: sin línea divisoria entre la fila y su detalle
+.permisos-table tr.rrhh-fila-expandida > td {
+  border-bottom: none;
+}
+
+// Detalle desplegado: franja a todo el ancho de la tabla, cédula y debajo el cargo
+.table-card > .permisos-table tr.rrhh-fila-detalle > td {
+  padding-top: 0;
+  padding-left: 2.35rem;
+  white-space: normal;
+  overflow: visible;
+}
+
 .rrhh-colab-detalle {
   display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 0.75rem;
-  row-gap: 0.2rem;
-  margin: 0.35rem 0 0 1.35rem;
-  padding: 0.5rem 0.65rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.9rem;
+  row-gap: 0.25rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
   border-radius: 8px;
   background: #f5f7fa;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.5;
 
   dt {
     color: var(--text-secondary);
@@ -207,8 +226,7 @@
 
   dd {
     margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
   }
 }
 
