@@ -317,8 +317,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.resumenCorte.detener();
     this.misAvisos.detener();
     this.notificacionesInternas.detener();
-    this.misAvisos.detener();
-    this.notificacionesInternas.detener();
     this.tokenService.clear();
     this.tokenMonitor.stopMonitoring();
     this.router.navigate(['/auth/login'], {
@@ -334,6 +332,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.descargas.cerrar();
     this.notificacionToast.cerrarTodos();
     this.resumenCorte.detener();
+    this.misAvisos.detener();
+    this.notificacionesInternas.detener();
     this.modalScrollLock.reset();
     this.dropdownScrollLock.reset();
     document.body.classList.remove('sidebar-open');
