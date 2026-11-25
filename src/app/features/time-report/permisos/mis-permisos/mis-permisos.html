@@ -21,13 +21,14 @@
     <div class="filter-group search-group">
       <label class="filter-label" for="mis-permisos-filter-1">Buscar</label>
       <input id="mis-permisos-filter-1"
+        maxlength="200"
         class="filter-control"
         type="text"
         name="busquedaSolicitudes"
         autocorrect="off"
         autocapitalize="off"
         spellcheck="false"
-        placeholder="Buscar por código, tipo, cliente, líder o estado..."
+        placeholder="Buscar por código, tipo, proyecto, cliente, líder o estado..."
         [ngModel]="busqueda()"
         (ngModelChange)="busqueda.set($event)" />
     </div>
@@ -123,7 +124,12 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of solicitudesFiltradas(); track item.codigo) {
+        @if (cargandoSolicitudes() && solicitudes().length === 0) {
+          <tr>
+            <td colspan="5" class="empty-row">Cargando solicitudes...</td>
+          </tr>
+        } @else {
+        @for (item of solicitudes(); track item.codigo) {
           <tr>
             <td>
               <strong>{{ item.tipo }}</strong>
@@ -154,9 +160,19 @@
             <td colspan="5" class="empty-row">No se encontraron solicitudes con los criterios de búsqueda.</td>
           </tr>
         }
+        }
       </tbody>
     </table>
   </div>
+
+  <app-paginacion
+    [paginaActual]="pagina()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalFiltrado()"
+    [porPagina]="porPagina"
+    etiquetaRegistros="solicitudes"
+    (paginaCambia)="pagina.set($event)"
+  />
 
   <!-- MODAL 1: SOLICITUD DE PERMISOS -->
   <app-modal-base
@@ -229,47 +245,58 @@
                 </div>
 
               </div>
-              <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                <div class="permiso-field">
-                  <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
-                  <input
-                    id="hora-inicio-otros"
-                    type="time"
-                    name="horaInicioOtros"
-                    min="07:00"
-                    max="18:00"
-                    step="900"
-                    class="isc-inline-date"
-                    [ngModel]="horaInicioOtrosForm()"
-                    (ngModelChange)="cambiarHoraInicioOtros($event)"
-                  />
+              @if (tipoSeleccionado() !== 'VACACIONES') {
+                <div class="permiso-fechas" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                  <div class="permiso-field">
+                    <label for="hora-inicio-otros">Hora desde <span aria-hidden="true">*</span></label>
+                    <input
+                      id="hora-inicio-otros"
+                      type="time"
+                      name="horaInicioOtros"
+                      min="07:00"
+                      max="18:00"
+                      step="900"
+                      class="isc-inline-date"
+                      [ngModel]="horaInicioOtrosForm()"
+                      (ngModelChange)="cambiarHoraInicioOtros($event)"
+                    />
+                  </div>
+                  <div class="permiso-field">
+                    <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
+                    <input
+                      id="hora-fin-otros"
+                      type="time"
+                      name="horaFinOtros"
+                      min="07:30"
+                      max="19:00"
+                      step="900"
+                      class="isc-inline-date"
+                      [ngModel]="horaFinOtrosForm()"
+                      (ngModelChange)="cambiarHoraFinOtros($event)"
+                    />
+                  </div>
                 </div>
-                <div class="permiso-field">
-                  <label for="hora-fin-otros">Hora hasta <span aria-hidden="true">*</span></label>
-                  <input
-                    id="hora-fin-otros"
-                    type="time"
-                    name="horaFinOtros"
-                    min="07:30"
-                    max="19:00"
-                    step="900"
-                    class="isc-inline-date"
-                    [ngModel]="horaFinOtrosForm()"
-                    (ngModelChange)="cambiarHoraFinOtros($event)"
-                  />
-                </div>
-              </div>
-              @if (horasPorDiaOtrosForm() <= 0) {
-                <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
-                  <strong>Revisa el horario:</strong> elige horas dentro de la jornada laboral y asegúrate de que la hora de fin sea posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.
-                </p>
+                @if (horasPorDiaOtrosForm() <= 0) {
+                  <p class="permiso-ayuda" style="color: #dc2626; font-weight: 600;">
+                    <strong>Revisa el horario:</strong> elige horas dentro de la jornada laboral y asegúrate de que la hora de fin sea posterior al inicio. El permiso debe durar entre 30 minutos y 8 horas por día.
+                  </p>
+                }
               }
               <div class="permiso-duracion" aria-live="polite">
                 <strong [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : null">{{ textoDuracionForm() }}</strong>
                 @if (tipoSeleccionado() === 'VACACIONES') {
-                  <span [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : '#475569'" style="font-weight: 500;">
-                    Quedan {{ diasDisponiblesNumero() }} de 15 días ({{ diasDisponiblesNumero() * 8 }} h)
-                  </span>
+                  @if (sinDerechoVacacionesForm()) {
+                    <span style="color: #dc2626; font-weight: 600;">
+                      Régimen Factura sin excepción activa (solicitar autorización a RRHH)
+                    </span>
+                  } @else {
+                    <span [style.color]="excedeSaldoVacacionesForm() ? '#dc2626' : esVacacionAnticipadaForm() ? '#b45309' : '#475569'" style="font-weight: 500;">
+                      Saldo acumulado: {{ diasDisponiblesNumero() }} día(s) calendario
+                      @if (esVacacionAnticipadaForm() && !excedeSaldoVacacionesForm()) {
+                        · Vacaciones anticipadas (se descontarán del siguiente ciclo)
+                      }
+                    </span>
+                  }
                 }
               </div>
             </div>

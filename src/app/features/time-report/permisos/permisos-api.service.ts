@@ -8,11 +8,64 @@ import {
   TipoPermisoOficial,
 } from './formulario-permiso-oficial/formulario-permiso-oficial';
 
+/** Página de resultados paginada en servidor (viaja dentro de "data"). */
+export interface PaginaApi<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 export interface ApiEnvelope<T> {
   success: boolean;
   statusCode: number;
   message: string;
   data: T;
+}
+
+export interface ResumenGestionRrhhApi {
+  porConfirmar: number;
+  pendientesLiderExterno: number;
+  confirmadas: number;
+  totalHistorial: number;
+  porVerificar: number;
+  totalColaboradores: number;
+  aniosDisponibles: number[];
+}
+
+export interface PaginaConsultaRrhh {
+  page: number;
+  pageSize: number;
+  buscar?: string | null;
+}
+
+/** Indicadores de Mis permisos, Aprobaciones del líder e Historial de gerencia. */
+export interface ResumenListadoPermisosApi {
+  total: number;
+  enProceso: number;
+  confirmados: number;
+  rechazados: number;
+  pendientesLider: number;
+  aprobadosLider: number;
+  ausentesHoy: number;
+  proyectos: string[];
+}
+
+export interface PaginaPermisosApi extends PaginaApi<PermisoItemApi> {
+  resumen: ResumenListadoPermisosApi;
+}
+
+/** Filtros comunes de los listados de solicitudes; sin page/pageSize se recibe la lista completa filtrada. */
+export interface ConsultaListadoPermisos {
+  page?: number;
+  pageSize?: number;
+  buscar?: string | null;
+  tipo?: string | null;
+  estado?: string | null;
+  desde?: string | null;
+  hasta?: string | null;
+  proyecto?: string | null;
 }
 
 export interface ProyectoAsignadoPermisoApi {
@@ -64,6 +117,14 @@ export interface ContextoColaboradorPermisoApi {
   lideresDisponibles: LiderDisponiblePermisoApi[];
   tiposPermiso?: TipoPermisoCatalogoApi[];
   rrhhDisponibles?: RrhhDisponiblePermisoApi[];
+  regimenVacaciones?: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tieneDerechoVacaciones?: boolean;
+  fechaInicioVacaciones?: string | null;
+  diasGanadosAcumulados?: number;
+  diasConsumidosVacaciones?: number;
+  diasAjusteVacaciones?: number;
+  diasProporcionalesCiclo?: number;
+  maximoAnticipoDias?: number;
 }
 
 export interface RrhhDisponiblePermisoApi {
@@ -143,6 +204,91 @@ export interface PermisoItemApi {
   avisoNotificacion?: string | null;
   versionSolicitud?: string | null;
   adjuntos?: AdjuntoPermisoApi[];
+  descuentaVacaciones?: boolean;
+  esRecuperable?: boolean;
+  esAnticipada?: boolean;
+  esHistorico?: boolean;
+  verificadoRrhh?: boolean;
+  observacionMigracion?: string | null;
+  regimen?: 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
+}
+
+export interface ColaboradorSelectorPermisoApi {
+  idEmpleado: number;
+  codigoEmpleado: string;
+  cedula: string;
+  apellidosNombres: string;
+  regimen: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tipoContrato: string;
+  empresa?: string | null;
+  activo: boolean;
+}
+
+export interface GuardarPermisoRrhhPayload {
+  idEmpleado: number;
+  tipoOficial: TipoPermisoOficial;
+  fechaInicio: string;
+  fechaFin: string;
+  fechaRegreso?: string | null;
+  totalDias?: number | null;
+  horario?: HorarioPermisoOficial;
+  detalleHorario?: string | null;
+  motivo: string;
+  descuentaVacaciones: boolean;
+  esRecuperable: boolean;
+  esAnticipada: boolean;
+  esHistorico: boolean;
+  verificadoRrhh: boolean;
+  observacionMigracion?: string | null;
+  estadoCodigo?: string | null;
+  impactoTimeReport?: 'RESTA_META' | 'SUMA_REPORTADAS' | 'SIN_IMPACTO' | null;
+}
+
+export interface AjusteVacacionesItemApi {
+  id: number;
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION';
+  diasAjuste: number;
+  permiteVacaciones?: boolean | null;
+  motivo: string;
+  usuarioCreacion: string;
+  fechaCreacion: string;
+  /** dd/MM/yyyy, solo para FECHA_AFILIACION */
+  fechaAfiliacionBase?: string | null;
+}
+
+export interface SaldoVacacionesColaboradorApi {
+  idEmpleado: number;
+  codigoEmpleado: string;
+  cedula: string;
+  apellidosNombres: string;
+  cargo: string;
+  empresa?: string | null;
+  tipoContrato: string;
+  regimen: 'AFILIADO' | 'MIXTO' | 'FACTURA';
+  tieneDerechoVacaciones: boolean;
+  excepcionFacturaActiva: boolean;
+  fechaIngresoOriginal?: string | null;
+  /** Procedencia de la fecha base: Contrato, Afiliación registrada en HC / por RR. HH. o Ingreso general. */
+  origenFechaInicioVacaciones?: string | null;
+  fechaInicioVacaciones?: string | null;
+  aniosAntiguedad: number;
+  diasGanadosAcumulados: number;
+  diasProporcionalesCiclo: number;
+  diasConsumidos: number;
+  diasAjuste: number;
+  saldoDisponible: number;
+  totalRegistrosHistorial: number;
+  registrosPorVerificar: number;
+  ajustes: AjusteVacacionesItemApi[];
+}
+
+export interface CrearAjusteVacacionesPayload {
+  tipoAjuste: 'AJUSTE_DIAS' | 'EXCEPCION_FACTURA' | 'FECHA_AFILIACION';
+  diasAjuste: number;
+  permiteVacaciones?: boolean | null;
+  motivo: string;
+  /** YYYY-MM-DD, requerido para FECHA_AFILIACION */
+  fechaAfiliacionBase?: string | null;
 }
 
 export interface CrearPermisoPayload {
@@ -274,10 +420,10 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<ContextoColaboradorPermisoApi>(raw)));
   }
 
-  obtenerMisPermisos(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerMisPermisos(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/mis-permisos`)
-      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+      .get<unknown>(`${this.baseUrl}/mis-permisos`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
   }
 
   crearSolicitud(
@@ -322,10 +468,10 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerEquipo(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerEquipo(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/equipo`)
-      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+      .get<unknown>(`${this.baseUrl}/equipo`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
   }
 
   registrarDecisionLider(
@@ -343,10 +489,122 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerBandejaRrhh(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerBandejaRrhh(
+    consulta?: PaginaConsultaRrhh & {
+      bandeja?: 'POR_CONFIRMAR' | 'LIDER_EXTERNO' | 'HISTORIAL';
+      tipo?: string | null;
+      desde?: string | null;
+      hasta?: string | null;
+    },
+  ): Observable<ApiEnvelope<PaginaApi<PermisoItemApi>>> {
+    const params = this.construirParams({ ...consulta });
     return this.http
-      .get<unknown>(`${this.baseUrl}/rrhh`)
+      .get<unknown>(`${this.baseUrl}/rrhh`, { params })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaApi<PermisoItemApi>>(raw)));
+  }
+
+  obtenerResumenRrhh(): Observable<ApiEnvelope<ResumenGestionRrhhApi>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/resumen`)
+      .pipe(map((raw) => this.normalizarEnvelope<ResumenGestionRrhhApi>(raw)));
+  }
+
+  /** Convierte un objeto de filtros en query params, omitiendo vacíos y el valor 'TODOS'. */
+  private construirParams(valores: Record<string, unknown>): Record<string, string> {
+    const params: Record<string, string> = {};
+    for (const [clave, valor] of Object.entries(valores)) {
+      if (valor === null || valor === undefined || valor === '' || valor === false || valor === 'TODOS') continue;
+      params[clave] = String(valor);
+    }
+    return params;
+  }
+
+  obtenerColaboradoresRrhh(): Observable<ApiEnvelope<ColaboradorSelectorPermisoApi[]>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/colaboradores`)
+      .pipe(map((raw) => this.normalizarEnvelope<ColaboradorSelectorPermisoApi[]>(raw)));
+  }
+
+  obtenerHistorialEditableRrhh(filtros: PaginaConsultaRrhh & {
+    idEmpleado?: number | null;
+    anio?: number | string | null;
+    desde?: string | null;
+    hasta?: string | null;
+    regimen?: 'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
+    tipo?: string | null;
+    soloPendientesVerificar?: boolean;
+    soloHistoricos?: boolean;
+  }): Observable<ApiEnvelope<PaginaApi<PermisoItemApi>>> {
+    const params = this.construirParams({ ...filtros });
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaApi<PermisoItemApi>>(raw)));
+  }
+
+  /** Historial completo con los filtros vigentes (para exportación Excel y PDF). */
+  obtenerHistorialEditableRrhhCompleto(filtros: {
+    buscar?: string | null;
+    idEmpleado?: number | null;
+    anio?: number | string | null;
+    desde?: string | null;
+    hasta?: string | null;
+    regimen?: 'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA' | null;
+    tipo?: string | null;
+    soloPendientesVerificar?: boolean;
+    soloHistoricos?: boolean;
+  }): Observable<ApiEnvelope<PermisoItemApi[]>> {
+    const params = this.construirParams({ ...filtros });
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/historial`, { params })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
+  }
+
+  crearRegistroRrhh(payload: GuardarPermisoRrhhPayload): Observable<ApiEnvelope<PermisoItemApi>> {
+    return this.http
+      .post<unknown>(`${this.baseUrl}/rrhh/registro`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
+  }
+
+  actualizarRegistroRrhh(
+    id: number,
+    payload: GuardarPermisoRrhhPayload,
+  ): Observable<ApiEnvelope<PermisoItemApi>> {
+    return this.http
+      .put<unknown>(`${this.baseUrl}/rrhh/${id}`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
+  }
+
+  anularRegistroRrhh(id: number): Observable<ApiEnvelope<{ id: number }>> {
+    return this.http
+      .delete<unknown>(`${this.baseUrl}/rrhh/${id}`)
+      .pipe(map((raw) => this.normalizarEnvelope<{ id: number }>(raw)));
+  }
+
+  obtenerSaldosVacacionesRrhh(
+    consulta?: PaginaConsultaRrhh & {
+      regimen?: 'TODOS' | 'AFILIADO' | 'MIXTO' | 'FACTURA';
+      soloSaldoNegativo?: boolean;
+    },
+  ): Observable<ApiEnvelope<PaginaApi<SaldoVacacionesColaboradorApi>>> {
+    const params = this.construirParams({ ...consulta });
+    return this.http
+      .get<unknown>(`${this.baseUrl}/rrhh/saldos`, { params })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaApi<SaldoVacacionesColaboradorApi>>(raw)));
+  }
+
+  crearAjusteVacacionesRrhh(
+    idEmpleado: number,
+    payload: CrearAjusteVacacionesPayload,
+  ): Observable<ApiEnvelope<AjusteVacacionesItemApi>> {
+    return this.http
+      .post<unknown>(`${this.baseUrl}/rrhh/saldos/${idEmpleado}/ajuste`, payload)
+      .pipe(map((raw) => this.normalizarEnvelope<AjusteVacacionesItemApi>(raw)));
+  }
+
+  anularAjusteVacacionesRrhh(idAjuste: number): Observable<ApiEnvelope<{ id: number }>> {
+    return this.http
+      .delete<unknown>(`${this.baseUrl}/rrhh/saldos/ajustes/${idAjuste}`)
+      .pipe(map((raw) => this.normalizarEnvelope<{ id: number }>(raw)));
   }
 
   registrarDecisionRrhh(
@@ -372,9 +630,16 @@ export class PermisosApiService {
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi>(raw)));
   }
 
-  obtenerHistorialGerencia(): Observable<ApiEnvelope<PermisoItemApi[]>> {
+  obtenerHistorialGerencia(consulta: ConsultaListadoPermisos & { page: number; pageSize: number }): Observable<ApiEnvelope<PaginaPermisosApi>> {
     return this.http
-      .get<unknown>(`${this.baseUrl}/gerencia`)
+      .get<unknown>(`${this.baseUrl}/gerencia`, { params: this.construirParams({ ...consulta }) })
+      .pipe(map((raw) => this.normalizarEnvelope<PaginaPermisosApi>(raw)));
+  }
+
+  /** Historial de gerencia completo con los filtros vigentes (selección masiva para reportes). */
+  obtenerHistorialGerenciaCompleto(consulta: Omit<ConsultaListadoPermisos, 'page' | 'pageSize'>): Observable<ApiEnvelope<PermisoItemApi[]>> {
+    return this.http
+      .get<unknown>(`${this.baseUrl}/gerencia`, { params: this.construirParams({ ...consulta }) })
       .pipe(map((raw) => this.normalizarEnvelope<PermisoItemApi[]>(raw)));
   }
 

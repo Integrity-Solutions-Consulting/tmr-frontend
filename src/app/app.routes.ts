@@ -68,6 +68,18 @@ export const routes: Routes = [
       },
 
       {
+        path: 'revision-perfiles/:colaborador',
+        loadComponent: () => import('./features/actualizacion-datos/revision-perfiles.page').then(m => m.RevisionPerfilesPage),
+      },
+      {
+        path: 'revision-perfiles',
+        loadComponent: () => import('./features/actualizacion-datos/revision-perfiles.page').then(m => m.RevisionPerfilesPage),
+      },
+      {
+        path: 'mi-perfil',
+        loadComponent: () => import('./features/actualizacion-datos/mi-perfil.page').then(m => m.MiPerfilPage),
+      },
+      {
         path: 'mis-datos',
         loadComponent: () => import('./features/actualizacion-datos/mis-datos.page').then(m => m.MisDatosPage),
       },

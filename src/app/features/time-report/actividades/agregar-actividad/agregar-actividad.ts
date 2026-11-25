@@ -65,6 +65,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
     public form!: FormGroup;
     public esEdicion = false;
+    // sm - Detalle de solo lectura: el líder ve desde Seguimiento una actividad que no puede modificar.
+    public soloVer = false;
     public mostrarEliminar = false;
     public errorEliminar: string | null = null;
 
@@ -181,7 +183,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, [Validators.required, this.autocompleteValidator(this.tiposActividad)]],
             proyectoId: [
-                act && act.idproyecto ? String(act.idproyecto) : (registroLider ? String(registroLider.proyecto.id) : null),
+                act && act.idproyecto ? String(act.idproyecto) : (registroLider?.proyecto ? String(registroLider.proyecto.id) : null),
                 [Validators.required, this.autocompleteValidator(this.proyectos)]
             ],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
@@ -199,6 +201,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
         });
 
         if (registroLider) this.form.get('proyectoId')?.disable({ emitEvent: false });
+        this.soloVer = !!this.data?.soloVer && !!act;
+        if (this.soloVer) this.form.disable({ emitEvent: false });
 
         // Listen for autocomplete search typing/value changes
         this.form.get('proyectoId')?.valueChanges.subscribe(val => {
@@ -463,7 +467,12 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
         // Proyectos
         // sm - El líder no usa la lista de la sesión (sus propios proyectos), sino el proyecto y la vigencia del colaborador.
         const registroLider = this.data?.registroLider;
-        (registroLider ? of([registroLider.proyecto]) : this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`))
+        // sm - En el detalle de solo lectura basta con el proyecto de la actividad, para mostrar su nombre aunque no
+        // esté entre los proyectos de quien la mira.
+        const actDetalle = this.data?.soloVer ? this.data?.actividad : null;
+        (actDetalle
+            ? of(actDetalle.idproyecto ? [{ id: actDetalle.idproyecto, nombre: actDetalle.proyectoNombre, codigo: actDetalle.codigorequerimiento }] : [])
+            : registroLider ? of([registroLider.proyecto]) : this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`))
             .subscribe({
                 next: (res) => {
                     if (res) {

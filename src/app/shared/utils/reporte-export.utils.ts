@@ -663,7 +663,7 @@ function formatearFecha(fecha: Date): string {
   });
 }
 
-function descargarBlob(blob: Blob, nombre: string): void {
+export function descargarBlob(blob: Blob, nombre: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

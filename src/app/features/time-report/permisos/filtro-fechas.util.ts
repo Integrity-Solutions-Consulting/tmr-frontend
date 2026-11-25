@@ -52,6 +52,22 @@ export function isoADmy(fechaIso: string): string {
 }
 
 /**
+ * Calcula días calendario (incluidos fines de semana) entre dos fechas ISO (YYYY-MM-DD).
+ */
+export function calcularDiasCalendarioIso(inicioIso: string, finIso: string): number {
+  if (!inicioIso) return 1;
+  const [y1, m1, d1] = inicioIso.split('-').map(Number);
+  const [y2, m2, d2] = (finIso || inicioIso).split('-').map(Number);
+  if (!y1 || !y2) return 1;
+
+  const inicio = Date.UTC(y1, m1 - 1, d1);
+  const fin = Date.UTC(y2, m2 - 1, d2);
+  if (fin < inicio) return 1;
+
+  return Math.floor((fin - inicio) / 86_400_000) + 1;
+}
+
+/**
  * Calcula días laborables (lunes a viernes) entre dos fechas ISO (YYYY-MM-DD).
  */
 export function calcularDiasLaborablesIso(inicioIso: string, finIso: string): number {

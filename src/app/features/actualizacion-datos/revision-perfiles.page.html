@@ -1,0 +1,415 @@
+<main class="revision-page">
+  @if (!perfilId) {
+    <app-header
+      title="Revisi&oacute;n de Solicitudes"
+      subtitle="Solicitudes de actualizaci&oacute;n de perfiles"
+    ></app-header>
+    @if (!loading) {
+      <div class="resumen">
+        <app-tarjeta-resumen
+          titulo="Colaboradores"
+          icono="groups"
+          tono="destacado"
+          [valor]="personas.length"
+        />
+        <app-tarjeta-resumen
+          titulo="En revisi&oacute;n"
+          icono="pending_actions"
+          tono="corporativo"
+          [valor]="contar('EnRevision')"
+        />
+        <app-tarjeta-resumen
+          titulo="Requieren correcci&oacute;n"
+          icono="edit_document"
+          tono="neutro"
+          [valor]="contar('RequiereCorreccion')"
+        />
+      </div>
+    }
+    <app-filter-bar>
+      <label filter-control class="filtro filtro--busqueda">
+        <span>B&uacute;squeda</span>
+        <span class="filtro-campo">
+          <span class="material-symbols-outlined filtro-icono" aria-hidden="true">search</span>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, c&eacute;dula o correo"
+            [(ngModel)]="busqueda"
+          />
+          @if (busqueda) {
+            <button
+              type="button"
+              class="filtro-limpiar"
+              aria-label="Limpiar b&uacute;squeda"
+              (click)="busqueda = ''"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+          }
+        </span>
+      </label>
+      <label filter-control class="filtro"
+        >Secci&oacute;n
+        <select [(ngModel)]="filtroSeccion">
+          <option value="">Todas</option>
+          @for (seccion of secciones | keyvalue; track seccion.key) {
+            <option [value]="seccion.key">
+              {{ seccion.value }}
+            </option>
+          }
+        </select>
+      </label>
+      <label filter-control class="filtro"
+        >Estado
+        <select [(ngModel)]="filtroEstado">
+          <option value="">Todos</option>
+          @for (estado of estados | keyvalue; track estado.key) {
+            <option [value]="estado.key">
+              {{ estado.value }}
+            </option>
+          }
+        </select>
+      </label>
+    </app-filter-bar>
+    <div class="tabla-wrapper" [attr.aria-busy]="loading">
+      <table class="tabla" aria-label="Solicitudes de actualizaci&oacute;n de perfiles">
+        <colgroup>
+          <col class="colaborador" />
+          <col class="cedula" />
+          <col class="correo" />
+          <col class="estado-revision" />
+          <col class="fecha-envio" />
+          <col class="acciones" />
+        </colgroup>
+        <thead class="tabla__head">
+          <tr>
+            @for (columna of columnas; track columna.campo) {
+              <th
+                scope="col"
+                [attr.aria-sort]="
+                  campoOrden === columna.campo
+                    ? ordenAscendente
+                      ? 'ascending'
+                      : 'descending'
+                    : null
+                "
+              >
+                <button type="button" class="tabla__orden" (click)="ordenar(columna.campo)">
+                  <span>{{ columna.titulo }}</span>
+                  <mat-icon class="sort-icon" aria-hidden="true">{{
+                    campoOrden === columna.campo
+                      ? ordenAscendente
+                        ? 'arrow_upward'
+                        : 'arrow_downward'
+                      : 'unfold_more'
+                  }}</mat-icon>
+                </button>
+              </th>
+            }
+            <th scope="col" class="acciones" aria-label="Acciones"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (persona of personasFiltradas; track persona.idEmpleado) {
+            <tr>
+              <td [title]="persona.nombre | titlecase">{{ persona.nombre | titlecase }}</td>
+              <td>{{ persona.cedula }}</td>
+              <td [title]="persona.correo || ''">{{ persona.correo || '?' }}</td>
+              <td>
+                @let estadoPerfil = estadoRevision(persona);
+                <app-badge-estado
+                  [estado]="estados[estadoPerfil] || 'Sin solicitudes'"
+                  [tono]="tonosEstado[estadoPerfil]"
+                />
+              </td>
+              <td>{{ persona.solicitudes[0].fechaCreacion | date: 'dd/MM/yyyy' }}</td>
+              <td class="acciones">
+                <a class="ver-perfil" [routerLink]="['/revision-perfiles', persona.idEmpleado]">
+                  <span class="material-symbols-outlined" aria-hidden="true">badge</span>
+                  Abrir perfil
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            @if (loading) {
+              <tr>
+                <td colspan="6">
+                  <div class="tabla-cargando" role="status" aria-label="Cargando solicitudes">
+                    <span class="tabla-cargando__spinner" aria-hidden="true"></span>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              <tr>
+                <td class="vacio" colspan="6">
+                  {{
+                    error && !personas.length
+                      ? error
+                      : personas.length
+                        ? 'No hay resultados para los filtros seleccionados.'
+                        : 'No hay solicitudes.'
+                  }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (error && (perfilId || personas.length)) {
+    <p class="aviso" role="alert">{{ error }}</p>
+  }
+  @if (perfilId && loading && !persona) {
+    <div class="tabla-cargando" role="status" aria-label="Cargando perfil">
+      <span class="tabla-cargando__spinner" aria-hidden="true"></span>
+    </div>
+  }
+  @if (perfilId && !loading && !persona) {
+    <a routerLink="/revision-perfiles">Volver a solicitudes</a>
+  }
+  @if (persona) {
+    <section class="detalle">
+      <app-boton
+        label="Volver a solicitudes"
+        icon="arrow_back"
+        type="secondary"
+        [disabled]="saving"
+        (clicked)="volver()"
+      />
+      <header class="identidad-perfil">
+        <div class="identidad-perfil__nombre">
+          <app-header title="Revisión de perfil" [compact]="true" />
+          <p>{{ persona.nombre | titlecase }}</p>
+        </div>
+        @if (estadoRevision(persona); as estadoPerfil) {
+          <app-badge-estado [estado]="estados[estadoPerfil]" [tono]="tonosEstado[estadoPerfil]" />
+        }
+      </header>
+      <div class="perfil-secciones">
+        @for (seccion of secciones | keyvalue: null; track seccion.key) {
+          @if (envios[seccion.key]; as envio) {
+            <section
+              class="seccion-enviada"
+              [class.seccion-certificaciones]="seccion.key === 'certificaciones'"
+              [class.seccion-conocimientos]="seccion.key === 'conocimientos'"
+            >
+              <header class="cabecera-seccion">
+                <h3>
+                  <span class="icono material-symbols-outlined" aria-hidden="true">{{
+                    iconosSeccion[seccion.key]
+                  }}</span
+                  >{{ seccion.value }}
+                </h3>
+                <div class="acciones-seccion">
+                  @if (envio.seccion !== 'conocimientos') {
+                    <app-badge-estado
+                      [estado]="estados[envio.estado]"
+                      [tono]="tonosEstado[envio.estado]"
+                    />
+                  }
+                  @if (envio.seccion !== 'conocimientos' && envio.estado === 'EnRevision') {
+                    <app-boton
+                      label="Revisar"
+                      icon="fact_check"
+                      type="secondary"
+                      [disabled]="saving"
+                      (clicked)="alternarDecision(envio.id)"
+                    />
+                  }
+                </div>
+              </header>
+              @if (envio.seccion === 'conocimientos') {
+                <div class="tabla-conocimientos-wrapper">
+                  <table class="tabla tabla-conocimientos" aria-label="Conocimientos">
+                    <thead class="tabla__head">
+                      <tr>
+                        <th scope="col">Conocimiento</th>
+                        <th scope="col">Porcentaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (conocimiento of envio.propuesta.conocimientos; track $index) {
+                        <tr>
+                          <td>{{ conocimiento.area }}</td>
+                          <td>{{ conocimiento.porcentaje }}%</td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td class="vacio" colspan="2">No hay conocimientos registrados.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                @for (apartado of apartados(envio); track $index) {
+                  <div class="apartado" [class.apartado--formacion]="envio.seccion === 'formacion'">
+                    @if (apartado.titulo && envio.seccion !== 'formacion') {
+                      <h4 [class.titulo-familiar]="envio.seccion === 'familia'">
+                        {{ apartado.titulo }}
+                      </h4>
+                    }
+                    @if (envio.seccion === 'personal' && esObjeto(apartado.datos)) {
+                      @let grupos = agruparDatosPersonales(
+                        apartado.datos,
+                        envio.vigente?.persona?.fechaNacimiento ?? envio.vigente?.fechaNacimiento,
+                        envio.estado
+                      );
+                      <div class="informacion-personal">
+                        <ng-container
+                          *ngTemplateOutlet="datos; context: { $implicit: grupos.informacion }"
+                        ></ng-container>
+                        <aside class="informacion-personal__discapacidad" aria-label="Discapacidad">
+                          <ng-container
+                            *ngTemplateOutlet="datos; context: { $implicit: grupos.discapacidad }"
+                          ></ng-container>
+                        </aside>
+                      </div>
+                    } @else {
+                      <ng-container
+                        *ngTemplateOutlet="datos; context: { $implicit: apartado.datos }"
+                      ></ng-container>
+                    }
+                    @if (apartado.archivos.length) {
+                      <div class="adjuntos">
+                        <h5>Documentos adjuntos</h5>
+                        @for (archivo of apartado.archivos; track archivo.id) {
+                          <div class="archivo">
+                            <div class="archivo-nombre">
+                              <span>{{ tipoDocumento(archivo.seccion) }}</span>
+                              <small>{{ archivo.nombreOriginal }}</small>
+                              @if (archivosEnCurso.has(archivo.id)) {
+                                <span
+                                  class="tabla-cargando__spinner"
+                                  role="status"
+                                  aria-label="Cargando archivo"
+                                ></span>
+                              }
+                              @if (erroresArchivo[archivo.id]; as mensaje) {
+                                <small class="error-archivo" role="alert">{{ mensaje }}</small>
+                              }
+                            </div>
+                            <div class="acciones-seccion">
+                              <button
+                                type="button"
+                                class="accion-archivo"
+                                [disabled]="archivosEnCurso.has(archivo.id)"
+                                (click)="descargar(archivo, envio.id, true)"
+                              >
+                                <span class="material-symbols-outlined" aria-hidden="true"
+                                  >visibility</span
+                                >Ver
+                              </button>
+                              <button
+                                type="button"
+                                class="accion-archivo"
+                                [disabled]="archivosEnCurso.has(archivo.id)"
+                                (click)="descargar(archivo, envio.id)"
+                              >
+                                <span class="material-symbols-outlined" aria-hidden="true"
+                                  >download</span
+                                >Descargar
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              }
+
+              @if (envio.seccion !== 'conocimientos' && envio.observacion) {
+                <p class="aviso"><strong>Observación</strong><br />{{ envio.observacion }}</p>
+              }
+              @if (decisiones[envio.id]; as decision) {
+                @if (envio.estado === 'EnRevision') {
+                  <form class="decision" (ngSubmit)="guardar(envio, decision)">
+                    <label class="filtro"
+                      >Estado de la sección
+                      <select name="estado" [(ngModel)]="decision.estado" [disabled]="saving">
+                        <option value="">Selecciona un estado</option>
+                        <option value="Aprobada">Aprobada</option>
+                        <option value="RequiereCorreccion">Requiere corrección</option>
+                      </select>
+                    </label>
+                    <label
+                      >{{
+                        decision.estado === 'RequiereCorreccion'
+                          ? 'Campo o documento que debe corregir y motivo'
+                          : 'Observación (opcional)'
+                      }}
+                      <textarea
+                        name="observacion"
+                        [(ngModel)]="decision.observacion"
+                        [disabled]="saving"
+                        [required]="decision.estado === 'RequiereCorreccion'"
+                      ></textarea>
+                    </label>
+                    @if (decision.error) {
+                      <p role="alert">{{ decision.error }}</p>
+                    }
+                    <app-boton
+                      label="Guardar decisión"
+                      icon="save"
+                      type="secondary"
+                      buttonType="submit"
+                      [disabled]="
+                        saving ||
+                        !decision.estado ||
+                        (decision.estado === 'RequiereCorreccion' && !decision.observacion.trim())
+                      "
+                    />
+                  </form>
+                }
+              }
+            </section>
+          }
+        }
+      </div>
+      @if (cargandoSecciones) {
+        <div class="tabla-cargando" role="status" aria-label="Cargando secciones">
+          <span class="tabla-cargando__spinner" aria-hidden="true"></span>
+        </div>
+      }
+      @if (faltanSecciones) {
+        <app-boton
+          label="Reintentar secciones pendientes"
+          icon="refresh"
+          type="secondary"
+          (clicked)="cargarSecciones()"
+        />
+      }
+    </section>
+  }
+  <ng-template #datos let-valor>
+    @if (esObjeto(valor)) {
+      <dl>
+        @for (campo of entradas(valor); track campo[0]) {
+          <div class="campo-dato">
+            <dt>{{ tituloCampo(campo[0]) }}</dt>
+            <dd>
+              @let fecha = fechaCampo(campo[0], campo[1]);
+              @if (fecha) {
+                {{ fecha }}
+              } @else if (campo[0] === 'porcentajeDiscapacidad') {
+                {{ campo[1] }}%
+              } @else {
+                <ng-container
+                  *ngTemplateOutlet="datos; context: { $implicit: campo[1] }"
+                ></ng-container>
+              }
+            </dd>
+          </div>
+        }
+      </dl>
+    } @else {
+      @if (valor === 'NoInformado') {
+        No informado
+      } @else {
+        {{ valor == null || valor === '' ? 'Sin información' : valor }}
+      }
+    }
+  </ng-template>
+</main>

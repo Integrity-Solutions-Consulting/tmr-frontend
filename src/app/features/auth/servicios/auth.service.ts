@@ -75,7 +75,7 @@ export class AuthService {
 
   /**
    * Obtiene el perfil completo del usuario desde /configuracion/usuarios/{id}
-   * para leer debeCambiarPassword, que el endpoint de login no devuelve.
+   * para versiones anteriores de la API que omiten debeCambiarPassword.
    */
   getUserProfileById(userId: number): Observable<{ debeCambiarPassword: boolean }> {
     return this.http

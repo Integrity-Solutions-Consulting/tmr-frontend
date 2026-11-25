@@ -3,11 +3,13 @@
   <div class="actividad-modal__header">
     <div class="actividad-modal__header-text">
       <h2 class="actividad-modal__title">
-        {{ esEdicion ? 'Editar actividad' : 'Agregar actividad' }}
+        {{ soloVer ? 'Detalle de la actividad' : esEdicion ? 'Editar actividad' : 'Agregar actividad' }}
       </h2>
       <p class="actividad-modal__subtitle">
         {{
-          esEdicion
+          soloVer
+            ? 'Solo lectura.'
+            : esEdicion
             ? 'Modifica los detalles de la actividad seleccionada.'
             : 'Registra el tiempo y detalles de tu
         actividad.'
@@ -499,6 +501,12 @@
 
   <!-- Footer -->
   <div class="actividad-modal__footer">
+    @if (soloVer) {
+      <div class="spacer"></div>
+      <button class="actividad-modal__btn actividad-modal__btn--save" type="button" (click)="cancelar()">
+        Cerrar
+      </button>
+    } @else {
     @if (esEdicion) {
       <button
         class="actividad-modal__btn actividad-modal__btn--delete"
@@ -518,6 +526,7 @@
     >
       {{ guardando ? 'Guardando…' : 'Guardar' }}
     </button>
+    }
   </div>
 </form>
 

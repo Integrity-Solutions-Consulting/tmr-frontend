@@ -7,20 +7,21 @@
       <button
         type="button"
         class="btn-tmr btn-tmr--secondary"
-        [disabled]="solicitudesFiltradas().length === 0"
+        [disabled]="totalFiltrado() === 0 || seleccionandoTodos()"
         (click)="alternarSeleccionarTodos()"
       >
         <span class="material-symbols-outlined" aria-hidden="true">
           {{ todosSeleccionados() ? 'deselect' : 'select_all' }}
         </span>
-        {{ todosSeleccionados() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+        {{ seleccionandoTodos() ? 'Seleccionando…' : todosSeleccionados() ? 'Deseleccionar todos' : 'Seleccionar todos (' + totalFiltrado() + ')' }}
       </button>
 
       <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="cantidadSeleccionados() === 0 || exportandoReporte()" [matMenuTriggerFor]="reporteMenu">
         {{ exportandoReporte() ? 'Generando…' : 'Reporte (' + cantidadSeleccionados() + ')' }}
       </button>
       <mat-menu #reporteMenu="matMenu">
-        <button mat-menu-item (click)="generarReporte('xlsx')" [disabled]="exportandoReporte()">Descargar Excel (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('vacaciones')" [disabled]="exportandoReporte()">Detalle vacaciones (.xlsx)</button>
+        <button mat-menu-item (click)="generarReporte('permisos')" [disabled]="exportandoReporte()">Permisos y faltas (.xlsx)</button>
         <button mat-menu-item (click)="generarReporte('pdf')" [disabled]="exportandoReporte()">Descargar PDF</button>
       </mat-menu>
     </div>
@@ -37,6 +38,7 @@
     <div class="filter-group search-group">
       <label class="filter-label" for="permisos-gerencia-filter-1">Buscar</label>
       <input id="permisos-gerencia-filter-1"
+        maxlength="200"
         type="text"
         class="filter-control"
         placeholder="Buscar"
@@ -83,7 +85,7 @@
     <div class="filter-group">
       <label class="filter-label" for="permisos-gerencia-filter-5">Tipo</label>
       <select id="permisos-gerencia-filter-5" class="filter-control" [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
-        <option value="TODOS">Todo período</option>
+        <option value="TODOS">Todos</option>
         <option value="VACACIONES">Vacaciones</option>
         <option value="LICENCIA_ENFERMEDAD">Licencia por enfermedad</option>
         <option value="CITAS_MEDICAS">Citas médicas</option>
@@ -100,7 +102,7 @@
     <div class="filter-group">
       <label class="filter-label" for="permisos-gerencia-filter-6">Semáforo</label>
       <select id="permisos-gerencia-filter-6" class="filter-control" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
-        <option value="TODOS">Todo período</option>
+        <option value="TODOS">Todos</option>
         <option value="proceso">En proceso</option>
         <option value="finalizado">Finalizado</option>
       </select>
@@ -132,11 +134,11 @@
             <input
               type="checkbox"
               class="gerencia-checkbox"
-              aria-label="Seleccionar todas las solicitudes visibles"
-              [checked]="todosSeleccionados()"
-              [indeterminate]="algunosSeleccionados()"
-              [disabled]="solicitudesFiltradas().length === 0"
-              (change)="alternarSeleccionarTodos()"
+              aria-label="Seleccionar las solicitudes de esta página"
+              [checked]="todosPaginaSeleccionados()"
+              [indeterminate]="algunosPaginaSeleccionados()"
+              [disabled]="solicitudes().length === 0"
+              (change)="alternarSeleccionPagina()"
             />
           </th>
           <th>Colaborador</th>
@@ -148,7 +150,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of solicitudesFiltradas(); track item.id) {
+        @for (item of solicitudes(); track item.id) {
           <tr
             [class.row-selected]="estaSeleccionado(item.id)"
           >
@@ -158,7 +160,7 @@
                 class="gerencia-checkbox"
                 [attr.aria-label]="'Seleccionar solicitud ' + item.folio + ' de ' + item.colaborador"
                 [checked]="estaSeleccionado(item.id)"
-                (change)="alternarSeleccion(item.id, $event)"
+                (change)="alternarSeleccion(item, $event)"
               />
             </td>
             <td><strong>{{ item.colaborador }}</strong></td>
@@ -194,6 +196,15 @@
       </tbody>
     </table>
   </div>
+
+  <app-paginacion
+    [paginaActual]="pagina()"
+    [totalPaginas]="totalPaginas()"
+    [total]="totalFiltrado()"
+    [porPagina]="porPagina"
+    etiquetaRegistros="solicitudes"
+    (paginaCambia)="pagina.set($event)"
+  />
 </div>
 
 <!-- MODAL: VISTA DEL DOCUMENTO PDF -->
