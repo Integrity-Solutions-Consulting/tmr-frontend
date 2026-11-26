@@ -31,7 +31,7 @@
           <label class="select-field" *ngIf="data?.cedula as cedula"><span>Cédula</span><input class="float-field__input" [value]="cedula" disabled placeholder="Ej. 0123456789"></label>
           <label class="select-field">
             <span>Fecha de nacimiento</span>
-            <input class="float-field__input" type="text" appFechaPerfil placeholder="dd/MM/yyyy" formControlName="fechaNacimiento"
+            <input class="float-field__input float-field__input--date" type="date" max="9999-12-31" formControlName="fechaNacimiento"
               data-control-path="persona.fechaNacimiento"
               [attr.aria-invalid]="controlInvalido('persona.fechaNacimiento') ? 'true' : null"
               [attr.aria-describedby]="controlInvalido('persona.fechaNacimiento') ? 'error-persona-fechaNacimiento' : null">

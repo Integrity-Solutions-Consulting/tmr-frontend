@@ -914,7 +914,7 @@ export class MisDatosPage {
     if (error?.status === 0) return 'No fue posible conectar con el servidor. Revisa tu conexión e inténtalo nuevamente.';
     if (error?.status === 409) return error?.error?.detail || 'Los datos cambiaron desde que los cargaste. Recarga la página antes de guardar.';
     if (error?.status >= 500) return 'El servidor no pudo guardar los cambios. Inténtalo nuevamente más tarde.';
-    if (error?.status === 400 || error?.status === 422) return error?.error?.message || error?.error?.title || 'Revisa los campos señalados';
+    if (error?.status === 400 || error?.status === 422) return error?.error?.message || error?.error?.detail || error?.error?.title || 'Revisa los campos señalados';
     return 'No fue posible guardar los cambios. Inténtalo nuevamente.';
   }
 
