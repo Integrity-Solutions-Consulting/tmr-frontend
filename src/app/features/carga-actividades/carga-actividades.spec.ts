@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CargaActividades } from './carga-actividades';
+import { CargaActividadesComponent } from './carga-actividades.component';
 
-describe('CargaActividades', () => {
-  let component: CargaActividades;
-  let fixture: ComponentFixture<CargaActividades>;
+describe('CargaActividadesComponent', () => {
+  let component: CargaActividadesComponent;
+  let fixture: ComponentFixture<CargaActividadesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CargaActividades],
+      imports: [CargaActividadesComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CargaActividades);
+    fixture = TestBed.createComponent(CargaActividadesComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

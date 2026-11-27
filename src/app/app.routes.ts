@@ -67,6 +67,23 @@ export const routes: Routes = [
           ),
       },
 
+      {
+        path: 'revision-perfiles/:colaborador',
+        loadComponent: () => import('./features/actualizacion-datos/revision-perfiles.page').then(m => m.RevisionPerfilesPage),
+      },
+      {
+        path: 'revision-perfiles',
+        loadComponent: () => import('./features/actualizacion-datos/revision-perfiles.page').then(m => m.RevisionPerfilesPage),
+      },
+      {
+        path: 'mi-perfil',
+        loadComponent: () => import('./features/actualizacion-datos/mi-perfil.page').then(m => m.MiPerfilPage),
+      },
+      {
+        path: 'mis-datos',
+        loadComponent: () => import('./features/actualizacion-datos/mis-datos.page').then(m => m.MisDatosPage),
+      },
+
       // Clientes
       {
         path: 'clientes',
@@ -165,6 +182,20 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/reportes/componentes/reporte-fechas/reporte-fechas.component').then(
                 m => m.ReporteFechasComponent
+              ),
+          },
+          {
+            path: 'colaboradores',
+            loadComponent: () =>
+              import('./features/reportes/componentes/reporte-colaboradores/reporte-colaboradores.component').then(
+                m => m.ReporteColaboradoresComponent
+              ),
+          },
+          {
+            path: 'clientes',
+            loadComponent: () =>
+              import('./features/reportes/componentes/reporte-clientes/reporte-clientes.component').then(
+                m => m.ReporteClientesComponent
               ),
           },
         ],

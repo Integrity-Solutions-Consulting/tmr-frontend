@@ -1,12 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
   DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import { PermisosPdfService } from '../permisos-pdf.service';
 import {
   PermisoItemApi,
@@ -17,7 +17,7 @@ import {
 @Component({
   selector: 'app-revision-externa',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FormularioPermisoOficialComponent],
+  imports: [CommonModule, FormsModule, ResumenSolicitudComponent],
   templateUrl: './revision-externa.html',
   styleUrl: './revision-externa.scss',
 })
@@ -32,18 +32,25 @@ export class RevisionExternaComponent implements OnInit {
   readonly observacionLider = signal('');
   readonly procesado = signal<'pendiente' | 'confirmado' | 'observado' | 'rechazado'>('pendiente');
   readonly enviandoDecision = signal(false);
+  readonly cargando = signal(false);
+  readonly errorEnlace = signal('');
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
     if (token) {
       this.tokenExterno.set(token);
       this.cargarPorToken(token);
+    } else {
+      this.errorEnlace.set('El enlace de revisión está incompleto. Ábrelo desde el correo enviado.');
     }
   }
 
   private cargarPorToken(token: string): void {
+    this.cargando.set(true);
+    this.errorEnlace.set('');
     this.apiService.obtenerPorTokenExterno(token).subscribe({
       next: (res) => {
+        this.cargando.set(false);
         if (res?.success && res.data) {
           this.solicitudApi.set(res.data);
           if (res.data.comentarioLider) {
@@ -53,19 +60,19 @@ export class RevisionExternaComponent implements OnInit {
             this.procesado.set('rechazado');
           } else if (res.data.estadoClase === 'observado') {
             this.procesado.set('observado');
-          } else if (res.data.aprobadoLider) {
+          } else if (res.data.aprobadoLider || res.data.estadoClase === 'confirmado') {
             this.procesado.set('confirmado');
           }
         }
       },
       error: (err) => {
-        this.toast.error(
-          'Enlace no disponible',
-          obtenerMensajeAmigablePermisos(
-            err,
-            'Este enlace de revisión no es válido o ya cumplió su tiempo de vigencia.',
-          ),
+        this.cargando.set(false);
+        const mensaje = obtenerMensajeAmigablePermisos(
+          err,
+          'Este enlace de revisión no es válido o ya cumplió su tiempo de vigencia.',
         );
+        this.errorEnlace.set(mensaje);
+        this.toast.error('Enlace no disponible', mensaje);
       },
     });
   }
@@ -164,7 +171,7 @@ export class RevisionExternaComponent implements OnInit {
         }
         this.toast.exito(
           '¡Gracias! Solicitud aprobada',
-          'Registramos tu aprobación y notificamos a Talento Humano y al colaborador.',
+          'Registramos tu aprobación. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {
@@ -226,7 +233,7 @@ export class RevisionExternaComponent implements OnInit {
         }
         this.toast.info(
           'Decisión registrada',
-          'Registramos tu respuesta y notificamos al colaborador y a Talento Humano.',
+          'Registramos tu respuesta. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {
@@ -240,5 +247,13 @@ export class RevisionExternaComponent implements OnInit {
         );
       },
     });
+  }
+
+  cerrarVentana(): void {
+    if (window.opener) {
+      window.close();
+    } else {
+      this.toast.info('Ventana finalizada', 'Ya puedes cerrar esta pestaña en tu navegador.');
+    }
   }
 }

@@ -28,18 +28,6 @@ export const logoutFailure = createAction(
   props<{ error: string }>()
 );
 
-export const refreshToken = createAction('[Auth] Refresh Token');
-
-export const refreshTokenSuccess = createAction(
-  '[Auth] Refresh Token Success',
-  props<{ token: string }>()
-);
-
-export const refreshTokenFailure = createAction(
-  '[Auth] Refresh Token Failure',
-  props<{ error: string }>()
-);
-
 export const forgotPassword = createAction(
   '[Auth] Forgot Password',
   props<{ email: string }>()
@@ -69,6 +57,4 @@ export const resetPasswordFailure = createAction(
   '[Auth] Reset Password Failure',
   props<{ error: string }>()
 );
-
-export const clearSuccessMessage = createAction('[Auth] Clear Success Message');
 

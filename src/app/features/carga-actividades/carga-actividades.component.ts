@@ -12,7 +12,6 @@ import { Actions, ofType } from '@ngrx/effects';
 import { Actividad } from '../../core/models/actividad.model';
 import { ActividadesActions } from '../../core/state/actividades/actividades.actions';
 import { selectActividadesCargando, selectActividadesList } from '../../core/state/actividades/actividades.selectors';
-import { ClientesService } from '../clientes/servicios/clientes.service';
 import { ColaboradoresService } from '../colaboradores/servicios/colaboradores.service';
 import { ProyectosService } from '../proyectos/servicios/proyectos.service';
 import { AvanceExportacion, exportarReporteExcel } from '../../shared/utils/reporte-export.utils';
@@ -20,12 +19,6 @@ import { DescargaCanceladaError, DescargaProgresoService } from '../../shared/se
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ajustarFinRango, fechaLocalInputHoy } from '../../shared/utils/date-range.utils';
 import { FechaLimitesService } from '../../shared/services/fecha-limites.service';
-
-const COLOR_PRIMARIO = 'FF163572';
-const COLOR_RECURSO = 'FFFFFFFF';
-const COLOR_RECURSO_ALT = 'FFF8FAFC';
-const COLOR_TEXTO = 'FF334155';
-const COLOR_BORDE = 'FFE2E8F0';
 
 // sm - Columnas por las que se puede ordenar la tabla (igual mecánica que Seguimiento).
 type CampoOrdenableActividad = 'colaborador' | 'proyecto' | 'cliente' | 'fecha' | 'nroHoras' | 'estado';
@@ -42,7 +35,6 @@ export class CargaActividadesComponent implements OnInit {
   private store = inject(Store);
   private actions$ = inject(Actions);
   private proyectosService = inject(ProyectosService);
-  private clientesService = inject(ClientesService);
   private colaboradoresService = inject(ColaboradoresService);
   private destroyRef = inject(DestroyRef);
   private fechaLimites = inject(FechaLimitesService);
@@ -308,8 +300,8 @@ export class CargaActividadesComponent implements OnInit {
       return;
     }
 
-    // ✅ CORRECCIÓN: escuchar importarExcelSuccess en lugar de cargarActividadesSuccess
-    // Así no dependemos del reload posterior y evitamos capturar eventos anteriores
+    // Escucha importarExcelSuccess directamente: así no depende del reload posterior
+    // ni captura eventos anteriores.
     this.actions$.pipe(
       ofType(
         ActividadesActions.importarExcelSuccess,
@@ -488,102 +480,12 @@ export class CargaActividadesComponent implements OnInit {
         ]),
         orientacionPdf: 'landscape',
       }, avance);
-      return;
-
-      const ExcelJS = await import('exceljs');
-      const Workbook = ExcelJS.Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any).default;
-      const workbook = new Workbook();
-      const worksheet = workbook.addWorksheet('Actividades');
-
-      worksheet.columns = [
-        { header: 'Fecha', key: 'fecha', width: 15 },
-        { header: 'Colaborador', key: 'colaborador', width: 36 },
-        { header: 'Proyecto', key: 'proyecto', width: 42 },
-        { header: 'Cliente', key: 'cliente', width: 36 },
-        { header: 'Lider Tecnico', key: 'liderTecnico', width: 30 },
-        { header: 'Horas', key: 'horas', width: 12 },
-        { header: 'Estado', key: 'estado', width: 18 },
-      ];
-
-      actividades.forEach(actividad => {
-        worksheet.addRow({
-          fecha: this.formatearFecha(actividad.fecha),
-          colaborador: actividad.colaborador || 'Sin colaborador',
-          proyecto: actividad.proyecto || 'Sin proyecto',
-          cliente: actividad.cliente || 'Sin cliente',
-          liderTecnico: actividad.liderTecnico || '-',
-          horas: Number(actividad.nroHoras) || 0,
-          estado: actividad.estado || 'Pendiente'
-        });
-      });
-
-      worksheet.getColumn('horas').numFmt = '#,##0.00';
-      this.aplicarEstiloHoja(worksheet, 7);
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-
-      this.crearDescarga(blob, `Reporte_Actividades_${new Date().toISOString().slice(0, 10)}.xlsx`);
     } catch (error) {
       // sm - Cancelar desde el toast no es un error: se deja subir para que el toast se cierre sin mensaje.
       if (error instanceof DescargaCanceladaError) throw error;
       this.errorMessage = 'No se pudo descargar el reporte.';
       console.error(error);
     }
-  }
-
-  private aplicarEstiloHoja(ws: any, colEstado: number): void {
-    const header = ws.getRow(1);
-    header.height = 22;
-    header.eachCell((cell: any) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PRIMARIO } };
-      cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border = this.bordeDelgado();
-    });
-
-    ws.eachRow((row: any, rowNumber: number) => {
-      if (rowNumber === 1) return;
-      const fill = rowNumber % 2 === 0 ? COLOR_RECURSO_ALT : COLOR_RECURSO;
-      row.height = 20;
-      row.eachCell((cell: any, colNumber: number) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
-        cell.font = { name: 'Segoe UI', size: 10, color: { argb: COLOR_TEXTO } };
-        cell.border = this.bordeDelgado(COLOR_BORDE);
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-
-        if (colNumber === colEstado) {
-          const estado = cell.value?.toString().toLowerCase() ?? '';
-          const cargado = estado === 'cargado';
-          const error = estado === 'error';
-          cell.font = {
-            name: 'Segoe UI',
-            size: 10,
-            bold: true,
-            color: { argb: cargado ? 'FF16A34A' : error ? 'FFDC2626' : 'FFB45309' }
-          };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        }
-      });
-    });
-  }
-
-  private bordeDelgado(color = COLOR_PRIMARIO): any {
-    const borde = { style: 'thin', color: { argb: color } };
-    return { top: borde, left: borde, bottom: borde, right: borde };
-  }
-
-  private crearDescarga(blob: Blob, nombreArchivo: string): void {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = nombreArchivo;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   // sm - Fecha de hoy en formato yyyy-MM-dd (el que espera <input type="date">), en hora local.

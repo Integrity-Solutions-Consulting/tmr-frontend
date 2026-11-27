@@ -12,18 +12,3 @@ export const selectActividadesCargando = createSelector(
   selectActividadesState,
   (state) => state.cargando
 );
-
-export const selectIsImporting = createSelector(
-  selectActividadesState,
-  (state) => state.importing
-);
-
-export const selectActividadesError = createSelector(
-  selectActividadesState,
-  (state) => state.error
-);
-
-export const selectHasActividades = createSelector(
-  selectActividadesList,
-  (items) => items.length > 0
-);

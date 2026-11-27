@@ -1,33 +1,12 @@
 // Mismo contenedor y encabezado que las demás páginas (ver Feriados)
 
-.page {
-  width: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 18px;
-  box-shadow: var(--elevation-card);
-  padding: 28px 28px 22px;
-  box-sizing: border-box;
-  font-family: 'Inter', 'Roboto', sans-serif;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+@use '../../../../styles/ui-patterns' as ui;
 
-.page-title {
-  font-size: clamp(24px, 2.5vw, 30px);
-  font-weight: 800;
-  color: var(--primary-color);
-  margin: 0;
-  line-height: 1.1;
-}
+.page { @include ui.page-shell; }
 
-.page-subtitle {
-  margin: 6px 0 0;
-  font-size: 14px;
-  color: var(--text-muted);
-  max-width: 760px;
-}
+.page-title { @include ui.page-title; }
+
+.page-subtitle { @include ui.page-subtitle; }
 
 // ── Avisos ────────────────────────────────────────────────────────────────
 

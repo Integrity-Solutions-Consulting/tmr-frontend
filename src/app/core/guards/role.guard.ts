@@ -23,8 +23,13 @@ export const roleGuard: CanActivateFn = (route) => {
   }
 
   const path = route.routeConfig?.path;
+  const parentPath = route.parent?.routeConfig?.path;
 
-  // Reglas específicas de visibilidad por rol en el módulo Permisos
+  // Reglas específicas de visibilidad por rol en el módulo Permisos (exclusivo Administrador)
+  if ((parentPath === 'permisos' || path === 'permisos') && !tokenService.canAccessMisPermisos()) {
+    router.navigate([tokenService.isColaborador() ? '/time-report/actividades' : '/dashboard']);
+    return false;
+  }
   if (path === 'equipo' && !tokenService.canAccessPermisosLider()) {
     router.navigate(['/permisos']);
     return false;
@@ -63,7 +68,6 @@ export const roleGuard: CanActivateFn = (route) => {
     }
     // Si es administrador, tiene acceso a los demás módulos de forma predeterminada.
     if (tokenService.isAdmin()) return true;
-    // ✅ CAMBIO: Usar UserModulesService (en memoria) en lugar de TokenService
     if (!userModulesService.hasModule(requiredModule)) {
       // Si intentó entrar al dashboard y no tiene acceso, lo mandamos a time-report (Actividades)
       // sm - Igual con Seguimiento: Actividades es la pantalla que tienen todos los usuarios.
@@ -76,6 +80,5 @@ export const roleGuard: CanActivateFn = (route) => {
     }
   }
 
-  if (tokenService.isAdmin()) return true;
   return true;
 };

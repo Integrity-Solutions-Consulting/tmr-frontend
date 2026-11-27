@@ -1,4 +1,9 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { conectarEnlaceSolicitud } from '../solicitud-enlace.util';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import { PaginacionComponent } from '../../../../shared/components/paginacion/paginacion.component';
+import { observarListadoPaginado } from '../listado-paginado.util';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -6,25 +11,25 @@ import { TarjetaResumenComponent } from '../../../../shared/components/tarjeta-r
 import { ModalBase } from '../../../../shared/components/modal-base/modal-base';
 import { NotificacionToastService } from '../../../../shared/services/notificacion-toast.service';
 import {
-  DatosFormularioOficial,
-  FormularioPermisoOficialComponent,
-  HorarioPermisoOficial,
+  DatosFormularioOficial,  HorarioPermisoOficial,
   TipoPermisoOficial,
 } from '../formulario-permiso-oficial/formulario-permiso-oficial';
 import {
   PeriodoPreset,
   calcularRangoPreset,
-  coincideBusquedaInteligente,
-  cumpleRangoFechas,
 } from '../filtro-fechas.util';
 import { PermisosPdfService } from '../permisos-pdf.service';
+import { ResumenSolicitudComponent } from '../resumen-solicitud/resumen-solicitud';
 import {
+  AdjuntoPermisoApi,
   PermisoItemApi,
   PermisosApiService,
+  ResumenListadoPermisosApi,
   obtenerMensajeAmigablePermisos,
 } from '../permisos-api.service';
 
 export interface SolicitudEquipo {
+  versionSolicitud?: string | null;
   id?: number;
   codigo: string;
   colaborador: string;
@@ -48,6 +53,7 @@ export interface SolicitudEquipo {
   horario: HorarioPermisoOficial;
   horasSolicitadas: string;
   duracion: string;
+  adjuntos?: AdjuntoPermisoApi[];
   evidencia: string | null;
   evidenciaUrl?: string | null;
   traslapeAlerta: string | null;
@@ -63,12 +69,13 @@ export interface SolicitudEquipo {
     HeaderComponent,
     TarjetaResumenComponent,
     ModalBase,
-    FormularioPermisoOficialComponent,
+    ResumenSolicitudComponent,
+    PaginacionComponent,
   ],
   templateUrl: './aprobaciones-lider.html',
   styleUrl: './aprobaciones-lider.scss',
 })
-export class AprobacionesLiderComponent implements OnInit {
+export class AprobacionesLiderComponent {
   private readonly toast = inject(NotificacionToastService);
   private readonly pdfService = inject(PermisosPdfService);
   private readonly permisosApi = inject(PermisosApiService);
@@ -82,81 +89,79 @@ export class AprobacionesLiderComponent implements OnInit {
   readonly modalRevisorVisible = signal(false);
   readonly solicitudActiva = signal<SolicitudEquipo | null>(null);
   readonly comentarioLider = signal('');
+  readonly verDetalle = signal(false);
+  readonly descargandoRespaldo = signal(false);
   readonly procesandoDecision = signal(false);
 
   readonly solicitudesEquipo = signal<SolicitudEquipo[]>([]);
 
-  readonly kpiPendientes = computed(
-    () => this.solicitudesEquipo().filter((s) => s.estado === 'Pendiente').length,
-  );
-  readonly kpiAusentesHoy = computed(() => { const hoy = new Date().toISOString().slice(0, 10); return this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado' && cumpleRangoFechas(s.fechaInicio, s.fechaFin, hoy, hoy)).length; }); readonly proyectosDisponibles = computed(() => Array.from(new Set(this.solicitudesEquipo().map((s) => s.proyecto).filter(Boolean))).sort());
-  readonly kpiAprobados = computed(
-    () => this.solicitudesEquipo().filter((s) => s.estado === 'Aprobado').length,
-  );
+  /** Indicadores de todo el equipo (no dependen de los filtros). */
+  readonly resumen = signal<ResumenListadoPermisosApi | null>(null);
+  readonly kpiPendientes = computed(() => this.resumen()?.pendientesLider ?? 0);
+  readonly kpiAusentesHoy = computed(() => this.resumen()?.ausentesHoy ?? 0);
+  readonly kpiAprobados = computed(() => this.resumen()?.aprobadosLider ?? 0);
+  readonly proyectosDisponibles = computed(() => this.resumen()?.proyectos ?? []);
 
-  readonly solicitudesFiltradas = computed(() => {
-    const q = this.busqueda();
-    const desde = this.fechaDesde();
-    const hasta = this.fechaHasta();
-    const proy = this.proyectoFiltro();
-    const est = this.estadoFiltro();
+  readonly porPagina = 10;
+  readonly pagina = signal(1);
+  readonly totalPaginas = signal(0);
+  readonly totalFiltrado = signal(0);
+  readonly cargando = signal(false);
+  private readonly destroyRef = inject(DestroyRef);
+  private consulta?: Subscription;
 
-    return this.solicitudesEquipo().filter((s) => {
-      if (!cumpleRangoFechas(s.fechaInicio, s.fechaFin, desde, hasta)) return false;
-      if (proy && s.proyecto !== proy) return false;
-      if (est && s.estado !== est) return false;
-      if (
-        !coincideBusquedaInteligente(q, [
-          s.codigo,
-          s.colaborador,
-          s.cedula,
-          s.cargo,
-          s.cliente,
-          s.proyecto,
-          s.tipo,
-          s.tipoOficial,
-          s.fechas,
-          s.fechaInicio,
-          s.fechaFin,
-          s.fechaRegreso,
-          s.diasSolicitados,
-          s.horasSolicitadas,
-          s.duracion,
-          s.horario,
-          s.estado,
-          s.motivo,
-          s.evidencia,
-          s.traslapeAlerta,
-        ])
-      ) {
-        return false;
-      }
-      return true;
-    });
-  });
+  constructor() {
+    observarListadoPaginado(
+      () => [this.busqueda().trim(), this.fechaDesde(), this.fechaHasta(), this.proyectoFiltro(), this.estadoFiltro()],
+      this.pagina,
+      () => this.cargarSolicitudes(),
+    );
+    conectarEnlaceSolicitud(item => { this.abrirRevision(this.mapearDesdeApi(item)); });
+  }
 
-  ngOnInit(): void {
-    this.permisosApi.obtenerEquipo().subscribe({
-      next: (res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          this.solicitudesEquipo.set(res.data.map((i) => this.mapearDesdeApi(i)));
-        }
-      },
-      error: (err) => {
-        this.toast.error(
-          'No se pudo cargar la bandeja de equipo',
-          obtenerMensajeAmigablePermisos(
-            err,
-            'No pudimos cargar las solicitudes de tu equipo en este momento.',
-          ),
-        );
-      },
-    });
+  /** Página actual de la bandeja del equipo con los filtros vigentes (filtrado y paginado en el servidor). */
+  cargarSolicitudes(): void {
+    this.consulta?.unsubscribe();
+    this.cargando.set(true);
+    this.consulta = this.permisosApi
+      .obtenerEquipo({
+        page: this.pagina(),
+        pageSize: this.porPagina,
+        buscar: this.busqueda().trim(),
+        proyecto: this.proyectoFiltro(),
+        estado: this.estadoFiltro(),
+        desde: this.fechaDesde(),
+        hasta: this.fechaHasta(),
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.cargando.set(false);
+          const pagina = res?.data;
+          if (!res?.success || !pagina || !Array.isArray(pagina.items)) return;
+          this.solicitudesEquipo.set(pagina.items.map((i) => this.mapearDesdeApi(i)));
+          this.totalFiltrado.set(pagina.totalCount);
+          this.totalPaginas.set(pagina.totalPages);
+          this.resumen.set(pagina.resumen ?? null);
+          if (pagina.totalPages > 0 && this.pagina() > pagina.totalPages) this.pagina.set(pagina.totalPages);
+        },
+        error: (err) => {
+          this.cargando.set(false);
+          this.toast.error(
+            'No se pudo cargar la bandeja de equipo',
+            obtenerMensajeAmigablePermisos(
+              err,
+              'No pudimos cargar las solicitudes de tu equipo en este momento.',
+            ),
+          );
+        },
+      });
   }
 
   private mapearDesdeApi(item: PermisoItemApi): SolicitudEquipo {
     return {
       id: item.id,
+      versionSolicitud: item.versionSolicitud,
       codigo: item.codigo,
       colaborador: item.colaborador,
       cedula: item.cedula,
@@ -179,6 +184,7 @@ export class AprobacionesLiderComponent implements OnInit {
       horario: item.horario,
       horasSolicitadas: item.horasSolicitadas,
       duracion: item.duracion,
+      adjuntos: item.adjuntos ?? [],
       evidencia: item.evidenciaNombre ?? null,
       evidenciaUrl: item.tieneEvidencia ? this.permisosApi.obtenerUrlEvidencia(item.id) : null,
       traslapeAlerta: item.traslapeAlerta ?? null,
@@ -211,7 +217,19 @@ export class AprobacionesLiderComponent implements OnInit {
     this.periodoPreset.set(!this.fechaDesde() && !valor ? 'TODOS' : 'PERSONALIZADO');
   }
 
+  aprobarDesdeTabla(item: SolicitudEquipo): void {
+    if (this.procesandoDecision() || item.estado !== 'Pendiente') return;
+    const seguro = window.confirm(
+      `¿Confirmas la aprobación de la solicitud ${item.codigo} de ${item.colaborador} (${item.tipo} - ${item.diasSolicitados})?`,
+    );
+    if (!seguro) return;
+    this.solicitudActiva.set(item);
+    this.comentarioLider.set('');
+    this.registrarDecisionLider('aprobar');
+  }
+
   abrirRevision(item: SolicitudEquipo): void {
+    this.verDetalle.set(false);
     this.solicitudActiva.set(item);
     this.comentarioLider.set('');
     this.modalRevisorVisible.set(true);
@@ -270,6 +288,27 @@ export class AprobacionesLiderComponent implements OnInit {
     );
   }
 
+
+  descargarRespaldo(item: SolicitudEquipo, adjunto?: AdjuntoPermisoApi): void {
+    if (!item.id || this.descargandoRespaldo()) return;
+    this.descargandoRespaldo.set(true);
+    this.permisosApi.descargarEvidenciaBlob(item.id, adjunto?.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = adjunto?.nombreOriginal || item.evidencia || 'respaldo';
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        this.descargandoRespaldo.set(false);
+      },
+      error: () => {
+        this.descargandoRespaldo.set(false);
+        this.toast.error('No se pudo descargar', 'Intenta descargar el respaldo nuevamente.');
+      }
+    });
+  }
+
   registrarDecisionLider(accion: 'aprobar' | 'observar' | 'rechazar'): void {
     const actual = this.solicitudActiva();
     if (!actual || !actual.id || this.procesandoDecision()) return;
@@ -284,7 +323,7 @@ export class AprobacionesLiderComponent implements OnInit {
     }
 
     this.procesandoDecision.set(true);
-    this.permisosApi.registrarDecisionLider(actual.id, accion, comentario).subscribe({
+    this.permisosApi.registrarDecisionLider(actual.id, accion, comentario, actual.versionSolicitud).subscribe({
       next: (res) => {
         this.procesandoDecision.set(false);
         if (res?.success && res.data) {
@@ -293,6 +332,8 @@ export class AprobacionesLiderComponent implements OnInit {
             lista.map((s) => (s.id === actual.id ? actualizada : s)),
           );
         }
+        // Actualiza indicadores y la página (la solicitud puede salir del filtro de estado)
+        this.cargarSolicitudes();
         this.modalRevisorVisible.set(false);
 
         if (res?.data?.avisoNotificacion) {
@@ -318,7 +359,7 @@ export class AprobacionesLiderComponent implements OnInit {
 
         this.toast.info(
           `Solicitud ${actual.codigo} rechazada`,
-          'Registramos tu decisión y notificamos al colaborador.',
+          'Registramos tu decisión. Los avisos quedaron pendientes de envío.',
         );
       },
       error: (err) => {

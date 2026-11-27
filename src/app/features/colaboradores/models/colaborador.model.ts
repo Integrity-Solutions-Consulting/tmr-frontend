@@ -25,10 +25,15 @@ export type EstadoProyecto =
   | 'En espera';
 
 export interface ProyectoAsignado {
+  idAsignacion?: number;
   id: string;
-  nombre: string;
-  cliente: string;
-  estado: EstadoProyecto;
+  codigo?: string | null;
+  nombre?: string | null;
+  cliente?: string | null;
+  rol?: string | null;
+  fechaAsignacion?: string | null;
+  fechaFinAsignacion?: string | null;
+  estado?: EstadoProyecto | string | null;
   // sm - Estado de asignación del colaborador en el proyecto (true = Activo, false = Inactivo).
   estadoAsignacion: boolean;
 }
@@ -74,7 +79,9 @@ export interface Colaborador {
   categoria: Categoria | string;
 
   // ── Datos de contacto ──────────────────────────────
-  correoElectronico: string;
+  correoElectronico: string;       // Correo personal
+  emailCorporativo?: string | null; // Correo institucional
+  correoPrincipal?: string;        // Lo que muestra la tabla: institucional o, si no hay, personal
   email?: string | null;
   telefono: string;
   direccion: string;
@@ -187,6 +194,7 @@ export interface ColaboradorListaApi {
   asociacion: string;
   nombreCompleto: string;
   email: string;
+  emailCorporativo: string;
   cargo: string;
   numProyectos: number;
   activo: boolean;
@@ -232,6 +240,7 @@ export interface ColaboradorDetalleApi {
 
   // Contacto.
   email: string;
+  emailCorporativo: string;
   telefono: string;
   direccion: string;
 

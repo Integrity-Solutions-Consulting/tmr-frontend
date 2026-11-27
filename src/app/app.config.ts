@@ -13,10 +13,11 @@ import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
+  DateAdapter,
   MAT_DATE_LOCALE,
   MAT_DATE_FORMATS,
-  provideNativeDateAdapter,
 } from '@angular/material/core';
+import { FechaDdMmYyyyAdapter } from './core/adapters/fecha-ddmmyyyy.adapter';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { MAT_AUTOCOMPLETE_DEFAULT_OPTIONS } from '@angular/material/autocomplete';
 
@@ -61,7 +62,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideAnimations(),
     { provide: LOCALE_ID, useValue: 'es-EC' },
-    provideNativeDateAdapter(MY_DATE_FORMATS),
+    // Interpreta estrictamente dd/mm/aaaa al escribir la fecha a mano (ver FechaDdMmYyyyAdapter).
+    { provide: DateAdapter, useClass: FechaDdMmYyyyAdapter },
     { provide: MAT_DATE_LOCALE, useValue: 'es-EC' }, // idioma del calendario (meses/días en español)
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }, // formato dd/MM/yyyy
     { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { disableClose: true } },
@@ -101,7 +103,6 @@ export const appConfig: ApplicationConfig = {
       DashboardEffects,
     ),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
-    // ✅ CAMBIO: Agregar inicializador para precargar módulos al arrancar
     {
       provide: APP_INITIALIZER,
       useFactory: () => loadUserModulesInitializer,

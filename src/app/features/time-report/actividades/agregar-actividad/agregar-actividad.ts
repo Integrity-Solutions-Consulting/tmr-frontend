@@ -10,9 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
@@ -45,7 +45,8 @@ export interface ProgresoProyectoDia {
         MatIconModule,
         MatTooltipModule,
         MatDatepickerModule,
-        MatNativeDateModule,
+        // El DateAdapter (dd/mm/aaaa estricto) viene de app.config; no importar MatNativeDateModule
+        // aquí porque registraría de nuevo el NativeDateAdapter y lo anularía.
         MatAutocompleteModule,
         ModalEliminarActividadComponent,
         ConfirmDialogComponent,
@@ -64,6 +65,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
     public form!: FormGroup;
     public esEdicion = false;
+    // sm - Detalle de solo lectura: el líder ve desde Seguimiento una actividad que no puede modificar.
+    public soloVer = false;
     public mostrarEliminar = false;
     public errorEliminar: string | null = null;
 
@@ -85,9 +88,11 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
     // Signals para llenar los dropdowns desde la base de datos
     public tiposActividad = signal<{ id: string, nombre: string }[]>([]);
     // sm - fechaEntrada/fechaSalida: vigencia de la asignación; salidaColaborador: su salida de la empresa si está Inactivo.
+    // finProyecto: fecha fin del proyecto (real o planificada); no se registran horas después de ella.
     public proyectos = signal<{
         id: string, nombre: string, codigo?: string | null,
-        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null
+        fechaEntrada?: Date | null, fechaSalida?: Date | null, salidaColaborador?: Date | null,
+        finProyecto?: Date | null
     }[]>([]);
 
     // Autocomplete filter signals
@@ -170,12 +175,17 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
 
         const act = this.data?.actividad;
         this.esEdicion = !!act;
+        // sm - El líder completa a nombre del colaborador y solo en el proyecto de la fila de Seguimiento.
+        const registroLider = this.data?.registroLider;
 
         const defaultDate = this.parseLocal(act ? act.fechaactividad : (this.data?.fecha || new Date()));
 
         this.form = this.fb.group({
             tipoActividad: [act ? String(act.idtipoactividad) : null, [Validators.required, this.autocompleteValidator(this.tiposActividad)]],
-            proyectoId: [act && act.idproyecto ? String(act.idproyecto) : null, [Validators.required, this.autocompleteValidator(this.proyectos)]],
+            proyectoId: [
+                act && act.idproyecto ? String(act.idproyecto) : (registroLider?.proyecto ? String(registroLider.proyecto.id) : null),
+                [Validators.required, this.autocompleteValidator(this.proyectos)]
+            ],
             codigoRequerimiento: [act ? act.codigorequerimiento : '', [Validators.required, Validators.maxLength(50)]],
             descripcion: [act ? act.descripcionactividad : '', Validators.maxLength(255)],
             fechaActividad: [defaultDate, [Validators.required, this.formatoFechaValidator(), this.vigenciaValidator]],
@@ -189,6 +199,10 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             notas: [act ? act.notas : ''],
             esbillable: [act ? act.esbillable : true]
         });
+
+        if (registroLider) this.form.get('proyectoId')?.disable({ emitEvent: false });
+        this.soloVer = !!this.data?.soloVer && !!act;
+        if (this.soloVer) this.form.disable({ emitEvent: false });
 
         // Listen for autocomplete search typing/value changes
         this.form.get('proyectoId')?.valueChanges.subscribe(val => {
@@ -335,6 +349,10 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                     : `Su salida del proyecto ${proyecto.nombre} es el ${this.textoFecha(salida)}. No puede registrar actividades posteriores a esa fecha.`
             };
         }
+        // TC-007/TC-009: tampoco después de la fecha fin del proyecto, aunque siga activo o la asignación no tenga salida.
+        if (proyecto.finProyecto && dia > this.claveDia(proyecto.finProyecto)) {
+            return { vigencia: `El proyecto ${proyecto.nombre} finalizó el ${this.textoFecha(proyecto.finProyecto)}. No puede registrar actividades posteriores a esa fecha.` };
+        }
         return null;
     };
 
@@ -447,7 +465,14 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             });
 
         // Proyectos
-        this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`)
+        // sm - El líder no usa la lista de la sesión (sus propios proyectos), sino el proyecto y la vigencia del colaborador.
+        const registroLider = this.data?.registroLider;
+        // sm - En el detalle de solo lectura basta con el proyecto de la actividad, para mostrar su nombre aunque no
+        // esté entre los proyectos de quien la mira.
+        const actDetalle = this.data?.soloVer ? this.data?.actividad : null;
+        (actDetalle
+            ? of(actDetalle.idproyecto ? [{ id: actDetalle.idproyecto, nombre: actDetalle.proyectoNombre, codigo: actDetalle.codigorequerimiento }] : [])
+            : registroLider ? of([registroLider.proyecto]) : this.http.get<any[]>(`${environment.apiUrl}/time-report/actividades/proyectos-disponibles`))
             .subscribe({
                 next: (res) => {
                     if (res) {
@@ -458,7 +483,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                         };
                         const mapped = res.map(p => ({
                             id: String(p.id), nombre: (p.nombre || '').trim(), codigo: p.codigo,
-                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador)
+                            fechaEntrada: fecha(p.fechaEntrada), fechaSalida: fecha(p.fechaSalida), salidaColaborador: fecha(p.fechaSalidaColaborador),
+                            finProyecto: fecha(p.fechaFinProyecto)
                         }));
                         const unique: typeof mapped = [];
                         const seen = new Set<string>();
@@ -482,7 +508,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                                     // sm - Proyecto que ya no está en sus asignaciones: sin vigencia conocida (valida el backend).
                                     fechaEntrada: null,
                                     fechaSalida: null,
-                                    salidaColaborador: null
+                                    salidaColaborador: null,
+                                    finProyecto: null
                                 });
                             }
                         }
@@ -612,7 +639,8 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             ...rawValue,
             fechaActividad: this.formatFecha(rawValue.fechaActividad),
             fechaInicio: this.formatFecha(rawValue.fechaInicio),
-            fechaFin: this.formatFecha(rawValue.fechaFin)
+            fechaFin: this.formatFecha(rawValue.fechaFin),
+            idEmpleado: this.data?.registroLider?.idEmpleado
         };
         this.errorGuardar = null;
         this.guardando = true;
@@ -632,6 +660,6 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
                 this.guardadoParcial = guardadas > 0;
             });
         }
-        // this.dialogRef.close(); // sm - ahora se cierra solo cuando el backend confirma que se guardó
+        // sm - El diálogo se cierra solo cuando el backend confirma que se guardó (ver alGuardar arriba).
     }
 }

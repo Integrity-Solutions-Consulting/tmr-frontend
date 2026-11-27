@@ -11,7 +11,9 @@ export type TipoPermisoOficial =
   | 'NACIMIENTO_HIJO'
   | 'OTROS'
   | 'MATERNIDAD'
-  | 'FALLECIMIENTO_FAMILIAR';
+  | 'FALLECIMIENTO_FAMILIAR'
+  | 'CALAMIDAD_DOMESTICA'
+  | 'ACCIDENTE';
 
 export type HorarioPermisoOficial = 'MANANA' | 'TARDE' | 'COMPLETA' | 'OTROS';
 

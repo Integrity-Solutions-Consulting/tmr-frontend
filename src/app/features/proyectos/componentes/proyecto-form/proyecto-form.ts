@@ -97,7 +97,8 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
   recursosExpandidos: boolean[][] = [];
 
   formulario = this.fb.group({
-    codigo: ['', Validators.required],
+    // sm - Lo asigna el servidor al crear; aquí solo se muestra al editar.
+    codigo: [''],
     nombre: ['', Validators.required],
     cliente: ['', [Validators.required, this.valorDebeCoincidirConLookup(() => this.clientesOpciones)]],
     idCliente: [null as number | null],
@@ -857,9 +858,11 @@ export class ProyectoFormComponent implements OnInit, OnChanges, OnDestroy {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = control.value;
       if (!valor) return null;
-      if (valor instanceof Date && !isNaN(valor.getTime())) return null;
-      const fecha = this.parseFechaString(String(valor));
-      return fecha && !isNaN(fecha.getTime()) ? null : { fechaInvalida: true };
+      const fecha = valor instanceof Date ? valor : this.parseFechaString(String(valor));
+      if (!fecha || isNaN(fecha.getTime())) return { fechaInvalida: true };
+      // El año debe tener 4 dígitos y estar en un rango razonable (evita años como 20266).
+      const anio = fecha.getFullYear();
+      return anio >= 1900 && anio <= 2100 ? null : { fechaInvalida: true };
     };
   }
 

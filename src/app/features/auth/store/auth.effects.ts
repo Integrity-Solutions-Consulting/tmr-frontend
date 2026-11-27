@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, forkJoin } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as AuthActions from './auth.actions';
@@ -49,20 +49,20 @@ export class AuthEffects {
             // Guardar tokens en localStorage (incluye accessToken, refreshToken y expiresAt)
             this.authService.updateTokens(response);
 
-            return this.authService.getUserModules().pipe(
-              tap((modules) => {
+            return forkJoin({ modules: this.authService.getUserModules(), permissions: this.authService.getUserPermissions() }).pipe(
+              tap(({ modules, permissions }) => {
                 //console.log("Módulos recibidos desde backend:", modules);
                 this.userModulesService.setModules(Array.isArray(modules) ? modules : []);
+                this.userModulesService.setPermissions(Array.isArray(permissions) ? permissions : []);
               }),
               tap(() => {
                 //console.log('🔄 Iniciando monitoreo de token...');
                 this.tokenMonitor.startMonitoring();
               }),
               switchMap(() => {
-                // El endpoint de login NO devuelve debeCambiarPassword.
-                // Lo obtenemos de /configuracion/usuarios/{id} que sí lo incluye.
-                const userId = (response.user as any)?.id as number | undefined;
-                if (!userId) {
+                // Un backend anterior requiere la consulta del perfil durante el despliegue.
+                const userId = Number(response.user?.id);
+                if (typeof response.user?.debeCambiarPassword === 'boolean' || !userId) {
                   return of(AuthActions.loginSuccess({ response }));
                 }
                 return this.authService.getUserProfileById(userId).pipe(
@@ -121,21 +121,6 @@ export class AuthEffects {
         })
       ),
     { dispatch: false }
-  );
-
-  refreshToken$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.refreshToken),
-      switchMap(() =>
-        this.authService.refreshToken().pipe(
-          tap(({ token }) => this.tokenService.setToken(token)),
-          map(({ token }) => AuthActions.refreshTokenSuccess({ token })),
-          catchError((error) =>
-            of(AuthActions.refreshTokenFailure({ error: error.message }))
-          )
-        )
-      )
-    )
   );
 
   forgotPassword$ = createEffect(() =>

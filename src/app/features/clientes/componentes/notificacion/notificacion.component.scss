@@ -1,12 +1,10 @@
 // ── Overlay ───────────────────────────────────────────────
 .notificacion-overlay {
   position: fixed;
-  inset: 0;
-  background: var(--overlay-backdrop);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 16px;
+  right: 16px;
   z-index: 2000;
+  pointer-events: none;
   animation: fadeIn 0.2s ease;
 }
 
@@ -14,20 +12,23 @@
 .notificacion-card {
   background: var(--bg-card);
   border-radius: 14px;
-  padding: 40px 48px;
+  padding: 14px 18px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
   box-shadow: 0 8px 32px rgba(22, 53, 114, 0.15);
   min-width: 260px;
+  max-width: min(420px, calc(100vw - 32px));
+  pointer-events: auto;
   animation: slideUp 0.25s ease;
 }
 
 // ── Ícono ─────────────────────────────────────────────────
 .icono-circulo {
-  width: 72px;
-  height: 72px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
 
   svg {
     width: 100%;
@@ -41,8 +42,13 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--status-success-text);
-  text-align: center;
+  text-align: left;
   margin: 0;
+}
+
+@media (max-width: 600px) {
+  .notificacion-overlay { top: 10px; right: 10px; left: 10px; }
+  .notificacion-card { min-width: 0; width: 100%; }
 }
 
 // ── Animaciones ───────────────────────────────────────────

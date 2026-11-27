@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
@@ -13,6 +13,13 @@ import {
 import { forkJoin } from 'rxjs';
 import { Colaborador } from '../../models/colaborador.model';
 import { coincideBusqueda } from '../../../../shared/utils/texto.utils';
+import {
+  DOMINIO_CORREO_INSTITUCIONAL,
+  alMenosUnCorreoValidator,
+  correoInstitucionalValidator,
+  correoPersonalValidator
+} from '../../../../shared/validators/form-validators';
+import { NOMBRE_PERSONA_MENSAJE, nombrePersonaValidator, normalizarNombrePersona } from '../../../../shared/validators/nombre-persona.validator';
 import {
   CatalogosService, CatalogoItem, CargoItem
 } from '../../servicios/catalogos.service';
@@ -32,6 +39,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<any>();
 
+  private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private fb = inject(FormBuilder);
   private scrollLock = inject(ModalScrollLockService);
   private dropdownScrollLock = inject(DropdownScrollLockService);
@@ -118,21 +126,23 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
         this.validatorIdentificacionPorTipo()
       ]],
       nombres: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       apellidos: ['', [
-        Validators.required,
-        Validators.maxLength(100),
-        this.validatorSoloLetras()
+        nombrePersonaValidator()
       ]],
       fechaNacimiento: [''],
       idGenero: [null],
       idNacionalidad: [null],
 
       // ── Datos de contacto ─────────────────────────────
-      correoElectronico: ['', [Validators.email, Validators.maxLength(100)]],
+      correoElectronico: ['', [
+        alMenosUnCorreoValidator('emailCorporativo'),
+        Validators.email,
+        Validators.maxLength(100),
+        correoPersonalValidator()
+      ]],
+      emailCorporativo: ['', [Validators.email, Validators.maxLength(100), correoInstitucionalValidator()]],
       telefono: ['', [Validators.maxLength(20), this.validatorTelefono()]],
       direccion: ['', [
         Validators.maxLength(255),
@@ -171,6 +181,10 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
         ctrl?.setValue(null);
       }
       ctrl?.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.form.get('emailCorporativo')?.valueChanges.subscribe(() => {
+      this.form.get('correoElectronico')?.updateValueAndValidity({ emitEvent: false });
     });
 
     this.configurarValidacionesDinamicas();
@@ -270,6 +284,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
 
       // ── Datos de contacto ─────────────────────────────
       correoElectronico: c.correoElectronico ?? c.email ?? '',
+      emailCorporativo: c.emailCorporativo ?? '',
       telefono: c.telefono ?? '',
       direccion: c.direccion ?? '',
 
@@ -289,6 +304,8 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
 
     this.aplicarReglasTipoPersona(this.form.get('tipoPersona')?.value);
     this.form.get('identificacion')?.updateValueAndValidity({ emitEvent: false });
+    // El personal se validó antes de cargar el institucional, y su obligatoriedad depende de este.
+    this.form.get('correoElectronico')?.updateValueAndValidity({ emitEvent: false });
 
     if (dep) {
       this.catalogosService.getCargosPorDepartamento(dep.id).subscribe(cargos => {
@@ -344,6 +361,7 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
       'idGenero',
       'idNacionalidad',
       'correoElectronico',
+      'emailCorporativo',
       'telefono',
       'direccion',
     ].forEach(campo => {
@@ -671,9 +689,19 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
     if (errors['soloLetras']) return 'Campo inválido';
     if (errors['maxlength']) return 'Supera el máximo de caracteres';
     if (errors['email']) return 'Ingrese un correo válido';
+    if (errors['correoRequerido']) return 'Ingrese al menos un correo: personal o institucional';
+    if (errors['correoNoInstitucional']) return `Debe ser un correo ${DOMINIO_CORREO_INSTITUCIONAL}`;
+    if (errors['correoEsInstitucional']) return 'Este correo va en el campo institucional';
     if (errors['telefonoInvalido']) return 'Ingrese un teléfono válido';
 
     return 'Campo inválido';
+  }
+
+  mensajeErrorNombre(campo: string): string {
+    const errors = this.form.get(campo)?.errors;
+    if (!errors) return '';
+    if (errors['required']) return 'Campo requerido';
+    return NOMBRE_PERSONA_MENSAJE;
   }
 
   tieneValor(campo: string): boolean {
@@ -691,6 +719,12 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      // El error puede estar fuera de la vista del modal: sin esto parece que Guardar no hace nada.
+      setTimeout(() => {
+        this.elementRef.nativeElement
+          .querySelector('.form-field__error')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       return;
     }
 
@@ -701,14 +735,15 @@ export class ModalEditarColaboradorComponent implements OnInit, OnDestroy {
       tipoPersona: v.tipoPersona,
       idTipoIdentificacion: v.idTipoIdentificacion ? Number(v.idTipoIdentificacion) : null,
       numeroIdentificacion: v.identificacion ? String(v.identificacion).trim() : null,
-      nombres: v.nombres ? String(v.nombres).trim() : null,
-      apellidos: v.apellidos ? String(v.apellidos).trim() : null,
+      nombres: v.nombres ? normalizarNombrePersona(v.nombres) : null,
+      apellidos: v.apellidos ? normalizarNombrePersona(v.apellidos) : null,
       fechaNacimiento: this.normalizarFechaInput(v.fechaNacimiento) || null,
       idGenero: v.idGenero ? Number(v.idGenero) : null,
       idNacionalidad: v.idNacionalidad ? Number(v.idNacionalidad) : null,
 
       // ── Datos de contacto ─────────────────────────────
       email: v.correoElectronico ? String(v.correoElectronico).trim() : null,
+      emailCorporativo: v.emailCorporativo ? String(v.emailCorporativo).trim() : null,
       telefono: v.telefono ? String(v.telefono).trim() : null,
       direccion: v.direccion ? String(v.direccion).trim() : null,
 

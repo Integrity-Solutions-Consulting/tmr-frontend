@@ -51,6 +51,39 @@
     font-weight: 500;
 }
 
+.calcol-modal__actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.calcol-modal__completar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 16px;
+    border: 1.5px solid var(--primary-color);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+
+    mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+    }
+
+    &--activo {
+        background: var(--status-info-bg-soft);
+    }
+}
+
 .calcol-modal__close {
     display: inline-flex;
     align-items: center;

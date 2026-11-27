@@ -1,5 +1,5 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
-import { Cliente, FiltrosCliente, Notificacion, PaginacionResponse, ResumenClientes } from '../modelos/cliente.model';
+import { Cliente, FiltrosCliente, Notificacion, ResumenClientes } from '../modelos/cliente.model';
 import { ClientesActions } from './clientes.actions';
 
 // ── State ────────────────────────────────────────────────────

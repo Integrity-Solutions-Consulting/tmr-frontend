@@ -9,7 +9,32 @@ import {
   ActionMenuItem,
 } from '../../../../shared/components/action-menu/action-menu.component';
 
-type CampoOrdenableColaborador = 'identificacion' | 'tipoIdentificacion' | 'nombreCompleto' | 'numProyectos' | 'correoElectronico' | 'cargo' | 'estado';
+export type CampoOrdenableColaborador = 'identificacion' | 'tipoIdentificacion' | 'nombreCompleto' | 'numProyectos' | 'correoPrincipal' | 'cargo' | 'estado';
+
+export interface OrdenColaboradores {
+  campo: CampoOrdenableColaborador;
+  asc: boolean;
+}
+
+/**
+ * Ordena la lista COMPLETA de colaboradores. La página lo aplica antes de paginar para que el
+ * orden abarque todos los registros y no solo los 10 de la página visible.
+ */
+export function ordenarColaboradores(lista: Colaborador[], orden: OrdenColaboradores | null): Colaborador[] {
+  if (!orden) return lista;
+  const factor = orden.asc ? 1 : -1;
+
+  return [...lista].sort((a, b) => {
+    const valorA = (a as any)[orden.campo];
+    const valorB = (b as any)[orden.campo];
+
+    if (typeof valorA === 'number' && typeof valorB === 'number') {
+      return (valorA - valorB) * factor;
+    }
+
+    return String(valorA ?? '').toLowerCase().localeCompare(String(valorB ?? '').toLowerCase(), 'es', { numeric: true }) * factor;
+  });
+}
 
 @Component({
   selector: 'app-tabla-colaboradores',
@@ -26,6 +51,8 @@ export class TablaColaboradoresComponent {
   @Output() editar = new EventEmitter<Colaborador>();
   @Output() cambiarEstado = new EventEmitter<Colaborador>();
   @Output() registrarSalida = new EventEmitter<Colaborador>();
+  /** La página ordena la lista completa antes de paginar (ver ordenarColaboradores). */
+  @Output() ordenCambia = new EventEmitter<OrdenColaboradores>();
 
   menuAbierto: string | null = null;
 
@@ -39,6 +66,7 @@ export class TablaColaboradoresComponent {
       this.sortField = campo;
       this.sortAsc = true;
     }
+    this.ordenCambia.emit({ campo: this.sortField, asc: this.sortAsc });
   }
 
   direccionOrden(campo: CampoOrdenableColaborador): 'ascending' | 'descending' | 'none' {
@@ -46,21 +74,9 @@ export class TablaColaboradoresComponent {
     return this.sortAsc ? 'ascending' : 'descending';
   }
 
+  // La lista ya llega ordenada y paginada desde la página.
   get colaboradoresOrdenados(): Colaborador[] {
-    if (!this.sortField) return this.colaboradores;
-    const campo = this.sortField;
-    const factor = this.sortAsc ? 1 : -1;
-
-    return [...this.colaboradores].sort((a, b) => {
-      const valorA = (a as any)[campo];
-      const valorB = (b as any)[campo];
-
-      if (typeof valorA === 'number' && typeof valorB === 'number') {
-        return (valorA - valorB) * factor;
-      }
-
-      return String(valorA ?? '').toLowerCase().localeCompare(String(valorB ?? '').toLowerCase(), 'es', { numeric: true }) * factor;
-    });
+    return this.colaboradores;
   }
 
   toggleMenu(payload: { id: string; event: Event }): void {

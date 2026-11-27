@@ -1,0 +1,30 @@
+<div class="resumen-dia">
+  <header class="resumen-dia__header">
+    <div>
+      <p class="resumen-dia__eyebrow">{{ data.titulo || 'Resumen diario' }}</p>
+      <h2>{{ fechaFormateada }}</h2>
+      <p class="resumen-dia__colaborador" *ngIf="data.nombreColaborador">{{ data.nombreColaborador }}</p>
+    </div>
+    <button mat-icon-button type="button" (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+  <div class="resumen-dia__total">
+    <div class="resumen-dia__horas"><mat-icon>schedule</mat-icon><span><strong>{{ totalHoras | horasFormat }}</strong> horas totales</span></div>
+    <button *ngIf="data.editable" mat-flat-button type="button" class="resumen-dia__agregar" (click)="agregar()"><mat-icon>add</mat-icon> Agregar actividad</button>
+  </div>
+  <section *ngIf="actividades.length; else vacio" class="resumen-dia__list" aria-label="Actividades del día">
+    <article class="actividad-item" *ngFor="let actividad of actividades">
+      <div class="actividad-item__main">
+        <div class="actividad-item__heading"><h3>{{ actividad.proyectoNombre || 'Sin proyecto' }}</h3><span class="actividad-item__hours">{{ actividad.cantidadhoras | horasFormat }}</span></div>
+        <dl>
+          <div><dt>Tipo</dt><dd>{{ actividad.tipoActividadNombre || 'General' }}</dd></div>
+          <div><dt>Requerimiento</dt><dd>{{ actividad.codigorequerimiento || '—' }}</dd></div>
+          <div><dt>Descripción</dt><dd>{{ actividad.descripcionactividad || 'Sin descripción' }}</dd></div>
+          <div><dt>Notas</dt><dd>{{ actividad.notas || '—' }}</dd></div>
+          <div><dt>Facturable</dt><dd>{{ actividad.esbillable === false ? 'No' : 'Sí' }}</dd></div>
+        </dl>
+      </div>
+      <button *ngIf="data.editable" mat-stroked-button type="button" class="actividad-item__edit" (click)="editar(actividad)" aria-label="Editar actividad"><mat-icon>edit</mat-icon> Editar</button>
+    </article>
+  </section>
+  <ng-template #vacio><div class="resumen-dia__empty"><mat-icon>event_busy</mat-icon><h3>Sin actividades registradas</h3><p>No hay actividades para esta fecha.</p></div></ng-template>
+</div>

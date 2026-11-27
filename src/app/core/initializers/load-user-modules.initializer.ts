@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { TokenService } from '../../features/auth/servicios/token.service';
 import { UserModulesService } from '../../features/auth/servicios/user-modules.service';
 import { AuthService } from '../../features/auth/servicios/auth.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
 /**
  * Inicializador que precarga los módulos del usuario autenticado al iniciar la aplicación.
@@ -27,10 +27,11 @@ export async function loadUserModulesInitializer(): Promise<void> {
     }
 
     // Obtener módulos del backend
-    const modules = await firstValueFrom(authService.getUserModules());
+    const result = await firstValueFrom(forkJoin({ modules: authService.getUserModules(), permissions: authService.getUserPermissions() }));
     
     // Guardar en memoria
-    userModulesService.setModules(Array.isArray(modules) ? modules : []);
+    userModulesService.setModules(Array.isArray(result.modules) ? result.modules : []);
+    userModulesService.setPermissions(Array.isArray(result.permissions) ? result.permissions : []);
   } catch (error) {
     // Si falla la precarga, solo loguear el error pero NO impedir que la app arranque
     console.warn('⚠️  loadUserModulesInitializer: Error al precargar módulos', error);

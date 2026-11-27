@@ -31,7 +31,7 @@
 
     <div class="filter-group date-group">
       <label class="filter-label">Ir a fecha</label>
-      <input type="date" class="filter-input" aria-label="Ir a fecha"
+      <input type="date" max="9999-12-31" class="filter-input" aria-label="Ir a fecha"
         title="Mueve el calendario a la fecha elegida" [value]="fechaCalendario()"
         (change)="cambiarFechaCalendario($any($event.target).value)" />
     </div>

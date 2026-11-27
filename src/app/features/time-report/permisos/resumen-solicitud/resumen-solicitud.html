@@ -1,0 +1,69 @@
+<section class="resumen" aria-label="Resumen de solicitud">
+  <div class="resumen__cabecera">
+    <div class="resumen__colaborador">
+      <strong>{{ datos.apellidosNombres }}</strong>
+      <span>{{ datos.cargo || 'Colaborador' }}@if(datos.numeroCedula) { · {{ datos.numeroCedula }} }</span>
+    </div>
+    @if(estado) {
+      <span class="resumen-pill" [class]="estadoClase">{{ estado }}</span>
+    }
+  </div>
+
+  <dl class="resumen__bloque">
+    <div class="resumen__fila">
+      <dt>Permiso</dt>
+      <dd>{{ tipo }}</dd>
+    </div>
+    <div class="resumen__fila">
+      <dt>Fechas y horario</dt>
+      <dd>{{ fechasYHorario }}</dd>
+    </div>
+    <div class="resumen__fila">
+      <dt>Duración</dt>
+      <dd>{{ duracionFormateada }}</dd>
+    </div>
+    <div class="resumen__fila">
+      <dt>Proyecto</dt>
+      <dd>{{ proyectoFormateado }}</dd>
+    </div>
+    <div class="resumen__motivo">
+      <span>Motivo</span>
+      <p>{{ datos.motivos }}</p>
+    </div>
+  </dl>
+
+  <div class="respaldos" aria-label="Documentos de respaldo">
+    <div class="respaldos__titulo">
+      <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+      <strong>Documentos adjuntos</strong>
+    </div>
+    <div class="respaldos__archivos">
+      @for(adjunto of adjuntos; track adjunto.id) {
+        <button
+          type="button"
+          class="respaldo-descarga"
+          [disabled]="descargando()"
+          (click)="descargar(adjunto)"
+          [attr.aria-label]="'Descargar respaldo ' + adjunto.nombreOriginal"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          <span>{{ adjunto.nombreOriginal }}</span>
+        </button>
+      } @empty {
+        @if(datos.evidenciaNombre) {
+          <button
+            type="button"
+            class="respaldo-descarga"
+            [disabled]="descargando()"
+            (click)="descargar()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+            <span>{{ datos.evidenciaNombre }}</span>
+          </button>
+        } @else {
+          <span class="respaldos__vacio">Sin documentos adjuntos</span>
+        }
+      }
+    </div>
+  </div>
+</section>

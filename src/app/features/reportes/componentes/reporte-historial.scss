@@ -1,0 +1,79 @@
+// Estilos propios de los reportes Por Colaborador y Por Cliente. El resto (contenedor, filtros, tarjetas,
+// estado vacío) se toma de reporte-fechas.component.scss para que se vean igual que los demás reportes.
+
+// Pestañas de vista: mismo diseño que las pestañas del Dashboard (brecha-historico).
+.pestanas {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-default);
+
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    margin-bottom: -1px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      color: var(--text-main);
+    }
+
+    &.activa {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+  }
+
+  .contador {
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+// Texto de ayuda bajo las pestañas (qué muestra la vista y que se puede hacer clic en una fila).
+.vista-ayuda {
+  margin: -8px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.mensaje-error {
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  box-shadow: var(--elevation-card);
+  color: var(--text-secondary);
+  font-size: 14px;
+
+  button {
+    margin-left: 8px;
+  }
+}
+
+// Filas clicables en la vista de resumen (abren el detalle en la otra pestaña).
+.filas-clicables ::ng-deep tbody tr {
+  cursor: pointer;
+}

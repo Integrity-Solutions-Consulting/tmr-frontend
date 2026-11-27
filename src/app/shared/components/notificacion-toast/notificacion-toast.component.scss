@@ -120,9 +120,19 @@
     to { opacity: 0; transform: translateX(16px); }
 }
 
+// Proceso en curso (p. ej. envío masivo): el icono gira hasta que el toast se cierra.
+.notif-toast__icon--girando {
+    animation: notif-toast-girar 1s linear infinite;
+}
+
+@keyframes notif-toast-girar {
+    to { transform: rotate(360deg); }
+}
+
 // Respeta la preferencia de "reducir movimiento" del sistema operativo.
 @media (prefers-reduced-motion: reduce) {
-    .notif-toast {
+    .notif-toast,
+    .notif-toast__icon--girando {
         animation: none;
     }
 }

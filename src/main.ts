@@ -10,6 +10,7 @@ import { environment } from "../src/environments/environment";
 
 console.log("DIGAME DON ARMANDO: ", { environment })
 
+
 registerLocaleData(localeEs, 'es-EC');
 
 bootstrapApplication(AppComponent, {

@@ -58,7 +58,9 @@ export class NotificacionesInternasService {
     this.conexion = this.notificacionesApi.streamInternas().subscribe({
       next: lista => {
         this.esperaReintentoMs = NotificacionesInternasService.ESPERA_MINIMA_MS;
-        this.items.set(lista);
+        this.items.set(this.tokenService.isRrhh() ? lista : lista.filter(aviso =>
+          aviso.titulo !== 'Solicitud de perfil pendiente de revisión' ||
+          !aviso.urlDestino?.startsWith('/revision-perfiles/')));
       },
       error: () => this.reconectar(),
       complete: () => this.reconectar(),

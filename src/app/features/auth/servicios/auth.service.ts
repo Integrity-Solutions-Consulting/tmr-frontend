@@ -75,7 +75,7 @@ export class AuthService {
 
   /**
    * Obtiene el perfil completo del usuario desde /configuracion/usuarios/{id}
-   * para leer debeCambiarPassword, que el endpoint de login no devuelve.
+   * para versiones anteriores de la API que omiten debeCambiarPassword.
    */
   getUserProfileById(userId: number): Observable<{ debeCambiarPassword: boolean }> {
     return this.http
@@ -100,16 +100,6 @@ export class AuthService {
     this.tokenService.setUser(JSON.stringify({ ...user, debeCambiarPassword: valor }));
   }
 
-  /**
-   * @deprecated Usar refreshTokenRequest() en su lugar
-   */
-  refreshToken(): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(
-      `${this.API_URL}/refresh-token`,
-      { RefreshToken: sessionStorage.getItem('refreshToken') }
-    );
-  }
-
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     const request: ForgotPasswordRequest = { email };
     return this.http.post<ForgotPasswordResponse>(
@@ -131,6 +121,10 @@ export class AuthService {
    */
   getUserModules(): Observable<string[]> {
     return this.http.get<string[]>(`${this.API_URL}/modules`);
+  }
+
+  getUserPermissions(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.API_URL}/permissions`);
   }
 
   changePassword(payload: ChangePasswordRequest): Observable<void> {

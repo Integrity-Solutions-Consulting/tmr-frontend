@@ -1,0 +1,32 @@
+<main class="expediente-page">
+  <app-boton label="Volver a colaboradores" icon="arrow_back" type="secondary" (clicked)="volver()"></app-boton>
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <div class="tabla-cargando" *ngIf="loading" role="status" aria-label="Cargando expediente"><span class="tabla-cargando__spinner"></span></div>
+  <ng-container *ngIf="!loading && expediente">
+    <header class="hero"><div><p class="eyebrow">Detalle del colaborador</p><h1>{{ expediente.nombreCompleto | titlecase }}</h1><p class="subtitle">{{ expediente.cargo || 'Sin cargo registrado' }} · {{ expediente.codigoEmpleado }}</p></div><app-badge-estado [estado]="expediente.estado" /></header>
+    <nav class="tabs" aria-label="Secciones del expediente">
+      <button [class.active]="tab==='general'" (click)="setTab('general')">Información general</button>
+      <button [class.active]="tab==='proyectos'" (click)="setTab('proyectos')">Proyectos</button>
+      <button *ngIf="canReadRestricted" [class.active]="tab==='familia'" (click)="setTab('familia')">Información familiar</button>
+      <button *ngIf="canReadRestricted" [class.active]="tab==='formacion'" (click)="setTab('formacion')">Formación académica</button>
+      <button *ngIf="canReadRestricted" [class.active]="tab==='certificaciones'" (click)="setTab('certificaciones')">Certificaciones</button>
+      <button *ngIf="canReadRestricted" [class.active]="tab==='historial'" (click)="setTab('historial')">Solicitudes e historial</button>
+    </nav>
+    <section class="card" *ngIf="tab==='general'"><h2>Información aprobada</h2><div class="grid"><div><small>Identificación</small><strong>{{ expediente.general.identificacion }}</strong></div><div><small>Departamento</small><strong>{{ expediente.departamento || '—' }}</strong></div><div><small>Correo</small><strong>{{ expediente.general.email || '—' }}</strong></div><div><small>Teléfono</small><strong>{{ expediente.general.telefono || '—' }}</strong></div><div><small>Dirección</small><strong>{{ expediente.general.direccion || '—' }}</strong></div><div><small>Fecha de ingreso</small><strong>{{ expediente.general.fechaIngreso || '—' }}</strong></div><div><small>Modalidad</small><strong>{{ expediente.general.modalidad || '—' }}</strong></div><div><small>Categoría</small><strong>{{ expediente.general.categoria || '—' }}</strong></div></div></section>
+    <section class="card projects-card" *ngIf="tab==='proyectos'">
+      <div class="section-heading"><div><h2>Proyectos</h2><p class="muted">Estado del proyecto y participación del colaborador son datos independientes.</p></div><span class="project-count" *ngIf="!proyectosLoading">{{ proyectos.length }}</span></div>
+      <div class="tabla-cargando" *ngIf="proyectosLoading" role="status" aria-label="Cargando proyectos"><span class="tabla-cargando__spinner"></span><span>Cargando proyectos…</span></div>
+      <div class="error project-error" *ngIf="!proyectosLoading && proyectosError" role="alert"><span>{{ proyectosError }}</span><app-boton label="Reintentar" icon="refresh" type="secondary" (clicked)="cargarProyectos()"></app-boton></div>
+      <p class="muted" *ngIf="!proyectosLoading && !proyectosError && !proyectos.length">Este colaborador no tiene asignaciones registradas.</p>
+      <div class="projects-table-wrap" *ngIf="!proyectosLoading && !proyectosError && proyectos.length">
+        <table class="projects-table"><thead><tr><th>Proyecto</th><th>Cliente</th><th>Rol</th><th>Fechas de participación</th><th>Estado del proyecto</th><th>Participación</th></tr></thead>
+          <tbody><tr *ngFor="let proyecto of proyectos"><td><strong>{{ proyecto.nombre || 'Sin nombre' }}</strong><small *ngIf="proyecto.codigo">{{ proyecto.codigo }}</small></td><td>{{ proyecto.cliente || '—' }}</td><td>{{ proyecto.rol || '—' }}</td><td>{{ formatFecha(proyecto.fechaAsignacion) }} – {{ formatFecha(proyecto.fechaFinAsignacion) }}</td><td><span class="status-label" [class.status-label--inactive]="proyecto.estado === 'Desactivado'">{{ proyecto.estado || '—' }}</span></td><td><span class="status-label" [class.status-label--inactive]="!proyecto.estadoAsignacion">{{ proyecto.estadoAsignacion ? 'Activa' : 'Inactiva' }}</span></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="card" *ngIf="canReadRestricted && tab==='familia'"><h2>Información familiar aprobada</h2><div class="grid"><div><small>Estado civil</small><strong>{{ expediente.familia?.estadoCivil || 'No informado' }}</strong></div><div><small>Tiene hijos</small><strong>{{ expediente.familia?.tieneHijos || 'No informado' }}</strong></div></div></section>
+    <section class="card" *ngIf="canReadRestricted && tab==='formacion'"><h2>Formación académica aprobada</h2><p *ngIf="!expediente.formaciones.length" class="muted">No hay formación registrada.</p><div class="record" *ngFor="let item of expediente.formaciones"><strong>{{ item.titulo }}</strong><span>{{ item.nivel }} · {{ item.institucion }}</span><small>{{ item.fechaInicio || '—' }} – {{ item.fechaFin || 'Actualidad' }}</small></div></section>
+    <section class="card" *ngIf="canReadRestricted && tab==='certificaciones'"><h2>Certificaciones aprobadas</h2><p *ngIf="!expediente.certificaciones.length" class="muted">No hay certificaciones registradas.</p><div class="record" *ngFor="let item of expediente.certificaciones"><strong>{{ item.nombre }}</strong><span>{{ item.entidadEmisora }} · Emisión {{ item.fechaEmision }}</span><small>Vencimiento: {{ item.fechaVencimiento || 'Sin vencimiento' }}</small></div></section>
+    <section class="card" *ngIf="canReadRestricted && tab==='historial'"><h2>Solicitudes e historial</h2><p class="muted">Los cambios de perfil se guardan directamente. Este apartado conserva el historial y las solicitudes independientes.</p><div class="record" *ngFor="let item of expediente.solicitudes"><button class="link" *ngIf="item.version" (click)="seleccionarSolicitud(item)"><strong>{{ item.asunto || item.estado }}</strong></button><strong *ngIf="!item.version">{{ item.asunto }}</strong><span>{{ item.fecha | date:'medium' }} · versión {{ item.version }}</span><small>{{ item.descripcion || item.observacion || 'Sin observaciones' }}</small></div></section>
+  </ng-container>
+</main>

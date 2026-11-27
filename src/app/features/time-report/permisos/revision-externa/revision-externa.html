@@ -14,12 +14,27 @@
         </div>
       </div>
       <div class="portal-banner__meta">
-        <strong>{{ datosFormulario().folio }}</strong>
+        @if (solicitudApi(); as api) {
+          <strong>{{ api.codigo }}</strong>
+        }
       </div>
     </header>
 
     <div class="portal-body">
-      <app-formulario-permiso-oficial [datos]="datosFormulario()" />
+      @if (cargando()) {
+        <p role="status" style="margin: 12px 0; color: var(--text-secondary);">Cargando solicitud...</p>
+      } @else if (errorEnlace(); as errMsg) {
+        <div role="alert" style="padding: 16px; border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; border-radius: 10px;">
+          <strong style="display: block; margin-bottom: 4px;">Enlace no disponible</strong>
+          <p style="margin: 0; font-size: 13.5px;">{{ errMsg }}</p>
+        </div>
+      } @else if (solicitudApi(); as api) {
+      <app-resumen-solicitud
+        [datos]="datosFormulario()"
+        [tipo]="api.tipo"
+        [proyecto]="api.proyecto || ''"
+        [estado]="api.estadoTexto || 'Pendiente de decisión'"
+        [adjuntos]="api.adjuntos || []" />
 
       @if (procesado() === 'pendiente') {
         <div class="modal-form">
@@ -33,9 +48,9 @@
           </div>
 
           <div class="modal-footer" style="justify-content: space-between;">
-            <a routerLink="/permisos" class="btn-tmr btn-tmr--secondary">
-              Volver
-            </a>
+            <button type="button" class="btn-tmr btn-tmr--secondary" (click)="cerrarVentana()">
+              Cerrar
+            </button>
             <div class="portal-actions">
               <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf()">
                 <span class="material-symbols-outlined">download</span>
@@ -73,11 +88,15 @@
             [class.status-badge--observado]="procesado() === 'observado'"
             [class.status-badge--rechazado]="procesado() === 'rechazado'">
             {{
-              procesado() === 'confirmado'
-                ? 'Solicitud Aprobada'
-                : procesado() === 'observado'
-                  ? 'Solicitud Observada'
-                  : 'Solicitud Rechazada'
+              api.metodoLider === 'Copia informativa'
+                ? 'Copia informativa · Registrada'
+                : api.confirmadoRrhh
+                  ? 'Confirmada por Talento Humano'
+                  : procesado() === 'confirmado'
+                    ? 'Solicitud Aprobada'
+                    : procesado() === 'observado'
+                      ? 'Solicitud Observada'
+                      : 'Solicitud Rechazada'
             }}
           </span>
           <div style="display: flex; gap: 0.5rem;">
@@ -87,6 +106,7 @@
             </button>
           </div>
         </div>
+      }
       }
     </div>
   </div>

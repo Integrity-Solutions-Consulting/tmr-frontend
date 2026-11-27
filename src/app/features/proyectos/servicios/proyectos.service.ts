@@ -28,7 +28,6 @@ export class ProyectosService {
         }];
 
     const payload: any = {
-      Codigo: proyecto.codigo,
       Nombre: proyecto.nombre,
       Descripcion: proyecto.descripcion ?? null,
       IdCliente: proyecto.idCliente ?? null,

@@ -1,5 +1,242 @@
 # Changelog
 
+## [3.15.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.14.0...v3.15.0) (2026-11-25)
+
+
+### Features
+
+* **validacion rrhh:** popup Ajustar saldo minimalista ([4931769](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/4931769d4f35050de4b72037675a76c1b221d8d6))
+
+
+### Bug Fixes
+
+* exportar vacaciones y permisos en libros separados con colores por mes ([b340a1a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b340a1a22200dd587365d735e812ee22524007fc))
+* **permisos:** ajustar anchos, centrado y desbordes en tabla de historial RRHH ([03d766c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/03d766cd050fed76ab46c8977f8730912bed38df))
+
+## [3.14.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.13.0...v3.14.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** mejoras en historial RRHH, afiliacion, buscador y exportaciones ([2cf3f97](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/2cf3f9789e7985d606c00a913d6ccdd0228e890b))
+
+## [3.13.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.12.0...v3.13.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** paginación en servidor para Mis permisos, Aprobaciones del líder e Historial de gerencia ([e79645a](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e79645a3f21b7c4d7117afc5096cc4b6fdc3d555))
+* **permisos:** paginación en servidor para Mis permisos, Aprobaciones del líder e Historial de gerencia ([500e7c1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/500e7c1f004f7e621fd5adb00796da1caa096485))
+
+## [3.12.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.11.0...v3.12.0) (2026-11-25)
+
+
+### Features
+
+* **permisos:** paginación en las pestañas de RRHH y edición centralizada en el popup ([d1cc10c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d1cc10c0028e8e37adfe45cb090ae7ff27c2d174))
+* **permisos:** paginación en las pestañas de RRHH y edición centralizada en el popup ([0b5a31c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b5a31c76e9d862736f08bfef5aa3366cbec8af9))
+
+## [3.11.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.1...v3.11.0) (2026-11-24)
+
+
+### Features
+
+* implement date normalization and formatting for profile data ([e8820ef](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e8820ef2a04787a694c4536b71a537c86f369d30))
+* **permisos:** ordenar acciones y mostrar procedencia de fecha base ([70b1e3c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/70b1e3c709a80adb3ebec7051944b098e1c98656))
+
+
+### Bug Fixes
+
+* **permisos:** validar formato ISO de afiliación ([c2673f4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/c2673f4e4ea84602a5bb14abafc93115ed437c84))
+* problemitas de carga masiva, paginacion y diseño del front ([ee3c5c9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ee3c5c9b5e617bdc695dab6b87c587d481e2df08))
+
+
+### Performance Improvements
+
+* **auth:** reutilizar indicador de cambio de contraseña del login ([2edade9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/2edade9b425e5b5a665b02a1c0fdf21b5ebe2ddb))
+* **permisos:** paginar historial RRHH y consultar por demanda ([7d55540](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/7d555402f30cef6bf10d060e3c19dcd96e48ebc7))
+
+## [3.10.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.10.0...v3.10.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **permisos:** restaurar diseño de Gestión Talento Humano y simplificar el historial ([adb9cac](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/adb9cac1becbaa8a642b1a558f2932ebd2208852))
+* **permisos:** restaurar diseño de Gestión Talento Humano y simplificar el historial ([028b953](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/028b9532d40135313e92babed5f20b1adc9f3b93))
+
+## [3.10.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.9.0...v3.10.0) (2026-11-24)
+
+
+### Features
+
+* enhance collaborator detail page with loading state and badge component ([0a6ca91](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0a6ca91cf1008ae9306ea7c000dc938bd88a55ab))
+
+## [3.9.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.8.0...v3.9.0) (2026-11-24)
+
+
+### Features
+
+* **permisos:** corregir fecha de afiliacion IESS desde saldos de vac… ([11fb71b](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/11fb71b0a8d9a8c173d13b9324ee34cecbf2e324))
+* **permisos:** corregir fecha de afiliacion IESS desde saldos de vacaciones RRHH ([d429fe7](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d429fe7b9706f57fb593c03561f3b610240db578))
+
+## [3.8.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.6...v3.8.0) (2026-11-24)
+
+
+### Features
+
+* **permisos:** ventana de historial editable, saldos de vacaciones RRHH y días calendario ([739645e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/739645e4715f1edae616c561f447f594ad6fadbd))
+* **permisos:** ventana de historial editable, tablero de saldos RRHH y vacaciones en dias calendario ([788a7a6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/788a7a601dc107e91d77dfc7573983631218fac4))
+
+## [3.7.6](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.5...v3.7.6) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejoras en logica ([54bb055](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/54bb0556d58e69e2171840f5782b0120bca055da))
+* Mejoras en logica ([96d2897](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/96d28979337cae98975db0481bec7352279f7c36))
+
+## [3.7.5](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.4...v3.7.5) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([0b8d66d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b8d66d21a6171a7c978c17abfc3d40a941ad2c5))
+* Mejora UX/UI ([aaba484](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/aaba484b93ab4d99779e7bf49cc1917a2ceafd45))
+
+## [3.7.4](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.3...v3.7.4) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([ac5aa34](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ac5aa3468cb1fe065ca847f27ebf8c98c4e68a97))
+* Mejora UX/UI ([d993b01](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d993b017952a7fe173028bd11824d0822d524aca))
+
+## [3.7.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.2...v3.7.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* Mejora UX/UI ([780f6b3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/780f6b327504de802ee5a43cafe29861433ccf20))
+* Mejora UX/UI ([161d469](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/161d469d67c5f731f2e9022118c3c3f3498051e4))
+
+## [3.7.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.1...v3.7.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* Añadir filtrado en Actividades ([579e04e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/579e04e4091acf8dab4f517c6f17e621fd7c3c61))
+* Añadir filtrado en Actividades ([bac5bfa](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/bac5bfa598b31929a9265453db8bce506bfc8447))
+* Añadir filtrado en Actividades ([810f09e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/810f09e1130ccf292e1538bb227c02200c453b73))
+* Historial ([0b6ad69](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0b6ad69e0a26a7c170ebb12e424b8952a830eeb8))
+
+## [3.7.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.7.0...v3.7.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* correcciones de testeo TimeReport (fechas, orden, búsqueda y teléfono) ([3092d82](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/3092d82078343a32fa9c22f6da8ef2398d9b798c))
+* **permisos:** ocultar modulo de permisos para todos los roles excepto administrador ([2348559](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/23485599fabb51b0dad40702e7ee7c1e7514798f))
+
+## [3.7.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.1...v3.7.0) (2026-11-17)
+
+
+### Features
+
+* add lightweight Christmas snow to login ([44008cd](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/44008cd8c6e1b044e48a643219291d64982d5a14))
+
+## [3.6.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.6.0...v3.6.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **seguimiento:** toast de progreso y resumen final al notificar a varias personas ([0a0b4b8](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/0a0b4b82d071f8117dfd8a67c47a83badaa61e02))
+
+## [3.6.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.3...v3.6.0) (2026-11-09)
+
+
+### Features
+
+* Botón para registrar actividades para los líderes ([d410554](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d410554d59a5f0cc876df169d897fac2b140c958))
+* Botón para registrar actividades para los líderes ([4bd1bfa](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/4bd1bfa6462253319e7b2ae5945981beb7b4e06e))
+
+## [3.5.3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.2...v3.5.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* Corrección de errores ([1c2e51d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1c2e51db144394bf55e86d339501a9dca79b9baf))
+* **seguimiento:** filtro de cliente solo muestra proyectos de ese cliente ([ba608c1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ba608c10505773b0d3b1f652a3da07774d2137a4))
+
+## [3.5.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.1...v3.5.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **colaboradores:** reactivar tipo de contrato obligatorio ([9adbee3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/9adbee3392f5845051f1d6208eb327dd8054e20a))
+* **colaboradores:** reactivar tipo de contrato obligatorio ([acc26fe](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/acc26fe6703594cd34c69a7e8a3e5b5f25e6ec7c))
+
+## [3.5.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.5.0...v3.5.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* Desactivación temporal de tipo de contrato obligatorio ([79f90df](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/79f90df2e7ec35dbd03d67f510b2f2726599a531))
+* Desactivación temporal de tipo de contrato obligatorio ([6bfc14d](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6bfc14d0593ed1581685a7f65628009a7285040e))
+
+## [3.5.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.4.0...v3.5.0) (2026-11-05)
+
+
+### Features
+
+* **correos:** mostrar institucional o, si no hay, personal ([e6f906e](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e6f906e7d8ea5ccef7e6b6363302042908fdaa0d))
+* **correos:** mostrar institucional o, si no hay, personal ([b12c599](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/b12c59932385e3af23872bda48f78ddee3ac868a))
+
+
+### Bug Fixes
+
+* **colaboradores:** exigir al menos un correo ([1c3584f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1c3584f0d7f658b2db4f060d75ca77d0be8dd6c3))
+* **colaboradores:** exigir al menos un correo ([e55ebd3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e55ebd3f8d7872de14967bc671f66198dfdd178e))
+
+## [3.4.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.1...v3.4.0) (2026-11-05)
+
+
+### Features
+
+* **colaboradores:** agregar correo institucional y correo personal ([aea2889](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/aea28893153c13ed2de08e46b8216211a15c5e42))
+* **colaboradores:** agregar correo institucional y correo personal ([af60704](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/af60704962b87e5052aa020a719f0d92d2bbd2b1))
+* **colaboradores:** agregar correo institucional y correo personal ([e2f2c68](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e2f2c685bdb222113c9f22925a65426851c39184))
+
+## [3.3.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.3.0...v3.3.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* Ajustar ancho de modales de Seguimiento y Agregar actividad ([d9444e9](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/d9444e9394211b6b17a6460a3ca099d66b5a83f2))
+* Se elimina validación de mínimo 3 actividades por día ([5916542](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/591654243ec001e35d9b8f169baf97368580103a))
+
+## [3.3.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.2...v3.3.0) (2026-10-22)
+
+
+### Features
+
+* Actualización de notificaciones ([ce69999](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ce6999984b5e91039f4177a23d21ccb99f93d973))
+* Integración del módulo de Notificaciones en frontend ([1106172](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/1106172b120d0479de0c02d8942985dc9093f4fd))
+* **notificaciones:** pantalla Fechas de Corte (flujo 3) ([ceb9f5b](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/ceb9f5b75255aa37ced4355b9fa4c90c863dc2c2))
+
+
+### Bug Fixes
+
+* **fechas-corte:** validar hora pasada y no repetir avisos de error ([64e1141](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/64e114179aab319de6168d50fdb6e896bff56816))
+* **fechas-corte:** validar hora pasada y no repetir avisos de error ([a89628f](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/a89628f3d65e48e97d70cb5f4bc9f7d4d93a494d))
+
+## [3.2.2](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.1...v3.2.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* digame don armando ([6061a2c](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/6061a2ca29af226daa5ba84f457ff872602c62ee))
+* digame don armando ([e02ee93](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/e02ee9314479a7c7794cec9c8afd50361e090c53))
+
 ## [3.2.1](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.2.0...v3.2.1) (2026-10-19)
 
 

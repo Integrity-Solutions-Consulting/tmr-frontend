@@ -83,7 +83,7 @@
               <div class="float-field">
                 <input
                   class="float-field__input float-field__input--date"
-                  type="date"
+                  type="date" max="9999-12-31"
                   formControlName="fechaCambioContrato"
                   placeholder=" "
                   [class.float-field__input--error]="campoInvalido('fechaCambioContrato')" />
@@ -211,7 +211,7 @@
             </div>
 
             @if (campoInvalido('nombres')) {
-              <span class="form-field__error">{{ mensajeErrorTexto('nombres') }}</span>
+         <span class="form-field__error">{{ mensajeErrorNombre('nombres') }}</span>
             }
           </div>
 
@@ -237,7 +237,7 @@
             </div>
 
             @if (campoInvalido('apellidos')) {
-              <span class="form-field__error">{{ mensajeErrorTexto('apellidos') }}</span>
+       <span class="form-field__error">{{ mensajeErrorNombre('apellidos') }}</span>
             }
           </div>
 
@@ -246,7 +246,7 @@
             <div class="float-field">
               <input
                 class="float-field__input float-field__input--date"
-                type="date"
+                type="date" max="9999-12-31"
                 formControlName="fechaNacimiento"
                 placeholder=" " />
 
@@ -311,8 +311,8 @@
 
         <div class="form-grid form-grid--2">
 
-          <!-- Correo electrónico -->
-          <div class="form-field form-field--full">
+          <!-- Correo personal -->
+          <div class="form-field">
             <div class="float-field">
               <input
                 class="float-field__input"
@@ -323,12 +323,39 @@
                 [class.float-field__input--error]="campoInvalido('correoElectronico')" />
 
               <label class="float-field__label">
-                Correo electrónico
+                Correo personal
+                @if (!tieneValor('emailCorporativo')) {
+                  <span class="req">*</span>
+                }
               </label>
             </div>
 
             @if (campoInvalido('correoElectronico')) {
               <span class="form-field__error">{{ mensajeErrorTexto('correoElectronico') }}</span>
+            }
+          </div>
+
+          <!-- Correo institucional -->
+          <div class="form-field">
+            <div class="float-field">
+              <input
+                class="float-field__input"
+                type="email"
+                formControlName="emailCorporativo"
+                placeholder=" "
+                maxlength="100"
+                [class.float-field__input--error]="campoInvalido('emailCorporativo')" />
+
+              <label class="float-field__label">
+                Correo institucional
+                @if (!tieneValor('correoElectronico')) {
+                  <span class="req">*</span>
+                }
+              </label>
+            </div>
+
+            @if (campoInvalido('emailCorporativo')) {
+              <span class="form-field__error">{{ mensajeErrorTexto('emailCorporativo') }}</span>
             }
           </div>
 
@@ -419,7 +446,7 @@
             <div class="float-field">
               <input
                 class="float-field__input float-field__input--date"
-                type="date"
+                type="date" max="9999-12-31"
                 formControlName="fechaContratacion"
                 placeholder=" "
                 [class.float-field__input--error]="campoInvalido('fechaContratacion')" />

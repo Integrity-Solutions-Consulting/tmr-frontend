@@ -69,7 +69,7 @@ export async function crearReporteSeguimientoExcel(
   worksheet.getCell(totalRow, 1).value = 'TOTAL';
   worksheet.getCell(totalRow, 6).value = { formula: 'SUM(F9:F' + (totalRow - 1) + ')' } as any;
   worksheet.getCell(totalRow, totalColumnas).value = { formula: 'SUM(' + columna(totalColumnas) + '9:' + columna(totalColumnas) + (totalRow - 1) + ')' } as any;
-  fechas.forEach((date, index) => {
+  fechas.forEach((_, index) => {
     const column = 7 + index;
     worksheet.getCell(totalRow, column).value = { formula: 'SUM(' + columna(column) + '9:' + columna(column) + (totalRow - 1) + ')' } as any;
   });

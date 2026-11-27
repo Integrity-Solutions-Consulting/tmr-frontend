@@ -1,199 +1,633 @@
 <div class="permisos-page">
   <app-header
-    title="Validación Talento Humano"
-    subtitle="Confirmación final de permisos y vacaciones"
-  />
+    title="Gestión Talento Humano"
+    subtitle="Validación, historial de permisos y saldos de vacaciones"
+  >
+    <div class="header-actions-permisos">
+      @if (vistaActiva() === 'HISTORIAL_EDITABLE') {
+        <button
+          type="button"
+          class="btn-tmr btn-tmr--secondary"
+          [disabled]="exportandoHistorial() || totalHistorialFiltrado() === 0"
+          [matMenuTriggerFor]="exportarHistorialMenu"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          {{ exportandoHistorial() ? 'Exportando…' : 'Descargar (' + totalHistorialFiltrado() + ')' }}
+        </button>
+        <mat-menu #exportarHistorialMenu="matMenu">
+          <button mat-menu-item (click)="exportarHistorial('xlsx')" [disabled]="exportandoHistorial()">
+            Excel (.xlsx) — por tipo de permiso
+          </button>
+          <button mat-menu-item (click)="exportarHistorial('pdf')" [disabled]="exportandoHistorial()">
+            PDF (.pdf)
+          </button>
+        </mat-menu>
+      }
+      <button type="button" class="btn-tmr btn-tmr--primary" (click)="abrirNuevoRegistroHistorial()">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Nuevo registro
+      </button>
+    </div>
+  </app-header>
 
   <section class="kpis-grid">
     <app-tarjeta-resumen [valor]="totalPorConfirmar()" titulo="Por confirmar" icono="verified" tono="advertencia" />
-    <app-tarjeta-resumen [valor]="totalPendientesExternos()" titulo="Pendientes líder" icono="forward_to_inbox" tono="corporativo" />
+    <app-tarjeta-resumen [valor]="totalHistorialRegistros()" titulo="Registros totales" icono="history" tono="corporativo" />
     <app-tarjeta-resumen [valor]="totalConfirmadasMes()" titulo="Confirmados" icono="task_alt" tono="exito" />
   </section>
 
-  <div class="filters-card">
-    <div class="filter-group search-group">
-      <label class="filter-label">Búsqueda inteligente</label>
-      <input
-        type="text"
-        class="filter-control"
-        placeholder="Colaborador, folio, proyecto, cliente, líder, duración o estado..."
-        [ngModel]="busqueda()"
-        (ngModelChange)="busqueda.set($event)"
-      />
-    </div>
+  <!-- Selector de vistas principales de RRHH -->
+  <nav #tabsNav class="rrhh-mode-tabs" aria-label="Secciones de Talento Humano">
+    <button
+      type="button"
+      class="rrhh-mode-tab"
+      [class.rrhh-mode-tab--active]="vistaActiva() === 'VALIDACION'"
+      (click)="cambiarVista('VALIDACION')"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">rule</span>
+      Validación de Solicitudes
+      @if (totalPorConfirmar() > 0) {
+        <span class="rrhh-pill rrhh-pill--info">{{ totalPorConfirmar() }}</span>
+      }
+    </button>
+    <button
+      type="button"
+      class="rrhh-mode-tab"
+      [class.rrhh-mode-tab--active]="vistaActiva() === 'HISTORIAL_EDITABLE'"
+      (click)="cambiarVista('HISTORIAL_EDITABLE')"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+      Historial
+    </button>
+    <button
+      type="button"
+      class="rrhh-mode-tab"
+      [class.rrhh-mode-tab--active]="vistaActiva() === 'SALDOS'"
+      (click)="cambiarVista('SALDOS')"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">beach_access</span>
+      Saldos de Vacaciones ({{ totalColaboradoresSaldos() }})
+    </button>
+  </nav>
 
-    <div class="filter-group">
-      <label class="filter-label">Período</label>
-      <select class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
-        <option value="TODOS">Todos</option>
-        <option value="HOY">Hoy</option>
-        <option value="ESTA_SEMANA">Esta semana</option>
-        <option value="ESTE_MES">Este mes</option>
-        <option value="MES_ANTERIOR">Mes anterior</option>
-        <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
-        <option value="ANIO_ACTUAL">Este año (2026)</option>
-        <option value="PERSONALIZADO">Rango personalizado</option>
-      </select>
-    </div>
+  <!-- ======================================================================= -->
+  <!-- VISTA 1: VALIDACIÓN DE SOLICITUDES (FLUJO NORMAL PASO 3)                -->
+  <!-- ======================================================================= -->
+  @if (vistaActiva() === 'VALIDACION') {
+    <section class="rrhh-vista-panel" aria-label="Validación de solicitudes">
+      <div class="filters-card">
+        <div class="filter-group search-group">
+          <label class="filter-label" for="gestion-rrhh-filter-1">Buscar</label>
+          <input id="gestion-rrhh-filter-1"
+            maxlength="200"
+            type="text"
+            class="filter-control"
+            placeholder="Buscar"
+            [ngModel]="busqueda()"
+            (ngModelChange)="busqueda.set($event)"
+          />
+        </div>
 
-    <div class="filter-group date-group">
-      <label class="filter-label">Desde</label>
-      <input
-        type="date"
-        class="filter-control"
-        [ngModel]="fechaDesde()"
-        (ngModelChange)="cambiarFechaDesde($event)"
-      />
-    </div>
+        <div class="filter-group">
+          <label class="filter-label" for="gestion-rrhh-filter-2">Período</label>
+          <select id="gestion-rrhh-filter-2" class="filter-control" [ngModel]="periodoPreset()" (ngModelChange)="cambiarPresetPeriodo($event)">
+            <option value="TODOS">Todo período</option>
+            <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+            <option value="PERSONALIZADO">Rango personalizado</option>
+          </select>
+        </div>
 
-    <div class="filter-group date-group">
-      <label class="filter-label">Hasta</label>
-      <input
-        type="date"
-        class="filter-control"
-        [ngModel]="fechaHasta()"
-        (ngModelChange)="cambiarFechaHasta($event)"
-      />
-    </div>
+        @if (periodoPreset() === 'PERSONALIZADO') {
+        <div class="filter-group date-group">
+          <label class="filter-label" for="gestion-rrhh-filter-3">Desde</label>
+          <input id="gestion-rrhh-filter-3"
+            type="date"
+            class="filter-control"
+            [ngModel]="fechaDesde()"
+            (ngModelChange)="cambiarFechaDesde($event)"
+          />
+        </div>
 
-    <div class="filter-group">
-      <label class="filter-label">Tipo</label>
-      <select
-        class="filter-control"
-        [ngModel]="filtroTipo()"
-        (ngModelChange)="filtroTipo.set($event)"
-      >
-        <option value="TODOS">Todos</option>
-        <option value="Vacaciones">Vacaciones</option>
-        <option value="Licencia">Licencia por enfermedad</option>
-        <option value="Citas">Citas médicas</option>
-        <option value="Fallecimiento">Fallecimiento de un familiar</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label class="filter-label">Bandeja</label>
-      <select
-        class="filter-control"
-        [ngModel]="tabActiva()"
-        (ngModelChange)="tabActiva.set($event)"
-      >
-        <option value="POR_CONFIRMAR">Por confirmar ({{ totalPorConfirmar() }})</option>
-        <option value="LIDER_EXTERNO">Pendientes líder ({{ totalPendientesExternos() }})</option>
-        <option value="HISTORIAL">Confirmados / Historial</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="table-card">
-    <table class="permisos-table">
-      <colgroup>
-        <col style="width: 11%;" />
-        <col style="width: 16%;" />
-        <col style="width: 15%;" />
-        <col style="width: 15%;" />
-        <col style="width: 15%;" />
-        <col style="width: 7%;" />
-        <col style="width: 11%;" />
-        <col style="width: 10%;" />
-      </colgroup>
-      <thead>
-        <tr>
-          <th>Folio</th>
-          <th>Colaborador</th>
-          <th>Tipo</th>
-          <th>Período</th>
-          <th>Jefe Inmediato</th>
-          <th>Horas</th>
-          <th>Estado</th>
-          <th style="text-align: right;">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of solicitudesFiltradas(); track item.id) {
-          <tr>
-            <td class="codigo-cell">{{ item.folio }}</td>
-            <td>{{ item.colaborador }}</td>
-            <td>{{ item.tipo }}</td>
-            <td>{{ item.periodo }}</td>
-            <td>
-              {{ item.liderNombre }}
-              <span class="tag-lider" [class.tag-lider--int]="item.liderTipo === 'Interno'" [class.tag-lider--ext]="item.liderTipo === 'Externo'">
-                {{ item.liderTipo === 'Externo' ? 'EXT' : 'INT' }}
-              </span>
-            </td>
-            <td>-{{ item.horasEquivalentes }} h</td>
-            <td>
-              <span [class]="'status-badge status-badge--' + item.estadoClase">
-                {{ item.estadoTexto }}
-              </span>
-            </td>
-            <td>
-              <div class="actions-cell">
-                @if (item.estado === 'CONFIRMADO_LIDER') {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--primary btn-tmr--sm"
-                    (click)="abrirModalValidacion(item)"
-                  >
-                    Revisar
-                  </button>
-                } @else if (item.estado === 'PENDIENTE_LIDER_EXT') {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
-                    (click)="reenviarEnlaceExterno(item)"
-                    title="Reenviar Magic Link"
-                  >
-                    Reenviar
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="btn-tmr btn-tmr--secondary btn-tmr--sm"
-                    (click)="abrirVistaFormulario(item)"
-                    title="Ver PDF"
-                  >
-                    <span class="material-symbols-outlined">picture_as_pdf</span>
-                  </button>
-                }
-              </div>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="8" class="empty-row">No se encontraron solicitudes en el rango seleccionado.</td>
-          </tr>
+        <div class="filter-group date-group">
+          <label class="filter-label" for="gestion-rrhh-filter-4">Hasta</label>
+          <input id="gestion-rrhh-filter-4"
+            type="date"
+            class="filter-control"
+            [ngModel]="fechaHasta()"
+            (ngModelChange)="cambiarFechaHasta($event)"
+          />
+        </div>
         }
-      </tbody>
-    </table>
-  </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="gestion-rrhh-filter-5">Tipo</label>
+          <select id="gestion-rrhh-filter-5"
+            class="filter-control"
+            [ngModel]="filtroTipo()"
+            (ngModelChange)="filtroTipo.set($event)"
+          >
+            <option value="TODOS">Todos los tipos de permiso</option>
+            <option value="Vacaciones">Vacaciones</option>
+            <option value="Licencia">Licencia por enfermedad</option>
+            <option value="Citas">Citas médicas</option>
+            <option value="Fallecimiento">Fallecimiento de un familiar</option>
+            <option value="Calamidad">Calamidad doméstica</option>
+            <option value="Accidente">Accidente</option>
+            <option value="Maternidad">Maternidad</option>
+            <option value="Nacimiento">Nacimiento de un Hijo/a</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="gestion-rrhh-filter-6">Bandeja</label>
+          <select id="gestion-rrhh-filter-6"
+            class="filter-control"
+            [ngModel]="tabActiva()"
+            (ngModelChange)="tabActiva.set($event)"
+          >
+            <option value="POR_CONFIRMAR">Por confirmar ({{ totalPorConfirmar() }})</option>
+            <option value="LIDER_EXTERNO">Pendientes líder ({{ totalPendientesExternos() }})</option>
+            <option value="HISTORIAL">Confirmados / Historial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-card" tabindex="0" role="region" aria-label="Listado de solicitudes">
+        <table class="permisos-table permisos-review-table">
+          <colgroup>
+            <col style="width: 24%;" />
+            <col style="width: 24%;" />
+            <col style="width: 18%;" />
+            <col style="width: 12%;" />
+            <col style="width: 150px;" />
+            <col style="width: 96px;" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Permiso</th>
+              <th>Fecha</th>
+              <th>Duración</th>
+              <th class="estado-column">Estado</th>
+              <th aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of solicitudes(); track item.id) {
+              <tr>
+                <td><strong>{{ item.colaborador }}</strong></td>
+                <td>
+                  {{ item.tipo }}
+                  @if (item.esAnticipada) {
+                    <span class="rrhh-tag rrhh-tag--purple">Anticipada</span>
+                  }
+                </td>
+                <td class="cell-muted">{{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }</td>
+                <td class="cell-muted">{{ item.diasSolicitados }}</td>
+                <td class="estado-column">
+                  <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                    {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button
+                      type="button"
+                      class="btn-tmr btn-tmr--primary btn-tmr--sm"
+                      (click)="item.estado === 'CONFIRMADO_LIDER' ? abrirModalValidacion(item) : abrirVistaFormulario(item)"
+                      aria-label="Revisar solicitud"
+                    >
+                      Revisar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty-row">
+                  {{ cargandoBandeja() ? 'Cargando solicitudes...' : 'No se encontraron solicitudes en el rango seleccionado.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-paginacion
+        [paginaActual]="paginaBandeja()"
+        [totalPaginas]="totalPaginasBandeja()"
+        [total]="totalBandejaFiltrada()"
+        [porPagina]="porPagina"
+        etiquetaRegistros="solicitudes"
+        (paginaCambia)="paginaBandeja.set($event)"
+      />
+    </section>
+  }
+
+  <!-- ======================================================================= -->
+  <!-- VISTA 2: HISTORIAL DE PERMISOS Y VACACIONES                             -->
+  <!-- ======================================================================= -->
+  @if (vistaActiva() === 'HISTORIAL_EDITABLE') {
+    <section class="rrhh-vista-panel" aria-label="Historial de permisos y vacaciones">
+      @if (colaboradorFiltroHistorial(); as colFiltro) {
+        <div class="rrhh-context-chip" role="status">
+          <span class="material-symbols-outlined" aria-hidden="true">person_search</span>
+          <span>
+            Mostrando historial de <strong>{{ colFiltro.nombre }}</strong>
+            @if (colFiltro.cedula) {
+              <span class="cell-muted">({{ colFiltro.cedula }})</span>
+            }
+          </span>
+          <button
+            type="button"
+            class="rrhh-context-chip__clear"
+            (click)="limpiarColaboradorFiltroHistorial()"
+          >
+            Ver todos
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
+      }
+
+      <div class="filters-card">
+        <div class="filter-group search-group">
+          <label class="filter-label" for="hist-buscar">Buscar</label>
+          <input
+            id="hist-buscar"
+            maxlength="200"
+            type="text"
+            class="filter-control"
+            placeholder="Colaborador, cédula, código HIST/PER, motivo o nota..."
+            [ngModel]="busquedaHistorial()"
+            (ngModelChange)="busquedaHistorial.set($event)"
+          />
+        </div>
+
+        <div class="filter-group rrhh-filter-compact">
+          <label class="filter-label" for="hist-anio">Año</label>
+          <select
+            id="hist-anio"
+            class="filter-control"
+            [ngModel]="filtroAnioHistorial()"
+            (ngModelChange)="cambiarAnioHistorial($event)"
+          >
+            <option value="TODOS">Todos los años</option>
+            @for (a of aniosDisponiblesHistorial(); track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="hist-periodo">Período</label>
+          <select
+            id="hist-periodo"
+            class="filter-control"
+            [ngModel]="periodoPresetHistorial()"
+            (ngModelChange)="cambiarPresetPeriodoHistorial($event)"
+          >
+            <option value="TODOS">Todo período</option>
+            <option value="ULTIMOS_3_MESES">Últimos 3 meses</option>
+            <option value="PERSONALIZADO">Rango personalizado</option>
+          </select>
+        </div>
+
+        @if (periodoPresetHistorial() === 'PERSONALIZADO') {
+          <div class="filter-group date-group">
+            <label class="filter-label" for="hist-desde">Desde</label>
+            <input
+              id="hist-desde"
+              type="date"
+              class="filter-control"
+              [ngModel]="fechaDesdeHistorial()"
+              (ngModelChange)="cambiarFechaDesdeHistorial($event)"
+            />
+          </div>
+
+          <div class="filter-group date-group">
+            <label class="filter-label" for="hist-hasta">Hasta</label>
+            <input
+              id="hist-hasta"
+              type="date"
+              class="filter-control"
+              [ngModel]="fechaHastaHistorial()"
+              (ngModelChange)="cambiarFechaHastaHistorial($event)"
+            />
+          </div>
+        }
+
+        <div class="filter-group">
+          <label class="filter-label" for="hist-tipo">Tipo</label>
+          <select
+            id="hist-tipo"
+            class="filter-control"
+            [ngModel]="filtroTipoHistorial()"
+            (ngModelChange)="filtroTipoHistorial.set($event)"
+          >
+            <option value="TODOS">Todos los tipos</option>
+            @for (tp of tiposPermisoOpciones; track tp.codigo) {
+              <option [value]="tp.codigo">{{ tp.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="hist-regimen">Afiliación</label>
+          <select
+            id="hist-regimen"
+            class="filter-control"
+            [ngModel]="filtroRegimenHistorial()"
+            (ngModelChange)="filtroRegimenHistorial.set($event)"
+          >
+            <option value="TODOS">Todos los regímenes</option>
+            <option value="AFILIADO">Afiliado IESS</option>
+            <option value="MIXTO">Mixto (RPS e ISC)</option>
+            <option value="FACTURA">Factura / Servicios</option>
+          </select>
+        </div>
+
+        @if (tieneFiltrosHistorialActivos()) {
+          <div class="filter-actions">
+            <button type="button" class="btn-tmr btn-tmr--secondary" (click)="limpiarFiltrosHistorial()">
+              Limpiar
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="table-card" tabindex="0" role="region" aria-label="Historial de permisos y vacaciones">
+        <table class="permisos-table rrhh-historial-table">
+          <colgroup>
+            <col class="col-hist-colaborador" />
+            <col class="col-hist-afiliacion" />
+            <col class="col-hist-permiso" />
+            <col class="col-hist-fechas" />
+            <col class="col-hist-dias" />
+            <col class="col-hist-estado" />
+            <col class="col-hist-acciones" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="rrhh-col-nombre">Colaborador</th>
+              <th class="rrhh-col-afiliacion">Afiliación</th>
+              <th class="rrhh-col-permiso">Permiso</th>
+              <th class="rrhh-col-fechas">Fechas</th>
+              <th class="rrhh-dias-column">Días</th>
+              <th class="estado-column">Estado</th>
+              <th class="rrhh-acciones-column" aria-label="Acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (cargandoHistorial()) {
+              <tr>
+                <td colspan="7" class="empty-row">Cargando historial de permisos...</td>
+              </tr>
+            } @else if (errorHistorial()) {
+              <tr>
+                <td colspan="7" class="empty-row">
+                  El historial no está disponible.
+                  <button type="button" class="btn-tmr btn-tmr--secondary btn-tmr--sm" (click)="cargarHistorialEditable()">
+                    Reintentar
+                  </button>
+                </td>
+              </tr>
+            } @else {
+              @for (item of historialRegistros(); track item.id) {
+                <tr>
+                  <td class="rrhh-col-nombre" [attr.title]="item.colaborador">{{ item.colaborador }}</td>
+                  <td class="rrhh-col-afiliacion">
+                    @if (item.regimen) {
+                      <span
+                        class="rrhh-tag"
+                        [class.rrhh-tag--ok]="item.regimen === 'AFILIADO'"
+                        [class.rrhh-tag--purple]="item.regimen === 'MIXTO'"
+                        [class.rrhh-tag--neutral]="item.regimen === 'FACTURA'"
+                      >
+                        {{ etiquetaRegimen(item.regimen) }}
+                      </span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="rrhh-col-permiso" [attr.title]="item.tipo">{{ item.tipo }}</td>
+                  <td class="cell-muted rrhh-col-fechas">
+                    {{ item.fechaInicio }}@if (item.fechaFin !== item.fechaInicio) { – {{ item.fechaFin }} }
+                  </td>
+                  <td class="rrhh-dias-column">
+                    <strong>{{ item.totalDias }} d</strong>
+                  </td>
+                  <td class="estado-column">
+                    <span [class]="'status-badge status-badge--' + item.estadoClase" [attr.title]="item.estadoTexto">
+                      {{ item.estadoClase === 'rrhh' ? 'Por confirmar' : item.estadoClase === 'pendiente' ? 'Pendiente líder' : item.estadoTexto }}
+                    </span>
+                  </td>
+                  <td class="rrhh-acciones-column" (click)="$event.stopPropagation()">
+                    <app-action-menu
+                      [itemId]="'hist-' + item.id"
+                      [menuAbierto]="menuHistorialAbierto()"
+                      [acciones]="accionesHistorial()"
+                      (toggleMenu)="toggleMenuHistorial($event)"
+                      (accionSeleccionada)="onAccionHistorial($event, item)"
+                    ></app-action-menu>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-row">No se encontraron registros con los filtros actuales.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-paginacion
+        [paginaActual]="paginaHistorial()"
+        [totalPaginas]="totalPaginasHistorial()"
+        [total]="totalHistorialFiltrado()"
+        [porPagina]="porPagina"
+        etiquetaRegistros="registros"
+        (paginaCambia)="paginaHistorial.set($event)"
+      />
+    </section>
+  }
+
+  <!-- ======================================================================= -->
+  <!-- VISTA 3: SALDOS DE VACACIONES POR COLABORADOR                           -->
+  <!-- ======================================================================= -->
+  @if (vistaActiva() === 'SALDOS') {
+    <section class="rrhh-vista-panel" aria-label="Saldos de vacaciones por colaborador">
+      <div class="filters-card">
+        <div class="filter-group search-group">
+          <label class="filter-label" for="saldos-buscar">Buscar colaborador</label>
+          <input
+            id="saldos-buscar"
+            maxlength="200"
+            type="text"
+            class="filter-control"
+            placeholder="Nombre, cédula, código, cargo o empresa..."
+            [ngModel]="busquedaSaldos()"
+            (ngModelChange)="busquedaSaldos.set($event)"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="saldos-regimen">Régimen</label>
+          <select
+            id="saldos-regimen"
+            class="filter-control"
+            [ngModel]="filtroRegimenSaldos()"
+            (ngModelChange)="filtroRegimenSaldos.set($event)"
+          >
+            <option value="TODOS">Todos los regímenes</option>
+            <option value="AFILIADO">Afiliado IESS</option>
+            <option value="MIXTO">Mixto (RPS e ISC)</option>
+            <option value="FACTURA">Factura / Servicios</option>
+          </select>
+        </div>
+
+        <div class="filter-group rrhh-check-filter">
+          <label class="rrhh-inline-check">
+            <input
+              type="checkbox"
+              [ngModel]="soloSaldoNegativo()"
+              (ngModelChange)="soloSaldoNegativo.set($event)"
+            />
+            <span>Solo con saldo negativo (anticipadas)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="table-card" tabindex="0" role="region" aria-label="Saldos de vacaciones por colaborador">
+        <table class="permisos-table">
+          <thead>
+            <tr>
+              <th class="rrhh-colaborador-column">Colaborador</th>
+              <th>Régimen</th>
+              <th>Fecha base</th>
+              <th>Ganados</th>
+              <th>Tomados</th>
+              <th>Ajustes</th>
+              <th>Saldo</th>
+              <th class="rrhh-acciones-column" aria-label="Acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (cargandoSaldos()) {
+              <tr>
+                <td colspan="8" class="empty-row">Calculando saldos de vacaciones...</td>
+              </tr>
+            } @else {
+              @for (col of saldosColaboradores(); track col.idEmpleado) {
+                <tr [class.rrhh-fila-expandida]="saldoExpandido(col.idEmpleado)">
+                  <td>
+                    <button
+                      type="button"
+                      class="rrhh-colab-toggle"
+                      [class.rrhh-colab-toggle--abierto]="saldoExpandido(col.idEmpleado)"
+                      [attr.aria-expanded]="saldoExpandido(col.idEmpleado)"
+                      (click)="toggleDetalleSaldo(col.idEmpleado)"
+                    >
+                      <svg class="rrhh-colab-toggle__icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M9 6l6 6-6 6"></path>
+                      </svg>
+                      <span>{{ col.apellidosNombres }}</span>
+                    </button>
+                  </td>
+                  <td>
+                    <div class="rrhh-tags-wrap">
+                      <span
+                        class="rrhh-tag"
+                        [class.rrhh-tag--ok]="col.regimen === 'AFILIADO'"
+                        [class.rrhh-tag--purple]="col.regimen === 'MIXTO'"
+                        [class.rrhh-tag--neutral]="col.regimen === 'FACTURA'"
+                      >
+                        {{ col.regimen === 'AFILIADO' ? 'Afiliado' : col.regimen === 'MIXTO' ? 'Mixto' : 'Factura' }}
+                      </span>
+                      @if (col.excepcionFacturaActiva) {
+                        <span class="rrhh-tag rrhh-tag--warn">Excepción activa</span>
+                      }
+                    </div>
+                  </td>
+                  <td [class.cell-muted]="!col.fechaInicioVacaciones">{{ col.fechaInicioVacaciones || 'Sin fecha' }}</td>
+                  <td><strong>{{ col.diasGanadosAcumulados }} d</strong></td>
+                  <td>{{ col.diasConsumidos }} d</td>
+                  <td class="cell-muted">{{ col.diasAjuste >= 0 ? '+' + col.diasAjuste : col.diasAjuste }} d</td>
+                  <td>
+                    <strong
+                      class="rrhh-saldo-value"
+                      [class.rrhh-saldo-value--neg]="col.saldoDisponible < 0"
+                      [class.rrhh-saldo-value--pos]="col.tieneDerechoVacaciones && col.saldoDisponible >= 0"
+                    >
+                      @if (!col.tieneDerechoVacaciones && col.saldoDisponible === 0) {
+                        N/A
+                      } @else {
+                        {{ col.saldoDisponible }} d
+                      }
+                    </strong>
+                  </td>
+                  <td class="rrhh-acciones-column" (click)="$event.stopPropagation()">
+                    <app-action-menu
+                      [itemId]="'saldo-' + col.idEmpleado"
+                      [menuAbierto]="menuSaldoAbierto()"
+                      [acciones]="accionesSaldo(col)"
+                      (toggleMenu)="toggleMenuSaldo($event)"
+                      (accionSeleccionada)="onAccionSaldo($event, col)"
+                    ></app-action-menu>
+                  </td>
+                </tr>
+                @if (saldoExpandido(col.idEmpleado)) {
+                  <tr class="rrhh-fila-detalle">
+                    <td colspan="8">
+                      <dl class="rrhh-colab-detalle">
+                        <dt>Cédula</dt>
+                        <dd>{{ col.cedula }}</dd>
+                        @if (col.cargo) {
+                          <dt>Cargo</dt>
+                          <dd>{{ col.cargo }}</dd>
+                        } @else {
+                          <dt>Código</dt>
+                          <dd>{{ col.codigoEmpleado }}</dd>
+                        }
+                      </dl>
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr>
+                  <td colspan="8" class="empty-row">No se encontraron colaboradores con los filtros actuales.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-paginacion
+        [paginaActual]="paginaSaldos()"
+        [totalPaginas]="totalPaginasSaldos()"
+        [total]="totalSaldosFiltrado()"
+        [porPagina]="porPagina"
+        etiquetaRegistros="colaboradores"
+        (paginaCambia)="paginaSaldos.set($event)"
+      />
+    </section>
+  }
 </div>
 
-<!-- MODAL 1: VALIDACIÓN FINAL (REVISAR Y CONFIRMAR DENTRO DEL POPUP) -->
+<!-- MODAL 1: VALIDACIÓN FINAL -->
 <app-modal-base
   titulo="Revisión y Confirmación de Talento Humano"
   [visible]="modalValidacionAbierto()"
-  [wide]="true"
+  [wide]="false"
   (cerrar)="modalValidacionAbierto.set(false)"
 >
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
-      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
 
       <div class="form-row">
-        <div class="form-field">
-          <label>Impacto en Time Report</label>
-          <select
-            [ngModel]="impactoSeleccionado()"
-            (ngModelChange)="impactoSeleccionado.set($event)"
-          >
-            <option value="RESTA_META">Restar {{ sol.horasEquivalentes }} h de la meta del período</option>
-            <option value="SUMA_REPORTADAS">Acreditar {{ sol.horasEquivalentes }} h justificadas</option>
-            <option value="SIN_IMPACTO">Sin impacto en meta de horas</option>
-          </select>
-        </div>
-
         <div class="form-field">
           <label>Observaciones</label>
           <input
@@ -205,35 +639,17 @@
       </div>
 
       <div class="modal-footer">
-        <button
-          type="button"
-          class="btn-tmr btn-tmr--secondary"
-          (click)="descargarPdf(sol)"
-        >
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf(sol)">
           <span class="material-symbols-outlined">download</span>
           Descargar PDF
         </button>
-        <button
-          type="button"
-          class="btn-tmr btn-tmr--danger"
-          [disabled]="procesandoAccion()"
-          (click)="devolverConObservacion()"
-        >
+        <button type="button" class="btn-tmr btn-tmr--danger" [disabled]="procesandoAccion()" (click)="devolverConObservacion()">
           Devolver
         </button>
-        <button
-          type="button"
-          class="btn-tmr btn-tmr--secondary"
-          (click)="modalValidacionAbierto.set(false)"
-        >
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalValidacionAbierto.set(false)">
           Cancelar
         </button>
-        <button
-          type="button"
-          class="btn-tmr btn-tmr--primary"
-          [disabled]="procesandoAccion()"
-          (click)="confirmarDefinitivamenteRrhh()"
-        >
+        <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="procesandoAccion()" (click)="confirmarDefinitivamenteRrhh()">
           Confirmar
         </button>
       </div>
@@ -243,21 +659,364 @@
 
 <!-- MODAL 2: VISTA DEL DOCUMENTO PDF -->
 <app-modal-base
-  titulo="Documento PDF"
+  titulo="Solicitud"
   [visible]="modalFormularioAbierto()"
-  [wide]="true"
+  [wide]="false"
   (cerrar)="modalFormularioAbierto.set(false)"
 >
   @if (solicitudActiva(); as sol) {
     <div class="modal-form">
-      <app-formulario-permiso-oficial [datos]="obtenerDatosFormulario(sol)" />
+      <app-resumen-solicitud [datos]="obtenerDatosFormulario(sol)" [tipo]="sol.tipo" [proyecto]="sol.proyecto || ''" [estado]="sol.estadoTexto" [adjuntos]="sol.adjuntos || []" />
       <div class="modal-footer">
         <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalFormularioAbierto.set(false)">
           Cerrar
         </button>
+        @if (sol.estado === 'PENDIENTE_LIDER_EXT') {
+          <button type="button" class="btn-tmr btn-tmr--secondary" (click)="reenviarEnlaceExterno(sol)">
+            Reenviar enlace
+          </button>
+        }
         <button type="button" class="btn-tmr btn-tmr--primary" (click)="descargarPdf(sol)">
           <span class="material-symbols-outlined">download</span>
           Descargar PDF
+        </button>
+      </div>
+    </div>
+  }
+</app-modal-base>
+
+<!-- MODAL 3: CREAR / EDITAR REGISTRO DE PERMISO O VACACIÓN -->
+<app-modal-base
+  [titulo]="editandoId() ? 'Editar registro de permiso / vacaciones' : 'Nuevo registro en historial de permisos'"
+  [visible]="modalEdicionAbierto()"
+  [wide]="false"
+  (cerrar)="modalEdicionAbierto.set(false)"
+>
+  <div class="modal-form rrhh-edit-form">
+    <div class="rrhh-form-grid">
+      <div class="form-field rrhh-combobox-field">
+        <label for="edit-emp">Colaborador *</label>
+        <div class="rrhh-combobox">
+          <span class="material-symbols-outlined rrhh-combobox__icon" aria-hidden="true">search</span>
+          <input
+            id="edit-emp"
+            type="text"
+            class="rrhh-combobox__input"
+            autocomplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            [attr.aria-expanded]="dropdownColaboradorAbierto()"
+            placeholder="Buscar por nombre, cédula o código..."
+            [ngModel]="busquedaColaboradorModal()"
+            (ngModelChange)="alEscribirColaboradorModal($event)"
+            (focus)="abrirDropdownColaboradorModal()"
+            (blur)="cerrarDropdownColaboradorModalConRetraso()"
+            (keydown)="alTeclaColaboradorModal($event)"
+          />
+          @if (busquedaColaboradorModal() || formIdEmpleado()) {
+            <button
+              type="button"
+              class="rrhh-combobox__clear"
+              aria-label="Limpiar colaborador"
+              (mousedown)="$event.preventDefault()"
+              (click)="limpiarColaboradorModal()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+          }
+
+          @if (dropdownColaboradorAbierto()) {
+            <div class="rrhh-combobox__dropdown" role="listbox">
+              @for (col of colaboradoresFiltradosModal(); track col.idEmpleado; let i = $index) {
+                <button
+                  type="button"
+                  role="option"
+                  class="rrhh-combobox__option"
+                  [class.rrhh-combobox__option--active]="i === indiceColaboradorActivo()"
+                  [class.rrhh-combobox__option--selected]="col.idEmpleado === formIdEmpleado()"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="seleccionarColaboradorModal(col)"
+                >
+                  <div class="rrhh-combobox__option-main">
+                    <span class="rrhh-combobox__option-name">{{ col.apellidosNombres }}</span>
+                    <span
+                      class="rrhh-tag"
+                      [class.rrhh-tag--ok]="col.regimen === 'AFILIADO'"
+                      [class.rrhh-tag--purple]="col.regimen === 'MIXTO'"
+                      [class.rrhh-tag--neutral]="col.regimen === 'FACTURA'"
+                    >
+                      {{ etiquetaRegimen(col.regimen) }}
+                    </span>
+                  </div>
+                  <div class="rrhh-combobox__option-meta">
+                    {{ col.cedula }} · {{ col.codigoEmpleado }}@if (col.empresa) { · {{ col.empresa }} }
+                  </div>
+                </button>
+              } @empty {
+                <div class="rrhh-combobox__empty">
+                  No se encontraron colaboradores para "{{ busquedaColaboradorModal() }}".
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (colaboradorSeleccionadoModal(); as colSel) {
+          <small class="rrhh-combobox__hint">
+            {{ colSel.cedula }} · {{ colSel.tipoContrato }} ({{ etiquetaRegimen(colSel.regimen) }})
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="edit-tipo">Tipo de permiso *</label>
+        <select
+          id="edit-tipo"
+          [ngModel]="formTipoOficial()"
+          (ngModelChange)="alCambiarTipoEnModal($event)"
+        >
+          @for (tp of tiposPermisoOpciones; track tp.codigo) {
+            <option [value]="tp.codigo">{{ tp.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="edit-inicio">Fecha inicio *</label>
+        <input
+          id="edit-inicio"
+          type="date"
+          [ngModel]="formFechaInicio()"
+          (ngModelChange)="alCambiarFechasEnModal($event, formFechaFin())"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="edit-fin">Fecha fin *</label>
+        <input
+          id="edit-fin"
+          type="date"
+          [min]="formFechaInicio()"
+          [ngModel]="formFechaFin()"
+          (ngModelChange)="alCambiarFechasEnModal(formFechaInicio(), $event)"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="edit-dias">Días (calendario) *</label>
+        <input
+          id="edit-dias"
+          type="number"
+          min="0.5"
+          max="365"
+          step="0.5"
+          [ngModel]="formTotalDias()"
+          (ngModelChange)="formTotalDias.set(+$event)"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="edit-estado">Estado</label>
+        <select
+          id="edit-estado"
+          [ngModel]="formEstadoCodigo()"
+          (ngModelChange)="formEstadoCodigo.set($event)"
+        >
+          <option value="APROBADA">Confirmado / Aprobado</option>
+          <option value="PENDIENTE_TH">En Talento Humano</option>
+          <option value="PENDIENTE_JEFE">Pendiente Jefe</option>
+          <option value="OBSERVADA">Observado</option>
+          <option value="RECHAZADA">Rechazado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-motivo">Motivo *</label>
+      <textarea
+        id="edit-motivo"
+        rows="2"
+        [ngModel]="formMotivo()"
+        (ngModelChange)="formMotivo.set($event)"
+      ></textarea>
+    </div>
+
+    <div class="rrhh-checks-grid">
+      <label class="rrhh-inline-check">
+        <input type="checkbox" [ngModel]="formDescuentaVacaciones()" (ngModelChange)="formDescuentaVacaciones.set($event)" />
+        <span>Descuenta de vacaciones</span>
+      </label>
+      <label class="rrhh-inline-check">
+        <input type="checkbox" [ngModel]="formEsRecuperable()" (ngModelChange)="formEsRecuperable.set($event)" />
+        <span>Permiso recuperable</span>
+      </label>
+      <label class="rrhh-inline-check">
+        <input type="checkbox" [ngModel]="formEsAnticipada()" (ngModelChange)="formEsAnticipada.set($event)" />
+        <span>Vacaciones anticipadas</span>
+      </label>
+    </div>
+
+    <div class="form-field">
+      <label for="edit-obs">Observación / Nota interna</label>
+      <textarea
+        id="edit-obs"
+        class="rrhh-obs-field"
+        rows="3"
+        placeholder="Ej. Falta documentación, respaldo adjunto..."
+        [ngModel]="formObservacionMigracion()"
+        (ngModelChange)="formObservacionMigracion.set($event)"
+      ></textarea>
+    </div>
+
+    <div class="modal-footer">
+      @if (editandoId()) {
+        <button type="button" class="btn-tmr btn-tmr--danger rrhh-footer-izq" [disabled]="guardandoEdicion()" (click)="anularDesdePopup()">
+          Anular registro
+        </button>
+      }
+      @if (registroEditandoActual(); as regEdit) {
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="descargarPdf(regEdit)">
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          Descargar PDF
+        </button>
+      }
+      <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalEdicionAbierto.set(false)">
+        Cancelar
+      </button>
+      <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="guardandoEdicion()" (click)="guardarRegistroHistorial()">
+        {{ guardandoEdicion() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </div>
+</app-modal-base>
+
+<!-- MODAL 4: AJUSTE DE SALDO / EXCEPCIÓN FACTURA -->
+<app-modal-base
+  titulo="Ajustar saldo"
+  [visible]="modalAjusteAbierto()"
+  (cerrar)="modalAjusteAbierto.set(false)"
+>
+  @if (colaboradorSaldoActivo(); as col) {
+    <div class="modal-form rrhh-ajuste-min">
+      <div class="rrhh-ajuste-min__colab">
+        <p class="rrhh-ajuste-min__nombre">{{ col.apellidosNombres }}</p>
+        <p class="cell-muted">
+          {{ col.cedula }} · {{ col.regimen === 'AFILIADO' ? 'Afiliado' : col.regimen === 'MIXTO' ? 'Mixto' : 'Factura' }}
+        </p>
+      </div>
+
+      <div class="rrhh-ajuste-min__saldo">
+        <p
+          class="rrhh-ajuste-min__saldo-valor"
+          [class.rrhh-saldo-value--neg]="col.saldoDisponible < 0"
+          [class.rrhh-saldo-value--pos]="col.tieneDerechoVacaciones && col.saldoDisponible >= 0"
+        >
+          @if (!col.tieneDerechoVacaciones && col.saldoDisponible === 0) {
+            N/A
+          } @else {
+            {{ col.saldoDisponible }} d
+          }
+          <span>disponibles</span>
+        </p>
+        <p class="cell-muted">
+          {{ col.diasGanadosAcumulados }} ganados · {{ col.diasConsumidos }} tomados · {{ col.diasAjuste }} de ajustes
+        </p>
+      </div>
+
+      <div class="rrhh-ajuste-min__campos">
+        <div class="form-field">
+          <label for="ajuste-tipo">Tipo de operación</label>
+          <select id="ajuste-tipo" [ngModel]="ajusteTipo()" (ngModelChange)="ajusteTipo.set($event)">
+            <option value="AJUSTE_DIAS">Ajuste manual de días (+/-)</option>
+            <option value="EXCEPCION_FACTURA">Excepción de vacaciones (personal Factura)</option>
+            <option value="FECHA_AFILIACION">Corregir fecha de afiliación IESS (base vacaciones)</option>
+          </select>
+        </div>
+
+        @if (ajusteTipo() === 'AJUSTE_DIAS') {
+          <div class="form-field">
+            <label for="ajuste-dias">Días a sumar (+) o descontar (-)</label>
+            <input
+              id="ajuste-dias"
+              class="rrhh-ajuste-min__dias"
+              type="number"
+              step="0.5"
+              [ngModel]="ajusteDias()"
+              (ngModelChange)="ajusteDias.set(+$event)"
+            />
+          </div>
+        } @else if (ajusteTipo() === 'FECHA_AFILIACION') {
+          <div class="form-field">
+            <label for="ajuste-fecha-afil">Fecha real de afiliación IESS *</label>
+            <input
+              id="ajuste-fecha-afil"
+              type="date"
+              [ngModel]="ajusteFechaAfiliacion()"
+              (ngModelChange)="ajusteFechaAfiliacion.set($event)"
+            />
+          </div>
+        } @else {
+          <div class="form-field">
+            <label for="ajuste-permite">Estado de excepción Factura</label>
+            <select
+              id="ajuste-permite"
+              [ngModel]="ajustePermiteVacaciones()"
+              (ngModelChange)="ajustePermiteVacaciones.set($event === true || $event === 'true')"
+            >
+              <option [ngValue]="true">Habilitar derecho a vacaciones (Excepción)</option>
+              <option [ngValue]="false">Revocar excepción (Sin derecho)</option>
+            </select>
+          </div>
+        }
+
+        <div class="form-field">
+          <label for="ajuste-motivo">Motivo / Respaldo *</label>
+          <input
+            id="ajuste-motivo"
+            type="text"
+            placeholder="Ej. Cuadre histórico inicial, autorización gerencial..."
+            [ngModel]="ajusteMotivo()"
+            (ngModelChange)="ajusteMotivo.set($event)"
+          />
+        </div>
+      </div>
+
+      @if (col.ajustes.length > 0) {
+        <details class="rrhh-ajustes-plegado">
+          <summary>Ajustes aplicados ({{ col.ajustes.length }})</summary>
+          <div class="rrhh-ajustes-list">
+            @for (aj of col.ajustes; track aj.id) {
+              <div class="rrhh-ajuste-row">
+                <div>
+                  <span class="rrhh-ajuste-row__titulo">
+                    @if (aj.tipoAjuste === 'EXCEPCION_FACTURA') {
+                      Excepción Factura: {{ aj.permiteVacaciones ? 'Habilitada' : 'Revocada' }}
+                    } @else if (aj.tipoAjuste === 'FECHA_AFILIACION') {
+                      Fecha afiliación: {{ aj.fechaAfiliacionBase }}
+                    } @else {
+                      Ajuste: {{ aj.diasAjuste >= 0 ? '+' + aj.diasAjuste : aj.diasAjuste }} día(s)
+                    }
+                  </span>
+                  <div class="cell-muted">{{ aj.motivo }} · {{ aj.usuarioCreacion }} ({{ aj.fechaCreacion }})</div>
+                </div>
+                <button
+                  type="button"
+                  class="btn-tmr btn-tmr--danger btn-tmr--sm"
+                  (click)="anularAjusteSaldo(aj.id)"
+                >
+                  Revertir
+                </button>
+              </div>
+            }
+          </div>
+        </details>
+      }
+
+      <div class="modal-footer">
+        <button type="button" class="btn-tmr btn-tmr--secondary" (click)="modalAjusteAbierto.set(false)">
+          Cerrar
+        </button>
+        <button type="button" class="btn-tmr btn-tmr--primary" [disabled]="guardandoAjuste()" (click)="guardarAjusteSaldo()">
+          {{ guardandoAjuste() ? 'Guardando...' : 'Aplicar ajuste' }}
         </button>
       </div>
     </div>
