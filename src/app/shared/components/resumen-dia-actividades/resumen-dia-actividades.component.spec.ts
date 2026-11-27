@@ -10,7 +10,7 @@ describe('ResumenDiaActividadesComponent', () => {
   let fixture: ComponentFixture<ResumenDiaActividadesComponent>;
   const fecha = new Date(2026, 0, 15);
   const actividades = signal<any[]>([]);
-  const dialog = { open: vi.fn() };
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => ({ subscribe: vi.fn() }) })) };
   let filtro: string[];
 
   beforeEach(async () => {
@@ -50,9 +50,11 @@ describe('ResumenDiaActividadesComponent', () => {
   it('permite crear en un día vacío y pasa la fecha al formulario existente', async () => {
     component.data.editable = true;
     fixture.detectChanges();
-    fixture.nativeElement.querySelector('.resumen-dia__agregar').click();
-    await vi.waitFor(() => expect(dialog.open).toHaveBeenCalled());
-    expect(dialog.open.mock.calls[0][1].data).toEqual({ fecha });
+    await component.agregar();
+    expect(dialog.open).toHaveBeenCalled();
+    expect(dialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: { fecha, registroLider: undefined },
+    }));
     expect(component.actividades).toHaveLength(0);
   });
 
@@ -66,5 +68,31 @@ describe('ResumenDiaActividadesComponent', () => {
     fixture.detectChanges();
     expect(component.actividades).toHaveLength(2);
     expect(component.totalHoras).toBe(6);
+  });
+
+  it('limita la edición del líder al proyecto autorizado', () => {
+    component.data.editable = true;
+    component.data.registroLider = { idEmpleado: 7, nombreColaborador: 'Colaborador', proyecto: { id: 1, nombre: 'Proyecto' } };
+    expect(component.puedeEditar({ idproyecto: 1 })).toBe(true);
+    expect(component.puedeEditar({ idproyecto: 2 })).toBe(false);
+    expect(component.puedeEditar({ idproyecto: null })).toBe(false);
+  });
+
+  it('permite al líder general editar la actividad del proyecto de la fila', () => {
+    component.data.editable = true;
+    component.data.registroLider = {
+      idEmpleado: 7,
+      nombreColaborador: 'Colaborador',
+      proyecto: { id: 1, nombre: 'Proyecto' },
+      esGlobal: true
+    };
+    expect(component.puedeEditar({ idproyecto: 1 })).toBe(true);
+    expect(component.puedeEditar({ idproyecto: 2 })).toBe(false);
+  });
+
+  it('mantiene solo lectura para un usuario sin permiso de gestión', () => {
+    component.data.editable = false;
+    component.data.registroLider = undefined;
+    expect(component.puedeEditar({ idproyecto: 1 })).toBe(false);
   });
 });

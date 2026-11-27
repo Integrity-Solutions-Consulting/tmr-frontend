@@ -6,7 +6,7 @@ export interface DocumentoPerfil { id: number; nombreOriginal: string; }
 export interface Persona { fechaNacimiento?: string | null; nombres:string; apellidos:string; email?:string; telefono?:string; direccion?:string; tieneDiscapacidad?:string | null; tipoDiscapacidad?:string | null; porcentajeDiscapacidad?:number | null; }
 export interface Formacion { nivel:string; institucion:string; titulo:string; fechaInicio?:string; fechaFin?:string; archivos?: DocumentoPerfil[]; }
 export interface Certificacion { nombre:string; entidadEmisora:string; fechaEmision:string; fechaVencimiento?:string; archivos?: DocumentoPerfil[]; }
-export interface MisDatos { fechaNacimiento?: string | null; solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:DocumentoPerfil[]; familia?:any; cedula?:string | null; conocimientos?: { area: string; porcentaje: number }[]; }
+export interface MisDatos { fechaNacimiento?: string | null; solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:DocumentoPerfil[]; actasNacimiento?: DocumentoPerfil[]; familia?:any; cedula?:string | null; conocimientos?: { area: string; porcentaje: number }[]; }
 @Injectable({providedIn:'root'}) export class ActualizacionDatosService {
  private http=inject(HttpClient); private base=`${environment.apiUrl}`;
  misRevisiones(){return this.http.get<any[]>(`${this.base}/mis-datos/revisiones`);}
@@ -24,10 +24,7 @@ export interface MisDatos { fechaNacimiento?: string | null; solicitudId?:number
  uploadSolicitud(id:number,file:File){const fd=new FormData();fd.append('file',file,file.name);return this.http.post(`${this.base}/mis-datos/solicitudes/${id}/archivos`,fd);}
  downloadSolicitud(id:number,fileId:number){return this.http.get(`${this.base}/mis-datos/solicitudes/${id}/archivos/${fileId}`,{responseType:'blob'});}
  deleteSolicitudDocument(id:number,fileId:number){return this.http.delete(`${this.base}/mis-datos/solicitudes/${id}/archivos/${fileId}`);}
- list(search='',status='',page=1,size=20){let p=new HttpParams().set('page',page).set('size',size);if(search)p=p.set('search',search);if(status)p=p.set('status',status);return this.http.get<any[]>(`${this.base}/actualizaciones-datos`,{params:p});}
- review(id:number,version:number,approve:boolean,observacion?:string){return this.http.post(`${this.base}/actualizaciones-datos/${id}/${approve?'aprobar':'devolver'}`,{version,observacion});}
  detail(id:number){return this.http.get<any>(`${this.base}/actualizaciones-datos/${id}`);}
  getExpediente(id:number){return this.http.get<any>(`${this.base}/colaboradores/${id}/expediente`);}
  downloadExpedienteFile(id:number,fileId:number){return this.http.get(`${this.base}/colaboradores/${id}/expediente/archivos/${fileId}`,{responseType:'blob'});}
- downloadReview(id:number,fileId:number){return this.http.get(`${this.base}/actualizaciones-datos/${id}/archivos/${fileId}`,{responseType:'blob'});}
 }

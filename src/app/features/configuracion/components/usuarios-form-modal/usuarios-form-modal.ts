@@ -47,7 +47,12 @@ export class UsuariosFormModal implements OnDestroy {
     usuarioInterno: [this.data.usuario?.usuarioInterno ?? Boolean(this.data.usuario?.idPersona)],
     idColaborador: [''],
     idPersona: [this.data.usuario?.idPersona ?? null as number | null],
-    roleid: [this.data.usuario?.rolesids?.[0] ?? '', [Validators.required]],
+    rolesids: [
+      (this.data.usuario?.rolesids ?? [])
+        .map((roleId) => Number(roleId))
+        .filter((roleId) => Number.isFinite(roleId)),
+      [Validators.required],
+    ],
     usuario: [
       this.data.usuario?.usuario ?? '',
       [Validators.required, Validators.minLength(3), Validators.pattern(INTERNAL_USERNAME_REGEX)],
@@ -242,7 +247,7 @@ export class UsuariosFormModal implements OnDestroy {
     }
 
     const value = this.form.getRawValue();
-    const rolesids = value.roleid ? [Number(value.roleid)].filter((roleId) => Number.isFinite(roleId)) : [];
+    const rolesids = value.rolesids.filter((roleId) => Number.isFinite(roleId));
     const idPersona = value.usuarioInterno ? value.idPersona : null;
 
     if (value.usuarioInterno && !idPersona) {

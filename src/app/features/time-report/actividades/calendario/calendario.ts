@@ -302,8 +302,13 @@ export class Calendario implements OnInit, OnDestroy {
     }
 
     seleccionarDia(fecha: Date) {
-        // sm - En modo solo lectura no se permite abrir el modal de agregar actividad al hacer clic en un día.
-        if (this.soloLectura) return;
+        // Las celdas de los días adyacentes también son seleccionables. Cambiar primero al mes
+        // correspondiente garantiza que el servicio cargue sus actividades antes de mostrar el resumen.
+        const visible = this._fechaActual();
+        if (fecha.getFullYear() !== visible.getFullYear() || fecha.getMonth() !== visible.getMonth()) {
+            this._fechaActual.set(new Date(fecha.getFullYear(), fecha.getMonth(), 1));
+            this.mesSeleccionado = fecha.getMonth();
+        }
         this.diaSeleccionado.emit(fecha);
     }
 }

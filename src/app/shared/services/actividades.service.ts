@@ -15,6 +15,7 @@ export interface CompletarLider {
   puedeCompletar: boolean;
   idLider?: number | null;
   proyecto?: any;
+  esGlobal?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

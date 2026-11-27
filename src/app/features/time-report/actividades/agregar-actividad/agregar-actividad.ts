@@ -597,7 +597,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
             this.data.actividad.id,
             () => {
                 this.mostrarEliminar = false;
-                this.dialogRef.close();
+                this.dialogRef.close({ cambio: true });
             },
             (err) => {
                 this.eliminando = false;
@@ -646,7 +646,7 @@ export class AgregarActividad implements OnInit, AfterViewInit, OnDestroy {
         this.guardando = true;
         const alGuardar = () => {
             this.guardando = false;
-            this.dialogRef.close();
+            this.dialogRef.close({ cambio: true });
         };
         if (this.esEdicion) {
             this.actividadesService.actualizarActividad(this.data.actividad.id, formValue, alGuardar, (mensaje) => {

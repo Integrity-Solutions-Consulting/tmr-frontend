@@ -4,7 +4,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
-import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { TarjetaResumenComponent } from '../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { BadgeEstadoComponent, type TonoBadgeEstado } from '../../shared/components/badge-estado/badge-estado.component';
@@ -23,7 +22,7 @@ interface DecisionSeccion {
 
 @Component({
   standalone: true,
-  imports: [BadgeEstadoComponent, DatePipe, KeyValuePipe, NgTemplateOutlet, FormsModule, MatIconModule, RouterLink, FilterBarComponent, HeaderComponent, TarjetaResumenComponent, Boton, TitleCasePipe],
+  imports: [BadgeEstadoComponent, DatePipe, KeyValuePipe, NgTemplateOutlet, FormsModule, MatIconModule, RouterLink, HeaderComponent, TarjetaResumenComponent, Boton, TitleCasePipe],
   templateUrl: './revision-perfiles.page.html',
   styleUrl: './revision-perfiles.page.scss',
 })
@@ -289,6 +288,17 @@ export class RevisionPerfilesPage {
 
   fechaCampo(campo: string, valor: unknown): string | null {
     return campo.startsWith('fecha') && typeof valor === 'string' ? formatearFechaPerfil(valor) : null;
+  }
+
+  actualizarObservacion(decision: DecisionSeccion, valor: string, campo: HTMLTextAreaElement) {
+    const caracteresNoPermitidos = /[^\p{L}\p{M}0-9 .,'"\r\n]/gu;
+    const observacion = valor.replace(caracteresNoPermitidos, '');
+    decision.observacion = observacion;
+    if (observacion === valor) return;
+
+    const posicion = valor.slice(0, campo.selectionStart).replace(caracteresNoPermitidos, '').length;
+    campo.value = observacion;
+    campo.setSelectionRange(posicion, posicion);
   }
 
   guardar(envio: any, decision: DecisionSeccion) {

@@ -23,7 +23,7 @@
           <div><dt>Facturable</dt><dd>{{ actividad.esbillable === false ? 'No' : 'Sí' }}</dd></div>
         </dl>
       </div>
-      <button *ngIf="data.editable" mat-stroked-button type="button" class="actividad-item__edit" (click)="editar(actividad)" aria-label="Editar actividad"><mat-icon>edit</mat-icon> Editar</button>
+      <button *ngIf="puedeEditar(actividad)" mat-stroked-button type="button" class="actividad-item__edit" (click)="editar(actividad)" aria-label="Editar actividad"><mat-icon>edit</mat-icon> Editar</button>
     </article>
   </section>
   <ng-template #vacio><div class="resumen-dia__empty"><mat-icon>event_busy</mat-icon><h3>Sin actividades registradas</h3><p>No hay actividades para esta fecha.</p></div></ng-template>

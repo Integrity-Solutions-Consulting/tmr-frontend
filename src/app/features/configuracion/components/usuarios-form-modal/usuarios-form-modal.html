@@ -88,9 +88,9 @@
 
         <div class="form-field">
           <div class="float-select">
-            <select class="float-select__input" formControlName="roleid"
-              [class.float-select__input--error]="campoInvalido('roleid')">
-              <option value="">Seleccione un rol</option>
+            <select class="float-select__input" formControlName="rolesids" multiple
+              [class.float-select__input--error]="campoInvalido('rolesids')"
+              aria-label="Roles del usuario">
               @for (r of rolesList; track r.id) {
               <option [value]="r.id">{{ r.nombre }}</option>
               }
@@ -99,8 +99,8 @@
               Rol <span class="req">*</span>
             </label>
           </div>
-          @if (campoInvalido('roleid')) {
-          <span class="form-field__error">Seleccione un rol</span>
+          @if (campoInvalido('rolesids')) {
+          <span class="form-field__error">Seleccione al menos un rol</span>
           }
         </div>
 
