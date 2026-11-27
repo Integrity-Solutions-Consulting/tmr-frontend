@@ -4,7 +4,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
-import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { TarjetaResumenComponent } from '../../shared/components/tarjeta-resumen/tarjeta-resumen.component';
 import { BadgeEstadoComponent, type TonoBadgeEstado } from '../../shared/components/badge-estado/badge-estado.component';
@@ -23,7 +22,7 @@ interface DecisionSeccion {
 
 @Component({
   standalone: true,
-  imports: [BadgeEstadoComponent, DatePipe, KeyValuePipe, NgTemplateOutlet, FormsModule, MatIconModule, RouterLink, FilterBarComponent, HeaderComponent, TarjetaResumenComponent, Boton, TitleCasePipe],
+  imports: [BadgeEstadoComponent, DatePipe, KeyValuePipe, NgTemplateOutlet, FormsModule, MatIconModule, RouterLink, HeaderComponent, TarjetaResumenComponent, Boton, TitleCasePipe],
   templateUrl: './revision-perfiles.page.html',
   styleUrl: './revision-perfiles.page.scss',
 })

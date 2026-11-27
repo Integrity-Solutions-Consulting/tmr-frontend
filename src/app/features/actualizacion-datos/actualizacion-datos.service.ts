@@ -6,7 +6,7 @@ export interface DocumentoPerfil { id: number; nombreOriginal: string; }
 export interface Persona { fechaNacimiento?: string | null; nombres:string; apellidos:string; email?:string; telefono?:string; direccion?:string; tieneDiscapacidad?:string | null; tipoDiscapacidad?:string | null; porcentajeDiscapacidad?:number | null; }
 export interface Formacion { nivel:string; institucion:string; titulo:string; fechaInicio?:string; fechaFin?:string; archivos?: DocumentoPerfil[]; }
 export interface Certificacion { nombre:string; entidadEmisora:string; fechaEmision:string; fechaVencimiento?:string; archivos?: DocumentoPerfil[]; }
-export interface MisDatos { fechaNacimiento?: string | null; solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:DocumentoPerfil[]; familia?:any; cedula?:string | null; conocimientos?: { area: string; porcentaje: number }[]; }
+export interface MisDatos { fechaNacimiento?: string | null; solicitudId?:number; estado:string; observacion?:string; persona:Persona; formaciones:Formacion[]; certificaciones:Certificacion[]; archivos:DocumentoPerfil[]; actasNacimiento?: DocumentoPerfil[]; familia?:any; cedula?:string | null; conocimientos?: { area: string; porcentaje: number }[]; }
 @Injectable({providedIn:'root'}) export class ActualizacionDatosService {
  private http=inject(HttpClient); private base=`${environment.apiUrl}`;
  misRevisiones(){return this.http.get<any[]>(`${this.base}/mis-datos/revisiones`);}

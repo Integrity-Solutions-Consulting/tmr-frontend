@@ -26,31 +26,33 @@
         />
       </div>
     }
-    <app-filter-bar>
-      <label filter-control class="filtro filtro--busqueda">
-        <span>B&uacute;squeda</span>
-        <span class="filtro-campo">
-          <span class="material-symbols-outlined filtro-icono" aria-hidden="true">search</span>
+    <div class="filters-card" role="group" aria-label="Filtros de solicitudes">
+      <div class="filter-group filter-group--busqueda">
+        <label class="filter-label" for="revision-busqueda">B&uacute;squeda</label>
+        <span class="filter-input-wrapper">
+          <span class="material-symbols-outlined filter-icon" aria-hidden="true">search</span>
           <input
             type="text"
+            id="revision-busqueda"
+            class="filter-input"
             placeholder="Buscar por nombre, c&eacute;dula o correo"
             [(ngModel)]="busqueda"
           />
           @if (busqueda) {
             <button
               type="button"
-              class="filtro-limpiar"
+              class="filter-clear"
               aria-label="Limpiar b&uacute;squeda"
               (click)="busqueda = ''"
             >
-              <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              <span class="material-icons" aria-hidden="true">close</span>
             </button>
           }
         </span>
-      </label>
-      <label filter-control class="filtro"
-        >Secci&oacute;n
-        <select [(ngModel)]="filtroSeccion">
+      </div>
+      <label class="filter-group">
+        <span class="filter-label">Secci&oacute;n</span>
+        <select class="filter-select" [(ngModel)]="filtroSeccion">
           <option value="">Todas</option>
           @for (seccion of secciones | keyvalue; track seccion.key) {
             <option [value]="seccion.key">
@@ -59,9 +61,9 @@
           }
         </select>
       </label>
-      <label filter-control class="filtro"
-        >Estado
-        <select [(ngModel)]="filtroEstado">
+      <label class="filter-group">
+        <span class="filter-label">Estado</span>
+        <select class="filter-select" [(ngModel)]="filtroEstado">
           <option value="">Todos</option>
           @for (estado of estados | keyvalue; track estado.key) {
             <option [value]="estado.key">
@@ -70,7 +72,7 @@
           }
         </select>
       </label>
-    </app-filter-bar>
+    </div>
     <div class="tabla-wrapper" [attr.aria-busy]="loading">
       <table class="tabla" aria-label="Solicitudes de actualizaci&oacute;n de perfiles">
         <colgroup>
