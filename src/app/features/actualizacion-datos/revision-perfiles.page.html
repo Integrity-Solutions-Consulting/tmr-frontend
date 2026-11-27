@@ -106,7 +106,7 @@
                 </button>
               </th>
             }
-            <th scope="col" class="acciones" aria-label="Acciones"></th>
+            <th scope="col" class="acciones">Ver</th>
           </tr>
         </thead>
         <tbody>
@@ -124,9 +124,9 @@
               </td>
               <td>{{ persona.solicitudes[0].fechaCreacion | date: 'dd/MM/yyyy' }}</td>
               <td class="acciones">
-                <a class="ver-perfil" [routerLink]="['/revision-perfiles', persona.idEmpleado]">
-                  <span class="material-symbols-outlined" aria-hidden="true">badge</span>
-                  Abrir perfil
+                <a class="ver-perfil" [routerLink]="['/revision-perfiles', persona.idEmpleado]"
+                   title="Ver perfil" [attr.aria-label]="'Ver perfil de ' + (persona.nombre | titlecase)">
+                  <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                 </a>
               </td>
             </tr>
@@ -341,8 +341,10 @@
                           : 'Observación (opcional)'
                       }}
                       <textarea
+                        #observacionInput
                         name="observacion"
-                        [(ngModel)]="decision.observacion"
+                        [ngModel]="decision.observacion"
+                        (ngModelChange)="actualizarObservacion(decision, $event, observacionInput)"
                         [disabled]="saving"
                         [required]="decision.estado === 'RequiereCorreccion'"
                       ></textarea>

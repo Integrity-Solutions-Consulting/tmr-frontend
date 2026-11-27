@@ -291,6 +291,17 @@ export class RevisionPerfilesPage {
     return campo.startsWith('fecha') && typeof valor === 'string' ? formatearFechaPerfil(valor) : null;
   }
 
+  actualizarObservacion(decision: DecisionSeccion, valor: string, campo: HTMLTextAreaElement) {
+    const caracteresNoPermitidos = /[^\p{L}\p{M}0-9 .,'"\r\n]/gu;
+    const observacion = valor.replace(caracteresNoPermitidos, '');
+    decision.observacion = observacion;
+    if (observacion === valor) return;
+
+    const posicion = valor.slice(0, campo.selectionStart).replace(caracteresNoPermitidos, '').length;
+    campo.value = observacion;
+    campo.setSelectionRange(posicion, posicion);
+  }
+
   guardar(envio: any, decision: DecisionSeccion) {
     const { estado, observacion } = decision;
     if (this.saving || envio.estado !== 'EnRevision' || !estado ||

@@ -29,7 +29,7 @@ const nombreSeccion: Record<SeccionPerfil, string> = {
   conocimientos: 'Conocimientos',
 };
 type PersonalInput = 'email' | 'telefono' | 'direccion' | 'porcentajeDiscapacidad';
-type FormatoEntrada = 'email' | 'direccion' | 'porcentaje' | 'nombrePersona' | 'nombreCertificado' | 'entidadEmisora';
+type FormatoEntrada = 'email' | 'direccion' | 'porcentaje' | 'nombrePersona' | 'nombreCertificado' | 'entidadEmisora' | 'institucion';
 
 const caracteresNoPermitidos: Record<FormatoEntrada, RegExp> = {
   email: /[^a-zA-Z0-9._%+@-]/g,
@@ -37,7 +37,8 @@ const caracteresNoPermitidos: Record<FormatoEntrada, RegExp> = {
   porcentaje: /[^0-9]/g,
   nombrePersona: /[^\p{L}\p{M} ]/gu,
   nombreCertificado: /[^\p{L}\p{M}0-9 .,:/+#&()'–—-]/gu,
-  entidadEmisora: /[^\p{L}\p{M}0-9 .&()'–—-]/gu
+  entidadEmisora: /[^\p{L}\p{M}0-9 .&()'–—-]/gu,
+  institucion: /[^\p{L}\p{M}0-9 "]/gu
 };
 const validadoresPorcentaje = [Validators.pattern(/^\d+$/), Validators.min(0), Validators.max(100)];
 const MAX_DIGITOS_E164 = 15;
@@ -420,9 +421,14 @@ export class MisDatosPage {
     }
     if (!ctrl?.errors) return '';
     if (ctrl.errors['backend']) return ctrl.errors['backend'];
+    if (ctrl.errors['fechaPerfil']) return 'Ingresa una fecha válida.';
+    if (ctrl.errors['fechaFutura']) return path.endsWith('.fechaEmision')
+      ? 'La fecha de emisión no puede ser futura.'
+      : 'La fecha de nacimiento no puede ser futura.';
     if (ctrl.errors['required']) return 'Este campo es obligatorio';
     if (ctrl.errors['nivelEducativo']) return 'Selecciona uno de los niveles educativos de la lista.';
     if (path.startsWith('formaciones.') && path.endsWith('.titulo') && ctrl.errors['pattern']) return 'Ingresa solo letras y espacios en el t\u00edtulo.';
+    if (path.endsWith('.institucion') && ctrl.errors['pattern']) return 'Usa solo letras, números, espacios y comillas dobles.';
     if (path.endsWith('.entidadEmisora') && ctrl.errors['pattern']) return 'Usa letras, números, espacios o signos como punto, guion, apóstrofo, & y paréntesis.';
     if (path.startsWith('certificaciones.') && path.endsWith('.nombre') && ctrl.errors['pattern']) return 'Usa letras, números, espacios y puntuación habitual en el nombre del certificado.';
     if (path === 'persona.email' && (ctrl.errors['email'] || ctrl.errors['pattern'])) return 'Ingresa un correo electrónico válido';
@@ -435,7 +441,6 @@ export class MisDatosPage {
     if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres`;
     if (ctrl.errors['min']) return `El valor mínimo es ${ctrl.errors['min'].min}`;
     if (ctrl.errors['max']) return `El valor máximo es ${ctrl.errors['max'].max}`;
-    if (ctrl.errors['fechaPerfil']) return 'Ingresa una fecha válida en formato dd/MM/yyyy.';
     if (ctrl.errors['pattern'] || ctrl.errors['soloLetras']) return 'Ingresa un valor con el formato permitido';
     return 'Revisa este campo';
   }
@@ -575,12 +580,19 @@ export class MisDatosPage {
 
   addFormacion(valor?: any) {
     const v = valor ?? {};
+    const institucionOriginal = v.id ? v.institucion : undefined;
+    const validarInstitucion = Validators.compose([
+      Validators.required,
+      Validators.maxLength(200),
+      Validators.pattern(/^(?=.*[^ ])[\p{L}\p{M}0-9 "]+(?![\s\S])/u),
+    ]);
     this.agregarFicha(this.formaciones, this.fb.group({
       id: [v.id || null],
       clave: [v.clave || crypto.randomUUID().replaceAll('-', '')],
       nivel: [v.nivel || '', [Validators.required, (control: AbstractControl<string>) =>
         !control.value || this.nivelesEducativos.includes(control.value) ? null : { nivelEducativo: true }]],
-      institucion: [v.institucion || '', Validators.required],
+      institucion: [v.institucion || '', (control: AbstractControl<string>) =>
+        control.value === institucionOriginal ? null : validarInstitucion?.(control) ?? null],
       titulo: [v.titulo || '', [Validators.required, Validators.pattern(/^(?=.*\p{L})[\p{L}\p{M} ]+$/u)]],
       fechaInicio: [normalizarFechaPerfil(v.fechaInicio) ?? ''],
       fechaFin: [normalizarFechaPerfil(v.fechaFin) ?? ''],
@@ -888,6 +900,7 @@ export class MisDatosPage {
           this.cargarRevisiones();
         } else {
           this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' });
+          if (seccion === 'familia') this.cargarRevisiones();
         }
         this.api.getMine().subscribe({
           next: datos => {
