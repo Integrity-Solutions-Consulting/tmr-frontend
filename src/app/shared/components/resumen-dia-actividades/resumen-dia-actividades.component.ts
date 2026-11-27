@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, Inject, Injector, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ export interface ResumenDiaActividadesData {
   editable: boolean;
   titulo?: string;
   nombreColaborador?: string;
+  registroLider?: { idEmpleado: number; nombreColaborador: string; proyecto?: { id: number; nombre: string } | null; esGlobal?: boolean };
 }
 
 @Component({
@@ -24,6 +25,8 @@ export class ResumenDiaActividadesComponent {
   private dialog = inject(MatDialog);
   private dialogRef = inject(MatDialogRef<ResumenDiaActividadesComponent>);
   private actividadesService = inject(ActividadesService);
+  private injector = inject(Injector);
+  private huboCambios = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: ResumenDiaActividadesData) {}
 
@@ -40,27 +43,34 @@ export class ResumenDiaActividadesComponent {
     return new Intl.DateTimeFormat('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(this.data.fecha);
   }
 
-  agregar(): void {
+  async agregar(): Promise<void> {
     if (!this.data.editable) return;
-    import('../../../features/time-report/actividades/agregar-actividad/agregar-actividad').then(({ AgregarActividad }) => {
-      this.dialog.open(AgregarActividad, {
-        width: '560px', maxHeight: '90vh', data: { fecha: this.data.fecha }, disableClose: true,
-        autoFocus: false, restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
-        panelClass: 'tmr-dialog-panel'
-      });
+    const { AgregarActividad } = await import('../../../features/time-report/actividades/agregar-actividad/agregar-actividad');
+    this.dialog.open(AgregarActividad, {
+      injector: this.injector, width: '560px', maxHeight: '90vh', data: { fecha: this.data.fecha, registroLider: this.data.registroLider }, disableClose: true,
+      autoFocus: false, restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
+      panelClass: 'tmr-dialog-panel'
+    }).afterClosed().subscribe(resultado => {
+      if (resultado?.cambio) this.huboCambios = true;
     });
   }
 
   editar(actividad: any): void {
-    if (!this.data.editable) return;
+    if (!this.puedeEditar(actividad)) return;
     import('../../../features/time-report/actividades/agregar-actividad/agregar-actividad').then(({ AgregarActividad }) => {
       this.dialog.open(AgregarActividad, {
-        width: '560px', maxHeight: '90vh', data: { actividad }, disableClose: true,
+        injector: this.injector, width: '560px', maxHeight: '90vh', data: { actividad, registroLider: this.data.registroLider }, disableClose: true,
         autoFocus: false, restoreFocus: false, enterAnimationDuration: '0ms', exitAnimationDuration: '0ms',
         panelClass: 'tmr-dialog-panel'
+      }).afterClosed().subscribe(resultado => {
+        if (resultado?.cambio) this.huboCambios = true;
       });
     });
   }
 
-  cerrar(): void { this.dialogRef.close(); }
+  puedeEditar(actividad: any): boolean {
+    return this.data.editable && (!this.data.registroLider || Number(actividad.idproyecto) === Number(this.data.registroLider.proyecto?.id));
+  }
+
+  cerrar(): void { this.dialogRef.close(this.huboCambios ? { cambio: true } : undefined); }
 }
