@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.17.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.16.0...v3.17.0) (2026-11-27)
+
+
+### Features
+
+* **time-report:** integrar gestión de actividades en seguimiento ([f1acbbb](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/f1acbbb747a6e2f2092645a6e91749cde9b82b74))
+* **time-report:** integrar gestión de actividades en seguimiento ([17f6ca3](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/commit/17f6ca338c491c02aad80cfd443296637bc052bb))
+
 ## [3.16.0](https://github.com/Integrity-Solutions-Consulting/tmr-frontend/compare/v3.15.1...v3.16.0) (2026-11-25)
 
 
