@@ -6,18 +6,13 @@
             <!-- sm - Cada fila de Seguimiento es un colaborador+proyecto puntual: se aclara a qué proyecto
                  corresponde el cumplimiento que se ve abajo (igual regla que esa fila: jornada completa en ESE proyecto). -->
             <p class="calcol-modal__subtitle" *ngIf="idProyecto; else sinProyectoSubtitulo">
-                {{ completando() ? 'Completando actividades: haz clic en un día para agregar' : 'Solo lectura' }} · Proyecto: {{ data.colaborador.proyecto }}
+                {{ completar() ? 'Selecciona un día para consultar o gestionar actividades' : 'Solo lectura' }} · Proyecto: {{ data.colaborador.proyecto }}
             </p>
             <ng-template #sinProyectoSubtitulo>
                 <p class="calcol-modal__subtitle">Solo lectura</p>
             </ng-template>
         </div>
         <div class="calcol-modal__actions">
-            <button *ngIf="completar()" class="calcol-modal__completar" type="button"
-                [class.calcol-modal__completar--activo]="completando()" (click)="alternarCompletar()">
-                <mat-icon aria-hidden="true">{{ completando() ? 'check' : 'edit_calendar' }}</mat-icon>
-                {{ completando() ? 'Terminar' : 'Completar actividades' }}
-            </button>
             <button class="calcol-modal__close" type="button" (click)="cerrar()" aria-label="Cerrar">
                 <img src="assets/iconos/x.svg" alt="Cerrar" />
             </button>
@@ -31,9 +26,7 @@
     <!-- sm - idLiderEdicion: al completar, el líder modifica las actividades del colaborador en este proyecto (las de
          otros proyectos solo las ve). -->
     <div class="calcol-modal__body">
-        <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="!completando()"
-            [idLiderEdicion]="completando() ? completar()?.idLider : null" [fechaInicialOverride]="data.fechaDesde"
-            (diaSeleccionado)="abrirAgregar($event)" (editarActividadEvent)="abrirEditar($event)"
-            [permitirVerDetalle]="true" [mostrarBotonAgregar]="true" (verActividadEvent)="abrirDetalle($event)"></app-calendario>
+        <app-calendario [idEmpleadoOverride]="idEmpleado" [idProyectoOverride]="idProyecto" [soloLectura]="true"
+            [fechaInicialOverride]="data.fechaDesde" (diaSeleccionado)="abrirResumen($event)"></app-calendario>
     </div>
 </div>

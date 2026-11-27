@@ -10,6 +10,7 @@ import { Calendario } from '../../actividades/calendario/calendario';
 import { AgregarActividad } from '../../actividades/agregar-actividad/agregar-actividad';
 import { ActividadesService, CompletarLider } from '../../../../shared/services/actividades.service';
 import { Colaborador } from '../../../../shared/models/colaborador.model';
+import { ResumenDiaActividadesComponent } from '../../../../shared/components/resumen-dia-actividades/resumen-dia-actividades.component';
 
 export interface CalendarioColaboradorModalData {
     colaborador: Colaborador;
@@ -72,6 +73,26 @@ export class CalendarioColaboradorModal implements OnInit {
         this.abrirActividad({ actividad, soloVer: true });
     }
 
+    abrirResumen(fecha: Date): void {
+        const permiso = this.completar();
+        this.dialog.open(ResumenDiaActividadesComponent, {
+            injector: this.injector, width: '720px', maxWidth: '95vw', maxHeight: '90vh',
+            data: {
+                fecha, editable: !!permiso, titulo: 'Actividades del colaborador',
+                nombreColaborador: this.data.colaborador.nombre,
+                registroLider: permiso ? {
+                    idEmpleado: this.idEmpleado,
+                    nombreColaborador: this.data.colaborador.nombre,
+                    proyecto: permiso.proyecto,
+                    esGlobal: permiso.esGlobal
+                } : undefined
+            },
+            panelClass: 'tmr-dialog-panel'
+        }).afterClosed().subscribe(resultado => {
+            if (resultado?.cambio) this.seActivoCompletar = true;
+        });
+    }
+
     // sm - injector: la ventana usa el ActividadesService de este modal, para validar y recargar el calendario del
     // colaborador y no el del líder.
     private abrirActividad(datos: { fecha?: Date; actividad?: any; soloVer?: boolean }): void {
@@ -84,7 +105,8 @@ export class CalendarioColaboradorModal implements OnInit {
                 registroLider: {
                     idEmpleado: this.idEmpleado,
                     nombreColaborador: this.data.colaborador.nombre,
-                    proyecto: this.completar()?.proyecto
+                    proyecto: this.completar()?.proyecto,
+                    esGlobal: this.completar()?.esGlobal
                 }
             },
             disableClose: true,
