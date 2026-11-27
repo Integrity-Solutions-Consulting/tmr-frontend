@@ -18,7 +18,7 @@ import { capitalizarInicialNombre, NOMBRE_PERSONA_MENSAJE, nombrePersonaValidato
 import { CountryCode, getCountries, getCountryCallingCode, parsePhoneNumberFromString, validatePhoneNumberLength } from 'libphonenumber-js/max';
 import { TIPOS_DISCAPACIDAD, tiposDiscapacidadRegistrados } from '../../shared/validators/tipo-discapacidad';
 
-type ConditionKind = 'children' | 'ownDisability' | 'partner' | 'childDisability';
+type ConditionKind = 'children' | 'partner';
 const controlPorSeccion = { personal: 'persona', familia: 'familia', formacion: 'formaciones', certificaciones: 'certificaciones', conocimientos: 'conocimientos' } as const;
 type SeccionPerfil = keyof typeof controlPorSeccion;
 const nombreSeccion: Record<SeccionPerfil, string> = {
@@ -84,11 +84,9 @@ export class MisDatosPage {
   private lastTab = 'personal';
   deletingId?: number;
   deleteTarget?: { id: number; nombre: string };
-  conditionTarget?: { kind: ConditionKind; previous: string; next: string; row?: AbstractControl };
+  conditionTarget?: { kind: ConditionKind; previous: string; next: string };
   private previousChildren = 'NoInformado';
-  private previousOwnDisability = 'NoInformado';
   private previousCivil = '';
-  private previousChildDisability = new Map<string, string>();
   private removedChildKeys: string[] = [];
   private removedPartnerKey?: string;
   private readonly uploadingDocuments = new Set<string>();
@@ -465,6 +463,11 @@ export class MisDatosPage {
     for (const [rawPath, rawMessage] of entries) {
       if (!rawPath) continue;
       const path = this.normalizeErrorPath(rawPath);
+      if (path === 'persona.actaNacimiento') {
+        this.respaldosRevisados.add(this.form.controls.persona);
+        applied.push(path);
+        continue;
+      }
       const ctrl = this.control(path);
       if (!ctrl) continue;
       const message = Array.isArray(rawMessage) ? String(rawMessage[0] || 'Revisa este campo') : String(rawMessage || 'Revisa este campo');
@@ -535,7 +538,6 @@ export class MisDatosPage {
           telefono: telefono?.nationalNumber ?? telefonoGuardado,
           limpiarDiscapacidad: false
         }, { emitEvent: false });
-        this.previousOwnDisability = datos.persona.tieneDiscapacidad ?? 'NoInformado';
         break;
       }
       case 'familia':
@@ -543,7 +545,6 @@ export class MisDatosPage {
         this.familiares.clear();
         this.removedChildKeys = [];
         this.removedPartnerKey = undefined;
-        this.previousChildDisability.clear();
         this.form.controls.familia.patchValue({ ...(datos.familia || {}), limpiarHijos: false, limpiarPareja: false }, { emitEvent: false });
         if (datos.familia?.pareja) {
           const pareja = datos.familia.pareja;
@@ -634,7 +635,6 @@ export class MisDatosPage {
       tieneDiscapacidad: [v.tieneDiscapacidad || 'NoInformado'], tipoDiscapacidad: [v.tipoDiscapacidad || ''],
       porcentajeDiscapacidad: [v.porcentajeDiscapacidad ?? '', validadoresPorcentaje], limpiarDiscapacidad: [false], archivos: [v.archivos || []]
     }, { validators: discapacidadObligatoria }), !valor);
-    this.previousChildDisability.set(key, v.tieneDiscapacidad || 'NoInformado');
   }
 
   hayFichaEnEdicion(registros: FormArray) { return this.fichasEnEdicion.has(registros); }
@@ -672,6 +672,7 @@ export class MisDatosPage {
 
   private tieneRespaldo(row: AbstractControl, tipo: string): boolean {
     if (tipo === 'Discapacidad') return !!this.data?.archivos?.length;
+    if (tipo === 'ActaNacimiento') return !!this.data?.actasNacimiento?.length;
     return (row.get('archivos')?.value ?? []).some((archivo: { seccion?: string }) =>
       tipo === 'PartidaNacimiento' || tipo === 'Familiar' ? archivo.seccion === tipo : !archivo.seccion || archivo.seccion === tipo
     );
@@ -688,6 +689,7 @@ export class MisDatosPage {
 
   private revisarRespaldos(seccion: SeccionPerfil): string | null {
     const persona = this.form.controls.persona;
+    if (seccion === 'personal' && !this.validarRespaldo(persona, 'ActaNacimiento')) return 'persona.actaNacimiento';
     if (seccion === 'personal' && this.isYes(persona.controls.tieneDiscapacidad.value)
       && !this.validarRespaldo(persona, 'Discapacidad')) return 'persona.archivos';
     if (seccion === 'familia' && this.canAddChild() && !this.familiares.length) {
@@ -719,9 +721,7 @@ export class MisDatosPage {
     a.removeAt(i);
   }
   private hasChildData() { return this.familiares.controls.some(c => { const v = c.value; return !!v.id || !!v.nombres || !!v.apellidos || !!v.fechaNacimiento || !!v.archivos?.length; }); }
-  private hasOwnDisabilityData() { const v = this.form.controls.persona.value; return this.previousOwnDisability === 'Si' || !!v.tipoDiscapacidad || !!v.porcentajeDiscapacidad || !!this.data?.archivos?.length; }
   private hasPartnerData() { const v: any = this.pareja.getRawValue(); return !!v.id || !!v.nombres || !!v.apellidos || !!v.identificacion || !!v.fechaNacimiento || !!v.archivos?.length; }
-  private hasChildDisabilityData(row: AbstractControl) { const v = row.value; return this.previousChildDisability.get(v.clave) === 'Si' || !!v.tipoDiscapacidad || !!v.porcentajeDiscapacidad || this.documentosHijo(row, false).length > 0; }
 
   onFamilyChange() {
     const current = this.form.controls.familia.controls.tieneHijos.value || 'NoInformado';
@@ -746,18 +746,7 @@ export class MisDatosPage {
   private familiesToRemoveKeys() { this.removedChildKeys.push(...this.familiares.controls.map(c => c.value.clave).filter(Boolean)); this.removedChildKeys = [...new Set(this.removedChildKeys)]; }
 
   onDisabilityChange(value: unknown) {
-    const current = String(value || 'NoInformado');
-    if (this.isYes(current)) { this.previousOwnDisability = current; this.form.controls.persona.controls.limpiarDiscapacidad.setValue(false, { emitEvent: false }); return; }
-    if (this.previousOwnDisability === 'Si' && this.hasOwnDisabilityData()) {
-      this.form.controls.persona.controls.tieneDiscapacidad.setValue(this.previousOwnDisability, { emitEvent: false });
-      this.conditionTarget = { kind: 'ownDisability', previous: this.previousOwnDisability, next: current }; return;
-    }
-    this.applyOwnDisability(current);
-  }
-  private applyOwnDisability(value: string) {
-    const persona = this.form.controls.persona.controls;
-    persona.tieneDiscapacidad.setValue(value, { emitEvent: false }); persona.tipoDiscapacidad.setValue('', { emitEvent: false }); persona.porcentajeDiscapacidad.setValue('', { emitEvent: false }); persona.limpiarDiscapacidad.setValue(true, { emitEvent: false });
-    if (this.data) this.data.archivos = []; this.previousOwnDisability = value;
+    this.actualizarDiscapacidad(this.form.controls.persona, value);
   }
 
   onCivilChange() {
@@ -781,18 +770,22 @@ export class MisDatosPage {
   }
 
   onChildDisabilityChange(row: AbstractControl, value: unknown) {
-    const current = String(value || 'NoInformado'); const key = row.value.clave; const previous = this.previousChildDisability.get(key) || 'NoInformado';
-    if (this.isYes(current)) { this.previousChildDisability.set(key, current); row.get('limpiarDiscapacidad')?.setValue(false, { emitEvent: false }); return; }
-    if (previous === 'Si' && this.hasChildDisabilityData(row)) {
-      row.get('tieneDiscapacidad')?.setValue(previous, { emitEvent: false });
-      this.conditionTarget = { kind: 'childDisability', previous, next: current, row }; return;
-    }
-    this.applyChildDisability(row, current);
+    this.actualizarDiscapacidad(row, value);
   }
-  private applyChildDisability(row: AbstractControl, value: string) {
-    row.patchValue({ tieneDiscapacidad: value, tipoDiscapacidad: '', porcentajeDiscapacidad: '', limpiarDiscapacidad: true }, { emitEvent: false });
-    row.get('archivos')?.setValue(this.documentosHijo(row, true), { emitEvent: false });
-    this.previousChildDisability.set(row.value.clave, value);
+
+  private actualizarDiscapacidad(row: AbstractControl, value: unknown) {
+    const estado = String(value || 'NoInformado');
+    if (this.isYes(estado)) {
+      row.get('limpiarDiscapacidad')?.setValue(false, { emitEvent: false });
+      return;
+    }
+
+    row.patchValue({
+      tieneDiscapacidad: estado,
+      tipoDiscapacidad: '',
+      porcentajeDiscapacidad: '',
+      limpiarDiscapacidad: true,
+    }, { emitEvent: false });
   }
 
   dialogTitle() { return this.deleteTarget ? 'Eliminar documento' : 'Limpiar información relacionada'; }
@@ -801,9 +794,7 @@ export class MisDatosPage {
     if (this.deleteTarget) { this.confirmDelete(); return; }
     const target = this.conditionTarget; if (!target) return;
     if (target.kind === 'children') this.applyChildrenState(target.next);
-    if (target.kind === 'ownDisability') this.applyOwnDisability(target.next);
     if (target.kind === 'partner') this.applyCivilState(target.next);
-    if (target.kind === 'childDisability' && target.row) this.applyChildDisability(target.row, target.next);
     this.conditionTarget = undefined;
   }
   cancelDialog() {
@@ -811,9 +802,7 @@ export class MisDatosPage {
     if (this.conditionTarget) {
       const target = this.conditionTarget;
       if (target.kind === 'children') this.form.controls.familia.controls.tieneHijos.setValue(target.previous, { emitEvent: false });
-      if (target.kind === 'ownDisability') this.form.controls.persona.controls.tieneDiscapacidad.setValue(target.previous, { emitEvent: false });
       if (target.kind === 'partner') this.form.controls.familia.controls.estadoCivil.setValue(target.previous, { emitEvent: false });
-      if (target.kind === 'childDisability' && target.row) target.row.get('tieneDiscapacidad')?.setValue(target.previous, { emitEvent: false });
       this.conditionTarget = undefined;
     }
   }
@@ -899,8 +888,12 @@ export class MisDatosPage {
             `Se envió a revisión la sección ${nombreSeccion[seccion]}.`, true);
           this.cargarRevisiones();
         } else {
-          this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' });
-          if (seccion === 'familia') this.cargarRevisiones();
+          if (seccion === 'familia') {
+            void this.popup.showText('check_circle', 'Sección guardada exitosamente', 'Los cambios ya se reflejan en tu perfil.', true);
+            this.cargarRevisiones();
+          } else {
+            this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Cambios guardados correctamente.' });
+          }
         }
         this.api.getMine().subscribe({
           next: datos => {
@@ -933,7 +926,7 @@ export class MisDatosPage {
 
   private uploadKey(section: string, row: any) {
     const value = row?.value ?? row;
-    const identity = section === 'Discapacidad' ? 'own' : value?.clave || value?.id || 'unknown';
+    const identity = (section === 'Discapacidad' || section === 'ActaNacimiento') ? 'own' : value?.clave || value?.id || 'unknown';
     return `${section}:${identity}`;
   }
   isUploading(section: string, row: any) { return this.uploadingDocuments.has(this.uploadKey(section, row)); }
@@ -950,6 +943,7 @@ export class MisDatosPage {
     this.api.uploadDirect(file, section, value.id || undefined, value.clave).pipe(finalize(() => this.uploadingDocuments.delete(key))).subscribe({
       next: (documento: any) => {
         if (section === 'Discapacidad') this.data.archivos = [...(this.data.archivos || []), documento];
+        else if (section === 'ActaNacimiento') this.data.actasNacimiento = [...(this.data.actasNacimiento || []), documento];
         else row.get('archivos')?.setValue([...(row.get('archivos')?.value || []), documento], { emitEvent: false });
         this.mostrarNotificacion({ tipo: 'exito', mensaje: 'Documento adjuntado correctamente.' });
       },
@@ -982,6 +976,7 @@ export class MisDatosPage {
 
   private removeDocumentFromView(id: number) {
     if (this.data?.archivos) this.data.archivos = this.data.archivos.filter((file: any) => file.id !== id);
+    if (this.data?.actasNacimiento) this.data.actasNacimiento = this.data.actasNacimiento.filter((file: { id: number }) => file.id !== id);
     const partnerFiles = (this.pareja.get('archivos')?.value as any[] | null) || [];
     (this.pareja.get('archivos') as any)?.setValue(partnerFiles.filter((file: any) => file.id !== id), { emitEvent: false });
     for (const row of [...this.familiares.controls, ...this.formaciones.controls, ...this.certificaciones.controls]) {

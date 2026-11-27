@@ -39,15 +39,36 @@
           </label>
           <div class="campos-pareados field-wide">
             <label class="select-field"><span>Correo electrónico</span><input id="persona-email" data-control-path="persona.email" class="float-field__input" formControlName="email" type="text" inputmode="email" autocomplete="email" (input)="filtrarEntradaPersonal('email', $event)" [class.float-field__input--error]="controlInvalido('persona.email')" [attr.aria-invalid]="controlInvalido('persona.email') ? 'true' : null" [attr.aria-describedby]="controlInvalido('persona.email') ? 'error-persona-email' : null" placeholder="Ej. nombre@correo.com"><span id="error-persona-email" class="form-field__error" *ngIf="controlInvalido('persona.email')">{{ mensajeError('persona.email') }}</span></label>
+            <div class="campos-pareados campo-telefono">
+              <label class="select-field"><span>Código de país</span><select class="float-field__input" [value]="paisTelefono" (change)="cambiarPaisTelefono($any($event.target).value)"><option *ngFor="let pais of paisesTelefono" [value]="pais.codigo" [selected]="pais.codigo === paisTelefono">{{ pais.nombre }} (+{{ pais.prefijo }})</option></select></label>
+              <label class="select-field"><span>Teléfono</span><input id="persona-telefono" data-control-path="persona.telefono" class="float-field__input" formControlName="telefono" type="tel" inputmode="numeric" autocomplete="tel-national" (input)="filtrarEntradaPersonal('telefono', $event)" [class.float-field__input--error]="controlInvalido('persona.telefono')" [attr.aria-invalid]="controlInvalido('persona.telefono') ? 'true' : null" [attr.aria-describedby]="controlInvalido('persona.telefono') ? 'error-persona-telefono' : null"><span id="error-persona-telefono" class="form-field__error" *ngIf="controlInvalido('persona.telefono')">{{ mensajeError('persona.telefono') }}</span></label>
+            </div>
             <label class="select-field"><span>Dirección</span><input id="persona-direccion" data-control-path="persona.direccion" class="float-field__input" formControlName="direccion" (input)="filtrarEntradaPersonal('direccion', $event)" [attr.aria-invalid]="controlInvalido('persona.direccion') ? 'true' : null" [attr.aria-describedby]="controlInvalido('persona.direccion') ? 'error-persona-direccion' : null" placeholder="Ej. Av. Principal 123 / Edificio 2"><span id="error-persona-direccion" class="form-field__error" *ngIf="controlInvalido('persona.direccion')">{{ mensajeError('persona.direccion') }}</span></label>
-          </div>
-          <div class="campos-pareados field-wide">
-            <label class="select-field">Código de país<select class="float-field__input" [value]="paisTelefono" (change)="cambiarPaisTelefono($any($event.target).value)"><option *ngFor="let pais of paisesTelefono" [value]="pais.codigo" [selected]="pais.codigo === paisTelefono">{{ pais.nombre }} (+{{ pais.prefijo }})</option></select></label>
-            <label class="select-field"><span>Teléfono</span><input id="persona-telefono" data-control-path="persona.telefono" class="float-field__input" formControlName="telefono" type="tel" inputmode="numeric" autocomplete="tel-national" (input)="filtrarEntradaPersonal('telefono', $event)" [class.float-field__input--error]="controlInvalido('persona.telefono')" [attr.aria-invalid]="controlInvalido('persona.telefono') ? 'true' : null" [attr.aria-describedby]="controlInvalido('persona.telefono') ? 'error-persona-telefono' : null"><span id="error-persona-telefono" class="form-field__error" *ngIf="controlInvalido('persona.telefono')">{{ mensajeError('persona.telefono') }}</span></label>
           </div>
           <label class="select-field">¿Tiene alguna discapacidad?<app-select formControlName="tieneDiscapacidad" [options]="triStateOptions" placeholder="No informado" ariaLabel="Discapacidad propia" (valueChange)="onDisabilityChange($event)"></app-select></label>
           <label class="select-field" *ngIf="isYes(form.controls.persona.controls.tieneDiscapacidad.value)"><span>Porcentaje de discapacidad</span><input id="persona-porcentajeDiscapacidad" data-control-path="persona.porcentajeDiscapacidad" class="float-field__input" inputmode="numeric" formControlName="porcentajeDiscapacidad" (input)="filtrarEntradaPersonal('porcentajeDiscapacidad', $event)" [attr.aria-invalid]="controlInvalido('persona.porcentajeDiscapacidad') ? 'true' : null" [attr.aria-describedby]="controlInvalido('persona.porcentajeDiscapacidad') ? 'error-persona-porcentaje' : null" placeholder="Ej. 40"><span id="error-persona-porcentaje" class="form-field__error" *ngIf="controlInvalido('persona.porcentajeDiscapacidad')">{{ mensajeError('persona.porcentajeDiscapacidad') }}</span></label>
           <ng-container *ngIf="isYes(form.controls.persona.controls.tieneDiscapacidad.value)"><ng-container *ngTemplateOutlet="tiposDiscapacidadCampos; context: { $implicit: form.controls.persona.controls.tipoDiscapacidad, path: 'persona.tipoDiscapacidad' }"></ng-container></ng-container>
+        </div>
+        <div class="documents-inline" tabindex="-1" data-control-path="persona.actaNacimiento">
+          <div class="documents-head">
+            <div><h3>Acta de nacimiento <span class="req">*</span></h3><p class="muted">PDF, JPG o PNG · máximo 10 MB.</p></div>
+            <div class="documents-head__actions">
+              <div class="upload-status" *ngIf="isUploading('ActaNacimiento', form.controls.persona)" role="status" aria-live="polite">
+                <span class="upload-status__spinner" aria-hidden="true"></span>Subiendo documento…
+              </div>
+              <input #actaFile type="file" hidden accept=".pdf,.jpg,.jpeg,.png" (change)="upload($event, 'ActaNacimiento', form.controls.persona)">
+              <app-boton label="Adjuntar acta de nacimiento" icon="upload_file" type="secondary"
+                [disabled]="isUploading('ActaNacimiento', form.controls.persona)" (clicked)="abrirArchivo(actaFile)"></app-boton>
+            </div>
+          </div>
+          <p class="form-field__error" role="alert" *ngIf="faltaRespaldo(form.controls.persona, 'ActaNacimiento')">Adjunta tu acta de nacimiento.</p>
+          <div class="document" *ngFor="let file of data?.actasNacimiento">
+            <span class="document-name">{{ file.nombreOriginal }}<small>{{ file.tamano | number }} bytes</small></span>
+            <div class="document-actions">
+              <app-boton label="Descargar" icon="download" type="secondary" (clicked)="download(file.id)"></app-boton>
+              <app-boton label="Eliminar" icon="delete_outline" type="danger" [disabled]="deletingId===file.id" (clicked)="askDelete(file)"></app-boton>
+            </div>
+          </div>
         </div>
         <div class="documents-inline" tabindex="-1" data-control-path="persona.archivos" *ngIf="isYes(form.controls.persona.controls.tieneDiscapacidad.value)">
           <div class="documents-head"><div><h3>Carnet de discapacidad</h3><p class="muted">PDF, JPG o PNG · máximo 10 MB.</p></div><div class="documents-head__actions"><div class="upload-status" *ngIf="isUploading('Discapacidad', form.controls.persona)" role="status" aria-live="polite"><span class="upload-status__spinner" aria-hidden="true"></span>Subiendo documento…</div><input #ownFile type="file" hidden accept=".pdf,.jpg,.jpeg,.png" (change)="upload($event, 'Discapacidad', form.controls.persona)"><app-boton label="Adjuntar carnet de discapacidad" icon="upload_file" type="secondary" [disabled]="isUploading('Discapacidad', form.controls.persona)" (clicked)="abrirArchivo(ownFile)"></app-boton></div></div>

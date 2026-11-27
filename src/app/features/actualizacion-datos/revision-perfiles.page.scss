@@ -1,4 +1,16 @@
 @use '../../../styles/table-theme' as table-theme;
+@use '../../../styles/filtros' as filtros;
+
+@include filtros.estandar;
+
+.filters-card .filter-group {
+  min-width: min(10rem, 100%);
+}
+
+.filters-card .filter-group--busqueda {
+  flex: 2;
+  min-width: min(18rem, 100%);
+}
 
 .revision-page {
   display: flex;
@@ -25,16 +37,6 @@
   font-size: 0.875rem;
   font-weight: 600;
 }
-.filtro--busqueda {
-  flex: 1 1 16rem;
-  min-width: 0;
-}
-.filtro-campo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.filtro-campo,
 .filtro select {
   min-height: 2.5rem;
   padding: 0 0.75rem;
@@ -42,33 +44,8 @@
   border-radius: 0.5rem;
   background: var(--bg-card);
   color: inherit;
-}
-.filtro input {
-  flex: 1;
-  min-width: 0;
-  padding-block: 0.5rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
   font: inherit;
   font-weight: 400;
-}
-.filtro select {
-  font: inherit;
-  font-weight: 400;
-}
-.filtro-icono,
-.filtro-limpiar span {
-  font-size: 1.125rem;
-}
-.filtro-limpiar {
-  display: grid;
-  place-items: center;
-  padding: 0.25rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
 }
 .tabla-wrapper {
   @include table-theme.table-shell;
@@ -76,6 +53,7 @@
   overflow-x: auto;
   border: 1px solid var(--pattern-border-color);
   border-radius: 12px;
+
 }
 
 .tabla {
